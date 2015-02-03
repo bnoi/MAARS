@@ -1,0 +1,139 @@
+//addClassPath("/home/marie/workspace/MaarsLib/MaarsLib.jar");
+addClassPath("C:/Program Files/Micro-Manager-1.4/jars/MaarsLib.jar");
+import MaarsLib.*;
+import MaarsLib.MaarsMainDialog;
+import MaarsLib.AllMaarsParameters;
+import MaarsLib.ExplorationXYPositions;
+import mmcorej.*;
+import org.micromanager.api.*;
+import ij.*;
+import java.io.IOException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+double calibration = gui.getMMCore().getPixelSizeUm();
+mmc.setAutoShutter(false);
+mmc.waitForDevice(mmc.getShutterDevice());
+
+gui.message("Create main window");
+MaarsMainDialog md = null;
+try {
+	//md = new MaarsMainDialog(gui, mmc, "/home/marie/workspace/MaarsLib/");
+	md = new MaarsMainDialog(gui, mmc, "D:/Data/marie/");
+} catch (IOException e) {
+	gui.message("Error");
+}
+
+gui.message("Show main window");
+
+md.show();
+
+while(md.isVisible()) {
+	gui.sleep(1000);
+}
+start = System.currentTimeMillis();
+gui.message("start "+start);
+if(md.isOkClicked()) {
+	
+	AllMaarsParameters param = null;
+	autofocus = gui.getAutofocus();
+	param = md.getParameters();
+	mmc.setOriginXY(mmc.getXYStageDevice());
+	int nbXField = param
+						.getParametersAsJsonObject()
+						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.X_FIELD_NUMBER)
+						.getAsInt();
+	int nbYField = param
+						.getParametersAsJsonObject()
+						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.Y_FIELD_NUMBER)
+						.getAsInt();
+	
+	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
+	
+
+	ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
+													nbYField,
+													(double) mmc.getImageWidth()*calibration,
+													(double) mmc.getImageHeight()*calibration);
+	
+	for (int i = 0; i < explo.length(); i++) {
+		gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
+		
+		gui.setXYStagePosition(explo.getX(i),explo.getY(i));
+		
+		MaarsAcquisitionForSegmentation mas = new MaarsAcquisitionForSegmentation(md,
+				explo.getX(i),
+				explo.getY(i));
+
+		mas.setupParameters();
+		
+		mmc.waitForDevice(mmc.getXYStageDevice());
+		
+		autofocus.fullFocus();
+
+		mas.acquire(false);
+		
+		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"\\MMStack.ome.tif");
+		ms.segmentation();
+		while(ms.isAnalysing()) {
+			gui.sleep(3000);
+		}
+		
+		MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
+		MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, explo.getX(i), explo.getY(i));
+		
+		
+		mfa.getSetOfCells().shuffle();
+		
+		MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
+														explo.getX(i),
+														explo.getY(i),
+														mfa.getSetOfCells());
+		if(param
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
+				.getAsBoolean()) {
+			
+			String acqNameFluo = "movie_X"
+				+Math.round(explo.getX(i))
+				+"_Y"+Math.round(explo.getY(i))
+				+"FLUO";
+			
+			ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
+			int cellNumber = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie());
+			if (cellNumber != -1) {
+				mmad.acquire(false, cellNumber, true, true);
+			}
+		}
+		else {
+			int j = 0;
+			boolean mitosis = false;
+			while(j <  mfa.getSetOfCells().length() && !mitosis) {
+				ImagePlus fluoImage = mafa.acquire(false, j);
+				fluoImage.show();
+				if (mfa.checkStartConditions(mfa.getSpindle(fluoImage, j))) {
+					gui.message("mitosis");
+					mmad.acquire(true, j, false); //don't crop image because it is already cropped
+					mitosis = true;
+				}
+				j++;
+			}
+		}
+		// close roi manager
+		mfa.getSetOfCells().closeRoiManager();
+		mas.setupParameters();
+	}
+}
+
+mmc.setAutoShutter(true);
+mmc.waitForDevice(mmc.getShutterDevice());
+gui.message("end "+System.currentTimeMillis());
+gui.message("it took "+(System.currentTimeMillis()-start));
+gui.message("DONE");
+gui.message("DONE.");
