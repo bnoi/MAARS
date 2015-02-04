@@ -66,6 +66,7 @@ public class CellsBoundaries implements PlugIn{
 		// to filter unusual cell shape
 	private Checkbox filterUnususalCkb;
 	private JTextField solidityField;
+	
 		//to filter background using min gray value
 	private Checkbox filterWithMeanGreyValueCkb;
 	private JTextField meanGreyValueField;
@@ -119,7 +120,7 @@ public class CellsBoundaries implements PlugIn{
 	/*
 	 * Create the main window in which there is :
 	 * 	- a panel to handle the image to Process and run the plugin
-	 *  - a panel to set
+	 *  - a panel to set(???)
 	 */
 	public void setMainWindow() {
 
@@ -518,7 +519,7 @@ public class CellsBoundaries implements PlugIn{
 	}
 
 	/*
-	 * Reset a panel colour (which might have been changed in case of error message)
+	 * Reset a panel color (which might have been changed in case of error message)
 	 */
 	public void resetPanelColor (Panel panel){
 		Color c = panel.getBackground();

@@ -66,9 +66,9 @@ public class CellsBoundariesIdentification {
  	private boolean flushImageToAnalyze;
     
     /**
-     * Constructor : need only a CellsBoundaries_ object 
+     * Constructor 1 : need a CellsBoundaries object and
      		int sigma : is the typical height of the cells you want to get
-			int direction : depends on how you made you movie
+			int direction : depends on how you made your movie
 								-> -1 if the boundaries of the cells are black on the first slice and white on the last one
 								-> 1 if the boundaries of the cells are white on the first slice and black on the last one
 			double minParticleSize : minimum area of cells
@@ -137,8 +137,8 @@ public class CellsBoundariesIdentification {
 	}
 	
 	/**
-	 * Constructor : need an ImagePlus object, a sigma value and a boolean notifying if the cells must be filtered
-	 * according to there shape. Default result options are also set : all is true.
+	 * Constructor 2 : need an ImagePlus object, a sigma value and a boolean notifying if the cells must be filtered
+	 * according to there shape. Default result options are also set : true for all.
 	 */
 	public CellsBoundariesIdentification (ImagePlus imageToAnalyse,
 			int sigma,
@@ -199,7 +199,7 @@ public class CellsBoundariesIdentification {
 	}
 	
 	/**
-	 * Constructor : need to enter all the variables.
+	 * Constructor 3 : need to enter all the variables.
 	  		int sigma : is the typical height of the cells you want to get
 			int direction : depends on how you made you movie
 								-> -1 if the boundaries of the cells are black on the first slice and white on the last one
@@ -327,7 +327,7 @@ public class CellsBoundariesIdentification {
 		
     	
     	correlationImage = new FloatProcessor(imageToAnalyze.getWidth(), imageToAnalyze.getHeight());
-    	
+    	//TODO refacto
     	for (int x = 0; x < imageToAnalyze.getWidth(); x++) {
     		
     		double progress = (x+1)*100/imageToAnalyze.getWidth();

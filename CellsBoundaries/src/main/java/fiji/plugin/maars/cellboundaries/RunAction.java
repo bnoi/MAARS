@@ -31,7 +31,7 @@ public class RunAction implements ActionListener{
 	// meaning file currently selected or file found with browser
 	private JTextField fileNameField;
 	
-	// Variable for the actionPArformed : if this is true that means units has been checked
+	// Variable for the actionPerformed : if this is true that means units has been checked
 	private boolean unitsChecked;
 	
 	public RunAction (CellsBoundaries cB) {
@@ -124,7 +124,7 @@ public class RunAction implements ActionListener{
 		int newMinParticleSize;
 		Calibration newCal = new Calibration();
 		newCal.setUnit("micron");
-		
+		//TODO refact
 		if (cB.getImageToAnalyze().getWidth() > maxWidth) {
 			System.out.println("Image width is greater than maximum width allowed");
 			
@@ -239,7 +239,7 @@ public class RunAction implements ActionListener{
 	 * It checks all parameters then run Algorithm.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		
+		//TODO maybe to refacto, too much condition test
 		// Check if fileNameField is empty meaning if there is a file to process
 		System.out.println("Check if fileNameField is empty");
 		
@@ -272,9 +272,9 @@ public class RunAction implements ActionListener{
 						checkUnitsAndScale();
 					}
 					
-					// Get cell typical size and check if the user did not make any mistake when he or she filled the field
+					// Get cell typical size and check if the user did not make any mistake while filling the field
 					double typicalCellSize = 0;
-					System.out.println("Try to get typival size");
+					System.out.println("Try to get typical size");
 					try {
 						typicalCellSize = Double.parseDouble(cB.getSizeField().getText());
 					}
