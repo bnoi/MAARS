@@ -12,10 +12,10 @@
 		<relativePath />
 	</parent>
 
-	<artifactId>CellStateAnalysis</artifactId>
+	<artifactId>MaarsLib</artifactId>
 
-	<name>plugins/MAARS/CellStateAnalysis.jar</name>
-	<description>measure, save and load cell features</description>
+	<name>jars/MAARS/MaarsLib</name>
+	<description>MaarsLib</description>
 
 	<developers>
 		<developer>
@@ -31,10 +31,6 @@
 		<tag>HEAD</tag>
 		<url>https://github.com/bnoi/MAARS</url>
 	</scm>
-
-	<properties>
-		<main-class>CellStateAnalysis</main-class>
-	</properties>
 
 	<dependencies>
 				<!-- ImageJ dependencies -->
@@ -61,6 +57,22 @@
 					<groupId>net.imglib2</groupId>
 					<artifactId>imglib2-ij</artifactId>
 				</dependency>
+        <dependency>
+	<groupId>com.google.code.gson</groupId>
+	<artifactId>gson</artifactId>
+	<version>2.3.1</version>
+</dependency>
+
+        <dependency>
+        	<groupId>sc.fiji.plugin.maars</groupId>
+        	<artifactId>CellStateAnalysis</artifactId>
+        	<version>1.0</version>
+        </dependency>
+        <dependency>
+        	<groupId>sc.fiji.plugin.maars</groupId>
+        	<artifactId>CellsBoundaries</artifactId>
+        	<version>1.0</version>
+        </dependency>
 	</dependencies>
 
 	<build>

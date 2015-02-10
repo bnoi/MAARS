@@ -82,4 +82,5 @@
 	</repositories>
 
 	<groupId>sc.fiji.plugin.maars</groupId>
+	<version>1.0</version>
 </project>
