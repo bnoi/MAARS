@@ -1,3 +1,5 @@
+package fiji.plugin.maars.maarslib;
+
 import ij.IJ;
 
 import java.awt.Color;

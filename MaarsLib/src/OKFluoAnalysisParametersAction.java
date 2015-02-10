@@ -1,3 +1,4 @@
+package fiji.plugin.maars.maarslib;
 import ij.gui.GenericDialog;
 
 import java.awt.event.ActionEvent;

@@ -1,3 +1,4 @@
+package fiji.plugin.maars.maarslib;
 /**
  * ExplorationXYPositions give positions for exploration of an area following this pattern :
  *        X

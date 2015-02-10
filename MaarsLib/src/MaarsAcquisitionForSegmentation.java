@@ -1,7 +1,8 @@
+package fiji.plugin.maars.maarslib;
 import java.awt.Color;
 
 import org.json.JSONException;
-import org.micromanager.MMStudioMainFrame;
+import org.micromanager.MMStudio;
 import org.micromanager.api.MMTags;
 import org.micromanager.utils.MMScriptException;
 
@@ -15,7 +16,7 @@ import mmcorej.TaggedImage;
  */
 public class MaarsAcquisitionForSegmentation {
 	
-	private MMStudioMainFrame gui;
+	private MMStudio gui;
 	private CMMCore mmc;
 	private AllMaarsParameters parameters;
 	private double positionX;
@@ -30,7 +31,7 @@ public class MaarsAcquisitionForSegmentation {
 	 * @param positionX : x field position (can be defined by ExplorationXYPositions)
 	 * @param positionY : y field position (can be defined by ExplorationXYPositions)
 	 */
-	public MaarsAcquisitionForSegmentation(MMStudioMainFrame gui,
+	public MaarsAcquisitionForSegmentation(MMStudio gui,
 			CMMCore mmc,
 			AllMaarsParameters parameters,
 			double positionX,

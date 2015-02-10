@@ -1,9 +1,9 @@
-//addClassPath("/home/marie/workspace/MaarsLib/MaarsLib.jar");
-addClassPath("C:/Program Files/Micro-Manager-1.4/jars/MaarsLib.jar");
-import MaarsLib.*;
-import MaarsLib.MaarsMainDialog;
-import MaarsLib.AllMaarsParameters;
-import MaarsLib.ExplorationXYPositions;
+addClassPath("/home/tong/Documents/code/MAARS/MaarsLib/MaarsLib.jar");
+//addClassPath("C:/Program Files/Micro-Manager-1.4/jars/MaarsLib.jar");
+import fiji.plugin.maars.maarslib.*;
+import fiji.plugin.maars.maarslib.MaarsMainDialog;
+import fiji.plugin.maars.maarslib.AllMaarsParameters;
+import fiji.plugin.maars.maarslib.ExplorationXYPositions;
 import mmcorej.*;
 import org.micromanager.api.*;
 import ij.*;
@@ -18,8 +18,9 @@ mmc.waitForDevice(mmc.getShutterDevice());
 gui.message("Create main window");
 MaarsMainDialog md = null;
 try {
+	md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
 	//md = new MaarsMainDialog(gui, mmc, "/home/marie/workspace/MaarsLib/");
-	md = new MaarsMainDialog(gui, mmc, "D:/Data/marie/");
+	//md = new MaarsMainDialog(gui, mmc, "D:/Data/marie/");
 } catch (IOException e) {
 	gui.message("Error");
 }

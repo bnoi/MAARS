@@ -13,7 +13,6 @@
 	</parent>
 
 	<artifactId>CellsBoundaries</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
 
 	<name>plugins/MAARS/CellsBoundaries.jar</name>
 	<description>Detect and segment fission yeast cells in bright field</description>

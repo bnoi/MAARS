@@ -1,10 +1,11 @@
+package fiji.plugin.maars.maarslib;
 import java.awt.Color;
 
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 
 import org.json.JSONException;
-import org.micromanager.MMStudioMainFrame;
+import org.micromanager.MMStudio;
 import org.micromanager.api.MMTags;
 import org.micromanager.utils.MMScriptException;
 
@@ -22,7 +23,7 @@ import ij.process.ShortProcessor;
  */
 public class MaarsAcquisitionForFluoAnalysis {
 	
-	private MMStudioMainFrame gui;
+	private MMStudio gui;
 	private CMMCore mmc;
 	private AllMaarsParameters parameters;
 	private double positionX;
@@ -38,7 +39,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 * @param positionY : y field position (can be defined by ExplorationXYPositions)
 	 * @param soc : Set of cells (object from CellStateAnalysis_)
 	 */
-	public MaarsAcquisitionForFluoAnalysis(MMStudioMainFrame gui,
+	public MaarsAcquisitionForFluoAnalysis(MMStudio gui,
 			CMMCore mmc,
 			AllMaarsParameters parameters,
 			double positionX,

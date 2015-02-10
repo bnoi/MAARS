@@ -1,3 +1,4 @@
+package fiji.plugin.maars.maarslib;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -13,7 +14,7 @@ import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 
 import org.json.JSONException;
-import org.micromanager.MMStudioMainFrame;
+import org.micromanager.MMStudio;
 import org.micromanager.api.MMTags;
 import org.micromanager.utils.MMScriptException;
 
@@ -27,7 +28,7 @@ import com.google.gson.JsonElement;
  */
 public class MaarsAcquisitionMitosis {
 	
-	private MMStudioMainFrame gui;
+	private MMStudio gui;
 	private CMMCore mmc;
 	private AllMaarsParameters parameters;
 	private MaarsFluoAnalysis mfa;
@@ -43,7 +44,7 @@ public class MaarsAcquisitionMitosis {
 	 * @param positionX : x field position (can be defined by ExplorationXYPositions)
 	 * @param positionY : y field position (can be defined by ExplorationXYPositions)
 	 */
-	public MaarsAcquisitionMitosis(MMStudioMainFrame gui,
+	public MaarsAcquisitionMitosis(MMStudio gui,
 			CMMCore mmc,
 			AllMaarsParameters parameters,
 			MaarsFluoAnalysis mfa,

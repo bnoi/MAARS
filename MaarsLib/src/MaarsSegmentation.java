@@ -1,3 +1,4 @@
+package fiji.plugin.maars.maarslib;
 import java.io.File;
 
 import ij.IJ;
@@ -10,7 +11,7 @@ import ij.IJ;
 public class MaarsSegmentation {
 	private AllMaarsParameters parameters;
 	private String moviePath;
-	private CellsBoundaries_ cB;
+	private CellsBoundaries cB;
 	
 	/**
 	 * Constructor :
@@ -32,7 +33,7 @@ public class MaarsSegmentation {
 	public void segmentation() {
 		
 		IJ.open(moviePath);
-		cB =  new CellsBoundaries_();
+		cB =  new CellsBoundaries();
 		cB.setMainWindow();
 		
 		cB.getDisplayFocusImage().setState(false);
@@ -135,9 +136,9 @@ public class MaarsSegmentation {
 	
 	/**
 	 * 
-	 * @return CellsBoundaries_ object
+	 * @return CellsBoundaries object
 	 */
-	public CellsBoundaries_ getSegmentationObject() {
+	public CellsBoundaries getSegmentationObject() {
 		return cB;
 	}
 }

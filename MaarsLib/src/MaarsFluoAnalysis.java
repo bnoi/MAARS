@@ -1,3 +1,4 @@
+package fiji.plugin.maars.maarslib;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -17,10 +18,10 @@ public class MaarsFluoAnalysis {
 	/**
 	 * Constructor :
 	 * @param parameters : parameters used for algorithm
-	 * @param cB : CellsBoundaries_ object (used for segmentation)
+	 * @param cB : CellsBoundaries object (used for segmentation)
 	 */
 	public MaarsFluoAnalysis(AllMaarsParameters parameters,
-			CellsBoundaries_ cB) {
+			CellsBoundaries cB) {
 		
 		this.parameters = parameters;
 		

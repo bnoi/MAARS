@@ -17,12 +17,12 @@ import ij.plugin.PlugIn;
 public class CellStateAnalysis implements PlugIn {
 	
 	public void run(String arg) {
-		ImagePlus image = IJ.getImage().duplicate();
-		ImagePlus image = IJ.openImage("/run/media/marie/data_marie_1/data/bf_gfp/filmtest/movie_X-0.0_Y-0.0/rescaled_DUP_MMStack.omeFocusImage.tif");
-		String path = IJ.getImage().getOriginalFileInfo().directory;
-		String path = "/run/media/marie/data_marie_1/data/bf_gfp/filmtest/movie_X-0.0_Y-0.0/";
-		ImagePlus correlationImagePlus = IJ.openImage(path+IJ.getImage().getShortTitle()+"CorrelationImage.tif");
-		ImagePlus correlationImagePlus = IJ.openImage(path+"rescaled_DUP_MMStack.omeCorrelationImage.tif");
+//		ImagePlus image = IJ.getImage().duplicate();
+//		ImagePlus image = IJ.openImage("/run/media/marie/data_marie_1/data/bf_gfp/filmtest/movie_X-0.0_Y-0.0/rescaled_DUP_MMStack.omeFocusImage.tif");
+//		String path = IJ.getImage().getOriginalFileInfo().directory;
+//		String path = "/run/media/marie/data_marie_1/data/bf_gfp/filmtest/movie_X-0.0_Y-0.0/";
+//		ImagePlus correlationImagePlus = IJ.openImage(path+IJ.getImage().getShortTitle()+"CorrelationImage.tif");
+//		ImagePlus correlationImagePlus = IJ.openImage(path+"rescaled_DUP_MMStack.omeCorrelationImage.tif");
 		/*
 		FileWriter resWriter = null;
 		try {

@@ -1,3 +1,4 @@
+package fiji.plugin.maars.maarslib;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,7 +14,7 @@ import javax.swing.BoxLayout;
 
 import mmcorej.CMMCore;
 
-import org.micromanager.MMStudioMainFrame;
+import org.micromanager.MMStudio;
 
 import ij.IJ;
 import ij.gui.NonBlockingGenericDialog;
@@ -27,7 +28,7 @@ public class MaarsMainDialog {
 	
 	private NonBlockingGenericDialog mainDialog;
 	private Label numFieldLabel;
-	private MMStudioMainFrame gui;
+	private MMStudio gui;
 	private CMMCore mmc;
 	private AllMaarsParameters parameters;
 	private double calibration;
@@ -40,7 +41,7 @@ public class MaarsMainDialog {
 	 * @param pathConfigFile : path to maars_config.txt file containing all parameters of the system (in JSON format)
 	 * @throws IOException
 	 */
-	public MaarsMainDialog(MMStudioMainFrame gui,
+	public MaarsMainDialog(MMStudio gui,
 			CMMCore mmc,
 			String pathConfigFile) throws IOException {
 		
@@ -170,7 +171,7 @@ public class MaarsMainDialog {
 	 * 
 	 * @return graphical user interface of Micro-Manager
 	 */
-	public MMStudioMainFrame getGui() {
+	public MMStudio getGui() {
 		return gui;
 	}
 	
