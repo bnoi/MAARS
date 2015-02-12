@@ -1,4 +1,4 @@
-addClassPath("/home/tong/Documents/code/MAARS/MaarsLib/MaarsLib.jar");
+//addClassPath("/home/tong/Documents/code/MAARS/MaarsLib/MaarsLib.jar");
 //addClassPath("C:/Program Files/Micro-Manager-1.4/jars/MaarsLib.jar");
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
@@ -28,6 +28,7 @@ try {
 gui.message("Show main window");
 
 md.show();
+
 
 while(md.isVisible()) {
 	gui.sleep(1000);

@@ -187,7 +187,7 @@ public class MaarsMainDialog {
 	 * Show dialog
 	 */
 	public void show() {
-		mainDialog.setVisible(true);
+		mainDialog.showDialog();;
 	}
 	
 	/**
