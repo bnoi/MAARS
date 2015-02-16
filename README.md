@@ -7,7 +7,6 @@ MAARS modules are Fiji and Micro-Manager libraries. Modules are:
 - SigmaOptimization_ : optimize parameters in segmentation algorithm from CellBoundaries_.
 - MaarsLib : core library for controlling microscop with Micro-Manager.
 
-
 ## License
 
 BSD License.

@@ -1,112 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 		http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>sc.fiji</groupId>
-		<artifactId>pom-fiji</artifactId>
-		<version>6.1.3</version>
-		<relativePath />
-	</parent>
+    <parent>
+        <groupId>sc.fiji</groupId>
+        <artifactId>pom-fiji</artifactId>
+        <version>6.1.3</version>
+        <relativePath />
+    </parent>
 
-	<artifactId>MaarsLib</artifactId>
+    <groupId>sc.fiji.plugin.maars</groupId>
+    <artifactId>MaarsLib</artifactId>
+    <version>1.0</version>
 
-	<name>jars/MAARS/MaarsLib</name>
-	<description>MaarsLib</description>
+    <name>jars/MAARS/MaarsLib</name>
+    <description>MaarsLib</description>
 
-	<developers>
-		<developer>
-			<id>BioinfoTongLI</id>
-			<name>Tong LI</name>
-			<email>tongli.bioinfo@gmail.com</email>
-		</developer>
-	</developers>
+    <developers>
+        <developer>
+            <id>BioinfoTongLI</id>
+            <name>Tong LI</name>
+            <email>tongli.bioinfo@gmail.com</email>
+        </developer>
+    </developers>
 
-	<scm>
-		<connection>scm:git:git://github.com/bnoi/MAARS</connection>
-		<developerConnection>scm:git:git@github.com:bnoi/MAARS</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://github.com/bnoi/MAARS</url>
-	</scm>
+    <scm>
+        <connection>scm:git:git://github.com/bnoi/MAARS</connection>
+        <developerConnection>scm:git:git@github.com:bnoi/MAARS</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/bnoi/MAARS</url>
+    </scm>
 
-	<dependencies>
-				<!-- ImageJ dependencies -->
-				<dependency>
-					<groupId>net.imagej</groupId>
-					<artifactId>ij</artifactId>
-				</dependency>
-				<!-- OME dependencies -->
-				<!-- ImgLib2 dependencies -->
-				<!-- Fiji dependencies -->
-				<dependency>
-					<groupId>ome</groupId>
-					<artifactId>bio-formats_plugins</artifactId>
-				</dependency>
-				<dependency>
-					<groupId>net.imglib2</groupId>
-					<artifactId>imglib2</artifactId>
-				</dependency>
-				<dependency>
-					<groupId>sc.fiji</groupId>
-					<artifactId>TrackMate_</artifactId>
-				</dependency>
-				<dependency>
-					<groupId>net.imglib2</groupId>
-					<artifactId>imglib2-ij</artifactId>
-				</dependency>
+    <dependencies>
+        <!-- ImageJ dependencies -->
         <dependency>
-	<groupId>com.google.code.gson</groupId>
-	<artifactId>gson</artifactId>
-	<version>2.3.1</version>
-</dependency>
-
+            <groupId>net.imagej</groupId>
+            <artifactId>ij</artifactId>
+        </dependency>
+        <!-- OME dependencies -->
+        <!-- ImgLib2 dependencies -->
+        <!-- Fiji dependencies -->
         <dependency>
-        	<groupId>sc.fiji.plugin.maars</groupId>
-        	<artifactId>CellStateAnalysis</artifactId>
-        	<version>1.0</version>
+            <groupId>ome</groupId>
+            <artifactId>bio-formats_plugins</artifactId>
         </dependency>
         <dependency>
-        	<groupId>sc.fiji.plugin.maars</groupId>
-        	<artifactId>CellsBoundaries</artifactId>
-        	<version>1.0</version>
+            <groupId>net.imglib2</groupId>
+            <artifactId>imglib2</artifactId>
         </dependency>
-	 <dependency>
-	  <groupId>mm</groupId>
-	  <artifactId>mmcorej</artifactId>
-	  <version>1.0</version>
-	 </dependency>
-	 <dependency>
-	  <groupId>mm</groupId>
-	  <artifactId>mmstudio</artifactId>
-	  <version>1.0</version>
-	 </dependency>
-	</dependencies>
+        <dependency>
+            <groupId>sc.fiji</groupId>
+            <artifactId>TrackMate_</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.imglib2</groupId>
+            <artifactId>imglib2-ij</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3.1</version>
+        </dependency>
 
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>${main-class}</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+        <!-- MAARS dependencies -->
+        <dependency>
+            <groupId>sc.fiji.plugin.maars</groupId>
+            <artifactId>CellStateAnalysis</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>sc.fiji.plugin.maars</groupId>
+            <artifactId>CellsBoundaries</artifactId>
+            <version>1.0</version>
+        </dependency>
+        
+        <!-- MAARS local dependencies (mainly Micro-Manager) -->
+        <dependency>
+            <groupId>org.mm</groupId>
+            <artifactId>mmcorej</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mm</groupId>
+            <artifactId>mmj</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 
-	<repositories>
-		<repository>
-			<id>imagej.public</id>
-			<url>http://maven.imagej.net/content/groups/public</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>imagej.public</id>
+            <url>http://maven.imagej.net/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>lib</id>
+            <url>file://${basedir}/../lib</url>
+        </repository>
+    </repositories>
 
-	<groupId>sc.fiji.plugin.maars</groupId>
-	<version>1.0</version>
 </project>
