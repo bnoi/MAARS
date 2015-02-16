@@ -154,7 +154,6 @@ public class MaarsMainDialog {
 		mainDialog.add(mitosisMovieButton);
 		
 		mainDialog.addCheckbox("Save parameters", true);
-		//TODO change the name of this button, maybe reset parameters.
 		System.out.println("- create OKMaarsMainDialog");
 		OKMaarsMainDialog maarsOkAction = new OKMaarsMainDialog(this);
 		Button okMainDialogButton = new Button("OK");
@@ -187,7 +186,7 @@ public class MaarsMainDialog {
 	 * Show dialog
 	 */
 	public void show() {
-		mainDialog.showDialog();;
+		mainDialog.setVisible(true);
 	}
 	
 	/**

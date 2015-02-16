@@ -1,4 +1,4 @@
-//addClassPath("/home/tong/Documents/code/MAARS/MaarsLib/MaarsLib.jar");
+addClassPath("/home/tong/Documents/code/MAARS/MaarsLib/target/MaarsLib-1.0.jar");
 //addClassPath("C:/Program Files/Micro-Manager-1.4/jars/MaarsLib.jar");
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
@@ -10,6 +10,7 @@ import ij.*;
 import java.io.IOException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.util.HashMap;
 
 double calibration = gui.getMMCore().getPixelSizeUm();
 mmc.setAutoShutter(false);
@@ -28,7 +29,6 @@ try {
 gui.message("Show main window");
 
 md.show();
-
 
 while(md.isVisible()) {
 	gui.sleep(1000);
@@ -61,7 +61,7 @@ if(md.isOkClicked()) {
 													nbYField,
 													(double) mmc.getImageWidth()*calibration,
 													(double) mmc.getImageHeight()*calibration);
-	
+
 	for (int i = 0; i < explo.length(); i++) {
 		gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
 		
@@ -70,8 +70,10 @@ if(md.isOkClicked()) {
 		MaarsAcquisitionForSegmentation mas = new MaarsAcquisitionForSegmentation(md,
 				explo.getX(i),
 				explo.getY(i));
-
-		mas.setupParameters();
+		AllMaarsParameters parameters = md.getParameters();
+		HashMap params = mas.getParametersFromConf(parameters);
+		params.put("shutter","DShutter");
+		mas.setParameters(params);
 		
 		mmc.waitForDevice(mmc.getXYStageDevice());
 		
@@ -79,7 +81,7 @@ if(md.isOkClicked()) {
 
 		mas.acquire(false);
 		
-		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"\\MMStack.ome.tif");
+		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack.ome.tif");
 		ms.segmentation();
 		while(ms.isAnalysing()) {
 			gui.sleep(3000);

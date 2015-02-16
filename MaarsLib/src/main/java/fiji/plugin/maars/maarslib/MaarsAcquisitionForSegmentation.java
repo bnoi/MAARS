@@ -1,10 +1,14 @@
 package fiji.plugin.maars.maarslib;
 import java.awt.Color;
+import java.util.HashMap;
 
 import org.json.JSONException;
 import org.micromanager.MMStudio;
+import org.micromanager.acquisition.AcquisitionManager;
+import org.micromanager.acquisition.MMAcquisition;
 import org.micromanager.api.MMTags;
 import org.micromanager.utils.MMScriptException;
+import org.micromanager.utils.ReportingUtils;
 
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
@@ -67,36 +71,36 @@ public class MaarsAcquisitionForSegmentation {
 	public void acquire(boolean show) {
 		
 		
-		System.out.println("Acquire movie for segmentation :");
-		System.out.println("________________________________");
+		ReportingUtils.logMessage("Acquire movie for segmentation :");
+		ReportingUtils.logMessage("________________________________");
 		
-		System.out.println("Close all previous acquisitions");
+		ReportingUtils.logMessage("Close all previous acquisitions");
 		
 		
-		System.out.println("... Initialize parameters :");
-		
-		setupParameters();
+		ReportingUtils.logMessage("... Initialize parameters :");
+		//TODO
+		//setupParameters();
 		
 		String rootDirName = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.SAVING_PATH)
 				.getAsString();
-		System.out.println("- saving path : "+rootDirName);
+		ReportingUtils.logMessage("- saving path : "+rootDirName);
 		
 		String channelGroup = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.CHANNEL_GROUP)
 				.getAsString();
-		System.out.println("- channel group : "+channelGroup);
+		ReportingUtils.logMessage("- channel group : "+channelGroup);
 		
 		String channel =  parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.CHANNEL)
 				.getAsString();
-		System.out.println("- channel : "+channel);
+		ReportingUtils.logMessage("- channel : "+channel);
 		
 		Color color = AllMaarsParameters.getColor(parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
@@ -107,63 +111,68 @@ public class MaarsAcquisitionForSegmentation {
 				.getAsJsonObject()
 				.get(AllMaarsParameters.COLOR)
 				.getAsString());
-		System.out.println("- color : "+color.toString());
+		ReportingUtils.logMessage("- color : "+color.toString());
 
 		int frameNumber = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.FRAME_NUMBER)
 				.getAsInt();
-		System.out.println("- frame number : "+frameNumber);
+		ReportingUtils.logMessage("- frame number : "+frameNumber);
 		
 		double range = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
 				.getAsDouble();
-		System.out.println("- range size : "+range);
+		ReportingUtils.logMessage("- range size : "+range);
 		
 		double step = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.STEP)
 				.getAsDouble();
-		System.out.println("- step : "+step);
+		ReportingUtils.logMessage("- step : "+step);
 		
 		int sliceNumber = (int) Math.round(range/step);
-		System.out.println("- slice number : "+sliceNumber);
+		ReportingUtils.logMessage("- slice number : "+sliceNumber);
 		
 		String acqName = "movie_X"+Math.round(positionX)+"_Y"+Math.round(positionY);
-		System.out.println("- acquisition name : "+acqName);
+		ReportingUtils.logMessage("- acquisition name : "+acqName);
 		
-		System.out.println("... Open acquisition");
+		ReportingUtils.logMessage("... Open acquisition");
+
 		try {
-			gui.openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber+1, show, true);
+			//last version need to specify the position number to 1, or raise error
+			//TODO refactorize
+			gui.openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber+1, 1, show, true);
+			MMAcquisition acq = gui.getAcquisition(acqName);
+			acq.setImagePhysicalDimensions(512, 512, 1, 8, 1);
+			acq.initialize();
 		} catch (MMScriptException e) {
-			System.out.println("Could not open acquisition");
-			e.printStackTrace();
+			ReportingUtils.logMessage("Could not open acquisition");
 		}
 		
-		System.out.println("... set channel color");
+		ReportingUtils.logMessage("... set channel color");
 		try {
 			gui.setChannelColor(acqName, 0, color);
 		} catch (MMScriptException e) {
-			System.out.println("Could not set channel color");
+			ReportingUtils.logMessage("Could not set channel color");
 			e.printStackTrace();
 		}
-		System.out.println("... set channel name");
+		ReportingUtils.logMessage("... set channel name");
 		try {
 			gui.setChannelName(acqName, 0, channel);
 		} catch (MMScriptException e) {
-			System.out.println("could not set channel name");
+			ReportingUtils.logMessage("could not set channel name");
 			e.printStackTrace();
 		}
 		
-		System.out.println("... set shutter open");
+		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
 		} catch (Exception e1) {
-			System.out.println("could not open shutter");
+			ReportingUtils.logMessage("could not open shutter");
 			e1.printStackTrace();
 		}
 		
@@ -171,46 +180,43 @@ public class MaarsAcquisitionForSegmentation {
 		try {
 			gui.sleep(3000);
 		} catch (MMScriptException e1) {
-			System.out.println("could not sleep "+3000+"s");
+			ReportingUtils.logMessage("could not sleep "+3000+"s");
 			e1.printStackTrace();
 		}
 		
-		System.out.println("... get z current position");
+		ReportingUtils.logMessage("... get z current position");
 		double zFocus = 0;
 		try {
 			zFocus = mmc.getPosition(mmc.getFocusDevice());
 		} catch (Exception e) {
-			System.out.println("could not get z current position");
+			ReportingUtils.logMessage("could not get z current position");
 			e.printStackTrace();
 		}
-		System.out.println("-> z focus is "+zFocus);
+		ReportingUtils.logMessage("-> z focus is "+zFocus);
 		
-		System.out.println("... start acquisition");
+		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
 		
 		for (int k = 0; k <= sliceNumber; k++) {
-			System.out.println("- set focus device at position "+z);
+			ReportingUtils.logMessage("- set focus device at position "+z);
 			try {
 				mmc.setPosition(mmc.getFocusDevice(), z);
 				mmc.waitForDevice(mmc.getFocusDevice());
 			} catch (Exception e) {
-				System.out.println("could not set focus device at position");
-				e.printStackTrace();
+				ReportingUtils.logMessage("could not set focus device at position");
 			}
 			
 			try {
 				mmc.snapImage();
 			} catch (Exception e) {
-				System.out.println("could not snape image");
-				e.printStackTrace();
+				ReportingUtils.logMessage("could not snape image");
 			}
 			
 			TaggedImage img = null;
 			try {
 				img = mmc.getTaggedImage();
 			} catch (Exception e) {
-				System.out.println("could not get tagged image");
-				e.printStackTrace();
+				ReportingUtils.logMessage("could not get tagged image");
 			}
 			
 			try {
@@ -222,29 +228,27 @@ public class MaarsAcquisitionForSegmentation {
 				img.tags.put(MMTags.Image.YUM,0);
 							
 			} catch (JSONException e) {
-				System.out.println("could not tag image");
+				ReportingUtils.logMessage("could not tag image");
 				e.printStackTrace();
 			}
 			
 			try {
-				//TODO
-				gui.addImage(acqName, img, true, true);
+				gui.addImage(acqName, img, false, false);
 			} catch (MMScriptException e) {
-				System.out.println("could not add image to gui");
-				e.printStackTrace();
+				ReportingUtils.logError(e);
 			}
 			
 			z = z+step;
 		}
 		
-		System.out.println("finish image cache");
+		ReportingUtils.logMessage("finish image cache");
 		try {
 			gui.getAcquisitionImageCache(acqName).finished();
 		} catch (MMScriptException e1) {
-			System.out.println("could not write metadata");
+			ReportingUtils.logMessage("could not write metadata");
 			e1.printStackTrace();
 		}
-		System.out.println("--- Acquisition done.");
+		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 		
 		try {
@@ -253,7 +257,7 @@ public class MaarsAcquisitionForSegmentation {
 			mmc.setShutterOpen(false);
 			mmc.waitForDevice(mmc.getShutterDevice());
 		} catch (Exception e) {
-			System.out.println("could not set focus device back to position and close shutter");
+			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
 		
@@ -263,12 +267,12 @@ public class MaarsAcquisitionForSegmentation {
 	/**
 	 * Get and set up all parameters for acquisition
 	 */
-	public void setupParameters() {
-
+	public HashMap<String,String> getParametersFromConf(AllMaarsParameters parameters) {
+		HashMap<String,String> params = new HashMap<String,String>() ;
 		try {
 			mmc.clearROI();
 		} catch (Exception e2) {
-			System.out.println("Could not clear ROI");
+			ReportingUtils.logMessage("Could not clear ROI");
 			e2.printStackTrace();
 		}
 		
@@ -276,11 +280,11 @@ public class MaarsAcquisitionForSegmentation {
 		try {
 			gui.clearMessageWindow();
 		} catch (MMScriptException e) {
-			System.out.println("could not clear message window");
+			ReportingUtils.logMessage("could not clear message window");
 			e.printStackTrace();
 		}
 		
-		System.out.println("... Initialize parameters :");
+		ReportingUtils.logMessage("... Initialize parameters :");
 		
 
 		String channelGroup = parameters.getParametersAsJsonObject()
@@ -288,14 +292,15 @@ public class MaarsAcquisitionForSegmentation {
 				.getAsJsonObject()
 				.get(AllMaarsParameters.CHANNEL_GROUP)
 				.getAsString();
-		System.out.println("- channel group : "+channelGroup);
-		
+		ReportingUtils.logMessage("- channel group : "+channelGroup);
+		params.put("channelGroup", channelGroup);
 		String channel =  parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.CHANNEL)
 				.getAsString();
-		System.out.println("- channel : "+channel);
+		ReportingUtils.logMessage("- channel : "+channel);
+		params.put("channel",channel);
 		
 		String shutter =  parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
@@ -306,7 +311,8 @@ public class MaarsAcquisitionForSegmentation {
 				.getAsJsonObject()
 				.get(AllMaarsParameters.SHUTTER)
 				.getAsString();
-		System.out.println("- shutter : "+shutter);
+		ReportingUtils.logMessage("- shutter : "+shutter);
+		params.put("shutter",shutter);
 		
 		Color color = AllMaarsParameters.getColor(parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
@@ -317,9 +323,10 @@ public class MaarsAcquisitionForSegmentation {
 						.getAsJsonObject()
 						.get(AllMaarsParameters.COLOR)
 						.getAsString());
-		System.out.println("- color : "+color.toString());
+		ReportingUtils.logMessage("- color : "+color.toString());
+		params.put("color",color.toString());
 		
-		int exposure = parameters.getParametersAsJsonObject()
+		String exposure = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.DEFAULT_CHANNEL_PARAMATERS)
@@ -327,38 +334,43 @@ public class MaarsAcquisitionForSegmentation {
 				.get(channel)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.EXPOSURE)
-				.getAsInt();
-		System.out.println("- exposure : "+exposure);
-		
-		System.out.println("... Set shutter device");
+				.getAsString();
+		ReportingUtils.logMessage("- exposure : "+exposure);
+		params.put("exposure", exposure);
+		return params;
+	}
+	public void setParameters(HashMap<String,String> params){
+		ReportingUtils.logMessage("... Set shutter device");
 		try {
-			mmc.setShutterDevice(shutter);
+			mmc.setShutterDevice(params.get("shutter").toString());
 		} catch (Exception e1) {
-			System.out.println("Could not set shutter device");
+			ReportingUtils.logMessage("Could not set shutter device");
 			e1.printStackTrace();
 		}
 		
-		System.out.println("... Set exposure");
+		ReportingUtils.logMessage("... Set exposure");
 		try {
-			mmc.setExposure(exposure);
+			mmc.setExposure(Integer.parseInt(params.get("exposure")));
 		} catch (Exception e1) {
-			System.out.println("could not set exposure");
+			ReportingUtils.logMessage("could not set exposure");
 			e1.printStackTrace();
 		}
 		
-		System.out.println("... set config");
+		ReportingUtils.logMessage("... set config");
 		try {
-			mmc.setConfig(channelGroup, channel);
+			mmc.setConfig(params.get("channelGroup").toString(),
+					params.get("channel").toString());
 		} catch (Exception e1) {
-			System.out.println("Could not set config");
+			ReportingUtils.logMessage("Could not set config");
 			e1.printStackTrace();
 		}
 		
-		System.out.println("... wait for config");
+		ReportingUtils.logMessage("... wait for config");
 		try {
-			mmc.waitForConfig(channelGroup, channel);
+			mmc.waitForConfig(params.get("channelGroup").toString(),
+					params.get("channel").toString());
 		} catch (Exception e1) {
-			System.out.println("Could not wait for config");
+			ReportingUtils.logMessage("Could not wait for config");
 			e1.printStackTrace();
 		}
 	}
