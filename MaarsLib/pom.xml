@@ -73,6 +73,16 @@
         	<artifactId>CellsBoundaries</artifactId>
         	<version>1.0</version>
         </dependency>
+	 <dependency>
+	  <groupId>mm</groupId>
+	  <artifactId>mmcorej</artifactId>
+	  <version>1.0</version>
+	 </dependency>
+	 <dependency>
+	  <groupId>mm</groupId>
+	  <artifactId>mmstudio</artifactId>
+	  <version>1.0</version>
+	 </dependency>
 	</dependencies>
 
 	<build>
