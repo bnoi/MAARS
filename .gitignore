@@ -27,3 +27,4 @@ target
 
 # Maven #
 /target/
+nb-configuration.xml
