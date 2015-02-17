@@ -81,7 +81,7 @@ if(md.isOkClicked()) {
 
 		mas.acquire(false);
 		
-		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack.ome.tif");
+		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 		ms.segmentation();
 		while(ms.isAnalysing()) {
 			gui.sleep(3000);
