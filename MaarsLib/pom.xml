@@ -82,11 +82,15 @@
             <groupId>org.mm</groupId>
             <artifactId>mmcorej</artifactId>
             <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../jars/MMCoreJ.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.mm</groupId>
             <artifactId>mmj</artifactId>
             <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../jars/MMJ_.jar</systemPath>
         </dependency>
     </dependencies>
 
@@ -94,10 +98,6 @@
         <repository>
             <id>imagej.public</id>
             <url>http://maven.imagej.net/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>lib</id>
-            <url>file://${basedir}/../lib</url>
         </repository>
     </repositories>
 
