@@ -34,9 +34,7 @@ public class MaarsAcquisitionForSegmentation {
 	private String pathToMovie;
 	private AcquisitionManager acqMgr = new AcquisitionManager();
 	private MMAcquisition acqForSeg;
-	private TaggedImageStorageMultipageTiff storage;
-	
-	private ShortProcessor shortPro;
+	private TaggedImageStorageMultipageTiff tiffHandler;
 
 	/**
 	 * Constructor :
@@ -147,6 +145,7 @@ public class MaarsAcquisitionForSegmentation {
 				+ Math.round(positionY);
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 
+		pathToMovie = rootDirName + acqName;
 		ReportingUtils
 				.logMessage("... Open acquisition in Acquisition manager");
 		try {
@@ -166,14 +165,15 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("... Set up Acquisition");
 		try {
 			acqForSeg.setDimensions(frameNumber, 1, sliceNumber + 1);
-			acqForSeg.setImagePhysicalDimensions(512, 512, 1, 8, 1);
+			acqForSeg.setImagePhysicalDimensions(512, 512, 1, 16, 1);
+			acqForSeg.setRootDirectory(pathToMovie);
 			acqForSeg.initialize();
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("Could not set up acquisition");
 			ReportingUtils.logError(e);
 		}
 		JSONObject metaData = acqForSeg.getSummaryMetadata();
-		pathToMovie = rootDirName + acqName;
+
 		// ReportingUtils.logMessage("... set channel name");
 		// try {
 		// // TODO
@@ -200,14 +200,20 @@ public class MaarsAcquisitionForSegmentation {
 
 		ReportingUtils.logMessage("... Update summary metadata");
 		try {
+			metaData.put("PixelType", "GRAY16");
+			metaData.put("Prefix", pathToMovie);
 			acqForSeg.setSummaryProperties(metaData);
 			ReportingUtils.logMessage(metaData.toString());
+			
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		ReportingUtils.logMessage("... Create image storage handler");
+		ReportingUtils.logMessage("... Create image tiff handler");
 		try {
-			storage = new TaggedImageStorageMultipageTiff(pathToMovie, true, acqForSeg.getSummaryMetadata());
+			tiffHandler = new TaggedImageStorageMultipageTiff(pathToMovie, true, acqForSeg.getSummaryMetadata());
 		} catch (IOException e2) {
 			ReportingUtils.logError(e2);
 		}
@@ -249,13 +255,12 @@ public class MaarsAcquisitionForSegmentation {
 				ReportingUtils
 						.logMessage("could not set focus device at position");
 			}
-
+			
 			try {
 				mmc.snapImage();
 			} catch (Exception e) {
 				ReportingUtils.logMessage("could not snape image");
 			}
-
 			TaggedImage img = null;
 			try {
 				img = mmc.getTaggedImage();
@@ -270,7 +275,6 @@ public class MaarsAcquisitionForSegmentation {
 				img.tags.put(MMTags.Image.ZUM, z);
 				img.tags.put(MMTags.Image.XUM, 0);
 				img.tags.put(MMTags.Image.YUM, 0);
-
 			} catch (JSONException e) {
 				ReportingUtils.logMessage("could not tag image");
 				ReportingUtils.logError(e);
@@ -278,7 +282,7 @@ public class MaarsAcquisitionForSegmentation {
 
 			try {
 				//TODO
-				storage.putImage(img);
+				tiffHandler.putImage(img);
 			} catch (MMException e) {
 				ReportingUtils.logError(e);
 			} catch (IOException e) {
@@ -307,7 +311,7 @@ public class MaarsAcquisitionForSegmentation {
 	}
 
 	/**
-	 * Get and set up all parameters for acquisition
+	 * Get and all parameters for acquisition
 	 */
 	public HashMap<String, String> getParametersFromConf(
 			AllMaarsParameters parameters) {

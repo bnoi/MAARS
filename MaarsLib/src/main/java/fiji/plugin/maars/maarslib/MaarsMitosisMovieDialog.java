@@ -35,7 +35,7 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog = new GenericDialog("MAARS - Mitosis movie parameters");
 		
 		//BoxLayout layout = new BoxLayout(mitosisMovieDialog, BoxLayout.Y_AXIS);
-		GridLayout layout = new GridLayout(0, 2, 0, 6);
+		GridLayout layout = new GridLayout(0, 2, 0, 10);
 		mitosisMovieDialog.setLayout(layout);
 		
 		mitosisMovieDialog.setBackground(Color.WHITE);
