@@ -3,7 +3,6 @@ package fiji.plugin.maars.maarslib;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.HashMap;
-import ij.process.ShortProcessor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.micromanager.MMStudio;
@@ -201,7 +200,7 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("... Update summary metadata");
 		try {
 			metaData.put("PixelType", "GRAY16");
-			metaData.put("Prefix", pathToMovie);
+//			metaData.put("Prefix", pathToMovie);
 			acqForSeg.setSummaryProperties(metaData);
 			ReportingUtils.logMessage(metaData.toString());
 			
