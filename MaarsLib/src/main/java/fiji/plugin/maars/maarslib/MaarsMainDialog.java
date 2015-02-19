@@ -18,7 +18,7 @@ import org.micromanager.MMStudio;
 
 import ij.IJ;
 import ij.gui.NonBlockingGenericDialog;
-
+import org.micromanager.utils.ReportingUtils;
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
  * @author marie
@@ -50,9 +50,7 @@ public class MaarsMainDialog {
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			IJ.error("CAN NOT write LOG file");
+			ReportingUtils.logError(e);
 		}
 		Color labelColor = Color.ORANGE;
 		okClicked = false;
@@ -60,11 +58,11 @@ public class MaarsMainDialog {
 		this.gui = gui;
 		this.mmc = mmc;
 		
-		System.out.println("create parameter object ...");
+		ReportingUtils.logMessage("create parameter object ...");
 		
 		parameters = new AllMaarsParameters(pathConfigFile+"maars_config.txt");
 		
-		System.out.println("Done.");
+		ReportingUtils.logMessage("Done.");
 		
 		int defaultXFieldNumber = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
@@ -75,7 +73,7 @@ public class MaarsMainDialog {
 				.getAsJsonObject()
 				.get(AllMaarsParameters.Y_FIELD_NUMBER).getAsInt();
 		
-		System.out.println("create main dialog ...");
+		ReportingUtils.logMessage("create main dialog ...");
 		
 		calibration = gui.getMMCore().getPixelSizeUm();
 		double fieldWidth = mmc.getImageWidth()* calibration;
@@ -83,16 +81,16 @@ public class MaarsMainDialog {
 		
 		mainDialog = new NonBlockingGenericDialog("Mitosis Analysing And Recording System - MAARS");
 		mainDialog.setBackground(Color.WHITE);
-		System.out.println("- set Layout");
+		ReportingUtils.logMessage("- set Layout");
 		BoxLayout layout = new BoxLayout(mainDialog, BoxLayout.Y_AXIS);
 		mainDialog.setLayout(layout);
 		
-		System.out.println("- set minimal dimension");
+		ReportingUtils.logMessage("- set minimal dimension");
 		Dimension minimumSize = new Dimension(300, 600);
 		mainDialog.setMinimumSize(minimumSize);
 		mainDialog.centerDialog(true);
 		
-		System.out.println("- create panel");
+		ReportingUtils.logMessage("- create panel");
 		Panel analysisParamPanel = new Panel();
 		
 			analysisParamPanel.setBackground(Color.WHITE);
@@ -102,38 +100,38 @@ public class MaarsMainDialog {
 		Label analysisParamLabel = new Label("Analysis parameters");
 		analysisParamLabel.setBackground(labelColor);
 		
-		System.out.println("- create OpenSegmentationDialogButtonAction");
+		ReportingUtils.logMessage("- create OpenSegmentationDialogButtonAction");
 		OpenSegmentationDialogButtonAction openSegAction = new OpenSegmentationDialogButtonAction(parameters);
 		Button segmButton = new Button("Segmentation");
 		segmButton.addActionListener(openSegAction);
 		
-		System.out.println("- create OpenFluoAnalysisDialogAction");
+		ReportingUtils.logMessage("- create OpenFluoAnalysisDialogAction");
 		OpenFluoAnalysisDialogAction openFluoAnaAction = new OpenFluoAnalysisDialogAction(parameters);
 		Button fluoAnalysisButton = new Button("Fluorescent analysis");
 		fluoAnalysisButton.addActionListener(openFluoAnaAction);
 		
-		System.out.println("- create AutofocusButtonAction");
+		ReportingUtils.logMessage("- create AutofocusButtonAction");
 		AutofocusButtonAction autofocusButtonAction = new AutofocusButtonAction(this);
 		Button autofocusButton = new Button("Autofocus");
 		autofocusButton.addActionListener(autofocusButtonAction);
 		
-		System.out.println("- add buttons to panel");
+		ReportingUtils.logMessage("- add buttons to panel");
 		analysisParamPanel.add(analysisParamLabel);
 		analysisParamPanel.add(autofocusButton);
 		analysisParamPanel.add(segmButton);
 		analysisParamPanel.add(fluoAnalysisButton);
 		
-		System.out.println("- add label for text field");
+		ReportingUtils.logMessage("- add label for text field");
 		Label explorationLabel = new Label("Area to explore");
 		explorationLabel.setBackground(labelColor);
 		numFieldLabel = new Label("Number of field : "+defaultXFieldNumber*defaultYFieldNumber);
 		
-		System.out.println("- create RefreshAreaToExploreAction");
+		ReportingUtils.logMessage("- create RefreshAreaToExploreAction");
 		RefreshAreaToExploreAction refreshAction = new RefreshAreaToExploreAction(this);
 		Button numfieldRefreshButton = new Button("Refresh");
 		numfieldRefreshButton.addActionListener(refreshAction);
 		
-		System.out.println("- add button, textfield and label to mainDialog");
+		ReportingUtils.logMessage("- add button, textfield and label to mainDialog");
 		mainDialog.add(explorationLabel);
 		mainDialog.addNumericField("Width", fieldWidth*defaultXFieldNumber, 0, 6, "micron");
 		mainDialog.addNumericField("Height", fieldHeight*defaultYFieldNumber, 0, 6, "micron");
@@ -142,27 +140,27 @@ public class MaarsMainDialog {
 		
 		mainDialog.addPanel(analysisParamPanel);
 		
-		System.out.println("- create OpenMitosisMovieParamDialog");
+		ReportingUtils.logMessage("- create OpenMitosisMovieParamDialog");
 		Label mitosisMovieLabel = new Label("Mitosis movie parameters");
 		mitosisMovieLabel.setBackground(labelColor);
 		OpenMitosisMovieParamDialog mitosisMovieAction = new OpenMitosisMovieParamDialog(parameters);
 		Button mitosisMovieButton = new Button("Parameters");
 		mitosisMovieButton.addActionListener(mitosisMovieAction);
 		
-		System.out.println("- add button and label to panel");
+		ReportingUtils.logMessage("- add button and label to panel");
 		mainDialog.add(mitosisMovieLabel);
 		mainDialog.add(mitosisMovieButton);
 		
 		mainDialog.addCheckbox("Save parameters", true);
-		System.out.println("- create OKMaarsMainDialog");
+		ReportingUtils.logMessage("- create OKMaarsMainDialog");
 		OKMaarsMainDialog maarsOkAction = new OKMaarsMainDialog(this);
 		Button okMainDialogButton = new Button("OK");
 		okMainDialogButton.addActionListener(maarsOkAction);
 		
-		System.out.println("- add button");
+		ReportingUtils.logMessage("- add button");
 		mainDialog.add(okMainDialogButton);
 		
-		System.out.println("Done.");
+		ReportingUtils.logMessage("Done.");
 		
 	}
 	

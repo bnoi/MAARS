@@ -3,6 +3,7 @@ package fiji.plugin.maars.maarslib;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.HashMap;
+import ij.process.ShortProcessor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.micromanager.MMStudio;
@@ -34,6 +35,8 @@ public class MaarsAcquisitionForSegmentation {
 	private AcquisitionManager acqMgr = new AcquisitionManager();
 	private MMAcquisition acqForSeg;
 	private TaggedImageStorageMultipageTiff storage;
+	
+	private ShortProcessor shortPro;
 
 	/**
 	 * Constructor :
