@@ -173,23 +173,6 @@ public class MaarsAcquisitionForSegmentation {
 		}
 		JSONObject metaData = acqForSeg.getSummaryMetadata();
 
-		// ReportingUtils.logMessage("... set channel name");
-		// try {
-		// // TODO
-		// JSONObject metaData = acqForSeg.getSummaryMetadata();
-		// ReportingUtils.logMessage(metaData.toString());
-		// // ReportingUtils.logMessage(metaData.get("Directory").toString());
-		// // ReportingUtils.logMessage(metaData.get("ChNames").toString());
-		// metaData.put("ChNames", channel);
-		// acqForSeg.setSummaryProperties(metaData);
-		// // acqForSeg.setChannelName(0, channel);
-		// } catch (MMScriptException e) {
-		// ReportingUtils.logMessage("could not set channel name");
-		// ReportingUtils.logError(e);
-		// } catch (JSONException e) {
-		// ReportingUtils.logError(e);
-		// }
-
 		ReportingUtils.logMessage("... set channel color");
 		try {
 			metaData.put("Channels", color.getRGB());
@@ -200,15 +183,14 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("... Update summary metadata");
 		try {
 			metaData.put("PixelType", "GRAY16");
-//			metaData.put("Prefix", pathToMovie);
+			metaData.put("Prefix", "");
 			acqForSeg.setSummaryProperties(metaData);
 			ReportingUtils.logMessage(metaData.toString());
 			
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
 		ReportingUtils.logMessage("... Create image tiff handler");
 		try {
@@ -307,6 +289,7 @@ public class MaarsAcquisitionForSegmentation {
 					.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
+		tiffHandler.close();
 	}
 
 	/**
