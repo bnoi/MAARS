@@ -164,29 +164,31 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("... Set up Acquisition");
 		try {
 			acqForSeg.setDimensions(frameNumber, 1, sliceNumber + 1);
-			acqForSeg.setImagePhysicalDimensions(512, 512, 1, 16, 1);
+			acqForSeg.setImagePhysicalDimensions((int) mmc.getImageWidth(),
+					(int) mmc.getImageHeight(), 1, 16, 1);
 			acqForSeg.setRootDirectory(pathToMovie);
-			acqForSeg.initialize();
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("Could not set up acquisition");
 			ReportingUtils.logError(e);
 		}
-		JSONObject metaData = acqForSeg.getSummaryMetadata();
-
-		ReportingUtils.logMessage("... set channel color");
+		
+		ReportingUtils.logMessage("... Initialize acquisition");
 		try {
-			metaData.put("Channels", color.getRGB());
-		} catch (JSONException e) {
-			ReportingUtils.logError(e);
+			acqForSeg.initialize();
+		} catch (MMScriptException e3) {
+			ReportingUtils.logError(e3);
 		}
-
+		
+		JSONObject metaData = acqForSeg.getSummaryMetadata();
+		
 		ReportingUtils.logMessage("... Update summary metadata");
 		try {
 			metaData.put("PixelType", "GRAY16");
-			metaData.put("Prefix", "");
+			metaData.put("Prefix", "Segment");
+//			metaData.put("Channels", color.getRGB());
 			acqForSeg.setSummaryProperties(metaData);
 			ReportingUtils.logMessage(metaData.toString());
-			
+
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		} catch (JSONException e) {
@@ -194,7 +196,8 @@ public class MaarsAcquisitionForSegmentation {
 		}
 		ReportingUtils.logMessage("... Create image tiff handler");
 		try {
-			tiffHandler = new TaggedImageStorageMultipageTiff(pathToMovie, true, acqForSeg.getSummaryMetadata());
+			tiffHandler = new TaggedImageStorageMultipageTiff(pathToMovie,
+					true, acqForSeg.getSummaryMetadata());
 		} catch (IOException e2) {
 			ReportingUtils.logError(e2);
 		}
@@ -236,7 +239,7 @@ public class MaarsAcquisitionForSegmentation {
 				ReportingUtils
 						.logMessage("could not set focus device at position");
 			}
-			
+
 			try {
 				mmc.snapImage();
 			} catch (Exception e) {
@@ -262,7 +265,7 @@ public class MaarsAcquisitionForSegmentation {
 			}
 
 			try {
-				//TODO
+				// TODO
 				tiffHandler.putImage(img);
 			} catch (MMException e) {
 				ReportingUtils.logError(e);
@@ -275,7 +278,7 @@ public class MaarsAcquisitionForSegmentation {
 
 		ReportingUtils.logMessage("finish image cache");
 		acqForSeg.getImageCache().finished();
-
+		
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 
@@ -289,11 +292,14 @@ public class MaarsAcquisitionForSegmentation {
 					.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
+		ReportingUtils.logMessage(tiffHandler.getSummaryMetadata().toString());
+		tiffHandler.finished();
+		ReportingUtils.logMessage(""+tiffHandler.isFinished());
 		tiffHandler.close();
 	}
 
 	/**
-	 * Get and all parameters for acquisition
+	 * Get parameters for acquisition
 	 */
 	public HashMap<String, String> getParametersFromConf(
 			AllMaarsParameters parameters) {
@@ -358,10 +364,13 @@ public class MaarsAcquisitionForSegmentation {
 		return params;
 	}
 
+	/**
+	 * Set up parameters for acquisition
+	 */
 	public void setParameters(HashMap<String, String> params) {
 		ReportingUtils.logMessage("... Set shutter device");
 		try {
-			mmc.setShutterDevice(params.get("shutter").toString());
+			mmc.setShutterDevice(params.get("shutter"));
 		} catch (Exception e1) {
 			ReportingUtils.logMessage("Could not set shutter device");
 			e1.printStackTrace();
@@ -375,19 +384,17 @@ public class MaarsAcquisitionForSegmentation {
 			e1.printStackTrace();
 		}
 
-		ReportingUtils.logMessage("... set config");
+		ReportingUtils.logMessage("... Set config");
 		try {
-			mmc.setConfig(params.get("channelGroup").toString(),
-					params.get("channel").toString());
+			mmc.setConfig(params.get("channelGroup"), params.get("channel"));
 		} catch (Exception e1) {
 			ReportingUtils.logMessage("Could not set config");
 			e1.printStackTrace();
 		}
 
-		ReportingUtils.logMessage("... wait for config");
+		ReportingUtils.logMessage("... Wait for config");
 		try {
-			mmc.waitForConfig(params.get("channelGroup").toString(), params
-					.get("channel").toString());
+			mmc.waitForConfig(params.get("channelGroup"), params.get("channel"));
 		} catch (Exception e1) {
 			ReportingUtils.logMessage("Could not wait for config");
 			e1.printStackTrace();

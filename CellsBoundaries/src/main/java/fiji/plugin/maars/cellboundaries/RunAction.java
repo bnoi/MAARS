@@ -124,20 +124,20 @@ public class RunAction implements ActionListener{
 		int newMinParticleSize;
 		Calibration newCal = new Calibration();
 		newCal.setUnit("micron");
-		//TODO refact
-		if (cB.getImageToAnalyze().getWidth() > maxWidth) {
+		ImagePlus img = cB.getImageToAnalyze();
+		if (img.getWidth() > maxWidth) {
 			System.out.println("Image width is greater than maximum width allowed");
 			
 			newWidth = maxWidth;
-        	newHeight = (int)cB.getImageToAnalyze().getHeight()*maxWidth/cB.getImageToAnalyze().getWidth(); 
+        	newHeight = (int)img.getHeight()*maxWidth/img.getWidth(); 
         	
-        	newMinParticleSize = (int)minParticleSize*maxWidth/cB.getImageToAnalyze().getWidth();
-        	newMaxParticleSize = (int)maxParticleSize*maxWidth/cB.getImageToAnalyze().getWidth();
+        	newMinParticleSize = (int)minParticleSize*maxWidth/img.getWidth();
+        	newMaxParticleSize = (int)maxParticleSize*maxWidth/img.getWidth();
         	
-        	if (cB.getImageToAnalyze().getCalibration().scaled()) {
+        	if (img.getCalibration().scaled()) {
         	
-	        	newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]*cB.getImageToAnalyze().getWidth()/maxWidth;
-	        	newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]*cB.getImageToAnalyze().getWidth()/maxWidth;
+	        	newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]*img.getWidth()/maxWidth;
+	        	newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]*img.getWidth()/maxWidth;
 	        	newCal.pixelDepth = cB.getScale()[CellsBoundaries.DEPTH];
         	}
         	
@@ -145,14 +145,14 @@ public class RunAction implements ActionListener{
         	if (newHeight > maxHeight) {
         		System.out.println("New height is still greater than maximum height allowed");
         		newHeight = maxHeight;
-        		newWidth = (int)cB.getImageToAnalyze().getWidth()*maxHeight/cB.getImageToAnalyze().getHeight();
+        		newWidth = (int)img.getWidth()*maxHeight/img.getHeight();
         		
-        		newMinParticleSize = (int)minParticleSize*maxHeight/cB.getImageToAnalyze().getHeight();
-            	newMaxParticleSize = (int)maxParticleSize*maxHeight/cB.getImageToAnalyze().getHeight();
+        		newMinParticleSize = (int)minParticleSize*maxHeight/img.getHeight();
+            	newMaxParticleSize = (int)maxParticleSize*maxHeight/img.getHeight();
             	
-            	if (cB.getImageToAnalyze().getCalibration().scaled()) {
-	            	newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]*cB.getImageToAnalyze().getHeight()/maxHeight;
-	            	newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]*cB.getImageToAnalyze().getHeight()/maxHeight;
+            	if (img.getCalibration().scaled()) {
+	            	newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]*img.getHeight()/maxHeight;
+	            	newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]*img.getHeight()/maxHeight;
 	            	newCal.pixelDepth = cB.getScale()[CellsBoundaries.DEPTH];
             	}
         		
@@ -163,19 +163,19 @@ public class RunAction implements ActionListener{
         	rescale(newWidth, newHeight, newMinParticleSize, newMaxParticleSize, newCal);
     	}
 		else {
-			if (cB.getImageToAnalyze().getHeight() > maxHeight) {
+			if (img.getHeight() > maxHeight) {
 				System.out.println("Image height is greater than maximum width allowed");
 				
 				newHeight = maxHeight;
-        		newWidth = (int)cB.getImageToAnalyze().getWidth()*maxHeight/cB.getImageToAnalyze().getHeight();
+        		newWidth = (int)img.getWidth()*maxHeight/img.getHeight();
 
-        		newMinParticleSize = (int)minParticleSize*maxHeight/cB.getImageToAnalyze().getHeight();
-            	newMaxParticleSize = (int)maxParticleSize*maxHeight/cB.getImageToAnalyze().getHeight();
+        		newMinParticleSize = (int)minParticleSize*maxHeight/img.getHeight();
+            	newMaxParticleSize = (int)maxParticleSize*maxHeight/img.getHeight();
             	
 
-            	if (cB.getImageToAnalyze().getCalibration().scaled()) {
-	            	newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]*cB.getImageToAnalyze().getHeight()/maxHeight;
-	            	newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]*cB.getImageToAnalyze().getHeight()/maxHeight;
+            	if (img.getCalibration().scaled()) {
+	            	newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]*img.getHeight()/maxHeight;
+	            	newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]*img.getHeight()/maxHeight;
 	            	newCal.pixelDepth = cB.getScale()[CellsBoundaries.DEPTH];
             	}
         		
@@ -185,19 +185,19 @@ public class RunAction implements ActionListener{
         			System.out.println("New Width is still greater than maximum height allowed");
         			
         			newWidth = maxWidth;
-                	newHeight = (int)cB.getImageToAnalyze().getHeight()*maxWidth/cB.getImageToAnalyze().getWidth();
+                	newHeight = (int)img.getHeight()*maxWidth/img.getWidth();
                 	
 
-                	if (cB.getImageToAnalyze().getCalibration().scaled()) {
-	                	newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]*cB.getImageToAnalyze().getWidth()/maxWidth;
-	                	newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]*cB.getImageToAnalyze().getWidth()/maxWidth;
+                	if (img.getCalibration().scaled()) {
+	                	newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]*img.getWidth()/maxWidth;
+	                	newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]*img.getWidth()/maxWidth;
 	                	newCal.pixelDepth = cB.getScale()[CellsBoundaries.DEPTH];
                 	}
                 	
                 	System.out.println("New values : w = "+newWidth+" h = "+newHeight);
                 	
-                	newMinParticleSize = (int)minParticleSize*maxWidth/cB.getImageToAnalyze().getWidth();
-                	newMaxParticleSize = (int)maxParticleSize*maxWidth/cB.getImageToAnalyze().getWidth();
+                	newMinParticleSize = (int)minParticleSize*maxWidth/img.getWidth();
+                	newMaxParticleSize = (int)maxParticleSize*maxWidth/img.getWidth();
                 	
         		}
 
