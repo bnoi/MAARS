@@ -527,7 +527,7 @@ public class CellsBoundariesIdentification {
         if (saveDataFrame){
         	System.out.println("saving data frame...");
         	try {
-        		resultTable.saveAs(savingPath+imageToAnalyze.getShortTitle()+"Results.csv");
+        		resultTable.saveAs(savingPath+imageToAnalyze.getShortTitle()+"_Results.csv");
         	}
         	catch (IOException io){
         		IJ.error("Error", "Could not save DataFrame");
@@ -547,7 +547,7 @@ public class CellsBoundariesIdentification {
         if(saveRoi) {
         	System.out.println("saving roi...");
         	roiManager.runCommand("Select All");
-        	roiManager.runCommand("Save", savingPath+imageToAnalyze.getShortTitle()+"ROI.zip");
+        	roiManager.runCommand("Save", savingPath+imageToAnalyze.getShortTitle()+"_ROI.zip");
         	System.out.println("Done");
         	System.out.println("Close roi manager");
         	roiManager.close();
@@ -566,9 +566,9 @@ public class CellsBoundariesIdentification {
 
         if (saveBinaryImg) {
         	System.out.println("save binary image");
-        	binCorrelationImage.setTitle(imageToAnalyze.getShortTitle()+"BinaryImage");
+        	binCorrelationImage.setTitle(imageToAnalyze.getShortTitle()+"_BinaryImage");
 			FileSaver fileSaver = new FileSaver(binCorrelationImage);
-			fileSaver.saveAsTiff(savingPath+imageToAnalyze.getShortTitle()+"BinaryImage.tif");
+			fileSaver.saveAsTiff(savingPath+imageToAnalyze.getShortTitle()+"_BinaryImage.tif");
         }
         if (displayBinaryImg) {
         	System.out.println("show binary image");
@@ -581,9 +581,9 @@ public class CellsBoundariesIdentification {
         
     	if (saveCorrelationImg) {
     		System.out.println("save correlation image");
-    		imgCorrTemp.setTitle(imageToAnalyze.getShortTitle()+"CorrelationImage");
+    		imgCorrTemp.setTitle(imageToAnalyze.getShortTitle()+"_CorrelationImage");
     		FileSaver fileSaver = new FileSaver(imgCorrTemp);
-    		fileSaver.saveAsTiff(savingPath+imageToAnalyze.getShortTitle()+"CorrelationImage.tif");
+    		fileSaver.saveAsTiff(savingPath+imageToAnalyze.getShortTitle()+"_CorrelationImage.tif");
     	}
     	if (displayCorrelationImg){
     		System.out.println("show correlation image");

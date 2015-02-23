@@ -166,26 +166,28 @@ public class MaarsAcquisitionForSegmentation {
 			acqForSeg.setDimensions(frameNumber, 1, sliceNumber + 1);
 			acqForSeg.setImagePhysicalDimensions((int) mmc.getImageWidth(),
 					(int) mmc.getImageHeight(), 1, 16, 1);
+			acqForSeg.setChannelColor(0, color.getRGB());
+			acqForSeg.setChannelName(0, channel);
 			acqForSeg.setRootDirectory(pathToMovie);
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("Could not set up acquisition");
 			ReportingUtils.logError(e);
 		}
-		
+
 		ReportingUtils.logMessage("... Initialize acquisition");
 		try {
 			acqForSeg.initialize();
 		} catch (MMScriptException e3) {
 			ReportingUtils.logError(e3);
 		}
-		
+
 		JSONObject metaData = acqForSeg.getSummaryMetadata();
-		
+
 		ReportingUtils.logMessage("... Update summary metadata");
 		try {
 			metaData.put("PixelType", "GRAY16");
 			metaData.put("Prefix", "Segment");
-//			metaData.put("Channels", color.getRGB());
+			metaData.put("Group", channelGroup);
 			acqForSeg.setSummaryProperties(metaData);
 			ReportingUtils.logMessage(metaData.toString());
 
@@ -194,6 +196,7 @@ public class MaarsAcquisitionForSegmentation {
 		} catch (JSONException e) {
 			ReportingUtils.logError(e);
 		}
+
 		ReportingUtils.logMessage("... Create image tiff handler");
 		try {
 			tiffHandler = new TaggedImageStorageMultipageTiff(pathToMovie,
@@ -265,7 +268,6 @@ public class MaarsAcquisitionForSegmentation {
 			}
 
 			try {
-				// TODO
 				tiffHandler.putImage(img);
 			} catch (MMException e) {
 				ReportingUtils.logError(e);
@@ -278,7 +280,7 @@ public class MaarsAcquisitionForSegmentation {
 
 		ReportingUtils.logMessage("finish image cache");
 		acqForSeg.getImageCache().finished();
-		
+
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 
@@ -294,7 +296,6 @@ public class MaarsAcquisitionForSegmentation {
 		}
 		ReportingUtils.logMessage(tiffHandler.getSummaryMetadata().toString());
 		tiffHandler.finished();
-		ReportingUtils.logMessage(""+tiffHandler.isFinished());
 		tiffHandler.close();
 	}
 
