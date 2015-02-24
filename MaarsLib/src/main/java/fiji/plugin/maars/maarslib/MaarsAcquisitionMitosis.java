@@ -156,7 +156,7 @@ public class MaarsAcquisitionMitosis {
 		}
 		
 		System.out.println("... Initialize parameters :");
-		
+
 		String channelGroup = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject()

@@ -56,7 +56,7 @@ public class SetOfCells {
 			String pathToSaveResults) {
 		
 		try {
-			PrintStream ps = new PrintStream(pathToSaveResults+bfImage.getShortTitle()+"CellStateAnalysis.LOG");
+			PrintStream ps = new PrintStream(pathToSaveResults+bfImage.getShortTitle()+"_CellStateAnalysis.LOG");
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
@@ -107,7 +107,7 @@ public class SetOfCells {
 			String pathToSaveResults) {
 		
 		try {
-			PrintStream ps = new PrintStream(pathToSaveResults+bfImage.getShortTitle()+"CellStateAnalysis.LOG");
+			PrintStream ps = new PrintStream(pathToSaveResults+bfImage.getShortTitle()+"_CellStateAnalysis.LOG");
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {

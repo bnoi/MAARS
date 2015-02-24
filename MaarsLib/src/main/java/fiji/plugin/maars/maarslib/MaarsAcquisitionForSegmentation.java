@@ -180,14 +180,15 @@ public class MaarsAcquisitionForSegmentation {
 		} catch (MMScriptException e3) {
 			ReportingUtils.logError(e3);
 		}
-
+		
 		JSONObject metaData = acqForSeg.getSummaryMetadata();
 
 		ReportingUtils.logMessage("... Update summary metadata");
 		try {
 			metaData.put("PixelType", "GRAY16");
 			metaData.put("Prefix", "Segment");
-			metaData.put("Group", channelGroup);
+			metaData.put("IJType", 1);
+//			metaData.put("ConfigGroup", channelGroup);
 			acqForSeg.setSummaryProperties(metaData);
 			ReportingUtils.logMessage(metaData.toString());
 
@@ -196,7 +197,7 @@ public class MaarsAcquisitionForSegmentation {
 		} catch (JSONException e) {
 			ReportingUtils.logError(e);
 		}
-
+		
 		ReportingUtils.logMessage("... Create image tiff handler");
 		try {
 			tiffHandler = new TaggedImageStorageMultipageTiff(pathToMovie,
