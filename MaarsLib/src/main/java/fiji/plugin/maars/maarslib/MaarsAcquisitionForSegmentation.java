@@ -190,7 +190,6 @@ public class MaarsAcquisitionForSegmentation {
 			metaData.put("IJType", 1);
 //			metaData.put("ConfigGroup", channelGroup);
 			acqForSeg.setSummaryProperties(metaData);
-			ReportingUtils.logMessage(metaData.toString());
 
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
@@ -295,7 +294,6 @@ public class MaarsAcquisitionForSegmentation {
 					.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
-		ReportingUtils.logMessage(tiffHandler.getSummaryMetadata().toString());
 		tiffHandler.finished();
 		tiffHandler.close();
 	}

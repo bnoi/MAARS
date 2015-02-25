@@ -15,9 +15,13 @@ import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.micromanager.MMStudio;
+import org.micromanager.acquisition.AcquisitionManager;
+import org.micromanager.acquisition.AcquisitionEngine;
 import org.micromanager.api.MMTags;
 import org.micromanager.utils.MMScriptException;
+import org.micromanager.utils.ReportingUtils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -35,6 +39,8 @@ public class MaarsAcquisitionMitosis {
 	private MaarsFluoAnalysis mfa;
 	private double positionX;
 	private double positionY;
+	private AcquisitionManager acqMgr;
+	private AcquisitionEngine acqEng;
 	
 	/**
 	 * Constructor :
@@ -304,6 +310,11 @@ public class MaarsAcquisitionMitosis {
 		System.out.println("- acquisition name : "+acqName);
 		
 		double zFocus = 0;
+		//TODO
+		JSONObject summaryMetadata = new JSONObject();
+		ReportingUtils.logMessage(summaryMetadata.toString());
+		acqEng = gui.getAcquisitionEngine();
+		acqMgr.createAcquisition(summaryMetadata, true, acqEng, false);
 		
 		System.out.println("... Open acquisition");
 		try {

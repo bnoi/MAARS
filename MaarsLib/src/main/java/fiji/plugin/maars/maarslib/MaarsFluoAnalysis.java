@@ -2,6 +2,8 @@ package fiji.plugin.maars.maarslib;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.micromanager.utils.ReportingUtils;
+
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
@@ -28,13 +30,13 @@ public class MaarsFluoAnalysis {
 		
 		this.parameters = parameters;
 		
-		ImagePlus corrImg = IJ.openImage(cB.getPathDirField().getText()+cB.getImageToAnalyze().getShortTitle()+"CorrelationImage.tif");
+		ImagePlus corrImg = IJ.openImage(cB.getPathDirField().getText()+cB.getImageToAnalyze().getShortTitle()+"_CorrelationImage.tif");
 		
 		soc = new SetOfCells(cB.getImageToAnalyze(),
 			corrImg,
 			(int) Math.round(cB.getImageToAnalyze().getNSlices()/2),
 			-1,
-			cB.getPathDirField().getText()+cB.getImageToAnalyze().getShortTitle()+"ROI.zip",
+			cB.getPathDirField().getText()+cB.getImageToAnalyze().getShortTitle()+"_ROI.zip",
 			cB.getPathDirField().getText());
 
 	}
@@ -151,7 +153,7 @@ public class MaarsFluoAnalysis {
 		try {
 			writer = new FileWriter(pathToResults+"spindleAnalysis.txt");
 		} catch (IOException e) {
-			System.out.println("Could not create "+pathToResults+"spindleAnalysis.csv");
+			ReportingUtils.logMessage("Could not create "+pathToResults+"spindleAnalysis.csv");
 			e.printStackTrace();
 		}
 		for (int i = 0; i < soc.length(); i ++) {
@@ -165,7 +167,7 @@ public class MaarsFluoAnalysis {
 			try {
 				writer.write(sp.toString(soc.getCell(i).getCellShapeRoi().getName())+"\n");
 			} catch (IOException e) {
-				System.out.println("could not write sp of cell "+ soc.getCell(i).getCellShapeRoi().getName());
+				ReportingUtils.logMessage("could not write sp of cell "+ soc.getCell(i).getCellShapeRoi().getName());
 				e.printStackTrace();
 			}
 			
@@ -180,7 +182,7 @@ public class MaarsFluoAnalysis {
 		try {
 			writer.close();
 		} catch (IOException e) {
-			System.out.println("Could not close writer");
+			ReportingUtils.logMessage("Could not close writer");
 			e.printStackTrace();
 		}
 		return cellNumber;

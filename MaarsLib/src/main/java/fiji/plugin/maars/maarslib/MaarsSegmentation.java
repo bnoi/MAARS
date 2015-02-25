@@ -1,6 +1,9 @@
 package fiji.plugin.maars.maarslib;
 
 import java.io.File;
+
+import org.micromanager.utils.ReportingUtils;
+
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;
 import fiji.plugin.maars.cellboundaries.CellsBoundariesIdentification;
 import ij.IJ;
@@ -29,7 +32,7 @@ public class MaarsSegmentation {
 
 		this.parameters = parameters;
 		this.moviePath = AllMaarsParameters.convertPath(moviePath);
-		System.out.println("Movie path for segmentation : " + moviePath);
+		ReportingUtils.logMessage("Movie path for segmentation : " + moviePath);
 
 	}
 

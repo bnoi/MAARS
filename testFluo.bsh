@@ -12,6 +12,7 @@ import java.io.IOException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
+import ij.io.Opener;
 
 double calibration = gui.getMMCore().getPixelSizeUm();
 mmc.setAutoShutter(false);
@@ -58,65 +59,62 @@ if(md.isOkClicked()) {
 	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
 
 	if (nbXField * nbYField != 0){
-	ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
+		ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
 													nbYField,
 													(double) mmc.getImageWidth()*calibration,
 													(double) mmc.getImageHeight()*calibration);
-
-	for (int i = 0; i < explo.length(); i++) {
-		gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
-		
-		gui.setXYStagePosition(explo.getX(i),explo.getY(i));
-		
 		MaarsAcquisitionForSegmentation mas = new MaarsAcquisitionForSegmentation(md,
-				explo.getX(i),
-				explo.getY(i));
+				0,
+				0);
 
 		HashMap params = mas.getParametersFromConf(param);
 		params.put("shutter","DShutter");
 		mas.setParameters(params);
+		
+		String pathToRootDir = param.getParametersAsJsonObject()
+				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.getAsString();
+		String pathToFluoImg = pathToRootDir;
 
-		mmc.waitForDevice(mmc.getXYStageDevice());
-	
-		autofocus.fullFocus();
+		Opener opener = new Opener();  
+		String pathToBf = pathToRootDir +"movie_X0_Y0/Segment_MMStack_Pos0.ome.tif";
+		ImagePlus bfImg = opener.openImage(pathToBf);
+		
+		String pathToCorrImg = pathToRootDir +"movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_CorrelationImage.tif";
+		ImagePlus corrImg = opener.openImage(pathToCorrImg);
 
-		mas.acquire(false);
+		String pathToFluoImg = pathToRootDir +"movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif";
+		ImagePlus fluoImage = opener.openImage(pathToFluoImg);
 
-		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/Segment_MMStack_Pos0.ome.tif");
-		ms.segmentation();
-		while(ms.isAnalysing()) {
-			gui.sleep(3000);
-		}
+		String pathToRoiZip = pathToRootDir + "movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_ROI.zip";
 
-		MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
+		int focusSlice = 16; // =33/2
+		
+		//SetOfCells soc = new SetOfCells(bfImg, corrImg, focus, direction, pathToRoiZip, savePath);
+		SetOfCells soc = new SetOfCells(bfImg, corrImg, focusSlice, -1, pathToRoiZip, pathToRootDir);
+		MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, corrImg, Soc);
 		MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, explo.getX(i), explo.getY(i));
-		
-		
+
 		mfa.getSetOfCells().shuffle();
-		
+
 		MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
-														explo.getX(i),
-														explo.getY(i),
+														0,
+														0,
 														mfa.getSetOfCells());
+
 		if(param
 				.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
 				.getAsBoolean()) {
-			
-			String acqNameFluo = "movie_X"
-				+Math.round(explo.getX(i))
-				+"_Y"+Math.round(explo.getY(i))
-				+"FLUO";
-			
-			ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
+
 			int cellNumber = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie());
 			if (cellNumber != -1) {
 				mmad.acquire(false, cellNumber, true, true);
 			}
-		}
-		else {
+		}else {
 			int j = 0;
 			boolean mitosis = false;
 			while(j <  mfa.getSetOfCells().length() && !mitosis) {
