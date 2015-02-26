@@ -315,7 +315,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 				mmc.setPosition(mmc.getFocusDevice(), z);
 				mmc.waitForDevice(mmc.getFocusDevice());
 			} catch (Exception e) {
-				ReportingUtils.logMessage("could not set focus device at position");
+				ReportingUtils
+						.logMessage("could not set focus device at position");
 				e.printStackTrace();
 			}
 

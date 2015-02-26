@@ -7,26 +7,20 @@ import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
 
 /**
- * Class containing measures realised on an image containing a ROI:
- * AREA = object area
- * STD_DEV = object standard-deviation
- * MIN = object minimum pixel value
- * MAX = object maximum pixel value
- * X_CENTROID = object centroid coordinates : x
- * Y_CENTROID = object centroid coordinates : y
- * PERIMETER = object perimeter
- * MAJOR = object major axis length
- * MINOR = object minor axis length
- * ANGLE = object major axis angle
- * CIRCULARITY = object circularity
- * ASPECT_RATIO = object aspect ration (see imageJ documentation)
- * ROUND = object round (see imageJ documentation)
- * SOLIDITY = object solidity (see imageJ documentation)
+ * Class containing measures realised on an image containing a ROI: AREA =
+ * object area STD_DEV = object standard-deviation MIN = object minimum pixel
+ * value MAX = object maximum pixel value X_CENTROID = object centroid
+ * coordinates : x Y_CENTROID = object centroid coordinates : y PERIMETER =
+ * object perimeter MAJOR = object major axis length MINOR = object minor axis
+ * length ANGLE = object major axis angle CIRCULARITY = object circularity
+ * ASPECT_RATIO = object aspect ration (see imageJ documentation) ROUND = object
+ * round (see imageJ documentation) SOLIDITY = object solidity (see imageJ
+ * documentation)
+ * 
  * @author marie
  *
  */
 public class Measures {
-	
 
 	private Analyzer bfAnalyzer;
 
@@ -45,40 +39,38 @@ public class Measures {
 	public static final int ASPECT_RATIO = 11;
 	public static final int ROUND = 12;
 	public static final int SOLIDITY = 13;
-	
+
 	/**
 	 * Constructor :
-	 * @param bfImage : image the measures are taken from
-	 * @param focusSlice : slice of the image the measures are taken from
-	 * @param cellShapeRoi : ROI of object measured
-	 * @param rt : result table (containing results of analysis)
+	 * 
+	 * @param bfImage
+	 *            : image the measures are taken from
+	 * @param focusSlice
+	 *            : slice of the image the measures are taken from
+	 * @param cellShapeRoi
+	 *            : ROI of object measured
+	 * @param rt
+	 *            : result table (containing results of analysis)
 	 */
-	public Measures (ImagePlus bfImage,
-			int focusSlice,
-			Roi cellShapeRoi,
+	public Measures(ImagePlus bfImage, int focusSlice, Roi cellShapeRoi,
 			ResultsTable rt) {
-		
+
 		System.out.println("- set focus slice");
 		bfImage.setSlice(focusSlice);
 		System.out.println("- set roi on bf image");
 		bfImage.setRoi(cellShapeRoi);
-		
+
 		System.out.println("- create analyzer");
 		bfAnalyzer = new Analyzer(bfImage, Measurements.AREA
-    			+Measurements.STD_DEV
-        		+Measurements.MIN_MAX
-        		+Measurements.SHAPE_DESCRIPTORS
-        		+Measurements.CENTROID
-        		+Measurements.PERIMETER
-        		+Measurements.ELLIPSE,
-        		rt);
-		
+				+ Measurements.STD_DEV + Measurements.MIN_MAX
+				+ Measurements.SHAPE_DESCRIPTORS + Measurements.CENTROID
+				+ Measurements.PERIMETER + Measurements.ELLIPSE, rt);
 
 		System.out.println("- measure");
 		bfAnalyzer.measure();
-		
+
 		System.out.println("- put results in array");
-		measures =  new double[14];
+		measures = new double[14];
 		measures[AREA] = rt.getValue("Area", 0);
 		measures[STD_DEV] = rt.getValue("StdDev", 0);
 		measures[MIN] = rt.getValue("Min", 0);
@@ -97,46 +89,59 @@ public class Measures {
 		System.out.println("- reset table");
 		rt.reset();
 	}
-	
+
 	public double getArea() {
 		return measures[AREA];
 	}
+
 	public double getStdDev() {
 		return measures[STD_DEV];
 	}
+
 	public double getMin() {
 		return measures[MIN];
 	}
+
 	public double getMax() {
 		return measures[MAX];
 	}
+
 	public double getXCentroid() {
 		return measures[X_CENTROID];
 	}
+
 	public double getYCentroid() {
 		return measures[Y_CENTROID];
 	}
+
 	public double getPerimeter() {
 		return measures[PERIMETER];
 	}
+
 	public double getMajor() {
 		return measures[MAJOR];
 	}
+
 	public double getMinor() {
 		return measures[MINOR];
 	}
+
 	public double getAngle() {
 		return measures[ANGLE];
 	}
+
 	public double getCircularity() {
 		return measures[CIRCULARITY];
 	}
+
 	public double getAspectRatio() {
 		return measures[ASPECT_RATIO];
 	}
+
 	public double getRound() {
 		return measures[ROUND];
 	}
+
 	public double getSolidity() {
 		return measures[SOLIDITY];
 	}
