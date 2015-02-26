@@ -131,7 +131,11 @@ public class MaarsAcquisitionForFluoAnalysis {
 			e.printStackTrace();
 		}
 
-		return acquire(show, acqName);
+		try {
+			return acquire(show, acqName);
+		} catch (MMScriptException e) {
+			return null;
+		}
 	}
 
 	/**

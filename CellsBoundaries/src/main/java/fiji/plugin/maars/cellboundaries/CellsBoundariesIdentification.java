@@ -291,7 +291,7 @@ public class CellsBoundariesIdentification {
 		if (saveFocusImage) {
 			FileSaver fileSaver = new FileSaver(focusImage);
 			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
-					+ "FocusImage.tif");
+					+ "_FocusImage.tif");
 		}
 	}
 

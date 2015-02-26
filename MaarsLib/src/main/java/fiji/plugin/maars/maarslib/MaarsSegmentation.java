@@ -124,7 +124,7 @@ public class MaarsSegmentation {
 
 		File file = new File(cB.getPathDirField().getText()
 				+ cB.getImageToAnalyze().getShortTitle()
-				+ "CorrelationImage.tif");
+				+ "_CorrelationImage.tif");
 		if (file.exists()) {
 			return false;
 		} else {
