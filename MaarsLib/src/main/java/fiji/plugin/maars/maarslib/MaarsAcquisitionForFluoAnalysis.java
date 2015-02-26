@@ -10,6 +10,8 @@ import org.micromanager.MMStudio;
 import org.micromanager.api.MMTags;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
+import org.micromanager.acquisition.AcquisitionManager;
+import org.micromanager.acquisition.MMAcquisition;
 
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import ij.ImagePlus;
@@ -34,6 +36,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 	private double positionX;
 	private double positionY;
 	private SetOfCells soc;
+	private AcquisitionManager acqMgr = new AcquisitionManager();
+	private MMAcquisition acqForSeg;
 
 	/**
 	 * Constructor :
@@ -139,7 +143,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 *            : name of acquisition
 	 * @return ImagePlus object
 	 */
-	public ImagePlus acquire(boolean show, String acqName) {
+	public ImagePlus acquire(boolean show, String acqName) throws MMScriptException {
 
 		boolean save = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -260,26 +264,32 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logMessage("Could not wait for config");
 			e1.printStackTrace();
 		}
-
-		ReportingUtils.logMessage("... Open acquisition");
+		//TODO
 		try {
-			gui.openAcquisition(acqName, rootDirName, frameNumber, 1,
-					sliceNumber + 1, show, save);
-		} catch (MMScriptException e) {
-			ReportingUtils.logMessage("Could not open acquisition");
-			e.printStackTrace();
+			acqMgr.openAcquisition(acqName, rootDirName, show, true);
+		} catch (MMScriptException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
-
+		
+		ReportingUtils.logMessage("... Get acquisition");
+		try {
+			acqForSeg = acqMgr.getAcquisition(acqName);
+		} catch (MMScriptException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
 		ReportingUtils.logMessage("... set channel color");
 		try {
-			gui.setChannelColor(acqName, 0, color);
+			acqForSeg.setChannelColor(0, color.getRGB());
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("Could not set channel color");
 			e.printStackTrace();
 		}
 		ReportingUtils.logMessage("... set channel name");
 		try {
-			gui.setChannelName(acqName, 0, channel);
+			acqForSeg.setChannelName(0, channel);
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("could not set channel name");
 			e.printStackTrace();
@@ -302,7 +312,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			e.printStackTrace();
 		}
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
-
+		
 		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
 
@@ -350,10 +360,10 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 			try {
 				// TODO
-				gui.addImage(acqName, img, true, true);
+				acqForSeg.insertTaggedImage(img, frameNumber,1, k);
 			} catch (MMScriptException e) {
 				ReportingUtils.logMessage("could not add image to gui");
-				e.printStackTrace();
+				ReportingUtils.logError(e);
 			}
 
 			ShortProcessor shortProcessor = new ShortProcessor(
@@ -374,12 +384,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		imagePlus.setCalibration(cal);
 
 		ReportingUtils.logMessage("finish image cache");
-		try {
-			gui.getAcquisitionImageCache(acqName).finished();
-		} catch (MMScriptException e1) {
-			ReportingUtils.logMessage("could not write metadata");
-			e1.printStackTrace();
-		}
+		acqForSeg.getImageCache().finished();
 
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
