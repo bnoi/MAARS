@@ -5,6 +5,7 @@ import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
 import fiji.plugin.maars.maarslib.AllMaarsParameters;
 import fiji.plugin.maars.maarslib.ExplorationXYPositions;
+import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import mmcorej.*;
 import org.micromanager.api.*;
 import ij.*;
@@ -93,15 +94,15 @@ if(md.isOkClicked()) {
 		
 		//SetOfCells soc = new SetOfCells(bfImg, corrImg, focus, direction, pathToRoiZip, savePath);
 		SetOfCells soc = new SetOfCells(bfImg, corrImg, focusSlice, -1, pathToRoiZip, pathToRootDir);
-		MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, corrImg, Soc);
-		MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, explo.getX(i), explo.getY(i));
+		MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, corrImg, soc);
+		MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, 0, 0);
 
 		mfa.getSetOfCells().shuffle();
 
 		MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
 														0,
 														0,
-														mfa.getSetOfCells());
+														soc);
 
 		if(param
 				.getParametersAsJsonObject()
