@@ -37,7 +37,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 	private double positionY;
 	private SetOfCells soc;
 	private AcquisitionManager acqMgr = new AcquisitionManager();
-	private MMAcquisition acqForSeg;
+	private MMAcquisition acqForFluo;
 
 	/**
 	 * Constructor :
@@ -147,7 +147,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 *            : name of acquisition
 	 * @return ImagePlus object
 	 */
-	public ImagePlus acquire(boolean show, String acqName) throws MMScriptException {
+	public ImagePlus acquire(boolean show, String acqName)
+			throws MMScriptException {
 
 		boolean save = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -268,37 +269,38 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logMessage("Could not wait for config");
 			e1.printStackTrace();
 		}
-		//TODO
+		// TODO
 		try {
 			acqMgr.openAcquisition(acqName, rootDirName, show, true);
 		} catch (MMScriptException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
+
 		ReportingUtils.logMessage("... Get acquisition");
 		try {
-			acqForSeg = acqMgr.getAcquisition(acqName);
+			acqForFluo = acqMgr.getAcquisition(acqName);
 		} catch (MMScriptException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
+		acqForFluo.setImagePhysicalDimensions((int) mmc.getImageWidth(),
+				(int) mmc.getImageHeight(), 1, 16, 1);
 		ReportingUtils.logMessage("... set channel color");
 		try {
-			acqForSeg.setChannelColor(0, color.getRGB());
+			acqForFluo.setChannelColor(0, color.getRGB());
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("Could not set channel color");
 			e.printStackTrace();
 		}
 		ReportingUtils.logMessage("... set channel name");
 		try {
-			acqForSeg.setChannelName(0, channel);
+			acqForFluo.setChannelName(0, channel);
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("could not set channel name");
 			e.printStackTrace();
 		}
-
+		acqForFluo.initialize();
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -316,7 +318,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			e.printStackTrace();
 		}
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
-		
+
 		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
 
@@ -364,7 +366,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 			try {
 				// TODO
-				acqForSeg.insertTaggedImage(img, frameNumber,1, k);
+				acqForFluo.insertTaggedImage(img, frameNumber, 1, k);
 			} catch (MMScriptException e) {
 				ReportingUtils.logMessage("could not add image to gui");
 				ReportingUtils.logError(e);
@@ -388,7 +390,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		imagePlus.setCalibration(cal);
 
 		ReportingUtils.logMessage("finish image cache");
-		acqForSeg.getImageCache().finished();
+		acqForFluo.getImageCache().finished();
 
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
