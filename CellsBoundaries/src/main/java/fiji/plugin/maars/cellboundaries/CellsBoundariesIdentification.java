@@ -358,10 +358,10 @@ public class CellsBoundariesIdentification {
 
 		// if the thresholding and the making binary image produced a white
 		// background, change it
-		if (byteImage.getStatistics().mode < 127) {
-			System.out.println("Invert image");
-			byteImage.invert();
-		}
+//		if (byteImage.getStatistics().mode < 127) {
+//			System.out.println("Invert image");
+//			byteImage.invert();
+//		}
 		binCorrelationImage = new ImagePlus("binary correlation Image",
 				byteImage);
 
