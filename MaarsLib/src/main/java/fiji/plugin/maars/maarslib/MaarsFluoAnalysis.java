@@ -185,10 +185,10 @@ public class MaarsFluoAnalysis {
 		double smallerSp = 900000;
 		FileWriter writer = null;
 		try {
-			writer = new FileWriter(pathToResults + "spindleAnalysis.txt");
+			writer = new FileWriter(pathToResults + "_spindleAnalysis.txt");
 		} catch (IOException e) {
 			ReportingUtils.logMessage("Could not create " + pathToResults
-					+ "spindleAnalysis.csv");
+					+ "_spindleAnalysis.csv");
 			e.printStackTrace();
 		}
 		for (int i = 0; i < soc.length(); i++) {

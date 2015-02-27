@@ -322,7 +322,6 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 
 		double zFocus = 0;
-		// TODO
 		ReportingUtils
 				.logMessage("... Open acquisition in acquisition manager");
 		try {
@@ -350,7 +349,8 @@ public class MaarsAcquisitionMitosis {
 				ReportingUtils.logError(e);
 			}
 		}
-
+		acqForFluo.setProperty("PixelType", "GRAY16");
+		
 		ImagePlus lastImage = null;
 		double startTime = System.currentTimeMillis();
 		ReportingUtils.logMessage("start time : " + startTime);

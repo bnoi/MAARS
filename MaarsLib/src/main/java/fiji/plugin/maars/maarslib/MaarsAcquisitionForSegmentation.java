@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.HashMap;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.micromanager.MMStudio;
 import org.micromanager.acquisition.AcquisitionManager;
 import org.micromanager.acquisition.MMAcquisition;
@@ -164,14 +163,34 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("... Set up Acquisition");
 		try {
 			acqForSeg.setDimensions(frameNumber, 1, sliceNumber + 1);
+		} catch (MMScriptException e4) {
+			// TODO Auto-generated catch block
+			e4.printStackTrace();
+		}
+		try {
 			acqForSeg.setImagePhysicalDimensions((int) mmc.getImageWidth(),
 					(int) mmc.getImageHeight(), 1, 16, 1);
+		} catch (MMScriptException e4) {
+			// TODO Auto-generated catch block
+			e4.printStackTrace();
+		}
+		try {
 			acqForSeg.setChannelColor(0, color.getRGB());
+		} catch (MMScriptException e4) {
+			// TODO Auto-generated catch block
+			e4.printStackTrace();
+		}
+		try {
 			acqForSeg.setChannelName(0, channel);
+		} catch (MMScriptException e4) {
+			// TODO Auto-generated catch block
+			e4.printStackTrace();
+		}
+		try {
 			acqForSeg.setRootDirectory(pathToMovie);
-		} catch (MMScriptException e) {
-			ReportingUtils.logMessage("Could not set up acquisition");
-			ReportingUtils.logError(e);
+		} catch (MMScriptException e4) {
+			// TODO Auto-generated catch block
+			e4.printStackTrace();
 		}
 
 		ReportingUtils.logMessage("... Initialize acquisition");
@@ -181,20 +200,30 @@ public class MaarsAcquisitionForSegmentation {
 			ReportingUtils.logError(e3);
 		}
 
-		JSONObject metaData = acqForSeg.getSummaryMetadata();
-
 		ReportingUtils.logMessage("... Update summary metadata");
 		try {
-			metaData.put("PixelType", "GRAY16");
-			metaData.put("Prefix", "Segment");
-			metaData.put("IJType", 1);
-			// metaData.put("ConfigGroup", channelGroup);
-			acqForSeg.setSummaryProperties(metaData);
-
-		} catch (MMScriptException e2) {
-			ReportingUtils.logError(e2);
-		} catch (JSONException e) {
-			ReportingUtils.logError(e);
+			acqForSeg.setProperty("PixelType", "GRAY16");
+		} catch (MMScriptException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
+		try {
+			acqForSeg.setProperty("Prefix", "Segment");
+		} catch (MMScriptException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
+		try {
+			acqForSeg.setProperty("IJType", "1");
+		} catch (MMScriptException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
+		}
+		try {
+			acqForSeg.setProperty("ConfigGroup", channelGroup);
+		} catch (MMScriptException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
 		}
 
 		ReportingUtils.logMessage("... Create image tiff handler");
@@ -294,6 +323,7 @@ public class MaarsAcquisitionForSegmentation {
 					.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
+		acqMgr.closeAll();
 		tiffHandler.finished();
 		tiffHandler.close();
 	}
