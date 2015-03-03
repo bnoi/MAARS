@@ -209,7 +209,6 @@ public class MaarsFluoAnalysis {
 						+ soc.getCell(i).getCellShapeRoi().getName());
 				e.printStackTrace();
 			}
-
 			if (checkStartConditions(sp)) {
 				if (sp.getLength() < smallerSp) {
 					cellNumber = i;

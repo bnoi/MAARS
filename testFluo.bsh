@@ -1,5 +1,6 @@
 addClassPath("/home/tong/Documents/code/MAARS/MaarsLib/target/MaarsLib-1.0.jar");
 addClassPath("/home/tong/Documents/code/MAARS/CellsBoundaries/target/CellsBoundaries-1.0.jar");
+addClassPath("/home/tong/Documents/code/MAARS/CellStateAnalysis/target/CellStateAnalysis-1.0.jar");
 //addClassPath("C:/Program Files/Micro-Manager-1.4/jars/MaarsLib.jar");
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
@@ -79,16 +80,16 @@ if(md.isOkClicked()) {
 		String pathToFluoImg = pathToRootDir;
 
 		Opener opener = new Opener();  
-		String pathToBf = pathToRootDir +"movie_X0_Y0/Segment_MMStack_Pos0.ome.tif";
+		String pathToBf = pathToRootDir +"best/movie_X0_Y0/Segment_MMStack_Pos0.ome.tif";
 		ImagePlus bfImg = opener.openImage(pathToBf);
 		
-		String pathToCorrImg = pathToRootDir +"movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_CorrelationImage.tif";
+		String pathToCorrImg = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_CorrelationImage.tif";
 		ImagePlus corrImg = opener.openImage(pathToCorrImg);
 
-		String pathToFluoImg = pathToRootDir +"movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif";
+		String pathToFluoImg = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif";
 		ImagePlus fluoImage = opener.openImage(pathToFluoImg);
 
-		String pathToRoiZip = pathToRootDir + "movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_ROI.zip";
+		String pathToRoiZip = pathToRootDir + "best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_ROI.zip";
 
 		int focusSlice = 16; // =33/2
 		
@@ -111,7 +112,7 @@ if(md.isOkClicked()) {
 				.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
 				.getAsBoolean()) {
 
-			int cellNumber = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie());
+			int cellNumber = mfa.analyzeEntireField(fluoImage, pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome");
 			if (cellNumber != -1) {
 				mmad.acquire(false, cellNumber, true, true);
 			}

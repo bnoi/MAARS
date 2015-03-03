@@ -2,6 +2,8 @@ package fiji.plugin.maars.cellstateanalysis;
 
 import java.util.ArrayList;
 
+import org.micromanager.utils.ReportingUtils;
+
 import fiji.plugin.trackmate.Spot;
 import ij.IJ;
 import ij.ImagePlus;
@@ -83,7 +85,7 @@ public class Cell {
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
 		scaleFactorForRoiFromBfToFluo = new double[2];
 		addFluoImage(fluoImage);
-		// System.out.println("scale factor for roi : x "+scaleFactorForRoiFromBfToFluo[0]+" y "+scaleFactorForRoiFromBfToFluo[1]);
+		// ReportingUtils.logMessage("scale factor for roi : x "+scaleFactorForRoiFromBfToFluo[0]+" y "+scaleFactorForRoiFromBfToFluo[1]);
 	}
 
 	/**
@@ -106,23 +108,23 @@ public class Cell {
 	public Cell(ImagePlus bfImage, ImagePlus correlationImage, int focusSlice,
 			int direction, Roi roiCellShape, ResultsTable rt) {
 
-		System.out.println("Cell " + roiCellShape.getName());
-		System.out.println("Get parameters");
+		ReportingUtils.logMessage("Cell " + roiCellShape.getName());
+		ReportingUtils.logMessage("Get parameters");
 		this.bfImage = bfImage;
 		this.correlationImage = correlationImage;
 		this.cellShapeRoi = roiCellShape;
-		System.out.println("Done");
-		System.out.println("Reset result table");
+		ReportingUtils.logMessage("Done");
+		ReportingUtils.logMessage("Reset result table");
 		rt.reset();
 		this.rt = rt;
-		System.out.println("Done.");
+		ReportingUtils.logMessage("Done.");
 
 		this.direction = direction;
 		lastSpindleComputed = null;
 
-		System.out.println("Create Measure object");
+		ReportingUtils.logMessage("Create Measure object");
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
-		System.out.println("done");
+		ReportingUtils.logMessage("done");
 		scaleFactorForRoiFromBfToFluo = new double[2];
 		// just for test
 		// cellLinearRoi = computeCellLinearRoi(measures);
@@ -154,16 +156,16 @@ public class Cell {
 		// profilePlot.createWindow();
 
 		double[][] peaks = findBoundariesPeaks(profileArray);
-		System.out.println("\n...........................\ncell : "
+		ReportingUtils.logMessage("\n...........................\ncell : "
 				+ cellShapeRoi.getName() + "\n...........................\n");
-		System.out.println("peak 1 = " + peaks[0][0] + " peak 2 = "
+		ReportingUtils.logMessage("peak 1 = " + peaks[0][0] + " peak 2 = "
 				+ peaks[1][0]);
 
 		for (int i = (int) peaks[0][0] + 1; i < peaks[1][0]; i++) {
 			if (profileArray[i] > profileArray[i + 1]
 					&& profileArray[i] > profileArray[i - 1]
 					&& profileArray[i] > 0) {
-				// System.out.println("i = "+i);
+				// ReportingUtils.logMessage("i = "+i);
 				boolean isSeptum = false;
 				for (int newAngle = 180; newAngle > 0; newAngle = newAngle - 3) {
 					if (!isSeptum) {
@@ -177,14 +179,14 @@ public class Cell {
 						// IJ.wait(500);
 						// int peakNumber = 0;
 
-						// System.out.println("peak 1 = "+peaksNewAngledegrees[0][0]+" peak 2 = "+peaksNewAngledegrees[1][0]);
+						// ReportingUtils.logMessage("peak 1 = "+peaksNewAngledegrees[0][0]+" peak 2 = "+peaksNewAngledegrees[1][0]);
 
 						while (j < (int) peaksNewAngledegrees[1][0]
 								&& (variableNewAngledegreeThreshold[0] + variableNewAngledegreeThreshold[1]
 										* j)
 										/ plotNewAngledegres[j] < threshold
 								&& plotNewAngledegres[j] > 0) {
-							// System.out.println((variableNewAngledegreeThreshold[0]
+							// ReportingUtils.logMessage((variableNewAngledegreeThreshold[0]
 							// + variableNewAngledegreeThreshold[1] * j)/
 							// plotNewAngledegres[j]);
 							/*
@@ -197,7 +199,7 @@ public class Cell {
 						if (j == (int) peaksNewAngledegrees[1][0]) {// &&
 																	// peakNumber
 																	// < 2) {
-							System.out.println("\n---\nseptum pos : " + i
+							ReportingUtils.logMessage("\n---\nseptum pos : " + i
 									+ "\n---\n");
 							isSeptum = true;
 							septumNumber += 1;
@@ -246,8 +248,8 @@ public class Cell {
 				.convertPolarToCartesianCoor(majorAxisCoordinates[0],
 						majorAxisCoordinates[1], peakPosition,
 						measures.getAngle() + 180);
-		// System.out.println("supposed 0 : x = "+majorAxisCoordinates[0]+" y = "+majorAxisCoordinates[1]);
-		// System.out.println("centroid new selection : x = "+xyCentroidNewSelection[0]+" y = "+xyCentroidNewSelection[1]);
+		// ReportingUtils.logMessage("supposed 0 : x = "+majorAxisCoordinates[0]+" y = "+majorAxisCoordinates[1]);
+		// ReportingUtils.logMessage("centroid new selection : x = "+xyCentroidNewSelection[0]+" y = "+xyCentroidNewSelection[1]);
 		/*
 		 * double minorAxis; if(bfImage.getCalibration().scaled()) { minorAxis =
 		 * convertMinorAxisLength(measures.getMinor(), measures.getMajor(),
@@ -292,8 +294,8 @@ public class Cell {
 	 */
 	public int getPeakWidth(double[] plot, int peakPosition) {
 
-		// System.out.println("peak position : "+peakPosition);
-		// System.out.println("length plot : "+plot.length);
+		// ReportingUtils.logMessage("peak position : "+peakPosition);
+		// ReportingUtils.logMessage("length plot : "+plot.length);
 
 		boolean firstBottomFound = false;
 		int firstBottom = 0;
@@ -395,17 +397,17 @@ public class Cell {
 	public Spindle findFluoSpotTempFunction(boolean crop, double spotRadius) {
 
 		scaleRoiForFluoImage(scaleFactorForRoiFromBfToFluo);
-		System.out.println("set ROI on fluo image");
+		ReportingUtils.logMessage("set ROI on fluo image");
 		fluoImage.setRoi(cellShapeRoi);
 		if (crop) {
 			/*
-			 * System.out.println("crop fluo image");
-			 * System.out.println("bounds of Original image x = "
+			 * ReportingUtils.logMessage("crop fluo image");
+			 * ReportingUtils.logMessage("bounds of Original image x = "
 			 * +fluoImage.getWidth()+" y = "+fluoImage.getHeight());
-			 * System.out.println
+			 * ReportingUtils.logMessage
 			 * ("bounds of cropped image x = "+cellShapeRoi.getBounds
 			 * ().width+" y = "+cellShapeRoi.getBounds().height);
-			 * System.out.println
+			 * ReportingUtils.logMessage
 			 * ("origin of cropping x = "+cellShapeRoi.getXBase
 			 * ()+" y = "+cellShapeRoi.getYBase());
 			 */
@@ -416,34 +418,34 @@ public class Cell {
 							cellShapeRoi.getBounds().height,
 							fluoImage.getNSlices()));
 
-			System.out.println("Done.");
-			System.out.println("Put new calibration newly cropped image");
+			ReportingUtils.logMessage("Done.");
+			ReportingUtils.logMessage("Put new calibration newly cropped image");
 			newImage.setCalibration(fluoImage.getCalibration());
-			System.out.println("Done.");
-			System.out.println("Set newly cropped image as fluorescent image");
+			ReportingUtils.logMessage("Done.");
+			ReportingUtils.logMessage("Set newly cropped image as fluorescent image");
 			setFluoImage(newImage);
-			System.out.println("Done");
+			ReportingUtils.logMessage("Done");
 		}
 		// fluoImage.show();
 		fluoImage.setRoi(cellShapeRoi);
-		System.out.println("Create CellFluoAnalysis object");
+		ReportingUtils.logMessage("Create CellFluoAnalysis object");
 		this.fluoAnalysis = new CellFluoAnalysis(this, spotRadius);
-		System.out.println("Done.");
-		System.out.println("Find fluorescent spot on image");
+		ReportingUtils.logMessage("Done.");
+		ReportingUtils.logMessage("Find fluorescent spot on image");
 		ArrayList<Spot> spotList = fluoAnalysis.findSpots();
 
-		System.out.println("Done.");
-		System.out.println("Create spindle using spots found");
+		ReportingUtils.logMessage("Done.");
+		ReportingUtils.logMessage("Create spindle using spots found");
 		Spindle spindle = new Spindle(spotList, measures, cellShapeRoi,
 				fluoImage.getCalibration());
-		System.out.println("Done.");
+		ReportingUtils.logMessage("Done.");
 
-		System.out.println("Cell : " + cellShapeRoi.getName() + " spots nb : "
+		ReportingUtils.logMessage("Cell : " + cellShapeRoi.getName() + " spots nb : "
 				+ spotList.size());
-		System.out.println("Back to initial ROI scale");
+		ReportingUtils.logMessage("Back to initial ROI scale");
 		rescaleRoiForBFImage(scaleFactorForRoiFromBfToFluo);
-		System.out.println("Done.");
-		System.out.println("Return spindle");
+		ReportingUtils.logMessage("Done.");
+		ReportingUtils.logMessage("Return spindle");
 		lastSpindleComputed = spindle;
 		return spindle;
 	}
@@ -495,7 +497,7 @@ public class Cell {
 	 */
 	public void scaleRoiForFluoImage(double[] scaleFactorForRoiFromBfToFluo) {
 		String name = cellShapeRoi.getName();
-		System.out.println("change ROI scale");
+		ReportingUtils.logMessage("change ROI scale");
 		cellShapeRoi = RoiScaler.scale(cellShapeRoi,
 				scaleFactorForRoiFromBfToFluo[0],
 				scaleFactorForRoiFromBfToFluo[1], false);

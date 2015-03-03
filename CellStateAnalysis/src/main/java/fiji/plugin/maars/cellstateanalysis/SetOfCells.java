@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.Random;
 
+import org.micromanager.utils.ReportingUtils;
+
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.ResultsTable;
@@ -72,30 +74,30 @@ public class SetOfCells {
 			e.printStackTrace();
 		}
 
-		System.out.println("Set of cells with fluorescent image :");
-		System.out.println("Get all parameters ...");
+		ReportingUtils.logMessage("Set of cells with fluorescent image :");
+		ReportingUtils.logMessage("Get all parameters ...");
 		this.bfImage = bfImage;
 		this.fluoImage = fluoImage;
 		this.correaltionImage = correaltionImage;
 		this.pathToRois = pathToRois;
 		this.pathToSaveResults = pathToSaveResults;
 		this.direction = direction;
-		System.out.println("Done");
-		System.out.println("create result table");
+		ReportingUtils.logMessage("Done");
+		ReportingUtils.logMessage("create result table");
 		rt = new ResultsTable();
-		System.out.println("Done");
+		ReportingUtils.logMessage("Done");
 
-		System.out.println("Get ROIs as array");
+		ReportingUtils.logMessage("Get ROIs as array");
 		bfAnalysisOnly = false;
 		roiArray = getRoisAsArray();
 		cellArray = new Cell[roiArray.length];
 
-		System.out.println("Initialize Cells in array");
+		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray[i] = new Cell(bfImage, correaltionImage, fluoImage,
 					focusSlice, direction, roiArray[i], rt);
 		}
-		System.out.println("Done.");
+		ReportingUtils.logMessage("Done.");
 	}
 
 	/**
@@ -130,25 +132,26 @@ public class SetOfCells {
 			e.printStackTrace();
 		}
 
-		System.out.println("Set of cells without fluorescent image :");
-		System.out.println("Get all parameters ...");
+		ReportingUtils.logMessage("Set of cells without fluorescent image :");
+		ReportingUtils.logMessage("Get all parameters ...");
 		this.bfImage = bfImage;
 		this.correaltionImage = correaltionImage;
 		this.pathToRois = pathToRois;
 		this.pathToSaveResults = pathToSaveResults;
 		this.direction = direction;
-		System.out.println("Done");
-		System.out.println("create result table");
+		ReportingUtils.logMessage("Done");
+		ReportingUtils.logMessage("create result table");
 		rt = new ResultsTable();
-		System.out.println("Done");
+		ReportingUtils.logMessage("Done");
 
-		System.out.println("Get ROIs as array");
+		ReportingUtils.logMessage("Get ROIs as array");
 		bfAnalysisOnly = true;
 		roiArray = getRoisAsArray();
+		ReportingUtils.logMessage(roiArray.toString());
 		cellArray = new Cell[roiArray.length];
 
 		// roiManager.runCommand("Delete");
-		System.out.println("Initialize Cells in array");
+		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray[i] = new Cell(bfImage, correaltionImage, focusSlice,
 					direction, roiArray[i], rt);
@@ -156,7 +159,7 @@ public class SetOfCells {
 			// just for test
 			// roiManager.addRoi(cellArray[i].getLinearRoi());
 		}
-		System.out.println("Done.");
+		ReportingUtils.logMessage("Done.");
 	}
 
 	/**
@@ -213,7 +216,7 @@ public class SetOfCells {
 			if (roiType == "cellLinearROI") {
 				roiManager.addRoi(cellArray[cellIndex].getLinearRoi());
 			} else {
-				System.out.println("Not an option");
+				ReportingUtils.logMessage("Not an option");
 			}
 		}
 	}
