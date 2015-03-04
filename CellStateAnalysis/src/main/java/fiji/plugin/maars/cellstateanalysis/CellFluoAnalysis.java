@@ -2,42 +2,34 @@ package fiji.plugin.maars.cellstateanalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
-import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 import org.micromanager.utils.ReportingUtils;
 
-import fiji.plugin.trackmate.FeatureModel;
-import fiji.plugin.trackmate.Logger;
-import fiji.plugin.trackmate.Model;
-import fiji.plugin.trackmate.SelectionModel;
-import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.DetectorKeys;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
-import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
-import fiji.plugin.trackmate.features.track.TrackSpeedStatisticsAnalyzer;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.oldlap.SimpleFastLAPTrackerFactory;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-
-//import net.imglib2.Iterator;
-//import net.imglib2.img.ImagePlusAdapter;
-//import net.imglib2.img.basictypeaccess.array.ShortArray;
-//import net.imglib2.img.display.imagej.ImageJFunctions;
-//import net.imglib2.iterator.IntervalIterator;
-//import ij.IJ;
-//import ij.ImagePlus;
-//import ij.gui.OvalRoi;
-//import ij.gui.Roi;
-//import ij.measure.*;
-//import ij.ImageStack;
-//import ij.plugin.RoiScaler;
-//import ij.plugin.filter.Analyzer;
+import fiji.plugin.trackmate.detection.DetectionUtils;
+import fiji.plugin.trackmate.detection.DogDetector;
+import fiji.plugin.trackmate.detection.LogDetector;
+import fiji.plugin.trackmate.util.TMUtils;
+import net.imglib2.Interval;
+import net.imglib2.Iterator;
+import net.imglib2.img.ImagePlusAdapter;
+import net.imglib2.img.ImgFactory;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.img.Img;
+import net.imglib2.iterator.IntervalIterator;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.FinalInterval;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Util;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.OvalRoi;
+import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.plugin.RoiScaler;
+import ij.plugin.filter.Analyzer;
 
 /**
  * This class is to find fluorescent spots in an image using LogDetector
@@ -52,9 +44,6 @@ public class CellFluoAnalysis {
 	private double factorForThreshold;
 
 	// TODO
-	private Model model;
-	private Settings settings;
-	private TrackMate trackMate;
 
 	/**
 	 * Constructor :
@@ -67,8 +56,8 @@ public class CellFluoAnalysis {
 
 	public CellFluoAnalysis(Cell cell, double spotRadius) {
 
-		ReportingUtils.logMessage("Instantiate model object ...");
-		model = new Model();
+		ReportingUtils.logMessage("Creating CellFluoAnalysis object ...");
+
 		// this.cellShapeRoi = cellShapeRoi;
 		// this.scaleFactorForRoiFromBfToFluo = scaleFactorForRoiFromBfToFluo;
 		this.cell = cell;
@@ -76,71 +65,97 @@ public class CellFluoAnalysis {
 
 		// RoiScaler.scale(cellShapeRoi, scaleFactorForRoiFromBfToFluo[0],
 		// scaleFactorForRoiFromBfToFluo[1], false);
-//		ReportingUtils.logMessage("Set logger ...");
-//		model.setLogger(Logger.IJ_LOGGER);
 
-		settings = new Settings();
-		ReportingUtils.logMessage("Prepare settings object ...");
+		ReportingUtils
+				.logMessage("- change image type so it can be used by spot analyzer");
 
-		settings.setFrom(cell.getFluoImage());
+		final Img<UnsignedShortType> img = ImageJFunctions.wrap(cell.getFluoImage());
+		ReportingUtils.logMessage("- Done.");
+		
+		ReportingUtils.logMessage("- Get fluo image calibration");
+		Calibration cal = cell.getFluoImage().getCalibration();
+		ReportingUtils.logMessage("- Initiate interval");
+				
+		 long[] min = new long[img.numDimensions()];
+		 long[] max = new long[img.numDimensions()];
 
-		ReportingUtils.logMessage("Configure detector ...");
-		settings.detectorFactory = new LogDetectorFactory<UnsignedShortType>();
-		HashMap<String, Object> mapToSetting = new HashMap<String, Object>();
-		mapToSetting.put(DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION, true);
-		mapToSetting.put(DetectorKeys.KEY_RADIUS, spotRadius);
-		mapToSetting.put(DetectorKeys.KEY_TARGET_CHANNEL, 1);
-		mapToSetting.put(DetectorKeys.KEY_THRESHOLD, 5.);
-		mapToSetting.put(DetectorKeys.KEY_DO_MEDIAN_FILTERING, false);
-		settings.detectorSettings = mapToSetting;
+		final net.imagej.ImgPlus imgPlus = TMUtils.rawWraps(cell.getFluoImage());
+		 
+		final int xindex = TMUtils.findXAxisIndex(imgPlus);
+		min[xindex] = 0;
+		max[xindex] = (long) (2000 * 0.0645);
+		
+		final int yindex = TMUtils.findYAxisIndex(imgPlus);
+		min[yindex] = 0;
+		max[yindex] = (long) (2000 * 0.0645);
+		
+		final int zindex = TMUtils.findZAxisIndex(imgPlus);
+		min[zindex] = 0;
+		max[zindex] = 23;
 
-		ReportingUtils.logMessage("Configure tracker ... ");
-		settings.trackerFactory = new SimpleFastLAPTrackerFactory();
-		settings.trackerSettings = LAPUtils.getDefaultLAPSettingsMap();
-		settings.trackerSettings.put("LINKING_MAX_DISTANCE", 10.0);
-		settings.trackerSettings.put("GAP_CLOSING_MAX_DISTANCE", 10.0);
-		settings.trackerSettings.put("MAX_FRAME_GAP", 3);
+		FinalInterval interval = new FinalInterval(min, max);
+		
+		ReportingUtils.logMessage(xindex + "");
+		ReportingUtils.logMessage(zindex + "");
+		
+		ReportingUtils.logMessage(img.numDimensions() + "");
+		// TODO
+		double[] calib = { 0.0645, 0.0645, 0.3 };
+		ReportingUtils.logMessage("- create detector");
+		final LogDetector<UnsignedShortType> detector = new LogDetector<UnsignedShortType>(
+				img, interval, calib, spotRadius / cal.pixelWidth, 0.0, false,
+				true);
+		// final DogDetector<UnsignedShortType> detector = new
+		// DogDetector<UnsignedShortType>(imgPlus, 0.15/cal.pixelWidth,
+		// 0.05/cal.pixelWidth, false, true);
+		ReportingUtils.logMessage("- done");
 
-		settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<UnsignedShortType>());
-		settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<UnsignedShortType>());
-		settings.addTrackAnalyzer(new TrackSpeedStatisticsAnalyzer());
-
-		settings.initialSpotFilterValue = 1.;
-
-		ReportingUtils.logMessage(settings.toString());
-
-		trackMate = new TrackMate(model, settings);
-
-		trackMate.process();
-
-		ReportingUtils.logMessage(
-				"Found " + model.getTrackModel().nTracks(true) + " tracks.");
-
-		SelectionModel selectionModel = new SelectionModel(model);
-		HyperStackDisplayer displayer = new HyperStackDisplayer(model,
-				selectionModel, cell.getFluoImage());
-		displayer.render();
-		displayer.refresh();
-
-		factorForThreshold = 4;
-		FeatureModel fm = model.getFeatureModel();
-		Iterator<Integer> trackIterator = model.getTrackModel().trackIDs(true)
-				.iterator();
-		while (trackIterator.hasNext()) {
-			Integer id = trackIterator.next();
-			Double v = fm.getTrackFeature(id, "TRACK_MEAN_SPEED");
-			model.getLogger().log("");
-			model.getLogger().log(
-					"Track " + id + ": mean velocity = " + v + " "
-							+ model.getSpaceUnits() + '/'
-							+ model.getTimeUnits());
-			Iterator<Spot> spotIterator = model.getTrackModel().trackSpots(id)
-					.iterator();
-			while (spotIterator.hasNext()) {
-				res.add(spotIterator.next());
-			}
+		if (!detector.checkInput()) {
+			ReportingUtils.logMessage("- Wrong input for detector");
+		} else {
+			ReportingUtils.logMessage("- input ok");
 		}
 
+		final long start = System.currentTimeMillis();
+		/*
+		 * Copy to float for convolution.
+		 */
+		final ImgFactory<FloatType> factory = Util.getArrayOrCellImgFactory(
+				interval, new FloatType());
+		ReportingUtils.logMessage("salutddd");
+
+		Img<FloatType> floatImg = DetectionUtils.copyToFloatImg(img, interval,
+				factory);
+		ReportingUtils.logMessage("salut");
+		// /*
+		// * Do median filtering (or not).
+		// */
+		// if (doMedianFilter) {
+		// floatImg = DetectionUtils.applyMedianFilter(floatImg);
+		// if (null == floatImg) {
+		// errorMessage = BASE_ERROR_MESSAGE
+		// + "Failed to apply median filter.";
+		// return false;
+		// }
+		// }
+		// int ndims = interval.numDimensions();
+		// for (int d = 0; d < interval.numDimensions(); d++) {
+		// // Squeeze singleton dimensions
+		// if (interval.dimension(d) <= 1) {
+		// ndims--;
+		// }
+		// }
+
+		if (!detector.process()) {
+			ReportingUtils.logMessage("- Detector not processing");
+		} else {
+			ReportingUtils.logMessage("- process ok");
+		}
+		ReportingUtils.logMessage("- compute results");
+		res = detector.getResult();
+		ReportingUtils.logMessage("- Done.");
+
+		factorForThreshold = 4;
 	}
 
 	/**
@@ -162,7 +177,7 @@ public class CellFluoAnalysis {
 		ArrayList<Spot> spotsToKeep = new ArrayList<Spot>();
 
 		// ReportingUtils.logMessage("Res : "+res);
-		Iterator<Spot> itr1 = res.iterator();
+		java.util.Iterator<Spot> itr1 = res.iterator();
 
 		double[] quality = new double[res.toArray().length];
 		int nb = 0;
@@ -195,7 +210,7 @@ public class CellFluoAnalysis {
 
 		ReportingUtils.logMessage("threshold : " + threshold);
 
-		Iterator<Spot> itr2 = res.iterator();
+		java.util.Iterator<Spot> itr2 = res.iterator();
 		while (itr2.hasNext()) {
 			Spot spot = itr2.next();
 			Map<String, Double> features = spot.getFeatures();
