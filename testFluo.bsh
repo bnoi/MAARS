@@ -1,7 +1,11 @@
-addClassPath("/home/tong/Documents/code/MAARS/MaarsLib/target/MaarsLib-1.0.jar");
-addClassPath("/home/tong/Documents/code/MAARS/CellsBoundaries/target/CellsBoundaries-1.0.jar");
-addClassPath("/home/tong/Documents/code/MAARS/CellStateAnalysis/target/CellStateAnalysis-1.0.jar");
-//addClassPath("C:/Program Files/Micro-Manager-1.4/jars/MaarsLib.jar");
+//base_dir = "C:/Program Files/Micro-Manager-1.4/jars/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
+
+addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
+addClassPath(base_dir + "CellsBoundaries/target/CellsBoundaries-1.0.jar");
+addClassPath(base_dir + "CellStateAnalysis/target/CellStateAnalysis-1.0.jar");
+
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
 import fiji.plugin.maars.maarslib.AllMaarsParameters;
@@ -14,7 +18,6 @@ import java.io.IOException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
-import ij.io.Opener;
 
 double calibration = gui.getMMCore().getPixelSizeUm();
 mmc.setAutoShutter(false);
@@ -23,9 +26,7 @@ mmc.waitForDevice(mmc.getShutterDevice());
 gui.message("Create main window");
 MaarsMainDialog md = null;
 try {
-	md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
-	//md = new MaarsMainDialog(gui, mmc, "/home/marie/workspace/MaarsLib/");
-	//md = new MaarsMainDialog(gui, mmc, "D:/Data/marie/");
+	md = new MaarsMainDialog(gui, mmc, base_dir + "MaarsLib/");
 } catch (IOException e) {
 	gui.message("Error");
 }
@@ -77,17 +78,17 @@ if(md.isOkClicked()) {
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString();
+		pathToRootDir = "/home/hadim/Documents/phd/data/maars/";
 		String pathToFluoImg = pathToRootDir;
 
-		Opener opener = new Opener();  
 		String pathToBf = pathToRootDir +"best/movie_X0_Y0/Segment_MMStack_Pos0.ome.tif";
-		ImagePlus bfImg = opener.openImage(pathToBf);
+		ImagePlus bfImg = IJ.openImage(pathToBf);
 		
 		String pathToCorrImg = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_CorrelationImage.tif";
-		ImagePlus corrImg = opener.openImage(pathToCorrImg);
+		ImagePlus corrImg = IJ.openImage(pathToCorrImg);
 
 		String pathToFluoImg = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif";
-		ImagePlus fluoImage = opener.openImage(pathToFluoImg);
+		ImagePlus fluoImage = IJ.openImage(pathToFluoImg);
 
 		String pathToRoiZip = pathToRootDir + "best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_ROI.zip";
 

@@ -5,17 +5,12 @@ import java.util.ArrayList;
 import org.micromanager.utils.ReportingUtils;
 
 import fiji.plugin.trackmate.Spot;
-import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Line;
 import ij.gui.ProfilePlot;
 import ij.gui.Roi;
-import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
 
 /**
  * Cell is a class containing information about cell image, including its

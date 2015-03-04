@@ -29,12 +29,12 @@ import org.micromanager.utils.ReportingUtils;
  */
 public class MaarsMainDialog {
 
-	private NonBlockingGenericDialog mainDialog;
-	private Label numFieldLabel;
-	private MMStudio gui;
-	private CMMCore mmc;
-	private AllMaarsParameters parameters;
-	private double calibration;
+	private final NonBlockingGenericDialog mainDialog;
+	private final Label numFieldLabel;
+	private final MMStudio gui;
+	private final CMMCore mmc;
+	private final AllMaarsParameters parameters;
+	private final double calibration;
 	private boolean okClicked;
 
 	/**

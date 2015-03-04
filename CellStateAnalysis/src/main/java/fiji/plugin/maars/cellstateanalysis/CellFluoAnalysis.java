@@ -7,33 +7,15 @@ import java.util.Map;
 import org.micromanager.utils.ReportingUtils;
 
 import fiji.plugin.trackmate.Spot;
-import fiji.plugin.trackmate.detection.DetectionUtils;
-import fiji.plugin.trackmate.detection.DogDetector;
-import fiji.plugin.trackmate.detection.LogDetector;
-import fiji.plugin.trackmate.util.TMUtils;
-import net.imglib2.Cursor;
-import net.imglib2.Interval;
-import net.imglib2.Iterator;
-import net.imglib2.RandomAccess;
-import net.imglib2.converter.RealFloatConverter;
-import net.imglib2.img.ImagePlusAdapter;
-import net.imglib2.img.ImgFactory;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.img.Img;
-import net.imglib2.iterator.IntervalIterator;
-import net.imglib2.meta.ImgPlus;
-import net.imglib2.FinalInterval;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.Util;
-import net.imglib2.view.Views;
-import ij.IJ;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.detection.LogDetectorFactory;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.TrackMate;
+
 import ij.ImagePlus;
-import ij.gui.OvalRoi;
-import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.plugin.RoiScaler;
-import ij.plugin.filter.Analyzer;
+import ij.plugin.ZProjector;
 
 /**
  * This class is to find fluorescent spots in an image using LogDetector
@@ -70,111 +52,57 @@ public class CellFluoAnalysis {
 		// RoiScaler.scale(cellShapeRoi, scaleFactorForRoiFromBfToFluo[0],
 		// scaleFactorForRoiFromBfToFluo[1], false);
 
-		ReportingUtils
-				.logMessage("- change image type so it can be used by spot analyzer");
-
-		final Img<UnsignedShortType> img = ImageJFunctions.wrap(cell
-				.getFluoImage());
-		ReportingUtils.logMessage("- Done.");
-
-		ReportingUtils.logMessage("- Get fluo image calibration");
+                // Do ZProjection
+                ZProjector projector = new ZProjector();
+                projector.setMethod(ZProjector.MAX_METHOD);
+                projector.setImage(cell.getFluoImage());
+                projector.doProjection();
+                ImagePlus zprojection = projector.getProjection();
+                
+                ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
-		ReportingUtils.logMessage("- Initiate interval");
+                
+                Model model = new Model();
 
-		long[] min = new long[img.numDimensions()];
-		long[] max = new long[img.numDimensions()];
+                Settings settings = new Settings();
+                settings.setFrom(zprojection);
 
-		final net.imagej.ImgPlus imgPlus = TMUtils
-				.rawWraps(cell.getFluoImage());
+                settings.detectorFactory = new LogDetectorFactory();
+                Map<String, Object> detectorSettings = new HashMap<String, Object>();
+                detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
+                detectorSettings.put("RADIUS", spotRadius / cal.pixelWidth);
+                detectorSettings.put("TARGET_CHANNEL", 1);
+                detectorSettings.put("THRESHOLD", 0.);
+                detectorSettings.put("DO_MEDIAN_FILTERING", false);
+                settings.detectorSettings = detectorSettings;
+                
+                FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
+                settings.addSpotFilter(filter1);
 
-		final int xindex = TMUtils.findXAxisIndex(imgPlus);
-		min[xindex] = 0;
-		max[xindex] = 160;
-
-		final int yindex = TMUtils.findYAxisIndex(imgPlus);
-		min[yindex] = 0;
-		max[yindex] = 120;
-
-		final int zindex = TMUtils.findZAxisIndex(imgPlus);
-		min[zindex] = 0;
-		max[zindex] = 20;
-
-		FinalInterval interval = new FinalInterval(min, max);
-
-		ReportingUtils.logMessage(xindex + "");
-		ReportingUtils.logMessage(zindex + "");
-
-		ReportingUtils.logMessage(img.numDimensions() + "");
-		// TODO
-		double[] calib = { 0.0645, 0.0645, 0.3 };
-		ReportingUtils.logMessage("- create detector");
-		final LogDetector<UnsignedShortType> detector = new LogDetector<UnsignedShortType>(
-				img, interval, calib, spotRadius / cal.pixelWidth, 0.0, false,
-				true);
-		// final DogDetector<UnsignedShortType> detector = new
-		// DogDetector<UnsignedShortType>(imgPlus, 0.15/cal.pixelWidth,
-		// 0.05/cal.pixelWidth, false, true);
-		ReportingUtils.logMessage("- done");
-
-		if (!detector.checkInput()) {
-			ReportingUtils.logMessage("- Wrong input for detector");
-		} else {
-			ReportingUtils.logMessage("- input ok");
-		}
-
-		final long start = System.currentTimeMillis();
-		/*
-		 * Copy to float for convolution.
-		 */
-		final ImgFactory<FloatType> factory = Util.getArrayOrCellImgFactory(
-				interval, new FloatType());
-		ReportingUtils.logMessage("salutddd");
-		final Img<FloatType> output = factory.create(interval, new FloatType());
-		final long[] minN = new long[interval.numDimensions()];
-		interval.min(minN);
-		final RandomAccess in = Views.offset(img, min).randomAccess();
-		final Cursor<FloatType> out = output.cursor();
-		final RealFloatConverter c = new RealFloatConverter();
-		int count = 0;
-		while (out.hasNext()) {
-			out.fwd();
-			in.setPosition(out);
-			c.convert(in.get(), out.get());
-			count++;
-			ReportingUtils.logMessage(count+"");
-		}
-		
-
-		// Img<FloatType> floatImg = DetectionUtils.copyToFloatImg(img,
-		// interval,
-		// factory);
-
-		// /*
-		// * Do median filtering (or not).
-		// */
-		// if (doMedianFilter) {
-		// floatImg = DetectionUtils.applyMedianFilter(floatImg);
-		// if (null == floatImg) {
-		// errorMessage = BASE_ERROR_MESSAGE
-		// + "Failed to apply median filter.";
-		// return false;
-		// }
-		// }
-		// int ndims = interval.numDimensions();
-		// for (int d = 0; d < interval.numDimensions(); d++) {
-		// // Squeeze singleton dimensions
-		// if (interval.dimension(d) <= 1) {
-		// ndims--;
-		// }
-		// }
-
-		if (!detector.process()) {
-			ReportingUtils.logMessage("- Detector not processing");
-		} else {
-			ReportingUtils.logMessage("- process ok");
-		}
-		ReportingUtils.logMessage("- compute results");
-		res = detector.getResult();
+                TrackMate trackmate = new TrackMate(model, settings);
+                ReportingUtils.logMessage("Trackmate created");
+                
+                trackmate.execDetection();
+                ReportingUtils.logMessage("execDetection done");
+                
+                trackmate.execInitialSpotFiltering();
+                ReportingUtils.logMessage("execInitialSpotFiltering done");
+                
+                trackmate.computeSpotFeatures(true);
+                ReportingUtils.logMessage("computeSpotFeatures done");
+                
+                trackmate.execSpotFiltering(true);
+                ReportingUtils.logMessage("execSpotFiltering done");
+  
+                ReportingUtils.logMessage("- get results");
+                
+                int nSpots = trackmate.getModel().getSpots().getNSpots(false);
+		ReportingUtils.logMessage("Found " + nSpots + " spots");
+                
+                res = new ArrayList<Spot>();
+                for(Spot spot : trackmate.getModel().getSpots().iterable(false)) {
+                    res.add(spot);
+                }
 		ReportingUtils.logMessage("- Done.");
 
 		factorForThreshold = 4;
@@ -198,7 +126,7 @@ public class CellFluoAnalysis {
 
 		ArrayList<Spot> spotsToKeep = new ArrayList<Spot>();
 
-		// ReportingUtils.logMessage("Res : "+res);
+		ReportingUtils.logMessage("Res : " + res);
 		java.util.Iterator<Spot> itr1 = res.iterator();
 
 		double[] quality = new double[res.toArray().length];
