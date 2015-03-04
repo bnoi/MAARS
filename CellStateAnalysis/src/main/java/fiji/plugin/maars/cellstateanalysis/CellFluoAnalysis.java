@@ -11,8 +11,11 @@ import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.DogDetector;
 import fiji.plugin.trackmate.detection.LogDetector;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.Iterator;
+import net.imglib2.RandomAccess;
+import net.imglib2.converter.RealFloatConverter;
 import net.imglib2.img.ImagePlusAdapter;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
@@ -23,6 +26,7 @@ import net.imglib2.FinalInterval;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Util;
+import net.imglib2.view.Views;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.OvalRoi;
@@ -69,35 +73,37 @@ public class CellFluoAnalysis {
 		ReportingUtils
 				.logMessage("- change image type so it can be used by spot analyzer");
 
-		final Img<UnsignedShortType> img = ImageJFunctions.wrap(cell.getFluoImage());
+		final Img<UnsignedShortType> img = ImageJFunctions.wrap(cell
+				.getFluoImage());
 		ReportingUtils.logMessage("- Done.");
-		
+
 		ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
 		ReportingUtils.logMessage("- Initiate interval");
-				
-		 long[] min = new long[img.numDimensions()];
-		 long[] max = new long[img.numDimensions()];
 
-		final net.imagej.ImgPlus imgPlus = TMUtils.rawWraps(cell.getFluoImage());
-		 
+		long[] min = new long[img.numDimensions()];
+		long[] max = new long[img.numDimensions()];
+
+		final net.imagej.ImgPlus imgPlus = TMUtils
+				.rawWraps(cell.getFluoImage());
+
 		final int xindex = TMUtils.findXAxisIndex(imgPlus);
 		min[xindex] = 0;
-		max[xindex] = (long) (2000 * 0.0645);
-		
+		max[xindex] = 160;
+
 		final int yindex = TMUtils.findYAxisIndex(imgPlus);
 		min[yindex] = 0;
-		max[yindex] = (long) (2000 * 0.0645);
-		
+		max[yindex] = 120;
+
 		final int zindex = TMUtils.findZAxisIndex(imgPlus);
 		min[zindex] = 0;
-		max[zindex] = 23;
+		max[zindex] = 20;
 
 		FinalInterval interval = new FinalInterval(min, max);
-		
+
 		ReportingUtils.logMessage(xindex + "");
 		ReportingUtils.logMessage(zindex + "");
-		
+
 		ReportingUtils.logMessage(img.numDimensions() + "");
 		// TODO
 		double[] calib = { 0.0645, 0.0645, 0.3 };
@@ -123,10 +129,26 @@ public class CellFluoAnalysis {
 		final ImgFactory<FloatType> factory = Util.getArrayOrCellImgFactory(
 				interval, new FloatType());
 		ReportingUtils.logMessage("salutddd");
+		final Img<FloatType> output = factory.create(interval, new FloatType());
+		final long[] minN = new long[interval.numDimensions()];
+		interval.min(minN);
+		final RandomAccess in = Views.offset(img, min).randomAccess();
+		final Cursor<FloatType> out = output.cursor();
+		final RealFloatConverter c = new RealFloatConverter();
+		int count = 0;
+		while (out.hasNext()) {
+			out.fwd();
+			in.setPosition(out);
+			c.convert(in.get(), out.get());
+			count++;
+			ReportingUtils.logMessage(count+"");
+		}
+		
 
-		Img<FloatType> floatImg = DetectionUtils.copyToFloatImg(img, interval,
-				factory);
-		ReportingUtils.logMessage("salut");
+		// Img<FloatType> floatImg = DetectionUtils.copyToFloatImg(img,
+		// interval,
+		// factory);
+
 		// /*
 		// * Do median filtering (or not).
 		// */
