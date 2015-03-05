@@ -1,6 +1,7 @@
 package fiji.plugin.maars.maarslib;
 
 import java.awt.Color;
+import java.io.IOException;
 
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
@@ -8,10 +9,12 @@ import mmcorej.TaggedImage;
 import org.json.JSONException;
 import org.micromanager.MMStudio;
 import org.micromanager.api.MMTags;
+import org.micromanager.utils.MMException;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
 import org.micromanager.acquisition.AcquisitionManager;
 import org.micromanager.acquisition.MMAcquisition;
+import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import ij.ImagePlus;
@@ -38,6 +41,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 	private SetOfCells soc;
 	private AcquisitionManager acqMgr = new AcquisitionManager();
 	private MMAcquisition acqForFluo;
+	private TaggedImageStorageMultipageTiff tiffHandler;
 
 	/**
 	 * Constructor :
@@ -107,7 +111,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		}
 
 		String acqName = "movie_X" + Math.round(positionX) + "_Y"
-				+ Math.round(positionY) + "FLUO"
+				+ Math.round(positionY) + "_FLUO"
 				+ soc.getCell(cellNumber).getCellShapeRoi().getName();
 
 		double wtest = mmc.getImageWidth();
@@ -128,7 +132,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 					(int) newroi.getBounds().height + margin * 2);
 		} catch (Exception e) {
 			ReportingUtils.logMessage("could not crop live image");
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
 
 		try {
@@ -168,7 +172,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			gui.clearMessageWindow();
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("could not clear message window");
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
 
 		ReportingUtils.logMessage("... Initialize parameters :");
@@ -266,24 +270,22 @@ public class MaarsAcquisitionForFluoAnalysis {
 		try {
 			mmc.waitForConfig(channelGroup, channel);
 		} catch (Exception e1) {
-			ReportingUtils.logMessage("Could not wait for config");
-			e1.printStackTrace();
+			ReportingUtils.logError(e1);
 		}
-		// TODO
 		try {
-			acqMgr.openAcquisition(acqName, rootDirName, show, true);
+			acqMgr.openAcquisition(acqName, rootDirName, show, false);
 		} catch (MMScriptException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			ReportingUtils.logError(e2);
 		}
 
 		ReportingUtils.logMessage("... Get acquisition");
 		try {
 			acqForFluo = acqMgr.getAcquisition(acqName);
 		} catch (MMScriptException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			ReportingUtils.logError(e2);
 		}
+		acqForFluo.setDimensions(frameNumber, 1, sliceNumber + 1);
+		//TODO
 		acqForFluo.setImagePhysicalDimensions((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight(), 1, 16, 1);
 		ReportingUtils.logMessage("... set channel color");
@@ -291,16 +293,18 @@ public class MaarsAcquisitionForFluoAnalysis {
 			acqForFluo.setChannelColor(0, color.getRGB());
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("Could not set channel color");
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
 		ReportingUtils.logMessage("... set channel name");
 		try {
 			acqForFluo.setChannelName(0, channel);
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("could not set channel name");
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
+
 		acqForFluo.initialize();
+		acqForFluo.setProperty("PixelType", "GRAY16");
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -315,13 +319,22 @@ public class MaarsAcquisitionForFluoAnalysis {
 			zFocus = mmc.getPosition(mmc.getFocusDevice());
 		} catch (Exception e) {
 			ReportingUtils.logMessage("could not get z current position");
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
+		
+		ReportingUtils.logMessage("... Create image tiff handler");
+		try {
+			tiffHandler = new TaggedImageStorageMultipageTiff(rootDirName+ "/" +acqName,
+					true, acqForFluo.getSummaryMetadata());
+		} catch (IOException e2) {
+			ReportingUtils.logError(e2);
+		}
+		
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 
 		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
-
+		ReportingUtils.logMessage("- create imagestack");
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight());
 
@@ -333,14 +346,14 @@ public class MaarsAcquisitionForFluoAnalysis {
 			} catch (Exception e) {
 				ReportingUtils
 						.logMessage("could not set focus device at position");
-				e.printStackTrace();
+				ReportingUtils.logError(e);
 			}
-
+			ReportingUtils.logMessage("- SnapImage");
 			try {
 				mmc.snapImage();
 			} catch (Exception e) {
 				ReportingUtils.logMessage("could not snape image");
-				e.printStackTrace();
+				ReportingUtils.logError(e);
 			}
 
 			TaggedImage img = null;
@@ -348,9 +361,9 @@ public class MaarsAcquisitionForFluoAnalysis {
 				img = mmc.getTaggedImage();
 			} catch (Exception e) {
 				ReportingUtils.logMessage("could not get tagged image");
-				e.printStackTrace();
+				ReportingUtils.logError(e);
 			}
-
+			ReportingUtils.logMessage("- Tag Image");
 			try {
 				img.tags.put(MMTags.Image.SLICE_INDEX, k);
 				img.tags.put(MMTags.Image.FRAME_INDEX, 0);
@@ -361,21 +374,24 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 			} catch (JSONException e) {
 				ReportingUtils.logMessage("could not tag image");
-				e.printStackTrace();
-			}
-
-			try {
-				// TODO
-				acqForFluo.insertTaggedImage(img, frameNumber, 1, k);
-			} catch (MMScriptException e) {
-				ReportingUtils.logMessage("could not add image to gui");
 				ReportingUtils.logError(e);
 			}
-
+			ReportingUtils.logMessage("- Insert TaggedImage");
+			try {
+				// TODO
+				tiffHandler.putImage(img);
+			} catch (MMException e) {
+				// TODO Auto-generated catch block
+				ReportingUtils.logError(e);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				ReportingUtils.logError(e);
+			}
+			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
 			shortProcessor.setPixels(img.pix);
-
+			ReportingUtils.logMessage("- add slice to imagestack");
 			imageStack.addSlice(shortProcessor);
 
 			z = z + step;
@@ -401,10 +417,11 @@ public class MaarsAcquisitionForFluoAnalysis {
 			mmc.setShutterOpen(false);
 			mmc.waitForDevice(mmc.getShutterDevice());
 		} catch (Exception e) {
-			System.out
-					.println("could not set focus device back to position and close shutter");
-			e.printStackTrace();
+			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
+			ReportingUtils.logError(e);
 		}
+		tiffHandler.finished();
+		tiffHandler.close();
 
 		return imagePlus;
 	}

@@ -52,57 +52,57 @@ public class CellFluoAnalysis {
 		// RoiScaler.scale(cellShapeRoi, scaleFactorForRoiFromBfToFluo[0],
 		// scaleFactorForRoiFromBfToFluo[1], false);
 
-                // Do ZProjection
-                ZProjector projector = new ZProjector();
-                projector.setMethod(ZProjector.MAX_METHOD);
-                projector.setImage(cell.getFluoImage());
-                projector.doProjection();
-                ImagePlus zprojection = projector.getProjection();
-                
-                ReportingUtils.logMessage("- Get fluo image calibration");
+		// Do ZProjection
+		ZProjector projector = new ZProjector();
+		projector.setMethod(ZProjector.MAX_METHOD);
+		projector.setImage(cell.getFluoImage());
+		projector.doProjection();
+		ImagePlus zprojection = projector.getProjection();
+
+		ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
-                
-                Model model = new Model();
 
-                Settings settings = new Settings();
-                settings.setFrom(zprojection);
+		Model model = new Model();
 
-                settings.detectorFactory = new LogDetectorFactory();
-                Map<String, Object> detectorSettings = new HashMap<String, Object>();
-                detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-                detectorSettings.put("RADIUS", spotRadius / cal.pixelWidth);
-                detectorSettings.put("TARGET_CHANNEL", 1);
-                detectorSettings.put("THRESHOLD", 0.);
-                detectorSettings.put("DO_MEDIAN_FILTERING", false);
-                settings.detectorSettings = detectorSettings;
-                
-                FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
-                settings.addSpotFilter(filter1);
+		Settings settings = new Settings();
+		settings.setFrom(zprojection);
 
-                TrackMate trackmate = new TrackMate(model, settings);
-                ReportingUtils.logMessage("Trackmate created");
-                
-                trackmate.execDetection();
-                ReportingUtils.logMessage("execDetection done");
-                
-                trackmate.execInitialSpotFiltering();
-                ReportingUtils.logMessage("execInitialSpotFiltering done");
-                
-                trackmate.computeSpotFeatures(true);
-                ReportingUtils.logMessage("computeSpotFeatures done");
-                
-                trackmate.execSpotFiltering(true);
-                ReportingUtils.logMessage("execSpotFiltering done");
-  
-                ReportingUtils.logMessage("- get results");
-                
-                int nSpots = trackmate.getModel().getSpots().getNSpots(false);
+		settings.detectorFactory = new LogDetectorFactory();
+		Map<String, Object> detectorSettings = new HashMap<String, Object>();
+		detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
+		detectorSettings.put("RADIUS", spotRadius / cal.pixelWidth);
+		detectorSettings.put("TARGET_CHANNEL", 1);
+		detectorSettings.put("THRESHOLD", 0.);
+		detectorSettings.put("DO_MEDIAN_FILTERING", false);
+		settings.detectorSettings = detectorSettings;
+
+		FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
+		settings.addSpotFilter(filter1);
+
+		TrackMate trackmate = new TrackMate(model, settings);
+		ReportingUtils.logMessage("Trackmate created");
+
+		trackmate.execDetection();
+		ReportingUtils.logMessage("execDetection done");
+
+		trackmate.execInitialSpotFiltering();
+		ReportingUtils.logMessage("execInitialSpotFiltering done");
+
+		trackmate.computeSpotFeatures(true);
+		ReportingUtils.logMessage("computeSpotFeatures done");
+
+		trackmate.execSpotFiltering(true);
+		ReportingUtils.logMessage("execSpotFiltering done");
+
+		ReportingUtils.logMessage("- get results");
+
+		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
 		ReportingUtils.logMessage("Found " + nSpots + " spots");
-                
-                res = new ArrayList<Spot>();
-                for(Spot spot : trackmate.getModel().getSpots().iterable(false)) {
-                    res.add(spot);
-                }
+
+		res = new ArrayList<Spot>();
+		for (Spot spot : trackmate.getModel().getSpots().iterable(false)) {
+			res.add(spot);
+		}
 		ReportingUtils.logMessage("- Done.");
 
 		factorForThreshold = 4;

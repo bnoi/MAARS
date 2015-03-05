@@ -1,6 +1,6 @@
 //base_dir = "C:/Program Files/Micro-Manager-1.4/jars/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
-base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 
 addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
 addClassPath(base_dir + "CellsBoundaries/target/CellsBoundaries-1.0.jar");
@@ -78,7 +78,8 @@ if(md.isOkClicked()) {
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString();
-		pathToRootDir = "/home/hadim/Documents/phd/data/maars/";
+		//pathToRootDir = "/home/hadim/Documents/phd/data/maars/";
+		pathToRootDir = "/home/tong/Documents/Movies/";
 		String pathToFluoImg = pathToRootDir;
 
 		String pathToBf = pathToRootDir +"best/movie_X0_Y0/Segment_MMStack_Pos0.ome.tif";
@@ -133,7 +134,7 @@ if(md.isOkClicked()) {
 		}
 		// close roi manager
 		mfa.getSetOfCells().closeRoiManager();
-		mas.setupParameters();
+		mas.setParameters(params);
 	}
 
 	mmc.setAutoShutter(true);
@@ -144,6 +145,6 @@ if(md.isOkClicked()) {
 	}else{
 		gui.message("Session aborted, 0 field to analyse");
 	}
-	}else{
-		gui.message("Session aborted, click 'OK' to start analyse.");
-}
+	//}else{
+	//	gui.message("Session aborted, click 'OK' to start analyse.");
+//}

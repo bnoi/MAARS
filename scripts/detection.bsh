@@ -14,7 +14,7 @@ import ij.plugin.ZProjector;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.SelectionModel;
 
-ImagePlus imp = IJ.openImage("/home/hadim/Documents/phd/data/maars/best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif");
+ImagePlus imp = IJ.openImage("/home/tong/Documents/Movies/best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif");
 ZProjector projector = new ZProjector();
 projector.setMethod(ZProjector.MAX_METHOD);
 projector.setImage(imp);
@@ -58,9 +58,9 @@ print("execSpotFiltering done");
 
 print("Found " + trackmate.getModel().getSpots().getNSpots(false) + " spots");
 
-for(Spot spot : trackmate.getModel().getSpots().iterable(true)) {
-    print(spot.getFeature(Spot.RADIUS));
-}
+//for(Spot spot : trackmate.getModel().getSpots().iterable(true)) {
+ //  print(spot.getFeature(Spot.RADIUS));
+//}
 
 // Show
 SelectionModel selectionModel = new SelectionModel(model);
