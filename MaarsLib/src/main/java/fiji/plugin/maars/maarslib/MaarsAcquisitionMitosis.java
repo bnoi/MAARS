@@ -321,7 +321,8 @@ public class MaarsAcquisitionMitosis {
 
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 
-		double zFocus = 0;
+		ReportingUtils.logMessage("...Create acquisition manager");
+		acqMgr = new AcquisitionManager();
 		ReportingUtils
 				.logMessage("... Open acquisition in acquisition manager");
 		try {
@@ -349,9 +350,16 @@ public class MaarsAcquisitionMitosis {
 				ReportingUtils.logError(e);
 			}
 		}
-		//TODO
-		acqForFluo.setProperty("PixelType", "GRAY16");
-		
+		int byteDepth = 2;
+		try {
+			acqForFluo.setImagePhysicalDimensions((int) mmc.getImageWidth(),
+					(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth, 1);
+		} catch (MMScriptException e4) {
+			ReportingUtils.logError(e4);
+		}
+		acqForFluo.initialize();
+
+		double zFocus = 0;
 		ImagePlus lastImage = null;
 		double startTime = System.currentTimeMillis();
 		ReportingUtils.logMessage("start time : " + startTime);
@@ -466,8 +474,8 @@ public class MaarsAcquisitionMitosis {
 					}
 
 					try {
-						//TODO
-						acqForFluo.insertTaggedImage(img, frame, channel, k);
+						// TODO
+						acqForFluo.insertImage(img);
 					} catch (MMScriptException e) {
 						ReportingUtils
 								.logMessage("could not add image to acquisition");

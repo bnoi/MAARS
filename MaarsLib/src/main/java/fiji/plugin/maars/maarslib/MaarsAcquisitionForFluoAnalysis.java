@@ -15,7 +15,6 @@ import org.micromanager.utils.ReportingUtils;
 import org.micromanager.acquisition.AcquisitionManager;
 import org.micromanager.acquisition.MMAcquisition;
 
-
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -41,7 +40,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 	private SetOfCells soc;
 	private AcquisitionManager acqMgr = new AcquisitionManager();
 	private MMAcquisition acqForFluo;
-
 
 	/**
 	 * Constructor :
@@ -286,8 +284,10 @@ public class MaarsAcquisitionForFluoAnalysis {
 		}
 		acqForFluo.setDimensions(frameNumber, 1, sliceNumber + 1);
 		// TODO
+		int byteDepth = 2;
 		acqForFluo.setImagePhysicalDimensions((int) mmc.getImageWidth(),
-				(int) mmc.getImageHeight(), 1, 16, 1);
+				(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth, 1);
+
 		ReportingUtils.logMessage("... set channel color");
 		try {
 			acqForFluo.setChannelColor(0, color.getRGB());
@@ -304,7 +304,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		}
 
 		acqForFluo.initialize();
-		acqForFluo.setProperty("PixelType", "GRAY16");
+
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -368,12 +368,12 @@ public class MaarsAcquisitionForFluoAnalysis {
 				ReportingUtils.logMessage("could not tag image");
 				ReportingUtils.logError(e);
 			}
-			
+
 			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
 			shortProcessor.setPixels(img.pix);
-			
+
 			ReportingUtils.logMessage("- add slice to imagestack");
 			imageStack.addSlice(shortProcessor);
 
