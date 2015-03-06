@@ -14,7 +14,7 @@ import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
 import org.micromanager.acquisition.AcquisitionManager;
 import org.micromanager.acquisition.MMAcquisition;
-import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
+
 
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import ij.ImagePlus;
@@ -41,7 +41,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 	private SetOfCells soc;
 	private AcquisitionManager acqMgr = new AcquisitionManager();
 	private MMAcquisition acqForFluo;
-	private TaggedImageStorageMultipageTiff tiffHandler;
+
 
 	/**
 	 * Constructor :
@@ -285,7 +285,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logError(e2);
 		}
 		acqForFluo.setDimensions(frameNumber, 1, sliceNumber + 1);
-		//TODO
+		// TODO
 		acqForFluo.setImagePhysicalDimensions((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight(), 1, 16, 1);
 		ReportingUtils.logMessage("... set channel color");
@@ -321,15 +321,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logMessage("could not get z current position");
 			ReportingUtils.logError(e);
 		}
-		
-		ReportingUtils.logMessage("... Create image tiff handler");
-		try {
-			tiffHandler = new TaggedImageStorageMultipageTiff(rootDirName+ "/" +acqName,
-					true, acqForFluo.getSummaryMetadata());
-		} catch (IOException e2) {
-			ReportingUtils.logError(e2);
-		}
-		
+
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 
 		ReportingUtils.logMessage("... start acquisition");
@@ -376,21 +368,12 @@ public class MaarsAcquisitionForFluoAnalysis {
 				ReportingUtils.logMessage("could not tag image");
 				ReportingUtils.logError(e);
 			}
-			ReportingUtils.logMessage("- Insert TaggedImage");
-			try {
-				// TODO
-				tiffHandler.putImage(img);
-			} catch (MMException e) {
-				// TODO Auto-generated catch block
-				ReportingUtils.logError(e);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				ReportingUtils.logError(e);
-			}
+			
 			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
 			shortProcessor.setPixels(img.pix);
+			
 			ReportingUtils.logMessage("- add slice to imagestack");
 			imageStack.addSlice(shortProcessor);
 
@@ -417,12 +400,10 @@ public class MaarsAcquisitionForFluoAnalysis {
 			mmc.setShutterOpen(false);
 			mmc.waitForDevice(mmc.getShutterDevice());
 		} catch (Exception e) {
-			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
+			ReportingUtils
+					.logMessage("could not set focus device back to position and close shutter");
 			ReportingUtils.logError(e);
 		}
-		tiffHandler.finished();
-		tiffHandler.close();
-
 		return imagePlus;
 	}
 }

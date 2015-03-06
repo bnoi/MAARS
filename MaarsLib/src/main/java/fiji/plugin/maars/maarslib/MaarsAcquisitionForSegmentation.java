@@ -1,17 +1,17 @@
 package fiji.plugin.maars.maarslib;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.HashMap;
+
 import org.json.JSONException;
 import org.micromanager.MMStudio;
 import org.micromanager.acquisition.AcquisitionManager;
 import org.micromanager.acquisition.MMAcquisition;
-import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 import org.micromanager.api.MMTags;
-import org.micromanager.utils.MMException;
+import org.micromanager.utils.ImageUtils;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
+
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 
@@ -30,7 +30,6 @@ public class MaarsAcquisitionForSegmentation {
 	private String pathToMovie;
 	private AcquisitionManager acqMgr = new AcquisitionManager();
 	private MMAcquisition acqForSeg;
-	private TaggedImageStorageMultipageTiff tiffHandler;
 
 	/**
 	 * Constructor :
@@ -131,7 +130,7 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils
 				.logMessage("... Open acquisition in Acquisition manager");
 		try {
-			acqMgr.openAcquisition(acqName, rootDirName, show, false);
+			acqMgr.openAcquisition(acqName, rootDirName, show, true);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logMessage("Could not open acquisition");
 			ReportingUtils.logError(e2);
@@ -150,10 +149,11 @@ public class MaarsAcquisitionForSegmentation {
 		} catch (MMScriptException e4) {
 			ReportingUtils.logError(e4);
 		}
+		// TODO
+		int byteDepth = 2;
 		try {
-			//TODO
 			acqForSeg.setImagePhysicalDimensions((int) mmc.getImageWidth(),
-					(int) mmc.getImageHeight(), 1, 16, 1);
+					(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth, 1);
 		} catch (MMScriptException e4) {
 			ReportingUtils.logError(e4);
 		}
@@ -167,11 +167,7 @@ public class MaarsAcquisitionForSegmentation {
 		} catch (MMScriptException e4) {
 			ReportingUtils.logError(e4);
 		}
-		try {
-			acqForSeg.setRootDirectory(rootDirName);
-		} catch (MMScriptException e4) {
-			ReportingUtils.logError(e4);
-		}
+
 		ReportingUtils.logMessage("... Initialize acquisition");
 		try {
 			acqForSeg.initialize();
@@ -179,35 +175,13 @@ public class MaarsAcquisitionForSegmentation {
 			ReportingUtils.logError(e3);
 		}
 		ReportingUtils.logMessage("... Update summary metadata");
-		try {
-			acqForSeg.setProperty("PixelType", "GRAY16");
-		} catch (MMScriptException e3) {
-			ReportingUtils.logError(e3);
-		}
-		try {
-			acqForSeg.setProperty("Prefix", "Segment");
-		} catch (MMScriptException e3) {
-			ReportingUtils.logError(e3);
-		}
-		try {
-			acqForSeg.setProperty("IJType", "1");
-		} catch (MMScriptException e3) {
-			ReportingUtils.logError(e3);
-		}
+
 		try {
 			acqForSeg.setProperty("ConfigGroup", channelGroup);
 		} catch (MMScriptException e3) {
 			ReportingUtils.logError(e3);
 		}
-		// Didmn't find a way to save imgs into a single tiff, so create a
-		// tiffHandler
-		ReportingUtils.logMessage("... Create image tiff handler");
-		try {
-			tiffHandler = new TaggedImageStorageMultipageTiff(pathToMovie,
-					true, acqForSeg.getSummaryMetadata());
-		} catch (IOException e2) {
-			ReportingUtils.logError(e2);
-		}
+
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -265,14 +239,14 @@ public class MaarsAcquisitionForSegmentation {
 				ReportingUtils.logError(e);
 			}
 			try {
-				tiffHandler.putImage(img);
-			} catch (MMException e) {
-				ReportingUtils.logError(e);
-			} catch (IOException e) {
+				acqForSeg.insertImage(img);
+			} catch (MMScriptException e) {
 				ReportingUtils.logError(e);
 			}
+
 			z = z + step;
 		}
+
 		ReportingUtils.logMessage("finish image cache");
 		acqForSeg.getImageCache().finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
@@ -288,8 +262,7 @@ public class MaarsAcquisitionForSegmentation {
 			e.printStackTrace();
 		}
 		acqMgr.closeAll();
-		tiffHandler.finished();
-		tiffHandler.close();
+
 	}
 
 	/**

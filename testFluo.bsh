@@ -145,6 +145,3 @@ if(md.isOkClicked()) {
 	}else{
 		gui.message("Session aborted, 0 field to analyse");
 	}
-	//}else{
-	//	gui.message("Session aborted, click 'OK' to start analyse.");
-//}

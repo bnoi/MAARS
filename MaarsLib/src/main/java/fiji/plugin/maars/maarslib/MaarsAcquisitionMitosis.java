@@ -349,6 +349,7 @@ public class MaarsAcquisitionMitosis {
 				ReportingUtils.logError(e);
 			}
 		}
+		//TODO
 		acqForFluo.setProperty("PixelType", "GRAY16");
 		
 		ImagePlus lastImage = null;
@@ -465,6 +466,7 @@ public class MaarsAcquisitionMitosis {
 					}
 
 					try {
+						//TODO
 						acqForFluo.insertTaggedImage(img, frame, channel, k);
 					} catch (MMScriptException e) {
 						ReportingUtils
@@ -541,7 +543,7 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("finish image cache");
 		acqForFluo.getImageCache().finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
-		gui.closeAllAcquisitions();
+		acqMgr.closeAll();
 
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);

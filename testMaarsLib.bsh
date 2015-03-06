@@ -82,7 +82,7 @@ if(md.isOkClicked()) {
 
 		mas.acquire(false);
 
-		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/Segment_MMStack_Pos0.ome.tif");
+		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 		ms.segmentation();
 		while(ms.isAnalysing()) {
 			gui.sleep(3000);
@@ -108,7 +108,7 @@ if(md.isOkClicked()) {
 			String acqNameFluo = "movie_X"
 				+Math.round(explo.getX(i))
 				+"_Y"+Math.round(explo.getY(i))
-				+"FLUO";
+				+"_FLUO";
 			
 			ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 			int cellNumber = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie());
@@ -132,7 +132,7 @@ if(md.isOkClicked()) {
 		}
 		// close roi manager
 		mfa.getSetOfCells().closeRoiManager();
-		mas.setupParameters();
+		mas.setParameters(params);
 	}
 
 	mmc.setAutoShutter(true);
