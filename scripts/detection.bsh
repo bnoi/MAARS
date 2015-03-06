@@ -14,7 +14,8 @@ import ij.plugin.ZProjector;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.SelectionModel;
 
-ImagePlus imp = IJ.openImage("/home/tong/Documents/Movies/best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif");
+//ImagePlus imp = IJ.openImage("/home/tong/Documents/Movies/best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif");
+ImagePlus imp = IJ.openImage("D:/Data/Tong/Movies/0_FLUO/MMStack_Pos0.ome.tif");
 ZProjector projector = new ZProjector();
 projector.setMethod(ZProjector.MAX_METHOD);
 projector.setImage(imp);

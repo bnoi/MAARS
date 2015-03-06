@@ -42,7 +42,6 @@ public class CellFluoAnalysis {
 
 	public CellFluoAnalysis(Cell cell, double spotRadius) {
 
-		ReportingUtils.logMessage("Creating CellFluoAnalysis object ...");
 
 		// this.cellShapeRoi = cellShapeRoi;
 		// this.scaleFactorForRoiFromBfToFluo = scaleFactorForRoiFromBfToFluo;

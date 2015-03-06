@@ -271,7 +271,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logError(e1);
 		}
 		try {
-			acqMgr.openAcquisition(acqName, rootDirName, show, false);
+			acqMgr.openAcquisition(acqName, rootDirName, show, true);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
@@ -368,7 +368,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 				ReportingUtils.logMessage("could not tag image");
 				ReportingUtils.logError(e);
 			}
-
+			acqForFluo.insertImage(img);
 			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
