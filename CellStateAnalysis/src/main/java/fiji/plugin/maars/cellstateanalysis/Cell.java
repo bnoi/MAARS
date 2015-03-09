@@ -279,12 +279,20 @@ public class Cell {
 	}
 
 	/**
-	 * Method to get peak width : peak position | v .. . . . . . . .....
-	 * .......... plot <----> peak width
-	 * 
+	 * Method to get peak width :
+	 *    peak position
+	 *         |
+	 *         v
+	 *         ..
+	 *        .  .
+	 *       .   .
+	 *      .     .
+	 * .....      .......... plot
+	 *      <---->
+	 *     peak width
+	 *     
 	 * @param plot
-	 * @param peakPosition
-	 *            : peak position
+	 * @param peakPosition : peak position
 	 * @return
 	 */
 	public int getPeakWidth(double[] plot, int peakPosition) {
@@ -319,8 +327,15 @@ public class Cell {
 	/**
 	 * Method to find most external peaks
 	 * 
-	 * .. . . . . . . . . . . . . ..... ......... .... plot ^ ^ | | peak peak
-	 * 
+	 *         ..
+	 *        .  .           . .
+	 *       .   .          .   .
+	 *      .     .        .     .
+	 * .....      .........       .... plot
+	 *         ^              ^
+	 *         |              |
+	 *       peak            peak
+	 *       
 	 * @param plot
 	 * @return
 	 */

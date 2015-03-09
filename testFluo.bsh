@@ -82,7 +82,7 @@ if(md.isOkClicked()) {
 		pathToRootDir = "/home/tong/Documents/Movies/";
 		String pathToFluoImg = pathToRootDir;
 
-		String pathToBf = pathToRootDir +"best/movie_X0_Y0/Segment_MMStack_Pos0.ome.tif";
+		String pathToBf = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FocusImage.tif";
 		ImagePlus bfImg = IJ.openImage(pathToBf);
 		
 		String pathToCorrImg = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_CorrelationImage.tif";
@@ -126,7 +126,7 @@ if(md.isOkClicked()) {
 				fluoImage.show();
 
 				if (mfa.checkStartConditions(mfa.getSpindle(fluoImage, j))) {
-					gui.message("mitosis");
+					logError("mitosis");
 					mmad.acquire(true, j, false,true); //don't crop image because it is already cropped
 					mitosis = true;
 				}

@@ -1,5 +1,5 @@
-base_dir = "D:/Data/Tong/MAARS-master/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "D:/Data/Tong/MAARS-master/";
+base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 
 addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
@@ -24,9 +24,9 @@ mmc.waitForDevice(mmc.getShutterDevice());
 gui.message("Create main window");
 MaarsMainDialog md = null;
 try {
-	//md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
+	md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
 	//md = new MaarsMainDialog(gui, mmc, "/home/marie/workspace/MaarsLib/");
-	md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS-master/MaarsLib/");
+	//md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS-master/MaarsLib/");
 } catch (IOException e) {
 	gui.message("Error");
 }
