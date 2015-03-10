@@ -124,7 +124,6 @@ if(md.isOkClicked()) {
 			while(j <  mfa.getSetOfCells().length() && !mitosis) {
 				ImagePlus fluoImage = mafa.acquire(false, j);
 				fluoImage.show();
-
 				if (mfa.checkStartConditions(mfa.getSpindle(fluoImage, j))) {
 					gui.message("mitosis");
 					mmad.acquire(true, j, false,true); //don't crop image because it is already cropped

@@ -8,7 +8,6 @@ import org.micromanager.MMStudio;
 import org.micromanager.acquisition.AcquisitionManager;
 import org.micromanager.acquisition.MMAcquisition;
 import org.micromanager.api.MMTags;
-import org.micromanager.utils.ImageUtils;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
 
@@ -127,6 +126,15 @@ public class MaarsAcquisitionForSegmentation {
 				+ Math.round(positionY);
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 		pathToMovie = rootDirName + acqName;
+		
+		ReportingUtils.logMessage("... set config");
+		try {
+			mmc.setConfig(channelGroup, channel);
+		} catch (Exception e1) {
+			ReportingUtils.logMessage("Could not set config");
+			e1.printStackTrace();
+		}
+		
 		ReportingUtils
 				.logMessage("... Open acquisition in Acquisition manager");
 		try {
@@ -173,15 +181,6 @@ public class MaarsAcquisitionForSegmentation {
 			acqForSeg.initialize();
 		} catch (MMScriptException e3) {
 			ReportingUtils.logError(e3);
-		}
-		ReportingUtils.logMessage("... Update summary metadata");
-
-		try {
-			mmc.setConfig(channelGroup, channel);
-		} catch (MMScriptException e3) {
-			ReportingUtils.logError(e3);
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 
 		ReportingUtils.logMessage("... set shutter open");

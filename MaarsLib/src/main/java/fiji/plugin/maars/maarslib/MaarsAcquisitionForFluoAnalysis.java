@@ -368,7 +368,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 				ReportingUtils.logMessage("could not tag image");
 				ReportingUtils.logError(e);
 			}
-			acqForFluo.insertImage(img);
+			//acqForFluo.insertImage(img);
 			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
@@ -387,6 +387,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		cal.pixelHeight = mmc.getPixelSizeUm();
 		cal.pixelDepth = step;
 		imagePlus.setCalibration(cal);
+
 
 		ReportingUtils.logMessage("finish image cache");
 		acqForFluo.getImageCache().finished();

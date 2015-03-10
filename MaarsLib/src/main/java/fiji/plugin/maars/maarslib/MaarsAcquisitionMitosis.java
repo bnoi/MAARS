@@ -475,10 +475,13 @@ public class MaarsAcquisitionMitosis {
 
 					try {
 						// TODO
-						acqForFluo.insertImage(img);
+						acqForFluo.insertImage(img,frame, channel, k, 0);
 					} catch (MMScriptException e) {
 						ReportingUtils
 								.logMessage("could not add image to acquisition");
+						e.printStackTrace();
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 
