@@ -126,7 +126,7 @@ if(md.isOkClicked()) {
 				fluoImage.show();
 
 				if (mfa.checkStartConditions(mfa.getSpindle(fluoImage, j))) {
-					logError("mitosis");
+					gui.message("mitosis");
 					mmad.acquire(true, j, false,true); //don't crop image because it is already cropped
 					mitosis = true;
 				}

@@ -177,9 +177,11 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("... Update summary metadata");
 
 		try {
-			acqForSeg.setProperty("ConfigGroup", channelGroup);
+			mmc.setConfig(channelGroup, channel);
 		} catch (MMScriptException e3) {
 			ReportingUtils.logError(e3);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		ReportingUtils.logMessage("... set shutter open");

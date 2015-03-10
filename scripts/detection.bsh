@@ -10,12 +10,14 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.TrackMate;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.measure.Calibration;
 import ij.plugin.ZProjector;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.SelectionModel;
 
 //ImagePlus imp = IJ.openImage("/home/tong/Documents/Movies/best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif");
-ImagePlus imp = IJ.openImage("D:/Data/Tong/Movies/0_FLUO/MMStack_Pos0.ome.tif");
+//ImagePlus imp = IJ.openImage("D:/Data/Tong/Movies/0_FLUO/MMStack_Pos0.ome.tif");
+ImagePlus imp =IJ.getImage();
 ZProjector projector = new ZProjector();
 projector.setMethod(ZProjector.MAX_METHOD);
 projector.setImage(imp);
@@ -23,7 +25,8 @@ projector.doProjection();
 
 ImagePlus zprojection = projector.getProjection();
 zprojection.show();
-
+		Calibration cal = imp.getCalibration();
+		print(cal.pixelWidth + "");
 Model model = new Model();
 
 Settings settings = new Settings();
@@ -33,7 +36,7 @@ settings.setFrom(zprojection);
 settings.detectorFactory = new LogDetectorFactory();
 Map detectorSettings = new HashMap();
 detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-detectorSettings.put("RADIUS", (double) 10);
+detectorSettings.put("RADIUS", (double) 5);
 detectorSettings.put("TARGET_CHANNEL", 1);
 detectorSettings.put("THRESHOLD", (double) 0);
 detectorSettings.put("DO_MEDIAN_FILTERING", false);
