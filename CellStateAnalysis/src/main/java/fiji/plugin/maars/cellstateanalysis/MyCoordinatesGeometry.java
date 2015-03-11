@@ -32,6 +32,7 @@ public class MyCoordinatesGeometry {
 				measures);
 
 		Line cellLineSelection;
+		//TODO WTF??
 		if (setWidth) {
 			Line.setWidth((int) convertMinorAxisLengthToPixel(
 					measures.getMinor(), measures.getAngle(),

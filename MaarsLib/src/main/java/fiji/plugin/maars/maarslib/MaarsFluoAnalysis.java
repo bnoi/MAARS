@@ -183,6 +183,8 @@ public class MaarsFluoAnalysis {
 	public int analyzeEntireField(ImagePlus fieldWideImage, String pathToResults) {
 		int cellNumber = -1;
 		double smallerSp = 900000;
+		int totalCellNumber =0;
+		int mitosisCellNumber =0;
 		FileWriter writer = null;
 		try {
 			writer = new FileWriter(pathToResults + "_spindleAnalysis.txt");
@@ -199,7 +201,12 @@ public class MaarsFluoAnalysis {
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
-
+			if (sp.getFeature().equals("NO_SPINDLE")){
+				totalCellNumber++;
+			}else if (sp.getFeature().equals("SPINDLE")){
+				totalCellNumber++;
+				mitosisCellNumber++;
+			}
 			try {
 				writer.write(sp.toString(soc.getCell(i).getCellShapeRoi()
 						.getName())
@@ -215,6 +222,11 @@ public class MaarsFluoAnalysis {
 					smallerSp = sp.getLength();
 				}
 			}
+		}
+		try {
+			writer.write("Percentage of mitosis is:"+ (double) mitosisCellNumber/ totalCellNumber);
+		} catch (IOException e1) {
+			ReportingUtils.logError(e1);
 		}
 
 		try {

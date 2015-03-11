@@ -398,6 +398,13 @@ public class Spindle {
 	}
 
 	/**
+	 * 
+	 * @return feature of this spindle
+	 */
+	public String getSpindleFeature() {
+		return this.feature;
+	}
+	/**
 	 * Method to write to JSON format features of spindle
 	 * 
 	 * @param name
