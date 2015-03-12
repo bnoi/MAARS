@@ -183,15 +183,24 @@ public class MaarsFluoAnalysis {
 	public int analyzeEntireField(ImagePlus fieldWideImage, String pathToResults) {
 		int cellNumber = -1;
 		double smallerSp = 900000;
-		int totalCellNumber =0;
-		int mitosisCellNumber =0;
-		FileWriter writer = null;
+		int emptyCellNumber = 0;
+		int totalCellNumber = 0;
+		int mitosisCellNumber = 0;
+		FileWriter spindleWriter = null;
+		FileWriter statWriter = null;
 		try {
-			writer = new FileWriter(pathToResults + "_spindleAnalysis.txt");
+			spindleWriter = new FileWriter(pathToResults
+					+ "_spindleAnalysis.txt");
 		} catch (IOException e) {
 			ReportingUtils.logMessage("Could not create " + pathToResults
 					+ "_spindleAnalysis.csv");
 			e.printStackTrace();
+		}
+		try {
+			spindleWriter.write("[");
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
 		for (int i = 0; i < soc.length(); i++) {
 			soc.getCell(i).addFluoImage(fieldWideImage);
@@ -201,16 +210,25 @@ public class MaarsFluoAnalysis {
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
-			if (sp.getFeature().equals("NO_SPINDLE")){
+			if (sp.getFeature().equals("NO_SPINDLE")) {
 				totalCellNumber++;
-			}else if (sp.getFeature().equals("SPINDLE")){
+			} else if (sp.getFeature().equals("SPINDLE")) {
 				totalCellNumber++;
 				mitosisCellNumber++;
+			} else {
+				emptyCellNumber++;
 			}
 			try {
-				writer.write(sp.toString(soc.getCell(i).getCellShapeRoi()
-						.getName())
-						+ "\n");
+				if (i != soc.length() - 1) {
+					spindleWriter.write(sp.toString(soc.getCell(i)
+							.getCellShapeRoi().getName())
+							+ "\n,");
+				} else {
+					spindleWriter.write(sp.toString(soc.getCell(i)
+							.getCellShapeRoi().getName())
+							+ "\n");
+				}
+
 			} catch (IOException e) {
 				ReportingUtils.logMessage("could not write sp of cell "
 						+ soc.getCell(i).getCellShapeRoi().getName());
@@ -224,13 +242,24 @@ public class MaarsFluoAnalysis {
 			}
 		}
 		try {
-			writer.write("Percentage of mitosis is:"+ (double) mitosisCellNumber/ totalCellNumber);
+			spindleWriter.write("]");
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		try {
+			statWriter = new FileWriter(pathToResults
+					+ "_statAnalysis.txt");
+			statWriter.write("Percentage of mitosis is :"
+					+ (double) mitosisCellNumber / totalCellNumber
+					+ "\nNumber of ROI with spot :" + emptyCellNumber);
 		} catch (IOException e1) {
 			ReportingUtils.logError(e1);
 		}
 
 		try {
-			writer.close();
+			spindleWriter.close();
+			statWriter.close();
 		} catch (IOException e) {
 			ReportingUtils.logMessage("Could not close writer");
 			e.printStackTrace();
