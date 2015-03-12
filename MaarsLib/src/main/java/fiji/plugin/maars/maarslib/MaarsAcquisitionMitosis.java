@@ -321,49 +321,31 @@ public class MaarsAcquisitionMitosis {
 		}
 
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
-		gui.openAcquisition(acqName, rootDirName, frameNumber, channelParam, sliceNumber);
-//		ReportingUtils.logMessage("...Create acquisition manager");
-//		acqMgr = new AcquisitionManager();
-//		ReportingUtils
-//				.logMessage("... Open acquisition in acquisition manager");
-//		try {
-//			acqMgr.openAcquisition(acqName, rootDirName, show, true);
-//		} catch (MMScriptException e2) {
-//			ReportingUtils.logError(e2);
-//		}
-//		ReportingUtils.logMessage("... Get acquisition");
-//		try {
-//			acqForFluo = acqMgr.getAcquisition(acqName);
-//		} catch (MMScriptException e2) {
-//			ReportingUtils.logError(e2);
-//		}
+		gui.openAcquisition(acqName, rootDirName, frameNumber, channelParam, sliceNumber,false,true);
+
 		for (int channel = 0; channel < channels.length; channel++) {
 			ReportingUtils.logMessage("... set channel color");
 			try {
 				gui.setChannelColor(acqName, channel, colors[channel]);
-//				acqForFluo.setChannelColor(channel, colors[channel].getRGB());
 			} catch (MMScriptException e) {
 				ReportingUtils.logError(e);
 			}
 			ReportingUtils.logMessage("... set channel name");
 			try {
 				gui.setChannelName(acqName, channel, channels[channel]);
-//				acqForFluo.setChannelName(channel, channels[channel]);
 			} catch (MMScriptException e) {
 				ReportingUtils.logError(e);
 			}
 		}
-		int byteDepth = 2;
 		try {
 			gui.setImageProperty(acqName, frameNumber, channels.length, sliceNumber, "fluoAcq", "test");
-//			acqForFluo.setImagePhysicalDimensions((int) mmc.getImageWidth(),
-//					(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth, 1);
 		} catch (MMScriptException e4) {
 			ReportingUtils.logError(e4);
 		}
+		int byteDepth = 2;
 		gui.initializeAcquisition(acqName, (int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth);
-//		acqForFluo.initialize();
+
 
 		double zFocus = 0;
 		ImagePlus lastImage = null;
@@ -465,16 +447,7 @@ public class MaarsAcquisitionMitosis {
 					}
 
 					try {
-						// MDUtils.setFrameIndex(img.tags, frame);
-						// MDUtils.setChannelIndex(img.tags, channel);
-						// MDUtils.setSliceIndex(img.tags, k);
-						// MDUtils.setPositionIndex(img.tags, 0);
-						// MDUtils.setTimeFirst(img.tags, false);
-						// MDUtils.setSlicesFirst(img.tags, true);
-						//
-						// MDUtils.setXPositionUm(img.tags, 0);
-						// MDUtils.setYPositionUm(img.tags, 0);
-						// MDUtils.setZPositionUm(img.tags, z);
+						//TODO
 						img.tags.put(MMTags.Image.SLICE_INDEX, k);
 						img.tags.put(MMTags.Image.FRAME_INDEX, frame);
 						img.tags.put(MMTags.Image.CHANNEL_INDEX, channel);
@@ -491,7 +464,6 @@ public class MaarsAcquisitionMitosis {
 
 					try {
 						// TODO
-//						acqForFluo.insertImage(img);
 						gui.addImageToAcquisition(acqName, frame, channel, k, 0, img);
 					} catch (MMScriptException e) {
 						ReportingUtils
@@ -567,10 +539,8 @@ public class MaarsAcquisitionMitosis {
 		}
 		ReportingUtils.logMessage("finish image cache");
 		gui.getAcquisitionImageCache(acqName).finished();
-//		acqForFluo.getImageCache().finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
-//		acqMgr.closeAll();
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.waitForDevice(mmc.getFocusDevice());

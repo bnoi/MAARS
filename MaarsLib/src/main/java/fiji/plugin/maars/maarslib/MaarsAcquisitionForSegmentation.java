@@ -27,8 +27,8 @@ public class MaarsAcquisitionForSegmentation {
 	private double positionX;
 	private double positionY;
 	private String pathToMovie;
-	private AcquisitionManager acqMgr = new AcquisitionManager();
-	private MMAcquisition acqForSeg;
+//	private AcquisitionManager acqMgr = new AcquisitionManager();
+//	private MMAcquisition acqForSeg;
 
 	/**
 	 * Constructor :
@@ -138,50 +138,32 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils
 				.logMessage("... Open acquisition in Acquisition manager");
 		try {
-			acqMgr.openAcquisition(acqName, rootDirName, show, true);
+			gui.openAcquisition(acqName, rootDirName, frameNumber, 0, sliceNumber, false, true);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logMessage("Could not open acquisition");
 			ReportingUtils.logError(e2);
 		}
-		ReportingUtils
-				.logMessage("... Get acquisition from Acquisition manager");
-		try {
-			acqForSeg = acqMgr.getAcquisition(acqName);
-		} catch (MMScriptException e2) {
-			ReportingUtils.logMessage("Could not get acquisition");
-			ReportingUtils.logError(e2);
-		}
 		ReportingUtils.logMessage("... Set up Acquisition");
 		try {
-			acqForSeg.setDimensions(frameNumber, 1, sliceNumber + 1);
+			gui.setChannelColor(acqName,0, color);
+		} catch (MMScriptException e4) {
+			ReportingUtils.logError(e4);
+		}
+		try {
+			gui.setChannelName(acqName, 0, channel);
 		} catch (MMScriptException e4) {
 			ReportingUtils.logError(e4);
 		}
 		// TODO
 		int byteDepth = 2;
-		try {
-			acqForSeg.setImagePhysicalDimensions((int) mmc.getImageWidth(),
-					(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth, 1);
-		} catch (MMScriptException e4) {
-			ReportingUtils.logError(e4);
-		}
-		try {
-			acqForSeg.setChannelColor(0, color.getRGB());
-		} catch (MMScriptException e4) {
-			ReportingUtils.logError(e4);
-		}
-		try {
-			acqForSeg.setChannelName(0, channel);
-		} catch (MMScriptException e4) {
-			ReportingUtils.logError(e4);
-		}
-
 		ReportingUtils.logMessage("... Initialize acquisition");
 		try {
-			acqForSeg.initialize();
-		} catch (MMScriptException e3) {
-			ReportingUtils.logError(e3);
+			gui.initializeAcquisition(acqName, (int) mmc.getImageWidth(),
+					(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth);
+		} catch (MMScriptException e2) {
+			ReportingUtils.logError(e2);
 		}
+
 
 		ReportingUtils.logMessage("... set shutter open");
 		try {
@@ -240,7 +222,7 @@ public class MaarsAcquisitionForSegmentation {
 				ReportingUtils.logError(e);
 			}
 			try {
-				acqForSeg.insertImage(img);
+				gui.addImageToAcquisition(acqName, frameNumber, 0, k, 0, img);
 			} catch (MMScriptException e) {
 				ReportingUtils.logError(e);
 			}
@@ -249,7 +231,11 @@ public class MaarsAcquisitionForSegmentation {
 		}
 
 		ReportingUtils.logMessage("finish image cache");
-		acqForSeg.getImageCache().finished();
+		try {
+			gui.getAcquisitionImageCache(acqName).finished();
+		} catch (MMScriptException e1) {
+			ReportingUtils.logError(e1);
+		}
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 		try {
@@ -262,7 +248,6 @@ public class MaarsAcquisitionForSegmentation {
 					.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
-		acqMgr.closeAll();
 
 	}
 

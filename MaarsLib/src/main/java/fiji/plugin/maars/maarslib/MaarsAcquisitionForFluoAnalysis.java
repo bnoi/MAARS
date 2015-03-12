@@ -271,39 +271,28 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logError(e1);
 		}
 		try {
-			acqMgr.openAcquisition(acqName, rootDirName, show, true);
+			gui.openAcquisition(acqName, rootDirName, frameNumber, 0 , sliceNumber,false,false);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
-
-		ReportingUtils.logMessage("... Get acquisition");
-		try {
-			acqForFluo = acqMgr.getAcquisition(acqName);
-		} catch (MMScriptException e2) {
-			ReportingUtils.logError(e2);
-		}
-		acqForFluo.setDimensions(frameNumber, 1, sliceNumber + 1);
-		// TODO
-		int byteDepth = 2;
-		acqForFluo.setImagePhysicalDimensions((int) mmc.getImageWidth(),
-				(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth, 1);
-
 		ReportingUtils.logMessage("... set channel color");
 		try {
-			acqForFluo.setChannelColor(0, color.getRGB());
+			gui.setChannelColor(acqName,0, color);
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("Could not set channel color");
 			ReportingUtils.logError(e);
 		}
 		ReportingUtils.logMessage("... set channel name");
 		try {
-			acqForFluo.setChannelName(0, channel);
+			gui.setChannelName(acqName, 0, channel);
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("could not set channel name");
 			ReportingUtils.logError(e);
 		}
-
-		acqForFluo.initialize();
+		// TODO
+		int byteDepth = 2;
+		gui.initializeAcquisition(acqName, (int) mmc.getImageWidth(),
+				(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth);
 
 		ReportingUtils.logMessage("... set shutter open");
 		try {
@@ -368,7 +357,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 				ReportingUtils.logMessage("could not tag image");
 				ReportingUtils.logError(e);
 			}
-			//acqForFluo.insertImage(img);
 			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
@@ -390,8 +378,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 
 		ReportingUtils.logMessage("finish image cache");
-		acqForFluo.getImageCache().finished();
-
+		gui.getAcquisitionImageCache(acqName).finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 
