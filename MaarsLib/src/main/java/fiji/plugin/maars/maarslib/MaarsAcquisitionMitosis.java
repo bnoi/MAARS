@@ -178,7 +178,8 @@ public class MaarsAcquisitionMitosis {
 			ReportingUtils.logMessage("could not clear message window");
 			e.printStackTrace();
 		}
-
+		//TODO
+		mmc.setAutoShutter(false);
 		ReportingUtils.logMessage("... Initialize parameters :");
 
 		String channelGroup = parameters.getParametersAsJsonObject()
@@ -322,10 +323,6 @@ public class MaarsAcquisitionMitosis {
 
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 		gui.openAcquisition(acqName, rootDirName, frameNumber, channelParam, sliceNumber,true,true);
-		int byteDepth = 2;
-		gui.initializeAcquisition(acqName, (int) mmc.getImageWidth(),
-				(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth);
-		
 		gui.setImageSavingFormat(org.micromanager.acquisition.TaggedImageStorageMultipageTiff.class); 
 		
 		for (int channel = 0; channel < channels.length; channel++) {
@@ -427,21 +424,21 @@ public class MaarsAcquisitionMitosis {
 						e.printStackTrace();
 					}
 
-					try {
-						mmc.snapImage();
-					} catch (Exception e) {
-						ReportingUtils.logMessage("could not snape image");
-						e.printStackTrace();
-					}
-
-					TaggedImage img = null;
-					try {
-						img = mmc.getTaggedImage();
-					} catch (Exception e) {
-						ReportingUtils.logMessage("could not get tagged image");
-						e.printStackTrace();
-					}
-
+//					try {
+//						mmc.snapImage();
+//					} catch (Exception e) {
+//						ReportingUtils.logMessage("could not snape image");
+//						e.printStackTrace();
+//					}
+//
+//					TaggedImage img = null;
+//					try {
+//						img = mmc.getTaggedImage();
+//					} catch (Exception e) {
+//						ReportingUtils.logMessage("could not get tagged image");
+//						e.printStackTrace();
+//					}
+//
 //					try {
 //						//TODO
 //						img.tags.put(MMTags.Image.SLICE_INDEX, k);
@@ -457,16 +454,19 @@ public class MaarsAcquisitionMitosis {
 //						ReportingUtils.logMessage("could not tag image");
 //						e.printStackTrace();
 //					}
-
-					try {
-						// TODO
-						gui.addImageToAcquisition(acqName, frame, channel, k, 0, img);
-					} catch (MMScriptException e) {
-						ReportingUtils
-								.logMessage("could not add image to acquisition");
-						e.printStackTrace();
-					}
-
+//
+//					try {
+//						// TODO
+//						gui.addImageToAcquisition(acqName, frame, channel, k, 0, img);
+//					} catch (MMScriptException e) {
+//						ReportingUtils
+//								.logMessage("could not add image to acquisition");
+//						e.printStackTrace();
+//					}
+					gui.snapAndAddImage(acqName, frame, channel, k, 0);
+					MMAcquisition acq = gui.getAcquisitionWithName(acqName);
+					TaggedImage img = acq.getImageCache().getImage(channel, k, frame, 0);
+					
 					if (channels[channel].equals(parameters
 							.getParametersAsJsonObject()
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -536,6 +536,7 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("finish image cache");
 		gui.getAcquisitionImageCache(acqName).finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
+		gui.closeAcquisition(acqName);
 		gui.closeAllAcquisitions();
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);

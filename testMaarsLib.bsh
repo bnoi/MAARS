@@ -67,6 +67,7 @@ if(md.isOkClicked()) {
 													(double) mmc.getImageHeight()*calibration);
 
 	for (int i = 0; i < explo.length(); i++) {
+		//for (int i = 0; i < 1; i++) {
 		gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
 		
 		gui.setXYStagePosition(explo.getX(i),explo.getY(i));
@@ -80,7 +81,8 @@ if(md.isOkClicked()) {
 		mas.setParameters(params);
 
 		mmc.waitForDevice(mmc.getXYStageDevice());
-	
+
+		autofocus.applySettings();
 		autofocus.fullFocus();
 
 		mas.acquire(false);
