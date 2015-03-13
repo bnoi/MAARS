@@ -222,7 +222,7 @@ public class MaarsAcquisitionForSegmentation {
 				ReportingUtils.logError(e);
 			}
 			try {
-				gui.addImageToAcquisition(acqName, frameNumber, 0, k, 0, img);
+				gui.addImage(acqName, img, false, false);
 			} catch (MMScriptException e) {
 				ReportingUtils.logError(e);
 			}

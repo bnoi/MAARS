@@ -321,8 +321,13 @@ public class MaarsAcquisitionMitosis {
 		}
 
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
-		gui.openAcquisition(acqName, rootDirName, frameNumber, channelParam, sliceNumber,false,true);
-
+		gui.openAcquisition(acqName, rootDirName, frameNumber, channelParam, sliceNumber,true,true);
+		int byteDepth = 2;
+		gui.initializeAcquisition(acqName, (int) mmc.getImageWidth(),
+				(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth);
+		
+		gui.setImageSavingFormat(org.micromanager.acquisition.TaggedImageStorageMultipageTiff.class); 
+		
 		for (int channel = 0; channel < channels.length; channel++) {
 			ReportingUtils.logMessage("... set channel color");
 			try {
@@ -337,15 +342,6 @@ public class MaarsAcquisitionMitosis {
 				ReportingUtils.logError(e);
 			}
 		}
-		try {
-			gui.setImageProperty(acqName, frameNumber, channels.length, sliceNumber, "fluoAcq", "test");
-		} catch (MMScriptException e4) {
-			ReportingUtils.logError(e4);
-		}
-		int byteDepth = 2;
-		gui.initializeAcquisition(acqName, (int) mmc.getImageWidth(),
-				(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth);
-
 
 		double zFocus = 0;
 		ImagePlus lastImage = null;
@@ -446,21 +442,21 @@ public class MaarsAcquisitionMitosis {
 						e.printStackTrace();
 					}
 
-					try {
-						//TODO
-						img.tags.put(MMTags.Image.SLICE_INDEX, k);
-						img.tags.put(MMTags.Image.FRAME_INDEX, frame);
-						img.tags.put(MMTags.Image.CHANNEL_INDEX, channel);
-						img.tags.put(MMTags.Image.TIME, Calendar.getInstance()
-								.getTime());
-						img.tags.put(MMTags.Image.ZUM, z);
-						img.tags.put(MMTags.Image.XUM, 0);
-						img.tags.put(MMTags.Image.YUM, 0);
-
-					} catch (JSONException e) {
-						ReportingUtils.logMessage("could not tag image");
-						e.printStackTrace();
-					}
+//					try {
+//						//TODO
+//						img.tags.put(MMTags.Image.SLICE_INDEX, k);
+//						img.tags.put(MMTags.Image.FRAME_INDEX, frame);
+//						img.tags.put(MMTags.Image.CHANNEL_INDEX, channel);
+//						img.tags.put(MMTags.Image.TIME, Calendar.getInstance()
+//								.getTime());
+//						img.tags.put(MMTags.Image.ZUM, z);
+//						img.tags.put(MMTags.Image.XUM, 0);
+//						img.tags.put(MMTags.Image.YUM, 0);
+//
+//					} catch (JSONException e) {
+//						ReportingUtils.logMessage("could not tag image");
+//						e.printStackTrace();
+//					}
 
 					try {
 						// TODO
