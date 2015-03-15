@@ -81,16 +81,17 @@ if(md.isOkClicked()) {
 				.getAsString();
 		//pathToRootDir = "/home/hadim/Documents/phd/data/maars/";
 		//pathToRootDir = "/home/tong/Documents/Movies/";
-		pathToRootDir = "/Users/theoli89/Desktop/Movies/";
+		pathToRootDir = "/Users/theoli89/Desktop/Test/";
 		
 		String pathToFluoImg = pathToRootDir;
 
-		String pathToBf = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FocusImage.tif";
+		String pathToBf = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_MMStack_Pos0.ome_FocusImage.tif";
 		ImagePlus bfImg = IJ.openImage(pathToBf);
 		
-		String pathToCorrImg = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_CorrelationImage.tif";
+		String pathToCorrImg = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_MMStack_Pos0.ome_CorrelationImage.tif";
 		ImagePlus corrImg = IJ.openImage(pathToCorrImg);
 
+		//no fluo image available
 		String pathToFluoImg = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FLUO.tif";
 		ImagePlus fluoImage = IJ.openImage(pathToFluoImg);
 

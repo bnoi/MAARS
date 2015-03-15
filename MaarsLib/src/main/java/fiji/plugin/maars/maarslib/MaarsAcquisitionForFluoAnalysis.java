@@ -1,20 +1,11 @@
 package fiji.plugin.maars.maarslib;
 
 import java.awt.Color;
-import java.io.IOException;
-
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
-
-import org.json.JSONException;
 import org.micromanager.MMStudio;
-import org.micromanager.api.MMTags;
-import org.micromanager.utils.MMException;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
-import org.micromanager.acquisition.AcquisitionManager;
-import org.micromanager.acquisition.MMAcquisition;
-
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -38,8 +29,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 	private double positionX;
 	private double positionY;
 	private SetOfCells soc;
-	private AcquisitionManager acqMgr = new AcquisitionManager();
-	private MMAcquisition acqForFluo;
 
 	/**
 	 * Constructor :
@@ -172,7 +161,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logMessage("could not clear message window");
 			ReportingUtils.logError(e);
 		}
-
 		ReportingUtils.logMessage("... Initialize parameters :");
 
 		String channelGroup = parameters.getParametersAsJsonObject()
@@ -271,7 +259,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logError(e1);
 		}
 		try {
-			gui.openAcquisition(acqName, rootDirName, frameNumber, 0 , sliceNumber,false,false);
+			gui.openAcquisition(acqName, rootDirName, frameNumber, 0 , sliceNumber,show,false);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
@@ -289,11 +277,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logMessage("could not set channel name");
 			ReportingUtils.logError(e);
 		}
-		// TODO
-		int byteDepth = 2;
-		gui.initializeAcquisition(acqName, (int) mmc.getImageWidth(),
-				(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth);
-
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -344,19 +327,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 				ReportingUtils.logMessage("could not get tagged image");
 				ReportingUtils.logError(e);
 			}
-			ReportingUtils.logMessage("- Tag Image");
-			try {
-				img.tags.put(MMTags.Image.SLICE_INDEX, k);
-				img.tags.put(MMTags.Image.FRAME_INDEX, 0);
-				img.tags.put(MMTags.Image.CHANNEL_INDEX, 0);
-				img.tags.put(MMTags.Image.ZUM, z);
-				img.tags.put(MMTags.Image.XUM, 0);
-				img.tags.put(MMTags.Image.YUM, 0);
-
-			} catch (JSONException e) {
-				ReportingUtils.logMessage("could not tag image");
-				ReportingUtils.logError(e);
-			}
 			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
@@ -367,7 +337,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 			z = z + step;
 		}
-
 		ImagePlus imagePlus = new ImagePlus("Maars", imageStack);
 		Calibration cal = new Calibration();
 		cal.setUnit("micron");
@@ -376,12 +345,10 @@ public class MaarsAcquisitionForFluoAnalysis {
 		cal.pixelDepth = step;
 		imagePlus.setCalibration(cal);
 
-
 		ReportingUtils.logMessage("finish image cache");
 		gui.getAcquisitionImageCache(acqName).finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
-
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.waitForDevice(mmc.getFocusDevice());
