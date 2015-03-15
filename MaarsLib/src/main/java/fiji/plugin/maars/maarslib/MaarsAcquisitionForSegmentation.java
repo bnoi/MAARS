@@ -2,17 +2,12 @@ package fiji.plugin.maars.maarslib;
 
 import java.awt.Color;
 import java.util.HashMap;
-
-import org.json.JSONException;
 import org.micromanager.MMStudio;
-import org.micromanager.acquisition.AcquisitionManager;
-import org.micromanager.acquisition.MMAcquisition;
-import org.micromanager.api.MMTags;
+import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
-
 import mmcorej.CMMCore;
-import mmcorej.TaggedImage;
+
 
 /**
  * Acquisition calibrated for image segmentation using package CellsBoundaries_
@@ -20,6 +15,7 @@ import mmcorej.TaggedImage;
  * @author marie
  *
  */
+
 public class MaarsAcquisitionForSegmentation {
 	private MMStudio gui;
 	private CMMCore mmc;
@@ -27,8 +23,6 @@ public class MaarsAcquisitionForSegmentation {
 	private double positionX;
 	private double positionY;
 	private String pathToMovie;
-//	private AcquisitionManager acqMgr = new AcquisitionManager();
-//	private MMAcquisition acqForSeg;
 
 	/**
 	 * Constructor :
@@ -138,11 +132,17 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils
 				.logMessage("... Open acquisition in Acquisition manager");
 		try {
-			gui.openAcquisition(acqName, rootDirName, frameNumber, 0, sliceNumber, false, true);
+			gui.openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber, show, true);
 		} catch (MMScriptException e2) {
-			ReportingUtils.logMessage("Could not open acquisition");
 			ReportingUtils.logError(e2);
 		}
+		ReportingUtils.logMessage("... Set save format");
+		try {
+			gui.setImageSavingFormat(TaggedImageStorageMultipageTiff.class);
+		} catch (MMScriptException e3) {
+			ReportingUtils.logError(e3);
+		}
+		
 		ReportingUtils.logMessage("... Set up Acquisition");
 		try {
 			gui.setChannelColor(acqName,0, color);
@@ -154,17 +154,6 @@ public class MaarsAcquisitionForSegmentation {
 		} catch (MMScriptException e4) {
 			ReportingUtils.logError(e4);
 		}
-		// TODO
-		int byteDepth = 2;
-		ReportingUtils.logMessage("... Initialize acquisition");
-		try {
-			gui.initializeAcquisition(acqName, (int) mmc.getImageWidth(),
-					(int) mmc.getImageHeight(), byteDepth, 8 * byteDepth);
-		} catch (MMScriptException e2) {
-			ReportingUtils.logError(e2);
-		}
-
-
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -199,37 +188,14 @@ public class MaarsAcquisitionForSegmentation {
 				ReportingUtils
 						.logMessage("could not set focus device at position");
 			}
+			ReportingUtils.logMessage("...snap and add images");
 			try {
-				mmc.snapImage();
-			} catch (Exception e) {
-				ReportingUtils.logMessage("could not snape image");
-			}
-			TaggedImage img = null;
-			try {
-				img = mmc.getTaggedImage();
-			} catch (Exception e) {
-				ReportingUtils.logMessage("could not get tagged image");
-			}
-			try {
-				img.tags.put(MMTags.Image.SLICE_INDEX, k);
-				img.tags.put(MMTags.Image.FRAME_INDEX, 0);
-				img.tags.put(MMTags.Image.CHANNEL_INDEX, 0);
-				img.tags.put(MMTags.Image.ZUM, z);
-				img.tags.put(MMTags.Image.XUM, 0);
-				img.tags.put(MMTags.Image.YUM, 0);
-			} catch (JSONException e) {
-				ReportingUtils.logMessage("could not tag image");
-				ReportingUtils.logError(e);
-			}
-			try {
-				gui.addImage(acqName, img, false, false);
+				gui.snapAndAddImage(acqName, frameNumber, 0, k, 0);
 			} catch (MMScriptException e) {
 				ReportingUtils.logError(e);
 			}
-
 			z = z + step;
 		}
-
 		ReportingUtils.logMessage("finish image cache");
 		try {
 			gui.getAcquisitionImageCache(acqName).finished();

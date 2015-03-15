@@ -1,5 +1,6 @@
 //base_dir = "C:/Program Files/Micro-Manager-1.4/jars/";
-base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "/Users/theoli89/Documents/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 
 addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
@@ -79,7 +80,9 @@ if(md.isOkClicked()) {
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString();
 		//pathToRootDir = "/home/hadim/Documents/phd/data/maars/";
-		pathToRootDir = "/home/tong/Documents/Movies/";
+		//pathToRootDir = "/home/tong/Documents/Movies/";
+		pathToRootDir = "/Users/theoli89/Desktop/Movies/";
+		
 		String pathToFluoImg = pathToRootDir;
 
 		String pathToBf = pathToRootDir +"best/movie_X0_Y0/rescaled_DUP_Segment_MMStack_Pos0.ome_FocusImage.tif";

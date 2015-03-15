@@ -12,11 +12,11 @@ gui.clearMessageWindow();
 
 // file locations
 acqName = gui.getUniqueAcquisitionName("test");
-rootDirName = "/home/hadim/";
+rootDirName = "/Users/theoli89/Desktop/";
 
 // parameters
-channelGroup = "Channels";
-String[] channels = {"State-0", "State-1"};
+channelGroup = "Illumination";
+String[] channels = {"BF", "GFP"};
 String[] shutters = {"DShutter", "DShutter"};
 Color[] colors = {Color.WHITE, Color.GREEN};
 int[] exposures = {200, 200};
@@ -25,7 +25,7 @@ numSlices = 5;
 sliceStep = 300;
 
 numFrames = 10;
-frameInterval = 10000;
+frameInterval = 7000;
 
 show = true;
 save = true;

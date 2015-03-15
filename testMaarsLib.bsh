@@ -1,10 +1,12 @@
-base_dir = "D:/Data/Tong/MAARS-master/";
+//base_dir = "D:/Data/Tong/MAARS-master/";
 //base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
+base_dir = "/Users/theoli89/Documents/MAARS/";
 
 addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
 addClassPath(base_dir + "CellsBoundaries/target/CellsBoundaries-1.0.jar");
 addClassPath(base_dir + "CellStateAnalysis/target/CellStateAnalysis-1.0.jar");
+
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
 import fiji.plugin.maars.maarslib.AllMaarsParameters;
@@ -24,8 +26,9 @@ mmc.waitForDevice(mmc.getShutterDevice());
 gui.message("Create main window");
 MaarsMainDialog md = null;
 try {
+	md = new MaarsMainDialog(gui, mmc, "/Users/theoli89/Documents/MAARS/MaarsLib/");
 	//md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
-	md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS-master/MaarsLib/");
+	//md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS-master/MaarsLib/");
 } catch (IOException e) {
 	gui.message("Error");
 }
@@ -77,7 +80,7 @@ if(md.isOkClicked()) {
 				explo.getY(i));
 
 		HashMap params = mas.getParametersFromConf(param);
-		//params.put("shutter","DShutter");
+		params.put("shutter","DShutter");
 		mas.setParameters(params);
 
 		mmc.waitForDevice(mmc.getXYStageDevice());
@@ -129,7 +132,7 @@ if(md.isOkClicked()) {
 				fluoImage.show();
 				if (mfa.checkStartConditions(mfa.getSpindle(fluoImage, j))) {
 					gui.message("mitosis");
-					mmad.acquire(true, j, false); //don't crop image because it is already cropped
+					mmad.acquire(true, j, false,true); //don't crop image because it is already cropped
 					mitosis = true;
 				}
 				j++;
