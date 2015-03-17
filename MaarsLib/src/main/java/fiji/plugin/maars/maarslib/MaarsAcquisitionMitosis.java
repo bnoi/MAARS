@@ -310,7 +310,7 @@ public class MaarsAcquisitionMitosis {
 		}
 
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
-		gui.openAcquisition(acqName, rootDirName, frameNumber, channelParam, sliceNumber,show,true);
+		gui.openAcquisition(acqName, rootDirName, frameNumber, channelParam, sliceNumber+1, show, true);
 		gui.setImageSavingFormat(org.micromanager.acquisition.TaggedImageStorageMultipageTiff.class); 
 		
 		for (int channel = 0; channel < channels.length; channel++) {
@@ -481,8 +481,6 @@ public class MaarsAcquisitionMitosis {
 			}
 			frame++;
 		}
-		ReportingUtils.logMessage("finish image cache");
-		gui.getAcquisitionImageCache(acqName).finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 		try {

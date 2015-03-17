@@ -344,9 +344,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 		cal.pixelHeight = mmc.getPixelSizeUm();
 		cal.pixelDepth = step;
 		imagePlus.setCalibration(cal);
-
-		ReportingUtils.logMessage("finish image cache");
-		gui.getAcquisitionImageCache(acqName).finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 		try {
