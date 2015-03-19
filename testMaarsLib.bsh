@@ -1,5 +1,5 @@
-//base_dir = "D:/Data/Tong/MAARS-master/";
-base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "D:/Data/Tong/MAARS-master/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Users/theoli89/Documents/MAARS/";
 
@@ -18,6 +18,7 @@ import java.io.IOException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
+import fiji.plugin.maars.cellstateanalysis.Cell;
 
 double calibration = gui.getMMCore().getPixelSizeUm();
 mmc.setAutoShutter(false);
@@ -27,8 +28,8 @@ gui.message("Create main window");
 MaarsMainDialog md = null;
 try {
 	//md = new MaarsMainDialog(gui, mmc, "/Users/theoli89/Documents/MAARS/MaarsLib/");
-	md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
-	//md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS-master/MaarsLib/");
+	//md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
+	md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS-master/MaarsLib/");
 } catch (IOException e) {
 	gui.message("Error");
 }
@@ -114,9 +115,10 @@ if(md.isOkClicked()) {
 				+"_FLUO";
 			
 			ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
-			Cell cell = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()+"/movie_X"
+			fiji.plugin.maars.cellstateanalysis.Cell cell = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()+"/movie_X"
 																										+Math.round(explo.getX(i))
 																										+"_Y"+Math.round(explo.getY(i)));
+			mfa.getSetOfCells().closeRoiManager();
 			if (cell.getCellNumber() != -1) {
 				mmad.acquire(false, cell, true, true);
 			}
