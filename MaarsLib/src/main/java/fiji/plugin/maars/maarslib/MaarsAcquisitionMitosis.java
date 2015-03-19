@@ -1,5 +1,7 @@
 package fiji.plugin.maars.maarslib;
 
+import fiji.plugin.maars.cellboundaries.CellsBoundaries;
+import fiji.plugin.maars.cellboundaries.CellsBoundariesIdentification;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -270,7 +272,7 @@ public class MaarsAcquisitionMitosis {
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
 		ReportingUtils.logMessage("- step : " + step);
-		
+
 		double segRange = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
@@ -280,8 +282,9 @@ public class MaarsAcquisitionMitosis {
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
 		ReportingUtils.logMessage("- step : " + segStep);
-		int segSliceNumber = (int) Math.round(range / step);
-		ReportingUtils.logMessage("- resegmentation slice number : " + segSliceNumber);
+		int segSliceNumber = (int) Math.round(segRange / segStep);
+		ReportingUtils.logMessage("- resegmentation slice number : "
+				+ segSliceNumber);
 
 		int sliceNumber = (int) Math.round(range / step);
 		ReportingUtils.logMessage("- fluo slice number : " + sliceNumber);
@@ -335,23 +338,24 @@ public class MaarsAcquisitionMitosis {
 					+ zStartComparedToZFocus);
 		}
 
-		ReportingUtils.logMessage("- acquisition name : " + fluoAcqName);
+		ReportingUtils.logMessage("- fluo acquisition name : " + fluoAcqName);
 		gui.openAcquisition(fluoAcqName, rootDirName, frameNumber,
 				channelParam, sliceNumber + 1, show, true);
 		gui.setImageSavingFormat(org.micromanager.acquisition.TaggedImageStorageMultipageTiff.class);
 		// TODO
-		gui.openAcquisition(bfAcqName, rootDirName, frameNumber, 0, segSliceNumber, show,
-				true);
+		ReportingUtils.logMessage("- fluo acquisition name : " + bfAcqName);
+		gui.openAcquisition(bfAcqName, rootDirName, frameNumber, 1,
+				segSliceNumber + 1, show, true);
 
 		ReportingUtils.logMessage("... set acquisition parameters");
 		for (int channel = 0; channel < channels.length; channel++) {
-			ReportingUtils.logMessage("... set channel color");
+			ReportingUtils.logMessage("... set fluo channel color");
 			try {
 				gui.setChannelColor(fluoAcqName, channel, colors[channel]);
 			} catch (MMScriptException e) {
 				ReportingUtils.logError(e);
 			}
-			ReportingUtils.logMessage("... set channel name");
+			ReportingUtils.logMessage("... set fluo channel name");
 			try {
 				gui.setChannelName(fluoAcqName, channel, channels[channel]);
 			} catch (MMScriptException e) {
@@ -359,11 +363,11 @@ public class MaarsAcquisitionMitosis {
 			}
 			// TODO
 			if (channels[channel].equals("BF")) {
+				ReportingUtils.logMessage("... set BF channel name and color");
 				gui.setChannelColor(bfAcqName, channel, colors[channel]);
 				gui.setChannelName(bfAcqName, channel, channels[channel]);
 			}
 		}
-
 		double zFocus = 0;
 		ImagePlus lastImage = null;
 		double startTime = System.currentTimeMillis();
@@ -380,7 +384,7 @@ public class MaarsAcquisitionMitosis {
 				// TODO
 				// test if the BF had already filmed, if so skip this channle
 				// and pass to next
-				if (channel >= channels.length){
+				if (channel >= channels.length) {
 					runChannels = false;
 					continue;
 				}
@@ -454,40 +458,145 @@ public class MaarsAcquisitionMitosis {
 
 						ReportingUtils.logMessage("... start acquisition");
 						double z = zFocus + zStartComparedToZFocus;
+
+						ImageStack imageStack = new ImageStack(
+								(int) mmc.getImageWidth(),
+								(int) mmc.getImageHeight());
 						// if current channel is BF go film and tell program to
 						// start fluo acquisition
 						// and keep this channel index into channelToSkip
 						// and reset channel to 0
 						if (channels[channel].equals("BF")) {
+							double segZ = z;
+							try {
+								gui.sleep(3000);
+							} catch (MMScriptException e1) {
+								ReportingUtils.logMessage("could not sleep "
+										+ 3000 + "s");
+								e1.printStackTrace();
+							}
 							for (int k = 0; k <= segSliceNumber; k++) {
 								ReportingUtils
 										.logMessage("- set focus device at position "
-												+ z);
+												+ segZ);
 								try {
-									mmc.setPosition(mmc.getFocusDevice(), z);
+									mmc.setPosition(mmc.getFocusDevice(), segZ);
 									mmc.waitForDevice(mmc.getFocusDevice());
 								} catch (Exception e) {
 									ReportingUtils
 											.logMessage("could not set focus device at position");
 									e.printStackTrace();
 								}
-								gui.snapAndAddImage(bfAcqName, frame, channel,
-										k, 0);
+								gui.snapAndAddImage(bfAcqName, frame, 0, k, 0);
+								MMAcquisition acq = gui
+										.getAcquisitionWithName(fluoAcqName);
+								TaggedImage img = acq.getImageCache().getImage(
+										channel, k, frame, 0);
 
-								z = z + step;
+								ShortProcessor shortProcessor = new ShortProcessor(
+										(int) mmc.getImageWidth(),
+										(int) mmc.getImageHeight());
+								shortProcessor.setPixels(img.pix);
+
+								imageStack.addSlice(shortProcessor);
+
+								segZ = segZ + segStep;
 
 							}
 							startFLuo = true;
 							channelToSkip = channel;
 							channel = 0;
+							try {
+								mmc.setPosition(mmc.getFocusDevice(), zFocus);
+								mmc.waitForDevice(mmc.getFocusDevice());
+								mmc.setShutterOpen(false);
+								mmc.waitForDevice(mmc.getShutterDevice());
+							} catch (Exception e) {
+								ReportingUtils
+										.logMessage("could not set focus device back to position and close shutter");
+								e.printStackTrace();
+							}
+							ImagePlus imagePlus = new ImagePlus("Maars "
+									+ bfAcqName + "_" + frame, imageStack);
+							Calibration cal = new Calibration();
+							cal.setUnit("micron");
+							cal.pixelWidth = mmc.getPixelSizeUm();
+							cal.pixelHeight = mmc.getPixelSizeUm();
+							cal.pixelDepth = segStep;
+							imagePlus.setCalibration(cal);
+							// TODO
+							double typicalCellSize = this.parameters
+									.getParametersAsJsonObject()
+									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+									.getAsJsonObject()
+									.get(AllMaarsParameters.CELL_SIZE)
+									.getAsDouble();
+							int sigma = convertMicronToPixelSize(
+									typicalCellSize, segStep);
+							int direction = 1;
+							double minParticleSize = this.parameters
+									.getParametersAsJsonObject()
+									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+									.getAsJsonObject()
+									.get(AllMaarsParameters.MINIMUM_CELL_AREA)
+									.getAsDouble();
+							double maxParticleSize = this.parameters
+									.getParametersAsJsonObject()
+									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+									.getAsJsonObject()
+									.get(AllMaarsParameters.MAXIMUM_CELL_AREA)
+									.getAsDouble();
+							float zf = (imagePlus.getNSlices() / 2) - 1;
+							double solidityThreshold = this.parameters
+									.getParametersAsJsonObject()
+									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+									.getAsJsonObject()
+									.get(AllMaarsParameters.SOLIDITY)
+									.getAsDouble();
+							double meanGrayValueThreshold = this.parameters
+									.getParametersAsJsonObject()
+									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+									.getAsJsonObject()
+									.get(AllMaarsParameters.MEAN_GREY_VALUE)
+									.getAsDouble();
+							String savingPath = rootDirName + "/"
+									+ bfAcqName;
+							CellsBoundariesIdentification cBI = new CellsBoundariesIdentification(
+									imagePlus, sigma, direction, true, true,
+									true, false, false, false, false, true,
+									false, true, false, true,savingPath , minParticleSize,
+									maxParticleSize, zf, solidityThreshold,
+									meanGrayValueThreshold, false, true);
+							cBI.identifyCellesBoundaries();
+							// ImagePlus imageToAnalyse, int sigma,
+							// int direction, boolean
+							// enableDoSomethingElseInParallel,
+							// boolean filterUnusualShape, boolean
+							// filterWithMinGrayValue,
+							// boolean displayCorrelationImg, boolean
+							// displayBinaryImg,
+							// boolean displayDataFrame, boolean
+							// displayFocusImage,
+							// boolean saveCorrelationImg, boolean
+							// saveBinaryImg,
+							// boolean saveDataFrame, boolean saveFocusImage,
+							// boolean saveRoi,
+							// String savingPath, double minParticleSize, double
+							// maxParticleSize,
+							// float zf, double solidityThreshold, double
+							// meanGrayValueThreshold,
+							// boolean makeLogFile, boolean flushImageToAnalyze
+
+							// SetOfCells(ImagePlus bfImage ok, ImagePlus
+							// correaltionImage,
+							// int focusSlice, int direction, String pathToRois,
+							// String pathToSaveResults)
+
+							continue;
 						}
 						// if current channel is not BF and startFluo is true,
 						// go film fluo films.
 						if (startFLuo) {
-
-							ImageStack imageStack = new ImageStack(
-									(int) mmc.getImageWidth(),
-									(int) mmc.getImageHeight());
 
 							for (int k = 0; k <= sliceNumber; k++) {
 								ReportingUtils
@@ -570,8 +679,8 @@ public class MaarsAcquisitionMitosis {
 							// TODO
 							if (channel == channels.length - 1) {
 								runChannels = false;
-								channel++;
 							}
+							channel++;
 						}
 					}
 				}
@@ -587,6 +696,9 @@ public class MaarsAcquisitionMitosis {
 			}
 			frame++;
 		}
+		ReportingUtils.logMessage("--- image save finished.");
+		gui.getAcquisitionImageCache(fluoAcqName).finished();
+		gui.getAcquisitionImageCache(bfAcqName).finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 		try {
@@ -756,5 +868,11 @@ public class MaarsAcquisitionMitosis {
 		}
 
 		return ok;
+	}
+
+	public int convertMicronToPixelSize(double micronSize,
+			double widthOrHeightOrDepth) {
+		int pixelSize = (int) Math.round(micronSize / widthOrHeightOrDepth);
+		return pixelSize;
 	}
 }

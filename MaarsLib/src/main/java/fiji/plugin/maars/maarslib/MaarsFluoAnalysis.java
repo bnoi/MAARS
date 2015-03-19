@@ -183,11 +183,7 @@ public class MaarsFluoAnalysis {
 	public int analyzeEntireField(ImagePlus fieldWideImage, String pathToResults) {
 		int cellNumber = -1;
 		double smallerSp = 900000;
-		int emptyCellNumber = 0;
-		int totalCellNumber = 0;
-		int mitosisCellNumber = 0;
 		FileWriter spindleWriter = null;
-		FileWriter statWriter = null;
 		try {
 			spindleWriter = new FileWriter(pathToResults
 					+ "_spindleAnalysis.txt");
@@ -210,14 +206,6 @@ public class MaarsFluoAnalysis {
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
-			if (sp.getFeature().equals("NO_SPINDLE")) {
-				totalCellNumber++;
-			} else if (sp.getFeature().equals("SPINDLE")) {
-				totalCellNumber++;
-				mitosisCellNumber++;
-			} else {
-				emptyCellNumber++;
-			}
 			try {
 				if (i != soc.length() - 1) {
 					spindleWriter.write(sp.toString(soc.getCell(i)
@@ -247,19 +235,9 @@ public class MaarsFluoAnalysis {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		try {
-			statWriter = new FileWriter(pathToResults
-					+ "_statAnalysis.txt");
-			statWriter.write("Percentage of mitosis is :"
-					+ (double) mitosisCellNumber / totalCellNumber
-					+ "\nNumber of ROI with spot :" + emptyCellNumber);
-		} catch (IOException e1) {
-			ReportingUtils.logError(e1);
-		}
 
 		try {
 			spindleWriter.close();
-			statWriter.close();
 		} catch (IOException e) {
 			ReportingUtils.logMessage("Could not close writer");
 			e.printStackTrace();

@@ -82,7 +82,6 @@ if(md.isOkClicked()) {
 
 		autofocus.fullFocus();
 		HashMap params = mas.getParametersFromConf(param);
-		params.put("shutter","DShutter");
 		mas.setParameters(params);
 		mas.acquire(false);
 
