@@ -1,7 +1,7 @@
 package fiji.plugin.maars.maarslib;
 
-import fiji.plugin.maars.cellboundaries.CellsBoundaries;
 import fiji.plugin.maars.cellboundaries.CellsBoundariesIdentification;
+import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -145,11 +145,11 @@ public class MaarsAcquisitionMitosis {
 	 * @param adjustZRange
 	 *            : true adjust range around focal plane
 	 */
-	public void acquire(boolean show, int cellNumber, boolean crop,
+	public void acquire(boolean show, Cell cell, boolean crop,
 			boolean adjustZRange) throws MMScriptException {
 
 		if (crop) {
-			crop(cellNumber);
+			crop(cell.getCellNumber());
 		}
 
 		boolean keepFilming = true;
@@ -157,21 +157,13 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("Acquire Mitosis Movie :");
 		ReportingUtils.logMessage("_______________________");
 		// TODO
-		String fluoAcqName = "movie_X"
-				+ Math.round(positionX)
-				+ "_Y"
-				+ Math.round(positionY)
-				+ "_"
-				+ mfa.getSetOfCells().getCell(cellNumber).getCellShapeRoi()
-						.getName() + "_Fluo";
+		String fluoAcqName = "movie_X" + Math.round(positionX) + "_Y"
+				+ Math.round(positionY) + "_"
+				+ cell.getCellShapeRoi().getName() + "_Fluo";
 		// TODO
-		String bfAcqName = "movie_X"
-				+ Math.round(positionX)
-				+ "_Y"
-				+ Math.round(positionY)
-				+ "_"
-				+ mfa.getSetOfCells().getCell(cellNumber).getCellShapeRoi()
-						.getName() + "_BF";
+		String bfAcqName = "movie_X" + Math.round(positionX) + "_Y"
+				+ Math.round(positionY) + "_"
+				+ cell.getCellShapeRoi().getName() + "_BF";
 		ReportingUtils.logMessage("Close all previous acquisitions");
 		gui.closeAllAcquisitions();
 		try {
@@ -286,6 +278,40 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("- resegmentation slice number : "
 				+ segSliceNumber);
 
+		double typicalCellSize = this.parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.CELL_SIZE)
+				.getAsDouble();
+		int sigma = convertMicronToPixelSize(
+				typicalCellSize, segStep);
+		int direction = 1;
+		double minParticleSize = this.parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.MINIMUM_CELL_AREA)
+				.getAsDouble();
+		double maxParticleSize = this.parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.MAXIMUM_CELL_AREA)
+				.getAsDouble();
+		double solidityThreshold = this.parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.SOLIDITY)
+				.getAsDouble();
+		double meanGrayValueThreshold = this.parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.MEAN_GREY_VALUE)
+				.getAsDouble();
+		
 		int sliceNumber = (int) Math.round(range / step);
 		ReportingUtils.logMessage("- fluo slice number : " + sliceNumber);
 
@@ -294,8 +320,8 @@ public class MaarsAcquisitionMitosis {
 		if (adjustZRange) {
 			ReportingUtils.logMessage("---> adjust z range");
 			ReportingUtils.logMessage("     get coordinates");
-			double[] spbCoord = mfa.getSetOfCells().getCell(cellNumber)
-					.getLastSpindleComputed().getSPBCoordinates();
+			double[] spbCoord = cell.getLastSpindleComputed()
+					.getSPBCoordinates();
 			ReportingUtils.logMessage("     get slice number for analysis : ");
 			int sliceNbInFluoAnalysis = (int) Math.round(parameters
 					.getParametersAsJsonObject()
@@ -489,9 +515,10 @@ public class MaarsAcquisitionMitosis {
 								}
 								gui.snapAndAddImage(bfAcqName, frame, 0, k, 0);
 								MMAcquisition acq = gui
-										.getAcquisitionWithName(fluoAcqName);
+										.getAcquisitionWithName(bfAcqName);
+
 								TaggedImage img = acq.getImageCache().getImage(
-										channel, k, frame, 0);
+										0, k, frame, 0);
 
 								ShortProcessor shortProcessor = new ShortProcessor(
 										(int) mmc.getImageWidth(),
@@ -525,67 +552,21 @@ public class MaarsAcquisitionMitosis {
 							cal.pixelDepth = segStep;
 							imagePlus.setCalibration(cal);
 							// TODO
-							double typicalCellSize = this.parameters
-									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-									.getAsJsonObject()
-									.get(AllMaarsParameters.CELL_SIZE)
-									.getAsDouble();
-							int sigma = convertMicronToPixelSize(
-									typicalCellSize, segStep);
-							int direction = 1;
-							double minParticleSize = this.parameters
-									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-									.getAsJsonObject()
-									.get(AllMaarsParameters.MINIMUM_CELL_AREA)
-									.getAsDouble();
-							double maxParticleSize = this.parameters
-									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-									.getAsJsonObject()
-									.get(AllMaarsParameters.MAXIMUM_CELL_AREA)
-									.getAsDouble();
 							float zf = (imagePlus.getNSlices() / 2) - 1;
-							double solidityThreshold = this.parameters
-									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-									.getAsJsonObject()
-									.get(AllMaarsParameters.SOLIDITY)
-									.getAsDouble();
-							double meanGrayValueThreshold = this.parameters
-									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-									.getAsJsonObject()
-									.get(AllMaarsParameters.MEAN_GREY_VALUE)
-									.getAsDouble();
-							String savingPath = rootDirName + "/"
-									+ bfAcqName;
+							String savingPath = rootDirName + bfAcqName + "/"
+									+ frame + "/";
+							try {
+								this.mmc.clearROI();
+							} catch (Exception e) {
+								ReportingUtils.logError(e);
+							}
+
 							CellsBoundariesIdentification cBI = new CellsBoundariesIdentification(
-									imagePlus, sigma, direction, true, true,
-									true, false, false, false, false, true,
-									false, true, false, true,savingPath , minParticleSize,
-									maxParticleSize, zf, solidityThreshold,
-									meanGrayValueThreshold, false, true);
+									imagePlus, sigma, true, true, savingPath,
+									minParticleSize, maxParticleSize,
+									direction, zf, solidityThreshold,
+									meanGrayValueThreshold);
 							cBI.identifyCellesBoundaries();
-							// ImagePlus imageToAnalyse, int sigma,
-							// int direction, boolean
-							// enableDoSomethingElseInParallel,
-							// boolean filterUnusualShape, boolean
-							// filterWithMinGrayValue,
-							// boolean displayCorrelationImg, boolean
-							// displayBinaryImg,
-							// boolean displayDataFrame, boolean
-							// displayFocusImage,
-							// boolean saveCorrelationImg, boolean
-							// saveBinaryImg,
-							// boolean saveDataFrame, boolean saveFocusImage,
-							// boolean saveRoi,
-							// String savingPath, double minParticleSize, double
-							// maxParticleSize,
-							// float zf, double solidityThreshold, double
-							// meanGrayValueThreshold,
-							// boolean makeLogFile, boolean flushImageToAnalyze
 
 							// SetOfCells(ImagePlus bfImage ok, ImagePlus
 							// correaltionImage,
@@ -667,7 +648,7 @@ public class MaarsAcquisitionMitosis {
 
 								keepFilming = checkEndMovieConditions(
 										lastImage, imagePlus, startTime,
-										cellNumber, frame);
+										cell, frame);
 								if (frame == 0) {
 									lastImage = new ImagePlus("Maars "
 											+ fluoAcqName, imageStack);
@@ -723,14 +704,14 @@ public class MaarsAcquisitionMitosis {
 	 *            : image to analyse
 	 * @param startTime
 	 *            : time of beginning of acquisition (in ms)
-	 * @param cellNumber
-	 *            : index of cell to check
+	 * @param cell
+	 *            : cell to check
 	 * @param frame
 	 *            : time point of image (0 if it is first image acquired)
 	 * @return true if system should keep filming
 	 */
 	public boolean checkEndMovieConditions(ImagePlus lastImage,
-			ImagePlus newImage, double startTime, int cellNumber, int frame) {
+			ImagePlus newImage, double startTime, Cell cell, int frame) {
 		boolean ok = true;
 
 		boolean checkTimeLimit = parameters.getParametersAsJsonObject()
@@ -793,7 +774,7 @@ public class MaarsAcquisitionMitosis {
 		}
 		if (checkAbsMaxSpSize || checkRelativeMaxSpSize || checkRelativeSpAngle
 				|| checkGrowing) {
-			Spindle newSp = mfa.getSpindle(newImage, cellNumber);
+			Spindle newSp = mfa.getSpindle(newImage, cell);
 
 			if (newSp.getFeature().equals(Spindle.NO_SPINDLE)
 					|| newSp.getFeature().equals(Spindle.NO_SPOT)) {
@@ -849,7 +830,7 @@ public class MaarsAcquisitionMitosis {
 				}
 				if (checkGrowing) {
 					ReportingUtils.logMessage("Check minimum growing");
-					Spindle lastSp = mfa.getSpindle(lastImage, cellNumber);
+					Spindle lastSp = mfa.getSpindle(lastImage, cell);
 					double growing = newSp.getLength() - lastSp.getLength();
 					ok = ok
 							&& growing >= parameters

@@ -1,5 +1,5 @@
-base_dir = "D:/Data/Tong/MAARS-master/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "D:/Data/Tong/MAARS-master/";
+base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Users/theoli89/Documents/MAARS/";
 
@@ -27,8 +27,8 @@ gui.message("Create main window");
 MaarsMainDialog md = null;
 try {
 	//md = new MaarsMainDialog(gui, mmc, "/Users/theoli89/Documents/MAARS/MaarsLib/");
-	//md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
-	md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS-master/MaarsLib/");
+	md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
+	//md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS-master/MaarsLib/");
 } catch (IOException e) {
 	gui.message("Error");
 }
@@ -114,22 +114,23 @@ if(md.isOkClicked()) {
 				+"_FLUO";
 			
 			ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
-			int cellNumber = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()+"/movie_X"
+			Cell cell = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()+"/movie_X"
 																										+Math.round(explo.getX(i))
 																										+"_Y"+Math.round(explo.getY(i)));
-			if (cellNumber != -1) {
-				mmad.acquire(false, cellNumber, true, true);
+			if (cell.getCellNumber() != -1) {
+				mmad.acquire(false, cell, true, true);
 			}
 		}
 		else {
 			int j = 0;
 			boolean mitosis = false;
+			//j will equal to cellNumber so we can keep this loop, or maybe iterat loop.
 			while(j <  mfa.getSetOfCells().length() && !mitosis) {
 				ImagePlus fluoImage = mafa.acquire(false, j);
 				fluoImage.show();
 				if (mfa.checkStartConditions(mfa.getSpindle(fluoImage, j))) {
 					gui.message("mitosis");
-					mmad.acquire(true, j, false,true); //don't crop image because it is already cropped
+					mmad.acquire(true, mfa.getSetOfCells().getCell(j), false,true); //don't crop image because it is already cropped
 					mitosis = true;
 				}
 				j++;

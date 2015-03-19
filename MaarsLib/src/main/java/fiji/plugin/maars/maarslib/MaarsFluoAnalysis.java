@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.micromanager.utils.ReportingUtils;
 
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;
+import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import ij.IJ;
@@ -70,10 +71,10 @@ public class MaarsFluoAnalysis {
 	 *            : cell index
 	 * @return Spindle object
 	 */
-	public Spindle getSpindle(ImagePlus image, int cellNumber) {
+	public Spindle getSpindle(ImagePlus image, Cell cell) {
 
-		soc.getCell(cellNumber).addFluoImage(image);
-		return soc.getCell(cellNumber).findFluoSpotTempFunction(
+		cell.addFluoImage(image);
+		return cell.findFluoSpotTempFunction(
 				false,
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -180,7 +181,7 @@ public class MaarsFluoAnalysis {
 	 * @return index of cell corresponding to search (-1 if none of the cell are
 	 *         corresponding to criteria)
 	 */
-	public int analyzeEntireField(ImagePlus fieldWideImage, String pathToResults) {
+	public Cell analyzeEntireField(ImagePlus fieldWideImage, String pathToResults) {
 		int cellNumber = -1;
 		double smallerSp = 900000;
 		FileWriter spindleWriter = null;
@@ -242,7 +243,7 @@ public class MaarsFluoAnalysis {
 			ReportingUtils.logMessage("Could not close writer");
 			e.printStackTrace();
 		}
-		return cellNumber;
+		return soc.getCell(cellNumber);
 	}
 
 	/**

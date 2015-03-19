@@ -34,6 +34,7 @@ public class Cell {
 	// 1 -> cell bounds are white then black
 
 	// informations
+	private int cellNumber;
 	private int septumNumber;
 	private ArrayList<Septum> septumArray;
 	private Measures measures;
@@ -68,7 +69,7 @@ public class Cell {
 	 */
 	public Cell(ImagePlus bfImage, ImagePlus correlationImage,
 			ImagePlus fluoImage, int focusSlice, int direction,
-			Roi roiCellShape, ResultsTable rt) {
+			Roi roiCellShape, int cellNb, ResultsTable rt) {
 
 		this.bfImage = bfImage;
 		lastSpindleComputed = null;
@@ -78,6 +79,7 @@ public class Cell {
 		this.rt = rt;
 		this.direction = direction;
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
+		this.cellNumber = cellNb;
 		scaleFactorForRoiFromBfToFluo = new double[2];
 		addFluoImage(fluoImage);
 		// ReportingUtils.logMessage("scale factor for roi : x "+scaleFactorForRoiFromBfToFluo[0]+" y "+scaleFactorForRoiFromBfToFluo[1]);
@@ -101,7 +103,7 @@ public class Cell {
 	 *            cell)
 	 */
 	public Cell(ImagePlus bfImage, ImagePlus correlationImage, int focusSlice,
-			int direction, Roi roiCellShape, ResultsTable rt) {
+			int direction, Roi roiCellShape, int cellNb, ResultsTable rt) {
 
 		ReportingUtils.logMessage("Cell " + roiCellShape.getName());
 		ReportingUtils.logMessage("Get parameters");
@@ -116,7 +118,7 @@ public class Cell {
 
 		this.direction = direction;
 		lastSpindleComputed = null;
-
+		this.cellNumber = cellNb;
 		ReportingUtils.logMessage("Create Measure object");
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
 		ReportingUtils.logMessage("done");
@@ -583,6 +585,10 @@ public class Cell {
 	 */
 	public Spindle getLastSpindleComputed() {
 		return lastSpindleComputed;
+	}
+	
+	public int getCellNumber(){
+		return cellNumber;
 	}
 
 }
