@@ -553,12 +553,13 @@ public class MaarsAcquisitionMitosis {
 									solidityThreshold, meanGrayValueThreshold,
 									true, true);
 							cBI.identifyCellesBoundaries();
-//							gui.sleep(2000);
-//							ImagePlus corrImg = IJ.getImage();
-//							SetOfCells soc = new SetOfCells(bfImagePlus,
-//									corrImg	, (int) zf, -1, savingPath
-//											+ "/Maars_ROI.zip", savingPath);
-//							cell = soc.getCell(0);
+							gui.sleep(2000);
+							ImagePlus corrImg = IJ.getImage();
+							SetOfCells soc = new SetOfCells(bfImagePlus,
+									corrImg	, (int) zf, -1, savingPath
+											+ "/Maars_ROI.zip", savingPath);
+							cell = soc.getCell(0);
+							corrImg.close();
 							try {
 								mmc.setPosition(mmc.getFocusDevice(), zFocus);
 								mmc.waitForDevice(mmc.getFocusDevice());
