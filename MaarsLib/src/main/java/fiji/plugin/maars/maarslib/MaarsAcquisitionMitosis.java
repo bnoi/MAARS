@@ -2,10 +2,13 @@ package fiji.plugin.maars.maarslib;
 
 import fiji.plugin.maars.cellboundaries.CellsBoundariesIdentification;
 import fiji.plugin.maars.cellstateanalysis.Cell;
+import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
+import ij.io.FileSaver;
 import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
 import ij.process.ShortProcessor;
@@ -285,14 +288,6 @@ public class MaarsAcquisitionMitosis {
 				.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE)
 				.getAsDouble();
 		int sigma = convertMicronToPixelSize(typicalCellSize, segStep);
-		double minParticleSize = this.parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MINIMUM_CELL_AREA)
-				.getAsDouble();
-		double maxParticleSize = this.parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_CELL_AREA)
-				.getAsDouble();
 		double solidityThreshold = this.parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SOLIDITY)
@@ -362,7 +357,7 @@ public class MaarsAcquisitionMitosis {
 		// TODO
 		ReportingUtils.logMessage("- fluo acquisition name : " + bfAcqName);
 		gui.openAcquisition(bfAcqName, rootDirName, frameNumber, 1,
-				segSliceNumber + 1, show, true);
+				segSliceNumber + 1, show, false);
 
 		ReportingUtils.logMessage("... set acquisition parameters");
 		for (int channel = 0; channel < channels.length; channel++) {
@@ -531,21 +526,39 @@ public class MaarsAcquisitionMitosis {
 							cal.pixelDepth = segStep;
 							bfImagePlus.setCalibration(cal);
 							float zf = (bfImagePlus.getNSlices() / 2) - 1;
+							double minParticleSize = (int) Math
+									.round(parameters
+											.getParametersAsJsonObject()
+											.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+											.getAsJsonObject()
+											.get(AllMaarsParameters.MINIMUM_CELL_AREA)
+											.getAsDouble()
+											/ cal.pixelWidth);
+							double maxParticleSize = (int) Math
+									.round(parameters
+											.getParametersAsJsonObject()
+											.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+											.getAsJsonObject()
+											.get(AllMaarsParameters.MAXIMUM_CELL_AREA)
+											.getAsDouble()
+											/ cal.pixelWidth);
 							String savingPath = rootDirName + bfAcqName + "/"
 									+ frame + "/";
 							new File(savingPath).mkdirs();
-
 							CellsBoundariesIdentification cBI = new CellsBoundariesIdentification(
-									bfImagePlus, sigma, true, true, savingPath,
-									minParticleSize, maxParticleSize,
-									-1, zf, solidityThreshold,
-									meanGrayValueThreshold);
+									bfImagePlus, sigma, -1, true, true, true,
+									true, false, false, false, true, true,
+									true, true, true, savingPath,
+									minParticleSize, maxParticleSize, zf,
+									solidityThreshold, meanGrayValueThreshold,
+									true, true);
 							cBI.identifyCellesBoundaries();
-
-							// SetOfCells(ImagePlus bfImage ok, ImagePlus
-							// correaltionImage,
-							// int focusSlice, int direction, String pathToRois,
-							// String pathToSaveResults)
+//							gui.sleep(2000);
+//							ImagePlus corrImg = IJ.getImage();
+//							SetOfCells soc = new SetOfCells(bfImagePlus,
+//									corrImg	, (int) zf, -1, savingPath
+//											+ "/Maars_ROI.zip", savingPath);
+//							cell = soc.getCell(0);
 							try {
 								mmc.setPosition(mmc.getFocusDevice(), zFocus);
 								mmc.waitForDevice(mmc.getFocusDevice());
