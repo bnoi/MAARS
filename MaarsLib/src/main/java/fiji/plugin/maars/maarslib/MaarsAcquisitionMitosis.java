@@ -10,7 +10,11 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.io.FileSaver;
 import ij.measure.Calibration;
+import ij.measure.Measurements;
+import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
+import ij.plugin.filter.Analyzer;
+import ij.plugin.frame.RoiManager;
 import ij.process.ShortProcessor;
 
 import java.awt.Color;
@@ -357,28 +361,30 @@ public class MaarsAcquisitionMitosis {
 		// TODO
 		ReportingUtils.logMessage("- fluo acquisition name : " + bfAcqName);
 		gui.openAcquisition(bfAcqName, rootDirName, frameNumber, 1,
-				segSliceNumber + 1, show, false);
+				segSliceNumber + 1, show, true);
 
 		ReportingUtils.logMessage("... set acquisition parameters");
 		for (int channel = 0; channel < channels.length; channel++) {
-			ReportingUtils.logMessage("... set fluo channel color");
-			try {
-				gui.setChannelColor(fluoAcqName, channel, colors[channel]);
-			} catch (MMScriptException e) {
-				ReportingUtils.logError(e);
-			}
-			ReportingUtils.logMessage("... set fluo channel name");
-			try {
-				gui.setChannelName(fluoAcqName, channel, channels[channel]);
-			} catch (MMScriptException e) {
-				ReportingUtils.logError(e);
-			}
 			// TODO
 			if (channels[channel].equals("BF")) {
 				ReportingUtils.logMessage("... set BF channel name and color");
-				gui.setChannelColor(bfAcqName, channel, colors[channel]);
-				gui.setChannelName(bfAcqName, channel, channels[channel]);
+				gui.setChannelColor(bfAcqName, 0, colors[channel]);
+				gui.setChannelName(bfAcqName, 0, channels[channel]);
+			} else {
+				ReportingUtils.logMessage("... set fluo channel color");
+				try {
+					gui.setChannelColor(fluoAcqName, channel, colors[channel]);
+				} catch (MMScriptException e) {
+					ReportingUtils.logError(e);
+				}
+				ReportingUtils.logMessage("... set fluo channel name");
+				try {
+					gui.setChannelName(fluoAcqName, channel, channels[channel]);
+				} catch (MMScriptException e) {
+					ReportingUtils.logError(e);
+				}
 			}
+
 		}
 		double zFocus = 0;
 		ImagePlus lastImage = null;
@@ -498,6 +504,7 @@ public class MaarsAcquisitionMitosis {
 									e.printStackTrace();
 								}
 								gui.snapAndAddImage(bfAcqName, frame, 0, k, 0);
+
 								MMAcquisition acq = gui
 										.getAcquisitionWithName(bfAcqName);
 
@@ -525,7 +532,8 @@ public class MaarsAcquisitionMitosis {
 							cal.pixelHeight = mmc.getPixelSizeUm();
 							cal.pixelDepth = segStep;
 							bfImagePlus.setCalibration(cal);
-							float zf = (bfImagePlus.getNSlices() / 2) - 1;
+							// TODO
+							float zf = (bfImagePlus.getNSlices() / 2) ;
 							double minParticleSize = (int) Math
 									.round(parameters
 											.getParametersAsJsonObject()
@@ -546,20 +554,13 @@ public class MaarsAcquisitionMitosis {
 									+ frame + "/";
 							new File(savingPath).mkdirs();
 							CellsBoundariesIdentification cBI = new CellsBoundariesIdentification(
-									bfImagePlus, sigma, -1, true, true, true,
-									true, false, false, false, true, true,
+									bfImagePlus, sigma, -1, true, false, false,
+									false, false, false, false, true, true,
 									true, true, true, savingPath,
 									minParticleSize, maxParticleSize, zf,
 									solidityThreshold, meanGrayValueThreshold,
 									true, true);
 							cBI.identifyCellesBoundaries();
-							gui.sleep(2000);
-							ImagePlus corrImg = IJ.getImage();
-							SetOfCells soc = new SetOfCells(bfImagePlus,
-									corrImg	, (int) zf, -1, savingPath
-											+ "/Maars_ROI.zip", savingPath);
-							cell = soc.getCell(0);
-							corrImg.close();
 							try {
 								mmc.setPosition(mmc.getFocusDevice(), zFocus);
 								mmc.waitForDevice(mmc.getFocusDevice());
@@ -570,6 +571,14 @@ public class MaarsAcquisitionMitosis {
 										.logMessage("could not set focus device back to position and close shutter");
 								e.printStackTrace();
 							}
+							ImagePlus corrImg = IJ.openImage(savingPath
+									+ "/Maars_CorrelationImage.tif");
+							ReportingUtils.logMessage(savingPath);
+							ImagePlus focusImg = IJ.openImage(savingPath
+									+ "/Maars_FocusImage.tif");
+							SetOfCells soc = new SetOfCells(focusImg,
+									corrImg, (int) zf, -1, savingPath
+											+ "/Maars_ROI.zip", savingPath);
 
 							continue;
 						}

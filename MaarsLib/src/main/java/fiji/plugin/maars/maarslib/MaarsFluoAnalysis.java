@@ -178,7 +178,7 @@ public class MaarsFluoAnalysis {
 	 *            : image of field
 	 * @param pathToResults
 	 *            : path to save results
-	 * @return index of cell corresponding to search (-1 if none of the cell are
+	 * @return cell corresponding to search (-1 if none of the cell are
 	 *         corresponding to criteria)
 	 */
 	public Cell analyzeEntireField(ImagePlus fieldWideImage, String pathToResults) {

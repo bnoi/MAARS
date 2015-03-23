@@ -154,7 +154,7 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray[i] = new Cell(bfImage, correaltionImage, focusSlice,
-					direction, roiArray[i],i, rt);
+					direction, roiArray[i], i, rt);
 
 			// just for test
 			// roiManager.addRoi(cellArray[i].getLinearRoi());
