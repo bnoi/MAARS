@@ -524,16 +524,21 @@ public class MaarsAcquisitionMitosis {
 							startFLuo = true;
 							channelToSkip = channel;
 							channel = 0;
-							ImagePlus bfImagePlus = new ImagePlus("Maars "
-									+ bfAcqName + "_" + frame, bfImageStack);
+							String fileTitle = "Maars_" + bfAcqName;
+							ImagePlus bfImagePlus = new ImagePlus(fileTitle,
+									bfImageStack);
+							double bfImgCalibWidth = mfa.getSetOfCells()
+									.getBFImage().getCalibration().pixelWidth;
+							double bfImgCalibHeight = mfa.getSetOfCells()
+									.getBFImage().getCalibration().pixelHeight;
 							Calibration cal = new Calibration();
 							cal.setUnit("micron");
-							cal.pixelWidth = mmc.getPixelSizeUm();
-							cal.pixelHeight = mmc.getPixelSizeUm();
+							cal.pixelWidth = bfImgCalibWidth;
+							cal.pixelHeight = bfImgCalibHeight;
 							cal.pixelDepth = segStep;
 							bfImagePlus.setCalibration(cal);
 							// TODO
-							float zf = (bfImagePlus.getNSlices() / 2) ;
+							float zf = (bfImagePlus.getNSlices() / 2);
 							double minParticleSize = (int) Math
 									.round(parameters
 											.getParametersAsJsonObject()
@@ -571,15 +576,19 @@ public class MaarsAcquisitionMitosis {
 										.logMessage("could not set focus device back to position and close shutter");
 								e.printStackTrace();
 							}
+							//TODO
+							//need to wait all files of cBI wrote...Running too fast.
 							ImagePlus corrImg = IJ.openImage(savingPath
-									+ "/Maars_CorrelationImage.tif");
-							ReportingUtils.logMessage(savingPath);
+									+ fileTitle + "_CorrelationImage.tif");
 							ImagePlus focusImg = IJ.openImage(savingPath
-									+ "/Maars_FocusImage.tif");
-							SetOfCells soc = new SetOfCells(focusImg,
-									corrImg, (int) zf, -1, savingPath
-											+ "/Maars_ROI.zip", savingPath);
-
+									+ fileTitle + "_FocusImage.tif");
+							String pathToRois = savingPath + fileTitle
+									+ "_ROI.zip";
+							SetOfCells soc = new SetOfCells(focusImg, corrImg,
+									0, -1, pathToRois, savingPath);
+							soc.getROIManager().close();
+							Cell newCell = soc.getCell(0);
+							cBI.getRoiManager().close();
 							continue;
 						}
 						// if current channel is not BF and startFluo is true,

@@ -280,4 +280,12 @@ public class SetOfCells {
 	public String getPath() {
 		return pathToSaveResults;
 	}
+	
+	/**
+	 * 
+	 * @return path where results are stored
+	 */
+	public RoiManager getROIManager() {
+		return this.roiManager;
+	}
 }
