@@ -673,6 +673,7 @@ public class MaarsAcquisitionMitosis {
 								cal.pixelWidth = mmc.getPixelSizeUm();
 								cal.pixelHeight = mmc.getPixelSizeUm();
 								cal.pixelDepth = fluoStep;
+								mfa.getSetOfCells().getCell(index)
 								fluoImagePlus.setCalibration(cal);
 								String savingPath = rootDirName + fluoAcqName
 										+ "/" + frame + "/";
