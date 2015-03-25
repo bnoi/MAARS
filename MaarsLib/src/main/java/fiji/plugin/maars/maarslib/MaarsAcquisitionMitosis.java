@@ -19,6 +19,8 @@ import ij.process.ShortProcessor;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Iterator;
 
 import mmcorej.CMMCore;
@@ -263,16 +265,16 @@ public class MaarsAcquisitionMitosis {
 				.getAsInt();
 		ReportingUtils.logMessage("- time interval " + timeInterval);
 
-		double range = parameters.getParametersAsJsonObject()
+		double fluoRange = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
 				.getAsDouble();
-		ReportingUtils.logMessage("- range size : " + range);
+		ReportingUtils.logMessage("- range size : " + fluoRange);
 
-		double step = parameters.getParametersAsJsonObject()
+		double fluoStep = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
-		ReportingUtils.logMessage("- step : " + step);
+		ReportingUtils.logMessage("- step : " + fluoStep);
 
 		double segRange = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
@@ -302,10 +304,10 @@ public class MaarsAcquisitionMitosis {
 				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE)
 				.getAsDouble();
 
-		int sliceNumber = (int) Math.round(range / step);
+		int sliceNumber = (int) Math.round(fluoRange / fluoStep);
 		ReportingUtils.logMessage("- fluo slice number : " + sliceNumber);
 
-		double zStartComparedToZFocus = -(range / 2);
+		double zStartComparedToZFocus = -(fluoRange / 2);
 
 		if (adjustZRange) {
 			ReportingUtils.logMessage("---> adjust z range");
@@ -348,7 +350,7 @@ public class MaarsAcquisitionMitosis {
 								.getAsDouble();
 			}
 			zStartComparedToZFocus = zStartComparedToZFocus
-					- (range - rangeBetweenTwoSpots) / 2;
+					- (fluoRange - rangeBetweenTwoSpots) / 2;
 
 			ReportingUtils.logMessage("     z start : "
 					+ zStartComparedToZFocus);
@@ -356,7 +358,7 @@ public class MaarsAcquisitionMitosis {
 
 		ReportingUtils.logMessage("- fluo acquisition name : " + fluoAcqName);
 		gui.openAcquisition(fluoAcqName, rootDirName, frameNumber,
-				channelParam, sliceNumber + 1, show, true);
+				channelArray.size() - 1, sliceNumber + 1, show, true);
 		gui.setImageSavingFormat(org.micromanager.acquisition.TaggedImageStorageMultipageTiff.class);
 		// TODO
 		ReportingUtils.logMessage("- fluo acquisition name : " + bfAcqName);
@@ -391,8 +393,10 @@ public class MaarsAcquisitionMitosis {
 		double startTime = System.currentTimeMillis();
 		ReportingUtils.logMessage("start time : " + startTime);
 		int frame = 0;
+		Cell newCell = null;
 		while (keepFilming) {
 			double beginAcq = System.currentTimeMillis();
+			int channelForFluo = 0;
 			boolean startFLuo = false;
 			boolean runChannels = true;
 			int channel = 0;
@@ -527,10 +531,8 @@ public class MaarsAcquisitionMitosis {
 							String fileTitle = "Maars_" + bfAcqName;
 							ImagePlus bfImagePlus = new ImagePlus(fileTitle,
 									bfImageStack);
-							double bfImgCalibWidth = mfa.getSetOfCells()
-									.getBFImage().getCalibration().pixelWidth;
-							double bfImgCalibHeight = mfa.getSetOfCells()
-									.getBFImage().getCalibration().pixelHeight;
+							double bfImgCalibWidth = mmc.getPixelSizeUm();
+							double bfImgCalibHeight = mmc.getPixelSizeUm();
 							Calibration cal = new Calibration();
 							cal.setUnit("micron");
 							cal.pixelWidth = bfImgCalibWidth;
@@ -547,24 +549,24 @@ public class MaarsAcquisitionMitosis {
 											.get(AllMaarsParameters.MINIMUM_CELL_AREA)
 											.getAsDouble()
 											/ cal.pixelWidth);
-							double maxParticleSize = (int) Math
-									.round(parameters
-											.getParametersAsJsonObject()
-											.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-											.getAsJsonObject()
-											.get(AllMaarsParameters.MAXIMUM_CELL_AREA)
-											.getAsDouble()
-											/ cal.pixelWidth);
+							// double maxParticleSize = (int) Math
+							// .round(parameters
+							// .getParametersAsJsonObject()
+							// .get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+							// .getAsJsonObject()
+							// .get(AllMaarsParameters.MAXIMUM_CELL_AREA)
+							// .getAsDouble()
+							// / cal.pixelWidth);
 							String savingPath = rootDirName + bfAcqName + "/"
 									+ frame + "/";
 							new File(savingPath).mkdirs();
 							CellsBoundariesIdentification cBI = new CellsBoundariesIdentification(
-									bfImagePlus, sigma, -1, true, false, false,
-									false, false, false, false, true, true,
-									true, true, true, savingPath,
-									minParticleSize, maxParticleSize, zf,
+									bfImagePlus, sigma, -1, false, false,
+									false, false, false, false, false, true,
+									true, true, true, true, savingPath,
+									minParticleSize, 99999, zf,
 									solidityThreshold, meanGrayValueThreshold,
-									true, true);
+									true, false);
 							cBI.identifyCellesBoundaries();
 							try {
 								mmc.setPosition(mmc.getFocusDevice(), zFocus);
@@ -576,8 +578,7 @@ public class MaarsAcquisitionMitosis {
 										.logMessage("could not set focus device back to position and close shutter");
 								e.printStackTrace();
 							}
-							//TODO
-							//need to wait all files of cBI wrote...Running too fast.
+							cBI.getRoiManager().close();
 							ImagePlus corrImg = IJ.openImage(savingPath
 									+ fileTitle + "_CorrelationImage.tif");
 							ImagePlus focusImg = IJ.openImage(savingPath
@@ -587,8 +588,16 @@ public class MaarsAcquisitionMitosis {
 							SetOfCells soc = new SetOfCells(focusImg, corrImg,
 									0, -1, pathToRois, savingPath);
 							soc.getROIManager().close();
-							Cell newCell = soc.getCell(0);
-							cBI.getRoiManager().close();
+							Roi[] cellList = soc.getRoisAsArray();
+							for (int c = 0; c < cellList.length; c++) {
+								if (cellList[c].contains(
+										(int) mmc.getImageWidth() / 2,
+										(int) mmc.getImageHeight() / 2)) {
+									newCell = soc.getCell(c);
+								}
+							}
+							soc.getROIManager().close();
+
 							continue;
 						}
 						// if current channel is not BF and startFluo is true,
@@ -597,13 +606,14 @@ public class MaarsAcquisitionMitosis {
 							ImageStack fluoImageStack = new ImageStack(
 									(int) mmc.getImageWidth(),
 									(int) mmc.getImageHeight());
-							double z = zFocus + zStartComparedToZFocus;
+							double fluoZ = zFocus + 0.8
+									+ zStartComparedToZFocus;
 							for (int k = 0; k <= sliceNumber; k++) {
 								ReportingUtils
 										.logMessage("- set focus device at position "
-												+ z);
+												+ fluoZ);
 								try {
-									mmc.setPosition(mmc.getFocusDevice(), z);
+									mmc.setPosition(mmc.getFocusDevice(), fluoZ);
 									mmc.waitForDevice(mmc.getFocusDevice());
 								} catch (Exception e) {
 									ReportingUtils
@@ -611,11 +621,11 @@ public class MaarsAcquisitionMitosis {
 									e.printStackTrace();
 								}
 								gui.snapAndAddImage(fluoAcqName, frame,
-										channel, k, 0);
+										channelForFluo, k, 0);
 								MMAcquisition acq = gui
 										.getAcquisitionWithName(fluoAcqName);
 								TaggedImage img = acq.getImageCache().getImage(
-										channel, k, frame, 0);
+										channelForFluo, k, frame, 0);
 
 								if (channels[channel]
 										.equals(parameters
@@ -633,7 +643,7 @@ public class MaarsAcquisitionMitosis {
 									fluoImageStack.addSlice(shortProcessor);
 								}
 
-								z = z + step;
+								fluoZ = fluoZ + fluoStep;
 
 							}
 
@@ -657,25 +667,27 @@ public class MaarsAcquisitionMitosis {
 											.getAsString())) {
 
 								ImagePlus fluoImagePlus = new ImagePlus(
-										"Maars " + fluoAcqName, fluoImageStack);
+										"Maars_" + fluoAcqName, fluoImageStack);
 								Calibration cal = new Calibration();
 								cal.setUnit("micron");
 								cal.pixelWidth = mmc.getPixelSizeUm();
 								cal.pixelHeight = mmc.getPixelSizeUm();
-								cal.pixelDepth = step;
+								cal.pixelDepth = fluoStep;
 								fluoImagePlus.setCalibration(cal);
-
+								String pathToSpindlePrefix = rootDirName + fluoAcqName +"/" + frame +"/";
+								writeSpinldeCoord(fluoImagePlus, newCell, pathToSpindlePrefix);
 								keepFilming = checkEndMovieConditions(
 										lastImage, fluoImagePlus, startTime,
-										cell, frame);
+										newCell, frame);
 								if (frame == 0) {
-									lastImage = new ImagePlus("Maars "
+									lastImage = new ImagePlus("Maars_"
 											+ fluoAcqName, fluoImageStack);
 									lastImage.setCalibration(cal);
 								} else {
 									lastImage.setImage(fluoImagePlus);
 								}
 							}
+							channelForFluo++;
 							// TODO
 							if (channel == channels.length - 1) {
 								runChannels = false;
@@ -695,10 +707,8 @@ public class MaarsAcquisitionMitosis {
 				e.printStackTrace();
 			}
 			frame++;
+			channelForFluo = 0;
 		}
-		ReportingUtils.logMessage("--- image save finished.");
-		gui.getAcquisitionImageCache(fluoAcqName).finished();
-		gui.getAcquisitionImageCache(bfAcqName).finished();
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 		try {
@@ -874,5 +884,52 @@ public class MaarsAcquisitionMitosis {
 			double widthOrHeightOrDepth) {
 		int pixelSize = (int) Math.round(micronSize / widthOrHeightOrDepth);
 		return pixelSize;
+	}
+
+	public void writeSpinldeCoord(ImagePlus mitosisImg, Cell cell,
+			String pathToWrite) {
+		FileWriter spindleWriter = null;
+		try {
+			spindleWriter = new FileWriter(pathToWrite + "_spindleAnalysis.txt");
+		} catch (IOException e) {
+			ReportingUtils.logMessage("Could not create " + pathToWrite
+					+ "_spindleAnalysis.csv");
+			e.printStackTrace();
+		}
+		try {
+			spindleWriter.write("[");
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+
+		cell.addFluoImage(mitosisImg);
+		Spindle sp = cell.findFluoSpotTempFunction(
+				true,
+				parameters.getParametersAsJsonObject()
+						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.SPOT_RADIUS)
+						.getAsDouble());
+
+		try {
+			spindleWriter.write(sp.toString(cell.getCellShapeRoi().getName())
+					+ "\n,");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			spindleWriter.write("]");
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+
+		try {
+			spindleWriter.close();
+		} catch (IOException e) {
+			ReportingUtils.logMessage("Could not close writer");
+			e.printStackTrace();
+		}
 	}
 }
