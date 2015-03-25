@@ -674,8 +674,20 @@ public class MaarsAcquisitionMitosis {
 								cal.pixelHeight = mmc.getPixelSizeUm();
 								cal.pixelDepth = fluoStep;
 								fluoImagePlus.setCalibration(cal);
-								String pathToSpindlePrefix = rootDirName + fluoAcqName +"/" + frame +"/";
-								writeSpinldeCoord(fluoImagePlus, newCell, pathToSpindlePrefix);
+								String savingPath = rootDirName + fluoAcqName
+										+ "/" + frame + "/";
+								new File(savingPath).mkdirs();
+								newCell.addFluoImage(fluoImagePlus);
+								newCell.findFluoSpotTempFunction(
+										false,
+										parameters
+												.getParametersAsJsonObject()
+												.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+												.getAsJsonObject()
+												.get(AllMaarsParameters.SPOT_RADIUS)
+												.getAsDouble());
+								writeSpinldeCoord(fluoImagePlus, newCell,
+										savingPath + fluoAcqName);
 								keepFilming = checkEndMovieConditions(
 										lastImage, fluoImagePlus, startTime,
 										newCell, frame);
