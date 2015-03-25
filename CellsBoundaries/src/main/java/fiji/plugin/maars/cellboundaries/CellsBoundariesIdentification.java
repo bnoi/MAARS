@@ -524,7 +524,7 @@ public class CellsBoundariesIdentification {
 			resultTable.reset();
 		}
 
-		if (saveRoi) {
+		if (saveRoi && roiManager.getRoisAsArray().length > 0) {
 			System.out.println("saving roi...");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Save",
