@@ -166,11 +166,9 @@ public class MaarsAcquisitionMitosis {
 
 		ReportingUtils.logMessage("Acquire Mitosis Movie :");
 		ReportingUtils.logMessage("_______________________");
-		// TODO
 		String fluoAcqName = "movie_X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
 				+ cell.getCellShapeRoi().getName() + "_Fluo";
-		// TODO
 		String bfAcqName = "movie_X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
 				+ cell.getCellShapeRoi().getName() + "_BF";
@@ -360,14 +358,12 @@ public class MaarsAcquisitionMitosis {
 		gui.openAcquisition(fluoAcqName, rootDirName, frameNumber,
 				channelArray.size() - 1, sliceNumber + 1, show, true);
 		gui.setImageSavingFormat(org.micromanager.acquisition.TaggedImageStorageMultipageTiff.class);
-		// TODO
 		ReportingUtils.logMessage("- fluo acquisition name : " + bfAcqName);
 		gui.openAcquisition(bfAcqName, rootDirName, frameNumber, 1,
 				segSliceNumber + 1, show, true);
 
 		ReportingUtils.logMessage("... set acquisition parameters");
 		for (int channel = 0; channel < channels.length; channel++) {
-			// TODO
 			if (channels[channel].equals("BF")) {
 				ReportingUtils.logMessage("... set BF channel name and color");
 				gui.setChannelColor(bfAcqName, 0, colors[channel]);
@@ -402,9 +398,7 @@ public class MaarsAcquisitionMitosis {
 			int channel = 0;
 			int channelToSkip = -1;
 			while (runChannels) {
-
-				// TODO
-				// test if the BF had already filmed, if so skip this channle
+				// test if the BF had already been filmed, if so skip this channle
 				// and pass to next
 				if (channel >= channels.length) {
 					runChannels = false;
@@ -539,7 +533,6 @@ public class MaarsAcquisitionMitosis {
 							cal.pixelHeight = bfImgCalibHeight;
 							cal.pixelDepth = segStep;
 							bfImagePlus.setCalibration(cal);
-							// TODO
 							float zf = (bfImagePlus.getNSlices() / 2);
 							double minParticleSize = (int) Math
 									.round(parameters
@@ -673,7 +666,6 @@ public class MaarsAcquisitionMitosis {
 								cal.pixelWidth = mmc.getPixelSizeUm();
 								cal.pixelHeight = mmc.getPixelSizeUm();
 								cal.pixelDepth = fluoStep;
-								mfa.getSetOfCells().getCell(index)
 								fluoImagePlus.setCalibration(cal);
 								String savingPath = rootDirName + fluoAcqName
 										+ "/" + frame + "/";
@@ -701,7 +693,6 @@ public class MaarsAcquisitionMitosis {
 								}
 							}
 							channelForFluo++;
-							// TODO
 							if (channel == channels.length - 1) {
 								runChannels = false;
 							}
@@ -909,40 +900,22 @@ public class MaarsAcquisitionMitosis {
 					+ "_spindleAnalysis.csv");
 			e.printStackTrace();
 		}
-		try {
-			spindleWriter.write("[");
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-
-		cell.addFluoImage(mitosisImg);
 		Spindle sp = cell.findFluoSpotTempFunction(
 				true,
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.SPOT_RADIUS)
 						.getAsDouble());
-
 		try {
-			spindleWriter.write(sp.toString(cell.getCellShapeRoi().getName())
-					+ "\n,");
+			spindleWriter.write("["+sp.toString(cell.getCellShapeRoi().getName())
+					+ "]");
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			ReportingUtils.logError(e1);
 		}
-		try {
-			spindleWriter.write("]");
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-
 		try {
 			spindleWriter.close();
 		} catch (IOException e) {
-			ReportingUtils.logMessage("Could not close writer");
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
 	}
 }
