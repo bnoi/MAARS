@@ -168,7 +168,8 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("_______________________");
 		String fluoAcqName = "movie_X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
-				+ cell.getCellShapeRoi().getName() + "_Fluo";
+				+ cell.getCellNumber() + "_Fluo";
+//				+ cell.getCellShapeRoi().getName() + "_Fluo";
 		String bfAcqName = "movie_X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
 				+ cell.getCellShapeRoi().getName() + "_BF";
