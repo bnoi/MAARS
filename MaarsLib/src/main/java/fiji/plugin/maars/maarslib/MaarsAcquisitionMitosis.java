@@ -111,7 +111,7 @@ public class MaarsAcquisitionMitosis {
 	 * @param cellNumber
 	 *            : index of cell to film
 	 */
-	public void crop(int cellNumber) {
+	public void crop(Roi cellRoi) {
 
 		try {
 			mmc.clearROI();
@@ -127,8 +127,7 @@ public class MaarsAcquisitionMitosis {
 				.getAsJsonObject().get(AllMaarsParameters.MARGIN_AROUD_CELL)
 				.getAsInt();
 
-		Roi newroi = RoiScaler.scale(mfa.getSetOfCells().getCell(cellNumber)
-				.getCellShapeRoi(), wtest
+		Roi newroi = RoiScaler.scale(cellRoi, wtest
 				/ mfa.getSetOfCells().getBFImage().getWidth(), htest
 				/ mfa.getSetOfCells().getBFImage().getHeight(), false);
 
@@ -159,7 +158,7 @@ public class MaarsAcquisitionMitosis {
 			boolean adjustZRange) throws MMScriptException {
 
 		if (crop) {
-			crop(Integer.valueOf(cell.getCellShapeRoi().getName()));
+			crop(cell.getCellShapeRoi());
 		}
 
 		boolean keepFilming = true;

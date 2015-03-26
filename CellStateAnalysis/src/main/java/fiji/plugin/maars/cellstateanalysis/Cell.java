@@ -438,7 +438,6 @@ public class Cell {
 			setFluoImage(newImage);
 			ReportingUtils.logMessage("Done");
 		}
-		// fluoImage.show();
 		fluoImage.setRoi(cellShapeRoi);
 		ReportingUtils.logMessage("Create CellFluoAnalysis object");
 		this.fluoAnalysis = new CellFluoAnalysis(this, spotRadius);

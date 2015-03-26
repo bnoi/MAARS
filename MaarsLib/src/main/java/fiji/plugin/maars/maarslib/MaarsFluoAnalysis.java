@@ -197,8 +197,7 @@ public class MaarsFluoAnalysis {
 		try {
 			spindleWriter.write("[");
 		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			ReportingUtils.logError(e2);
 		}
 		for (int i = 0; i < soc.length(); i++) {
 			soc.getCell(i).addFluoImage(fieldWideImage);
@@ -234,8 +233,7 @@ public class MaarsFluoAnalysis {
 		try {
 			spindleWriter.write("]");
 		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			ReportingUtils.logError(e2);
 		}
 
 		try {
