@@ -244,11 +244,24 @@ public class MaarsFluoAnalysis {
 			ReportingUtils.logMessage("Could not close writer");
 			e.printStackTrace();
 		}
+		ReportingUtils.logMessage("didilala"+ cellNumber + soc.getCell(cellNumber).getCellNumber() + soc.getCell(cellNumber).getCellShapeRoi().getName());
 		if (cellNumber != -1) {
 			return soc.getCell(cellNumber);
 		}else{
 			return null;
 		}
+//		if (cellNumber != -1) {
+//			for (int i = 0; i < soc.length(); i++) {
+//				if (soc.getCell(i).getCellShapeRoi().getName()
+//						.equals(String.valueOf(cellNumber))) {
+//					return soc.getCell(cellNumber);
+//				}else{
+//					return null;
+//				}
+//			}
+//		} else {
+//			return null;
+//		}
 	}
 
 	/**

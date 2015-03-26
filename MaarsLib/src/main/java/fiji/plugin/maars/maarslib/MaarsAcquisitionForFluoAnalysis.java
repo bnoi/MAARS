@@ -338,12 +338,10 @@ public class MaarsAcquisitionForFluoAnalysis {
 			z = z + step;
 		}
 		ImagePlus imagePlus = new ImagePlus("Maars", imageStack);
-		Calibration cal = new Calibration();
-		cal.setUnit("micron");
-		cal.pixelWidth = mmc.getPixelSizeUm();
-		cal.pixelHeight = mmc.getPixelSizeUm();
-		cal.pixelDepth = step;
-		imagePlus.setCalibration(cal);
+		Calibration newCalib = 
+				soc.getBFImage().getCalibration();
+		newCalib.pixelDepth = step;
+		imagePlus.setCalibration(newCalib);
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 		try {

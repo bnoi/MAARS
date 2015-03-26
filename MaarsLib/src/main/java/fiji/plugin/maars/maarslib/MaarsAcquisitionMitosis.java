@@ -159,7 +159,7 @@ public class MaarsAcquisitionMitosis {
 			boolean adjustZRange) throws MMScriptException {
 
 		if (crop) {
-			crop(cell.getCellNumber());
+			crop(Integer.valueOf(cell.getCellShapeRoi().getName()));
 		}
 
 		boolean keepFilming = true;
@@ -168,8 +168,7 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("_______________________");
 		String fluoAcqName = "movie_X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
-				+ cell.getCellNumber() + "_Fluo";
-//				+ cell.getCellShapeRoi().getName() + "_Fluo";
+				+ cell.getCellShapeRoi().getName() + "_Fluo";
 		String bfAcqName = "movie_X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
 				+ cell.getCellShapeRoi().getName() + "_BF";
@@ -549,14 +548,14 @@ public class MaarsAcquisitionMitosis {
 											.get(AllMaarsParameters.MINIMUM_CELL_AREA)
 											.getAsDouble()
 											/ newBfCalib.pixelWidth);
-							// double maxParticleSize = (int) Math
-							// .round(parameters
-							// .getParametersAsJsonObject()
-							// .get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-							// .getAsJsonObject()
-							// .get(AllMaarsParameters.MAXIMUM_CELL_AREA)
-							// .getAsDouble()
-							// / cal.pixelWidth);
+							 double maxParticleSize = (int) Math
+							 .round(parameters
+							 .getParametersAsJsonObject()
+							 .get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+							 .getAsJsonObject()
+							 .get(AllMaarsParameters.MAXIMUM_CELL_AREA)
+							 .getAsDouble()
+							 / newBfCalib.pixelWidth);
 							String savingPath = rootDirName + bfAcqName + "/"
 									+ frame + "/";
 							new File(savingPath).mkdirs();
@@ -564,7 +563,7 @@ public class MaarsAcquisitionMitosis {
 									bfImagePlus, sigma, -1, false, false,
 									false, false, false, false, false, true,
 									true, true, true, true, savingPath,
-									minParticleSize, 99999, zf,
+									minParticleSize, maxParticleSize, zf,
 									solidityThreshold, meanGrayValueThreshold,
 									true, false);
 							cBI.identifyCellesBoundaries();
@@ -581,7 +580,7 @@ public class MaarsAcquisitionMitosis {
 							cBI.getRoiManager().close();
 							newCell = resetCurrentCell(newCell, fileTitle,
 									savingPath);
-
+							bfImagePlus.show();
 							continue;
 						}
 						// if current channel is not BF and startFluo is true,
@@ -649,11 +648,10 @@ public class MaarsAcquisitionMitosis {
 											.getAsJsonObject()
 											.get(AllMaarsParameters.CHANNEL)
 											.getAsString())) {
-
-								ImagePlus fluoImagePlus = new ImagePlus(
-										"Maars_" + fluoAcqName, fluoImageStack);
 								Calibration newFluoCalib = 
 										mfa.getSetOfCells().getBFImage().getCalibration();
+								ImagePlus fluoImagePlus = new ImagePlus(
+										"Maars_" + fluoAcqName, fluoImageStack);
 //								Calibration cal = new Calibration();
 //								cal.setUnit("micron");
 //								cal.pixelWidth = mmc.getPixelSizeUm();
