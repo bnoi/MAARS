@@ -191,7 +191,7 @@ public class MaarsFluoAnalysis {
 					+ "_spindleAnalysis.txt");
 		} catch (IOException e) {
 			ReportingUtils.logMessage("Could not create " + pathToResults
-					+ "_spindleAnalysis.csv");
+					+ "_spindleAnalysis.txt");
 			e.printStackTrace();
 		}
 		try {
