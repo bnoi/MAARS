@@ -524,17 +524,22 @@ public class MaarsAcquisitionMitosis {
 							channelToSkip = channel;
 							channel = 0;
 							String fileTitle = "Maars_" + bfAcqName;
+							//first bf image's calibration
+							Calibration newBfCalib = 
+									mfa.getSetOfCells().getBFImage().getCalibration();
 							ImagePlus bfImagePlus = new ImagePlus(fileTitle,
 									bfImageStack);
-							double bfImgCalibWidth = mmc.getPixelSizeUm();
-							double bfImgCalibHeight = mmc.getPixelSizeUm();
-							Calibration cal = new Calibration();
-							cal.setUnit("micron");
-							cal.pixelWidth = bfImgCalibWidth;
-							cal.pixelHeight = bfImgCalibHeight;
-							cal.pixelDepth = segStep;
-							bfImagePlus.setCalibration(cal);
+//							double bfImgCalibWidth = mmc.getPixelSizeUm();
+//							double bfImgCalibHeight = mmc.getPixelSizeUm();
+//							Calibration cal = new Calibration();
+//							cal.setUnit("micron");
+//							cal.pixelWidth = bfImgCalibWidth;
+//							cal.pixelHeight = bfImgCalibHeight;
+							newBfCalib.pixelDepth = segStep;
+							bfImagePlus.setCalibration(newBfCalib);
 							float zf = (bfImagePlus.getNSlices() / 2);
+							//TODO
+							
 							double minParticleSize = (int) Math
 									.round(parameters
 											.getParametersAsJsonObject()
@@ -542,7 +547,7 @@ public class MaarsAcquisitionMitosis {
 											.getAsJsonObject()
 											.get(AllMaarsParameters.MINIMUM_CELL_AREA)
 											.getAsDouble()
-											/ cal.pixelWidth);
+											/ newBfCalib.pixelWidth);
 							// double maxParticleSize = (int) Math
 							// .round(parameters
 							// .getParametersAsJsonObject()
@@ -646,13 +651,15 @@ public class MaarsAcquisitionMitosis {
 
 								ImagePlus fluoImagePlus = new ImagePlus(
 										"Maars_" + fluoAcqName, fluoImageStack);
-								Calibration cal = new Calibration();
-								cal.setUnit("micron");
-								cal.pixelWidth = mmc.getPixelSizeUm();
-								cal.pixelHeight = mmc.getPixelSizeUm();
-								cal.pixelDepth = fluoStep;
+								Calibration newFluoCalib = 
+										mfa.getSetOfCells().getBFImage().getCalibration();
+//								Calibration cal = new Calibration();
+//								cal.setUnit("micron");
+//								cal.pixelWidth = mmc.getPixelSizeUm();
+//								cal.pixelHeight = mmc.getPixelSizeUm();
+								newFluoCalib.pixelDepth = fluoStep;
 								//TODO
-								fluoImagePlus.setCalibration(cal);
+								fluoImagePlus.setCalibration(newFluoCalib);
 								String savingPath = rootDirName + fluoAcqName
 										+ "/" + frame + "/";
 								new File(savingPath).mkdirs();
@@ -673,7 +680,7 @@ public class MaarsAcquisitionMitosis {
 								if (frame == 0) {
 									lastImage = new ImagePlus("Maars_"
 											+ fluoAcqName, fluoImageStack);
-									lastImage.setCalibration(cal);
+									lastImage.setCalibration(newFluoCalib);
 								} else {
 									lastImage.setImage(fluoImagePlus);
 								}
