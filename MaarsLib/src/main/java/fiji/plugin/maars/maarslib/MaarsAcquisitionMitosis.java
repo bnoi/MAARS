@@ -361,26 +361,27 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("- fluo acquisition name : " + bfAcqName);
 		gui.openAcquisition(bfAcqName, rootDirName, frameNumber, 1,
 				segSliceNumber + 1, show, true);
-
+		int chlIndex = 0;
 		ReportingUtils.logMessage("... set acquisition parameters");
-		for (int channel = 0; channel < channels.length; channel++) {
-			if (channels[channel].equals("BF")) {
+		for (int i = 0; i < channels.length; i++) {
+			if (channels[i].equals("BF")) {
 				ReportingUtils.logMessage("... set BF channel name and color");
-				gui.setChannelColor(bfAcqName, 0, colors[channel]);
-				gui.setChannelName(bfAcqName, 0, channels[channel]);
+				gui.setChannelColor(bfAcqName, 0, colors[i]);
+				gui.setChannelName(bfAcqName, 0, channels[i]);
 			} else {
 				ReportingUtils.logMessage("... set fluo channel color");
 				try {
-					gui.setChannelColor(fluoAcqName, channel, colors[channel]);
+					gui.setChannelColor(fluoAcqName, chlIndex, colors[i]);
 				} catch (MMScriptException e) {
 					ReportingUtils.logError(e);
 				}
 				ReportingUtils.logMessage("... set fluo channel name");
 				try {
-					gui.setChannelName(fluoAcqName, channel, channels[channel]);
+					gui.setChannelName(fluoAcqName, chlIndex, channels[i]);
 				} catch (MMScriptException e) {
 					ReportingUtils.logError(e);
 				}
+				chlIndex++;
 			}
 
 		}
@@ -572,24 +573,8 @@ public class MaarsAcquisitionMitosis {
 								e.printStackTrace();
 							}
 							cBI.getRoiManager().close();
-							ImagePlus corrImg = IJ.openImage(savingPath
-									+ fileTitle + "_CorrelationImage.tif");
-							ImagePlus focusImg = IJ.openImage(savingPath
-									+ fileTitle + "_FocusImage.tif");
-							String pathToRois = savingPath + fileTitle
-									+ "_ROI.zip";
-							SetOfCells soc = new SetOfCells(focusImg, corrImg,
-									0, -1, pathToRois, savingPath);
-							soc.getROIManager().close();
-							Roi[] cellList = soc.getRoisAsArray();
-							for (int c = 0; c < cellList.length; c++) {
-								if (cellList[c].contains(
-										(int) mmc.getImageWidth() / 2,
-										(int) mmc.getImageHeight() / 2)) {
-									newCell = soc.getCell(c);
-								}
-							}
-							soc.getROIManager().close();
+							newCell = resetCurrentCell(newCell, fileTitle,
+									savingPath);
 
 							continue;
 						}
@@ -666,6 +651,7 @@ public class MaarsAcquisitionMitosis {
 								cal.pixelWidth = mmc.getPixelSizeUm();
 								cal.pixelHeight = mmc.getPixelSizeUm();
 								cal.pixelDepth = fluoStep;
+								//TODO
 								fluoImagePlus.setCalibration(cal);
 								String savingPath = rootDirName + fluoAcqName
 										+ "/" + frame + "/";
@@ -726,6 +712,35 @@ public class MaarsAcquisitionMitosis {
 			e.printStackTrace();
 		}
 
+	}
+
+	/**
+	 * @param newCell
+	 * @param fileTitle
+	 * @param savingPath
+	 * @return
+	 */
+	private Cell resetCurrentCell(Cell newCell, String fileTitle,
+			String savingPath) {
+		ImagePlus corrImg = IJ.openImage(savingPath
+				+ fileTitle + "_CorrelationImage.tif");
+		ImagePlus focusImg = IJ.openImage(savingPath
+				+ fileTitle + "_FocusImage.tif");
+		String pathToRois = savingPath + fileTitle
+				+ "_ROI.zip";
+		SetOfCells soc = new SetOfCells(focusImg, corrImg,
+				0, -1, pathToRois, savingPath);
+		soc.getROIManager().close();
+		Roi[] cellList = soc.getRoisAsArray();
+		for (int c = 0; c < cellList.length; c++) {
+			if (cellList[c].contains(
+					(int) mmc.getImageWidth() / 2,
+					(int) mmc.getImageHeight() / 2)) {
+				newCell = soc.getCell(c);
+			}
+		}
+		soc.getROIManager().close();
+		return newCell;
 	}
 
 	/**

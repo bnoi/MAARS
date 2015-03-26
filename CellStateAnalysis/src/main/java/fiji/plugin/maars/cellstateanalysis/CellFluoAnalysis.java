@@ -60,7 +60,8 @@ public class CellFluoAnalysis {
 
 		ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
-
+		//TODO
+		ReportingUtils.logMessage("bibibibi"+cal.pixelWidth);
 		Model model = new Model();
 
 		Settings settings = new Settings();

@@ -181,7 +181,8 @@ public class MaarsFluoAnalysis {
 	 * @return cell corresponding to search (-1 if none of the cell are
 	 *         corresponding to criteria)
 	 */
-	public Cell analyzeEntireField(ImagePlus fieldWideImage, String pathToResults) {
+	public Cell analyzeEntireField(ImagePlus fieldWideImage,
+			String pathToResults) {
 		int cellNumber = -1;
 		double smallerSp = 900000;
 		FileWriter spindleWriter = null;
@@ -243,7 +244,11 @@ public class MaarsFluoAnalysis {
 			ReportingUtils.logMessage("Could not close writer");
 			e.printStackTrace();
 		}
-		return soc.getCell(cellNumber);
+		if (cellNumber != -1) {
+			return soc.getCell(cellNumber);
+		}else{
+			return null;
+		}
 	}
 
 	/**
