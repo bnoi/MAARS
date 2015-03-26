@@ -563,7 +563,7 @@ public class MaarsAcquisitionMitosis {
 									bfImagePlus, sigma, -1, false, false,
 									false, false, false, false, false, true,
 									true, true, true, true, savingPath,
-									minParticleSize, maxParticleSize, zf,
+									minParticleSize, 9999, zf,
 									solidityThreshold, meanGrayValueThreshold,
 									true, false);
 							cBI.identifyCellesBoundaries();

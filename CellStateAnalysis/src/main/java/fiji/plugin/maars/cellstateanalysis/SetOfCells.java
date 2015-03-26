@@ -147,14 +147,13 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Get ROIs as array");
 		bfAnalysisOnly = true;
 		roiArray = getRoisAsArray();
-		ReportingUtils.logMessage(roiArray.toString());
 		cellArray = new Cell[roiArray.length];
 
 		// roiManager.runCommand("Delete");
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray[i] = new Cell(bfImage, correaltionImage, focusSlice,
-					direction, roiArray[i], i, rt);
+					direction, roiArray[i], i+1, rt);
 
 			// just for test
 			// roiManager.addRoi(cellArray[i].getLinearRoi());
