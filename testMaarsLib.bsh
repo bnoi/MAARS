@@ -120,7 +120,7 @@ if(md.isOkClicked()) {
 						+"_Y"+Math.round(explo.getY(i)));
 			mfa.getSetOfCells().closeRoiManager();
 			if(tragetCell != null){	
-				mmad.acquire(false, tragetCell, true, false);
+				mmad.acquire(false, tragetCell, true, true);
 			}																						
 		}
 		else {

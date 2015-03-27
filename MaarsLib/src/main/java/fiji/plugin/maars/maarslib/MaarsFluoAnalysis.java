@@ -209,12 +209,10 @@ public class MaarsFluoAnalysis {
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
 			try {
 				if (i != soc.length() - 1) {
-					spindleWriter.write(sp.toString(soc.getCell(i)
-							.getCellShapeRoi().getName())
+					spindleWriter.write(sp.toString(String.valueOf(soc.getCell(i).getCellNumber()))
 							+ "\n,");
 				} else {
-					spindleWriter.write(sp.toString(soc.getCell(i)
-							.getCellShapeRoi().getName())
+					spindleWriter.write(sp.toString(String.valueOf(soc.getCell(i).getCellNumber()))
 							+ "\n");
 				}
 
@@ -248,18 +246,6 @@ public class MaarsFluoAnalysis {
 		}else{
 			return null;
 		}
-//		if (cellNumber != -1) {
-//			for (int i = 0; i < soc.length(); i++) {
-//				if (soc.getCell(i).getCellShapeRoi().getName()
-//						.equals(String.valueOf(cellNumber))) {
-//					return soc.getCell(cellNumber);
-//				}else{
-//					return null;
-//				}
-//			}
-//		} else {
-//			return null;
-//		}
 	}
 
 	/**

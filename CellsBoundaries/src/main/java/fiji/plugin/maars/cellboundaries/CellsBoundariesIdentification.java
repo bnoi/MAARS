@@ -90,7 +90,7 @@ public class CellsBoundariesIdentification {
 			try {
 				PrintStream ps = new PrintStream(savingPath
 						+ imageToAnalyze.getShortTitle()
-						+ "BoundariesIdentification.LOG");
+						+ "_BoundariesIdentification.LOG");
 				System.setOut(ps);
 				System.setErr(ps);
 			} catch (FileNotFoundException e) {
