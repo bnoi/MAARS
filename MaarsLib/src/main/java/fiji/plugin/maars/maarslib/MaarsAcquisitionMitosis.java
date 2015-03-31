@@ -423,22 +423,22 @@ public class MaarsAcquisitionMitosis {
 								.logMessage("set up everything to acquire with channel "
 										+ channels[channel]);
 
-						ReportingUtils.logMessage("... Set shutter device");
-						try {
-							mmc.setShutterDevice(shutters[channel]);
-						} catch (Exception e1) {
-							ReportingUtils
-									.logMessage("Could not set shutter device");
-							e1.printStackTrace();
-						}
-
-						ReportingUtils.logMessage("... Set exposure");
-						try {
-							mmc.setExposure(exposures[channel]);
-						} catch (Exception e1) {
-							ReportingUtils.logMessage("could not set exposure");
-							e1.printStackTrace();
-						}
+//						ReportingUtils.logMessage("... Set shutter device");
+//						try {
+//							mmc.setShutterDevice(shutters[channel]);
+//						} catch (Exception e1) {
+//							ReportingUtils
+//									.logMessage("Could not set shutter device");
+//							e1.printStackTrace();
+//						}
+//
+//						ReportingUtils.logMessage("... Set exposure");
+//						try {
+//							mmc.setExposure(exposures[channel]);
+//						} catch (Exception e1) {
+//							ReportingUtils.logMessage("could not set exposure");
+//							e1.printStackTrace();
+//						}
 
 						ReportingUtils.logMessage("... set config");
 						try {
@@ -464,7 +464,11 @@ public class MaarsAcquisitionMitosis {
 							ReportingUtils.logMessage("could not open shutter");
 							e1.printStackTrace();
 						}
-
+						try {
+							mmc.waitForSystem();
+						} catch (Exception e3) {
+							ReportingUtils.logError(e3);
+						}
 						ReportingUtils.logMessage("... get z current position");
 
 						try {
@@ -482,17 +486,10 @@ public class MaarsAcquisitionMitosis {
 						// and keep this channel index into channelToSkip
 						// and reset channel to 0
 						if (channels[channel].equals("BF")) {
-							double segZ = zFocus - (segRange / 2);
+							double segZ = zFocus - (segRange / 2)+1;
 							ImageStack bfImageStack = new ImageStack(
 									(int) mmc.getImageWidth(),
 									(int) mmc.getImageHeight());
-							try {
-								gui.sleep(3000);
-							} catch (MMScriptException e1) {
-								ReportingUtils.logMessage("could not sleep "
-										+ 3000 + "s");
-								e1.printStackTrace();
-							}
 							for (int k = 0; k <= segSliceNumber; k++) {
 								ReportingUtils
 										.logMessage("- set focus device at position "
@@ -587,7 +584,7 @@ public class MaarsAcquisitionMitosis {
 									(int) mmc.getImageWidth(),
 									(int) mmc.getImageHeight());
 							//TODO focus level is a shit
-							double fluoZ = zFocus - (fluoRange / 2) + 1;
+							double fluoZ = zFocus - (fluoRange / 2) + 1.5;
 							for (int k = 0; k <= sliceNumber; k++) {
 								ReportingUtils
 										.logMessage("- set focus device at position "
@@ -679,23 +676,23 @@ public class MaarsAcquisitionMitosis {
 								}
 								// TODO
 								if (keepFilming) {
-									try {
-										mmc.setShutterDevice(shutters[channelToSkip]);
-									} catch (Exception e1) {
-										ReportingUtils
-												.logMessage("Could not set shutter device");
-										e1.printStackTrace();
-									}
-
-									ReportingUtils
-											.logMessage("... Set exposure");
-									try {
-										mmc.setExposure(exposures[channelToSkip]);
-									} catch (Exception e1) {
-										ReportingUtils
-												.logMessage("could not set exposure");
-										e1.printStackTrace();
-									}
+//									try {
+//										mmc.setShutterDevice(shutters[channelToSkip]);
+//									} catch (Exception e1) {
+//										ReportingUtils
+//												.logMessage("Could not set shutter device");
+//										e1.printStackTrace();
+//									}
+//
+//									ReportingUtils
+//											.logMessage("... Set exposure");
+//									try {
+//										mmc.setExposure(exposures[channelToSkip]);
+//									} catch (Exception e1) {
+//										ReportingUtils
+//												.logMessage("could not set exposure");
+//										e1.printStackTrace();
+//									}
 
 									ReportingUtils.logMessage("... set config");
 									try {
