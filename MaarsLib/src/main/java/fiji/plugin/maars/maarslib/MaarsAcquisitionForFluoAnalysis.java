@@ -1,11 +1,15 @@
 package fiji.plugin.maars.maarslib;
 
 import java.awt.Color;
+
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
+
 import org.micromanager.MMStudio;
+import org.micromanager.acquisition.MMAcquisition;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
+
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -312,21 +316,28 @@ public class MaarsAcquisitionForFluoAnalysis {
 						.logMessage("could not set focus device at position");
 				ReportingUtils.logError(e);
 			}
-			ReportingUtils.logMessage("- SnapImage");
-			try {
-				mmc.snapImage();
-			} catch (Exception e) {
-				ReportingUtils.logMessage("could not snape image");
-				ReportingUtils.logError(e);
-			}
+			gui.snapAndAddImage(acqName, 0, 0, k, 0);
+			MMAcquisition acq = gui
+					.getAcquisitionWithName(acqName);
 
-			TaggedImage img = null;
-			try {
-				img = mmc.getTaggedImage();
-			} catch (Exception e) {
-				ReportingUtils.logMessage("could not get tagged image");
-				ReportingUtils.logError(e);
-			}
+			TaggedImage img = acq.getImageCache().getImage(
+					0, k, 0, 0);
+
+//			ReportingUtils.logMessage("- SnapImage");
+//			try {
+//				mmc.snapImage();
+//			} catch (Exception e) {
+//				ReportingUtils.logMessage("could not snape image");
+//				ReportingUtils.logError(e);
+//			}
+//
+//			TaggedImage img = null;
+//			try {
+//				img = mmc.getTaggedImage();
+//			} catch (Exception e) {
+//				ReportingUtils.logMessage("could not get tagged image");
+//				ReportingUtils.logError(e);
+//			}
 			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());

@@ -157,17 +157,18 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
+			mmc.waitForSystem();
 		} catch (Exception e1) {
 			ReportingUtils.logMessage("could not open shutter");
 			e1.printStackTrace();
 		}
 		// wait a few second to be sure the lamp is well set
-		try {
-			gui.sleep(3000);
-		} catch (MMScriptException e1) {
-			ReportingUtils.logMessage("could not sleep " + 3000 + "s");
-			e1.printStackTrace();
-		}
+//		try {
+//			gui.sleep(3000);
+//		} catch (MMScriptException e1) {
+//			ReportingUtils.logMessage("could not sleep " + 3000 + "s");
+//			e1.printStackTrace();
+//		}
 		ReportingUtils.logMessage("... get z current position");
 		double zFocus = 0;
 		try {
