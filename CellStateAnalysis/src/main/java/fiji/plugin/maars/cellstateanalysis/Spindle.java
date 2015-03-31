@@ -24,7 +24,6 @@ public class Spindle {
 	private double length;
 	private double lengthToMajorAxis;
 	private double angleToMajorAxis;
-	private double angleToHorizontal;
 	private double[] XYCenterAbsolutePositionToMajorMinorAxis;
 	private double[] XYCenterRelativePositionToMajorMinorAxis;
 	private String feature;
@@ -59,7 +58,6 @@ public class Spindle {
 			length = 0;
 			lengthToMajorAxis = 0;
 			angleToMajorAxis = 0;
-			angleToHorizontal = 0;
 			XYCenterAbsolutePositionToMajorMinorAxis = null;
 			XYCenterRelativePositionToMajorMinorAxis = null;
 			coordSPB = null;
@@ -70,7 +68,6 @@ public class Spindle {
 				length = 0;
 				lengthToMajorAxis = 0;
 				angleToMajorAxis = 0;
-				angleToHorizontal = 0;
 				XYCenterAbsolutePositionToMajorMinorAxis = null;
 				XYCenterRelativePositionToMajorMinorAxis = null;
 				coordSPB = null;

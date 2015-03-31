@@ -8,15 +8,9 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
-import ij.io.FileSaver;
 import ij.measure.Calibration;
-import ij.measure.Measurements;
-import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.frame.RoiManager;
 import ij.process.ShortProcessor;
-
 import java.awt.Color;
 import java.io.File;
 import java.io.FileWriter;
