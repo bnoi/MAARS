@@ -1,14 +1,16 @@
 package fiji.plugin.maars.maarslib;
 
+import fiji.plugin.maars.cellboundaries.CellsBoundariesIdentification;
 import fiji.plugin.maars.cellstateanalysis.Cell;
+import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
 import ij.process.ShortProcessor;
-
 import java.awt.Color;
 import java.io.File;
 import java.io.FileWriter;
@@ -162,6 +164,9 @@ public class MaarsAcquisitionMitosis {
 		String fluoAcqName = "movie_X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
 				+ cell.getCellShapeRoi().getName() + "_Fluo";
+		String bfAcqName = "movie_X" + Math.round(positionX) + "_Y"
+				+ Math.round(positionY) + "_"
+				+ cell.getCellShapeRoi().getName() + "_BF";
 		ReportingUtils.logMessage("Close all previous acquisitions");
 		gui.closeAllAcquisitions();
 
@@ -264,6 +269,34 @@ public class MaarsAcquisitionMitosis {
 				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
 		ReportingUtils.logMessage("- step : " + fluoStep);
 
+		double segRange = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
+				.getAsDouble();
+		ReportingUtils.logMessage("- range size : " + segRange);
+		double segStep = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
+		ReportingUtils.logMessage("- step : " + segStep);
+		int segSliceNumber = (int) Math.round(segRange / segStep);
+		ReportingUtils.logMessage("- resegmentation slice number : "
+				+ segSliceNumber);
+
+		double typicalCellSize = this.parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE)
+				.getAsDouble();
+		int sigma = convertMicronToPixelSize(typicalCellSize, segStep);
+		double solidityThreshold = this.parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SOLIDITY)
+				.getAsDouble();
+		double meanGrayValueThreshold = this.parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE)
+				.getAsDouble();
+
 		int sliceNumber = (int) Math.round(fluoRange / fluoStep);
 		ReportingUtils.logMessage("- fluo slice number : " + sliceNumber);
 
@@ -318,179 +351,377 @@ public class MaarsAcquisitionMitosis {
 
 		ReportingUtils.logMessage("- fluo acquisition name : " + fluoAcqName);
 		gui.openAcquisition(fluoAcqName, rootDirName, frameNumber,
-				channelArray.size(), sliceNumber + 1, show, true);
+				channelArray.size() - 1, sliceNumber + 1, show, true);
 		gui.setImageSavingFormat(org.micromanager.acquisition.TaggedImageStorageMultipageTiff.class);
-
+		ReportingUtils.logMessage("- fluo acquisition name : " + bfAcqName);
+		gui.openAcquisition(bfAcqName, rootDirName, frameNumber, 1,
+				segSliceNumber + 1, show, true);
+		int chlIndex = 0;
 		ReportingUtils.logMessage("... set acquisition parameters");
 		for (int i = 0; i < channels.length; i++) {
-
-			ReportingUtils.logMessage("... set fluo channel color");
-			try {
-				gui.setChannelColor(fluoAcqName, i, colors[i]);
-			} catch (MMScriptException e) {
-				ReportingUtils.logError(e);
-			}
-			ReportingUtils.logMessage("... set fluo channel name");
-			try {
-				gui.setChannelName(fluoAcqName, i, channels[i]);
-			} catch (MMScriptException e) {
-				ReportingUtils.logError(e);
-
+			if (channels[i].equals("BF")) {
+				ReportingUtils.logMessage("... set BF channel name and color");
+				gui.setChannelColor(bfAcqName, 0, colors[i]);
+				gui.setChannelName(bfAcqName, 0, channels[i]);
+			} else {
+				ReportingUtils.logMessage("... set fluo channel color");
+				try {
+					gui.setChannelColor(fluoAcqName, chlIndex, colors[i]);
+				} catch (MMScriptException e) {
+					ReportingUtils.logError(e);
+				}
+				ReportingUtils.logMessage("... set fluo channel name");
+				try {
+					gui.setChannelName(fluoAcqName, chlIndex, channels[i]);
+				} catch (MMScriptException e) {
+					ReportingUtils.logError(e);
+				}
+				chlIndex++;
 			}
 
 		}
 		double zFocus = 0;
 		ImagePlus lastImage = null;
-
+		Autofocus autofocus = gui.getAutofocus();
 		double startTime = System.currentTimeMillis();
 		int frame = 0;
-		Autofocus autofocus = gui.getAutofocus();
+		Cell newCell = null;
 		ReportingUtils.logMessage("start time : " + startTime);
 		while (keepFilming) {
 			double beginAcq = System.currentTimeMillis();
-
-			for (int channel = 0; channel < channels.length; channel++) {
-				ReportingUtils.logMessage("... set config");
-				try {
-					mmc.setConfig(channelGroup, channels[channel]);
-				} catch (Exception e1) {
-					ReportingUtils.logMessage("Could not set config");
-					e1.printStackTrace();
+			int channelForFluo = 0;
+			boolean startFLuo = false;
+			boolean runChannels = true;
+			int channel = 0;
+			int channelToSkip = -1;
+			while (runChannels) {
+				// test if the BF had already been filmed, if so skip this
+				// channle
+				// and pass to next
+				if (channel >= channels.length) {
+					runChannels = false;
+					continue;
 				}
-
-				ReportingUtils.logMessage("... wait for config");
-				try {
-					mmc.waitForConfig(channelGroup, channels[channel]);
-				} catch (Exception e1) {
-					ReportingUtils.logMessage("Could not wait for config");
-					e1.printStackTrace();
-				}
-
-				ReportingUtils.logMessage("... set shutter open");
-				try {
-					mmc.setShutterOpen(true);
-				} catch (Exception e1) {
-					ReportingUtils.logMessage("could not open shutter");
-					e1.printStackTrace();
-				}
-				try {
-					mmc.waitForSystem();
-				} catch (Exception e3) {
-					ReportingUtils.logError(e3);
-				}
-				ReportingUtils.logMessage("... get z current position");
-
-				try {
-					zFocus = mmc.getPosition(mmc.getFocusDevice());
-				} catch (Exception e) {
-					ReportingUtils
-							.logMessage("could not get z current position");
-					e.printStackTrace();
-				}
-				ReportingUtils.logMessage("-> z focus is " + zFocus);
-
-				ReportingUtils.logMessage("... start acquisition");
-				ImageStack fluoImageStack = new ImageStack(
-						(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-				double fluoZ = zFocus - (fluoRange / 2) + 1;
-				for (int k = 0; k <= sliceNumber; k++) {
-					ReportingUtils.logMessage("- set focus device at position "
-							+ fluoZ);
-					try {
-						mmc.setPosition(mmc.getFocusDevice(), fluoZ);
-						mmc.waitForDevice(mmc.getFocusDevice());
-					} catch (Exception e) {
-						ReportingUtils
-								.logMessage("could not set focus device at position");
-						e.printStackTrace();
-					}
-					gui.snapAndAddImage(fluoAcqName, frame, channel, k, 0);
-
-					if (channels[channel].equals(parameters
-							.getParametersAsJsonObject()
-							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-							.getAsJsonObject().get(AllMaarsParameters.CHANNEL)
-							.getAsString())) {
-						MMAcquisition acq = gui
-								.getAcquisitionWithName(fluoAcqName);
-						TaggedImage img = acq.getImageCache().getImage(channel,
-								k, frame, 0);
-						ShortProcessor shortProcessor = new ShortProcessor(
-								(int) mmc.getImageWidth(),
-								(int) mmc.getImageHeight());
-						shortProcessor.setPixels(img.pix);
-
-						fluoImageStack.addSlice(shortProcessor);
-					}
-
-					fluoZ = fluoZ + fluoStep;
-
-				}
-
-				try {
-					mmc.setPosition(mmc.getFocusDevice(), zFocus);
-					mmc.waitForDevice(mmc.getFocusDevice());
-					mmc.setShutterOpen(false);
-					mmc.waitForDevice(mmc.getShutterDevice());
-				} catch (Exception e) {
-					ReportingUtils
-							.logMessage("could not set focus device back to position and close shutter");
-					e.printStackTrace();
-				}
-
-				if (channels[channel].equals(parameters
-						.getParametersAsJsonObject()
-						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.CHANNEL)
-						.getAsString())) {
-					ReportingUtils.logMessage("... set config");
-					ImagePlus fluoImagePlus = new ImagePlus("Maars_"
-							+ fluoAcqName, fluoImageStack);
-					Calibration cal = new Calibration();
-					cal.setUnit("micron");
-					cal.pixelWidth = mmc.getPixelSizeUm();
-					cal.pixelHeight = mmc.getPixelSizeUm();
-					cal.pixelDepth = fluoStep;
-					fluoImagePlus.setCalibration(cal);
-					cell.addFluoImage(fluoImagePlus);
-					cell.findFluoSpotTempFunction(
-							false,
-							parameters
-									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-									.getAsJsonObject()
-									.get(AllMaarsParameters.SPOT_RADIUS)
-									.getAsDouble());
-					String savingPath = rootDirName + fluoAcqName + "/" + frame
-							+ "_";
-					writeSpinldeCoord(cell, savingPath);
-					keepFilming = checkEndMovieConditions(lastImage,
-							fluoImagePlus, startTime, cell, frame);
-					if (frame == 0) {
-						lastImage = new ImagePlus("Maars_" + fluoAcqName,
-								fluoImageStack);
-						lastImage.setCalibration(cal);
+				if (channel == channelToSkip) {
+					channel++;
+					continue;
+				} else {
+					// if current channel is not BF and BF not been filmed, pass
+					// to next
+					if (!channels[channel].equals("BF") && !startFLuo) {
+						channel++;
+						continue;
 					} else {
-						lastImage.setImage(fluoImagePlus);
-					}
-					try {
-						mmc.setConfig(channelGroup, "BF");
-					} catch (Exception e1) {
-						ReportingUtils.logMessage("Could not set config");
-						e1.printStackTrace();
-					}
+						// no matter BF or fluo we set params for acquisition
+						ReportingUtils
+								.logMessage("set up everything to acquire with channel "
+										+ channels[channel]);
 
-					ReportingUtils.logMessage("... wait for config");
-					try {
-						mmc.waitForConfig(channelGroup, "BF");
-					} catch (Exception e1) {
-						ReportingUtils.logMessage("Could not wait for config");
-						e1.printStackTrace();
-					}
-					try {
-						autofocus.fullFocus();
-					} catch (MMException e2) {
-						ReportingUtils.logError(e2);
+//						ReportingUtils.logMessage("... Set shutter device");
+//						try {
+//							mmc.setShutterDevice(shutters[channel]);
+//						} catch (Exception e1) {
+//							ReportingUtils
+//									.logMessage("Could not set shutter device");
+//							e1.printStackTrace();
+//						}
+//
+//						ReportingUtils.logMessage("... Set exposure");
+//						try {
+//							mmc.setExposure(exposures[channel]);
+//						} catch (Exception e1) {
+//							ReportingUtils.logMessage("could not set exposure");
+//							e1.printStackTrace();
+//						}
+
+						ReportingUtils.logMessage("... set config");
+						try {
+							mmc.setConfig(channelGroup, channels[channel]);
+						} catch (Exception e1) {
+							ReportingUtils.logMessage("Could not set config");
+							e1.printStackTrace();
+						}
+
+						ReportingUtils.logMessage("... wait for config");
+						try {
+							mmc.waitForConfig(channelGroup, channels[channel]);
+						} catch (Exception e1) {
+							ReportingUtils
+									.logMessage("Could not wait for config");
+							e1.printStackTrace();
+						}
+
+						ReportingUtils.logMessage("... set shutter open");
+						try {
+							mmc.setShutterOpen(true);
+						} catch (Exception e1) {
+							ReportingUtils.logMessage("could not open shutter");
+							e1.printStackTrace();
+						}
+						try {
+							mmc.waitForSystem();
+						} catch (Exception e3) {
+							ReportingUtils.logError(e3);
+						}
+						ReportingUtils.logMessage("... get z current position");
+
+						try {
+							zFocus = mmc.getPosition(mmc.getFocusDevice());
+						} catch (Exception e) {
+							ReportingUtils
+									.logMessage("could not get z current position");
+							e.printStackTrace();
+						}
+						ReportingUtils.logMessage("-> z focus is " + zFocus);
+
+						ReportingUtils.logMessage("... start acquisition");
+						// if current channel is BF go film and tell program to
+						// start fluo acquisition
+						// and keep this channel index into channelToSkip
+						// and reset channel to 0
+						if (channels[channel].equals("BF")) {
+							double segZ = zFocus - (segRange / 2)+1;
+							ImageStack bfImageStack = new ImageStack(
+									(int) mmc.getImageWidth(),
+									(int) mmc.getImageHeight());
+							for (int k = 0; k <= segSliceNumber; k++) {
+								ReportingUtils
+										.logMessage("- set focus device at position "
+												+ segZ);
+								try {
+									mmc.setPosition(mmc.getFocusDevice(), segZ);
+									mmc.waitForDevice(mmc.getFocusDevice());
+								} catch (Exception e) {
+									ReportingUtils
+											.logMessage("could not set focus device at position");
+									e.printStackTrace();
+								}
+								gui.snapAndAddImage(bfAcqName, frame, 0, k, 0);
+
+								MMAcquisition acq = gui
+										.getAcquisitionWithName(bfAcqName);
+
+								TaggedImage img = acq.getImageCache().getImage(
+										0, k, frame, 0);
+
+								ShortProcessor shortProcessor = new ShortProcessor(
+										(int) mmc.getImageWidth(),
+										(int) mmc.getImageHeight());
+								shortProcessor.setPixels(img.pix);
+
+								bfImageStack.addSlice(shortProcessor);
+
+								segZ = segZ + segStep;
+
+							}
+							startFLuo = true;
+							channelToSkip = channel;
+							channel = 0;
+							String fileTitle = "Maars_" + bfAcqName;
+							ImagePlus bfImagePlus = new ImagePlus(fileTitle,
+									bfImageStack);
+							Calibration cal = new Calibration();
+							cal.setUnit("micron");
+							cal.pixelWidth = mmc.getPixelSizeUm();
+							cal.pixelHeight = mmc.getPixelSizeUm();
+							cal.pixelDepth = segStep;
+							bfImagePlus.setCalibration(cal);
+							float zf = (bfImagePlus.getNSlices() / 2);
+
+							double minParticleSize = (int) Math
+									.round(parameters
+											.getParametersAsJsonObject()
+											.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+											.getAsJsonObject()
+											.get(AllMaarsParameters.MINIMUM_CELL_AREA)
+											.getAsDouble()
+											/ cal.pixelWidth);
+							double maxParticleSize = (int) Math
+									.round(parameters
+											.getParametersAsJsonObject()
+											.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+											.getAsJsonObject()
+											.get(AllMaarsParameters.MAXIMUM_CELL_AREA)
+											.getAsDouble()
+											/ cal.pixelWidth);
+							String savingPath = rootDirName + bfAcqName + "/"
+									+ frame + "/";
+							new File(savingPath).mkdirs();
+							CellsBoundariesIdentification cBI = new CellsBoundariesIdentification(
+									bfImagePlus, sigma, -1, false, true, true,
+									false, false, false, false, true, true,
+									true, true, true, savingPath,
+									minParticleSize * 1.7,
+									maxParticleSize * 1.7, zf,
+									solidityThreshold, meanGrayValueThreshold,
+									true, false);
+							cBI.identifyCellesBoundaries();
+							try {
+								mmc.setPosition(mmc.getFocusDevice(), zFocus);
+								mmc.waitForDevice(mmc.getFocusDevice());
+								mmc.setShutterOpen(false);
+								mmc.waitForDevice(mmc.getShutterDevice());
+							} catch (Exception e) {
+								ReportingUtils
+										.logMessage("could not set focus device back to position and close shutter");
+								e.printStackTrace();
+							}
+							cBI.getRoiManager().close();
+							newCell = resetCurrentCell(newCell, fileTitle,
+									savingPath);
+							continue;
+						}
+						// if current channel is not BF and startFluo is true,
+						// go film fluo films.
+						if (startFLuo) {
+							ImageStack fluoImageStack = new ImageStack(
+									(int) mmc.getImageWidth(),
+									(int) mmc.getImageHeight());
+							//TODO focus level is a shit
+							double fluoZ = zFocus - (fluoRange / 2) + 1.5;
+							for (int k = 0; k <= sliceNumber; k++) {
+								ReportingUtils
+										.logMessage("- set focus device at position "
+												+ fluoZ);
+								try {
+									mmc.setPosition(mmc.getFocusDevice(), fluoZ);
+									mmc.waitForDevice(mmc.getFocusDevice());
+								} catch (Exception e) {
+									ReportingUtils
+											.logMessage("could not set focus device at position");
+									e.printStackTrace();
+								}
+								gui.snapAndAddImage(fluoAcqName, frame,
+										channelForFluo, k, 0);
+								MMAcquisition acq = gui
+										.getAcquisitionWithName(fluoAcqName);
+								TaggedImage img = acq.getImageCache().getImage(
+										channelForFluo, k, frame, 0);
+
+								if (channels[channel]
+										.equals(parameters
+												.getParametersAsJsonObject()
+												.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+												.getAsJsonObject()
+												.get(AllMaarsParameters.CHANNEL)
+												.getAsString())) {
+
+									ShortProcessor shortProcessor = new ShortProcessor(
+											(int) mmc.getImageWidth(),
+											(int) mmc.getImageHeight());
+									shortProcessor.setPixels(img.pix);
+
+									fluoImageStack.addSlice(shortProcessor);
+								}
+
+								fluoZ = fluoZ + fluoStep;
+
+							}
+
+							try {
+								mmc.setPosition(mmc.getFocusDevice(), zFocus);
+								mmc.waitForDevice(mmc.getFocusDevice());
+								mmc.setShutterOpen(false);
+								mmc.waitForDevice(mmc.getShutterDevice());
+							} catch (Exception e) {
+								ReportingUtils
+										.logMessage("could not set focus device back to position and close shutter");
+								e.printStackTrace();
+							}
+
+							if (channels[channel]
+									.equals(parameters
+											.getParametersAsJsonObject()
+											.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+											.getAsJsonObject()
+											.get(AllMaarsParameters.CHANNEL)
+											.getAsString())) {
+								ImagePlus fluoImagePlus = new ImagePlus(
+										"Maars_" + fluoAcqName, fluoImageStack);
+								Calibration cal = new Calibration();
+								cal.setUnit("micron");
+								cal.pixelWidth = mmc.getPixelSizeUm();
+								cal.pixelHeight = mmc.getPixelSizeUm();
+								cal.pixelDepth = fluoStep;
+								fluoImagePlus.setCalibration(cal);
+								String savingPath = rootDirName + fluoAcqName
+										+ "/" + frame + "/";
+								new File(savingPath).mkdirs();
+								newCell.addFluoImage(fluoImagePlus);
+								newCell.findFluoSpotTempFunction(
+										false,
+										parameters
+												.getParametersAsJsonObject()
+												.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+												.getAsJsonObject()
+												.get(AllMaarsParameters.SPOT_RADIUS)
+												.getAsDouble());
+								writeSpinldeCoord(fluoImagePlus, newCell,
+										savingPath + fluoAcqName);
+								keepFilming = checkEndMovieConditions(
+										lastImage, fluoImagePlus, startTime,
+										newCell, frame);
+								if (frame == 0) {
+									lastImage = new ImagePlus("Maars_"
+											+ fluoAcqName, fluoImageStack);
+									lastImage.setCalibration(cal);
+								} else {
+									lastImage.setImage(fluoImagePlus);
+								}
+								// TODO
+								if (keepFilming) {
+//									try {
+//										mmc.setShutterDevice(shutters[channelToSkip]);
+//									} catch (Exception e1) {
+//										ReportingUtils
+//												.logMessage("Could not set shutter device");
+//										e1.printStackTrace();
+//									}
+//
+//									ReportingUtils
+//											.logMessage("... Set exposure");
+//									try {
+//										mmc.setExposure(exposures[channelToSkip]);
+//									} catch (Exception e1) {
+//										ReportingUtils
+//												.logMessage("could not set exposure");
+//										e1.printStackTrace();
+//									}
+
+									ReportingUtils.logMessage("... set config");
+									try {
+										mmc.setConfig(channelGroup,
+												channels[channelToSkip]);
+									} catch (Exception e1) {
+										ReportingUtils
+												.logMessage("Could not set config");
+										e1.printStackTrace();
+									}
+
+									ReportingUtils
+											.logMessage("... wait for config");
+									try {
+										mmc.waitForConfig(channelGroup,
+												channels[channelToSkip]);
+									} catch (Exception e1) {
+										ReportingUtils
+												.logMessage("Could not wait for config");
+										e1.printStackTrace();
+									}
+									try {
+										autofocus.fullFocus();
+									} catch (MMException e2) {
+										// TODO Auto-generated catch block
+										e2.printStackTrace();
+									}
+								}
+							}
+							channelForFluo++;
+							if (channel == channels.length - 1) {
+								runChannels = false;
+							}
+							channel++;
+						}
 					}
 				}
 			}
@@ -504,6 +735,7 @@ public class MaarsAcquisitionMitosis {
 				e.printStackTrace();
 			}
 			frame++;
+			channelForFluo = 0;
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
@@ -518,6 +750,33 @@ public class MaarsAcquisitionMitosis {
 			e.printStackTrace();
 		}
 
+	}
+
+	/**
+	 * @param newCell
+	 * @param fileTitle
+	 * @param savingPath
+	 * @return
+	 */
+	private Cell resetCurrentCell(Cell newCell, String fileTitle,
+			String savingPath) {
+		ImagePlus corrImg = IJ.openImage(savingPath + fileTitle
+				+ "_CorrelationImage.tif");
+		ImagePlus focusImg = IJ.openImage(savingPath + fileTitle
+				+ "_FocusImage.tif");
+		String pathToRois = savingPath + fileTitle + "_ROI.zip";
+		SetOfCells soc = new SetOfCells(focusImg, corrImg, 0, -1, pathToRois,
+				savingPath);
+		soc.getROIManager().close();
+		Roi[] cellList = soc.getRoisAsArray();
+		for (int c = 0; c < cellList.length; c++) {
+			if (cellList[c].contains((int) mmc.getImageWidth() / 2,
+					(int) mmc.getImageHeight() / 2)) {
+				newCell = soc.getCell(c);
+			}
+		}
+		soc.getROIManager().close();
+		return newCell;
 	}
 
 	/**
@@ -682,7 +941,8 @@ public class MaarsAcquisitionMitosis {
 		return pixelSize;
 	}
 
-	public void writeSpinldeCoord(Cell cell, String pathToWrite) {
+	public void writeSpinldeCoord(ImagePlus mitosisImg, Cell cell,
+			String pathToWrite) {
 		FileWriter spindleWriter = null;
 		try {
 			spindleWriter = new FileWriter(pathToWrite + "_spindleAnalysis.txt");
@@ -691,10 +951,15 @@ public class MaarsAcquisitionMitosis {
 					+ "_spindleAnalysis.csv");
 			e.printStackTrace();
 		}
+		Spindle sp = cell.findFluoSpotTempFunction(
+				true,
+				parameters.getParametersAsJsonObject()
+						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.SPOT_RADIUS)
+						.getAsDouble());
 		try {
 			spindleWriter.write("["
-					+ cell.getLastSpindleComputed().toString(
-							cell.getCellShapeRoi().getName()) + "]");
+					+ sp.toString(cell.getCellShapeRoi().getName()) + "]");
 		} catch (IOException e1) {
 			ReportingUtils.logError(e1);
 		}

@@ -109,7 +109,7 @@ if(md.isOkClicked()) {
 				.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
 				.getAsBoolean()) {
 			
-			String acqNameFluo = mas.getPathToMovie()+"/movie_X"
+			String acqNameFluo = "/movie_X"
 				+Math.round(explo.getX(i))
 				+"_Y"+Math.round(explo.getY(i))
 				+"_FLUO";

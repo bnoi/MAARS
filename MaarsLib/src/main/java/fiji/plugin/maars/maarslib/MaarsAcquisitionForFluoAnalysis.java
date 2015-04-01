@@ -263,7 +263,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logError(e1);
 		}
 		try {
-			gui.openAcquisition(acqName, rootDirName, frameNumber, 0 , sliceNumber,show,save);
+			gui.openAcquisition(acqName, rootDirName, frameNumber, 1 , sliceNumber,show,save);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
