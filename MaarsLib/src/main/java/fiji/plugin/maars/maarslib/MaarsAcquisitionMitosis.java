@@ -335,9 +335,7 @@ public class MaarsAcquisitionMitosis {
 				gui.setChannelName(fluoAcqName, i, channels[i]);
 			} catch (MMScriptException e) {
 				ReportingUtils.logError(e);
-
 			}
-
 		}
 		double zFocus = 0;
 		ImagePlus lastImage = null;

@@ -102,7 +102,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		}
 
 		String acqName = "movie_X" + Math.round(positionX) + "_Y"
-				+ Math.round(positionY) + "_FLUO"
+				+ Math.round(positionY) + "_FLUO_"
 				+ soc.getCell(cellNumber).getCellShapeRoi().getName();
 
 		double wtest = mmc.getImageWidth();

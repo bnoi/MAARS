@@ -102,13 +102,14 @@ if(md.isOkClicked()) {
 														explo.getX(i),
 														explo.getY(i),
 														mfa.getSetOfCells());
+
 		if(param
 				.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
 				.getAsBoolean()) {
-			
+					
 			String acqNameFluo = "/movie_X"
 				+Math.round(explo.getX(i))
 				+"_Y"+Math.round(explo.getY(i))
@@ -124,19 +125,37 @@ if(md.isOkClicked()) {
 			}																						
 		}
 		else {
-			int j = 0;
-			boolean mitosis = false;
-			//j will equal to cellNumber so we can keep this loop, or maybe iterat loop.
-			while(j <  mfa.getSetOfCells().length() && !mitosis) {
-				ImagePlus fluoImage = mafa.acquire(false, j);
-				fluoImage.show();
-				if (mfa.checkStartConditions(mfa.getSpindle(fluoImage, mfa.getSetOfCells().getCell(j)))) {
-					gui.message("mitosis");
-					mmad.acquire(true, mfa.getSetOfCells().getCell(j), false,true); //don't crop image because it is already cropped
-					mitosis = true;
-				}
-				j++;
+			int timeInterval = param.getParametersAsJsonObject()
+					.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+					.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
+					.getAsInt();
+			double startTime = System.currentTimeMillis();
+			int frame = 0;
+			while (System.currentTimeMillis() - startTime <= 1800000){
+				double beginAcq = System.currentTimeMillis();
+				String acqNameFluo = "/movie_X"
+											+Math.round(explo.getX(i))
+											+"_Y"+Math.round(explo.getY(i))
+											+"_FLUO/" + frame;
+				ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
+				mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()
+															+acqNameFluo);
+				double acqTook = System.currentTimeMillis() - beginAcq;
+				gui.sleep((long) (timeInterval - acqTook));
+				frame++;
 			}
+//			int j = 0;
+//			boolean mitosis = false;
+//			j will equal to cellNumber so we can keep this loop, or maybe iterat loop.
+//			while(j <  mfa.getSetOfCells().length() && !mitosis) {
+//				ImagePlus fluoImage = mafa.acquire(false, j);
+//				if (mfa.checkStartConditions(mfa.getSpindle(fluoImage, mfa.getSetOfCells().getCell(j)))) {
+//					gui.message("mitosis");
+//					mmad.acquire(true, mfa.getSetOfCells().getCell(j), false,true); //don't crop image because it is already cropped
+//					mitosis = true;
+//				}
+//				j++;
+//			}
 		}
 		// close roi manager
 		mfa.getSetOfCells().closeRoiManager();
