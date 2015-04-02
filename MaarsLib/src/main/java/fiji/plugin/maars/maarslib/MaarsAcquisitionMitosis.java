@@ -390,7 +390,8 @@ public class MaarsAcquisitionMitosis {
 				ReportingUtils.logMessage("... start acquisition");
 				ImageStack fluoImageStack = new ImageStack(
 						(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-				double fluoZ = zFocus - (fluoRange / 2) + 1;
+				//TODO
+				double fluoZ = zFocus - (fluoRange / 2) + 2;
 				for (int k = 0; k <= sliceNumber; k++) {
 					ReportingUtils.logMessage("- set focus device at position "
 							+ fluoZ);
