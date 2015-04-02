@@ -301,7 +301,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 
 		ReportingUtils.logMessage("... start acquisition");
-		double z = zFocus - (range / 2);
+		//TODO 
+		double z = zFocus - (range / 2) + 2;
 		ReportingUtils.logMessage("- create imagestack");
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight());

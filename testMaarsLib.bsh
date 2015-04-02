@@ -133,13 +133,12 @@ if(md.isOkClicked()) {
 			int frame = 0;
 			while (System.currentTimeMillis() - startTime <= 1800000){
 				double beginAcq = System.currentTimeMillis();
-				String acqNameFluo = "/movie_X"
-											+Math.round(explo.getX(i))
-											+"_Y"+Math.round(explo.getY(i))
-											+"_FLUO/" + frame;
+				String acqNameFluo = "\\movie_X"
+												+Math.round(explo.getX(i))
+												+"_Y"+Math.round(explo.getY(i))+
+												"_FLUO\\" + frame;
 				ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
-				mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()
-															+acqNameFluo);
+				mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()+"_FLUO\\" + frame);
 				double acqTook = System.currentTimeMillis() - beginAcq;
 				gui.sleep((long) (timeInterval - acqTook));
 				frame++;
