@@ -16,6 +16,7 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
+import ij.plugin.ZProjector;
 import ij.process.ShortProcessor;
 
 /**
@@ -350,12 +351,16 @@ public class MaarsAcquisitionForFluoAnalysis {
 			z = z + step;
 		}
 		ImagePlus imagePlus = new ImagePlus("Maars", imageStack);
+		ZProjector projector = new ZProjector();
+		projector.setMethod(ZProjector.MAX_METHOD);
+		projector.setImage(imagePlus);
+		projector.doProjection();
+		ImagePlus zProjectField = projector.getProjection();
 		Calibration cal = new Calibration();
 		cal.setUnit("micron");
 		cal.pixelWidth = mmc.getPixelSizeUm();
 		cal.pixelHeight = mmc.getPixelSizeUm();
-		cal.pixelDepth = step;
-		imagePlus.setCalibration(cal);
+		zProjectField.setCalibration(cal);
 		ReportingUtils.logMessage("--- Acquisition done.");
 		gui.closeAllAcquisitions();
 		try {
@@ -368,6 +373,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 					.logMessage("could not set focus device back to position and close shutter");
 			ReportingUtils.logError(e);
 		}
-		return imagePlus;
+		return zProjectField;
 	}
 }

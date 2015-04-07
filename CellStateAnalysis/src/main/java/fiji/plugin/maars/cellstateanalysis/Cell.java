@@ -429,7 +429,6 @@ public class Cell {
 							cellShapeRoi.getBounds().width,
 							cellShapeRoi.getBounds().height,
 							fluoImage.getNSlices()));
-
 			ReportingUtils.logMessage("Done.");
 			ReportingUtils.logMessage("Put new calibration newly cropped image");
 			newImage.setCalibration(fluoImage.getCalibration());
@@ -485,6 +484,7 @@ public class Cell {
 					bfImage.getCalibration().pixelHeight
 							/ fluoImage.getCalibration().pixelHeight);
 		}
+		ReportingUtils.logMessage(""+scaleFactorForRoiFromBfToFluo[0]+" "+scaleFactorForRoiFromBfToFluo[1]);
 	}
 
 	/**

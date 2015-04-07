@@ -53,23 +53,24 @@ public class CellFluoAnalysis {
 
 		// Do ZProjection
 		//TODO
-//		ZProjector projector = new ZProjector();
-//		projector.setMethod(ZProjector.MAX_METHOD);
-//		projector.setImage(cell.getFluoImage());
-//		projector.doProjection();
-//		ImagePlus zprojection = projector.getProjection();
-
+		ZProjector projector = new ZProjector();
+		projector.setMethod(ZProjector.MAX_METHOD);
+		projector.setImage(cell.getFluoImage());
+		projector.doProjection();
+		ImagePlus zprojection = projector.getProjection();
+		
 		ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
 		Model model = new Model();
-
+//		cell.getFluoImage().show();
+		ReportingUtils.logMessage(""+ spotRadius + " " + cal.pixelWidth);
 		Settings settings = new Settings();
-		settings.setFrom(cell.getFluoImage());
+		settings.setFrom(zprojection);
 
 		settings.detectorFactory = new LogDetectorFactory();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
 		detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-		detectorSettings.put("RADIUS", spotRadius / cal.pixelWidth);
+		detectorSettings.put("RADIUS", (double) spotRadius / cal.pixelWidth);
 		detectorSettings.put("TARGET_CHANNEL", 1);
 		detectorSettings.put("THRESHOLD", 0.);
 		detectorSettings.put("DO_MEDIAN_FILTERING", false);

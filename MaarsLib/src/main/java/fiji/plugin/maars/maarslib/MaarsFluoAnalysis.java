@@ -11,6 +11,7 @@ import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.measure.Calibration;
 import ij.plugin.ZProjector;
 
 /**
@@ -23,7 +24,6 @@ public class MaarsFluoAnalysis {
 
 	private AllMaarsParameters parameters;
 	private SetOfCells soc;
-
 	/**
 	 * Constructor 1:
 	 * 
@@ -186,13 +186,6 @@ public class MaarsFluoAnalysis {
 			String pathToResults) {
 		int cellNumber = -1;
 		double smallerSp = 900000;
-		// Do ZProjection
-		//TODO
-		ZProjector projector = new ZProjector();
-		projector.setMethod(ZProjector.MAX_METHOD);
-		projector.setImage(fieldWideImage);
-		projector.doProjection();
-		ImagePlus zProjectField = projector.getProjection();
 		FileWriter spindleWriter = null;
 		try {
 			spindleWriter = new FileWriter(pathToResults
@@ -209,7 +202,7 @@ public class MaarsFluoAnalysis {
 		}
 		for (int i = 0; i < soc.length(); i++) {
 			//TODO
-			soc.getCell(i).addFluoImage(zProjectField);
+			soc.getCell(i).addFluoImage(fieldWideImage);
 			Spindle sp = soc.getCell(i).findFluoSpotTempFunction(
 					true,
 					parameters.getParametersAsJsonObject()
