@@ -11,6 +11,7 @@ import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.plugin.ZProjector;
 
 /**
  * Class to find and measure mitotic spindle using fluorescence image analysis
@@ -185,6 +186,13 @@ public class MaarsFluoAnalysis {
 			String pathToResults) {
 		int cellNumber = -1;
 		double smallerSp = 900000;
+		// Do ZProjection
+		//TODO
+		ZProjector projector = new ZProjector();
+		projector.setMethod(ZProjector.MAX_METHOD);
+		projector.setImage(fieldWideImage);
+		projector.doProjection();
+		ImagePlus zProjectField = projector.getProjection();
 		FileWriter spindleWriter = null;
 		try {
 			spindleWriter = new FileWriter(pathToResults
@@ -200,7 +208,8 @@ public class MaarsFluoAnalysis {
 			ReportingUtils.logError(e2);
 		}
 		for (int i = 0; i < soc.length(); i++) {
-			soc.getCell(i).addFluoImage(fieldWideImage);
+			//TODO
+			soc.getCell(i).addFluoImage(zProjectField);
 			Spindle sp = soc.getCell(i).findFluoSpotTempFunction(
 					true,
 					parameters.getParametersAsJsonObject()
@@ -240,7 +249,6 @@ public class MaarsFluoAnalysis {
 			ReportingUtils.logMessage("Could not close writer");
 			e.printStackTrace();
 		}
-		ReportingUtils.logMessage("didilala"+ cellNumber + soc.getCell(cellNumber).getCellNumber() + soc.getCell(cellNumber).getCellShapeRoi().getName());
 		if (cellNumber != -1) {
 			return soc.getCell(cellNumber);
 		}else{

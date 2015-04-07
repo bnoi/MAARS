@@ -52,18 +52,19 @@ public class CellFluoAnalysis {
 		// scaleFactorForRoiFromBfToFluo[1], false);
 
 		// Do ZProjection
-		ZProjector projector = new ZProjector();
-		projector.setMethod(ZProjector.MAX_METHOD);
-		projector.setImage(cell.getFluoImage());
-		projector.doProjection();
-		ImagePlus zprojection = projector.getProjection();
+		//TODO
+//		ZProjector projector = new ZProjector();
+//		projector.setMethod(ZProjector.MAX_METHOD);
+//		projector.setImage(cell.getFluoImage());
+//		projector.doProjection();
+//		ImagePlus zprojection = projector.getProjection();
 
 		ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
 		Model model = new Model();
 
 		Settings settings = new Settings();
-		settings.setFrom(zprojection);
+		settings.setFrom(cell.getFluoImage());
 
 		settings.detectorFactory = new LogDetectorFactory();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
