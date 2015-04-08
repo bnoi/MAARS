@@ -264,7 +264,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logError(e1);
 		}
 		try {
-			gui.openAcquisition(acqName, rootDirName, frameNumber, 1 , sliceNumber,show,save);
+			gui.openAcquisition(acqName, rootDirName, frameNumber, 1 , sliceNumber+1,show,save);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
@@ -309,7 +309,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 				(int) mmc.getImageHeight());
 
 		for (int k = 0; k <= sliceNumber; k++) {
-			ReportingUtils.logMessage("- set focus device at position " + z);
+//			ReportingUtils.logMessage("- set focus device at position " + z);
 			try {
 				mmc.setPosition(mmc.getFocusDevice(), z);
 				mmc.waitForDevice(mmc.getFocusDevice());
@@ -324,28 +324,12 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 			TaggedImage img = acq.getImageCache().getImage(
 					0, k, 0, 0);
-
-//			ReportingUtils.logMessage("- SnapImage");
-//			try {
-//				mmc.snapImage();
-//			} catch (Exception e) {
-//				ReportingUtils.logMessage("could not snape image");
-//				ReportingUtils.logError(e);
-//			}
-//
-//			TaggedImage img = null;
-//			try {
-//				img = mmc.getTaggedImage();
-//			} catch (Exception e) {
-//				ReportingUtils.logMessage("could not get tagged image");
-//				ReportingUtils.logError(e);
-//			}
-			ReportingUtils.logMessage("- create short processor");
+//			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
 			shortProcessor.setPixels(img.pix);
 
-			ReportingUtils.logMessage("- add slice to imagestack");
+//			ReportingUtils.logMessage("- add slice to imagestack");
 			imageStack.addSlice(shortProcessor);
 
 			z = z + step;

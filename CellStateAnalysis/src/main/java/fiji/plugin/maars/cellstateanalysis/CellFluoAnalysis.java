@@ -59,11 +59,9 @@ public class CellFluoAnalysis {
 		projector.doProjection();
 		ImagePlus zprojection = projector.getProjection();
 		
-		ReportingUtils.logMessage("- Get fluo image calibration");
+//		ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
 		Model model = new Model();
-//		cell.getFluoImage().show();
-		ReportingUtils.logMessage(""+ spotRadius + " " + cal.pixelWidth);
 		Settings settings = new Settings();
 		settings.setFrom(zprojection);
 
@@ -80,30 +78,28 @@ public class CellFluoAnalysis {
 		settings.addSpotFilter(filter1);
 
 		TrackMate trackmate = new TrackMate(model, settings);
-		ReportingUtils.logMessage("Trackmate created");
+//		ReportingUtils.logMessage("Trackmate created");
 
 		trackmate.execDetection();
-		ReportingUtils.logMessage("execDetection done");
+//		ReportingUtils.logMessage("execDetection done");
 
 		trackmate.execInitialSpotFiltering();
-		ReportingUtils.logMessage("execInitialSpotFiltering done");
+//		ReportingUtils.logMessage("execInitialSpotFiltering done");
 
 		trackmate.computeSpotFeatures(true);
-		ReportingUtils.logMessage("computeSpotFeatures done");
+//		ReportingUtils.logMessage("computeSpotFeatures done");
 
 		trackmate.execSpotFiltering(true);
-		ReportingUtils.logMessage("execSpotFiltering done");
-
-		ReportingUtils.logMessage("- get results");
+//		ReportingUtils.logMessage("execSpotFiltering done");
 
 		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
-		ReportingUtils.logMessage("Found " + nSpots + " spots");
+//		ReportingUtils.logMessage("Found " + nSpots + " spots");
 
 		res = new ArrayList<Spot>();
 		for (Spot spot : trackmate.getModel().getSpots().iterable(false)) {
 			res.add(spot);
 		}
-		ReportingUtils.logMessage("- Done.");
+//		ReportingUtils.logMessage("- Done.");
 
 		factorForThreshold = 4;
 	}
@@ -126,7 +122,7 @@ public class CellFluoAnalysis {
 
 		ArrayList<Spot> spotsToKeep = new ArrayList<Spot>();
 
-		ReportingUtils.logMessage("Res : " + res);
+//		ReportingUtils.logMessage("Res : " + res);
 		java.util.Iterator<Spot> itr1 = res.iterator();
 
 		double[] quality = new double[res.toArray().length];
@@ -152,13 +148,13 @@ public class CellFluoAnalysis {
 			 */
 		}
 
-		ReportingUtils.logMessage("initial number of spots : " + nb);
+//		ReportingUtils.logMessage("initial number of spots : " + nb);
 
 		Statistics stat = new Statistics(quality);
 		double threshold = stat.getMean() + factorForThreshold
 				* stat.getStdDev();
 
-		ReportingUtils.logMessage("threshold : " + threshold);
+//		ReportingUtils.logMessage("threshold : " + threshold);
 
 		java.util.Iterator<Spot> itr2 = res.iterator();
 		while (itr2.hasNext()) {
@@ -182,6 +178,7 @@ public class CellFluoAnalysis {
 				 */
 			}
 		}
+		res = null;
 		return spotsToKeep;
 		// rt.show("Measures");
 	}

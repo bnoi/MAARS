@@ -187,6 +187,7 @@ public class MaarsFluoAnalysis {
 		int cellNumber = -1;
 		double smallerSp = 900000;
 		FileWriter spindleWriter = null;
+		ReportingUtils.logMessage("Open writer");
 		try {
 			spindleWriter = new FileWriter(pathToResults
 					+ "_spindleAnalysis.txt");
@@ -202,10 +203,84 @@ public class MaarsFluoAnalysis {
 		}
 		for (int i = 0; i < soc.length(); i++) {
 			//TODO
-			Spindle sp = null;
-			System.gc();
 			soc.getCell(i).addFluoImage(fieldWideImage);
-			sp = soc.getCell(i).findFluoSpotTempFunction(
+			Spindle sp = soc.getCell(i).findFluoSpotTempFunction(
+					true,
+					parameters.getParametersAsJsonObject()
+							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+							.getAsJsonObject()
+							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
+//			ReportingUtils.logMessage("Writing spindle coordinates");
+			try {
+				if (i != soc.length() - 1) {
+					spindleWriter.write(sp.toString(String.valueOf(soc.getCell(i).getCellNumber()))
+							+ "\n,");
+				} else {
+					spindleWriter.write(sp.toString(String.valueOf(soc.getCell(i).getCellNumber()))
+							+ "\n");
+				}
+
+			} catch (IOException e) {
+				ReportingUtils.logMessage("could not write sp of cell "
+						+ soc.getCell(i).getCellShapeRoi().getName());
+				e.printStackTrace();
+			}
+			if (checkStartConditions(sp)) {
+//				ReportingUtils.logMessage("Reset last spindle computed");
+				if (sp.getLength() < smallerSp) {
+					cellNumber = i;
+					smallerSp = sp.getLength();
+				}
+			}
+		}
+		try {
+			spindleWriter.write("]");
+		} catch (IOException e2) {
+			ReportingUtils.logError(e2);
+		}
+		ReportingUtils.logMessage("Close writer");
+		try {
+			spindleWriter.close();
+		} catch (IOException e) {
+			ReportingUtils.logMessage("Could not close writer");
+			e.printStackTrace();
+		}
+		if (cellNumber != -1) {
+			return soc.getCell(cellNumber);
+		}else{
+			return null;
+		}
+	}
+
+	/**
+	 * Method to analyse an entire field 
+	 * 
+	 * @param fieldWideImage
+	 *            : image of field
+	 * @param pathToResults
+	 *            : path to save results
+	 */
+	public void analyzeEntireFieldNoReturn(ImagePlus fieldWideImage,
+			String pathToResults) {
+		FileWriter spindleWriter = null;
+		try {
+			spindleWriter = new FileWriter(pathToResults
+					+ "_spindleAnalysis.txt");
+		} catch (IOException e) {
+			ReportingUtils.logMessage("Could not create " + pathToResults
+					+ "_spindleAnalysis.txt");
+			e.printStackTrace();
+		}
+		try {
+			spindleWriter.write("[");
+		} catch (IOException e2) {
+			ReportingUtils.logError(e2);
+		}
+		for (int i = 0; i < soc.length(); i++) {
+			Spindle sp = null;
+			//TODO
+			soc.getCell(i).addFluoImage(fieldWideImage);
+			 sp = soc.getCell(i).findFluoSpotTempFunction(
 					true,
 					parameters.getParametersAsJsonObject()
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -225,29 +300,17 @@ public class MaarsFluoAnalysis {
 						+ soc.getCell(i).getCellShapeRoi().getName());
 				e.printStackTrace();
 			}
-			if (checkStartConditions(sp)) {
-				if (sp.getLength() < smallerSp) {
-					cellNumber = i;
-					smallerSp = sp.getLength();
-				}
-			}
 		}
 		try {
 			spindleWriter.write("]");
 		} catch (IOException e2) {
 			ReportingUtils.logError(e2);
 		}
-
 		try {
 			spindleWriter.close();
 		} catch (IOException e) {
 			ReportingUtils.logMessage("Could not close writer");
 			e.printStackTrace();
-		}
-		if (cellNumber != -1) {
-			return soc.getCell(cellNumber);
-		}else{
-			return null;
 		}
 	}
 
