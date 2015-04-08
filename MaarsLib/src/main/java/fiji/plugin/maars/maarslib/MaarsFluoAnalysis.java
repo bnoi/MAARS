@@ -202,8 +202,10 @@ public class MaarsFluoAnalysis {
 		}
 		for (int i = 0; i < soc.length(); i++) {
 			//TODO
+			Spindle sp = null;
+			System.gc();
 			soc.getCell(i).addFluoImage(fieldWideImage);
-			Spindle sp = soc.getCell(i).findFluoSpotTempFunction(
+			sp = soc.getCell(i).findFluoSpotTempFunction(
 					true,
 					parameters.getParametersAsJsonObject()
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
