@@ -202,27 +202,25 @@ public class MaarsFluoAnalysis {
 			ReportingUtils.logError(e2);
 		}
 		for (int i = 0; i < soc.length(); i++) {
+			Cell cell = soc.getCell(i); 
 			//TODO
-			soc.getCell(i).addFluoImage(fieldWideImage);
+			cell.addFluoImage(fieldWideImage);
 			Spindle sp = soc.getCell(i).findFluoSpotTempFunction(
 					true,
 					parameters.getParametersAsJsonObject()
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
-//			ReportingUtils.logMessage("Writing spindle coordinates");
 			try {
 				if (i != soc.length() - 1) {
-					spindleWriter.write(sp.toString(String.valueOf(soc.getCell(i).getCellNumber()))
+					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
 							+ "\n,");
 				} else {
-					spindleWriter.write(sp.toString(String.valueOf(soc.getCell(i).getCellNumber()))
+					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
 							+ "\n");
 				}
 
 			} catch (IOException e) {
-				ReportingUtils.logMessage("could not write sp of cell "
-						+ soc.getCell(i).getCellShapeRoi().getName());
 				e.printStackTrace();
 			}
 			if (checkStartConditions(sp)) {
@@ -232,6 +230,7 @@ public class MaarsFluoAnalysis {
 					smallerSp = sp.getLength();
 				}
 			}
+			cell = null;
 		}
 		try {
 			spindleWriter.write("]");
@@ -267,9 +266,7 @@ public class MaarsFluoAnalysis {
 			spindleWriter = new FileWriter(pathToResults
 					+ "_spindleAnalysis.txt");
 		} catch (IOException e) {
-			ReportingUtils.logMessage("Could not create " + pathToResults
-					+ "_spindleAnalysis.txt");
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
 		try {
 			spindleWriter.write("[");
@@ -277,10 +274,10 @@ public class MaarsFluoAnalysis {
 			ReportingUtils.logError(e2);
 		}
 		for (int i = 0; i < soc.length(); i++) {
-			Spindle sp = null;
+			Cell cell = soc.getCell(i); 
 			//TODO
-			soc.getCell(i).addFluoImage(fieldWideImage);
-			 sp = soc.getCell(i).findFluoSpotTempFunction(
+			cell.addFluoImage(fieldWideImage);
+			Spindle sp = cell.findFluoSpotTempFunction(
 					true,
 					parameters.getParametersAsJsonObject()
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -288,18 +285,18 @@ public class MaarsFluoAnalysis {
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
 			try {
 				if (i != soc.length() - 1) {
-					spindleWriter.write(sp.toString(String.valueOf(soc.getCell(i).getCellNumber()))
+					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
 							+ "\n,");
 				} else {
-					spindleWriter.write(sp.toString(String.valueOf(soc.getCell(i).getCellNumber()))
+					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
 							+ "\n");
 				}
 
 			} catch (IOException e) {
-				ReportingUtils.logMessage("could not write sp of cell "
-						+ soc.getCell(i).getCellShapeRoi().getName());
-				e.printStackTrace();
+				ReportingUtils.logError(e);
 			}
+			cell = null;
+			sp = null;
 		}
 		try {
 			spindleWriter.write("]");
@@ -309,8 +306,7 @@ public class MaarsFluoAnalysis {
 		try {
 			spindleWriter.close();
 		} catch (IOException e) {
-			ReportingUtils.logMessage("Could not close writer");
-			e.printStackTrace();
+			ReportingUtils.logError(e);
 		}
 	}
 

@@ -92,7 +92,7 @@ public class CellFluoAnalysis {
 		trackmate.execSpotFiltering(true);
 //		ReportingUtils.logMessage("execSpotFiltering done");
 
-		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
+//		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
 //		ReportingUtils.logMessage("Found " + nSpots + " spots");
 
 		res = new ArrayList<Spot>();

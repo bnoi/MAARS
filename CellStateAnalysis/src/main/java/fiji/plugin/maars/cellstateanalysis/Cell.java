@@ -435,6 +435,7 @@ public class Cell {
 //			ReportingUtils.logMessage("Done.");
 //			ReportingUtils.logMessage("Set newly cropped image as fluorescent image");
 			setFluoImage(newImage);
+			newImage = null;
 //			ReportingUtils.logMessage("Done");
 		}
 		fluoImage.setRoi(cellShapeRoi);

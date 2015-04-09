@@ -72,16 +72,19 @@ if(md.isOkClicked()) {
 
 	for (int i = 0; i < explo.length(); i++) {
 		gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
+		double xPos = explo.getX(i);
+		double yPos = explo.getY(i);
 		
-		gui.setXYStagePosition(explo.getX(i),explo.getY(i));
+		gui.setXYStagePosition(xPos,yPos);
 		
 		MaarsAcquisitionForSegmentation mas = new MaarsAcquisitionForSegmentation(md,
-				explo.getX(i),
-				explo.getY(i));
+				xPos,
+				yPos);
 
 		mmc.waitForDevice(mmc.getXYStageDevice());
 
 		autofocus.fullFocus();
+
 		HashMap params = mas.getParametersFromConf(param);
 		mas.setParameters(params);
 		mas.acquire(false);
@@ -93,14 +96,14 @@ if(md.isOkClicked()) {
 		}
 
 		MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
-		MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, explo.getX(i), explo.getY(i));
+		MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
 		
 		
 		mfa.getSetOfCells().shuffle();
 		
 		MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
-														explo.getX(i),
-														explo.getY(i),
+														xPos,
+														yPos,
 														mfa.getSetOfCells());
 
 		if(param
@@ -111,14 +114,14 @@ if(md.isOkClicked()) {
 				.getAsBoolean()) {
 					
 			String acqNameFluo = "/movie_X"
-				+Math.round(explo.getX(i))
-				+"_Y"+Math.round(explo.getY(i))
+				+Math.round(xPos)
+				+"_Y"+Math.round(yPos)
 				+"_FLUO";
 			
 			ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 			fiji.plugin.maars.cellstateanalysis.Cell tragetCell = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()
-						+"/movie_X"+Math.round(explo.getX(i))
-						+"_Y"+Math.round(explo.getY(i)));
+						+"/movie_X"+Math.round(xPos)
+						+"_Y"+Math.round(yPos));
 			mfa.getSetOfCells().closeRoiManager();
 			if(tragetCell != null){	
 				mmad.acquire(false, tragetCell, true, true);
@@ -134,11 +137,14 @@ if(md.isOkClicked()) {
 			while (System.currentTimeMillis() - startTime <= 1800000){
 				double beginAcq = System.currentTimeMillis();
 				String acqNameFluo = "\\movie_X"
-												+Math.round(explo.getX(i))
-												+"_Y"+Math.round(explo.getY(i))+
+												+Math.round(xPos)
+												+"_Y"+Math.round(yPos)+
 												"_FLUO\\" + frame;
 				ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 				mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO\\" + frame);
+				acqNameFluo = null;
+				fluoImage = null;
+				gui.message(java.lang.Runtime.getRuntime().freeMemory());
 				double acqTook = System.currentTimeMillis() - beginAcq;
 				gui.sleep((long) (timeInterval - acqTook));
 				frame++;

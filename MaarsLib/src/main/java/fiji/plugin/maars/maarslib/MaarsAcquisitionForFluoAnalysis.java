@@ -268,20 +268,20 @@ public class MaarsAcquisitionForFluoAnalysis {
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
-		ReportingUtils.logMessage("... set channel color");
-		try {
-			gui.setChannelColor(acqName,0, color);
-		} catch (MMScriptException e) {
-			ReportingUtils.logMessage("Could not set channel color");
-			ReportingUtils.logError(e);
-		}
-		ReportingUtils.logMessage("... set channel name");
-		try {
-			gui.setChannelName(acqName, 0, channel);
-		} catch (MMScriptException e) {
-			ReportingUtils.logMessage("could not set channel name");
-			ReportingUtils.logError(e);
-		}
+//		ReportingUtils.logMessage("... set channel color");
+//		try {
+//			gui.setChannelColor(acqName,0, color);
+//		} catch (MMScriptException e) {
+//			ReportingUtils.logMessage("Could not set channel color");
+//			ReportingUtils.logError(e);
+//		}
+//		ReportingUtils.logMessage("... set channel name");
+//		try {
+//			gui.setChannelName(acqName, 0, channel);
+//		} catch (MMScriptException e) {
+//			ReportingUtils.logMessage("could not set channel name");
+//			ReportingUtils.logError(e);
+//		}
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -295,7 +295,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 		try {
 			zFocus = mmc.getPosition(mmc.getFocusDevice());
 		} catch (Exception e) {
-			ReportingUtils.logMessage("could not get z current position");
 			ReportingUtils.logError(e);
 		}
 
@@ -303,19 +302,16 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 		ReportingUtils.logMessage("... start acquisition");
 		//TODO 
-		double z = zFocus - (range / 2) + 2;
+		double z = zFocus - (range / 2) + 1.5;
 		ReportingUtils.logMessage("- create imagestack");
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight());
 
 		for (int k = 0; k <= sliceNumber; k++) {
-//			ReportingUtils.logMessage("- set focus device at position " + z);
 			try {
 				mmc.setPosition(mmc.getFocusDevice(), z);
 				mmc.waitForDevice(mmc.getFocusDevice());
 			} catch (Exception e) {
-				ReportingUtils
-						.logMessage("could not set focus device at position");
 				ReportingUtils.logError(e);
 			}
 			gui.snapAndAddImage(acqName, 0, 0, k, 0);
@@ -324,14 +320,10 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 			TaggedImage img = acq.getImageCache().getImage(
 					0, k, 0, 0);
-//			ReportingUtils.logMessage("- create short processor");
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-			shortProcessor.setPixels(img.pix);
-
-//			ReportingUtils.logMessage("- add slice to imagestack");
+			shortProcessor.setPixels(img.pix);;
 			imageStack.addSlice(shortProcessor);
-
 			z = z + step;
 		}
 		ImagePlus imagePlus = new ImagePlus("Maars", imageStack);
@@ -357,6 +349,9 @@ public class MaarsAcquisitionForFluoAnalysis {
 					.logMessage("could not set focus device back to position and close shutter");
 			ReportingUtils.logError(e);
 		}
+		projector = null;
+		cal = null;
+		imageStack = null;
 		return zProjectField;
 	}
 }
