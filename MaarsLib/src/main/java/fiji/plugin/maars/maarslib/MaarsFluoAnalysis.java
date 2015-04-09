@@ -224,7 +224,7 @@ public class MaarsFluoAnalysis {
 				e.printStackTrace();
 			}
 			if (checkStartConditions(sp)) {
-//				ReportingUtils.logMessage("Reset last spindle computed");
+				ReportingUtils.logMessage("Reset last spindle computed");
 				if (sp.getLength() < smallerSp) {
 					cellNumber = i;
 					smallerSp = sp.getLength();
@@ -273,7 +273,8 @@ public class MaarsFluoAnalysis {
 		} catch (IOException e2) {
 			ReportingUtils.logError(e2);
 		}
-		for (int i = 0; i < soc.length(); i++) {
+		int nbOfCells = soc.length();
+		for (int i = 0; i < nbOfCells; i++) {
 			Cell cell = soc.getCell(i); 
 			//TODO
 			cell.addFluoImage(fieldWideImage);
@@ -284,7 +285,7 @@ public class MaarsFluoAnalysis {
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
 			try {
-				if (i != soc.length() - 1) {
+				if (i != nbOfCells - 1) {
 					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
 							+ "\n,");
 				} else {

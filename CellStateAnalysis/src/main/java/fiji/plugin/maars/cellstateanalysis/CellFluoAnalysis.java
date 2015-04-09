@@ -11,8 +11,8 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.TrackMate;
-
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import ij.plugin.ZProjector;
@@ -50,20 +50,12 @@ public class CellFluoAnalysis {
 
 		// RoiScaler.scale(cellShapeRoi, scaleFactorForRoiFromBfToFluo[0],
 		// scaleFactorForRoiFromBfToFluo[1], false);
-
-		// Do ZProjection
-		//TODO
-		ZProjector projector = new ZProjector();
-		projector.setMethod(ZProjector.MAX_METHOD);
-		projector.setImage(cell.getFluoImage());
-		projector.doProjection();
-		ImagePlus zprojection = projector.getProjection();
 		
-//		ReportingUtils.logMessage("- Get fluo image calibration");
+		ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
 		Model model = new Model();
 		Settings settings = new Settings();
-		settings.setFrom(zprojection);
+		settings.setFrom(cell.getFluoImage());
 
 		settings.detectorFactory = new LogDetectorFactory();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
@@ -78,28 +70,35 @@ public class CellFluoAnalysis {
 		settings.addSpotFilter(filter1);
 
 		TrackMate trackmate = new TrackMate(model, settings);
-//		ReportingUtils.logMessage("Trackmate created");
-
+		ReportingUtils.logMessage("Trackmate created");
+		//TODO
 		trackmate.execDetection();
-//		ReportingUtils.logMessage("execDetection done");
+		ReportingUtils.logMessage("execDetection done");
 
 		trackmate.execInitialSpotFiltering();
-//		ReportingUtils.logMessage("execInitialSpotFiltering done");
+		ReportingUtils.logMessage("execInitialSpotFiltering done");
 
 		trackmate.computeSpotFeatures(true);
-//		ReportingUtils.logMessage("computeSpotFeatures done");
+		ReportingUtils.logMessage("computeSpotFeatures done");
 
 		trackmate.execSpotFiltering(true);
-//		ReportingUtils.logMessage("execSpotFiltering done");
+		ReportingUtils.logMessage("execSpotFiltering done");
 
-//		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
-//		ReportingUtils.logMessage("Found " + nSpots + " spots");
+		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
+		ReportingUtils.logMessage("Found " + nSpots + " spots");
 
 		res = new ArrayList<Spot>();
 		for (Spot spot : trackmate.getModel().getSpots().iterable(false)) {
 			res.add(spot);
 		}
-//		ReportingUtils.logMessage("- Done.");
+		ReportingUtils.logMessage("- Done.");
+//		projector = null;
+//		zprojection = null;
+		settings= null;
+		detectorSettings= null;
+		trackmate= null;
+		filter1 = null;
+		model = null;
 
 		factorForThreshold = 4;
 	}

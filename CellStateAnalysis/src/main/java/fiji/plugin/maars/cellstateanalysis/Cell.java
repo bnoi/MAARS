@@ -11,6 +11,7 @@ import ij.gui.ProfilePlot;
 import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
+import ij.process.ImageProcessor;
 
 /**
  * Cell is a class containing information about cell image, including its
@@ -409,7 +410,7 @@ public class Cell {
 	public Spindle findFluoSpotTempFunction(boolean crop, double spotRadius) {
 
 		scaleRoiForFluoImage(scaleFactorForRoiFromBfToFluo);
-//		ReportingUtils.logMessage("set ROI on fluo image");
+		ReportingUtils.logMessage("set ROI on fluo image");
 		fluoImage.setRoi(cellShapeRoi);
 		if (crop) {
 			/*
@@ -423,39 +424,43 @@ public class Cell {
 			 * ("origin of cropping x = "+cellShapeRoi.getXBase
 			 * ()+" y = "+cellShapeRoi.getYBase());
 			 */
-			ImagePlus newImage = new ImagePlus("CroppedFluoImage", fluoImage
-					.getImageStack().crop((int) cellShapeRoi.getXBase(),
-							(int) cellShapeRoi.getYBase(), 0,
-							cellShapeRoi.getBounds().width,
-							cellShapeRoi.getBounds().height,
-							fluoImage.getNSlices()));
-//			ReportingUtils.logMessage("Done.");
-//			ReportingUtils.logMessage("Put new calibration newly cropped image");
+			ImageProcessor ip =  fluoImage.getProcessor();
+			ip.setRoi(cellShapeRoi);
+			fluoImage.setProcessor(ip.crop());
+			ImagePlus newImage = fluoImage;
+//					new ImagePlus("CroppedFluoImage", fluoImage
+//					.getImageStack().crop((int) cellShapeRoi.getXBase(),
+//							(int) cellShapeRoi.getYBase(), 0,
+//							cellShapeRoi.getBounds().width,
+//							cellShapeRoi.getBounds().height,
+//							fluoImage.getNSlices()));
+			ReportingUtils.logMessage("Done.");
+			ReportingUtils.logMessage("Put new calibration newly cropped image");
 			newImage.setCalibration(fluoImage.getCalibration());
-//			ReportingUtils.logMessage("Done.");
-//			ReportingUtils.logMessage("Set newly cropped image as fluorescent image");
+			ReportingUtils.logMessage("Done.");
+			ReportingUtils.logMessage("Set newly cropped image as fluorescent image");
+			newImage.show();
 			setFluoImage(newImage);
-			newImage = null;
-//			ReportingUtils.logMessage("Done");
+			ReportingUtils.logMessage("Done");
 		}
 		fluoImage.setRoi(cellShapeRoi);
-//		ReportingUtils.logMessage("Create CellFluoAnalysis object");
+		ReportingUtils.logMessage("Create CellFluoAnalysis object");
 		this.fluoAnalysis = new CellFluoAnalysis(this, spotRadius);
-//		ReportingUtils.logMessage("Done.");
-//		ReportingUtils.logMessage("Find fluorescent spot on image");
+		ReportingUtils.logMessage("Done.");
+		ReportingUtils.logMessage("Find fluorescent spot on image");
 		ArrayList<Spot> spotList = fluoAnalysis.findSpots();
-//		ReportingUtils.logMessage("Done.");
-//		ReportingUtils.logMessage("Create spindle using spots found");
+		ReportingUtils.logMessage("Done.");
+		ReportingUtils.logMessage("Create spindle using spots found");
 		Spindle spindle = new Spindle(spotList, measures, cellShapeRoi,
 				fluoImage.getCalibration());
-//		ReportingUtils.logMessage("Done.");
+		ReportingUtils.logMessage("Done.");
 
-//		ReportingUtils.logMessage("Cell : " + cellShapeRoi.getName() + " spots nb : "
-//				+ spotList.size());
-//		ReportingUtils.logMessage("Back to initial ROI scale");
+		ReportingUtils.logMessage("Cell : " + cellShapeRoi.getName() + " spots nb : "
+				+ spotList.size());
+		ReportingUtils.logMessage("Back to initial ROI scale");
 		rescaleRoiForBFImage(scaleFactorForRoiFromBfToFluo);
-//		ReportingUtils.logMessage("Done.");
-//		ReportingUtils.logMessage("Return spindle");
+		ReportingUtils.logMessage("Done.");
+		ReportingUtils.logMessage("Return spindle");
 		lastSpindleComputed = spindle;
 		return spindle;
 	}

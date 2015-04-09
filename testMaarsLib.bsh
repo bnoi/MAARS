@@ -144,7 +144,6 @@ if(md.isOkClicked()) {
 				mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO\\" + frame);
 				acqNameFluo = null;
 				fluoImage = null;
-				gui.message(java.lang.Runtime.getRuntime().freeMemory());
 				double acqTook = System.currentTimeMillis() - beginAcq;
 				gui.sleep((long) (timeInterval - acqTook));
 				frame++;
