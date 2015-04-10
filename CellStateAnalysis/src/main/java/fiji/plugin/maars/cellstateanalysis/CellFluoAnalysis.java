@@ -3,7 +3,6 @@ package fiji.plugin.maars.cellstateanalysis;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.micromanager.utils.ReportingUtils;
 
@@ -12,7 +11,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.util.TMUtils;
 import fiji.plugin.trackmate.TrackMate;
 import ij.ImagePlus;
 import ij.measure.Calibration;
@@ -39,7 +37,7 @@ public class CellFluoAnalysis {
 	 *            : spot typical radius
 	 */
 
-	public CellFluoAnalysis(Cell cell, double spotRadius) {
+	public CellFluoAnalysis(Cell cell, double spotRadius) throws InterruptedException {
 
 
 		// this.cellShapeRoi = cellShapeRoi;
@@ -49,12 +47,17 @@ public class CellFluoAnalysis {
 
 		// RoiScaler.scale(cellShapeRoi, scaleFactorForRoiFromBfToFluo[0],
 		// scaleFactorForRoiFromBfToFluo[1], false);
+		ZProjector projector = new ZProjector();
+		projector.setMethod(ZProjector.MAX_METHOD);
+		projector.setImage(cell.getFluoImage());
+		projector.doProjection();
+		ImagePlus zProjectField = projector.getProjection();
 		
 		ReportingUtils.logMessage("- Get fluo image calibration");
 		Calibration cal = cell.getFluoImage().getCalibration();
 		Model model = new Model();
 		Settings settings = new Settings();
-		settings.setFrom(cell.getFluoImage());
+		settings.setFrom(zProjectField);
 
 		settings.detectorFactory = new LogDetectorFactory();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
@@ -71,9 +74,7 @@ public class CellFluoAnalysis {
 		TrackMate trackmate = new TrackMate(model, settings);
 		ReportingUtils.logMessage("Trackmate created");
 		//TODO
-		if(!trackmate.execDetection()){
-			System.exit(0);
-		};
+		trackmate.execDetection();
 		ReportingUtils.logMessage("execDetection done");
 
 		trackmate.execInitialSpotFiltering();
@@ -84,18 +85,6 @@ public class CellFluoAnalysis {
 
 		trackmate.execSpotFiltering(true);
 		ReportingUtils.logMessage("execSpotFiltering done");
-//		trackmate.setNumThreads();
-//		Runtime.getRuntime().
-		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-		Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
-		for(Thread thread : threadArray){
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
 		ReportingUtils.logMessage("Found " + nSpots + " spots");
 
@@ -104,6 +93,12 @@ public class CellFluoAnalysis {
 			res.add(spot);
 		}
 		ReportingUtils.logMessage("- Done.");
+//		Thread[] threadArray = Thread.getAllStackTraces().keySet().toArray(new Thread[Thread.getAllStackTraces().keySet().size()]);
+//		for(Thread thread : threadArray){
+//			if(!thread.isAlive()){
+//				thread.interrupt();
+//			}
+//		}
 //		projector = null;
 //		zprojection = null;
 		settings= null;

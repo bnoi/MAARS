@@ -425,23 +425,23 @@ public class Cell {
 			 * ()+" y = "+cellShapeRoi.getYBase());
 			 */
 			//TODO
-			ImageProcessor ip =  fluoImage.getProcessor();
-			ip.setRoi(cellShapeRoi);
-			fluoImage.setProcessor(ip.crop());
-			ImagePlus newImage = fluoImage;
-//					new ImagePlus("CroppedFluoImage", fluoImage
-//					.getImageStack().crop((int) cellShapeRoi.getXBase(),
-//							(int) cellShapeRoi.getYBase(), 0,
-//							cellShapeRoi.getBounds().width,
-//							cellShapeRoi.getBounds().height,
-//							fluoImage.getNSlices()));
+//			ImageProcessor ip =  fluoImage.getProcessor();
+//			ip.setRoi(cellShapeRoi);
+//			fluoImage.setProcessor(ip.crop());
+			ImagePlus newImage = 
+					new ImagePlus("CroppedFluoImage", fluoImage
+					.getImageStack().crop((int) cellShapeRoi.getXBase(),
+							(int) cellShapeRoi.getYBase(), 0,
+							cellShapeRoi.getBounds().width,
+							cellShapeRoi.getBounds().height,
+							fluoImage.getNSlices()));
 			ReportingUtils.logMessage("Done.");
 			ReportingUtils.logMessage("Put new calibration newly cropped image");
 			newImage.setCalibration(fluoImage.getCalibration());
 			ReportingUtils.logMessage("Done.");
 			ReportingUtils.logMessage("Set newly cropped image as fluorescent image");
-			newImage.show();
 			setFluoImage(newImage);
+			newImage = null;
 			ReportingUtils.logMessage("Done");
 		}
 		fluoImage.setRoi(cellShapeRoi);

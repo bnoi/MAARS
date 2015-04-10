@@ -1,0 +1,59 @@
+package fiji.plugin.maars.cellstateanalysis;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.micromanager.utils.ReportingUtils;
+
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.detection.LogDetectorFactory;
+import fiji.plugin.trackmate.features.FeatureFilter;
+import fiji.plugin.trackmate.TrackMate;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.measure.Calibration;
+import ij.plugin.ZProjector;
+IJ.open("CroppedFluoImage.tif");
+ImagePlus imp =IJ.getImage();
+print("- Get fluo image calibration");
+Calibration cal = imp.getCalibration();
+Model model = new Model();
+
+Settings settings = new Settings();
+settings.setFrom(imp);
+
+settings.detectorFactory = new LogDetectorFactory();
+Map detectorSettings = new HashMap();
+detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
+detectorSettings.put("RADIUS", (double) 2.3);
+detectorSettings.put("TARGET_CHANNEL", 1);
+detectorSettings.put("THRESHOLD", 0.);
+detectorSettings.put("DO_MEDIAN_FILTERING", false);
+settings.detectorSettings = detectorSettings;
+
+FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
+settings.addSpotFilter(filter1);
+
+TrackMate trackmate = new TrackMate(model, settings);
+print("Trackmate created");
+
+trackmate.execDetection();
+print("execDetection done");
+
+trackmate.execInitialSpotFiltering();
+print("execInitialSpotFiltering done");
+
+trackmate.computeSpotFeatures(true);
+print("computeSpotFeatures done");
+
+trackmate.execSpotFiltering(true);
+print("execSpotFiltering done");
+
+print("- get results");
+
+int nSpots = trackmate.getModel().getSpots().getNSpots(false);
+print("Found " + nSpots + " spots");
+imp.close();
