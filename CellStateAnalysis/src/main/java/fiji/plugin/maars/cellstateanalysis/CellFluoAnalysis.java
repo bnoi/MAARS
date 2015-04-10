@@ -106,7 +106,6 @@ public class CellFluoAnalysis {
 		trackmate= null;
 		filter1 = null;
 		model = null;
-
 		factorForThreshold = 4;
 	}
 

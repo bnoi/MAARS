@@ -16,8 +16,8 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import ij.plugin.ZProjector;
-IJ.open("CroppedFluoImage.tif");
-ImagePlus imp =IJ.getImage();
+
+ImagePlus imp = IJ.open("MAX_MMStack_Pos0.ome.tif");
 print("- Get fluo image calibration");
 Calibration cal = imp.getCalibration();
 Model model = new Model();
@@ -56,4 +56,5 @@ print("- get results");
 
 int nSpots = trackmate.getModel().getSpots().getNSpots(false);
 print("Found " + nSpots + " spots");
+Thread.currentThread().interrupt();
 imp.close();
