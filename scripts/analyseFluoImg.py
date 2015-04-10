@@ -67,5 +67,8 @@ print("execSpotFiltering done");
 print("- get results");
 
 nSpots = trackmate.getModel().getSpots().getNSpots(False);
-print("Found " + nSpots + " spots");
-imp.close();
+print("Found " + str(nSpots) + " spots");
+for spot in trackmate.getModel().getSpots().iterable(False):
+	print("X_coord: "+str(spot.getFeatures().get("POSITION_X"))+"\tY_coord: "+str(spot.getFeatures().get("POSITION_X")));
+
+zProjectField.close();
