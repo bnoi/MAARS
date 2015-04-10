@@ -334,15 +334,9 @@ public class MyCoordinatesGeometry {
 			Line spindleLine = new Line(coordinates[0], coordinates[1],
 					coordinates[3], coordinates[4]);
 
-			if (coordinates[1] < coordinates[4]) {
-				angleLengthXYCenter[0] = spindleLine.getAngle(
-						(int) coordinates[0], (int) coordinates[1],
-						(int) coordinates[3], (int) coordinates[4]);
-			}else{
-				angleLengthXYCenter[0] = spindleLine.getAngle(
-						(int) coordinates[3], (int) coordinates[4],
-						(int) coordinates[0], (int) coordinates[1]);
-			}
+			angleLengthXYCenter[0] = spindleLine.getAngle((int) coordinates[0],
+					(int) coordinates[1], (int) coordinates[3],
+					(int) coordinates[4]);
 			angleLengthXYCenter[1] = spindleLine.getLength();
 			double[] XYCenter = new double[2];
 

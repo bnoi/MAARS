@@ -446,7 +446,12 @@ public class Cell {
 		}
 		fluoImage.setRoi(cellShapeRoi);
 		ReportingUtils.logMessage("Create CellFluoAnalysis object");
-		this.fluoAnalysis = new CellFluoAnalysis(this, spotRadius);
+		try {
+			this.fluoAnalysis = new CellFluoAnalysis(this, spotRadius);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		ReportingUtils.logMessage("Done.");
 		ReportingUtils.logMessage("Find fluorescent spot on image");
 		ArrayList<Spot> spotList = fluoAnalysis.findSpots();

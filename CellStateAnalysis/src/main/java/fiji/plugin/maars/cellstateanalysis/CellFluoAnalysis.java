@@ -99,8 +99,7 @@ public class CellFluoAnalysis {
 //				thread.interrupt();
 //			}
 //		}
-//		projector = null;
-//		zprojection = null;
+		projector = null;
 		settings= null;
 		detectorSettings= null;
 		trackmate= null;
