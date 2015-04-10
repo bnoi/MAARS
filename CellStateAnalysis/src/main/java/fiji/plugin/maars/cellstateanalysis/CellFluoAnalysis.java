@@ -3,6 +3,7 @@ package fiji.plugin.maars.cellstateanalysis;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.micromanager.utils.ReportingUtils;
 
@@ -28,8 +29,6 @@ public class CellFluoAnalysis {
 	private Cell cell;
 	private java.util.List<Spot> res;
 	private double factorForThreshold;
-
-	// TODO
 
 	/**
 	 * Constructor :
@@ -72,7 +71,9 @@ public class CellFluoAnalysis {
 		TrackMate trackmate = new TrackMate(model, settings);
 		ReportingUtils.logMessage("Trackmate created");
 		//TODO
-		trackmate.execDetection();
+		if(!trackmate.execDetection()){
+			System.exit(0);
+		};
 		ReportingUtils.logMessage("execDetection done");
 
 		trackmate.execInitialSpotFiltering();
@@ -83,7 +84,18 @@ public class CellFluoAnalysis {
 
 		trackmate.execSpotFiltering(true);
 		ReportingUtils.logMessage("execSpotFiltering done");
-
+//		trackmate.setNumThreads();
+//		Runtime.getRuntime().
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+		for(Thread thread : threadArray){
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
 		ReportingUtils.logMessage("Found " + nSpots + " spots");
 

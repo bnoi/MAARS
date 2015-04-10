@@ -424,6 +424,7 @@ public class Cell {
 			 * ("origin of cropping x = "+cellShapeRoi.getXBase
 			 * ()+" y = "+cellShapeRoi.getYBase());
 			 */
+			//TODO
 			ImageProcessor ip =  fluoImage.getProcessor();
 			ip.setRoi(cellShapeRoi);
 			fluoImage.setProcessor(ip.crop());
