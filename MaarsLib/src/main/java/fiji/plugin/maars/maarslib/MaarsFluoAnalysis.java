@@ -24,6 +24,7 @@ public class MaarsFluoAnalysis {
 
 	private AllMaarsParameters parameters;
 	private SetOfCells soc;
+
 	/**
 	 * Constructor 1:
 	 * 
@@ -171,88 +172,89 @@ public class MaarsFluoAnalysis {
 		return conditions;
 	}
 
-	/**
-	 * Method to analyse an entire field and find the cell corresponding to
-	 * criteria with the smallest spindle
-	 * 
-	 * @param fieldWideImage
-	 *            : image of field
-	 * @param pathToResults
-	 *            : path to save results
-	 * @return cell corresponding to search (-1 if none of the cell are
-	 *         corresponding to criteria)
-	 */
-	public Cell analyzeEntireField(ImagePlus fieldWideImage,
-			String pathToResults) {
-		int cellNumber = -1;
-		double smallerSp = 900000;
-		FileWriter spindleWriter = null;
-		ReportingUtils.logMessage("Open writer");
-		try {
-			spindleWriter = new FileWriter(pathToResults
-					+ "_spindleAnalysis.txt");
-		} catch (IOException e) {
-			ReportingUtils.logMessage("Could not create " + pathToResults
-					+ "_spindleAnalysis.txt");
-			e.printStackTrace();
-		}
-		try {
-			spindleWriter.write("[");
-		} catch (IOException e2) {
-			ReportingUtils.logError(e2);
-		}
-		for (int i = 0; i < soc.length(); i++) {
-			Cell cell = soc.getCell(i); 
-			//TODO
-			cell.addFluoImage(fieldWideImage);
-			Spindle sp = soc.getCell(i).findFluoSpotTempFunction(
-					true,
-					parameters.getParametersAsJsonObject()
-							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
-			try {
-				if (i != soc.length() - 1) {
-					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
-							+ "\n,");
-				} else {
-					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
-							+ "\n");
-				}
+//	/**
+//	 * Method to analyse an entire field and find the cell corresponding to
+//	 * criteria with the smallest spindle
+//	 * 
+//	 * @param fieldWideImage
+//	 *            : image of field
+//	 * @param pathToResults
+//	 *            : path to save results
+//	 * @return cell corresponding to search (-1 if none of the cell are
+//	 *         corresponding to criteria)
+//	 */
+//	public Cell analyzeEntireField(ImagePlus fieldWideImage,
+//			String pathToResults) {
+//		int cellNumber = -1;
+//		double smallerSp = 900000;
+//		FileWriter spindleWriter = null;
+//		ReportingUtils.logMessage("Open writer");
+//		try {
+//			spindleWriter = new FileWriter(pathToResults
+//					+ "_spindleAnalysis.txt");
+//		} catch (IOException e) {
+//			ReportingUtils.logMessage("Could not create " + pathToResults
+//					+ "_spindleAnalysis.txt");
+//			e.printStackTrace();
+//		}
+//		try {
+//			spindleWriter.write("[");
+//		} catch (IOException e2) {
+//			ReportingUtils.logError(e2);
+//		}
+//		for (int i = 0; i < soc.length(); i++) {
+//			Cell cell = soc.getCell(i);
+//			// TODO
+//			cell.addFluoImage(fieldWideImage);
+//			Spindle sp = soc.getCell(i).findFluoSpotTempFunction(
+//					true,
+//					parameters.getParametersAsJsonObject()
+//							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
+//			try {
+//				if (i != soc.length() - 1) {
+//					spindleWriter.write(sp.toString(String.valueOf(cell
+//							.getCellNumber())) + "\n,");
+//				} else {
+//					spindleWriter.write(sp.toString(String.valueOf(cell
+//							.getCellNumber())) + "\n");
+//				}
+//
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//
+//			if (checkStartConditions(sp)) {
+//				ReportingUtils.logMessage("Reset last spindle computed");
+//				if (sp.getLength() < smallerSp) {
+//					cellNumber = i;
+//					smallerSp = sp.getLength();
+//				}
+//			}
+//			cell = null;
+//		}
+//		try {
+//			spindleWriter.write("]");
+//		} catch (IOException e2) {
+//			ReportingUtils.logError(e2);
+//		}
+//		ReportingUtils.logMessage("Close writer");
+//		try {
+//			spindleWriter.close();
+//		} catch (IOException e) {
+//			ReportingUtils.logMessage("Could not close writer");
+//			e.printStackTrace();
+//		}
+//		if (cellNumber != -1) {
+//			return soc.getCell(cellNumber);
+//		} else {
+//			return null;
+//		}
+//	}
 
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			if (checkStartConditions(sp)) {
-				ReportingUtils.logMessage("Reset last spindle computed");
-				if (sp.getLength() < smallerSp) {
-					cellNumber = i;
-					smallerSp = sp.getLength();
-				}
-			}
-			cell = null;
-		}
-		try {
-			spindleWriter.write("]");
-		} catch (IOException e2) {
-			ReportingUtils.logError(e2);
-		}
-		ReportingUtils.logMessage("Close writer");
-		try {
-			spindleWriter.close();
-		} catch (IOException e) {
-			ReportingUtils.logMessage("Could not close writer");
-			e.printStackTrace();
-		}
-		if (cellNumber != -1) {
-			return soc.getCell(cellNumber);
-		}else{
-			return null;
-		}
-	}
-
 	/**
-	 * Method to analyse an entire field 
+	 * Method to analyse an entire field
 	 * 
 	 * @param fieldWideImage
 	 *            : image of field
@@ -275,8 +277,8 @@ public class MaarsFluoAnalysis {
 		}
 		int nbOfCells = soc.length();
 		for (int i = 0; i < nbOfCells; i++) {
-			Cell cell = soc.getCell(i); 
-			//TODO
+			Cell cell = soc.getCell(i);
+			// TODO
 			cell.addFluoImage(fieldWideImage);
 			Spindle sp = cell.findFluoSpotTempFunction(
 					true,
@@ -286,15 +288,22 @@ public class MaarsFluoAnalysis {
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
 			try {
 				if (i != nbOfCells - 1) {
-					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
-							+ "\n,");
+					spindleWriter.write(sp.toString(String.valueOf(cell
+							.getCellNumber())) + "\n,");
 				} else {
-					spindleWriter.write(sp.toString(String.valueOf(cell.getCellNumber()))
-							+ "\n");
+					spindleWriter.write(sp.toString(String.valueOf(cell
+							.getCellNumber())) + "\n");
 				}
 
 			} catch (IOException e) {
 				ReportingUtils.logError(e);
+			}
+			if (parameters.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject()
+					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
+					.getAsBoolean()) {
+				cell.saveFluoImage(pathToResults + "\\" + String.valueOf(cell.getCellNumber()));
 			}
 			cell = null;
 			sp = null;

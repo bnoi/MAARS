@@ -23,7 +23,6 @@ import ij.plugin.ZProjector;
  *
  */
 public class CellFluoAnalysis {
-	// private double[] scaleFactorForRoiFromBfToFluo;
 	private Cell cell;
 	private java.util.List<Spot> res;
 	private double factorForThreshold;
@@ -38,15 +37,7 @@ public class CellFluoAnalysis {
 	 */
 
 	public CellFluoAnalysis(Cell cell, double spotRadius) throws InterruptedException {
-
-
-		// this.cellShapeRoi = cellShapeRoi;
-		// this.scaleFactorForRoiFromBfToFluo = scaleFactorForRoiFromBfToFluo;
 		this.cell = cell;
-		// ResultsTable rt = new ResultsTable();
-
-		// RoiScaler.scale(cellShapeRoi, scaleFactorForRoiFromBfToFluo[0],
-		// scaleFactorForRoiFromBfToFluo[1], false);
 		ZProjector projector = new ZProjector();
 		projector.setMethod(ZProjector.MAX_METHOD);
 		projector.setImage(cell.getFluoImage());
@@ -93,12 +84,6 @@ public class CellFluoAnalysis {
 			res.add(spot);
 		}
 		ReportingUtils.logMessage("- Done.");
-//		Thread[] threadArray = Thread.getAllStackTraces().keySet().toArray(new Thread[Thread.getAllStackTraces().keySet().size()]);
-//		for(Thread thread : threadArray){
-//			if(!thread.isAlive()){
-//				thread.interrupt();
-//			}
-//		}
 		projector = null;
 		settings= null;
 		detectorSettings= null;
@@ -133,11 +118,6 @@ public class CellFluoAnalysis {
 		int nb = 0;
 		while (itr1.hasNext()) {
 			Spot spot = itr1.next();
-			/*
-			 * ReportingUtils.logMessage("\n___\n");
-			 * ReportingUtils.logMessage("spot : "+spot.getName());
-			 * ReportingUtils.logMessage(spot.getFeatures());
-			 */
 			Map<String, Double> features = spot.getFeatures();
 			quality[nb] = features.get("QUALITY");
 			nb++;

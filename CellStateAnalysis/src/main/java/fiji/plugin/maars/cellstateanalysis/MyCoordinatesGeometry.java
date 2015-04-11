@@ -333,16 +333,18 @@ public class MyCoordinatesGeometry {
 
 			Line spindleLine = new Line(coordinates[0], coordinates[1],
 					coordinates[3], coordinates[4]);
-
-			angleLengthXYCenter[0] = spindleLine.getAngle((int) coordinates[0],
-					(int) coordinates[1], (int) coordinates[3],
-					(int) coordinates[4]);
+			if(spindleLine.getAngle()>90){
+				angleLengthXYCenter[0] = spindleLine.getAngle() - 180;
+			}
 			angleLengthXYCenter[1] = spindleLine.getLength();
-			double[] XYCenter = new double[2];
 
-			XYCenter = convertPolarToCartesianCoor(coordinates[0],
-					coordinates[1], angleLengthXYCenter[1] / 2,
-					angleLengthXYCenter[0]);
+			double[] XYCenter = new double[2];
+			XYCenter = getCenterBetween2Points(coordinates[0], coordinates[1],
+					coordinates[3], coordinates[4]); 
+			
+//			XYCenter = convertPolarToCartesianCoor(coordinates[0],
+//					coordinates[1], angleLengthXYCenter[1] / 2,
+//					angleLengthXYCenter[0]);
 
 			angleLengthXYCenter[2] = XYCenter[0];
 			angleLengthXYCenter[3] = XYCenter[1];
@@ -352,16 +354,16 @@ public class MyCoordinatesGeometry {
 
 			Line spindleLine = new Line(coordinates[0], coordinates[1],
 					coordinates[2], coordinates[3]);
-
-			angleLengthXYCenter[0] = spindleLine.getAngle((int) coordinates[0],
-					(int) coordinates[1], (int) coordinates[2],
-					(int) coordinates[3]);
+			if(spindleLine.getAngle()>90){
+				angleLengthXYCenter[0] = spindleLine.getAngle() - 180;
+			}
 			angleLengthXYCenter[1] = spindleLine.getLength();
 			double[] XYCenter = new double[2];
-
-			XYCenter = convertPolarToCartesianCoor(coordinates[0],
-					coordinates[1], angleLengthXYCenter[1] / 2,
-					angleLengthXYCenter[0]);
+			XYCenter = getCenterBetween2Points(coordinates[0], coordinates[1],
+					coordinates[2], coordinates[3]);
+//			XYCenter = convertPolarToCartesianCoor(coordinates[0],
+//					coordinates[1], angleLengthXYCenter[1] / 2,
+//					angleLengthXYCenter[0]);
 
 			angleLengthXYCenter[2] = XYCenter[0];
 			angleLengthXYCenter[3] = XYCenter[1];
@@ -377,9 +379,12 @@ public class MyCoordinatesGeometry {
 	 * @return
 	 */
 	public static double getAngleToAxis(double angleAxis, double otherAngle) {
-
-		// return Math.abs(angleAxis - otherAngle);
-		return (angleAxis - otherAngle);
+		if (angleAxis * otherAngle > 0){
+			return Math.abs(angleAxis - otherAngle);
+		}else{
+			return Math.abs(angleAxis) + Math.abs(otherAngle);
+		}
+		
 	}
 
 	/**
@@ -399,6 +404,28 @@ public class MyCoordinatesGeometry {
 			return Math.sqrt(Math.pow(coordinates[0] - coordinates[2], 2)
 					+ Math.pow(coordinates[1] - coordinates[3], 2));
 		}
+	}
+	
+	/**
+	 * Method to get center between 2 points
+	 * 
+	 * @param coordinates
+	 * @param tridimentional
+	 * @return
+	 */
+	public static double[] getCenterBetween2Points(double x1, double y1,double x2,double y2) {
+		double[] XYCenter = new double[2];
+		if(x1>x2){
+			XYCenter[0] = x2 + (x1-x2) / 2;
+		}else{
+			XYCenter[0] = x1 + (x2-x1) / 2;
+		}
+		if(y1>y2){
+			XYCenter[1] = y2 + (y1-y2) / 2;
+		}else{
+			XYCenter[1] = y1 + (y2-y1) / 2;
+		}
+		return XYCenter;
 	}
 
 }

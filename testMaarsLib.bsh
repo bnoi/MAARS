@@ -144,13 +144,12 @@ if(md.isOkClicked()) {
 				mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO\\" + frame);
 				acqNameFluo = null;
 				fluoImage = null;
-//				Thread.getAllStackTraces().keySet();
-				Thread[] threadArray = Thread.getAllStackTraces().keySet().toArray(new Thread[Thread.getAllStackTraces().keySet().size()]);
-				for(Thread thread : threadArray){
-					if(!thread.isAlive()){
-						thread.interrupt();
-					}
-				}
+//				Thread[] threadArray = Thread.getAllStackTraces().keySet().toArray(new Thread[Thread.getAllStackTraces().keySet().size()]);
+//				for(Thread thread : threadArray){
+//					if(!thread.isAlive()){
+//						thread.interrupt();
+//					}
+//				}
 				double acqTook = System.currentTimeMillis() - beginAcq;
 				gui.sleep((long) (timeInterval - acqTook));
 				frame++;

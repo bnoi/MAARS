@@ -1,10 +1,13 @@
 package fiji.plugin.maars.cellstateanalysis;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.micromanager.utils.ReportingUtils;
 
 import fiji.plugin.trackmate.Spot;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.ProfilePlot;
@@ -425,9 +428,6 @@ public class Cell {
 			 * ()+" y = "+cellShapeRoi.getYBase());
 			 */
 			//TODO
-//			ImageProcessor ip =  fluoImage.getProcessor();
-//			ip.setRoi(cellShapeRoi);
-//			fluoImage.setProcessor(ip.crop());
 			ImagePlus newImage = 
 					new ImagePlus("CroppedFluoImage", fluoImage
 					.getImageStack().crop((int) cellShapeRoi.getXBase(),
@@ -598,6 +598,10 @@ public class Cell {
 	
 	public int getCellNumber(){
 		return cellNumber;
+	}
+
+	public void saveFluoImage(String path){
+		IJ.saveAsTiff(fluoImage, path);
 	}
 
 }

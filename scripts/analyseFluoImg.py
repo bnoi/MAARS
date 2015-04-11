@@ -19,7 +19,7 @@ import fiji.plugin.trackmate.features.track.TrackDurationAnalyzer as TrackDurati
 from ij.plugin import ZProjector;
 from ij.measure import Calibration
 
-imp = IJ.openImage('/Users/theoli89/Desktop/curioData/single_field/102_3/movie_X0_Y0_FLUO/0/MMStack_Pos0.ome.tif')
+imp = IJ.openImage('/Users/theoli89/Documents/MAARS/scripts/MAX_MMStack_Pos0.ome.tif')
 #imp.show()
 
 projector = ZProjector();

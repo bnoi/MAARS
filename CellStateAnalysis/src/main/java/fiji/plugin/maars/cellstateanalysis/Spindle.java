@@ -21,6 +21,10 @@ import fiji.plugin.trackmate.Spot;
  *
  */
 public class Spindle {
+	private double angleSpCellCenter;
+	private double lengthSpCellCenter;
+	private double centerCellX;
+	private double centerCellY;
 	private double length;
 	private double lengthToMajorAxis;
 	private double angleToMajorAxis;
@@ -103,12 +107,21 @@ public class Spindle {
 		Map<String, Double> features2 = spotList.get(index2).getFeatures();
 
 		double[] coordinates = new double[6];
-		coordinates[0] = features1.get("POSITION_X");
-		coordinates[1] = features1.get("POSITION_Y");
-		coordinates[2] = features1.get("POSITION_Z") + 1;
-		coordinates[3] = features2.get("POSITION_X");
-		coordinates[4] = features2.get("POSITION_Y");
-		coordinates[5] = features2.get("POSITION_Z") + 1;
+		if (features1.get("POSITION_Y") > features2.get("POSITION_Y")) {
+			coordinates[0] = features1.get("POSITION_X");
+			coordinates[1] = features1.get("POSITION_Y");
+			coordinates[2] = features1.get("POSITION_Z") + 1;
+			coordinates[3] = features2.get("POSITION_X");
+			coordinates[4] = features2.get("POSITION_Y");
+			coordinates[5] = features2.get("POSITION_Z") + 1;
+		}else{
+			coordinates[3] = features1.get("POSITION_X");
+			coordinates[4] = features1.get("POSITION_Y");
+			coordinates[5] = features1.get("POSITION_Z") + 1;
+			coordinates[0] = features2.get("POSITION_X");
+			coordinates[1] = features2.get("POSITION_Y");
+			coordinates[2] = features2.get("POSITION_Z") + 1;
+		}
 
 		return coordinates;
 	}
@@ -156,195 +169,201 @@ public class Spindle {
 				absoluteAngleLengthXYCenter[1], absoluteAngleLengthXYCenter[0],
 				cal);
 		lengthToMajorAxis = measures.getMajor() / length;
+		double cellAbsoAngle = measures.getAngle();
+		if (cellAbsoAngle > 90){
+			cellAbsoAngle -= 180; 
+		}
 		angleToMajorAxis = MyCoordinatesGeometry.getAngleToAxis(
-				measures.getAngle(), absoluteAngleLengthXYCenter[0]);
+				cellAbsoAngle, absoluteAngleLengthXYCenter[0]);
 
 		coordSPB = coordinates;
 
 		double[] coorTemp = new double[4];
+		//center in pixel
 		coorTemp[0] = absoluteAngleLengthXYCenter[2];
 		coorTemp[1] = absoluteAngleLengthXYCenter[3];
-		coorTemp[2] = (measures.getXCentroid() / cal.pixelWidth)
+		//center of Roi in pixel
+		centerCellX = (measures.getXCentroid() / cal.pixelWidth)
 				- cellShapeRoi.getXBase();
-		coorTemp[3] = (measures.getYCentroid() / cal.pixelHeight)
+		centerCellY = (measures.getYCentroid() / cal.pixelHeight)
 				- cellShapeRoi.getYBase();
-
-		Line tempLine = new Line(coorTemp[2], coorTemp[3], coorTemp[0],
+		//pixel
+		Line tempLine = new Line(centerCellX, centerCellY, coorTemp[0],
 				coorTemp[1]);
 
-		double tempAngle = tempLine.getAngle((int) coorTemp[2],
-				(int) coorTemp[3], (int) coorTemp[0], (int) coorTemp[1]);
-
-		double lengthTemp = tempLine.getLength();
-
-		XYCenterAbsolutePositionToMajorMinorAxis = MyCoordinatesGeometry
-				.convertPolarToCartesianCoor(
-						0,
-						0,
-						lengthTemp,
-						MyCoordinatesGeometry.getAngleToAxis(
-								measures.getAngle() + 90, tempAngle));
-		XYCenterAbsolutePositionToMajorMinorAxis[0] = XYCenterAbsolutePositionToMajorMinorAxis[0]
-				* cal.pixelWidth;
-		XYCenterAbsolutePositionToMajorMinorAxis[1] = XYCenterAbsolutePositionToMajorMinorAxis[1]
-				* cal.pixelHeight;
-
-		XYCenterRelativePositionToMajorMinorAxis = new double[2];
-
-		XYCenterRelativePositionToMajorMinorAxis[0] = measures.getMinor()
-				/ XYCenterAbsolutePositionToMajorMinorAxis[0];
-		XYCenterRelativePositionToMajorMinorAxis[1] = measures.getMajor()
-				/ XYCenterAbsolutePositionToMajorMinorAxis[1];
+		angleSpCellCenter = tempLine.getAngle();
+		//pixel
+		lengthSpCellCenter = tempLine.getLength();
+		//pixel[]
+//		XYCenterAbsolutePositionToMajorMinorAxis = MyCoordinatesGeometry
+//				.convertPolarToCartesianCoor(
+//						0,
+//						0,
+//						lengthTemp,
+//						MyCoordinatesGeometry.getAngleToAxis(
+//								measures.getAngle() + 90, tempAngle));
+//		//um
+//		XYCenterAbsolutePositionToMajorMinorAxis[0] = XYCenterAbsolutePositionToMajorMinorAxis[0]
+//				* cal.pixelWidth;
+//		XYCenterAbsolutePositionToMajorMinorAxis[1] = XYCenterAbsolutePositionToMajorMinorAxis[1]
+//				* cal.pixelHeight;
+//
+//		XYCenterRelativePositionToMajorMinorAxis = new double[2];
+//		//um
+//		XYCenterRelativePositionToMajorMinorAxis[0] = measures.getMinor()
+//				/ XYCenterAbsolutePositionToMajorMinorAxis[0];
+//		XYCenterRelativePositionToMajorMinorAxis[1] = measures.getMajor()
+//				/ XYCenterAbsolutePositionToMajorMinorAxis[1];
 	}
 
-	/**
-	 * Method to see what was detected by the program : it returns a duplicate
-	 * of image entered where cell boundaries are drawn in pink, major and minor
-	 * axis in yellow and spindle in blue
-	 * 
-	 * @param croppedFluoImg
-	 * @return
-	 */
-	public ImagePlus testFunction(ImagePlus croppedFluoImg) {
-
-		croppedFluoImg.deleteRoi();
-
-		double[] coorMaj = MyCoordinatesGeometry.computeCoordinatesOfMajorAxis(
-				measures.getXCentroid(), measures.getYCentroid(),
-				measures.getMajor(), measures.getAngle());
-
-		Line maj = new Line(
-				(coorMaj[0] / croppedFluoImg.getCalibration().pixelWidth)
-						- cellShapeRoi.getXBase(),
-				(coorMaj[1] / croppedFluoImg.getCalibration().pixelHeight)
-						- cellShapeRoi.getYBase(),
-				(coorMaj[2] / croppedFluoImg.getCalibration().pixelWidth)
-						- cellShapeRoi.getXBase(),
-				(coorMaj[3] / croppedFluoImg.getCalibration().pixelHeight)
-						- cellShapeRoi.getYBase());
-
-		double[] coorMin = MyCoordinatesGeometry.computeCoordinatesOfMajorAxis(
-				measures.getXCentroid(), measures.getYCentroid(),
-				measures.getMinor(), measures.getAngle() + 90);
-
-		Line min = new Line(
-				(coorMin[0] / croppedFluoImg.getCalibration().pixelWidth)
-						- cellShapeRoi.getXBase(),
-				(coorMin[1] / croppedFluoImg.getCalibration().pixelHeight)
-						- cellShapeRoi.getYBase(),
-				(coorMin[2] / croppedFluoImg.getCalibration().pixelWidth)
-						- cellShapeRoi.getXBase(),
-				(coorMin[3] / croppedFluoImg.getCalibration().pixelHeight)
-						- cellShapeRoi.getYBase());
-
-		Line spindleLine;
-
-		if (spotList.size() == 2) {
-			spindleLine = new Line(coordSPB[0], coordSPB[1], coordSPB[3],
-					coordSPB[4]);
-		} else {
-			spindleLine = null;
-		}
-
-		cellShapeRoi.setLocation(0, 0);
-
-		ImageStack ims = new ImageStack(croppedFluoImg.getWidth(),
-				croppedFluoImg.getHeight());
-
-		for (int i = 1; i <= croppedFluoImg.getNSlices(); i++) {
-			croppedFluoImg.setSlice(i);
-			ColorProcessor newIp = croppedFluoImg.getProcessor().duplicate()
-					.convertToColorProcessor();
-			newIp.setColor(Color.PINK);
-			cellShapeRoi.drawPixels(newIp);
-			newIp.setColor(Color.YELLOW);
-			maj.drawPixels(newIp);
-			min.drawPixels(newIp);
-			if (spotList.size() == 2) {
-				newIp.setColor(Color.BLUE);
-				spindleLine.drawPixels(newIp);
-			}
-
-			ims.addSlice(newIp);
-
-		}
-
-		ImagePlus im = new ImagePlus("Cell " + cellShapeRoi.getName(), ims);
-
-		return im;
-	}
-
-	/**
-	 * Method to get a schematic representation of the spindle according to the
-	 * cell dimensions
-	 * 
-	 * @param width
-	 *            : cell dimension for representation
-	 * @param heigth
-	 *            : cell dimension for representation
-	 * @param cal
-	 * @param absoluteSpindleLength
-	 * @param absoluteXYCenterCoord
-	 * @return an image Processor
-	 */
-	public ColorProcessor getProcessorReferencedSpindle(int width, int heigth,
-			Calibration cal, boolean absoluteSpindleLength,
-			boolean absoluteXYCenterCoord) {
-
-		double spindleLength;
-		int x;
-		int y;
-		if (absoluteSpindleLength) {
-			spindleLength = MyCoordinatesGeometry.convertAxisLengthToPixel(
-					length, angleToMajorAxis + 90, cal);
-		} else {
-			spindleLength = heigth / lengthToMajorAxis;
-		}
-
-		if (absoluteXYCenterCoord) {
-			x = (int) Math
-					.round((width / 2)
-							+ (XYCenterAbsolutePositionToMajorMinorAxis[0] / cal.pixelWidth));
-			y = (int) Math
-					.round((heigth / 2)
-							+ (XYCenterAbsolutePositionToMajorMinorAxis[1] / cal.pixelHeight));
-		} else {
-			x = (int) Math.round((width / 2)
-					+ (width / XYCenterRelativePositionToMajorMinorAxis[0]));
-			y = (int) Math.round((heigth / 2)
-					+ (heigth / XYCenterRelativePositionToMajorMinorAxis[1]));
-		}
-
-		ColorProcessor cp = new ColorProcessor(width, heigth);
-
-		Line maj = new Line(width / 2, 0, width / 2, heigth);
-
-		Line min = new Line(0, heigth / 2, width, heigth / 2);
-
-		double[] spindleCoord = MyCoordinatesGeometry
-				.computeCoordinatesOfMajorAxis(x, y, spindleLength,
-						angleToMajorAxis + 90);
-
-		Line spindle = new Line(spindleCoord[0], spindleCoord[1],
-				spindleCoord[2], spindleCoord[3]);
-
-		OvalRoi center = new OvalRoi(x, y, 1, 1);
-
-		cp.setColor(Color.YELLOW);
-		maj.drawPixels(cp);
-		min.drawPixels(cp);
-
-		cp.setColor(Color.BLUE);
-		spindle.drawPixels(cp);
-
-		cp.setColor(Color.RED);
-		center.drawPixels(cp);
-
-		System.out.println("x center : " + x);
-		System.out.println("y center : " + y);
-
-		return cp;
-	}
+//	/**
+//	 * Method to see what was detected by the program : it returns a duplicate
+//	 * of image entered where cell boundaries are drawn in pink, major and minor
+//	 * axis in yellow and spindle in blue
+//	 * 
+//	 * @param croppedFluoImg
+//	 * @return
+//	 */
+//	public ImagePlus testFunction(ImagePlus croppedFluoImg) {
+//
+//		croppedFluoImg.deleteRoi();
+//
+//		double[] coorMaj = MyCoordinatesGeometry.computeCoordinatesOfMajorAxis(
+//				measures.getXCentroid(), measures.getYCentroid(),
+//				measures.getMajor(), measures.getAngle());
+//
+//		Line maj = new Line(
+//				(coorMaj[0] / croppedFluoImg.getCalibration().pixelWidth)
+//						- cellShapeRoi.getXBase(),
+//				(coorMaj[1] / croppedFluoImg.getCalibration().pixelHeight)
+//						- cellShapeRoi.getYBase(),
+//				(coorMaj[2] / croppedFluoImg.getCalibration().pixelWidth)
+//						- cellShapeRoi.getXBase(),
+//				(coorMaj[3] / croppedFluoImg.getCalibration().pixelHeight)
+//						- cellShapeRoi.getYBase());
+//
+//		double[] coorMin = MyCoordinatesGeometry.computeCoordinatesOfMajorAxis(
+//				measures.getXCentroid(), measures.getYCentroid(),
+//				measures.getMinor(), measures.getAngle() + 90);
+//
+//		Line min = new Line(
+//				(coorMin[0] / croppedFluoImg.getCalibration().pixelWidth)
+//						- cellShapeRoi.getXBase(),
+//				(coorMin[1] / croppedFluoImg.getCalibration().pixelHeight)
+//						- cellShapeRoi.getYBase(),
+//				(coorMin[2] / croppedFluoImg.getCalibration().pixelWidth)
+//						- cellShapeRoi.getXBase(),
+//				(coorMin[3] / croppedFluoImg.getCalibration().pixelHeight)
+//						- cellShapeRoi.getYBase());
+//
+//		Line spindleLine;
+//
+//		if (spotList.size() == 2) {
+//			spindleLine = new Line(coordSPB[0], coordSPB[1], coordSPB[3],
+//					coordSPB[4]);
+//		} else {
+//			spindleLine = null;
+//		}
+//
+//		cellShapeRoi.setLocation(0, 0);
+//
+//		ImageStack ims = new ImageStack(croppedFluoImg.getWidth(),
+//				croppedFluoImg.getHeight());
+//
+//		for (int i = 1; i <= croppedFluoImg.getNSlices(); i++) {
+//			croppedFluoImg.setSlice(i);
+//			ColorProcessor newIp = croppedFluoImg.getProcessor().duplicate()
+//					.convertToColorProcessor();
+//			newIp.setColor(Color.PINK);
+//			cellShapeRoi.drawPixels(newIp);
+//			newIp.setColor(Color.YELLOW);
+//			maj.drawPixels(newIp);
+//			min.drawPixels(newIp);
+//			if (spotList.size() == 2) {
+//				newIp.setColor(Color.BLUE);
+//				spindleLine.drawPixels(newIp);
+//			}
+//
+//			ims.addSlice(newIp);
+//
+//		}
+//
+//		ImagePlus im = new ImagePlus("Cell " + cellShapeRoi.getName(), ims);
+//
+//		return im;
+//	}
+//
+//	/**
+//	 * Method to get a schematic representation of the spindle according to the
+//	 * cell dimensions
+//	 * 
+//	 * @param width
+//	 *            : cell dimension for representation
+//	 * @param heigth
+//	 *            : cell dimension for representation
+//	 * @param cal
+//	 * @param absoluteSpindleLength
+//	 * @param absoluteXYCenterCoord
+//	 * @return an image Processor
+//	 */
+//	public ColorProcessor getProcessorReferencedSpindle(int width, int heigth,
+//			Calibration cal, boolean absoluteSpindleLength,
+//			boolean absoluteXYCenterCoord) {
+//
+//		double spindleLength;
+//		int x;
+//		int y;
+//		if (absoluteSpindleLength) {
+//			spindleLength = MyCoordinatesGeometry.convertAxisLengthToPixel(
+//					length, angleToMajorAxis + 90, cal);
+//		} else {
+//			spindleLength = heigth / lengthToMajorAxis;
+//		}
+//
+//		if (absoluteXYCenterCoord) {
+//			x = (int) Math
+//					.round((width / 2)
+//							+ (XYCenterAbsolutePositionToMajorMinorAxis[0] / cal.pixelWidth));
+//			y = (int) Math
+//					.round((heigth / 2)
+//							+ (XYCenterAbsolutePositionToMajorMinorAxis[1] / cal.pixelHeight));
+//		} else {
+//			x = (int) Math.round((width / 2)
+//					+ (width / XYCenterRelativePositionToMajorMinorAxis[0]));
+//			y = (int) Math.round((heigth / 2)
+//					+ (heigth / XYCenterRelativePositionToMajorMinorAxis[1]));
+//		}
+//
+//		ColorProcessor cp = new ColorProcessor(width, heigth);
+//
+//		Line maj = new Line(width / 2, 0, width / 2, heigth);
+//
+//		Line min = new Line(0, heigth / 2, width, heigth / 2);
+//
+//		double[] spindleCoord = MyCoordinatesGeometry
+//				.computeCoordinatesOfMajorAxis(x, y, spindleLength,
+//						angleToMajorAxis + 90);
+//
+//		Line spindle = new Line(spindleCoord[0], spindleCoord[1],
+//				spindleCoord[2], spindleCoord[3]);
+//
+//		OvalRoi center = new OvalRoi(x, y, 1, 1);
+//
+//		cp.setColor(Color.YELLOW);
+//		maj.drawPixels(cp);
+//		min.drawPixels(cp);
+//
+//		cp.setColor(Color.BLUE);
+//		spindle.drawPixels(cp);
+//
+//		cp.setColor(Color.RED);
+//		center.drawPixels(cp);
+//
+//		System.out.println("x center : " + x);
+//		System.out.println("y center : " + y);
+//
+//		return cp;
+//	}
 
 	/**
 	 * 
@@ -401,41 +420,56 @@ public class Spindle {
 	public String getSpindleFeature() {
 		return this.feature;
 	}
+
 	/**
 	 * Method to write to JSON format features of spindle
+	 * 
 	 * @param name
 	 * @return
 	 */
 	public String toString(String name) {
-		String spindle = "{\""+name+"\""
-				+":{"
-				+"\"cell\":"+cellShapeRoi.getName()+","
-				+"\"feature\":\""+feature+"\","
-				+"\"number_of_spot_detected\":"+getNumberOfSpotDetected();
-		if (!feature.equals(NO_SPINDLE) && !feature.equals(NO_SPOT)) {
-			spindle = spindle+",\"length\":{"
-							+"\"absolute\":"+length+","
-							+"\"relative\":"+lengthToMajorAxis+"},"
-					+"\"angle_to_major_axis\":"+angleToMajorAxis+","
-					+"\"SPB_coordinates\":{"
-						+"\"spb1\":{"
-							+"\"x\":"+coordSPB[0]+","
-							+"\"y\":"+coordSPB[1]+","
-							+"\"z\":"+coordSPB[2]+"},"
-						+"\"spb2\":{"
-							+"\"x\":"+coordSPB[3]+","
-							+"\"y\":"+coordSPB[4]+","
-							+"\"z\":"+coordSPB[5]+"}},"
-					+"\"center\":{"
-							+"\"absolute_coordinates\":{"
-								+"\"x\":"+XYCenterAbsolutePositionToMajorMinorAxis[0]+","
-								+"\"y\":"+XYCenterAbsolutePositionToMajorMinorAxis[1]+"},"
-							+"\"relative_coordinates\":{"
-								+"\"x\":"+XYCenterRelativePositionToMajorMinorAxis[0]+","
-								+"\"y\":"+XYCenterRelativePositionToMajorMinorAxis[1]+"}}";
+		String spindle = "{\"" + name + "\"" + ":{" + "\"cell\":"
+				+ cellShapeRoi.getName() + "," + "\"feature\":\"" + feature
+				+ "\"," + "\"number_of_spot_detected\":"
+				+ getNumberOfSpotDetected();
+		if (!feature.equals(NO_SPINDLE) && !feature.equals(NO_SPOT)) 
+//		{
+//			spindle = spindle + ",\"length\":{" + "\"absolute\":" + length
+//					+ "," + "\"relative\":" + lengthToMajorAxis + "},"
+//					+ "\"angle_to_major_axis\":" + angleToMajorAxis + ","
+//					+ "\"SPB_coordinates\":{" + "\"spb1\":{" + "\"x\":"
+//					+ coordSPB[0] + "," + "\"y\":" + coordSPB[1] + ","
+//					+ "\"z\":" + coordSPB[2] + "}," + "\"spb2\":{" + "\"x\":"
+//					+ coordSPB[3] + "," + "\"y\":" + coordSPB[4] + ","
+//					+ "\"z\":" + coordSPB[5] + "}}," + "\"center\":{"
+//					+ "\"absolute_coordinates\":{" + "\"x\":"
+//					+ XYCenterAbsolutePositionToMajorMinorAxis[0] + ","
+//					+ "\"y\":" + XYCenterAbsolutePositionToMajorMinorAxis[1]
+//					+ "}," + "\"relative_coordinates\":{" + "\"x\":"
+//					+ XYCenterRelativePositionToMajorMinorAxis[0] + ","
+//					+ "\"y\":" + XYCenterRelativePositionToMajorMinorAxis[1]
+//					+ "}}";
+//		}
+		{
+			spindle = spindle + ",\"length\":{" + "\"absolute\":" + length
+					+ "," + "\"relative\":" + lengthToMajorAxis + "},"
+					+ "\"angle_to_major_axis\":" + angleToMajorAxis + ","
+					+ "\"SPB_coordinates\":{" + "\"spb1\":{" + "\"x\":"
+					+ coordSPB[0] + "," + "\"y\":" + coordSPB[1] + ","
+					+ "\"z\":" + coordSPB[2] + "}," + "\"spb2\":{" + "\"x\":"
+					+ coordSPB[3] + "," + "\"y\":" + coordSPB[4] + ","
+					+ "\"z\":" + coordSPB[5] + "}}," + "\"center\":{"
+					+ "\"absolute_coordinates\":{" + "\"x\":"
+					+ centerCellX + ","
+					+ "\"y\":" + centerCellY
+					+ "}," + "\"relative_coordinates\":{" + "\"x\":"
+					+ angleSpCellCenter  + ","
+					+ "\"y\":" + lengthSpCellCenter
+					+ "}}";
 		}
-		spindle = spindle+"}}";
-		
+
+		spindle = spindle + "}}";
+
 		return spindle;
 	}
 }
