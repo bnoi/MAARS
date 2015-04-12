@@ -25,11 +25,13 @@ public class Spindle {
 	private double lengthSpCellCenter;
 	private double centerCellX;
 	private double centerCellY;
+	private double centerSpX;
+	private double centerSpY;
 	private double length;
 	private double lengthToMajorAxis;
 	private double angleToMajorAxis;
-	private double[] XYCenterAbsolutePositionToMajorMinorAxis;
-	private double[] XYCenterRelativePositionToMajorMinorAxis;
+//	private double[] XYCenterAbsolutePositionToMajorMinorAxis;
+//	private double[] XYCenterRelativePositionToMajorMinorAxis;
 	private String feature;
 	private Roi cellShapeRoi;
 	private Measures measures;
@@ -62,8 +64,8 @@ public class Spindle {
 			length = 0;
 			lengthToMajorAxis = 0;
 			angleToMajorAxis = 0;
-			XYCenterAbsolutePositionToMajorMinorAxis = null;
-			XYCenterRelativePositionToMajorMinorAxis = null;
+//			XYCenterAbsolutePositionToMajorMinorAxis = null;
+//			XYCenterRelativePositionToMajorMinorAxis = null;
 			coordSPB = null;
 
 			feature = "NO_SPOT";
@@ -72,8 +74,8 @@ public class Spindle {
 				length = 0;
 				lengthToMajorAxis = 0;
 				angleToMajorAxis = 0;
-				XYCenterAbsolutePositionToMajorMinorAxis = null;
-				XYCenterRelativePositionToMajorMinorAxis = null;
+//				XYCenterAbsolutePositionToMajorMinorAxis = null;
+//				XYCenterRelativePositionToMajorMinorAxis = null;
 				coordSPB = null;
 
 				feature = "NO_SPINDLE";
@@ -180,16 +182,16 @@ public class Spindle {
 
 		double[] coorTemp = new double[4];
 		//center in pixel
-		coorTemp[0] = absoluteAngleLengthXYCenter[2];
-		coorTemp[1] = absoluteAngleLengthXYCenter[3];
+		centerSpX = absoluteAngleLengthXYCenter[2];
+		centerSpY = absoluteAngleLengthXYCenter[3];
 		//center of Roi in pixel
 		centerCellX = (measures.getXCentroid() / cal.pixelWidth)
 				- cellShapeRoi.getXBase();
 		centerCellY = (measures.getYCentroid() / cal.pixelHeight)
 				- cellShapeRoi.getYBase();
 		//pixel
-		Line tempLine = new Line(centerCellX, centerCellY, coorTemp[0],
-				coorTemp[1]);
+		Line tempLine = new Line(centerCellX, centerCellY, centerSpX,
+				centerSpY);
 
 		angleSpCellCenter = tempLine.getAngle();
 		//pixel

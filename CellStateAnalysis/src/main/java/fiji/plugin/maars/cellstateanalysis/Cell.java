@@ -131,273 +131,273 @@ public class Cell {
 		// cellLinearRoi = computeCellLinearRoi(measures);
 	}
 
-	/**
-	 * Method used to find if the cell has a septum (DOES NOT WORK WELL): the
-	 * method is based on transversal intensity plot analysis of the cell.
-	 * 
-	 * @param threshold
-	 */
-	public void findSeptum(double threshold) {
-		septumArray = new ArrayList<Septum>();
-		septumNumber = 0;
-		cellLinearRoi = MyCoordinatesGeometry.computeCellLinearRoi(bfImage,
-				measures, true);
-		cellLinearRoi.setName("Linear_" + cellShapeRoi.getName());
-
-		correlationImage.setRoi(cellLinearRoi);
-		ProfilePlot profilePlot = new ProfilePlot(correlationImage);
-		double[] profileArray = profilePlot.getProfile();
-
-		/*
-		 * if (cellShapeRoi.getName().equals("106")) {
-		 * profilePlot.createWindow(); }
-		 */
-
-		// slopeImage.show();
-		// profilePlot.createWindow();
-
-		double[][] peaks = findBoundariesPeaks(profileArray);
-		ReportingUtils.logMessage("\n...........................\ncell : "
-				+ cellShapeRoi.getName() + "\n...........................\n");
-		ReportingUtils.logMessage("peak 1 = " + peaks[0][0] + " peak 2 = "
-				+ peaks[1][0]);
-
-		for (int i = (int) peaks[0][0] + 1; i < peaks[1][0]; i++) {
-			if (profileArray[i] > profileArray[i + 1]
-					&& profileArray[i] > profileArray[i - 1]
-					&& profileArray[i] > 0) {
-				// ReportingUtils.logMessage("i = "+i);
-				boolean isSeptum = false;
-				for (int newAngle = 180; newAngle > 0; newAngle = newAngle - 3) {
-					if (!isSeptum) {
-						int peakWidth = getPeakWidth(profileArray, i);
-						double[] plotNewAngledegres = getNewAngleDegresPlot(
-								cellLinearRoi, cellShapeRoi, measures,
-								correlationImage, i, peakWidth, newAngle);
-						double[][] peaksNewAngledegrees = findBoundariesPeaks(plotNewAngledegres);
-						double[] variableNewAngledegreeThreshold = findVariableThreshold(peaksNewAngledegrees);
-						int j = (int) peaksNewAngledegrees[0][0];
-						// IJ.wait(500);
-						// int peakNumber = 0;
-
-						// ReportingUtils.logMessage("peak 1 = "+peaksNewAngledegrees[0][0]+" peak 2 = "+peaksNewAngledegrees[1][0]);
-
-						while (j < (int) peaksNewAngledegrees[1][0]
-								&& (variableNewAngledegreeThreshold[0] + variableNewAngledegreeThreshold[1]
-										* j)
-										/ plotNewAngledegres[j] < threshold
-								&& plotNewAngledegres[j] > 0) {
-							// ReportingUtils.logMessage((variableNewAngledegreeThreshold[0]
-							// + variableNewAngledegreeThreshold[1] * j)/
-							// plotNewAngledegres[j]);
-							/*
-							 * if (plotNewAngledegres[j] >
-							 * plotNewAngledegres[j+1] && plotNewAngledegres[j]
-							 * > plotNewAngledegres[j-1]) { peakNumber++; }
-							 */
-							j++;
-						}
-						if (j == (int) peaksNewAngledegrees[1][0]) {// &&
-																	// peakNumber
-																	// < 2) {
-							ReportingUtils.logMessage("\n---\nseptum pos : " + i
-									+ "\n---\n");
-							isSeptum = true;
-							septumNumber += 1;
-
-						}
-					}
-				}
-			}
-
-		}
-		// TODO finish that
-	}
-
-	/**
-	 * Method which return an array of double containing plot intensity values
-	 * according to a line defined by a specific angle and position relative to
-	 * cell major axis.
-	 * 
-	 * @param cellLinearRoi
-	 *            : linear ROI corresponding to major axis
-	 * @param cellShapeRoi
-	 *            : ROI corresponding to segmented cell
-	 * @param measures
-	 *            : Measures object of cell
-	 * @param correlationImage
-	 *            : correlation image of cell
-	 * @param peakPosition
-	 *            : position of centre of new line
-	 * @param peakWidth
-	 *            : width of new line
-	 * @param newAngleDegree
-	 *            : angle in degree of new line
-	 * @return double[]
-	 */
-	public double[] getNewAngleDegresPlot(Line cellLinearRoi, Roi cellShapeRoi,
-			Measures measures, ImagePlus correlationImage, int peakPosition,
-			int peakWidth, int newAngleDegree) {
-
-		ProfilePlot ppNewAngle;
-		double[] plotNewAngleDegres;
-		double[] majorAxisCoordinates = MyCoordinatesGeometry
-				.computeCellLinearRoiCoordinates(bfImage, measures);
-		Line lineNewAngledegres;
-		double[] newCoordinates;
-		double[] xyCentroidNewSelection = MyCoordinatesGeometry
-				.convertPolarToCartesianCoor(majorAxisCoordinates[0],
-						majorAxisCoordinates[1], peakPosition,
-						measures.getAngle() + 180);
-		// ReportingUtils.logMessage("supposed 0 : x = "+majorAxisCoordinates[0]+" y = "+majorAxisCoordinates[1]);
-		// ReportingUtils.logMessage("centroid new selection : x = "+xyCentroidNewSelection[0]+" y = "+xyCentroidNewSelection[1]);
-		/*
-		 * double minorAxis; if(bfImage.getCalibration().scaled()) { minorAxis =
-		 * convertMinorAxisLength(measures.getMinor(), measures.getMajor(),
-		 * bfImage.getCalibration()); } else { minorAxis = measures.getMinor();
-		 * }
-		 * 
-		 * newCoordinates =
-		 * computeCoordinatesOfMajorAxis(xyCentroidNewSelection[0],
-		 * xyCentroidNewSelection[1], minorAxis,
-		 * measures.getAngle()-newAngleDegree);
-		 */
-		newCoordinates = MyCoordinatesGeometry
-				.computeCoordinatesOfAjutstedLengthAxis(cellShapeRoi,
-						xyCentroidNewSelection[0], xyCentroidNewSelection[1],
-						measures.getAngle() - newAngleDegree);
-
-		Line.setWidth(peakWidth);
-		lineNewAngledegres = new Line(newCoordinates[0], newCoordinates[1],
-				newCoordinates[2], newCoordinates[3]);
-
-		correlationImage.setRoi(lineNewAngledegres);
-		ppNewAngle = new ProfilePlot(correlationImage);
-
-		// test
-		/*
-		 * if (cellShapeRoi.getName().equals("26")) { ppNewAngle.createWindow();
-		 * }
-		 */
-		plotNewAngleDegres = ppNewAngle.getProfile();
-
-		return plotNewAngleDegres;
-	}
-
-	/**
-	 * Method to get peak width :
-	 *    peak position
-	 *         |
-	 *         v
-	 *         ..
-	 *        .  .
-	 *       .   .
-	 *      .     .
-	 * .....      .......... plot
-	 *      <---->
-	 *     peak width
-	 *     
-	 * @param plot
-	 * @param peakPosition : peak position
-	 * @return
-	 */
-	public int getPeakWidth(double[] plot, int peakPosition) {
-
-		// ReportingUtils.logMessage("peak position : "+peakPosition);
-		// ReportingUtils.logMessage("length plot : "+plot.length);
-
-		boolean firstBottomFound = false;
-		int firstBottom = 0;
-		boolean lastBottomFound = false;
-		int lastBottom = plot.length - 1;
-		int i = 1;
-		while (!firstBottomFound && i < peakPosition) {
-
-			if (plot[peakPosition - (i + 1)] > plot[peakPosition - i]) {
-				firstBottom = i;
-				firstBottomFound = true;
-			}
-			i++;
-		}
-		i = 1;
-		while (!lastBottomFound && i < plot.length - peakPosition) {
-			if (plot[peakPosition + (i + 1)] > plot[peakPosition + i]) {
-				lastBottom = i;
-				lastBottomFound = true;
-			}
-			i++;
-		}
-		return (lastBottom - firstBottom);
-	}
-
-	/**
-	 * Method to find most external peaks
-	 * 
-	 *         ..
-	 *        .  .           . .
-	 *       .   .          .   .
-	 *      .     .        .     .
-	 * .....      .........       .... plot
-	 *         ^              ^
-	 *         |              |
-	 *       peak            peak
-	 *       
-	 * @param plot
-	 * @return
-	 */
-	public double[][] findBoundariesPeaks(double[] plot) {
-		double[][] peaks = new double[2][2];
-		int i = 1;
-		boolean firstPeakFound = false;
-		boolean lastPeakFound = false;
-
-		while ((!firstPeakFound || !lastPeakFound) && i < plot.length) {
-			if (!firstPeakFound) {
-				if (plot[i + 1] < plot[i] && plot[i - 1] < plot[i]) {
-					peaks[0][0] = i;
-					peaks[0][1] = plot[i];
-					firstPeakFound = true;
-				}
-			}
-			if (!lastPeakFound) {
-				if (plot[(plot.length - 1) - (i + 1)] < plot[(plot.length - 1)
-						- i]
-						&& plot[(plot.length - 1) - (i - 1)] < plot[(plot.length - 1)
-								- i]) {
-					peaks[1][0] = (plot.length - 1) - i;
-					peaks[1][1] = plot[(plot.length - 1) - i];
-					lastPeakFound = true;
-				}
-			}
-
-			i++;
-		}
-		return peaks;
-	}
-
-	/**
-	 * find parameters of a linear equation y = ax + b (a and b) that go through
-	 * 2 peaks
-	 * 
-	 * @param peaks
-	 * @return double[] where parameters[1] = a and parameters[0] = b
-	 */
-	public double[] findVariableThreshold(double[][] peaks) {
-		double[] parameters = new double[2];
-		parameters[1] = (peaks[1][1] - peaks[0][1])
-				/ (peaks[1][0] - peaks[0][0]);
-		parameters[0] = peaks[0][1] - (parameters[1] * peaks[0][0]);
-		return parameters;
-	}
-
-	/**
-	 * Return number of septa predicted
-	 * 
-	 * @return
-	 */
-	public int septumNumber() {
-		return septumNumber;
-	}
+//	/**
+//	 * Method used to find if the cell has a septum (DOES NOT WORK WELL): the
+//	 * method is based on transversal intensity plot analysis of the cell.
+//	 * 
+//	 * @param threshold
+//	 */
+//	public void findSeptum(double threshold) {
+//		septumArray = new ArrayList<Septum>();
+//		septumNumber = 0;
+//		cellLinearRoi = MyCoordinatesGeometry.computeCellLinearRoi(bfImage,
+//				measures, true);
+//		cellLinearRoi.setName("Linear_" + cellShapeRoi.getName());
+//
+//		correlationImage.setRoi(cellLinearRoi);
+//		ProfilePlot profilePlot = new ProfilePlot(correlationImage);
+//		double[] profileArray = profilePlot.getProfile();
+//
+//		/*
+//		 * if (cellShapeRoi.getName().equals("106")) {
+//		 * profilePlot.createWindow(); }
+//		 */
+//
+//		// slopeImage.show();
+//		// profilePlot.createWindow();
+//
+//		double[][] peaks = findBoundariesPeaks(profileArray);
+//		ReportingUtils.logMessage("\n...........................\ncell : "
+//				+ cellShapeRoi.getName() + "\n...........................\n");
+//		ReportingUtils.logMessage("peak 1 = " + peaks[0][0] + " peak 2 = "
+//				+ peaks[1][0]);
+//
+//		for (int i = (int) peaks[0][0] + 1; i < peaks[1][0]; i++) {
+//			if (profileArray[i] > profileArray[i + 1]
+//					&& profileArray[i] > profileArray[i - 1]
+//					&& profileArray[i] > 0) {
+//				// ReportingUtils.logMessage("i = "+i);
+//				boolean isSeptum = false;
+//				for (int newAngle = 180; newAngle > 0; newAngle = newAngle - 3) {
+//					if (!isSeptum) {
+//						int peakWidth = getPeakWidth(profileArray, i);
+//						double[] plotNewAngledegres = getNewAngleDegresPlot(
+//								cellLinearRoi, cellShapeRoi, measures,
+//								correlationImage, i, peakWidth, newAngle);
+//						double[][] peaksNewAngledegrees = findBoundariesPeaks(plotNewAngledegres);
+//						double[] variableNewAngledegreeThreshold = findVariableThreshold(peaksNewAngledegrees);
+//						int j = (int) peaksNewAngledegrees[0][0];
+//						// IJ.wait(500);
+//						// int peakNumber = 0;
+//
+//						// ReportingUtils.logMessage("peak 1 = "+peaksNewAngledegrees[0][0]+" peak 2 = "+peaksNewAngledegrees[1][0]);
+//
+//						while (j < (int) peaksNewAngledegrees[1][0]
+//								&& (variableNewAngledegreeThreshold[0] + variableNewAngledegreeThreshold[1]
+//										* j)
+//										/ plotNewAngledegres[j] < threshold
+//								&& plotNewAngledegres[j] > 0) {
+//							// ReportingUtils.logMessage((variableNewAngledegreeThreshold[0]
+//							// + variableNewAngledegreeThreshold[1] * j)/
+//							// plotNewAngledegres[j]);
+//							/*
+//							 * if (plotNewAngledegres[j] >
+//							 * plotNewAngledegres[j+1] && plotNewAngledegres[j]
+//							 * > plotNewAngledegres[j-1]) { peakNumber++; }
+//							 */
+//							j++;
+//						}
+//						if (j == (int) peaksNewAngledegrees[1][0]) {// &&
+//																	// peakNumber
+//																	// < 2) {
+//							ReportingUtils.logMessage("\n---\nseptum pos : " + i
+//									+ "\n---\n");
+//							isSeptum = true;
+//							septumNumber += 1;
+//
+//						}
+//					}
+//				}
+//			}
+//
+//		}
+//		// TODO finish that
+//	}
+//
+//	/**
+//	 * Method which return an array of double containing plot intensity values
+//	 * according to a line defined by a specific angle and position relative to
+//	 * cell major axis.
+//	 * 
+//	 * @param cellLinearRoi
+//	 *            : linear ROI corresponding to major axis
+//	 * @param cellShapeRoi
+//	 *            : ROI corresponding to segmented cell
+//	 * @param measures
+//	 *            : Measures object of cell
+//	 * @param correlationImage
+//	 *            : correlation image of cell
+//	 * @param peakPosition
+//	 *            : position of centre of new line
+//	 * @param peakWidth
+//	 *            : width of new line
+//	 * @param newAngleDegree
+//	 *            : angle in degree of new line
+//	 * @return double[]
+//	 */
+//	public double[] getNewAngleDegresPlot(Line cellLinearRoi, Roi cellShapeRoi,
+//			Measures measures, ImagePlus correlationImage, int peakPosition,
+//			int peakWidth, int newAngleDegree) {
+//
+//		ProfilePlot ppNewAngle;
+//		double[] plotNewAngleDegres;
+//		double[] majorAxisCoordinates = MyCoordinatesGeometry
+//				.computeCellLinearRoiCoordinates(bfImage, measures);
+//		Line lineNewAngledegres;
+//		double[] newCoordinates;
+//		double[] xyCentroidNewSelection = MyCoordinatesGeometry
+//				.convertPolarToCartesianCoor(majorAxisCoordinates[0],
+//						majorAxisCoordinates[1], peakPosition,
+//						measures.getAngle() + 180);
+//		// ReportingUtils.logMessage("supposed 0 : x = "+majorAxisCoordinates[0]+" y = "+majorAxisCoordinates[1]);
+//		// ReportingUtils.logMessage("centroid new selection : x = "+xyCentroidNewSelection[0]+" y = "+xyCentroidNewSelection[1]);
+//		/*
+//		 * double minorAxis; if(bfImage.getCalibration().scaled()) { minorAxis =
+//		 * convertMinorAxisLength(measures.getMinor(), measures.getMajor(),
+//		 * bfImage.getCalibration()); } else { minorAxis = measures.getMinor();
+//		 * }
+//		 * 
+//		 * newCoordinates =
+//		 * computeCoordinatesOfMajorAxis(xyCentroidNewSelection[0],
+//		 * xyCentroidNewSelection[1], minorAxis,
+//		 * measures.getAngle()-newAngleDegree);
+//		 */
+//		newCoordinates = MyCoordinatesGeometry
+//				.computeCoordinatesOfAjutstedLengthAxis(cellShapeRoi,
+//						xyCentroidNewSelection[0], xyCentroidNewSelection[1],
+//						measures.getAngle() - newAngleDegree);
+//
+//		Line.setWidth(peakWidth);
+//		lineNewAngledegres = new Line(newCoordinates[0], newCoordinates[1],
+//				newCoordinates[2], newCoordinates[3]);
+//
+//		correlationImage.setRoi(lineNewAngledegres);
+//		ppNewAngle = new ProfilePlot(correlationImage);
+//
+//		// test
+//		/*
+//		 * if (cellShapeRoi.getName().equals("26")) { ppNewAngle.createWindow();
+//		 * }
+//		 */
+//		plotNewAngleDegres = ppNewAngle.getProfile();
+//
+//		return plotNewAngleDegres;
+//	}
+//
+//	/**
+//	 * Method to get peak width :
+//	 *    peak position
+//	 *         |
+//	 *         v
+//	 *         ..
+//	 *        .  .
+//	 *       .   .
+//	 *      .     .
+//	 * .....      .......... plot
+//	 *      <---->
+//	 *     peak width
+//	 *     
+//	 * @param plot
+//	 * @param peakPosition : peak position
+//	 * @return
+//	 */
+//	public int getPeakWidth(double[] plot, int peakPosition) {
+//
+//		// ReportingUtils.logMessage("peak position : "+peakPosition);
+//		// ReportingUtils.logMessage("length plot : "+plot.length);
+//
+//		boolean firstBottomFound = false;
+//		int firstBottom = 0;
+//		boolean lastBottomFound = false;
+//		int lastBottom = plot.length - 1;
+//		int i = 1;
+//		while (!firstBottomFound && i < peakPosition) {
+//
+//			if (plot[peakPosition - (i + 1)] > plot[peakPosition - i]) {
+//				firstBottom = i;
+//				firstBottomFound = true;
+//			}
+//			i++;
+//		}
+//		i = 1;
+//		while (!lastBottomFound && i < plot.length - peakPosition) {
+//			if (plot[peakPosition + (i + 1)] > plot[peakPosition + i]) {
+//				lastBottom = i;
+//				lastBottomFound = true;
+//			}
+//			i++;
+//		}
+//		return (lastBottom - firstBottom);
+//	}
+//
+//	/**
+//	 * Method to find most external peaks
+//	 * 
+//	 *         ..
+//	 *        .  .           . .
+//	 *       .   .          .   .
+//	 *      .     .        .     .
+//	 * .....      .........       .... plot
+//	 *         ^              ^
+//	 *         |              |
+//	 *       peak            peak
+//	 *       
+//	 * @param plot
+//	 * @return
+//	 */
+//	public double[][] findBoundariesPeaks(double[] plot) {
+//		double[][] peaks = new double[2][2];
+//		int i = 1;
+//		boolean firstPeakFound = false;
+//		boolean lastPeakFound = false;
+//
+//		while ((!firstPeakFound || !lastPeakFound) && i < plot.length) {
+//			if (!firstPeakFound) {
+//				if (plot[i + 1] < plot[i] && plot[i - 1] < plot[i]) {
+//					peaks[0][0] = i;
+//					peaks[0][1] = plot[i];
+//					firstPeakFound = true;
+//				}
+//			}
+//			if (!lastPeakFound) {
+//				if (plot[(plot.length - 1) - (i + 1)] < plot[(plot.length - 1)
+//						- i]
+//						&& plot[(plot.length - 1) - (i - 1)] < plot[(plot.length - 1)
+//								- i]) {
+//					peaks[1][0] = (plot.length - 1) - i;
+//					peaks[1][1] = plot[(plot.length - 1) - i];
+//					lastPeakFound = true;
+//				}
+//			}
+//
+//			i++;
+//		}
+//		return peaks;
+//	}
+//
+//	/**
+//	 * find parameters of a linear equation y = ax + b (a and b) that go through
+//	 * 2 peaks
+//	 * 
+//	 * @param peaks
+//	 * @return double[] where parameters[1] = a and parameters[0] = b
+//	 */
+//	public double[] findVariableThreshold(double[][] peaks) {
+//		double[] parameters = new double[2];
+//		parameters[1] = (peaks[1][1] - peaks[0][1])
+//				/ (peaks[1][0] - peaks[0][0]);
+//		parameters[0] = peaks[0][1] - (parameters[1] * peaks[0][0]);
+//		return parameters;
+//	}
+//
+//	/**
+//	 * Return number of septa predicted
+//	 * 
+//	 * @return
+//	 */
+//	public int septumNumber() {
+//		return septumNumber;
+//	}
 
 	/**
 	 * Method to find fluorescent spots on cell image and create a Spindle

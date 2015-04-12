@@ -415,16 +415,8 @@ public class MyCoordinatesGeometry {
 	 */
 	public static double[] getCenterBetween2Points(double x1, double y1,double x2,double y2) {
 		double[] XYCenter = new double[2];
-		if(x1>x2){
-			XYCenter[0] = x2 + (x1-x2) / 2;
-		}else{
-			XYCenter[0] = x1 + (x2-x1) / 2;
-		}
-		if(y1>y2){
-			XYCenter[1] = y2 + (y1-y2) / 2;
-		}else{
-			XYCenter[1] = y1 + (y2-y1) / 2;
-		}
+		XYCenter[0] = (x1 + x2) / 2;
+		XYCenter[1] = (y1 + y2) / 2;
 		return XYCenter;
 	}
 
