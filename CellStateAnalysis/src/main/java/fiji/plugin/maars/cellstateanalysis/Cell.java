@@ -1,20 +1,24 @@
 package fiji.plugin.maars.cellstateanalysis;
 
+import java.awt.Rectangle;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.micromanager.utils.ReportingUtils;
 
+import ij.process.ImageProcessor;
+import ij.gui.ProfilePlot;
 import fiji.plugin.trackmate.Spot;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Line;
-import ij.gui.ProfilePlot;
 import ij.gui.Roi;
+import ij.io.FileSaver;
 import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
-import ij.process.ImageProcessor;
+
 
 /**
  * Cell is a class containing information about cell image, including its
@@ -428,18 +432,26 @@ public class Cell {
 			 * ()+" y = "+cellShapeRoi.getYBase());
 			 */
 			//TODO
+			fluoImage.deleteRoi();
+			ImageProcessor imgProcessor = fluoImage.getProcessor();
+			Rectangle newRoi = new Rectangle((int)cellShapeRoi.getXBase(), (int)cellShapeRoi.getYBase(),
+					(int)cellShapeRoi.getBounds().width, (int)cellShapeRoi.getBounds().height);
+			imgProcessor.setRoi(newRoi);
+//			ImageStack stack = 
+//					fluoImage.getImageStack().crop((int) cellShapeRoi.getXBase(),
+//					(int) cellShapeRoi.getYBase(), 0,
+//					cellShapeRoi.getBounds().width,
+//					cellShapeRoi.getBounds().height,
+//					fluoImage.getNSlices());
 			ImagePlus newImage = 
-					new ImagePlus("CroppedFluoImage", fluoImage
-					.getImageStack().crop((int) cellShapeRoi.getXBase(),
-							(int) cellShapeRoi.getYBase(), 0,
-							cellShapeRoi.getBounds().width,
-							cellShapeRoi.getBounds().height,
-							fluoImage.getNSlices()));
+					new ImagePlus("CroppedFluoImage", imgProcessor.crop());
+			
 			ReportingUtils.logMessage("Done.");
 			ReportingUtils.logMessage("Put new calibration newly cropped image");
 			newImage.setCalibration(fluoImage.getCalibration());
 			ReportingUtils.logMessage("Done.");
 			ReportingUtils.logMessage("Set newly cropped image as fluorescent image");
+
 			setFluoImage(newImage);
 			newImage = null;
 			ReportingUtils.logMessage("Done");

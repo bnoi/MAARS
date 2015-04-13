@@ -44,8 +44,6 @@ public class CellFluoAnalysis {
 		projector.doProjection();
 		ImagePlus zProjectField = projector.getProjection();
 		
-		ReportingUtils.logMessage("- Get fluo image calibration");
-		Calibration cal = cell.getFluoImage().getCalibration();
 		Model model = new Model();
 		Settings settings = new Settings();
 		settings.setFrom(zProjectField);
@@ -53,13 +51,14 @@ public class CellFluoAnalysis {
 		settings.detectorFactory = new LogDetectorFactory();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
 		detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-		detectorSettings.put("RADIUS", (double) spotRadius / cal.pixelWidth);
+		detectorSettings.put("RADIUS", spotRadius);
 		detectorSettings.put("TARGET_CHANNEL", 1);
 		detectorSettings.put("THRESHOLD", 0.);
 		detectorSettings.put("DO_MEDIAN_FILTERING", false);
 		settings.detectorSettings = detectorSettings;
 
 		FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
+//		settings.initialSpotFilterValue = 10.0;
 		settings.addSpotFilter(filter1);
 
 		TrackMate trackmate = new TrackMate(model, settings);
@@ -67,20 +66,21 @@ public class CellFluoAnalysis {
 		//TODO
 		trackmate.execDetection();
 		ReportingUtils.logMessage("execDetection done");
-
+		
 		trackmate.execInitialSpotFiltering();
 		ReportingUtils.logMessage("execInitialSpotFiltering done");
 
-		trackmate.computeSpotFeatures(true);
+		trackmate.computeSpotFeatures(false);
 		ReportingUtils.logMessage("computeSpotFeatures done");
 
-		trackmate.execSpotFiltering(true);
+		trackmate.execSpotFiltering(false);
 		ReportingUtils.logMessage("execSpotFiltering done");
-		int nSpots = trackmate.getModel().getSpots().getNSpots(false);
+		int nSpots = trackmate.getModel().getSpots().getNSpots(true);
 		ReportingUtils.logMessage("Found " + nSpots + " spots");
 
 		res = new ArrayList<Spot>();
-		for (Spot spot : trackmate.getModel().getSpots().iterable(false)) {
+		for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
+			ReportingUtils.logMessage(String.valueOf(spot.getFeature("QUALITY")));
 			res.add(spot);
 		}
 		ReportingUtils.logMessage("- Done.");
@@ -88,9 +88,9 @@ public class CellFluoAnalysis {
 		settings= null;
 		detectorSettings= null;
 		trackmate= null;
-		filter1 = null;
+//		filter1 = null;
 		model = null;
-		factorForThreshold = 4;
+		factorForThreshold = 4.5;
 	}
 
 	/**

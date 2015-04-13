@@ -303,7 +303,7 @@ public class MaarsFluoAnalysis {
 					.getAsJsonObject()
 					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
 					.getAsBoolean()) {
-				cell.saveFluoImage(pathToResults + "\\" + String.valueOf(cell.getCellNumber()));
+				cell.saveFluoImage(pathToResults  + String.valueOf(cell.getCellNumber()));
 			}
 			cell = null;
 			sp = null;

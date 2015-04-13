@@ -18,9 +18,9 @@ import ij.measure.Calibration;
 import ij.plugin.ZProjector;
 
 //ImagePlus imp = IJ.open("MAX_MMStack_Pos0.ome.tif");
-imp = IJ.openImage("/Users/theoli89/Desktop/curioData/single_field/102_3/movie_X0_Y0_FLUO/0/MMStack_Pos0.ome.tif");
-print("- Get fluo image calibration");
-Calibration cal = imp.getCalibration();
+//ImagePlus imp = IJ.openImage("/Users/theoli89/Desktop/curioData/Virtual/movie_X0_Y0_FLUO/0/1.tif");
+ImagePlus imp = IJ.getImage();
+for(int i = 0; i<6000;i++){
 Model model = new Model();
 
 Settings settings = new Settings();
@@ -29,7 +29,7 @@ settings.setFrom(imp);
 settings.detectorFactory = new LogDetectorFactory();
 Map detectorSettings = new HashMap();
 detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-detectorSettings.put("RADIUS", (double) 2.3);
+detectorSettings.put("RADIUS", (double) 0.4);
 detectorSettings.put("TARGET_CHANNEL", 1);
 detectorSettings.put("THRESHOLD", 0.);
 detectorSettings.put("DO_MEDIAN_FILTERING", false);
@@ -57,8 +57,8 @@ print("- get results");
 
 int nSpots = trackmate.getModel().getSpots().getNSpots(false);
 print("Found " + nSpots + " spots");
-for (Spot spot : trackmate.getModel().getSpots().iterable(false)) {
-	print(spot.getFeatures());
-}
-//Thread.currentThread().interrupt();
+//for (Spot spot : trackmate.getModel().getSpots().iterable(false)) {
+//	print(spot.getFeatures());
+//}
 imp.close();
+}
