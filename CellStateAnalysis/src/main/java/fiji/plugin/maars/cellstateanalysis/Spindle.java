@@ -436,23 +436,6 @@ public class Spindle {
 				+ "\"," + "\"number_of_spot_detected\":"
 				+ getNumberOfSpotDetected();
 		if (!feature.equals(NO_SPINDLE) && !feature.equals(NO_SPOT)) 
-//		{
-//			spindle = spindle + ",\"length\":{" + "\"absolute\":" + length
-//					+ "," + "\"relative\":" + lengthToMajorAxis + "},"
-//					+ "\"angle_to_major_axis\":" + angleToMajorAxis + ","
-//					+ "\"SPB_coordinates\":{" + "\"spb1\":{" + "\"x\":"
-//					+ coordSPB[0] + "," + "\"y\":" + coordSPB[1] + ","
-//					+ "\"z\":" + coordSPB[2] + "}," + "\"spb2\":{" + "\"x\":"
-//					+ coordSPB[3] + "," + "\"y\":" + coordSPB[4] + ","
-//					+ "\"z\":" + coordSPB[5] + "}}," + "\"center\":{"
-//					+ "\"absolute_coordinates\":{" + "\"x\":"
-//					+ XYCenterAbsolutePositionToMajorMinorAxis[0] + ","
-//					+ "\"y\":" + XYCenterAbsolutePositionToMajorMinorAxis[1]
-//					+ "}," + "\"relative_coordinates\":{" + "\"x\":"
-//					+ XYCenterRelativePositionToMajorMinorAxis[0] + ","
-//					+ "\"y\":" + XYCenterRelativePositionToMajorMinorAxis[1]
-//					+ "}}";
-//		}
 		{			
 			spindle = spindle + 
 					",\"length\":{" 
@@ -472,16 +455,16 @@ public class Spindle {
 								+ "\"y\":" + coordSPB[4] + ","
 								+ "\"z\":" + coordSPB[5] + "}},"
 					+ "\"cell_center\":{"
-						+ "\"absolute_coordinates\":{"
-							+ "\"x\":"
-								+ centerCellX + ","
-							+ "\"y\":"
-								+ centerCellY+ "},"
+						+ "\"x\":"
+							+ centerCellX + ","
+						+ "\"y\":"
+							+ centerCellY+ "},"
 					+ "\"SpindleAndCellCenter\":{"
 						+ "\"angle\":"
 							+ angleSpCellCenter  + ","
-						+ "\"distance\":" + lengthSpCellCenter
-				+ "}}";
+						+ "\"distance\":"
+							+ lengthSpCellCenter
+				+ "}";
 		}
 
 		spindle = spindle + "}}";

@@ -262,10 +262,10 @@ public class MaarsFluoAnalysis {
 	 *            : path to save results
 	 */
 	public void analyzeEntireFieldNoReturn(ImagePlus fieldWideImage,
-			String pathToResults) {
+			String pathToResults , int frame) {
 		FileWriter spindleWriter = null;
 		try {
-			spindleWriter = new FileWriter(pathToResults
+			spindleWriter = new FileWriter(pathToResults + "/" + frame
 					+ "_spindleAnalysis.txt");
 		} catch (IOException e) {
 			ReportingUtils.logError(e);
@@ -303,7 +303,7 @@ public class MaarsFluoAnalysis {
 					.getAsJsonObject()
 					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
 					.getAsBoolean()) {
-				cell.saveFluoImage(pathToResults  + String.valueOf(cell.getCellNumber()));
+				cell.saveFluoImage(pathToResults+"/"+frame+"/"+ String.valueOf(cell.getCellNumber()));
 			}
 			cell = null;
 			sp = null;

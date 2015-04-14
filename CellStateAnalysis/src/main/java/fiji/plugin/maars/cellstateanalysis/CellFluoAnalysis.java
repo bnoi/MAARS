@@ -42,17 +42,11 @@ public class CellFluoAnalysis {
 	public CellFluoAnalysis(Cell cell, double spotRadius) throws InterruptedException {
 		this.cell = cell;
 		
-		ZProjector projector = new ZProjector();
-		projector.setMethod(ZProjector.MAX_METHOD);
-		projector.setImage(cell.getFluoImage());
-		projector.doProjection();
-		ImagePlus zProjectField = projector.getProjection();
-
-		zProjectField.setCalibration(cell.getFluoImage().getCalibration());
-		
+		ImagePlus fluoCellImg = cell.getFluoImage();
+		fluoCellImg.deleteRoi();
 		Model model = new Model();
 		Settings settings = new Settings();
-		settings.setFrom(zProjectField);
+		settings.setFrom(fluoCellImg);
 
 		settings.detectorFactory = new LogDetectorFactory();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
@@ -72,8 +66,8 @@ public class CellFluoAnalysis {
 		trackmate.execDetection();
 		ReportingUtils.logMessage("execDetection done");
 		
-		trackmate.execInitialSpotFiltering();
-		ReportingUtils.logMessage("execInitialSpotFiltering done");
+//		trackmate.execInitialSpotFiltering();
+//		ReportingUtils.logMessage("execInitialSpotFiltering done");
 
 		trackmate.computeSpotFeatures(false);
 		ReportingUtils.logMessage("computeSpotFeatures done");
@@ -88,12 +82,6 @@ public class CellFluoAnalysis {
 			res.add(spot);
 		}
 		ReportingUtils.logMessage("- Done.");
-		projector = null;
-		settings= null;
-		detectorSettings= null;
-		trackmate= null;
-		filter1 = null;
-		model = null;
 		factorForThreshold = 4;
 	}
 
@@ -116,7 +104,6 @@ public class CellFluoAnalysis {
 		Calibration cal = cell.getFluoImage().getCalibration();
 		ArrayList<Spot> spotsToKeep = new ArrayList<Spot>();
 
-//		ReportingUtils.logMessage("Res : " + res);
 		java.util.Iterator<Spot> itr1 = res.iterator();
 
 		double[] quality = new double[res.toArray().length];
@@ -137,13 +124,11 @@ public class CellFluoAnalysis {
 			 */
 		}
 
-//		ReportingUtils.logMessage("initial number of spots : " + nb);
-
 		Statistics stat = new Statistics(quality);
 		double threshold = stat.getMean() + factorForThreshold
 				* stat.getStdDev();
 
-//		ReportingUtils.logMessage("threshold : " + threshold);
+		ReportingUtils.logMessage("threshold for spot filter: " + threshold);
 
 		java.util.Iterator<Spot> itr2 = res.iterator();
 		while (itr2.hasNext()) {
