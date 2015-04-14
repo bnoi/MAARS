@@ -145,4 +145,10 @@ public class Measures {
 	public double getSolidity() {
 		return measures[SOLIDITY];
 	}
+	public void setXCentroid(double centroX){
+		measures[X_CENTROID] = centroX;
+	}
+	public void setYCentroid(double centroY){
+		measures[Y_CENTROID] = centroY;
+	}
 }

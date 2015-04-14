@@ -631,8 +631,11 @@ public class Cell {
 			newYsF[i] = (float) newYs[i];
 		};
 		PolygonRoi newRoi = new PolygonRoi(newXsF, newYsF, Roi.POLYGON);
+		measures.setXCentroid(measures.getXCentroid() - cellShapeRoi.getXBase() * fluoImage.getCalibration().pixelWidth);
+		measures.setYCentroid(measures.getYCentroid() - cellShapeRoi.getYBase() * fluoImage.getCalibration().pixelHeight);
 		setCellShapeRoi(newRoi);
 		cellShapeRoi.setName(name);
+		
 	}
 	public void saveFluoImage(String path){
 		IJ.saveAsTiff(fluoImage, path);

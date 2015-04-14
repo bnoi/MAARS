@@ -186,25 +186,9 @@ public class Spindle {
 		centerSpX = absoluteAngleLengthXYCenter[2];
 		centerSpY = absoluteAngleLengthXYCenter[3];
 		//center of Roi in um
-		centerCellX = cellShapeRoi.getBounds().getWidth()/2*cal.pixelWidth;
-		centerCellY = cellShapeRoi.getBounds().getHeight()/2*cal.pixelHeight;
-		ReportingUtils.logMessage("lala "
-				+"cell Nb "+cellShapeRoi.getName() + "\n"
-				+ "measureX "+measures.getXCentroid() + "\n"
-				+" measureY "+measures.getYCentroid() + "\n"
-				+" cellXbase "+cellShapeRoi.getXBase() + "\n"
-				+" cellYbase "+cellShapeRoi.getYBase() + "\n"
-				+" centercellX " + centerCellX + "\n"
-				+" centercellY " + centerCellY + "\n"
-				+" centerSpX " + centerSpX  + "\n"
-				+" centerSpY " + centerSpY  + "\n"
-				+" calibra "+cal.pixelWidth  + "\n"
-				+" sp1x " + coordinates[0]  + "\n"
-				+" sp1Y " + coordinates[1]  + "\n"
-				+" sp2x " + coordinates[3]  + "\n"
-				+" sp2Y " + coordinates[4]  + "\n"
-				+" Roi coord " + cellShapeRoi
-				);
+		centerCellX = measures.getXCentroid() ;
+		centerCellY = measures.getYCentroid() ;
+
 		//pixel
 		Line tempLine = new Line(centerCellX, centerCellY, centerSpX,
 				centerSpY);
@@ -212,6 +196,7 @@ public class Spindle {
 		angleSpCellCenter = tempLine.getAngle();
 		//pixel
 		lengthSpCellCenter = tempLine.getLength();
+
 		//pixel[]
 //		XYCenterAbsolutePositionToMajorMinorAxis = MyCoordinatesGeometry
 //				.convertPolarToCartesianCoor(
@@ -468,24 +453,35 @@ public class Spindle {
 //					+ "\"y\":" + XYCenterRelativePositionToMajorMinorAxis[1]
 //					+ "}}";
 //		}
-		{
-			spindle = spindle + ",\"length\":{" + "\"absolute\":" + length
-					+ "," + "\"relative\":" + lengthToMajorAxis + "},"
-					+ "\"angle_to_major_axis\":" + angleToMajorAxis + ","
-					+ "\"SPB_coordinates\":{" + "\"spb1\":{" + "\"x\":"
-					+ coordSPB[0] + "," + "\"y\":" + coordSPB[1] + ","
-					+ "\"z\":" + coordSPB[2] + "}," + "\"spb2\":{" + "\"x\":"
-					+ coordSPB[3] + "," + "\"y\":" + coordSPB[4] + ","
-					+ "\"z\":" + coordSPB[5] + "}}," + "\"center\":{"
-					+ "\"absolute_coordinates\":{" + "\"x\":"
-					+ centerCellX + ","
-					+ "\"y\":" + centerCellY
-					+ "}," + "\"relative_coordinates\":{" + "\"x\":"
-					+ angleSpCellCenter  + ","
-					+ "\"y\":" + lengthSpCellCenter
-					+ "}}";
-			
-			
+		{			
+			spindle = spindle + 
+					",\"length\":{" 
+						+ "\"absolute\":"
+							+ length + "," 
+						+ "\"relative\":" 
+							+ lengthToMajorAxis + "},"
+					+ "\"angle_to_major_axis\":" 
+							+ angleToMajorAxis + ","
+					+ "\"SPB_coordinates\":{"
+							+ "\"spb1\":{" + "\"x\":"
+								+ coordSPB[0] + "," 
+								+ "\"y\":" + coordSPB[1] + ","
+								+ "\"z\":" + coordSPB[2] + "},"
+							+ "\"spb2\":{" + "\"x\":"
+								+ coordSPB[3] + ","
+								+ "\"y\":" + coordSPB[4] + ","
+								+ "\"z\":" + coordSPB[5] + "}},"
+					+ "\"cell_center\":{"
+						+ "\"absolute_coordinates\":{"
+							+ "\"x\":"
+								+ centerCellX + ","
+							+ "\"y\":"
+								+ centerCellY+ "},"
+					+ "\"SpindleAndCellCenter\":{"
+						+ "\"angle\":"
+							+ angleSpCellCenter  + ","
+						+ "\"distance\":" + lengthSpCellCenter
+				+ "}}";
 		}
 
 		spindle = spindle + "}}";
