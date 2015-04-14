@@ -12,7 +12,10 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.TrackMate;
+import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.ZProjector;
 
@@ -38,11 +41,14 @@ public class CellFluoAnalysis {
 
 	public CellFluoAnalysis(Cell cell, double spotRadius) throws InterruptedException {
 		this.cell = cell;
+		
 		ZProjector projector = new ZProjector();
 		projector.setMethod(ZProjector.MAX_METHOD);
 		projector.setImage(cell.getFluoImage());
 		projector.doProjection();
 		ImagePlus zProjectField = projector.getProjection();
+
+		zProjectField.setCalibration(cell.getFluoImage().getCalibration());
 		
 		Model model = new Model();
 		Settings settings = new Settings();
@@ -58,7 +64,6 @@ public class CellFluoAnalysis {
 		settings.detectorSettings = detectorSettings;
 
 		FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
-//		settings.initialSpotFilterValue = 10.0;
 		settings.addSpotFilter(filter1);
 
 		TrackMate trackmate = new TrackMate(model, settings);
@@ -80,7 +85,6 @@ public class CellFluoAnalysis {
 
 		res = new ArrayList<Spot>();
 		for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
-			ReportingUtils.logMessage(String.valueOf(spot.getFeature("QUALITY")));
 			res.add(spot);
 		}
 		ReportingUtils.logMessage("- Done.");
@@ -88,9 +92,9 @@ public class CellFluoAnalysis {
 		settings= null;
 		detectorSettings= null;
 		trackmate= null;
-//		filter1 = null;
+		filter1 = null;
 		model = null;
-		factorForThreshold = 4.5;
+		factorForThreshold = 4;
 	}
 
 	/**
@@ -109,6 +113,7 @@ public class CellFluoAnalysis {
 	 */
 	public ArrayList<Spot> findSpots() {
 
+		Calibration cal = cell.getFluoImage().getCalibration();
 		ArrayList<Spot> spotsToKeep = new ArrayList<Spot>();
 
 //		ReportingUtils.logMessage("Res : " + res);
@@ -147,10 +152,8 @@ public class CellFluoAnalysis {
 
 			if (features.get("QUALITY") > threshold
 					&& cell.getCellShapeRoi().contains(
-							(int) Math.round(cell.getCellShapeRoi().getXBase()
-									+ features.get("POSITION_X")),
-							(int) Math.round(cell.getCellShapeRoi().getYBase()
-									+ features.get("POSITION_Y")))) {
+							(int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
+							(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight))) {
 				spotsToKeep.add(spot);
 				// ReportingUtils.logMessage(features);
 				/*
@@ -161,6 +164,7 @@ public class CellFluoAnalysis {
 				 * cell.getFluoImage().setRoi(roi); IJ.wait(5000);
 				 */
 			}
+
 		}
 		res = null;
 		return spotsToKeep;

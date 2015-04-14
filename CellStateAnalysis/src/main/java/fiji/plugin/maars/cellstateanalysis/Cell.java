@@ -14,10 +14,12 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Line;
+import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.io.FileSaver;
 import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
+import ij.plugin.Selection;
 
 
 /**
@@ -432,31 +434,28 @@ public class Cell {
 			 * ()+" y = "+cellShapeRoi.getYBase());
 			 */
 			//TODO
-			fluoImage.deleteRoi();
 			ImageProcessor imgProcessor = fluoImage.getProcessor();
-			Rectangle newRoi = new Rectangle((int)cellShapeRoi.getXBase(), (int)cellShapeRoi.getYBase(),
+			Rectangle newRectangle = new Rectangle((int)cellShapeRoi.getXBase(), (int)cellShapeRoi.getYBase(),
 					(int)cellShapeRoi.getBounds().width, (int)cellShapeRoi.getBounds().height);
-			imgProcessor.setRoi(newRoi);
-//			ImageStack stack = 
-//					fluoImage.getImageStack().crop((int) cellShapeRoi.getXBase(),
-//					(int) cellShapeRoi.getYBase(), 0,
-//					cellShapeRoi.getBounds().width,
-//					cellShapeRoi.getBounds().height,
-//					fluoImage.getNSlices());
+			imgProcessor.setRoi(newRectangle);
 			ImagePlus newImage = 
 					new ImagePlus("CroppedFluoImage", imgProcessor.crop());
-			
+
 			ReportingUtils.logMessage("Done.");
 			ReportingUtils.logMessage("Put new calibration newly cropped image");
 			newImage.setCalibration(fluoImage.getCalibration());
 			ReportingUtils.logMessage("Done.");
 			ReportingUtils.logMessage("Set newly cropped image as fluorescent image");
-
+			
+			centerTheRoi();
+			
+//			fluoImage.show();
 			setFluoImage(newImage);
+			fluoImage.setRoi(cellShapeRoi);
 			newImage = null;
 			ReportingUtils.logMessage("Done");
 		}
-		fluoImage.setRoi(cellShapeRoi);
+		
 		ReportingUtils.logMessage("Create CellFluoAnalysis object");
 		try {
 			this.fluoAnalysis = new CellFluoAnalysis(this, spotRadius);
@@ -530,7 +529,7 @@ public class Cell {
 	 */
 	public void scaleRoiForFluoImage(double[] scaleFactorForRoiFromBfToFluo) {
 		String name = cellShapeRoi.getName();
-//		ReportingUtils.logMessage("change ROI scale");
+		ReportingUtils.logMessage("change ROI scale");
 		cellShapeRoi = RoiScaler.scale(cellShapeRoi,
 				scaleFactorForRoiFromBfToFluo[0],
 				scaleFactorForRoiFromBfToFluo[1], false);
@@ -611,7 +610,30 @@ public class Cell {
 	public int getCellNumber(){
 		return cellNumber;
 	}
+	
+	public void setCellShapeRoi(Roi cellShapeRoi){
+		this.cellShapeRoi = cellShapeRoi;
+	}
 
+	public void centerTheRoi(){
+		String name = cellShapeRoi.getName();
+		int[] newXs =cellShapeRoi.getPolygon().xpoints;
+		int[] newYs =cellShapeRoi.getPolygon().ypoints;
+		int nbPoints = cellShapeRoi.getPolygon().npoints;
+		for(int i=0 ; i < nbPoints;i++){
+			newXs[i] = newXs[i] - (int)cellShapeRoi.getXBase();
+			newYs[i] = newYs[i] - (int)cellShapeRoi.getYBase();
+		};
+		float[] newXsF = new float[nbPoints];
+		float[] newYsF = new float[nbPoints];
+		for(int i=0 ; i < nbPoints ;i++){
+			newXsF[i] = (float) newXs[i];
+			newYsF[i] = (float) newYs[i];
+		};
+		PolygonRoi newRoi = new PolygonRoi(newXsF, newYsF, Roi.POLYGON);
+		setCellShapeRoi(newRoi);
+		cellShapeRoi.setName(name);
+	}
 	public void saveFluoImage(String path){
 		IJ.saveAsTiff(fluoImage, path);
 	}
