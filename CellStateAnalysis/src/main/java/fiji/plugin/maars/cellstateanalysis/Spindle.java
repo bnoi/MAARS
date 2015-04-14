@@ -170,7 +170,7 @@ public class Spindle {
 		double[] absoluteAngleLengthXYCenter = MyCoordinatesGeometry
 				.getAngleLengthXYCenterFromCoor(coordinates, true);
 		Line spindleLine = new Line(coordinates[0],coordinates[1],
-				coordinates[2],coordinates[3]);
+				coordinates[3],coordinates[4]);
 		length =  spindleLine.getLength();
 		lengthToMajorAxis = measures.getMajor() / length;
 		double cellAbsoAngle = measures.getAngle();
@@ -454,17 +454,21 @@ public class Spindle {
 								+ coordSPB[3] + ","
 								+ "\"y\":" + coordSPB[4] + ","
 								+ "\"z\":" + coordSPB[5] + "}},"
-					+ "\"cell_center\":{"
+					+ "\"CellCenter\":{"
 						+ "\"x\":"
 							+ centerCellX + ","
 						+ "\"y\":"
 							+ centerCellY+ "},"
-					+ "\"SpindleAndCellCenter\":{"
+					+ "\"CellCenterToSpindleCenter\":{"
 						+ "\"angle\":"
 							+ angleSpCellCenter  + ","
 						+ "\"distance\":"
-							+ lengthSpCellCenter
-				+ "}";
+							+ lengthSpCellCenter+"},"
+					+ "\"spindleCenterCoord\":{"
+						+ "\"x\":"
+							+ centerSpX + ","
+						+ "\"y\":"
+							+ centerSpY + "}";
 		}
 
 		spindle = spindle + "}}";
