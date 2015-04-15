@@ -134,14 +134,19 @@ if(md.isOkClicked()) {
 					.getAsInt();
 			double startTime = System.currentTimeMillis();
 			int frame = 0;
-			while (System.currentTimeMillis() - startTime <= 1800000){
+//			while (System.currentTimeMillis() - startTime <= 1800000)
+			while (frame < 2)
+			{
 				double beginAcq = System.currentTimeMillis();
-				String acqNameFluo = "\\movie_X"
+				String acqNameFluo = "/movie_X"
 												+Math.round(xPos)
 												+"_Y"+Math.round(yPos)+
-												"_FLUO\\" + frame;
+												"_FLUO/" + frame;
+				File dir = new File (mas.getPathToMovie()+"_FLUO");
+				dir.mkdirs();
 				ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
-				mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO\\" + frame);
+				fluoImage.show();
+				mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO", frame);
 				acqNameFluo = null;
 				fluoImage = null;
 //				Thread[] threadArray = Thread.getAllStackTraces().keySet().toArray(new Thread[Thread.getAllStackTraces().keySet().size()]);

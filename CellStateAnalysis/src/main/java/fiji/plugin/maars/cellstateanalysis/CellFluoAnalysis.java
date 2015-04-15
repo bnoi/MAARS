@@ -82,7 +82,7 @@ public class CellFluoAnalysis {
 			res.add(spot);
 		}
 		ReportingUtils.logMessage("- Done.");
-		factorForThreshold = 4;
+		factorForThreshold = 2;
 	}
 
 	/**

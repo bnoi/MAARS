@@ -1,5 +1,6 @@
 package fiji.plugin.maars.maarslib;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -265,6 +266,8 @@ public class MaarsFluoAnalysis {
 			String pathToResults , int frame) {
 		FileWriter spindleWriter = null;
 		try {
+			File dir = new File (pathToResults + "/" + frame);
+			dir.mkdirs();
 			spindleWriter = new FileWriter(pathToResults + "/" + frame
 					+ "_spindleAnalysis.txt");
 		} catch (IOException e) {

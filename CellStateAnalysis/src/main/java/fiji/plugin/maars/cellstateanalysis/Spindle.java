@@ -186,8 +186,8 @@ public class Spindle {
 		centerSpX = absoluteAngleLengthXYCenter[2];
 		centerSpY = absoluteAngleLengthXYCenter[3];
 		//center of Roi in um
-		centerCellX = measures.getXCentroid() ;
-		centerCellY = measures.getYCentroid() ;
+		centerCellX = measures.getXCentroid() - cellShapeRoi.getXBase() * cal.pixelWidth;
+		centerCellY = measures.getYCentroid() - cellShapeRoi.getYBase() * cal.pixelHeight;
 
 		//pixel
 		Line tempLine = new Line(centerCellX, centerCellY, centerSpX,
