@@ -135,8 +135,8 @@ if(md.isOkClicked()) {
 			double startTime = System.currentTimeMillis();
 			int frame = 0;
 //			while (System.currentTimeMillis() - startTime <= 1800000)
-			while (frame < 2)
-			{
+//			while (frame < 1)
+//			{
 				double beginAcq = System.currentTimeMillis();
 				String acqNameFluo = "/movie_X"
 												+Math.round(xPos)
@@ -147,18 +147,13 @@ if(md.isOkClicked()) {
 				ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 				fluoImage.show();
 				mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO", frame);
-				acqNameFluo = null;
-				fluoImage = null;
-//				Thread[] threadArray = Thread.getAllStackTraces().keySet().toArray(new Thread[Thread.getAllStackTraces().keySet().size()]);
-//				for(Thread thread : threadArray){
-//					if(!thread.isAlive()){
-//						thread.interrupt();
-//					}
-//				}
 				double acqTook = System.currentTimeMillis() - beginAcq;
 				gui.sleep((long) (timeInterval - acqTook));
-				frame++;
-			}
+				fluoImage.close();
+				acqNameFluo = null;
+				fluoImage = null;
+//				frame++;
+//			}
 		}
 		// close roi manager
 		mfa.getSetOfCells().closeRoiManager();

@@ -420,8 +420,9 @@ public class Cell {
 
 		scaleRoiForFluoImage(scaleFactorForRoiFromBfToFluo);
 		ReportingUtils.logMessage("set ROI on fluo image");
-		Roi lastRoi = null;
-		lastRoi.copyAttributes(cellShapeRoi);
+		//keep the last roi into memory because need the X and Y base of original ROI
+		//while calculating the X centroid and Y centroid of the cropped image.
+		Roi lastRoi = cellShapeRoi;
 		fluoImage.setRoi(cellShapeRoi);
 		if (crop) {
 			/*
@@ -451,7 +452,6 @@ public class Cell {
 			
 			centerTheRoi();
 			
-//			fluoImage.show();
 			setFluoImage(newImage);
 			fluoImage.setRoi(cellShapeRoi);
 			newImage = null;
@@ -471,7 +471,7 @@ public class Cell {
 		ReportingUtils.logMessage("Done.");
 		ReportingUtils.logMessage("Create spindle using spots found");
 		Spindle spindle = new Spindle(spotList, measures, cellShapeRoi,
-				fluoImage.getCalibration());
+				fluoImage.getCalibration(), lastRoi);
 		ReportingUtils.logMessage("Done.");
 
 		ReportingUtils.logMessage("Cell : " + cellShapeRoi.getName() + " spots nb : "

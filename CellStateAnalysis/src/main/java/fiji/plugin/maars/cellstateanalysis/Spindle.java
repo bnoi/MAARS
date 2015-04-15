@@ -36,6 +36,7 @@ public class Spindle {
 //	private double[] XYCenterRelativePositionToMajorMinorAxis;
 	private String feature;
 	private Roi cellShapeRoi;
+	private Roi roiBeforeCrop;
 	private Measures measures;
 	private ArrayList<Spot> spotList;
 	private double[] coordSPB;
@@ -57,9 +58,10 @@ public class Spindle {
 	 *            : calibration of image on which spot has been found
 	 */
 	public Spindle(ArrayList<Spot> spotList, Measures measures,
-			Roi cellShapeRoi, Calibration cal) {
+			Roi cellShapeRoi, Calibration cal, Roi roiBeforeCrop) {
 		this.spotList = spotList;
 		this.cellShapeRoi = cellShapeRoi;
+		this.roiBeforeCrop = roiBeforeCrop;
 		this.measures = measures;
 		int size = spotList.size();
 		if (size == 0) {
@@ -186,9 +188,13 @@ public class Spindle {
 		centerSpX = absoluteAngleLengthXYCenter[2];
 		centerSpY = absoluteAngleLengthXYCenter[3];
 		//center of Roi in um
-		centerCellX = measures.getXCentroid() - cellShapeRoi.getXBase() * cal.pixelWidth;
-		centerCellY = measures.getYCentroid() - cellShapeRoi.getYBase() * cal.pixelHeight;
-
+		centerCellX = measures.getXCentroid() - roiBeforeCrop.getXBase() * cal.pixelWidth;
+		centerCellY = measures.getYCentroid() - roiBeforeCrop.getYBase() * cal.pixelHeight;
+		ReportingUtils.logMessage("xcentroid " + measures.getXCentroid()+ "\n"+
+				"ycentroid " +measures.getYCentroid()+ "\n"+
+				"xbase " + +roiBeforeCrop.getXBase()+ "\n"+
+				"ybase " + roiBeforeCrop.getYBase()
+				);
 		//pixel
 		Line tempLine = new Line(centerCellX, centerCellY, centerSpX,
 				centerSpY);
