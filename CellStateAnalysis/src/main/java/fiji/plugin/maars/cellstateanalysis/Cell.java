@@ -420,6 +420,8 @@ public class Cell {
 
 		scaleRoiForFluoImage(scaleFactorForRoiFromBfToFluo);
 		ReportingUtils.logMessage("set ROI on fluo image");
+		Roi lastRoi = null;
+		lastRoi.copyAttributes(cellShapeRoi);
 		fluoImage.setRoi(cellShapeRoi);
 		if (crop) {
 			/*
@@ -475,6 +477,7 @@ public class Cell {
 		ReportingUtils.logMessage("Cell : " + cellShapeRoi.getName() + " spots nb : "
 				+ spotList.size());
 		ReportingUtils.logMessage("Back to initial ROI scale");
+		setCellShapeRoi(lastRoi);
 		rescaleRoiForBFImage(scaleFactorForRoiFromBfToFluo);
 		ReportingUtils.logMessage("Done.");
 		ReportingUtils.logMessage("Return spindle");
