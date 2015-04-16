@@ -1,25 +1,19 @@
 package fiji.plugin.maars.cellstateanalysis;
 
 import java.awt.Rectangle;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.micromanager.utils.ReportingUtils;
 
 import ij.process.ImageProcessor;
-import ij.gui.ProfilePlot;
 import fiji.plugin.trackmate.Spot;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Line;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.io.FileSaver;
 import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
-import ij.plugin.Selection;
 
 
 /**

@@ -60,5 +60,5 @@ print("Found " + nSpots + " spots");
 //for (Spot spot : trackmate.getModel().getSpots().iterable(false)) {
 //	print(spot.getFeatures());
 //}
-imp.close();
+//imp.close();
 }
