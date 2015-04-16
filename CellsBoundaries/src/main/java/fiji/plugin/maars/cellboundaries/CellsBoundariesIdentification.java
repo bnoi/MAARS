@@ -415,9 +415,10 @@ public class CellsBoundariesIdentification {
 
 				System.out.println("- reset result table");
 				resultTable.reset();
-				System.out.println("- get roi as array");
-				roiArray = roiManager.getRoisAsArray();
-				if (roiArray != null) {
+				Integer nbRoi= roiManager.getCount();
+				if (!nbRoi.equals(0)) {
+					System.out.println("- get roi as array");
+					roiArray = roiManager.getRoisAsArray();
 					System.out
 							.println("- select and delete all roi from roi manager");
 					roiManager.runCommand("Select All");
@@ -456,7 +457,7 @@ public class CellsBoundariesIdentification {
 					deleteRowOfResultTable(rowTodelete);
 					System.out.println("Filter done.");
 				}else{
-					noRoiDetected = true;
+					this.noRoiDetected = true;
 					roiManager.close();
 				}
 			}
@@ -464,10 +465,10 @@ public class CellsBoundariesIdentification {
 			if (filterUnusualShape) {
 
 				System.out.println("Filtering with solidity...");
-
-				System.out.println("- get roi as array");
-				roiArray = roiManager.getRoisAsArray();
-				if (roiArray != null) {
+				Integer nbRoi= roiManager.getCount();
+				if (!nbRoi.equals(0)) {
+					System.out.println("- get roi as array");
+					roiArray = roiManager.getRoisAsArray();
 					System.out
 							.println("- select and delete all roi from roi manager");
 					roiManager.runCommand("Select All");
@@ -492,7 +493,7 @@ public class CellsBoundariesIdentification {
 					deleteRowOfResultTable(rowTodelete);
 					System.out.println("Filter done.");
 				}else{
-					noRoiDetected = true;
+					this.noRoiDetected = true;
 					roiManager.close();
 				}
 			}
@@ -538,7 +539,8 @@ public class CellsBoundariesIdentification {
 		}
 
 		if (saveRoi && roiManager.getRoisAsArray().length > 0) {
-			if (roiManager.getRoisAsArray() == null) {
+			Integer nbRoi= roiManager.getCount();
+			if (!nbRoi.equals(0)) {
 				System.out.println("saving roi...");
 				roiManager.runCommand("Select All");
 				roiManager.runCommand("Save",
@@ -548,7 +550,7 @@ public class CellsBoundariesIdentification {
 				System.out.println("Close roi manager");
 				roiManager.close();
 			}else{
-				noRoiDetected = true;
+				this.noRoiDetected = true;
 				roiManager.close();
 			}
 		}
@@ -650,7 +652,7 @@ public class CellsBoundariesIdentification {
 			analyseAndFilterParticles();
 			showAndSaveResultsAndCleanUp();
 		}
-		return noRoiDetected;
+		return this.noRoiDetected;
 	}
 
 }
