@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import org.micromanager.utils.ReportingUtils;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -18,6 +20,7 @@ import ij.process.AutoThresholder;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
+
 
 public class CellsBoundariesIdentification {
 
@@ -457,7 +460,7 @@ public class CellsBoundariesIdentification {
 					deleteRowOfResultTable(rowTodelete);
 					System.out.println("Filter done.");
 				}else{
-					this.noRoiDetected = true;
+					setNoRoiDetectedTrue();
 					roiManager.close();
 				}
 			}
@@ -493,7 +496,8 @@ public class CellsBoundariesIdentification {
 					deleteRowOfResultTable(rowTodelete);
 					System.out.println("Filter done.");
 				}else{
-					this.noRoiDetected = true;
+					setNoRoiDetectedTrue();
+					ReportingUtils.logMessage("lala1 "+this.noRoiDetected);
 					roiManager.close();
 				}
 			}
@@ -516,10 +520,13 @@ public class CellsBoundariesIdentification {
 	 * Method to show and saved specified results and flush unwanted results
 	 */
 	public void showAndSaveResultsAndCleanUp() {
-
+		Integer nbRoi= roiManager.getCount();
+		if (!nbRoi.equals(0)) {
+			setNoRoiDetectedTrue();
+		}
 		System.out.println("Show and save results");
 
-		if (saveDataFrame) {
+		if (saveDataFrame && !noRoiDetected) {
 			System.out.println("saving data frame...");
 			try {
 				resultTable.saveAs(savingPath + imageToAnalyze.getShortTitle()
@@ -538,21 +545,15 @@ public class CellsBoundariesIdentification {
 			resultTable.reset();
 		}
 
-		if (saveRoi && roiManager.getRoisAsArray().length > 0) {
-			Integer nbRoi= roiManager.getCount();
-			if (!nbRoi.equals(0)) {
-				System.out.println("saving roi...");
-				roiManager.runCommand("Select All");
-				roiManager.runCommand("Save",
-						savingPath + imageToAnalyze.getShortTitle()
-								+ "_ROI.zip");
-				System.out.println("Done");
-				System.out.println("Close roi manager");
-				roiManager.close();
-			}else{
-				this.noRoiDetected = true;
-				roiManager.close();
-			}
+		if (saveRoi && !noRoiDetected) {
+			System.out.println("saving roi...");
+			roiManager.runCommand("Select All");
+			roiManager.runCommand("Save",
+					savingPath + imageToAnalyze.getShortTitle()
+							+ "_ROI.zip");
+			System.out.println("Done");
+			System.out.println("Close roi manager");
+			roiManager.close();
 		}
 
 		if (displayFocusImage) {
@@ -563,7 +564,7 @@ public class CellsBoundariesIdentification {
 			focusImage.flush();
 		}
 
-		if (saveBinaryImg) {
+		if (saveBinaryImg && !noRoiDetected) {
 			System.out.println("save binary image");
 			binCorrelationImage.setTitle(imageToAnalyze.getShortTitle()
 					+ "_BinaryImage");
@@ -644,15 +645,33 @@ public class CellsBoundariesIdentification {
 
 			};
 			threads[0].start();
+			try {
+				threads[0].join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		} else {
+			final Thread thread = Thread.currentThread();
 			System.out.println("Do not create threads");
 			createCorrelationImage();
 			convertCorrelationToBinaryImage();
 			analyseAndFilterParticles();
 			showAndSaveResultsAndCleanUp();
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		ReportingUtils.logMessage("lala2 "+this.noRoiDetected);
 		return this.noRoiDetected;
+	}
+	
+	public void setNoRoiDetectedTrue(){
+		this.noRoiDetected = true;
 	}
 
 }

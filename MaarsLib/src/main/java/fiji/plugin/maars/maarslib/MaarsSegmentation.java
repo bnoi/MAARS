@@ -113,7 +113,7 @@ public class MaarsSegmentation {
 						.getImageToAnalyze().getNSlices() / 2), solidity,
 				meanGrey, true, false);
 		boolean noRoiDec = cBI.identifyCellesBoundaries();
-		ReportingUtils.logMessage("lala " + noRoiDec);
+		ReportingUtils.logMessage("lala3 " + noRoiDec);
 		if(noRoiDec){
 			this.noRoiDetected = true;
 		}
