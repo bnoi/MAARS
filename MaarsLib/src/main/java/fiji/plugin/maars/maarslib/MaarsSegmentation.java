@@ -112,10 +112,11 @@ public class MaarsSegmentation {
 				cB, cellSizePixel, minSize, maxSize, -1, (int) Math.round(cB
 						.getImageToAnalyze().getNSlices() / 2), solidity,
 				meanGrey, true, false);
-
-		if(cBI.identifyCellesBoundaries()){
-			noRoiDetected = true;
-		};
+		boolean noRoiDec = cBI.identifyCellesBoundaries();
+		ReportingUtils.logMessage("lala " + noRoiDec);
+		if(noRoiDec){
+			this.noRoiDetected = true;
+		}
 		IJ.getImage().close();
 	}
 
@@ -144,9 +145,9 @@ public class MaarsSegmentation {
 	}
 	/**
 	 * 
-	 * @return CellsBoundaries object
+	 * @return if no Roi detected
 	 */
 	public boolean noRoiDetected() {
-		return noRoiDetected;
+		return this.noRoiDetected;
 	}
 }
