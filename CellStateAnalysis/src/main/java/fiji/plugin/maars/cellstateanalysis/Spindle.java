@@ -1,14 +1,10 @@
 package fiji.plugin.maars.cellstateanalysis;
 
-import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Line;
-import ij.gui.OvalRoi;
+
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.process.ColorProcessor;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Map;
 

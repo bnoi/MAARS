@@ -19,6 +19,7 @@ public class MaarsSegmentation {
 	private AllMaarsParameters parameters;
 	private String moviePath;
 	private CellsBoundaries cB;
+	private boolean noRoiDetected = false;
 
 	/**
 	 * Constructor :
@@ -112,7 +113,9 @@ public class MaarsSegmentation {
 						.getImageToAnalyze().getNSlices() / 2), solidity,
 				meanGrey, true, false);
 
-		cBI.identifyCellesBoundaries();
+		if(cBI.identifyCellesBoundaries()){
+			noRoiDetected = true;
+		};
 		IJ.getImage().close();
 	}
 
@@ -138,5 +141,12 @@ public class MaarsSegmentation {
 	 */
 	public CellsBoundaries getSegmentationObject() {
 		return cB;
+	}
+	/**
+	 * 
+	 * @return CellsBoundaries object
+	 */
+	public boolean noRoiDetected() {
+		return noRoiDetected;
 	}
 }

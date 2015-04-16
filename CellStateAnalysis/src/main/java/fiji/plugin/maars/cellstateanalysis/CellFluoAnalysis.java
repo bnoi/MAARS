@@ -12,12 +12,8 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.TrackMate;
-import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.plugin.ZProjector;
 
 /**
  * This class is to find fluorescent spots in an image using LogDetector

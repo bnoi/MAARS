@@ -50,6 +50,7 @@ public class CellsBoundariesIdentification {
 	private Analyzer analyzer;
 	private RoiManager roiManager;
 	private Roi[] roiArray;
+	private boolean noRoiDetected = false;
 
 	// Result Optionsshuffle [] java
 	private boolean displayCorrelationImg;
@@ -416,41 +417,48 @@ public class CellsBoundariesIdentification {
 				resultTable.reset();
 				System.out.println("- get roi as array");
 				roiArray = roiManager.getRoisAsArray();
+				if (roiArray != null) {
+					System.out
+							.println("- select and delete all roi from roi manager");
+					roiManager.runCommand("Select All");
+					roiManager.runCommand("Delete");
 
-				System.out
-						.println("- select and delete all roi from roi manager");
-				roiManager.runCommand("Select All");
-				roiManager.runCommand("Delete");
+					System.out.println("- initialize analyser");
+					analyzer = new Analyzer(imgCorrTemp, Measurements.AREA
+							+ Measurements.STD_DEV + Measurements.MIN_MAX
+							+ Measurements.SHAPE_DESCRIPTORS
+							+ Measurements.MEAN + Measurements.CENTROID
+							+ Measurements.PERIMETER + Measurements.ELLIPSE,
+							resultTable);
 
-				System.out.println("- initialize analyser");
-				analyzer = new Analyzer(imgCorrTemp, Measurements.AREA
-						+ Measurements.STD_DEV + Measurements.MIN_MAX
-						+ Measurements.SHAPE_DESCRIPTORS + Measurements.MEAN
-						+ Measurements.CENTROID + Measurements.PERIMETER
-						+ Measurements.ELLIPSE, resultTable);
-
-				System.out
-						.println("- analyze each roi and add it to manager if it is wanted");
-				for (int i = 0; i < roiArray.length; i++) {
-					roiArray[i].setImage(imgCorrTemp);
-					imgCorrTemp.setRoi(roiArray[i]);
-					analyzer.measure();
-				}
-				imgCorrTemp.deleteRoi();
-
-				System.out.println("- delete from result table roi unwanted");
-				for (int i = 0; i < resultTable.getColumn(ResultsTable.MEAN).length; i++) {
-
-					if (resultTable.getValue("Mean", i) <= meanGreyValueThreshold) {
-						rowTodelete.add(i);
-					} else {
-						roiArray[i].setName("" + name);
-						roiManager.addRoi(roiArray[i]);
-						name++;
+					System.out
+							.println("- analyze each roi and add it to manager if it is wanted");
+					for (int i = 0; i < roiArray.length; i++) {
+						roiArray[i].setImage(imgCorrTemp);
+						imgCorrTemp.setRoi(roiArray[i]);
+						analyzer.measure();
 					}
+					imgCorrTemp.deleteRoi();
+
+					System.out
+							.println("- delete from result table roi unwanted");
+					for (int i = 0; i < resultTable
+							.getColumn(ResultsTable.MEAN).length; i++) {
+
+						if (resultTable.getValue("Mean", i) <= meanGreyValueThreshold) {
+							rowTodelete.add(i);
+						} else {
+							roiArray[i].setName("" + name);
+							roiManager.addRoi(roiArray[i]);
+							name++;
+						}
+					}
+					deleteRowOfResultTable(rowTodelete);
+					System.out.println("Filter done.");
+				}else{
+					noRoiDetected = true;
+					roiManager.close();
 				}
-				deleteRowOfResultTable(rowTodelete);
-				System.out.println("Filter done.");
 			}
 
 			if (filterUnusualShape) {
@@ -459,29 +467,34 @@ public class CellsBoundariesIdentification {
 
 				System.out.println("- get roi as array");
 				roiArray = roiManager.getRoisAsArray();
+				if (roiArray != null) {
+					System.out
+							.println("- select and delete all roi from roi manager");
+					roiManager.runCommand("Select All");
+					roiManager.runCommand("Delete");
 
-				System.out
-						.println("- select and delete all roi from roi manager");
-				roiManager.runCommand("Select All");
-				roiManager.runCommand("Delete");
+					ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
+					int name = 1;
 
-				ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
-				int name = 1;
-
-				System.out.println("- delete from result table roi unwanted");
-				for (int i = 0; i < resultTable
-						.getColumn(ResultsTable.SOLIDITY).length; i++) {
-					if (resultTable.getValue("Solidity", i) <= unusualShapeFilteringThreshold) {
-						rowTodelete.add(i);
-					} else {
-						roiArray[i].setName("" + name);
-						roiManager.addRoi(roiArray[i]);
-						name++;
+					System.out
+							.println("- delete from result table roi unwanted");
+					for (int i = 0; i < resultTable
+							.getColumn(ResultsTable.SOLIDITY).length; i++) {
+						if (resultTable.getValue("Solidity", i) <= unusualShapeFilteringThreshold) {
+							rowTodelete.add(i);
+						} else {
+							roiArray[i].setName("" + name);
+							roiManager.addRoi(roiArray[i]);
+							name++;
+						}
 					}
-				}
 
-				deleteRowOfResultTable(rowTodelete);
-				System.out.println("Filter done.");
+					deleteRowOfResultTable(rowTodelete);
+					System.out.println("Filter done.");
+				}else{
+					noRoiDetected = true;
+					roiManager.close();
+				}
 			}
 
 		}
@@ -525,14 +538,19 @@ public class CellsBoundariesIdentification {
 		}
 
 		if (saveRoi && roiManager.getRoisAsArray().length > 0) {
-			System.out.println("saving roi...");
-			roiManager.runCommand("Select All");
-			roiManager.runCommand("Save",
-					savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
-			System.out.println("Done");
-			System.out.println("Close roi manager");
-			roiManager.close();
-
+			if (roiManager.getRoisAsArray() == null) {
+				System.out.println("saving roi...");
+				roiManager.runCommand("Select All");
+				roiManager.runCommand("Save",
+						savingPath + imageToAnalyze.getShortTitle()
+								+ "_ROI.zip");
+				System.out.println("Done");
+				System.out.println("Close roi manager");
+				roiManager.close();
+			}else{
+				noRoiDetected = true;
+				roiManager.close();
+			}
 		}
 
 		if (displayFocusImage) {
@@ -600,9 +618,9 @@ public class CellsBoundariesIdentification {
 	}
 
 	/**
-	 * Run algorithm
+	 * Run algorithm, return true if no roi is detected.
 	 */
-	public void identifyCellesBoundaries() {
+	public boolean identifyCellesBoundaries() {
 
 		// Run the Methods on one thread only
 		// So it is possible to run other process while this one is running
@@ -632,6 +650,7 @@ public class CellsBoundariesIdentification {
 			analyseAndFilterParticles();
 			showAndSaveResultsAndCleanUp();
 		}
+		return noRoiDetected;
 	}
 
 }
