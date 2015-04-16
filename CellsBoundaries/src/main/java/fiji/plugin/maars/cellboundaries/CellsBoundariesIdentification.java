@@ -103,8 +103,8 @@ public class CellsBoundariesIdentification {
 		this.filterUnusualShape = cB.getFilterUnususalCkb().getState();
 		this.filterWithMeanGrayValue = cB.getFilterWithMeanGreyValueCkb()
 				.getState();
-		this.minParticleSize = minParticleSize;
-		this.maxParticleSize = maxParticleSize;
+		this.minParticleSize = minParticleSize / cB.getImageToAnalyze().getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / cB.getImageToAnalyze().getCalibration().pixelWidth;
 		this.direction = direction;
 
 		// ResultOptions
@@ -174,8 +174,8 @@ public class CellsBoundariesIdentification {
 
 		this.flushImageToAnalyze = true;
 
-		this.minParticleSize = minParticleSize;
-		this.maxParticleSize = maxParticleSize;
+		this.minParticleSize = minParticleSize / imageToAnalyse.getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / imageToAnalyse.getCalibration().pixelWidth;
 
 		enableDoSomethingElseInParallel = true;
 
@@ -260,8 +260,8 @@ public class CellsBoundariesIdentification {
 
 		this.flushImageToAnalyze = flushImageToAnalyze;
 
-		this.minParticleSize = minParticleSize;
-		this.maxParticleSize = maxParticleSize;
+		this.minParticleSize = minParticleSize / imageToAnalyse.getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / imageToAnalyse.getCalibration().pixelWidth;
 
 		this.enableDoSomethingElseInParallel = enableDoSomethingElseInParallel;
 
