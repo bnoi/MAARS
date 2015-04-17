@@ -112,6 +112,7 @@ public class MaarsSegmentation {
 				meanGrey, true, false);
 		if(cBI.identifyCellesBoundaries()){
 			this.noRoiDetected = true;
+			cBI.getRoiManager().close();
 		}
 		IJ.getImage().close();
 

@@ -91,7 +91,7 @@ if(md.isOkClicked()) {
 
 		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 		ms.segmentation();
-
+		
 		if(!ms.noRoiDetected()){
 			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
 			MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
@@ -149,7 +149,6 @@ if(md.isOkClicked()) {
 			fluoImage.close();
 			acqNameFluo = null;
 			fluoImage = null;
-
 		}
 		// close roi manager
 		mfa.getSetOfCells().closeRoiManager();
