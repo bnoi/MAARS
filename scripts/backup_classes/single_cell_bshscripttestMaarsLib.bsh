@@ -91,6 +91,9 @@ if(md.isOkClicked()) {
 
 		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 		ms.segmentation();
+//		while(ms.isAnalysing()) {
+//			gui.sleep(3000);
+//		}
 
 		if(!ms.noRoiDetected()){
 			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
@@ -104,56 +107,58 @@ if(md.isOkClicked()) {
 															yPos,
 															mfa.getSetOfCells());
 	
-		if(param
-			.getParametersAsJsonObject()
-			.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-			.getAsJsonObject()
-			.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
-			.getAsBoolean()) {
-			String acqNameFluo = "/movie_X"
-				+Math.round(xPos)
-				+"_Y"+Math.round(yPos)
-				+"_FLUO";
-			int timeInterval = param.getParametersAsJsonObject()
-					.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-					.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
-					.getAsInt();
-			double startTime = System.currentTimeMillis();
-			int frame = 0;
-			while (System.currentTimeMillis() - startTime <= 1800000)
-				{
-					String fluoFolder = mas.getPathToMovie()+"_FLUO";
-					File dir = new File(fluoFolder);
-					String acqNameFluo = fluoFolder+ "/" + frame;
-					dir.mkdirs();
-					double beginAcq = System.currentTimeMillis();
-					ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
-					mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO", frame);
-					mfa.getSetOfCells().closeRoiManager();
-					frame++;
-					double acqTook = System.currentTimeMillis() - beginAcq;
-					gui.sleep((long) (timeInterval - acqTook));			
-				}									
-				// close roi manager
+			if(param
+					.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject()
+					.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
+					.getAsBoolean()) {
+						
+				String acqNameFluo = "/movie_X"
+					+Math.round(xPos)
+					+"_Y"+Math.round(yPos)
+					+"_FLUO";
+				
+				ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
+				fiji.plugin.maars.cellstateanalysis.Cell tragetCell = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()
+							+"/movie_X"+Math.round(xPos)
+							+"_Y"+Math.round(yPos));
 				mfa.getSetOfCells().closeRoiManager();
-				mas.setParameters(params);										
-		}else {
-			int frame = 0;
-			String fluoFolder = mas.getPathToMovie()+"_FLUO";
-			File dir = new File(fluoFolder);
-			String acqNameFluo = fluoFolder+ "/" + frame;
-			dir.mkdirs();
-			ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
-			fluoImage.show();
-			mfa.analyzeEntireFieldNoReturn(fluoImage, fluoFolder, frame);
-			fluoImage.close();
-			acqNameFluo = null;
-			fluoImage = null;
-
-		}
-		// close roi manager
-		mfa.getSetOfCells().closeRoiManager();
-		mas.setParameters(params);
+				if(tragetCell != null){	
+					mmad.acquire(false, tragetCell, true, true);
+				}																						
+			}
+			else {
+				int timeInterval = param.getParametersAsJsonObject()
+						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
+						.getAsInt();
+				double startTime = System.currentTimeMillis();
+				int frame = 0;
+	//			while (System.currentTimeMillis() - startTime <= 1800000)
+	//			while (frame < 1)
+	//			{
+	//				double beginAcq = System.currentTimeMillis();
+					String acqNameFluo = "/movie_X"
+													+Math.round(xPos)
+													+"_Y"+Math.round(yPos)+
+													"_FLUO/" + frame;
+					File dir = new File (mas.getPathToMovie()+"_FLUO");
+					dir.mkdirs();
+					ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
+					fluoImage.show();
+					mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO", frame);
+	//				double acqTook = System.currentTimeMillis() - beginAcq;
+	//				gui.sleep((long) (timeInterval - acqTook));
+					fluoImage.close();
+					acqNameFluo = null;
+					fluoImage = null;
+	//				frame++;
+	//			}
+			}
+			// close roi manager
+			mfa.getSetOfCells().closeRoiManager();
+			mas.setParameters(params);
 		}
 	}
 

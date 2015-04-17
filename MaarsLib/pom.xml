@@ -66,16 +66,6 @@
         </dependency>
 
         <!-- MAARS dependencies -->
-        <dependency>
-            <groupId>sc.fiji.plugin.maars</groupId>
-            <artifactId>CellStateAnalysis</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>sc.fiji.plugin.maars</groupId>
-            <artifactId>CellsBoundaries</artifactId>
-            <version>1.0</version>
-        </dependency>
         
         <!-- MAARS local dependencies (mainly Micro-Manager) -->
         <dependency>

@@ -112,28 +112,11 @@ public class MaarsSegmentation {
 				cB, cellSizePixel, minSize, maxSize, -1, (int) Math.round(cB
 						.getImageToAnalyze().getNSlices() / 2), solidity,
 				meanGrey, true, false);
-		boolean noRoiDec = cBI.identifyCellesBoundaries();
-		ReportingUtils.logMessage("lala3 " + noRoiDec);
-		if(noRoiDec){
+		if(cBI.identifyCellesBoundaries()){
 			this.noRoiDetected = true;
 		}
 		IJ.getImage().close();
-	}
 
-	/**
-	 * 
-	 * @return true if program is still working on segmentation
-	 */
-	public boolean isAnalysing() {
-
-		File file = new File(cB.getPathDirField().getText()
-				+ cB.getImageToAnalyze().getShortTitle()
-				+ "_CorrelationImage.tif");
-		if (file.exists()) {
-			return false;
-		} else {
-			return true;
-		}
 	}
 
 	/**
