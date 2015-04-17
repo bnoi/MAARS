@@ -91,9 +91,9 @@ if(md.isOkClicked()) {
 
 		MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 		ms.segmentation();
-		while(ms.isAnalysing()) {
-			gui.sleep(3000);
-		}
+//		while(ms.isAnalysing()) {
+//			gui.sleep(3000);
+//		}
 
 		if(!ms.noRoiDetected()){
 			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());

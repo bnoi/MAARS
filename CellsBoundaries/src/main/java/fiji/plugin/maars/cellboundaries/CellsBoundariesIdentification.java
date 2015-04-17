@@ -130,7 +130,7 @@ public class CellsBoundariesIdentification {
 		unusualShapeFilteringThreshold = solidityThreshold;
 		this.meanGreyValueThreshold = meanGrayValueThreshold;
 
-		enableDoSomethingElseInParallel = true;
+		enableDoSomethingElseInParallel = false;
 
 	}
 
@@ -461,7 +461,6 @@ public class CellsBoundariesIdentification {
 					System.out.println("Filter done.");
 				}else{
 					setNoRoiDetectedTrue();
-					roiManager.close();
 				}
 			}
 
@@ -497,8 +496,6 @@ public class CellsBoundariesIdentification {
 					System.out.println("Filter done.");
 				}else{
 					setNoRoiDetectedTrue();
-					ReportingUtils.logMessage("lala1 "+this.noRoiDetected);
-					roiManager.close();
 				}
 			}
 
@@ -521,7 +518,7 @@ public class CellsBoundariesIdentification {
 	 */
 	public void showAndSaveResultsAndCleanUp() {
 		Integer nbRoi= roiManager.getCount();
-		if (!nbRoi.equals(0)) {
+		if (nbRoi.equals(0)) {
 			setNoRoiDetectedTrue();
 		}
 		System.out.println("Show and save results");
@@ -548,6 +545,7 @@ public class CellsBoundariesIdentification {
 		if (saveRoi && !noRoiDetected) {
 			System.out.println("saving roi...");
 			roiManager.runCommand("Select All");
+			ReportingUtils.logMessage("lala1 "+roiManager.getCount());
 			roiManager.runCommand("Save",
 					savingPath + imageToAnalyze.getShortTitle()
 							+ "_ROI.zip");
@@ -623,6 +621,7 @@ public class CellsBoundariesIdentification {
 	/**
 	 * Run algorithm, return true if no roi is detected.
 	 */
+	
 	public boolean identifyCellesBoundaries() {
 
 		// Run the Methods on one thread only
@@ -651,20 +650,15 @@ public class CellsBoundariesIdentification {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			threads[0].interrupt();
 
 		} else {
-			final Thread thread = Thread.currentThread();
 			System.out.println("Do not create threads");
 			createCorrelationImage();
 			convertCorrelationToBinaryImage();
 			analyseAndFilterParticles();
 			showAndSaveResultsAndCleanUp();
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}
 		ReportingUtils.logMessage("lala2 "+this.noRoiDetected);
 		return this.noRoiDetected;
