@@ -1,7 +1,5 @@
 package fiji.plugin.maars.maarslib;
 
-import java.io.File;
-
 import org.micromanager.utils.ReportingUtils;
 
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;

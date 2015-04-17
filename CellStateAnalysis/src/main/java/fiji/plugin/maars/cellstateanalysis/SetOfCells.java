@@ -33,7 +33,7 @@ public class SetOfCells {
 	// -1 -> cell bounds are black then white
 	// 1 -> cell bounds are white then black
 
-	private boolean bfAnalysisOnly;
+	
 	private Cell[] cellArray;
 
 	// output
@@ -88,7 +88,6 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Done");
 
 		ReportingUtils.logMessage("Get ROIs as array");
-		bfAnalysisOnly = false;
 		roiArray = getRoisAsArray();
 		cellArray = new Cell[roiArray.length];
 
@@ -145,7 +144,6 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Done");
 
 		ReportingUtils.logMessage("Get ROIs as array");
-		bfAnalysisOnly = true;
 		roiArray = getRoisAsArray();
 		cellArray = new Cell[roiArray.length];
 

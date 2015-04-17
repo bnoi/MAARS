@@ -12,8 +12,6 @@ import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.measure.Calibration;
-import ij.plugin.ZProjector;
 
 /**
  * Class to find and measure mitotic spindle using fluorescence image analysis

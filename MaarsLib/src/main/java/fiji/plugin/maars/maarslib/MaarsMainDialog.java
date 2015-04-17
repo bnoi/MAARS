@@ -242,8 +242,9 @@ public class MaarsMainDialog {
 	 * Method to display number of field the program has to scan
 	 */
 	public void refreshNumField() {
-
+		
 		Vector<TextField> numFields = mainDialog.getNumericFields();
+			
 		double newWidth = Double.parseDouble(numFields.get(0).getText());
 		double newHeigth = Double.parseDouble(numFields.get(1).getText());
 

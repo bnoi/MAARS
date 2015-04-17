@@ -28,8 +28,6 @@ public class Spindle {
 	private double length;
 	private double lengthToMajorAxis;
 	private double angleToMajorAxis;
-//	private double[] XYCenterAbsolutePositionToMajorMinorAxis;
-//	private double[] XYCenterRelativePositionToMajorMinorAxis;
 	private String feature;
 	private Roi cellShapeRoi;
 	private Roi roiBeforeCrop;
@@ -64,8 +62,6 @@ public class Spindle {
 			length = 0;
 			lengthToMajorAxis = 0;
 			angleToMajorAxis = 0;
-//			XYCenterAbsolutePositionToMajorMinorAxis = null;
-//			XYCenterRelativePositionToMajorMinorAxis = null;
 			coordSPB = null;
 
 			feature = "NO_SPOT";
@@ -74,8 +70,6 @@ public class Spindle {
 				length = 0;
 				lengthToMajorAxis = 0;
 				angleToMajorAxis = 0;
-//				XYCenterAbsolutePositionToMajorMinorAxis = null;
-//				XYCenterRelativePositionToMajorMinorAxis = null;
 				coordSPB = null;
 
 				feature = "NO_SPINDLE";
@@ -199,26 +193,6 @@ public class Spindle {
 		//pixel
 		lengthSpCellCenter = tempLine.getLength();
 
-		//pixel[]
-//		XYCenterAbsolutePositionToMajorMinorAxis = MyCoordinatesGeometry
-//				.convertPolarToCartesianCoor(
-//						0,
-//						0,
-//						lengthTemp,
-//						MyCoordinatesGeometry.getAngleToAxis(
-//								measures.getAngle() + 90, tempAngle));
-//		//um
-//		XYCenterAbsolutePositionToMajorMinorAxis[0] = XYCenterAbsolutePositionToMajorMinorAxis[0]
-//				* cal.pixelWidth;
-//		XYCenterAbsolutePositionToMajorMinorAxis[1] = XYCenterAbsolutePositionToMajorMinorAxis[1]
-//				* cal.pixelHeight;
-//
-//		XYCenterRelativePositionToMajorMinorAxis = new double[2];
-//		//um
-//		XYCenterRelativePositionToMajorMinorAxis[0] = measures.getMinor()
-//				/ XYCenterAbsolutePositionToMajorMinorAxis[0];
-//		XYCenterRelativePositionToMajorMinorAxis[1] = measures.getMajor()
-//				/ XYCenterAbsolutePositionToMajorMinorAxis[1];
 	}
 
 //	/**

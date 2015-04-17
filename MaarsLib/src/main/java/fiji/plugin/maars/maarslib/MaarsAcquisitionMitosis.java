@@ -10,7 +10,6 @@ import ij.plugin.RoiScaler;
 import ij.process.ShortProcessor;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
