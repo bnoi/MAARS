@@ -19,6 +19,7 @@ import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 
+
 public class CellsBoundariesIdentification {
 
 	// Parameters for algorithm
@@ -30,6 +31,8 @@ public class CellsBoundariesIdentification {
 	private int direction; // this is the direction of the equation to integrate
 	// it is 1 for image with cell boundaries be black then white
 	// it is -1 for image with cell boundaries be white then black
+
+	private boolean enableDoSomethingElseInParallel;
 
 	// Parameters to filter results
 	private double minParticleSize;
@@ -102,10 +105,8 @@ public class CellsBoundariesIdentification {
 		this.filterUnusualShape = cB.getFilterUnususalCkb().getState();
 		this.filterWithMeanGrayValue = cB.getFilterWithMeanGreyValueCkb()
 				.getState();
-		this.minParticleSize = minParticleSize
-				/ cB.getImageToAnalyze().getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize
-				/ cB.getImageToAnalyze().getCalibration().pixelWidth;
+		this.minParticleSize = minParticleSize / cB.getImageToAnalyze().getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / cB.getImageToAnalyze().getCalibration().pixelWidth;
 		this.direction = direction;
 
 		// ResultOptions
@@ -126,6 +127,8 @@ public class CellsBoundariesIdentification {
 
 		unusualShapeFilteringThreshold = solidityThreshold;
 		this.meanGreyValueThreshold = meanGrayValueThreshold;
+
+		enableDoSomethingElseInParallel = false;
 
 	}
 
@@ -173,10 +176,10 @@ public class CellsBoundariesIdentification {
 
 		this.flushImageToAnalyze = true;
 
-		this.minParticleSize = minParticleSize
-				/ imageToAnalyse.getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize
-				/ imageToAnalyse.getCalibration().pixelWidth;
+		this.minParticleSize = minParticleSize / imageToAnalyse.getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / imageToAnalyse.getCalibration().pixelWidth;
+
+		enableDoSomethingElseInParallel = false;
 
 		zFocus = zf;
 
@@ -214,7 +217,7 @@ public class CellsBoundariesIdentification {
 	 * flushImageToAnalyze : to empty the ImageProcessor of image to analyze
 	 */
 	public CellsBoundariesIdentification(ImagePlus imageToAnalyse, int sigma,
-			int direction,
+			int direction, boolean enableDoSomethingElseInParallel,
 			boolean filterUnusualShape, boolean filterWithMinGrayValue,
 			boolean displayCorrelationImg, boolean displayBinaryImg,
 			boolean displayDataFrame, boolean displayFocusImage,
@@ -259,10 +262,10 @@ public class CellsBoundariesIdentification {
 
 		this.flushImageToAnalyze = flushImageToAnalyze;
 
-		this.minParticleSize = minParticleSize
-				/ imageToAnalyse.getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize
-				/ imageToAnalyse.getCalibration().pixelWidth;
+		this.minParticleSize = minParticleSize / imageToAnalyse.getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / imageToAnalyse.getCalibration().pixelWidth;
+
+		this.enableDoSomethingElseInParallel = enableDoSomethingElseInParallel;
 
 		zFocus = zf;
 
@@ -413,7 +416,7 @@ public class CellsBoundariesIdentification {
 
 				System.out.println("- reset result table");
 				resultTable.reset();
-				Integer nbRoi = roiManager.getCount();
+				Integer nbRoi= roiManager.getCount();
 				if (!nbRoi.equals(0)) {
 					System.out.println("- get roi as array");
 					roiArray = roiManager.getRoisAsArray();
@@ -454,7 +457,7 @@ public class CellsBoundariesIdentification {
 					}
 					deleteRowOfResultTable(rowTodelete);
 					System.out.println("Filter done.");
-				} else {
+				}else{
 					setNoRoiDetectedTrue();
 				}
 			}
@@ -462,7 +465,7 @@ public class CellsBoundariesIdentification {
 			if (filterUnusualShape) {
 
 				System.out.println("Filtering with solidity...");
-				Integer nbRoi = roiManager.getCount();
+				Integer nbRoi= roiManager.getCount();
 				if (!nbRoi.equals(0)) {
 					System.out.println("- get roi as array");
 					roiArray = roiManager.getRoisAsArray();
@@ -489,7 +492,7 @@ public class CellsBoundariesIdentification {
 
 					deleteRowOfResultTable(rowTodelete);
 					System.out.println("Filter done.");
-				} else {
+				}else{
 					setNoRoiDetectedTrue();
 				}
 			}
@@ -512,7 +515,7 @@ public class CellsBoundariesIdentification {
 	 * Method to show and saved specified results and flush unwanted results
 	 */
 	public void showAndSaveResultsAndCleanUp() {
-		Integer nbRoi = roiManager.getCount();
+		Integer nbRoi= roiManager.getCount();
 		if (nbRoi.equals(0)) {
 			setNoRoiDetectedTrue();
 		}
@@ -541,7 +544,8 @@ public class CellsBoundariesIdentification {
 			System.out.println("saving roi...");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Save",
-					savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
+					savingPath + imageToAnalyze.getShortTitle()
+							+ "_ROI.zip");
 			System.out.println("Done");
 			System.out.println("Close roi manager");
 			roiManager.close();
@@ -592,6 +596,17 @@ public class CellsBoundariesIdentification {
 		}
 	}
 
+	/**
+	 * Create a Thread[] array as large as the number of processors available.
+	 * From Stephan Preibisch's Multithreading.java class. See:
+	 * http://repo.or.cz
+	 * /w/trakem2.git?a=blob;f=mpi/fruitfly/general/MultiThreading.java;hb=HEAD
+	 */
+	private Thread[] newThreadArray() {
+		int n_cpus = Runtime.getRuntime().availableProcessors();
+		return new Thread[n_cpus];
+	}
+
 	public int getDirection() {
 		return direction;
 	}
@@ -603,16 +618,48 @@ public class CellsBoundariesIdentification {
 	/**
 	 * Run algorithm, return true if no roi is detected.
 	 */
-
+	
 	public boolean identifyCellesBoundaries() {
-		createCorrelationImage();
-		convertCorrelationToBinaryImage();
-		analyseAndFilterParticles();
-		showAndSaveResultsAndCleanUp();
+
+		// Run the Methods on one thread only
+		// So it is possible to run other process while this one is running
+		// NB : createCorrelation is the longest method to execute
+		if (enableDoSomethingElseInParallel) {
+			final Thread[] threads = newThreadArray();
+			threads[0] = new Thread() {
+
+				{
+					setPriority(Thread.NORM_PRIORITY);
+				}
+
+				public void run() {
+					createCorrelationImage();
+					convertCorrelationToBinaryImage();
+					analyseAndFilterParticles();
+					showAndSaveResultsAndCleanUp();
+				}
+
+			};
+			threads[0].start();
+			try {
+				threads[0].join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} else {
+			System.out.println("Do not create threads");
+			createCorrelationImage();
+			convertCorrelationToBinaryImage();
+			analyseAndFilterParticles();
+			showAndSaveResultsAndCleanUp();
+			
+		}
 		return this.noRoiDetected;
 	}
-
-	public void setNoRoiDetectedTrue() {
+	
+	public void setNoRoiDetectedTrue(){
 		this.noRoiDetected = true;
 	}
 
