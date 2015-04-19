@@ -322,7 +322,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 					0, k, 0, 0);
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-			shortProcessor.setPixels(img.pix);;
+			shortProcessor.setPixels(img.pix);
 			imageStack.addSlice(shortProcessor);
 			z = z + step;
 		}

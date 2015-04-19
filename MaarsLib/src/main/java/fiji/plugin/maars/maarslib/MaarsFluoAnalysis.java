@@ -23,6 +23,7 @@ public class MaarsFluoAnalysis {
 
 	private AllMaarsParameters parameters;
 	private SetOfCells soc;
+	private String pathToSaveImgs;
 
 	/**
 	 * Constructor 1:
@@ -265,7 +266,10 @@ public class MaarsFluoAnalysis {
 		FileWriter spindleWriter = null;
 		try {
 			File dir = new File (pathToResults + "/" + frame);
-			dir.mkdirs();
+			if(!dir.exists()){
+				dir.mkdirs();
+			}
+			pathToSaveImgs = pathToResults;
 			spindleWriter = new FileWriter(pathToResults + "/" + frame
 					+ "_spindleAnalysis.txt");
 		} catch (IOException e) {
@@ -287,6 +291,7 @@ public class MaarsFluoAnalysis {
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
+			cell.addFluoSlice();
 			try {
 				if (i != nbOfCells - 1) {
 					spindleWriter.write(sp.toString(String.valueOf(cell
@@ -298,13 +303,6 @@ public class MaarsFluoAnalysis {
 
 			} catch (IOException e) {
 				ReportingUtils.logError(e);
-			}
-			if (parameters.getParametersAsJsonObject()
-					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-					.getAsJsonObject()
-					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
-					.getAsBoolean()) {
-				cell.saveFluoImage(pathToResults+"/"+frame+"/"+ String.valueOf(cell.getCellNumber()));
 			}
 			cell = null;
 			sp = null;
@@ -329,4 +327,11 @@ public class MaarsFluoAnalysis {
 		return soc;
 	}
 
+	public void saveCroppedImgs(){
+		int nbCell = soc.length();
+		for(int i=0; i < nbCell;i++){
+			Cell cell = soc.getCell(i);
+			cell.saveFluoImage(pathToSaveImgs);	
+		}
+	}
 }

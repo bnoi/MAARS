@@ -333,9 +333,9 @@ public class MyCoordinatesGeometry {
 
 			Line spindleLine = new Line(coordinates[0], coordinates[1],
 					coordinates[3], coordinates[4]);
-			if(spindleLine.getAngle()>90){
-				angleLengthXYCenter[0] = spindleLine.getAngle() - 180;
-			}
+			
+			angleLengthXYCenter[0] = spindleLine.getAngle();
+			
 			angleLengthXYCenter[1] = spindleLine.getLength();
 
 			double[] XYCenter = new double[2];
@@ -379,12 +379,7 @@ public class MyCoordinatesGeometry {
 	 * @return
 	 */
 	public static double getAngleToAxis(double angleAxis, double otherAngle) {
-		if (angleAxis * otherAngle > 0){
-			return Math.abs(angleAxis - otherAngle);
-		}else{
-			return Math.abs(angleAxis) + Math.abs(otherAngle);
-		}
-		
+		return Math.abs(angleAxis - otherAngle);
 	}
 
 	/**

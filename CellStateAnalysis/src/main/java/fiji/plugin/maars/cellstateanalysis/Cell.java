@@ -1,6 +1,7 @@
 package fiji.plugin.maars.cellstateanalysis;
 
 import java.awt.Rectangle;
+import java.io.File;
 import java.util.ArrayList;
 
 import org.micromanager.utils.ReportingUtils;
@@ -9,6 +10,7 @@ import ij.process.ImageProcessor;
 import fiji.plugin.trackmate.Spot;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Line;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -30,6 +32,7 @@ public class Cell {
 	private ImagePlus fluoImage;
 	private double[] scaleFactorForRoiFromBfToFluo;
 	private ImagePlus correlationImage;
+	private ImageStack fluoStack = new ImageStack();
 	private Roi cellShapeRoi;
 	private Line cellLinearRoi;
 	private ResultsTable rt;
@@ -633,7 +636,19 @@ public class Cell {
 		
 	}
 	public void saveFluoImage(String path){
-		IJ.saveAsTiff(fluoImage, path);
+		String pathToCroppedImgDir = path+"/croppedImgs/";
+		String pathToCroppedImg = pathToCroppedImgDir+"/"+String.valueOf(this.getCellNumber());
+		if (!new File(pathToCroppedImgDir).exists()){
+			new File(pathToCroppedImgDir).mkdirs();
+		}
+		ImagePlus imp = new ImagePlus("cell"+getCellNumber(),fluoStack);
+		IJ.saveAsTiff(imp, pathToCroppedImg);
 	}
-
+	public void addFluoSlice(){
+		if (fluoStack.getSize()==0){
+			fluoStack = new ImageStack(fluoImage.getWidth(), fluoImage.getHeight());
+		}
+		ImageProcessor ip = fluoImage.getImageStack().getProcessor(1);
+		fluoStack.addSlice(ip);
+	}
 }

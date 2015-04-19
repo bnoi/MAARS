@@ -165,13 +165,15 @@ public class Spindle {
 				coordinates[3],coordinates[4]);
 		length =  spindleLine.getLength();
 		lengthToMajorAxis = measures.getMajor() / length;
-		double cellAbsoAngle = measures.getAngle();
-		if (cellAbsoAngle > 90){
-			cellAbsoAngle -= 180; 
-		}
-		angleToMajorAxis = MyCoordinatesGeometry.getAngleToAxis(
-				cellAbsoAngle, absoluteAngleLengthXYCenter[0]);
 
+		ReportingUtils.logMessage("cellAngle : "+measures.getAngle()+"\n"+ 
+					"spindleAngle : " +absoluteAngleLengthXYCenter[0]);
+		angleToMajorAxis = MyCoordinatesGeometry.getAngleToAxis(
+				measures.getAngle(), absoluteAngleLengthXYCenter[0]);
+		if(angleToMajorAxis>90){
+			angleToMajorAxis -= 180;
+			angleToMajorAxis = Math.abs(angleToMajorAxis);
+		}
 		coordSPB = coordinates;
 
 		//center in um

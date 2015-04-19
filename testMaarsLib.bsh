@@ -154,6 +154,14 @@ if(md.isOkClicked()) {
 		mfa.getSetOfCells().closeRoiManager();
 		mas.setParameters(params);
 		}
+		if (param.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject()
+					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
+					.getAsBoolean()) {
+				mfa.saveCroppedImgs();
+		}
+		
 	}
 
 	mmc.setAutoShutter(true);
