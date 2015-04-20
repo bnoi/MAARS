@@ -110,6 +110,7 @@ public class MaarsSegmentation {
 				cB, cellSizePixel, minSize, maxSize, -1, (int) Math.round(cB
 						.getImageToAnalyze().getNSlices() / 2), solidity,
 				meanGrey, true, false);
+		//cBI.identifyCellesBoundaries() return true, if no ROI detected.
 		if(cBI.identifyCellesBoundaries()){
 			this.noRoiDetected = true;
 			cBI.getRoiManager().close();
