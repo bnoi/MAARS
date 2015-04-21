@@ -269,6 +269,10 @@ public class MaarsFluoAnalysis {
 		FileWriter spindleWriter = null;
 		CSVWriter writer = null;
 		List<String[]> cells = new ArrayList<String[]>();
+		int timeInterval = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
+				.getAsInt();
 		try {
 			File dir = new File (pathToResults + "/" + frame);
 			if(!dir.exists()){
@@ -293,7 +297,7 @@ public class MaarsFluoAnalysis {
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
 			cell.addFluoSlice();
-			cells.add(sp.toList(frame));
+			cells.add(sp.toList(frame*timeInterval/1000));
 			cell = null;
 			sp = null;
 		}

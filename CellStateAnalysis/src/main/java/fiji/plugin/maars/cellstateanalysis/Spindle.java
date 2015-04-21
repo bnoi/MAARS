@@ -1,7 +1,6 @@
 package fiji.plugin.maars.cellstateanalysis;
 
 import ij.gui.Line;
-
 import ij.gui.Roi;
 import ij.measure.Calibration;
 
@@ -408,62 +407,37 @@ public class Spindle {
 	/**
 	 * Method to write to JSON format features of spindle
 	 * 
-	 * @param name
+	 * @param frame(second)
 	 * @return
 	 */
 	public String[] toList(int frame) {
-		String[] spindle = new String[23];
+		String[] spindleCoord = new String[23];
+		spindleCoord[0] = cellShapeRoi.getName();
+		spindleCoord[1] = String.valueOf(frame);
+		spindleCoord[2] = feature;
+		spindleCoord[3] = String.valueOf(getNumberOfSpotDetected());
 		if (!feature.equals(NO_SPINDLE) && !feature.equals(NO_SPOT)) 
 		{
-			spindle[0] = cellShapeRoi.getName();
-			spindle[1] = String.valueOf(frame);
-			spindle[2] = feature;
-			spindle[3] = String.valueOf(getNumberOfSpotDetected());
-			spindle[4] = String.valueOf(centerCellX);
-			spindle[5] = String.valueOf(centerCellY);
-			spindle[6] = String.valueOf(measures.getAngle());
-			spindle[7] = String.valueOf(measures.getMajor());
-			spindle[8] = String.valueOf(measures.getMinor());
-			spindle[9] = String.valueOf(spAbsoAng);
-			spindle[10] = String.valueOf(angleToMajorAxis);
-			spindle[11] = String.valueOf(length);
-			spindle[12] = String.valueOf(coordSPB[0]);
-			spindle[13] = String.valueOf(coordSPB[1]);
-			spindle[14] = String.valueOf(coordSPB[2]);
-			spindle[15] = String.valueOf(coordSPB[3]);
-			spindle[16] = String.valueOf(coordSPB[4]);
-			spindle[17] = String.valueOf(coordSPB[5]);
-			spindle[18] = String.valueOf(centerSpX);
-			spindle[19] = String.valueOf(centerSpY);
-			spindle[20] = String.valueOf(centerSpZ);
-			spindle[21] = String.valueOf(lengthSpCellCenter);
-			spindle[22] = String.valueOf(angleSpCellCenter);
-		}else{
-			spindle[0] = cellShapeRoi.getName();
-			spindle[1] = String.valueOf(frame);
-			spindle[2] = feature;
-			spindle[3] = String.valueOf(getNumberOfSpotDetected());
-			spindle[4] = "";
-			spindle[5] = "";
-			spindle[6] = "";
-			spindle[7] = "";
-			spindle[8] = "";
-			spindle[9] = "";
-			spindle[10] = "";
-			spindle[11] = "";
-			spindle[12] = "";
-			spindle[13] = "";
-			spindle[14] = "";
-			spindle[15] = "";
-			spindle[16] = "";
-			spindle[17] = "";
-			spindle[18] = "";
-			spindle[19] = "";
-			spindle[20] = "";
-			spindle[21] = "";
-			spindle[22] = "";
+		      spindleCoord[4] = String.valueOf(centerCellX);
+		      spindleCoord[5] = String.valueOf(centerCellY);
+		      spindleCoord[6] = String.valueOf(measures.getAngle());
+		      spindleCoord[7] = String.valueOf(measures.getMajor());
+		      spindleCoord[8] = String.valueOf(measures.getMinor());
+		      spindleCoord[9] = String.valueOf(spAbsoAng);
+		      spindleCoord[10] = String.valueOf(angleToMajorAxis);
+		      spindleCoord[11] = String.valueOf(length);
+		      spindleCoord[12] = String.valueOf(coordSPB[0]);
+		      spindleCoord[13] = String.valueOf(coordSPB[1]);
+		      spindleCoord[14] = String.valueOf(coordSPB[2]);
+		      spindleCoord[15] = String.valueOf(coordSPB[3]);
+		      spindleCoord[16] = String.valueOf(coordSPB[4]);
+		      spindleCoord[17] = String.valueOf(coordSPB[5]);
+		      spindleCoord[18] = String.valueOf(centerSpX);
+		      spindleCoord[19] = String.valueOf(centerSpY);
+		      spindleCoord[20] = String.valueOf(centerSpZ);
+		      spindleCoord[21] = String.valueOf(lengthSpCellCenter);
+		      spindleCoord[22] = String.valueOf(angleSpCellCenter);
 		}
-
-		return spindle;
+		return spindleCoord;
 	}
 }
