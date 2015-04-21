@@ -96,7 +96,6 @@ if(md.isOkClicked()) {
 			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
 			MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
 			
-			//mfa.getSetOfCells().shuffle();
 			
 			MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
 															xPos,
@@ -138,10 +137,7 @@ if(md.isOkClicked()) {
 					frame++;
 					double acqTook = System.currentTimeMillis() - beginAcq;
 					gui.sleep((long) (timeInterval - acqTook));			
-				}									
-				// close roi manager
-				mfa.getSetOfCells().closeRoiManager();
-				mas.setParameters(params);										
+				}																		
 		}else {
 			int frame = 0;
 			String fluoFolder = mas.getPathToMovie()+"_FLUO";
@@ -155,18 +151,18 @@ if(md.isOkClicked()) {
 			acqNameFluo = null;
 			fluoImage = null;
 		}
-		// close roi manager
-		mfa.getSetOfCells().closeRoiManager();
-		mas.setParameters(params);
-		}
 		if (param.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject()
 					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
 					.getAsBoolean()) {
 				mfa.saveCroppedImgs();
+			}
+		// close roi manager
+		mfa.getSetOfCells().closeRoiManager();
+		mas.setParameters(params);
 		}
-		
+
 	}
 
 	mmc.setAutoShutter(true);
