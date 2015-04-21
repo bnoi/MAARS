@@ -280,8 +280,33 @@ public class MaarsFluoAnalysis {
 			}
 			pathToSaveImgs = pathToResults;
 			spindleWriter = new FileWriter(pathToResults + "/" + frame
-					+ "_spindleAnalysis.txt");
+					+ "_spindleAnalysis.csv");
 			writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
+			writer.writeNext(new String[]{
+				"Cell",
+				"Second",
+				"Feature",
+				"NbOfSpotDetected",
+				"CellCenterX",
+				"CellCenterY",
+				"CellAbsoMajAng",
+				"CellMajLength",
+				"CellMinLength",
+				"SpAbsoAng",
+				"SpAngToMaj",
+				"SpLength",
+				"spb1X",
+				"spb1Y",
+				"spb1Z",
+				"spb2X",
+				"spb2Y",
+				"spb2Z",
+				"SpCenterX",
+				"SpCenterY",
+				"SpCenterZ",
+				"CellCenterToSpCenterLen",
+				"CellCenterToSpCenterAng"
+			});
 		} catch (IOException e) {
 			ReportingUtils.logError(e);
 		}
