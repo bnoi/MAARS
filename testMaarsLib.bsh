@@ -27,9 +27,7 @@ mmc.waitForDevice(mmc.getShutterDevice());
 gui.message("Create main window");
 MaarsMainDialog md = null;
 try {
-	//md = new MaarsMainDialog(gui, mmc, "/Users/theoli89/Documents/MAARS/MaarsLib/");
-	//md = new MaarsMainDialog(gui, mmc, "/home/tong/Documents/code/MAARS/MaarsLib/");
-	md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS/MaarsLib/");
+	md = new MaarsMainDialog(gui, mmc, base_dir + "MaarsLib/");
 } catch (IOException e) {
 	gui.message("Error");
 }
@@ -90,7 +88,7 @@ if(md.isOkClicked()) {
 	
 			MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 			ms.segmentation();
-			
+			ms.writeUsedConfig();
 			if(!ms.noRoiDetected()){
 				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
 				MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
@@ -103,9 +101,33 @@ if(md.isOkClicked()) {
 																mfa.getSetOfCells());
 				
 				List cellsInAllFields = new ArrayList();
-				File dir = new File (pathToResults + "/" + frame);
 				spindleWriter = new FileWriter(mas.getPathToMovie()+"_FLUO/spindleAnalysis.txt");
 				writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
+				writer.writeNext(new String[]{
+					"Cell",
+					"Second",
+					"Feature",
+					"NbOfSpotDetected",
+					"CellCenterX",
+					"CellCenterY",
+					"CellAbsoMajAng",
+					"CellMajLength",
+					"CellMinLength",
+					"SpAbsoAng",
+					"SpAngToMaj",
+					"SpLength",
+					"spb1X",
+					"spb1Y",
+					"spb1Z",
+					"spb2X",
+					"spb2Y",
+					"spb2Z",
+					"SpCenterX",
+					"SpCenterY",
+					"SpCenterZ",
+					"CellCenterToSpCenterLen",
+					"CellCenterToSpCenterAng"
+				});
 				if(param
 					.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
