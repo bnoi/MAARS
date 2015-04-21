@@ -82,6 +82,11 @@
             <scope>system</scope>
             <systemPath>${basedir}/../jars/MMJ_.jar</systemPath>
         </dependency>
+        <dependency>
+        	<groupId>net.sf.opencsv</groupId>
+        	<artifactId>opencsv</artifactId>
+        	<version>2.0</version>
+        </dependency>
     </dependencies>
 
     <repositories>

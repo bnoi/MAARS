@@ -101,6 +101,11 @@ if(md.isOkClicked()) {
 															xPos,
 															yPos,
 															mfa.getSetOfCells());
+		
+		List cellsInAllFields = new ArrayList();
+		File dir = new File (pathToResults + "/" + frame);
+		spindleWriter = new FileWriter(mas.getPathToMovie()+"_FLUO/spindleAnalysis.txt");
+		writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
 		if(param
 			.getParametersAsJsonObject()
 			.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -132,7 +137,8 @@ if(md.isOkClicked()) {
 					dir.mkdirs();
 					double beginAcq = System.currentTimeMillis();
 					ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
-					mfa.analyzeEntireFieldNoReturn(fluoImage, mas.getPathToMovie()+"_FLUO", frame);
+					cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
+													mas.getPathToMovie()+"_FLUO", frame));
 					mfa.getSetOfCells().closeRoiManager();
 					frame++;
 					double acqTook = System.currentTimeMillis() - beginAcq;
@@ -151,6 +157,12 @@ if(md.isOkClicked()) {
 			acqNameFluo = null;
 			fluoImage = null;
 		}
+<<<<<<< Updated upstream
+=======
+		// close roi manager
+		mfa.getSetOfCells().closeRoiManager();
+		mas.setParameters(params);
+>>>>>>> Stashed changes
 		if (param.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject()
@@ -162,7 +174,15 @@ if(md.isOkClicked()) {
 		mfa.getSetOfCells().closeRoiManager();
 		mas.setParameters(params);
 		}
+<<<<<<< Updated upstream
 
+=======
+		writer.writeAll(cellsInAllFields);
+		spindleWriter.close();
+		writer.close();
+		}
+		
+>>>>>>> Stashed changes
 	}
 
 	mmc.setAutoShutter(true);

@@ -24,6 +24,8 @@ import org.micromanager.utils.MMException;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
 
+import util.opencsv.CSVWriter;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
@@ -459,9 +461,9 @@ public class MaarsAcquisitionMitosis {
 									.getAsJsonObject()
 									.get(AllMaarsParameters.SPOT_RADIUS)
 									.getAsDouble());
-					String savingPath = rootDirName + fluoAcqName + "/" + frame
-							+ "_";
-					writeSpinldeCoord(cell, savingPath);
+//					String savingPath = rootDirName + fluoAcqName + "/" + frame
+//							+ "_";
+//					writeSpinldeCoord(cell, savingPath);
 					keepFilming = checkEndMovieConditions(lastImage,
 							fluoImagePlus, startTime, cell, frame);
 					if (frame == 0) {
@@ -680,26 +682,26 @@ public class MaarsAcquisitionMitosis {
 		return pixelSize;
 	}
 
-	public void writeSpinldeCoord(Cell cell, String pathToWrite) {
-		FileWriter spindleWriter = null;
-		try {
-			spindleWriter = new FileWriter(pathToWrite + "_spindleAnalysis.txt");
-		} catch (IOException e) {
-			ReportingUtils.logMessage("Could not create " + pathToWrite
-					+ "_spindleAnalysis.csv");
-			e.printStackTrace();
-		}
-		try {
-			spindleWriter.write("["
-					+ cell.getLastSpindleComputed().toString(
-							cell.getCellShapeRoi().getName()) + "]");
-		} catch (IOException e1) {
-			ReportingUtils.logError(e1);
-		}
-		try {
-			spindleWriter.close();
-		} catch (IOException e) {
-			ReportingUtils.logError(e);
-		}
-	}
+//	public void writeSpinldeCoord(Cell cell, String pathToWrite) {
+//		FileWriter spindleWriter = null;
+//		CSVWriter writer = null;
+//		try {
+//			spindleWriter = new FileWriter(pathToWrite + "_spindleAnalysis.txt");
+//			writer = new CSVWriter(spindleWriter);
+//		} catch (IOException e) {
+//			ReportingUtils.logMessage("Could not create " + pathToWrite
+//					+ "_spindleAnalysis.csv");
+//			e.printStackTrace();
+//		}
+//		try {
+//			writer.writeAll(cell.getLastSpindleComputed().toList());
+//		} catch (IOException e1) {
+//			ReportingUtils.logError(e1);
+//		}
+//		try {
+//			spindleWriter.close();
+//		} catch (IOException e) {
+//			ReportingUtils.logError(e);
+//		}
+//	}
 }

@@ -25,9 +25,11 @@ public class Spindle {
 	private double centerCellY;
 	private double centerSpX;
 	private double centerSpY;
+	private double centerSpZ;
 	private double length;
 	private double lengthToMajorAxis;
 	private double angleToMajorAxis;
+	private double spAbsoAng;
 	private String feature;
 	private Roi cellShapeRoi;
 	private Roi roiBeforeCrop;
@@ -118,6 +120,7 @@ public class Spindle {
 			coordinates[1] = features2.get("POSITION_Y");
 			coordinates[2] = features2.get("POSITION_Z") + 1;
 		}
+		centerSpZ = (coordinates[2] + coordinates[5])/2;
 
 		return coordinates;
 	}
@@ -165,11 +168,11 @@ public class Spindle {
 				coordinates[3],coordinates[4]);
 		length =  spindleLine.getLength();
 		lengthToMajorAxis = measures.getMajor() / length;
-
+		spAbsoAng = absoluteAngleLengthXYCenter[0];
 		ReportingUtils.logMessage("cellAngle : "+measures.getAngle()+"\n"+ 
-					"spindleAngle : " +absoluteAngleLengthXYCenter[0]);
+					"spindleAngle : " + spAbsoAng);
 		angleToMajorAxis = MyCoordinatesGeometry.getAngleToAxis(
-				measures.getAngle(), absoluteAngleLengthXYCenter[0]);
+				measures.getAngle(), spAbsoAng);
 		if(angleToMajorAxis>90){
 			angleToMajorAxis -= 180;
 			angleToMajorAxis = Math.abs(angleToMajorAxis);
@@ -408,48 +411,58 @@ public class Spindle {
 	 * @param name
 	 * @return
 	 */
-	public String toString(String name) {
-		String spindle = "{\"" + name + "\"" + ":{" + "\"cell\":"
-				+ cellShapeRoi.getName() + "," + "\"feature\":\"" + feature
-				+ "\"," + "\"number_of_spot_detected\":"
-				+ getNumberOfSpotDetected();
+	public String[] toList(int frame) {
+		String[] spindle = new String[23];
 		if (!feature.equals(NO_SPINDLE) && !feature.equals(NO_SPOT)) 
-		{			
-			spindle = spindle + 
-					",\"length\":{" 
-						+ "\"absolute\":"
-							+ length + "," 
-						+ "\"relative\":" 
-							+ lengthToMajorAxis + "},"
-					+ "\"angle_to_major_axis\":" 
-							+ angleToMajorAxis + ","
-					+ "\"SPB_coordinates\":{"
-							+ "\"spb1\":{" + "\"x\":"
-								+ coordSPB[0] + "," 
-								+ "\"y\":" + coordSPB[1] + ","
-								+ "\"z\":" + coordSPB[2] + "},"
-							+ "\"spb2\":{" + "\"x\":"
-								+ coordSPB[3] + ","
-								+ "\"y\":" + coordSPB[4] + ","
-								+ "\"z\":" + coordSPB[5] + "}},"
-					+ "\"CellCenter\":{"
-						+ "\"x\":"
-							+ centerCellX + ","
-						+ "\"y\":"
-							+ centerCellY+ "},"
-					+ "\"CellCenterToSpindleCenter\":{"
-						+ "\"angle\":"
-							+ angleSpCellCenter  + ","
-						+ "\"distance\":"
-							+ lengthSpCellCenter+"},"
-					+ "\"spindleCenterCoord\":{"
-						+ "\"x\":"
-							+ centerSpX + ","
-						+ "\"y\":"
-							+ centerSpY + "}";
+		{
+			spindle[0] = cellShapeRoi.getName();
+			spindle[1] = String.valueOf(frame);
+			spindle[2] = feature;
+			spindle[3] = String.valueOf(getNumberOfSpotDetected());
+			spindle[4] = String.valueOf(centerCellX);
+			spindle[5] = String.valueOf(centerCellY);
+			spindle[6] = String.valueOf(measures.getAngle());
+			spindle[7] = String.valueOf(measures.getMajor());
+			spindle[8] = String.valueOf(measures.getMinor());
+			spindle[9] = String.valueOf(spAbsoAng);
+			spindle[10] = String.valueOf(angleToMajorAxis);
+			spindle[11] = String.valueOf(length);
+			spindle[12] = String.valueOf(coordSPB[0]);
+			spindle[13] = String.valueOf(coordSPB[1]);
+			spindle[14] = String.valueOf(coordSPB[2]);
+			spindle[15] = String.valueOf(coordSPB[3]);
+			spindle[16] = String.valueOf(coordSPB[4]);
+			spindle[17] = String.valueOf(coordSPB[5]);
+			spindle[18] = String.valueOf(centerSpX);
+			spindle[19] = String.valueOf(centerSpY);
+			spindle[20] = String.valueOf(centerSpZ);
+			spindle[21] = String.valueOf(lengthSpCellCenter);
+			spindle[22] = String.valueOf(angleSpCellCenter);
+		}else{
+			spindle[0] = cellShapeRoi.getName();
+			spindle[1] = String.valueOf(frame);
+			spindle[2] = feature;
+			spindle[3] = String.valueOf(getNumberOfSpotDetected());
+			spindle[4] = "";
+			spindle[5] = "";
+			spindle[6] = "";
+			spindle[7] = "";
+			spindle[8] = "";
+			spindle[9] = "";
+			spindle[10] = "";
+			spindle[11] = "";
+			spindle[12] = "";
+			spindle[13] = "";
+			spindle[14] = "";
+			spindle[15] = "";
+			spindle[16] = "";
+			spindle[17] = "";
+			spindle[18] = "";
+			spindle[19] = "";
+			spindle[20] = "";
+			spindle[21] = "";
+			spindle[22] = "";
 		}
-
-		spindle = spindle + "}}";
 
 		return spindle;
 	}

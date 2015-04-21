@@ -3,9 +3,12 @@ package fiji.plugin.maars.maarslib;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.micromanager.utils.ReportingUtils;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;
 import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
@@ -261,9 +264,11 @@ public class MaarsFluoAnalysis {
 	 * @param pathToResults
 	 *            : path to save results
 	 */
-	public void analyzeEntireFieldNoReturn(ImagePlus fieldWideImage,
+	public List<String[]> analyzeEntireFieldReturnListSp(ImagePlus fieldWideImage,
 			String pathToResults , int frame) {
 		FileWriter spindleWriter = null;
+		CSVWriter writer = null;
+		List<String[]> cells = new ArrayList<String[]>();
 		try {
 			File dir = new File (pathToResults + "/" + frame);
 			if(!dir.exists()){
@@ -272,13 +277,9 @@ public class MaarsFluoAnalysis {
 			pathToSaveImgs = pathToResults;
 			spindleWriter = new FileWriter(pathToResults + "/" + frame
 					+ "_spindleAnalysis.txt");
+			writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
 		} catch (IOException e) {
 			ReportingUtils.logError(e);
-		}
-		try {
-			spindleWriter.write("[");
-		} catch (IOException e2) {
-			ReportingUtils.logError(e2);
 		}
 		int nbOfCells = soc.length();
 		for (int i = 0; i < nbOfCells; i++) {
@@ -292,31 +293,18 @@ public class MaarsFluoAnalysis {
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
 			cell.addFluoSlice();
-			try {
-				if (i != nbOfCells - 1) {
-					spindleWriter.write(sp.toString(String.valueOf(cell
-							.getCellNumber())) + "\n,");
-				} else {
-					spindleWriter.write(sp.toString(String.valueOf(cell
-							.getCellNumber())) + "\n");
-				}
-
-			} catch (IOException e) {
-				ReportingUtils.logError(e);
-			}
+			cells.add(sp.toList(frame));
 			cell = null;
 			sp = null;
 		}
-		try {
-			spindleWriter.write("]");
-		} catch (IOException e2) {
-			ReportingUtils.logError(e2);
-		}
+		writer.writeAll(cells);
 		try {
 			spindleWriter.close();
+			writer.close();
 		} catch (IOException e) {
 			ReportingUtils.logError(e);
 		}
+		return cells;
 	}
 
 	/**
