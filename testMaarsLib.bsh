@@ -86,7 +86,9 @@ if(md.isOkClicked()) {
 		"SpCenterY",
 		"SpCenterZ",
 		"CellCenterToSpCenterLen",
-		"CellCenterToSpCenterAng"
+		"CellCenterToSpCenterAng",
+		"fieldX",
+		"fieldY"
 	};
 	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
 	List cellsInAllFields = new ArrayList();
@@ -178,7 +180,7 @@ if(md.isOkClicked()) {
 							double beginAcq = System.currentTimeMillis();
 							ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 							cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-															fluoFolder, frame));
+															fluoFolder, frame,Math.round(xPos),Math.round(yPos)));
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
 							double acqTook = System.currentTimeMillis() - beginAcq;
@@ -191,7 +193,10 @@ if(md.isOkClicked()) {
 					ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 					fluoImage.show();
 					cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-																								fluoFolder, frame));
+																								fluoFolder, 
+																								frame,
+																								Math.round(xPos),
+																								Math.round(yPos)));
 					fluoImage.close();
 					acqNameFluo = null;
 					fluoImage = null;

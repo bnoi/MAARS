@@ -265,7 +265,7 @@ public class MaarsFluoAnalysis {
 	 *            : path to save results
 	 */
 	public List<String[]> analyzeEntireFieldReturnListSp(ImagePlus fieldWideImage,
-			String pathToResults , int frame) {
+			String pathToResults , int frame, int fieldX, int fieldY) {
 		FileWriter spindleWriter = null;
 		CSVWriter writer = null;
 		List<String[]> cells = new ArrayList<String[]>();
@@ -305,7 +305,9 @@ public class MaarsFluoAnalysis {
 				"SpCenterY",
 				"SpCenterZ",
 				"CellCenterToSpCenterLen",
-				"CellCenterToSpCenterAng"
+				"CellCenterToSpCenterAng",
+				"fieldX",
+				"fieldY"
 			});
 		} catch (IOException e) {
 			ReportingUtils.logError(e);
@@ -322,7 +324,7 @@ public class MaarsFluoAnalysis {
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
 			cell.addFluoSlice();
-			cells.add(sp.toList(frame*timeInterval/1000));
+			cells.add(sp.toList(frame*timeInterval/1000,fieldX,fieldY));
 			cell = null;
 			sp = null;
 		}
