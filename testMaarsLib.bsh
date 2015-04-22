@@ -7,6 +7,10 @@ addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
 addClassPath(base_dir + "CellsBoundaries/target/CellsBoundaries-1.0.jar");
 addClassPath(base_dir + "CellStateAnalysis/target/CellStateAnalysis-1.0.jar");
 
+
+import org.micromanager.utils.ReportingUtils;
+import au.com.bytecode.opencsv.CSVWriter;
+import java.util.List;
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
 import fiji.plugin.maars.maarslib.AllMaarsParameters;
@@ -59,9 +63,46 @@ if(md.isOkClicked()) {
 						.getAsJsonObject()
 						.get(AllMaarsParameters.Y_FIELD_NUMBER)
 						.getAsInt();
-	
+	String[] outputHeader = new String[]{
+		"Cell",
+		"Second",
+		"Feature",
+		"NbOfSpotDetected",
+		"CellCenterX",
+		"CellCenterY",
+		"CellAbsoMajAng",
+		"CellMajLength",
+		"CellMinLength",
+		"SpAbsoAng",
+		"SpAngToMaj",
+		"SpLength",
+		"spb1X",
+		"spb1Y",
+		"spb1Z",
+		"spb2X",
+		"spb2Y",
+		"spb2Z",
+		"SpCenterX",
+		"SpCenterY",
+		"SpCenterZ",
+		"CellCenterToSpCenterLen",
+		"CellCenterToSpCenterAng"
+	};
 	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
-
+	List cellsInAllFields = new ArrayList();
+	if(!param.getParametersAsJsonObject()
+			.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+			.getAsJsonObject()
+			.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
+			.getAsBoolean()){
+		String rootDirName = param.getParametersAsJsonObject()
+				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.getAsString();
+		spindleWriter = new FileWriter(rootDirName+"/spindleAnalysis.csv");
+		writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
+		writer.writeNext(outputHeader);
+	}		
 	if (nbXField * nbYField != 0){
 		ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
 														nbYField,
@@ -84,60 +125,37 @@ if(md.isOkClicked()) {
 	
 			HashMap params = mas.getParametersFromConf(param);
 			mas.setParameters(params);
+///////////////////////////////BF acquisition////////////////////////////////////////////
 			mas.acquire(false);
-	
+//////////////////////////////segmentation///////////////////////////////////////////////
 			MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 			ms.segmentation();
-			ms.writeUsedConfig();
+			ms.writeUsedConfig(mas.getPathToMovie());
+
+			
 			if(!ms.noRoiDetected()){
+///////////////////////////////if got ROI, initialise commen variables////////////////////////////////
 				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
 				MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
-				
-				//mfa.getSetOfCells().shuffle();
-				
+
 				MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
 																xPos,
 																yPos,
 																mfa.getSetOfCells());
-				
-				List cellsInAllFields = new ArrayList();
-				spindleWriter = new FileWriter(mas.getPathToMovie()+"_FLUO/spindleAnalysis.txt");
-				writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
-				writer.writeNext(new String[]{
-					"Cell",
-					"Second",
-					"Feature",
-					"NbOfSpotDetected",
-					"CellCenterX",
-					"CellCenterY",
-					"CellAbsoMajAng",
-					"CellMajLength",
-					"CellMinLength",
-					"SpAbsoAng",
-					"SpAngToMaj",
-					"SpLength",
-					"spb1X",
-					"spb1Y",
-					"spb1Z",
-					"spb2X",
-					"spb2Y",
-					"spb2Z",
-					"SpCenterX",
-					"SpCenterY",
-					"SpCenterZ",
-					"CellCenterToSpCenterLen",
-					"CellCenterToSpCenterAng"
-				});
+				String fluoFolder = mas.getPathToMovie()+"_FLUO";
+				File dir = new File(fluoFolder);
+				dir.mkdirs();
+				String acqNameFluo = "/movie_X"
+						+Math.round(xPos)
+						+"_Y"+Math.round(yPos)
+						+"_FLUO";
+//////////////////////////multiple snapshot per field//////////////////////////////
 				if(param
 					.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject()
 					.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
 					.getAsBoolean()) {
-					String acqNameFluo = "/movie_X"
-						+Math.round(xPos)
-						+"_Y"+Math.round(yPos)
-						+"_FLUO";
 					int timeInterval = param.getParametersAsJsonObject()
 							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 							.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
@@ -151,51 +169,50 @@ if(md.isOkClicked()) {
 							.getAsJsonObject().get(AllMaarsParameters.VALUES)
 							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
 							.getAsDouble() * 60 * 1000;
+					spindleWriter = new FileWriter(fluoFolder+"/spindleAnalysis.csv");
+					writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
+					writer.writeNext(outputHeader);
 					while (System.currentTimeMillis() - startTime <= timeLimit)
 						{
-							String fluoFolder = mas.getPathToMovie()+"_FLUO";
-							File dir = new File(fluoFolder);
-							String acqNameFluo = fluoFolder+ "/" + frame;
-							dir.mkdirs();
+							String acqNameFluo = acqNameFluo + "/" + frame;
 							double beginAcq = System.currentTimeMillis();
 							ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 							cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-															mas.getPathToMovie()+"_FLUO", frame));
+															fluoFolder, frame));
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
 							double acqTook = System.currentTimeMillis() - beginAcq;
 							gui.sleep((long) (timeInterval - acqTook));			
-						}																			
+						}
+////////////////////////////one snapshot per field/////////////////////////////////																			
 				}else {
 					int frame = 0;
-					String fluoFolder = mas.getPathToMovie()+"_FLUO";
-					File dir = new File(fluoFolder);
-					String acqNameFluo = fluoFolder+ "/" + frame;
-					dir.mkdirs();
+					String acqNameFluo = acqNameFluo+ "/" + frame ;
 					ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 					fluoImage.show();
 					cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-																								fluoFolder, frame);
+																								fluoFolder, frame));
 					fluoImage.close();
 					acqNameFluo = null;
 					fluoImage = null;
 				}
+///////////////////////////save cropped images//////////////////////////////////////
+				if (param.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject()
+					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
+					.getAsBoolean()) {
+					mfa.saveCroppedImgs();
+				}
+/////////////////////////write spindle coordinates///////////////////////////////////
+				writer.writeAll(cellsInAllFields);
+				spindleWriter.close();
+				writer.close();
 				// close roi manager
 				mfa.getSetOfCells().closeRoiManager();
 				mas.setParameters(params);
 			}
-			if (param.getParametersAsJsonObject()
-						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-						.getAsJsonObject()
-						.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
-						.getAsBoolean()) {
-					mfa.saveCroppedImgs();
-			}
-			writer.writeAll(cellsInAllFields);
-			spindleWriter.close();
-			writer.close();
 		}
-	
 		mmc.setAutoShutter(true);
 		mmc.waitForDevice(mmc.getShutterDevice());
 		gui.message("end "+System.currentTimeMillis());

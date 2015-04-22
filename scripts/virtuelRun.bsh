@@ -1,7 +1,7 @@
-//base_dir = "D:/Data/Tong/MAARS/";
+base_dir = "D:/Data/Tong/MAARS/";
 //base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
-base_dir = "/Users/theoli89/Documents/MAARS/";
+//base_dir = "/Users/theoli89/Documents/MAARS/";
 
 addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
 addClassPath(base_dir + "CellsBoundaries/target/CellsBoundaries-1.0.jar");
@@ -29,10 +29,11 @@ mmc.waitForDevice(mmc.getShutterDevice());
 
 gui.message("Create main window");
 MaarsMainDialog md = null;
+//String dataDir = "/Users/theoli89/Desktop/curioData/Virtual/";
+//String dataDir = "/media/tong/Tong_data/test/Virtual/";
+String dataDir = "G:/test/Virtual/";
 try {
-	md = new MaarsMainDialog(gui, mmc, "/Users/theoli89/Desktop/curioData/Virtual/");
-	//md = new MaarsMainDialog(gui, mmc, "/media/tong/Tong_data/test/Virtual/");
-	//md = new MaarsMainDialog(gui, mmc, "D:/Data/Tong/MAARS/MaarsLib/");
+	md = new MaarsMainDialog(gui, mmc, dataDir);
 } catch (IOException e) {
 	gui.message("Error");
 }
@@ -91,16 +92,13 @@ if(md.isOkClicked()) {
 		mas.setParameters(params);
 //		mas.acquire(false);
 
-		MaarsSegmentation ms = new MaarsSegmentation(param, "/Users/theoli89/Desktop/curioData/Virtual/movie_X0_Y0/MMStack_Pos0.ome.tif");
+		MaarsSegmentation ms = new MaarsSegmentation(param, dataDir+"movie_X0_Y0/MMStack_Pos0.ome.tif");
 		ms.segmentation();
-		ms.writeUsedConfig();
+		ms.writeUsedConfig(dataDir+"movie_X0_Y0");
 		
 		if (!ms.noRoiDetected()){
 			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
 			MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
-			
-			
-			mfa.getSetOfCells().shuffle();
 			
 			MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
 															xPos,
@@ -110,7 +108,7 @@ if(md.isOkClicked()) {
 
 		List cellsInAllFields = new ArrayList();
 		File dir = new File (pathToResults + "/" + frame);
-		spindleWriter = new FileWriter("/Users/theoli89/Desktop/curioData/Virtual/movie_X0_Y0_FLUO/spindleAnalysis.csv");
+		spindleWriter = new FileWriter(dataDir+"movie_X0_Y0_FLUO/spindleAnalysis.csv");
 		writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
 		writer.writeNext(new String[]{
 				"Cell",
@@ -138,10 +136,10 @@ if(md.isOkClicked()) {
 				"CellCenterToSpCenterAng"
 			});
 		while(frame<2){
-			fluoImage = IJ.openImage("/Users/theoli89/Desktop/curioData/Virtual/movie_X0_Y0_FLUO/"+frame+"/MMStack_Pos0.ome.tif");
+			fluoImage = IJ.openImage(dataDir+"movie_X0_Y0_FLUO/"+frame+"/MMStack_Pos0.ome.tif");
 			fluoImage.show();
 			cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-				"/Users/theoli89/Desktop/curioData/Virtual/movie_X0_Y0_FLUO/",frame));
+									dataDir+"movie_X0_Y0_FLUO/",frame));
 			acqNameFluo = null;
 			fluoImage = null;
 			// close roi manager

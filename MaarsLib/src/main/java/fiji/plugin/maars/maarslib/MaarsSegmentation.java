@@ -141,7 +141,7 @@ public class MaarsSegmentation {
 	 * write config parameters used in current analysis
 	 * 
 	 */
-	public void writeUsedConfig() {
+	public void writeUsedConfig(String path) {
 		int timeInterval = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
@@ -208,7 +208,7 @@ public class MaarsSegmentation {
 				.getState();
 		FileWriter configFile = null;
 		try {
-			configFile = new FileWriter(rootDirName+"/configUsed.txt");
+			configFile = new FileWriter(path+"/configUsed.txt");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
