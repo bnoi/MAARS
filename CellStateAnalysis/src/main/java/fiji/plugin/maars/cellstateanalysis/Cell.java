@@ -642,6 +642,7 @@ public class Cell {
 			new File(pathToCroppedImgDir).mkdirs();
 		}
 		ImagePlus imp = new ImagePlus("cell"+getCellNumber(),fluoStack);
+		imp.setCalibration(getFluoImage().getCalibration());
 		IJ.saveAsTiff(imp, pathToCroppedImg);
 	}
 	public void addFluoSlice(){

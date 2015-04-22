@@ -167,7 +167,7 @@ if(md.isOkClicked()) {
 							double beginAcq = System.currentTimeMillis();
 							ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 							cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-															fluoFolder, frame,xPos,yPos));
+															fluoFolder, frame, Math.round(xPos), Math.round(yPos)));
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
 							double acqTook = System.currentTimeMillis() - beginAcq;
@@ -183,7 +183,7 @@ if(md.isOkClicked()) {
 					String acqNameFluo = acqNameFluo+ "/" + frame ;
 					ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 					fluoImage.show();
-					mfa.analyzeEntireFieldReturnListSp(fluoImage, fluoFolder,frame,xPos,yPos);
+					mfa.analyzeEntireFieldReturnListSp(fluoImage, fluoFolder,frame,Math.round(xPos),Math.round(yPos));
 					fluoImage.close();
 					acqNameFluo = null;
 					fluoImage = null;
