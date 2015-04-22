@@ -265,7 +265,7 @@ public class MaarsFluoAnalysis {
 	 *            : path to save results
 	 */
 	public List<String[]> analyzeEntireFieldReturnListSp(ImagePlus fieldWideImage,
-			String pathToResults , int frame, int fieldX, int fieldY) {
+			String pathToResults , int frame, double fieldX, double fieldY) {
 		FileWriter spindleWriter = null;
 		CSVWriter writer = null;
 		List<String[]> cells = new ArrayList<String[]>();

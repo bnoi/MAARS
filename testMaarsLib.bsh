@@ -91,20 +91,6 @@ if(md.isOkClicked()) {
 		"fieldY"
 	};
 	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
-	List cellsInAllFields = new ArrayList();
-	if(!param.getParametersAsJsonObject()
-			.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-			.getAsJsonObject()
-			.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
-			.getAsBoolean()){
-		String rootDirName = param.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
-				.getAsString();
-		spindleWriter = new FileWriter(rootDirName+"/spindleAnalysis.csv");
-		writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
-		writer.writeNext(outputHeader);
-	}		
 	if (nbXField * nbYField != 0){
 		ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
 														nbYField,
@@ -144,6 +130,7 @@ if(md.isOkClicked()) {
 																xPos,
 																yPos,
 																mfa.getSetOfCells());
+				List cellsInAllFields = new ArrayList();	
 				String fluoFolder = mas.getPathToMovie()+"_FLUO";
 				File dir = new File(fluoFolder);
 				dir.mkdirs();
@@ -180,23 +167,23 @@ if(md.isOkClicked()) {
 							double beginAcq = System.currentTimeMillis();
 							ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 							cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-															fluoFolder, frame,Math.round(xPos),Math.round(yPos)));
+															fluoFolder, frame,xPos,yPos));
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
 							double acqTook = System.currentTimeMillis() - beginAcq;
 							gui.sleep((long) (timeInterval - acqTook));			
 						}
+/////////////////////////write spindle coordinates///////////////////////////////////
+					writer.writeAll(cellsInAllFields);
+					spindleWriter.close();
+					writer.close();
 ////////////////////////////one snapshot per field/////////////////////////////////																			
 				}else {
 					int frame = 0;
 					String acqNameFluo = acqNameFluo+ "/" + frame ;
 					ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 					fluoImage.show();
-					cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-																								fluoFolder, 
-																								frame,
-																								Math.round(xPos),
-																								Math.round(yPos)));
+					mfa.analyzeEntireFieldReturnListSp(fluoImage, fluoFolder,frame,xPos,yPos);
 					fluoImage.close();
 					acqNameFluo = null;
 					fluoImage = null;
@@ -209,10 +196,6 @@ if(md.isOkClicked()) {
 					.getAsBoolean()) {
 					mfa.saveCroppedImgs();
 				}
-/////////////////////////write spindle coordinates///////////////////////////////////
-				writer.writeAll(cellsInAllFields);
-				spindleWriter.close();
-				writer.close();
 				// close roi manager
 				mfa.getSetOfCells().closeRoiManager();
 				mas.setParameters(params);
