@@ -78,6 +78,7 @@ public class CellFluoAnalysis {
 			res.add(spot);
 		}
 		ReportingUtils.logMessage("- Done.");
+		//TODO filter factor (between 3 and 4)
 		factorForThreshold = 3.5;
 	}
 

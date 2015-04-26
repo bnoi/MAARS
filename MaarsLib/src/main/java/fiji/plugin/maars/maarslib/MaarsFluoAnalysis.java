@@ -324,7 +324,7 @@ public class MaarsFluoAnalysis {
 							.getAsJsonObject()
 							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
 			cell.addFluoSlice();
-			cells.add(sp.toList(frame*timeInterval/1000,fieldX,fieldY));
+			cells.add(sp.toList(frame*timeInterval/1000,Math.round(fieldX),Math.round(fieldY)));
 			cell = null;
 			sp = null;
 		}
