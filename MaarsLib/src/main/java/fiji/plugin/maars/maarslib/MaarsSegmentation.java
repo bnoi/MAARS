@@ -53,8 +53,16 @@ public class MaarsSegmentation {
 		cB.getSaveDataFrame().setState(true);
 		cB.getSaveFocusImage().setState(true);
 		cB.getSaveRoi().setState(true);
-		cB.getFilterUnususalCkb().setState(true);
-		cB.getFilterWithMeanGreyValueCkb().setState(true);
+		cB.getFilterUnususalCkb().setState(
+				parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.FILTER_SOLIDITY)
+				.getAsBoolean());
+		cB.getFilterWithMeanGreyValueCkb().setState(
+				parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE)
+				.getAsBoolean());
 		cB.getAlreadryOpenedImage();
 		cB.getImageToAnalyze().getCalibration().pixelDepth = parameters
 				.getParametersAsJsonObject()
@@ -203,9 +211,14 @@ public class MaarsSegmentation {
 		double fluoStep = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
-		boolean filterUnusualShape = cB.getFilterUnususalCkb().getState();
-		boolean filterWithMeanGrayValue = cB.getFilterWithMeanGreyValueCkb()
-				.getState();
+		boolean filterUnusualShape = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.FILTER_SOLIDITY)
+				.getAsBoolean();
+		boolean filterWithMeanGrayValue = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE)
+				.getAsBoolean();
 		FileWriter configFile = null;
 		try {
 			configFile = new FileWriter(path+"/configUsed.txt");

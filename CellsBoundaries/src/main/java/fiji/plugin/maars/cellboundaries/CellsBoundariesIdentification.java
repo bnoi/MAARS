@@ -397,7 +397,6 @@ public class CellsBoundariesIdentification {
 
 		System.out.println("minParticleSize " + minParticleSize
 				+ " maxParticleSize " + maxParticleSize);
-
 		System.out.println("Analyse particles on "
 				+ binCorrelationImage.getTitle() + " ...");
 		particleAnalyzer.analyze(binCorrelationImage);
