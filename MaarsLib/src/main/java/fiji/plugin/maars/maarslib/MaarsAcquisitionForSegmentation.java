@@ -172,7 +172,8 @@ public class MaarsAcquisitionForSegmentation {
 		}
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 		ReportingUtils.logMessage("... start acquisition");
-		double z = zFocus - (range / 2);
+		//TODO
+		double z = zFocus - (range / 2) +1.5;
 		for (int k = 0; k <= sliceNumber; k++) {
 			ReportingUtils.logMessage("- set focus device at position " + z);
 			try {

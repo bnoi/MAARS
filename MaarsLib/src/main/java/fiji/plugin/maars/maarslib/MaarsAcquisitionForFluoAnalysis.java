@@ -270,13 +270,14 @@ public class MaarsAcquisitionForFluoAnalysis {
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
-		Autofocus autofocus = gui.getAutofocus();
-		try {
-			autofocus.fullFocus();
-		} catch (MMException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
+//		Autofocus autofocus = gui.getAutofocus();
+//		try {
+//			autofocus.fullFocus();
+//		} catch (MMException e2) {
+//			// TODO Auto-generated catch block
+//			e2.printStackTrace();
+//		}
+		
 //		ReportingUtils.logMessage("... set channel color");
 //		try {
 //			gui.setChannelColor(acqName,0, color);
@@ -311,8 +312,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 		ReportingUtils.logMessage("... start acquisition");
 		//TODO 
-		double z = zFocus - (range / 2);
-//		double z = zFocus - (range / 2) + 1.5;
+//		double z = zFocus - (range / 2);
+		double z = zFocus - (range / 2) + 1.5;
 		ReportingUtils.logMessage("- create imagestack");
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight());
