@@ -1,0 +1,9 @@
+import ij.plugin.frame.RoiManager;
+import ij.gui.Roi;
+String pathToRois = "/home/tong/Documents/Movies/0/rescaled_DUP_MMStack_Pos0.ome_ROI.zip";
+roiManager = new RoiManager();
+roiManager.runCommand("Open", pathToRois);
+Roi[] roiArray = roiManager.getRoisAsArray();
+for (int i = 0 ; i< roiArray.length;i++){
+	print(roiArray[i]);	
+}

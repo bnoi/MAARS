@@ -1,0 +1,16 @@
+import au.com.bytecode.opencsv.CSVWriter;
+import java.util.List;
+List cells = new ArrayList();
+
+String[] columns = {"cell_id", "feature", "size"};
+cells.add(columns);
+
+for(i=0; i<10; i++){
+   String[] cell = {String.valueOf(i), "SPINDLE", String.valueOf(4.999)};
+   cells.add(cell);
+}
+
+Writer out = new FileWriter("/Users/theoli89/Desktop/curioData/test.csv");
+CSVWriter writer = new util.opencsv.CSVWriter(out);
+writer.writeAll(cells);
+writer.close();
