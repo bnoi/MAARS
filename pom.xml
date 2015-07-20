@@ -16,7 +16,7 @@
     <artifactId>MAARS</artifactId>
     <version>1.0</version>
 
-    <name>plugins/MAARS/MAARS.jar</name>
+    <name>plugins/MAARS.jar</name>
     <description></description>
 
     <developers>
@@ -34,9 +34,6 @@
         <url>https://github.com/bnoi/MAARS</url>
     </scm>
 
-    <properties>
-        <main-class>CellsBoundaries</main-class>
-    </properties>
 
     <dependencies>
         <!-- Fiji dependencies -->
