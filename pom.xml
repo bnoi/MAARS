@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>sc.fiji</groupId>
+        <artifactId>pom-fiji</artifactId>
+        <version>7.1.2</version>
+        <relativePath />
+    </parent>
+    
+    <groupId>sc.fiji.plugin.maars</groupId>
+    <artifactId>MAARS</artifactId>
+    <version>1.0</version>
+
+    <name>plugins/MAARS/MAARS.jar</name>
+    <description></description>
+
+    <developers>
+        <developer>
+            <id>hadim</id>
+            <name>Hadrien Mary</name>
+            <email>hadrien.mary@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/bnoi/MAARS</connection>
+        <developerConnection>scm:git:git@github.com:bnoi/MAARS</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/bnoi/MAARS</url>
+    </scm>
+
+    <properties>
+        <main-class>CellsBoundaries</main-class>
+    </properties>
+
+    <dependencies>
+        <!-- Fiji dependencies -->
+
+        <!-- ImageJ dependencies -->
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>ij</artifactId>
+        </dependency>
+
+        <!-- ImgLib2 dependencies -->
+
+        <!-- OME dependencies -->
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>bio-formats_plugins</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>formats-api</artifactId>
+        </dependency>
+
+        <dependency>
+        	<groupId>net.imagej</groupId>
+        	<artifactId>imagej-common</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>net.imglib2</groupId>
+        	<artifactId>imglib2</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>sc.fiji</groupId>
+        	<artifactId>TrackMate_</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>net.imglib2</groupId>
+        	<artifactId>imglib2-ij</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>org.scijava</groupId>
+        	<artifactId>scijava-common</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>org.mm</groupId>
+        	<artifactId>mmcorej</artifactId>
+        	<systemPath>${basedir}/jars/MMCoreJ.jar</systemPath>
+        	<version>1.0</version>
+        	<optional>true</optional>
+        	<scope>system</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.mm</groupId>
+        	<artifactId>mmj</artifactId>
+        	<systemPath>${basedir}/jars/MMJ_.jar</systemPath>
+        	<version>1.0</version>
+        	<optional>true</optional>
+        	<scope>system</scope>
+        </dependency>
+        <dependency>
+        	<groupId>com.google.code.gson</groupId>
+        	<artifactId>gson</artifactId>
+        	<version>2.3.1</version>
+        </dependency>
+        <dependency>
+        	<groupId>net.sf.opencsv</groupId>
+        	<artifactId>opencsv</artifactId>
+        	<version>2.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${main-class}</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>imagej.public</id>
+            <url>http://maven.imagej.net/content/groups/public</url>
+        </repository>
+    </repositories>
+
+
+</project>
