@@ -13,10 +13,10 @@
     </parent>
     
     <groupId>sc.fiji.plugin.maars</groupId>
-    <artifactId>MAARS</artifactId>
+    <artifactId>MAARS_</artifactId>
     <version>1.0</version>
 
-    <name>plugins/MAARS.jar</name>
+    <name>plugins/MAARS_.jar</name>
     <description></description>
 
     <developers>
