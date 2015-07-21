@@ -3,10 +3,7 @@ base_dir = "D:/Data/Tong/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Users/theoli89/Documents/MAARS/";
 
-addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
-addClassPath(base_dir + "CellsBoundaries/target/CellsBoundaries-1.0.jar");
-addClassPath(base_dir + "CellStateAnalysis/target/CellStateAnalysis-1.0.jar");
-
+addClassPath(base_dir + "target/MAARS_-1.0.jar");
 
 import org.micromanager.utils.ReportingUtils;
 import au.com.bytecode.opencsv.CSVWriter;
@@ -30,14 +27,14 @@ mmc.waitForDevice(mmc.getShutterDevice());
 
 gui.message("Create main window");
 MaarsMainDialog md = null;
+
 try {
-	md = new MaarsMainDialog(gui, mmc, base_dir + "MaarsLib/");
+	md = new MaarsMainDialog(gui, mmc, base_dir + "maars_config.txt");
 } catch (IOException e) {
 	gui.message("Error");
 }
 
 gui.message("Show main window");
-
 md.show();
 
 while(md.isVisible()) {

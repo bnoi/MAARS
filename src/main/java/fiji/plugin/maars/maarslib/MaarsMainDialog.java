@@ -53,7 +53,7 @@ public class MaarsMainDialog {
 			throws IOException {
 
 		try {
-			PrintStream ps = new PrintStream(pathConfigFile + "Maars.LOG");
+			PrintStream ps = new PrintStream(System.getProperty("user.dir") + "/MAARS.LOG");
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
@@ -67,7 +67,7 @@ public class MaarsMainDialog {
 
 		ReportingUtils.logMessage("create parameter object ...");
 
-		parameters = new AllMaarsParameters(pathConfigFile + "maars_config.txt");
+		parameters = new AllMaarsParameters(pathConfigFile);
 
 		ReportingUtils.logMessage("Done.");
 

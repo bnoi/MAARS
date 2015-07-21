@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 
+import org.micromanager.utils.ReportingUtils;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -172,7 +174,7 @@ public class AllMaarsParameters {
 		fReader = new FileReader(defaultParametersFile);
 		JsonParser jParser = new JsonParser();
 		JsonElement jElement = jParser.parse(fReader);
-		
+		ReportingUtils.logMessage("didi");
 		parametersJObject = jElement.getAsJsonObject();
 	}
 	
