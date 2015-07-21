@@ -1,7 +1,7 @@
-base_dir = "D:/Data/Tong/MAARS/";
+//base_dir = "D:/Data/Tong/MAARS/";
 //base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
-//base_dir = "/Users/theoli89/Documents/MAARS/";
+base_dir = "/Users/theoli89/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
 
@@ -60,6 +60,7 @@ if(md.isOkClicked()) {
 						.getAsJsonObject()
 						.get(AllMaarsParameters.Y_FIELD_NUMBER)
 						.getAsInt();
+	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
 	String[] outputHeader = new String[]{
 		"Cell",
 		"Second",
@@ -87,7 +88,6 @@ if(md.isOkClicked()) {
 		"fieldX",
 		"fieldY"
 	};
-	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
 	if (nbXField * nbYField != 0){
 		ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
 														nbYField,
@@ -110,16 +110,14 @@ if(md.isOkClicked()) {
 	
 			HashMap params = mas.getParametersFromConf(param);
 			mas.setParameters(params);
-///////////////////////////////BF acquisition////////////////////////////////////////////
+			//--------------------------BF acquisition-----------------------------//
 			mas.acquire(false);
-//////////////////////////////segmentation///////////////////////////////////////////////
+			//--------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 			ms.segmentation();
 			ms.writeUsedConfig(mas.getPathToMovie());
-
-			
 			if(!ms.noRoiDetected()){
-///////////////////////////////if got ROI, initialise commen variables////////////////////////////////
+			//----------------if got ROI, start fluo-acquisition --------//
 				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
 				MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
 

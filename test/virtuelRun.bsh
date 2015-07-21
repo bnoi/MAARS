@@ -3,9 +3,7 @@
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 base_dir = "/Users/theoli89/Documents/MAARS/";
 
-addClassPath(base_dir + "MaarsLib/target/MaarsLib-1.0.jar");
-addClassPath(base_dir + "CellsBoundaries/target/CellsBoundaries-1.0.jar");
-addClassPath(base_dir + "CellStateAnalysis/target/CellStateAnalysis-1.0.jar");
+addClassPath(base_dir + "target/MAARS_-1.0.jar");
 
 import au.com.bytecode.opencsv.CSVWriter;
 import java.util.List;
@@ -33,7 +31,7 @@ String dataDir = "/Users/theoli89/Desktop/curioData/Virtual/";
 //String dataDir = "/media/tong/Tong_data/test/Virtual/";
 //String dataDir = "G:/test/Virtual/";
 try {
-	md = new MaarsMainDialog(gui, mmc, dataDir);
+	md = new MaarsMainDialog(gui, mmc, base_dir + "maars_config.txt");
 } catch (IOException e) {
 	gui.message("Error");
 }
@@ -137,7 +135,7 @@ if(md.isOkClicked()) {
 				"fieldX",
 				"fieldY"
 			});
-		while(frame<2){
+		while(frame<1){
 			fluoImage = IJ.openImage(dataDir+"movie_X0_Y0_FLUO/"+frame+"/MMStack_Pos0.ome.tif");
 			fluoImage.show();
 			cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,

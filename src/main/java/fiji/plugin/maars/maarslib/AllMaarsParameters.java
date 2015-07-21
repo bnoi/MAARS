@@ -169,12 +169,10 @@ public class AllMaarsParameters {
 	public AllMaarsParameters(String defaultParametersFile) throws IOException {
 		
 		this.defaultParametersFile = defaultParametersFile;
-		
 		Reader fReader =  null;
 		fReader = new FileReader(defaultParametersFile);
 		JsonParser jParser = new JsonParser();
 		JsonElement jElement = jParser.parse(fReader);
-		ReportingUtils.logMessage("didi");
 		parametersJObject = jElement.getAsJsonObject();
 	}
 	
@@ -187,7 +185,7 @@ public class AllMaarsParameters {
 	}
 	
 	/**
-	 * Write the parameters in the configuration file
+	 * Write the parameters into the configuration file
 	 * @throws IOException
 	 */
 	public void save() throws IOException {
@@ -203,8 +201,8 @@ public class AllMaarsParameters {
 	 */
 	public static String convertPath(String unixPath) {
 		String path = unixPath;
-		System.out.println("program running on windows : "+IJ.isWindows());
-		System.out.println("path is containing '/' : "+path.contains("/"));
+		ReportingUtils.logMessage("program running on windows : "+IJ.isWindows());
+		ReportingUtils.logMessage("path is containing '/' : "+path.contains("/"));
 		if (IJ.isWindows() && path.contains("/")) {
 			path = path.replace("/", "\\\\");
 		}

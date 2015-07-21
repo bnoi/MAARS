@@ -50,37 +50,37 @@ public class MaarsSegmentationDialog {
 						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3, 12, "micron");
 		segmentationDialog.addNumericField(
 				"step",
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.STEP)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3, 12, "micron");
 
 		Label segmParemLabel = new Label("Segementation parameters");
 		segmParemLabel.setBackground(labelColor);
 		segmentationDialog.add(segmParemLabel);
 		segmentationDialog.addNumericField(
-				"typical cell z size",
+				"typical cell thickness (z axis)",
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3, 12, "micron");
 		segmentationDialog.addNumericField(
 				"minimum cell area",
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.MINIMUM_CELL_AREA)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3, 12, "micron");
 		segmentationDialog.addNumericField(
 				"maximum cell area",
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.MAXIMUM_CELL_AREA)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3, 12, "micron");
 		segmentationDialog.addCheckbox(
 				"Filter background using mean grey value on correlation image",
 				parameters.getParametersAsJsonObject()
@@ -94,7 +94,7 @@ public class MaarsSegmentationDialog {
 						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.MEAN_GREY_VALUE).getAsDouble(),
-				3, 5, "intensity");
+				3, 12, "intensity");
 		segmentationDialog
 				.addCheckbox(
 						"Filter unusual shape using solidity",
@@ -109,7 +109,7 @@ public class MaarsSegmentationDialog {
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.SOLIDITY)
-						.getAsDouble(), 3, 5, "");
+						.getAsDouble(), 3, 12, "");
 		OKSegmentationParamAction okSeg = new OKSegmentationParamAction(this);
 		Button okSegParam = new Button("OK");
 		okSegParam.addActionListener(okSeg);

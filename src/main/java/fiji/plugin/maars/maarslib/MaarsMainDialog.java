@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.TextField;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -19,6 +21,7 @@ import org.micromanager.MMStudio;
 
 import ij.IJ;
 import ij.gui.NonBlockingGenericDialog;
+
 import org.micromanager.utils.ReportingUtils;
 
 /**
@@ -51,7 +54,7 @@ public class MaarsMainDialog {
 	 */
 	public MaarsMainDialog(MMStudio gui, CMMCore mmc, String pathConfigFile)
 			throws IOException {
-
+		//------------initialization of parameters---------------//
 		try {
 			PrintStream ps = new PrintStream(System.getProperty("user.dir") + "/MAARS.LOG");
 			System.setOut(ps);
@@ -86,6 +89,7 @@ public class MaarsMainDialog {
 		double fieldWidth = mmc.getImageWidth() * calibration;
 		double fieldHeight = mmc.getImageHeight() * calibration;
 
+		//------------set up the dialog---------------//
 		mainDialog = new NonBlockingGenericDialog(
 				"Mitosis Analysing And Recording System - MAARS");
 		mainDialog.setBackground(Color.WHITE);
@@ -105,7 +109,7 @@ public class MaarsMainDialog {
 		BoxLayout analysisParamLayout = new BoxLayout(analysisParamPanel,
 				BoxLayout.Y_AXIS);
 		analysisParamPanel.setLayout(analysisParamLayout);
-
+		//------------analysis parameters---------------//
 		Label analysisParamLabel = new Label("Analysis parameters");
 		analysisParamLabel.setBackground(labelColor);
 
@@ -139,13 +143,7 @@ public class MaarsMainDialog {
 		explorationLabel.setBackground(labelColor);
 		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber
 				* defaultYFieldNumber);
-
-		ReportingUtils.logMessage("- create RefreshAreaToExploreAction");
-		RefreshAreaToExploreAction refreshAction = new RefreshAreaToExploreAction(
-				this);
-		Button numfieldRefreshButton = new Button("Refresh");
-		numfieldRefreshButton.addActionListener(refreshAction);
-
+		//------------area to explore---------------//
 		ReportingUtils
 				.logMessage("- add button, textfield and label to mainDialog");
 		mainDialog.add(explorationLabel);
@@ -153,9 +151,43 @@ public class MaarsMainDialog {
 				0, 6, "micron");
 		mainDialog.addNumericField("Height", fieldHeight * defaultYFieldNumber,
 				0, 6, "micron");
-		mainDialog.add(numfieldRefreshButton);
+		Vector<TextField> numFields = mainDialog.getNumericFields();
+		numFields.get(0).addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				refreshNumField();
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+		});
+		numFields.get(1).addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				refreshNumField();
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+		});
 		mainDialog.add(numFieldLabel);
-
+		//------------mitosis movies parameters---------------//
 		mainDialog.addPanel(analysisParamPanel);
 
 		ReportingUtils.logMessage("- create OpenMitosisMovieParamDialog");

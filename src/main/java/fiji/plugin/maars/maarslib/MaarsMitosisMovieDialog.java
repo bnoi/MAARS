@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Label;
 
+import javax.swing.JPanel;
+
 import com.google.gson.JsonElement;
 
 import ij.gui.GenericDialog;
@@ -38,14 +40,11 @@ public class MaarsMitosisMovieDialog {
 
 		mitosisMovieDialog = new GenericDialog(
 				"MAARS - Mitosis movie parameters");
-
-		// BoxLayout layout = new BoxLayout(mitosisMovieDialog,
-		// BoxLayout.Y_AXIS);
 		GridLayout layout = new GridLayout(0, 2, 0, 10);
 		mitosisMovieDialog.setLayout(layout);
 
 		mitosisMovieDialog.setBackground(Color.WHITE);
-		Dimension minimumSize = new Dimension(400, 850);
+		Dimension minimumSize = new Dimension(700, 800);
 		mitosisMovieDialog.setMinimumSize(minimumSize);
 		mitosisMovieDialog.centerDialog(true);
 
@@ -83,7 +82,7 @@ public class MaarsMitosisMovieDialog {
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MINIMUM_SPINDLE_SIZE)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3,10, "micron");
 
 		System.out.println("- "
 				+ AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE);
@@ -113,7 +112,7 @@ public class MaarsMitosisMovieDialog {
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3,10, "micron");
 
 		System.out.println("- " + AllMaarsParameters.RELATIVE_SPINDLE_ANGLE);
 		System.out.println("-- add checkbox condition");
@@ -141,7 +140,7 @@ public class MaarsMitosisMovieDialog {
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE)
-						.getAsDouble(), 3, 5, "degree");
+						.getAsDouble(), 3,10, "degree");
 
 		System.out.println("- add label for end movie conditions and value");
 
@@ -176,7 +175,7 @@ public class MaarsMitosisMovieDialog {
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3,10, "micron");
 
 		System.out.println("- "
 				+ AllMaarsParameters.RELATIVE_MAXIMUM_SPINDLE_SIZE);
@@ -205,7 +204,7 @@ public class MaarsMitosisMovieDialog {
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_MAXIMUM_SPINDLE_SIZE)
-						.getAsDouble(), 3, 5, "");
+						.getAsDouble(), 3,10, "of cell length");
 
 		System.out.println("- " + AllMaarsParameters.RELATIVE_SPINDLE_ANGLE);
 		System.out.println("-- add checkbox condition");
@@ -233,7 +232,7 @@ public class MaarsMitosisMovieDialog {
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE)
-						.getAsDouble(), 3, 5, "degree");
+						.getAsDouble(), 3,10, "degree");
 
 		System.out.println("- " + AllMaarsParameters.TIME_LIMIT);
 		System.out.println("-- add checkbox condition");
@@ -259,7 +258,7 @@ public class MaarsMitosisMovieDialog {
 						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
-						.getAsDouble(), 3, 5, "min");
+						.getAsDouble(), 3,10, "min");
 
 		System.out.println("- " + AllMaarsParameters.GROWING_SPINDLE);
 		System.out.println("-- add checkbox condition");
@@ -290,7 +289,7 @@ public class MaarsMitosisMovieDialog {
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.GROWING_SPINDLE).getAsDouble(),
-				3, 5, "micron/time interval");
+				3,10, "micron/time interval");
 
 		System.out.println("- add checkbox to film only one cell in the field");
 		mitosisMovieDialog.addCheckbox(
@@ -332,7 +331,7 @@ public class MaarsMitosisMovieDialog {
 						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.TIME_INTERVAL).getAsInt(), 3,
-				5, "ms");
+				10, "ms");
 
 		System.out.println("- add field for "
 				+ AllMaarsParameters.RANGE_SIZE_FOR_MOVIE);
@@ -342,7 +341,7 @@ public class MaarsMitosisMovieDialog {
 						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
-						.getAsInt(), 3, 5, "micron");
+						.getAsInt(), 3,10, "micron");
 
 		System.out.println("- add field for " + AllMaarsParameters.STEP);
 		mitosisMovieDialog.addNumericField(
@@ -350,7 +349,7 @@ public class MaarsMitosisMovieDialog {
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.STEP)
-						.getAsDouble(), 3, 5, "micron");
+						.getAsDouble(), 3,10, "micron");
 
 		System.out.println("- add field for "
 				+ AllMaarsParameters.MARGIN_AROUD_CELL);
@@ -360,7 +359,7 @@ public class MaarsMitosisMovieDialog {
 						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.MARGIN_AROUD_CELL)
-						.getAsDouble(), 3, 5, "pixel");
+						.getAsDouble(), 3,10, "pixel");
 
 		System.out.println("- add field for " + AllMaarsParameters.SAVING_PATH);
 		mitosisMovieDialog.addStringField(
@@ -374,6 +373,7 @@ public class MaarsMitosisMovieDialog {
 		Button okButton = new Button("OK");
 		okButton.addActionListener(okAction);
 
+		mitosisMovieDialog.add(new Label());
 		mitosisMovieDialog.add(okButton);
 		System.out.println("Done");
 	}

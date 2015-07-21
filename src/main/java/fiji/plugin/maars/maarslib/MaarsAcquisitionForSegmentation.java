@@ -75,7 +75,6 @@ public class MaarsAcquisitionForSegmentation {
 	public void acquire(boolean show) {
 		ReportingUtils.logMessage("Acquire movie for segmentation :");
 		ReportingUtils.logMessage("________________________________");
-		ReportingUtils.logMessage("Close all previous acquisitions");
 		ReportingUtils.logMessage("... Initialize parameters :");
 		String rootDirName = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
@@ -130,20 +129,20 @@ public class MaarsAcquisitionForSegmentation {
 		}
 		
 		ReportingUtils
-				.logMessage("... Open acquisition in Acquisition manager");
+				.logMessage("... Initialize an acquisition");
 		try {
 			gui.openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber, show, true);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
-		ReportingUtils.logMessage("... Set save format");
+		ReportingUtils.logMessage("... Set save format to TIF");
 		try {
 			gui.setImageSavingFormat(TaggedImageStorageMultipageTiff.class);
 		} catch (MMScriptException e3) {
 			ReportingUtils.logError(e3);
 		}
 		
-		ReportingUtils.logMessage("... Set up Acquisition");
+		ReportingUtils.logMessage("... Set up Channel");
 		try {
 			gui.setChannelColor(acqName,0, color);
 		} catch (MMScriptException e4) {
@@ -154,7 +153,7 @@ public class MaarsAcquisitionForSegmentation {
 		} catch (MMScriptException e4) {
 			ReportingUtils.logError(e4);
 		}
-		ReportingUtils.logMessage("... set shutter open");
+		ReportingUtils.logMessage("... Set shutter open");
 		try {
 			mmc.setShutterOpen(true);
 			mmc.waitForSystem();
@@ -162,7 +161,7 @@ public class MaarsAcquisitionForSegmentation {
 			ReportingUtils.logMessage("could not open shutter");
 			e1.printStackTrace();
 		}
-		ReportingUtils.logMessage("... get z current position");
+		ReportingUtils.logMessage("... Get z current position");
 		double zFocus = 0;
 		try {
 			zFocus = mmc.getPosition(mmc.getFocusDevice());
@@ -172,8 +171,11 @@ public class MaarsAcquisitionForSegmentation {
 		}
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 		ReportingUtils.logMessage("... start acquisition");
-		//TODO
-		double z = zFocus - (range / 2) +1.5;
+		/*important to add 2 µm. Depends on different microscopes.
+		in our case, the z-focus position is not in the middle of z range. It
+		is often lower than the real medium plan. So we add 2. This parameter 
+		needs to be defined by testing on your own microscope.*/
+		double z = zFocus - (range / 2) + 2;
 		for (int k = 0; k <= sliceNumber; k++) {
 			ReportingUtils.logMessage("- set focus device at position " + z);
 			try {
