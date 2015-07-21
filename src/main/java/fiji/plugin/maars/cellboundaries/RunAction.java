@@ -628,7 +628,7 @@ public class RunAction implements ActionListener {
 										maxParticleSize, cB.getDirection(),
 										zFocus, solidityThreshold,
 										meanGrayValThreshold, false, true);
-								cellBoundId.identifyCellesBoundaries();
+								cellBoundId.identifyCellsBoundaries();
 							}
 						}
 					}

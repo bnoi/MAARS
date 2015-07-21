@@ -3,6 +3,7 @@ package fiji.plugin.maars.maarslib;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
 
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;
@@ -20,7 +21,7 @@ public class MaarsSegmentation {
 	private AllMaarsParameters parameters;
 	private String moviePath;
 	private CellsBoundaries cB;
-	private boolean noRoiDetected = false;
+	private boolean roiDetected = true;
 
 	/**
 	 * Constructor :
@@ -122,12 +123,11 @@ public class MaarsSegmentation {
 						.getImageToAnalyze().getNSlices() / 2), solidity,
 				meanGrey, true, false);
 		//cBI.identifyCellesBoundaries() return true, if no ROI detected.
-		if(cBI.identifyCellesBoundaries()){
-			this.noRoiDetected = true;
+		if(cBI.identifyCellsBoundaries()){
+			this.roiDetected = true;
 			cBI.getRoiManager().close();
 		}
 		IJ.getImage().close();
-
 	}
 
 	/**
@@ -141,8 +141,8 @@ public class MaarsSegmentation {
 	 * 
 	 * @return if no Roi detected
 	 */
-	public boolean noRoiDetected() {
-		return this.noRoiDetected;
+	public boolean roiDetected() {
+		return this.roiDetected;
 	}
 	
 	/**
