@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import org.micromanager.utils.ReportingUtils;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -48,7 +50,7 @@ public class CellsBoundariesIdentification {
 	private Analyzer analyzer;
 	private RoiManager roiManager;
 	private Roi[] roiArray;
-	private boolean noRoiDetected = false;
+	private boolean roiDetected = true;
 
 	// Result Optionsshuffle [] java
 	private boolean displayCorrelationImg;
@@ -276,7 +278,7 @@ public class CellsBoundariesIdentification {
 
 	// I know it is messy but I have not found an other solution yet
 	public void getFocusImage() {
-		System.out.println("get Focus Image");
+		ReportingUtils.logMessage("get Focus Image");
 
 		imageToAnalyze.setZ((int) Math.round(zFocus) - 1);
 
@@ -300,7 +302,7 @@ public class CellsBoundariesIdentification {
 	 */
 	public void createCorrelationImage() {
 
-		System.out.println("creating correlation image");
+		ReportingUtils.logMessage("creating correlation image");
 
 		correlationImage = new FloatProcessor(imageToAnalyze.getWidth(),
 				imageToAnalyze.getHeight());
@@ -344,13 +346,11 @@ public class CellsBoundariesIdentification {
 	 */
 	public void convertCorrelationToBinaryImage() {
 
-		System.out.println("Convert correlation image to binary image");
+		ReportingUtils.logMessage("Convert correlation image to binary image");
 
 		byteImage = correlationImage.convertToByteProcessor(true);
 		byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false,
 				BinaryProcessor.BLACK_AND_WHITE_LUT);
-		// byteImage.autoThreshold();
-		// byteImage.threshold(byteImage.getAutoThreshold());
 
 		byteImage.dilate();
 		byteImage.erode();
@@ -358,7 +358,7 @@ public class CellsBoundariesIdentification {
 		// if the thresholding and the making binary image produced a white
 		// background, change it
 		if (byteImage.getStatistics().mode > 127) {
-			System.out.println("Invert image");
+			ReportingUtils.logMessage("Invert image");
 			byteImage.invert();
 		}
 		BinaryProcessor binImage = new BinaryProcessor(byteImage);
@@ -377,7 +377,7 @@ public class CellsBoundariesIdentification {
 	 */
 	public void analyseAndFilterParticles() {
 
-		System.out.println("Analyse results");
+		ReportingUtils.logMessage("Analyse results");
 
 		resultTable = new ResultsTable();
 
@@ -395,33 +395,38 @@ public class CellsBoundariesIdentification {
 						+ Measurements.SHAPE_DESCRIPTORS + Measurements.ELLIPSE,
 				resultTable, minParticleSize, maxParticleSize);
 
-		System.out.println("minParticleSize " + minParticleSize
+		ReportingUtils.logMessage("minParticleSize " + minParticleSize
 				+ " maxParticleSize " + maxParticleSize);
-		System.out.println("Analyse particles on "
+		ReportingUtils.logMessage("Analyse particles on "
 				+ binCorrelationImage.getTitle() + " ...");
+
 		particleAnalyzer.analyze(binCorrelationImage);
-		System.out.println("Done");
+		ReportingUtils.logMessage("Done");
 
 		if (filterUnusualShape || filterWithMeanGrayValue) {
 
 			if (filterWithMeanGrayValue) {
 
-				System.out.println("Filtering with mean grey value...");
+				ReportingUtils.logMessage("Filtering with mean grey value...");
 				ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
 				int name = 1;
 
-				System.out.println("- reset result table");
+				ReportingUtils.logMessage("- reset result table");
 				resultTable.reset();
 				Integer nbRoi = roiManager.getCount();
 				if (!nbRoi.equals(0)) {
-					System.out.println("- get roi as array");
+
+					ReportingUtils.logMessage("- get roi as array");
+
 					roiArray = roiManager.getRoisAsArray();
 					System.out
 							.println("- select and delete all roi from roi manager");
+
 					roiManager.runCommand("Select All");
 					roiManager.runCommand("Delete");
 
-					System.out.println("- initialize analyser");
+					ReportingUtils.logMessage("- initialize analyser");
+
 					analyzer = new Analyzer(imgCorrTemp, Measurements.AREA
 							+ Measurements.STD_DEV + Measurements.MIN_MAX
 							+ Measurements.SHAPE_DESCRIPTORS
@@ -452,18 +457,18 @@ public class CellsBoundariesIdentification {
 						}
 					}
 					deleteRowOfResultTable(rowTodelete);
-					System.out.println("Filter done.");
+					ReportingUtils.logMessage("Filter done.");
 				} else {
-					setNoRoiDetectedTrue();
+					setRoiDetectedFalse();
 				}
 			}
 
 			if (filterUnusualShape) {
 
-				System.out.println("Filtering with solidity...");
+				ReportingUtils.logMessage("Filtering with solidity...");
 				Integer nbRoi = roiManager.getCount();
 				if (!nbRoi.equals(0)) {
-					System.out.println("- get roi as array");
+					ReportingUtils.logMessage("- get roi as array");
 					roiArray = roiManager.getRoisAsArray();
 					System.out
 							.println("- select and delete all roi from roi manager");
@@ -487,9 +492,9 @@ public class CellsBoundariesIdentification {
 					}
 
 					deleteRowOfResultTable(rowTodelete);
-					System.out.println("Filter done.");
+					ReportingUtils.logMessage("Filter done.");
 				} else {
-					setNoRoiDetectedTrue();
+					setRoiDetectedFalse();
 				}
 			}
 
@@ -513,12 +518,12 @@ public class CellsBoundariesIdentification {
 	public void showAndSaveResultsAndCleanUp() {
 		Integer nbRoi = roiManager.getCount();
 		if (nbRoi.equals(0)) {
-			setNoRoiDetectedTrue();
+			setRoiDetectedFalse();
 		}
-		System.out.println("Show and save results");
+		ReportingUtils.logMessage("Show and save results");
 
-		if (saveDataFrame && !noRoiDetected) {
-			System.out.println("saving data frame...");
+		if (saveDataFrame && !roiDetected) {
+			ReportingUtils.logMessage("saving data frame...");
 			try {
 				resultTable.saveAs(savingPath + imageToAnalyze.getShortTitle()
 						+ "_Results.csv");
@@ -528,34 +533,34 @@ public class CellsBoundariesIdentification {
 		}
 
 		if (displayDataFrame) {
-			System.out.println("display data frame");
+			ReportingUtils.logMessage("display data frame");
 			resultTable.show("Result");
-			System.out.println("done.");
+			ReportingUtils.logMessage("done.");
 		} else {
-			System.out.println("reset data frame");
+			ReportingUtils.logMessage("reset data frame");
 			resultTable.reset();
 		}
 
-		if (saveRoi && !noRoiDetected) {
-			System.out.println("saving roi...");
+		if (saveRoi && roiDetected) {
+			ReportingUtils.logMessage("saving roi...");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Save",
 					savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
-			System.out.println("Done");
-			System.out.println("Close roi manager");
+			ReportingUtils.logMessage("Done");
+			ReportingUtils.logMessage("Close roi manager");
 			roiManager.close();
 		}
 
 		if (displayFocusImage) {
-			System.out.println("show focus image");
+			ReportingUtils.logMessage("show focus image");
 			focusImage.show();
 		} else {
-			System.out.println("flush focus image");
+			ReportingUtils.logMessage("flush focus image");
 			focusImage.flush();
 		}
 
-		if (saveBinaryImg && !noRoiDetected) {
-			System.out.println("save binary image");
+		if (saveBinaryImg && roiDetected) {
+			ReportingUtils.logMessage("save binary image");
 			binCorrelationImage.setTitle(imageToAnalyze.getShortTitle()
 					+ "_BinaryImage");
 			FileSaver fileSaver = new FileSaver(binCorrelationImage);
@@ -563,15 +568,15 @@ public class CellsBoundariesIdentification {
 					+ "_BinaryImage.tif");
 		}
 		if (displayBinaryImg) {
-			System.out.println("show binary image");
+			ReportingUtils.logMessage("show binary image");
 			binCorrelationImage.show();
 		} else {
-			System.out.println("flush binary image");
+			ReportingUtils.logMessage("flush binary image");
 			binCorrelationImage.flush();
 		}
 
 		if (saveCorrelationImg) {
-			System.out.println("save correlation image");
+			ReportingUtils.logMessage("save correlation image");
 			imgCorrTemp.setTitle(imageToAnalyze.getShortTitle()
 					+ "_CorrelationImage");
 			FileSaver fileSaver = new FileSaver(imgCorrTemp);
@@ -579,14 +584,14 @@ public class CellsBoundariesIdentification {
 					+ "_CorrelationImage.tif");
 		}
 		if (displayCorrelationImg) {
-			System.out.println("show correlation image");
+			ReportingUtils.logMessage("show correlation image");
 			imgCorrTemp.show();
 		} else {
-			System.out.println("flush correlation image");
+			ReportingUtils.logMessage("flush correlation image");
 			imgCorrTemp.flush();
 		}
 		if (flushImageToAnalyze) {
-			System.out.println("flush image to analyze");
+			ReportingUtils.logMessage("flush image to analyze");
 			imageToAnalyze.flush();
 		}
 	}
@@ -603,16 +608,16 @@ public class CellsBoundariesIdentification {
 	 * Run algorithm, return true if no roi is detected.
 	 */
 
-	public boolean identifyCellesBoundaries() {
+	public boolean identifyCellsBoundaries() {
 		createCorrelationImage();
 		convertCorrelationToBinaryImage();
 		analyseAndFilterParticles();
 		showAndSaveResultsAndCleanUp();
-		return this.noRoiDetected;
+		return this.roiDetected;
 	}
 
-	public void setNoRoiDetectedTrue() {
-		this.noRoiDetected = true;
+	public void setRoiDetectedFalse() {
+		this.roiDetected = false;
 	}
 
 }

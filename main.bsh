@@ -116,7 +116,7 @@ if(md.isOkClicked()) {
 			MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
 			ms.segmentation();
 			ms.writeUsedConfig(mas.getPathToMovie());
-			if(!ms.noRoiDetected()){
+			if(ms.roiDetected()){
 			//----------------if got ROI, start fluo-acquisition --------//
 				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
 				MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
