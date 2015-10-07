@@ -1,11 +1,9 @@
 package fiji.plugin.maars.cellboundaries;
 
 import ij.ImagePlus;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-
 import loci.formats.FormatException;
 import loci.plugins.LociImporter;
 import loci.plugins.in.DisplayHandler;
@@ -19,6 +17,7 @@ import loci.plugins.in.ImporterOptions;
  * @author marie
  *
  */
+
 public class BrowseAction implements ActionListener {
 
 	private LociImporter lociImpt;

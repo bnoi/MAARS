@@ -1,7 +1,7 @@
 //base_dir = "D:/Data/Tong/MAARS/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
-base_dir = "/Users/theoli89/Documents/MAARS/";
+//base_dir = "/Users/theoli89/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
 
@@ -23,7 +23,7 @@ import ij.ImagePlus;
 
 double calibration = gui.getMMCore().getPixelSizeUm();
 mmc.setAutoShutter(false);
-mmc.waitForDevice(mmc.getShutterDevice());
+//mmc.waitForDevice(mmc.getShutterDevice());
 
 gui.message("Create main window");
 MaarsMainDialog md = null;
@@ -50,7 +50,7 @@ if(md.isOkClicked()) {
 	AllMaarsParameters param = null;
 	autofocus = gui.getAutofocus();
 	param = md.getParameters();
-	mmc.setOriginXY(mmc.getXYStageDevice());
+	//mmc.setOriginXY(mmc.getXYStageDevice());
 	int nbXField = param
 						.getParametersAsJsonObject()
 						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
