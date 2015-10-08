@@ -17,12 +17,12 @@ import javax.swing.BoxLayout;
 
 import mmcorej.CMMCore;
 
-import org.micromanager.MMStudio;
+import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
 import ij.gui.NonBlockingGenericDialog;
 
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.ReportingUtils;
 
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
@@ -34,7 +34,7 @@ public class MaarsMainDialog {
 
 	private final NonBlockingGenericDialog mainDialog;
 	private final Label numFieldLabel;
-	private final MMStudio gui;
+	private final MMStudio mm;
 	private final CMMCore mmc;
 	private final AllMaarsParameters parameters;
 	private final double calibration;
@@ -43,7 +43,7 @@ public class MaarsMainDialog {
 	/**
 	 * Constructor :
 	 * 
-	 * @param gui
+	 * @param mm
 	 *            : graphical user interface of Micro-Manager
 	 * @param mmc
 	 *            : Core object of Micro-Manager
@@ -52,7 +52,7 @@ public class MaarsMainDialog {
 	 *            the system (in JSON format)
 	 * @throws IOException
 	 */
-	public MaarsMainDialog(MMStudio gui, CMMCore mmc, String pathConfigFile)
+	public MaarsMainDialog(MMStudio mm, CMMCore mmc, String pathConfigFile)
 			throws IOException {
 		//------------initialization of parameters---------------//
 		try {
@@ -65,7 +65,7 @@ public class MaarsMainDialog {
 		Color labelColor = Color.ORANGE;
 		okClicked = false;
 
-		this.gui = gui;
+		this.mm = mm;
 		this.mmc = mmc;
 
 		ReportingUtils.logMessage("create parameter object ...");
@@ -85,7 +85,7 @@ public class MaarsMainDialog {
 
 		ReportingUtils.logMessage("create main dialog ...");
 
-		calibration = gui.getMMCore().getPixelSizeUm();
+		calibration = mm.getCMMCore().getPixelSizeUm();
 		double fieldWidth = mmc.getImageWidth() * calibration;
 		double fieldHeight = mmc.getImageHeight() * calibration;
 
@@ -219,8 +219,8 @@ public class MaarsMainDialog {
 	 * 
 	 * @return graphical user interface of Micro-Manager
 	 */
-	public MMStudio getGui() {
-		return gui;
+	public MMStudio getMM() {
+		return mm;
 	}
 
 	/**

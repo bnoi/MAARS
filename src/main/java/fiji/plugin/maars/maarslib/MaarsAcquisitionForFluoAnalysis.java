@@ -5,12 +5,12 @@ import java.awt.Color;
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 
-import org.micromanager.MMStudio;
-import org.micromanager.acquisition.MMAcquisition;
+import org.micromanager.internal.MMStudio;
+import org.micromanager.acquisition.internal.MMAcquisition;
 import org.micromanager.api.Autofocus;
-import org.micromanager.utils.MMException;
-import org.micromanager.utils.MMScriptException;
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.MMException;
+import org.micromanager.internal.utils.MMScriptException;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import ij.ImagePlus;
@@ -30,7 +30,7 @@ import ij.process.ShortProcessor;
  */
 public class MaarsAcquisitionForFluoAnalysis {
 
-	private MMStudio gui;
+	private MMStudio mm;
 	private CMMCore mmc;
 	private AllMaarsParameters parameters;
 	private double positionX;
@@ -53,10 +53,10 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 * @param soc
 	 *            : Set of cells (object from CellStateAnalysis)
 	 */
-	public MaarsAcquisitionForFluoAnalysis(MMStudio gui, CMMCore mmc,
+	public MaarsAcquisitionForFluoAnalysis(MMStudio mm, CMMCore mmc,
 			AllMaarsParameters parameters, double positionX, double positionY,
 			SetOfCells soc) {
-		this.gui = gui;
+		this.mm = mm;
 		this.mmc = mmc;
 		this.parameters = parameters;
 		this.positionX = positionX;
@@ -78,7 +78,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 */
 	public MaarsAcquisitionForFluoAnalysis(MaarsMainDialog md,
 			double positionX, double positionY, SetOfCells soc) {
-		gui = md.getGui();
+		mm = md.getMM();
 		mmc = md.getMMC();
 		parameters = md.getParameters();
 		this.positionX = positionX;
@@ -161,9 +161,9 @@ public class MaarsAcquisitionForFluoAnalysis {
 		ReportingUtils.logMessage("________________________________");
 
 		ReportingUtils.logMessage("Close all previous acquisitions");
-		gui.closeAllAcquisitions();
+		mm.closeAllAcquisitions();
 		try {
-			gui.clearMessageWindow();
+			mm.clearMessageWindow();
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("could not clear message window");
 			ReportingUtils.logError(e);
