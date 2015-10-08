@@ -1,11 +1,8 @@
 //base_dir = "D:/Data/Tong/MAARS/";
-base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
-<<<<<<< HEAD
 base_dir = "/Volumes/Macintosh/Documents/MAARS/";
-=======
-//base_dir = "/Users/theoli89/Documents/MAARS/";
->>>>>>> f82e20b2e0f610e8f4d5e61a118bc1f6a2018ebb
+
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
 
@@ -16,7 +13,7 @@ import fiji.plugin.maars.maarslib.MaarsMainDialog;
 import fiji.plugin.maars.maarslib.AllMaarsParameters;
 import fiji.plugin.maars.maarslib.ExplorationXYPositions;
 import mmcorej.CMMCore;
-import org.micromanager.internal.*;
+import org.micromanager.*;
 import ij.*;
 import java.io.IOException;
 import com.google.gson.JsonElement;
@@ -25,13 +22,13 @@ import java.util.HashMap;
 import fiji.plugin.maars.cellstateanalysis.Cell;
 import ij.ImagePlus;
 
-double calibration = mm.core().getPixelSizeUm();
+double calibration = gui.getMMCore().getPixelSizeUm();
 mmc.setAutoShutter(false);
 //mmc.waitForDevice(mmc.getShutterDevice());
 
 print("Create main window");
 MaarsMainDialog md = null;
-String dataDir = "/Users/theoli89/Desktop/curioData/Virtual/";
+String dataDir = "/Volumes/Macintosh/curioData/Virtual/";
 //String dataDir = "/media/tong/Tong_data/test/Virtual/";
 //String dataDir = "G:/test/Virtual/";
 try {
