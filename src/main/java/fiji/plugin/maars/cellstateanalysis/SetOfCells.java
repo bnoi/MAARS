@@ -70,7 +70,6 @@ public class SetOfCells {
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -92,6 +91,7 @@ public class SetOfCells {
 		cellArray = new Cell[roiArray.length];
 
 		ReportingUtils.logMessage("Initialize Cells in array");
+		//TODO fluoimage to split
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray[i] = new Cell(bfImage, correaltionImage, fluoImage,
 					focusSlice, direction, roiArray[i],i, rt);
@@ -127,7 +127,6 @@ public class SetOfCells {
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

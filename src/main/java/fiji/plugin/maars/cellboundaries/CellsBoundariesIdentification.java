@@ -547,6 +547,8 @@ public class CellsBoundariesIdentification {
 			roiManager.runCommand("Save",
 					savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
 			ReportingUtils.logMessage("Done");
+			roiManager.runCommand("Select All");
+			roiManager.runCommand("Delete");
 			ReportingUtils.logMessage("Close roi manager");
 			roiManager.close();
 		}

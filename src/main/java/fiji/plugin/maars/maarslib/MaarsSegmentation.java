@@ -3,7 +3,6 @@ package fiji.plugin.maars.maarslib;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
 
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;

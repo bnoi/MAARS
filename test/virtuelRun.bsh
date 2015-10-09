@@ -1,7 +1,7 @@
 //base_dir = "D:/Data/Tong/MAARS/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
-base_dir = "/Volumes/Macintosh/Documents/MAARS/";
+//base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
@@ -28,8 +28,8 @@ mmc.setAutoShutter(false);
 
 print("Create main window");
 MaarsMainDialog md = null;
-String dataDir = "/Volumes/Macintosh/curioData/Virtual/";
-//String dataDir = "/media/tong/Tong_data/test/Virtual/";
+//String dataDir = "/Volumes/Macintosh/curioData/Virtual/";
+String dataDir = "/media/tong/74CDBC0B2251059E/test/Virtual/";
 //String dataDir = "G:/test/Virtual/";
 try {
 	md = new MaarsMainDialog(gui, mmc, base_dir + "maars_config.txt");
