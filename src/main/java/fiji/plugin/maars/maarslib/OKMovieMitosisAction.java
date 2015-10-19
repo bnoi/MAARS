@@ -530,24 +530,24 @@ public class OKMovieMitosisAction implements ActionListener {
 							Double.valueOf(minGrowing));
 		}
 
-		boolean oneMitosis = dialog.getNextBoolean();
-		if (oneMitosis != maarsMMD.getParameters().getParametersAsJsonObject()
+		boolean dynamicFilming = dialog.getNextBoolean();
+		if (dynamicFilming != maarsMMD.getParameters().getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject()
-				.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
+				.get(AllMaarsParameters.DYNAMIC)
 				.getAsBoolean()) {
 
 			maarsMMD.getParameters().getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject()
-					.remove(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD);
+					.remove(AllMaarsParameters.DYNAMIC);
 
 			maarsMMD.getParameters()
 					.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject()
-					.addProperty(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD,
-							Boolean.valueOf(oneMitosis));
+					.addProperty(AllMaarsParameters.DYNAMIC,
+							Boolean.valueOf(dynamicFilming));
 		}
 
 		String[] fluoUsedArray = dialog.getNextString().split(",");

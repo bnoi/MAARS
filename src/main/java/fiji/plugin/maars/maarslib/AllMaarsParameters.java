@@ -47,7 +47,9 @@ import com.google.gson.JsonParser;
  *    +-----> SAVE_FLUORESCENT_MOVIES
  *    +-----> CHANNEL
  *    +-----> MAXIMUM_NUMBER_OF_SPOT
- *    +-----> FIND_BEST_MITOSIS_IN_FIELD
+ *    +-----> DYNAMIC
+ *    +-----> KT_COLOR
+ *    +-----> SPB_COLOR
  *    
  * MITOSIS_MOVIE_PARAMETERS
  *    |
@@ -118,7 +120,10 @@ public class AllMaarsParameters {
 	public static final String SPOT_RADIUS = "SPOT_RADIUS";
 	public static final String SAVE_FLUORESCENT_MOVIES = "SAVE_FLUORESCENT_MOVIES";
 	public static final String MAXIMUM_NUMBER_OF_SPOT = "MAXIMUM_NUMBER_OF_SPOT";
-	public static final String FIND_BEST_MITOSIS_IN_FIELD = "FIND_BEST_MITOSIS_IN_FIELD";
+	public static final String DYNAMIC = "DYNAMIC";
+	public static final String KT_SPB_SAME_COLOR = "KT_SPB_SAME_COLOR";
+	public static final String KT_COLOR = "KT_COLOR";
+	public static final String SPB_COLOR = "SPB_COLOR";
 
 	public static final String X_FIELD_NUMBER = "X_FIELD_NUMBER";
 	public static final String Y_FIELD_NUMBER = "Y_FIELD_NUMBER";

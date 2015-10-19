@@ -291,16 +291,26 @@ public class MaarsMitosisMovieDialog {
 						.get(AllMaarsParameters.GROWING_SPINDLE).getAsDouble(),
 				3,10, "micron/time interval");
 
-		System.out.println("- add checkbox to film only one cell in the field");
+		System.out.println("- add checkbox to use static option or dynamic option");
 		mitosisMovieDialog.addCheckbox(
-				"Film only one mitosis per field (with smallest spindle)",
+				"Film each field for 30 mins then next",
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
+						.get(AllMaarsParameters.DYNAMIC)
 						.getAsBoolean());
 		mitosisMovieDialog.add(new Label());
 
+		System.out.println("- add checkbox to verify if Kt and SPB are marked with same color");
+		mitosisMovieDialog.addCheckbox(
+				"Kt and SPB are in the same color",
+				parameters.getParametersAsJsonObject()
+						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.KT_SPB_SAME_COLOR)
+						.getAsBoolean());
+		mitosisMovieDialog.add(new Label());
+		
 		System.out.println("- add label for acquisition parameters");
 
 		Label acquireParamLabel = new Label("Acquisition parameters");
