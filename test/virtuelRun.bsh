@@ -1,0 +1,175 @@
+base_dir = "D:/Data/Tong/MAARS/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
+//base_dir = "/Volumes/Macintosh/Documents/MAARS/";
+
+
+addClassPath(base_dir + "target/MAARS_-1.0.jar");
+
+import au.com.bytecode.opencsv.CSVWriter;
+import java.util.List;
+import fiji.plugin.maars.maarslib.*;
+import fiji.plugin.maars.maarslib.MaarsMainDialog;
+import fiji.plugin.maars.maarslib.AllMaarsParameters;
+import fiji.plugin.maars.maarslib.ExplorationXYPositions;
+import mmcorej.CMMCore;
+import org.micromanager.*;
+import ij.*;
+import java.io.IOException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import java.util.HashMap;
+import fiji.plugin.maars.cellstateanalysis.Cell;
+import ij.ImagePlus;
+
+double calibration = gui.getMMCore().getPixelSizeUm();
+mmc.setAutoShutter(false);
+//mmc.waitForDevice(mmc.getShutterDevice());
+
+print("Create main window");
+MaarsMainDialog md = null;
+//String dataDir = "/Volumes/Macintosh/curioData/Virtual/";
+//String dataDir = "/media/tong/74CDBC0B2251059E/test/Virtual/";
+String dataDir = "F:/test/Virtual/";
+try {
+	md = new MaarsMainDialog(gui, mmc, base_dir + "maars_config.txt");
+} catch (IOException e) {
+	gui.message("Error");
+}
+
+print("Show main window");
+
+md.show();
+
+while(md.isVisible()) {
+	gui.sleep(1000);
+}
+
+if(md.isOkClicked()) {
+	start = System.currentTimeMillis();
+	gui.message("start "+start);
+	AllMaarsParameters param = null;
+	autofocus = gui.getAutofocus();
+	param = md.getParameters();
+	//mmc.setOriginXY(mmc.getXYStageDevice());
+	int nbXField = param
+						.getParametersAsJsonObject()
+						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.X_FIELD_NUMBER)
+						.getAsInt();
+	int nbYField = param
+						.getParametersAsJsonObject()
+						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.Y_FIELD_NUMBER)
+						.getAsInt();
+	
+	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
+
+	if (nbXField * nbYField != 0){
+	ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
+													nbYField,
+													(double) mmc.getImageWidth()*calibration,
+													(double) mmc.getImageHeight()*calibration);
+
+	ImagePlus fluoImage = null;
+	for (int i = 0; i < explo.length(); i++) {
+		gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
+		double xPos = explo.getX(i);
+		double yPos = explo.getY(i);
+		
+		gui.setXYStagePosition(xPos,yPos);
+		
+		MaarsAcquisitionForSegmentation mas = new MaarsAcquisitionForSegmentation(md,
+				xPos,
+				yPos);
+
+		mmc.waitForDevice(mmc.getXYStageDevice());
+
+		HashMap params = mas.getParametersFromConf(param);
+		mas.setParameters(params);
+//		mas.acquire(false);
+
+		MaarsSegmentation ms = new MaarsSegmentation(param, dataDir+"movie_X0_Y0/MMStack_Pos0.ome.tif");
+		ms.segmentation();
+		ms.writeUsedConfig(dataDir+"movie_X0_Y0");
+		
+		if (ms.roiDetected()){
+			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
+			MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
+			
+			MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
+															xPos,
+															yPos,
+															mfa.getSetOfCells());
+		int frame = 0;
+
+		List cellsInAllFields = new ArrayList();
+		File dir = new File (pathToResults + "/" + frame);
+		spindleWriter = new FileWriter(dataDir+"movie_X0_Y0_FLUO/spindleAnalysis.csv");
+		writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
+		writer.writeNext(new String[]{
+				"Cell",
+				"Second",
+				"Feature",
+				"NbOfSpotDetected",
+				"CellCenterX",
+				"CellCenterY",
+				"CellAbsoMajAng",
+				"CellMajLength",
+				"CellMinLength",
+				"SpAbsoAng",
+				"SpAngToMaj",
+				"SpLength",
+				"spb1X",
+				"spb1Y",
+				"spb1Z",
+				"spb2X",
+				"spb2Y",
+				"spb2Z",
+				"SpCenterX",
+				"SpCenterY",
+				"SpCenterZ",
+				"CellCenterToSpCenterLen",
+				"CellCenterToSpCenterAng",
+				"fieldX",
+				"fieldY"
+			});
+		while(frame<1){
+			fluoImage = IJ.openImage(dataDir+"movie_X0_Y0_FLUO/"+frame+"/MMStack_Pos0.ome.tif");
+			fluoImage.show();
+			cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
+									dataDir+"movie_X0_Y0_FLUO/",frame, Math.round(xPos), Math.round(yPos)));
+			acqNameFluo = null;
+			fluoImage.close();
+			fluoImage = null;
+			// close roi manager
+			mfa.getSetOfCells().closeRoiManager();
+			mas.setParameters(params);
+			frame++;
+		}
+		if (param.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject()
+					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
+					.getAsBoolean()) {
+				mfa.saveCroppedImgs();
+		}
+		writer.writeAll(cellsInAllFields);
+		spindleWriter.close();
+		writer.close();
+		}
+		mmc.setAutoShutter(true);
+		mmc.waitForDevice(mmc.getShutterDevice());
+		gui.message("end "+System.currentTimeMillis());
+		gui.message("it took "+(System.currentTimeMillis()-start));
+		gui.message("DONE.");
+	}
+
+	}else{
+		gui.message("Session aborted, 0 field to analyse");
+	}
+	}else{
+		gui.message("Session aborted, click 'OK' to start analyse.");
+}
