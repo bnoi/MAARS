@@ -522,7 +522,7 @@ public class CellsBoundariesIdentification {
 		}
 		ReportingUtils.logMessage("Show and save results");
 
-		if (saveDataFrame && !roiDetected) {
+		if (saveDataFrame && roiDetected) {
 			ReportingUtils.logMessage("saving data frame...");
 			try {
 				resultTable.saveAs(savingPath + imageToAnalyze.getShortTitle()
