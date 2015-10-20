@@ -440,15 +440,15 @@ public class Cell {
 			imgProcessor.setRoi(newRectangle);
 			ImagePlus newImage = 
 					new ImagePlus("CroppedFluoImage", imgProcessor.crop());
-
 			ReportingUtils.logMessage("Done.");
+			
 			ReportingUtils.logMessage("Put new calibration newly cropped image");
 			newImage.setCalibration(fluoImage.getCalibration());
 			ReportingUtils.logMessage("Done.");
+			
 			ReportingUtils.logMessage("Set newly cropped image as fluorescent image");
 			
 			centerTheRoi();
-			
 			setFluoImage(newImage);
 			fluoImage.setRoi(cellShapeRoi);
 			newImage = null;

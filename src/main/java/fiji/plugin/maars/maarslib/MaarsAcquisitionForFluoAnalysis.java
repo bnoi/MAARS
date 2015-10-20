@@ -86,7 +86,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		this.soc = soc;
 	}
 
-	/**
+/*	*//**
 	 * Crop image to film only one cell then acquire specific movie
 	 * 
 	 * @param show
@@ -94,7 +94,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 * @param cellNumber
 	 *            : index of cell filmed
 	 * @return ImagePlus object
-	 */
+	 *//*
 	public ImagePlus acquire(boolean show, int cellNumber) {
 
 		try {
@@ -134,7 +134,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		} catch (MMScriptException e) {
 			return null;
 		}
-	}
+	}*/
 
 	/**
 	 * Acquire specific movie
@@ -143,9 +143,12 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 *            : true to see acquisition in live
 	 * @param acqName
 	 *            : name of acquisition
+	 * @param channel 
+	 *            : marker channel
+	 *            
 	 * @return ImagePlus object
 	 */
-	public ImagePlus acquire(boolean show, String acqName)
+	public ImagePlus acquire(boolean show, String acqName, String channel)
 			throws MMScriptException {
 
 		boolean save = parameters.getParametersAsJsonObject()
@@ -182,10 +185,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 				.getAsString();
 		ReportingUtils.logMessage("- saving path : " + rootDirName);
 
-		String channel = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.CHANNEL)
-				.getAsString();
 		ReportingUtils.logMessage("- channel : " + channel);
 
 		String shutter = parameters.getParametersAsJsonObject()

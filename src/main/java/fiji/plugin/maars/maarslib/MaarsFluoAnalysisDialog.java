@@ -59,7 +59,7 @@ public class MaarsFluoAnalysisDialog {
 				"fluorescence used",
 				parameters.getParametersAsJsonObject()
 						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.CHANNEL)
+						.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
 						.getAsString(), 5);
 		fluoAnalysisDialog.addCheckbox(
 				"save movies",

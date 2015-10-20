@@ -45,11 +45,9 @@ import com.google.gson.JsonParser;
  *    +-----> STEP
  *    +-----> SPOT_RADIUS
  *    +-----> SAVE_FLUORESCENT_MOVIES
- *    +-----> CHANNEL
+ *    +-----> FLUO_CHANNELS
  *    +-----> MAXIMUM_NUMBER_OF_SPOT
  *    +-----> DYNAMIC
- *    +-----> KT_COLOR
- *    +-----> SPB_COLOR
  *    
  * MITOSIS_MOVIE_PARAMETERS
  *    |
@@ -121,9 +119,6 @@ public class AllMaarsParameters {
 	public static final String SAVE_FLUORESCENT_MOVIES = "SAVE_FLUORESCENT_MOVIES";
 	public static final String MAXIMUM_NUMBER_OF_SPOT = "MAXIMUM_NUMBER_OF_SPOT";
 	public static final String DYNAMIC = "DYNAMIC";
-	public static final String KT_SPB_SAME_COLOR = "KT_SPB_SAME_COLOR";
-	public static final String KT_COLOR = "KT_COLOR";
-	public static final String SPB_COLOR = "SPB_COLOR";
 
 	public static final String X_FIELD_NUMBER = "X_FIELD_NUMBER";
 	public static final String Y_FIELD_NUMBER = "Y_FIELD_NUMBER";
@@ -158,6 +153,7 @@ public class AllMaarsParameters {
 	public static final String COLOR = "COLOR";
 	public static final String EXPOSURE = "EXPOSURE";
 	public static final String CHANNEL = "CHANNEL";
+	public static final String FLUO_CHANNELS = "FLUO_CHANNELS";
 	public static final String FRAME_NUMBER = "FRAME_NUMBER";
 	
 	public static final String GENERAL_ACQUISITION_PARAMETERS = "GENERAL_ACQUISITION_PARAMETERS";

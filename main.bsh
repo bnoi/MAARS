@@ -1,5 +1,5 @@
-//base_dir = "D:/Data/Tong/MAARS/";
-base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "D:/Data/Tong/MAARS/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Users/theoli89/Documents/MAARS/";
 
@@ -138,7 +138,7 @@ if(md.isOkClicked()) {
 					.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject()
-					.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
+					.get(AllMaarsParameters.DYNAMIC)
 					.getAsBoolean()) {
 					int timeInterval = param.getParametersAsJsonObject()
 							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
@@ -158,11 +158,18 @@ if(md.isOkClicked()) {
 					writer.writeNext(outputHeader);
 					while (System.currentTimeMillis() - startTime <= timeLimit)
 						{
-							String acqNameFluo = acqNameFluo + "/" + frame;
 							double beginAcq = System.currentTimeMillis();
-							ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
-							cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-															fluoFolder, frame, Math.round(xPos), Math.round(yPos)));
+
+							String channels = param.getParametersAsJsonObject()
+								.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+								.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
+								.getAsString();
+							String[] arrayChannels = channels.split(",", -1);
+							for (String channel:arrayChannels) {
+								String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
+								ImagePlus fluoImage = mafa.acquire(false, acqNameFluo, channel);
+								cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage, fluoFolder, frame, Math.round(xPos), Math.round(yPos), channel));
+							}
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
 							double acqTook = System.currentTimeMillis() - beginAcq;

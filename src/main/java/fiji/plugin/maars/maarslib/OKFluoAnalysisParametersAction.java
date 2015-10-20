@@ -69,17 +69,17 @@ public class OKFluoAnalysisParametersAction implements ActionListener {
 		String fluoUsed = dialog.getNextString();
 		if (fluoUsed != maarsFAD.getParameters().getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.CHANNEL)
+				.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
 				.getAsString()) {
 
 			maarsFAD.getParameters().getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-					.getAsJsonObject().remove(AllMaarsParameters.CHANNEL);
+					.getAsJsonObject().remove(AllMaarsParameters.FLUO_CHANNELS);
 
 			maarsFAD.getParameters().getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject()
-					.addProperty(AllMaarsParameters.CHANNEL, fluoUsed);
+					.addProperty(AllMaarsParameters.FLUO_CHANNELS, fluoUsed);
 		}
 
 		boolean saveMovies = dialog.getNextBoolean();
