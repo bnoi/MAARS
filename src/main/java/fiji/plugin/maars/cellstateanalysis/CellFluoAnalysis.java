@@ -14,6 +14,7 @@ import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.TrackMate;
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.gui.Roi;
 
 /**
  * This class is to find fluorescent spots in an image using LogDetector
@@ -39,6 +40,8 @@ public class CellFluoAnalysis {
 		this.cell = cell;
 		
 		ImagePlus fluoCellImg = cell.getFluoImage();
+		Calibration cal = fluoCellImg.getCalibration();
+		Roi cellShape = fluoCellImg.getRoi();
 		fluoCellImg.deleteRoi();
 		Model model = new Model();
 		Settings settings = new Settings();
@@ -68,15 +71,27 @@ public class CellFluoAnalysis {
 		trackmate.computeSpotFeatures(false);
 		ReportingUtils.logMessage("computeSpotFeatures done");
 
-		trackmate.execSpotFiltering(false);
+		trackmate.execSpotFiltering(true);
 		ReportingUtils.logMessage("execSpotFiltering done");
 		int nSpots = trackmate.getModel().getSpots().getNSpots(true);
 		ReportingUtils.logMessage("Found " + nSpots + " spots");
 
 		res = new ArrayList<Spot>();
+		int nbSpotInCell = 0;
 		for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
-			res.add(spot);
-		}
+			Map<String, Double> features = spot.getFeatures();
+			if (cellShape.contains((int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
+					(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight))){
+				nbSpotInCell+=1;
+				if (nbSpotInCell > 2){
+					res.clear();
+					next;
+				}else{
+					res.add(spot);
+				}
+			};
+		};
+			
 		ReportingUtils.logMessage("- Done.");
 		//TODO filter factor (between 3 and 4)
 		factorForThreshold = 3.5;

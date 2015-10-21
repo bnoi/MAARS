@@ -1,5 +1,5 @@
-base_dir = "D:/Data/Tong/MAARS/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "D:/Data/Tong/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
@@ -29,8 +29,8 @@ mmc.setAutoShutter(false);
 print("Create main window");
 MaarsMainDialog md = null;
 //String dataDir = "/Volumes/Macintosh/curioData/Virtual/";
-//String dataDir = "/media/tong/74CDBC0B2251059E/test/Virtual/";
-String dataDir = "F:/test/Virtual/";
+String dataDir = "/media/tong/74CDBC0B2251059E/test/Virtual/";
+//String dataDir = "F:/test/Virtual/";
 try {
 	md = new MaarsMainDialog(gui, mmc, base_dir + "maars_config.txt");
 } catch (IOException e) {
@@ -140,7 +140,7 @@ if(md.isOkClicked()) {
 			fluoImage = IJ.openImage(dataDir+"movie_X0_Y0_FLUO/"+frame+"/MMStack_Pos0.ome.tif");
 			fluoImage.show();
 			cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-									dataDir+"movie_X0_Y0_FLUO/",frame, Math.round(xPos), Math.round(yPos)));
+									dataDir+"movie_X0_Y0_FLUO/",frame, Math.round(xPos), Math.round(yPos),"CFP"));
 			acqNameFluo = null;
 			fluoImage.close();
 			fluoImage = null;
