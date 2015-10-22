@@ -113,12 +113,14 @@ if(md.isOkClicked()) {
 			//--------------------------BF acquisition-----------------------------//
 			mas.acquire(false);
 			//--------------------------segmentation-----------------------------//
-			MaarsSegmentation ms = new MaarsSegmentation(param, mas.getPathToMovie()+"/MMStack_Pos0.ome.tif");
+			MaarsSegmentation ms = new MaarsSegmentation(param,
+				xPos,
+				yPos);
 			ms.segmentation();
-			ms.writeUsedConfig(mas.getPathToMovie());
+			ms.writeUsedConfig();
 			if(ms.roiDetected()){
 			//----------------if got ROI, start fluo-acquisition --------//
-				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
+				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject(), xPos, yPos);
 				MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
 
 				MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
@@ -126,13 +128,6 @@ if(md.isOkClicked()) {
 																yPos,
 																mfa.getSetOfCells());
 				List cellsInAllFields = new ArrayList();	
-				String fluoFolder = mas.getPathToMovie()+"_FLUO";
-				File dir = new File(fluoFolder);
-				dir.mkdirs();
-				String acqNameFluo = "/movie_X"
-						+Math.round(xPos)
-						+"_Y"+Math.round(yPos)
-						+"_FLUO";
 //////////////////////////multiple snapshot per field//////////////////////////////
 				if(param
 					.getParametersAsJsonObject()
@@ -153,7 +148,15 @@ if(md.isOkClicked()) {
 							.getAsJsonObject().get(AllMaarsParameters.VALUES)
 							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
 							.getAsDouble() * 60 * 1000;
-					spindleWriter = new FileWriter(fluoFolder+"/spindleAnalysis.csv");
+					spindleWriter = new FileWriter(AllMaarsParameters.convertPath(param
+													.getParametersAsJsonObject()
+													.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+													.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+													.getAsString()
+													+ "/movie_X"
+													+ Math.round(positionX)
+													+ "_Y"
+													+ Math.round(positionY) + "_FLUO"+"/spindleAnalysis.csv");
 					writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
 					writer.writeNext(outputHeader);
 					while (System.currentTimeMillis() - startTime <= timeLimit)
@@ -168,7 +171,9 @@ if(md.isOkClicked()) {
 							for (String channel:arrayChannels) {
 								String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
 								ImagePlus fluoImage = mafa.acquire(false, acqNameFluo, channel);
-								cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage, fluoFolder, frame, Math.round(xPos), Math.round(yPos), channel));
+								cellsInAllFields.addAll(
+									mfa.analyzeEntireFieldReturnListSp(fluoImage, frame, Math.round(xPos), Math.round(yPos), channel)
+									);
 							}
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
@@ -185,7 +190,7 @@ if(md.isOkClicked()) {
 					String acqNameFluo = acqNameFluo+ "/" + frame ;
 					ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 					fluoImage.show();
-					mfa.analyzeEntireFieldReturnListSp(fluoImage, fluoFolder,frame,Math.round(xPos),Math.round(yPos));
+					mfa.analyzeEntireFieldReturnListSp(fluoImage,frame,Math.round(xPos),Math.round(yPos));
 					fluoImage.close();
 					acqNameFluo = null;
 					fluoImage = null;

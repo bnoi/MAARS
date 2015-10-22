@@ -18,7 +18,8 @@ import ij.IJ;
  */
 public class MaarsSegmentation {
 	private AllMaarsParameters parameters;
-	private String moviePath;
+	private String pathToSegMovie;
+	private String pathToSegDir;
 	private CellsBoundaries cB;
 	private boolean roiDetected = true;
 
@@ -30,12 +31,20 @@ public class MaarsSegmentation {
 	 * @param moviePath
 	 *            : where is stored image to segment
 	 */
-	public MaarsSegmentation(AllMaarsParameters parameters, String moviePath) {
+	public MaarsSegmentation(AllMaarsParameters parameters, double positionX,
+			double positionY) {
 
 		this.parameters = parameters;
-		this.moviePath = AllMaarsParameters.convertPath(moviePath);
-		ReportingUtils.logMessage("Movie path for segmentation : " + moviePath);
-
+		this.pathToSegDir = AllMaarsParameters.convertPath(parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.getAsString()
+				+ "/movie_X"
+				+ Math.round(positionX)
+				+ "_Y"
+				+ Math.round(positionY));
+		this.pathToSegMovie = AllMaarsParameters.convertPath(pathToSegDir+ "/MMStack_Pos0.ome.tif");
 	}
 
 	/**
@@ -43,7 +52,9 @@ public class MaarsSegmentation {
 	 */
 	public void segmentation() {
 
-		IJ.open(moviePath);
+		ReportingUtils.logMessage("Movie path for segmentation : "+ pathToSegMovie);
+		IJ.open(pathToSegMovie);
+
 		cB = new CellsBoundaries();
 		cB.setMainWindow();
 
@@ -53,16 +64,20 @@ public class MaarsSegmentation {
 		cB.getSaveDataFrame().setState(true);
 		cB.getSaveFocusImage().setState(true);
 		cB.getSaveRoi().setState(true);
-		cB.getFilterUnususalCkb().setState(
-				parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.FILTER_SOLIDITY)
-				.getAsBoolean());
+		cB.getFilterUnususalCkb()
+				.setState(
+						parameters
+								.getParametersAsJsonObject()
+								.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+								.getAsJsonObject()
+								.get(AllMaarsParameters.FILTER_SOLIDITY)
+								.getAsBoolean());
 		cB.getFilterWithMeanGreyValueCkb().setState(
 				parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE)
-				.getAsBoolean());
+						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE)
+						.getAsBoolean());
 		cB.getAlreadryOpenedImage();
 		cB.getImageToAnalyze().getCalibration().pixelDepth = parameters
 				.getParametersAsJsonObject()
@@ -121,8 +136,8 @@ public class MaarsSegmentation {
 				cB, cellSizePixel, minSize, maxSize, -1, (int) Math.round(cB
 						.getImageToAnalyze().getNSlices() / 2), solidity,
 				meanGrey, true, false);
-		//cBI.identifyCellesBoundaries() return true, if no ROI detected.
-		if(cBI.identifyCellsBoundaries()){
+		// cBI.identifyCellesBoundaries() return true, if no ROI detected.
+		if (cBI.identifyCellsBoundaries()) {
 			this.roiDetected = true;
 			cBI.getRoiManager().close();
 		}
@@ -136,6 +151,7 @@ public class MaarsSegmentation {
 	public CellsBoundaries getSegmentationObject() {
 		return cB;
 	}
+
 	/**
 	 * 
 	 * @return if no Roi detected
@@ -143,35 +159,31 @@ public class MaarsSegmentation {
 	public boolean roiDetected() {
 		return this.roiDetected;
 	}
-	
+
 	/**
 	 * write config parameters used in current analysis
 	 * 
 	 */
-	public void writeUsedConfig(String path) {
+	public void writeUsedConfig() {
 		int timeInterval = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
-				.getAsInt()/1000;
-		int maxNbSpot = parameters
-				.getParametersAsJsonObject()
+				.getAsInt() / 1000;
+		int maxNbSpot = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt();
-		int maxWidth = parameters
-				.getParametersAsJsonObject()
+		int maxWidth = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE)
 				.getAsInt();
-		int maxHeight = parameters
-				.getParametersAsJsonObject()
+		int maxHeight = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE)
 				.getAsInt();
-		double cellSize = parameters
-				.getParametersAsJsonObject()
+		double cellSize = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE)
 				.getAsDouble();
@@ -181,8 +193,7 @@ public class MaarsSegmentation {
 				.getAsDouble();
 		double segStep = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.STEP)
-				.getAsDouble();
+				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
 		double minCellArea = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.MINIMUM_CELL_AREA)
@@ -214,40 +225,46 @@ public class MaarsSegmentation {
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.FILTER_SOLIDITY)
 				.getAsBoolean();
-		boolean filterWithMeanGrayValue = parameters.getParametersAsJsonObject()
+		boolean filterWithMeanGrayValue = parameters
+				.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE)
-				.getAsBoolean();
+				.getAsJsonObject()
+				.get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean();
 		FileWriter configFile = null;
 		try {
-			configFile = new FileWriter(path+"/configUsed.txt");
+			configFile = new FileWriter(AllMaarsParameters.convertPath(pathToSegDir + "/configUsed.txt"));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-			try {
-				configFile.write(
-						"Interval between 2 frames:\t"+String.valueOf(timeInterval)+"\n"+
-						"Max number of spot:\t"+String.valueOf(maxNbSpot)+"\n"+
-						"Max width of bright field:\t"+String.valueOf(maxWidth)+"\n"+
-						"Max height of bright field:\t"+String.valueOf(maxHeight)+"\n"+
-						"Typical cell size:\t"+String.valueOf(cellSize)+"\n"+
-						"Segmentation range:\t"+String.valueOf(segRange)+"\n"+
-						"Segmentation step size:\t"+String.valueOf(segStep)+"\n"+
-						"Fluo acquisition range:\t"+String.valueOf(fluoRange)+"\n"+
-						"Fluo acquisition step size:\t"+String.valueOf(fluoStep)+"\n"+
-						"Minimum cell area:\t"+String.valueOf(minCellArea)+"\n"+
-						"Maximum cell area:\t"+String.valueOf(maxCellArea)+"\n"+
-						"Solidity thresold enable:\t"+String.valueOf(filterUnusualShape)+"\n"+
-						"Solidity thresold:\t"+String.valueOf(solidity)+"\n"+
-						"Gray level thresold enable:\t"+String.valueOf(filterWithMeanGrayValue)+"\n"+
-						"Gray level thresold:\t"+String.valueOf(meanGrey)+"\n"+
-						"Root dir:\t"+rootDirName+"\n"
-						);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			configFile.write("Interval between 2 frames:\t"
+					+ String.valueOf(timeInterval) + "\n"
+					+ "Max number of spot:\t" + String.valueOf(maxNbSpot)
+					+ "\n" + "Max width of bright field:\t"
+					+ String.valueOf(maxWidth) + "\n"
+					+ "Max height of bright field:\t"
+					+ String.valueOf(maxHeight) + "\n" + "Typical cell size:\t"
+					+ String.valueOf(cellSize) + "\n" + "Segmentation range:\t"
+					+ String.valueOf(segRange) + "\n"
+					+ "Segmentation step size:\t" + String.valueOf(segStep)
+					+ "\n" + "Fluo acquisition range:\t"
+					+ String.valueOf(fluoRange) + "\n"
+					+ "Fluo acquisition step size:\t"
+					+ String.valueOf(fluoStep) + "\n" + "Minimum cell area:\t"
+					+ String.valueOf(minCellArea) + "\n"
+					+ "Maximum cell area:\t" + String.valueOf(maxCellArea)
+					+ "\n" + "Solidity thresold enable:\t"
+					+ String.valueOf(filterUnusualShape) + "\n"
+					+ "Solidity thresold:\t" + String.valueOf(solidity) + "\n"
+					+ "Gray level thresold enable:\t"
+					+ String.valueOf(filterWithMeanGrayValue) + "\n"
+					+ "Gray level thresold:\t" + String.valueOf(meanGrey)
+					+ "\n" + "Root dir:\t" + rootDirName + "\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		try {
 			configFile.close();
 		} catch (IOException e) {
@@ -255,5 +272,5 @@ public class MaarsSegmentation {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

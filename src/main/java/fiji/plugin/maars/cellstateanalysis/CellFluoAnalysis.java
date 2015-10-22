@@ -2,6 +2,7 @@ package fiji.plugin.maars.cellstateanalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.micromanager.utils.ReportingUtils;
@@ -24,7 +25,7 @@ import ij.gui.Roi;
  */
 public class CellFluoAnalysis {
 	private Cell cell;
-	private java.util.List<Spot> res;
+	private ArrayList<Spot> res;
 	private double factorForThreshold;
 
 	/**
@@ -43,58 +44,77 @@ public class CellFluoAnalysis {
 		Calibration cal = fluoCellImg.getCalibration();
 		Roi cellShape = fluoCellImg.getRoi();
 		fluoCellImg.deleteRoi();
-		Model model = new Model();
-		Settings settings = new Settings();
-		settings.setFrom(fluoCellImg);
+		Boolean thresholdFound = false;
+		int nSpotsDetected = 0;
+		double threshold = 0;
+		double lowBound = 0;
+		double highBound = 80;
+		int maxNbSpotPerCell = cell.getMaxNbSpotPerCell();
+		double stepFactor = 0.5;
 
-		settings.detectorFactory = new LogDetectorFactory();
-		Map<String, Object> detectorSettings = new HashMap<String, Object>();
-		detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-		detectorSettings.put("RADIUS", spotRadius);
-		detectorSettings.put("TARGET_CHANNEL", 1);
-		detectorSettings.put("THRESHOLD", 0.);
-		detectorSettings.put("DO_MEDIAN_FILTERING", false);
-		settings.detectorSettings = detectorSettings;
+		while (!thresholdFound){
+			Model model = new Model();
+			Settings settings = new Settings();
+			settings.setFrom(fluoCellImg);
+	
+			settings.detectorFactory = new LogDetectorFactory();
+			Map<String, Object> detectorSettings = new HashMap<String, Object>();
+			detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
+			detectorSettings.put("RADIUS", spotRadius);
+			detectorSettings.put("TARGET_CHANNEL", 1);
+			detectorSettings.put("THRESHOLD", threshold);
+			detectorSettings.put("DO_MEDIAN_FILTERING", false);
+			settings.detectorSettings = detectorSettings;
+	
+			FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
+			settings.addSpotFilter(filter1);
+	
+			TrackMate trackmate = new TrackMate(model, settings);
+			ReportingUtils.logMessage("Trackmate created");
 
-		FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
-		settings.addSpotFilter(filter1);
-
-		TrackMate trackmate = new TrackMate(model, settings);
-		ReportingUtils.logMessage("Trackmate created");
-		//TODO
-		trackmate.execDetection();
-		ReportingUtils.logMessage("execDetection done");
-		
-//		trackmate.execInitialSpotFiltering();
-//		ReportingUtils.logMessage("execInitialSpotFiltering done");
-
-		trackmate.computeSpotFeatures(false);
-		ReportingUtils.logMessage("computeSpotFeatures done");
-
-		trackmate.execSpotFiltering(true);
-		ReportingUtils.logMessage("execSpotFiltering done");
-		int nSpots = trackmate.getModel().getSpots().getNSpots(true);
-		ReportingUtils.logMessage("Found " + nSpots + " spots");
-
-		res = new ArrayList<Spot>();
-		int nbSpotInCell = 0;
-		for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
-			Map<String, Double> features = spot.getFeatures();
-			if (cellShape.contains((int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
-					(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight))){
-				nbSpotInCell+=1;
-				if (nbSpotInCell > 2){
-					res.clear();
-					next;
-				}else{
-					res.add(spot);
+			trackmate.execDetection();
+			ReportingUtils.logMessage("execDetection done");
+			
+			trackmate.execInitialSpotFiltering();
+			ReportingUtils.logMessage("execInitialSpotFiltering done");
+	
+			trackmate.computeSpotFeatures(false);
+			ReportingUtils.logMessage("computeSpotFeatures done");
+	
+			trackmate.execSpotFiltering(true);
+			ReportingUtils.logMessage("execSpotFiltering done");
+			nSpotsDetected = trackmate.getModel().getSpots().getNSpots(true);
+			ReportingUtils.logMessage("Found " + nSpotsDetected + " spots in total");
+			ReportingUtils.logMessage("Threshold = " + threshold +", LowBound = " + lowBound + ", HighBound = " + highBound);
+			
+			res = new ArrayList<Spot>();
+			for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
+				Map<String, Double> features = spot.getFeatures();
+				if (cellShape.contains(	(int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
+										(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight)))
+				{
+					if (res.size() > maxNbSpotPerCell ){
+						break;
+					}else{
+						res.add(spot);
+					}
 				}
 			};
-		};
-			
+			ReportingUtils.logMessage("Found " + res.size() + " spots inside the cell");
+			if (res.size() == 0){
+				highBound = threshold;
+				threshold = lowBound + ((highBound - lowBound) * stepFactor);
+			}else if(res.size() > maxNbSpotPerCell){
+				lowBound = threshold;
+				threshold = lowBound + ((highBound - lowBound) * stepFactor);
+				res = new ArrayList<Spot>();
+			}else{
+				thresholdFound = true;
+			}
+		}
 		ReportingUtils.logMessage("- Done.");
 		//TODO filter factor (between 3 and 4)
-		factorForThreshold = 3.5;
+//		factorForThreshold = 3.5;
 	}
 
 	/**
@@ -106,6 +126,15 @@ public class CellFluoAnalysis {
 		factorForThreshold = fact;
 	}
 
+	/**
+	 * Method to change threshold if necessary
+	 * 
+	 * @param fact
+	 */
+	public ArrayList<Spot> getSpots() {
+		return res;
+	}
+	
 	/**
 	 * Method to find spots
 	 * 

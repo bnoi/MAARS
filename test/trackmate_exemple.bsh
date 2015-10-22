@@ -22,7 +22,7 @@ import ij.plugin.ZProjector;
 //ImagePlus imp = IJ.openImage("/Users/theoli89/Desktop/curioData/Virtual/movie_X0_Y0_FLUO/0/1.tif");
 //ImagePlus imp = IJ.getImage();
 
-for (int i = 1;i<2;i++){
+for (int i = 1;i<60;i++){
 	ImagePlus imp = IJ.openImage("/home/tong/Documents/movies/102-s4/movie_X0_Y0_FLUO/croppedImgs/"+i+".tif");
 	ZProjector projector = new ZProjector();
 	projector.setMethod(ZProjector.MAX_METHOD);
@@ -30,7 +30,7 @@ for (int i = 1;i<2;i++){
 	projector.doProjection();
 	imp = projector.getProjection();
 	int nSpotsDetected = 0;
-	double threshold = 120;
+	double threshold = 200;
 	double low = 0;
 	double high = threshold;
 	
@@ -82,11 +82,11 @@ for (int i = 1;i<2;i++){
 		nSpotsDetected = trackmate.getModel().getSpots().getNSpots(false);
 		print("Found " + nSpotsDetected + " spots; Threshold = " + threshold);
 		if (nSpotsDetected < maxNbSpotPerCell){
-			low = threshold;
-			threshold = low - (high - low) /2;
-		}else if (nSpotsDetected > maxNbSpotPerCell){
 			high = threshold;
-			threshold = high + (high - low) /2;
+			threshold = low + ((high - low) /2);
+		}else if (nSpotsDetected > maxNbSpotPerCell){
+			low = threshold;
+			threshold = low + ((high - low) /2);
 		}else{
 			targetThreshold = threshold;
 			print("Target threshold = " + targetThreshold);

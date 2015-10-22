@@ -3,6 +3,8 @@ package fiji.plugin.maars.cellstateanalysis;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.micromanager.utils.ReportingUtils;
 
@@ -14,6 +16,7 @@ import ij.ImageStack;
 import ij.gui.Line;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
 
@@ -42,12 +45,14 @@ public class Cell {
 
 	// informations
 	private int cellNumber;
+	private int maxNbSpotPerCell;
 	private int septumNumber;
 	private ArrayList<Septum> septumArray;
 	private Measures measures;
 	private Spindle lastSpindleComputed;
 
 	private CellFluoAnalysis fluoAnalysis;
+	private ArrayList<Spot>  spotList;
 
 	private boolean isAlive;
 
@@ -73,10 +78,12 @@ public class Cell {
 	 * @param rt
 	 *            : result table used to display result of analysis (measures on
 	 *            cell)
+	 * @param maxNbSpotPerCell
+	 * 			  : maximum number of spots in each cell.
 	 */
 	public Cell(ImagePlus bfImage, ImagePlus correlationImage,
 			ImagePlus fluoImage, int focusSlice, int direction,
-			Roi roiCellShape, int cellNb, ResultsTable rt) {
+			Roi roiCellShape, int cellNb, ResultsTable rt, int maxNbSpotPerCell) {
 
 		this.bfImage = bfImage;
 		lastSpindleComputed = null;
@@ -88,6 +95,7 @@ public class Cell {
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
 		this.cellNumber = cellNb;
 		scaleFactorForRoiFromBfToFluo = new double[2];
+		this.maxNbSpotPerCell = maxNbSpotPerCell;
 		addFluoImage(fluoImage);
 		// ReportingUtils.logMessage("scale factor for roi : x "+scaleFactorForRoiFromBfToFluo[0]+" y "+scaleFactorForRoiFromBfToFluo[1]);
 	}
@@ -108,9 +116,11 @@ public class Cell {
 	 * @param rt
 	 *            : result table used to display result of analysis (measures on
 	 *            cell)
+	 * @param maxNbSpotPerCell
+	 * 			  : maximum number of spots in each cell.
 	 */
 	public Cell(ImagePlus bfImage, ImagePlus correlationImage, int focusSlice,
-			int direction, Roi roiCellShape, int cellNb, ResultsTable rt) {
+			int direction, Roi roiCellShape, int cellNb, ResultsTable rt, int maxNbSpotPerCell) {
 
 		ReportingUtils.logMessage("Cell " + roiCellShape.getName());
 		ReportingUtils.logMessage("Get parameters");
@@ -130,6 +140,7 @@ public class Cell {
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
 		ReportingUtils.logMessage("done");
 		scaleFactorForRoiFromBfToFluo = new double[2];
+		this.maxNbSpotPerCell = maxNbSpotPerCell;
 		// just for test
 		// cellLinearRoi = computeCellLinearRoi(measures);
 	}
@@ -463,9 +474,9 @@ public class Cell {
 			e.printStackTrace();
 		}
 		ReportingUtils.logMessage("Done.");
-		ReportingUtils.logMessage("Find fluorescent spot on image");
-		ArrayList<Spot> spotList = fluoAnalysis.findSpots();
-		ReportingUtils.logMessage("Done.");
+		ReportingUtils.logMessage("Get fluorescent spot on image");
+
+		spotList = fluoAnalysis.getSpots();
 		ReportingUtils.logMessage("Create spindle using spots found");
 		Spindle spindle = new Spindle(spotList, measures, cellShapeRoi,
 				fluoImage.getCalibration(), lastRoi);
@@ -573,6 +584,14 @@ public class Cell {
 	public Line getLinearRoi() {
 		return cellLinearRoi;
 	}
+	
+	/**
+	 * 
+	 * @return linear ROI of cell (major axis of cell)
+	 */
+	public int getMaxNbSpotPerCell() {
+		return maxNbSpotPerCell;
+	}
 
 	/**
 	 * 
@@ -636,6 +655,7 @@ public class Cell {
 		
 	}
 	public void saveFluoImage(String path){
+		//TODO no path convert??
 		String pathToCroppedImgDir = path+"/croppedImgs/";
 		String pathToCroppedImg = pathToCroppedImgDir+"/"+String.valueOf(this.getCellNumber());
 		if (!new File(pathToCroppedImgDir).exists()){
@@ -651,5 +671,27 @@ public class Cell {
 		}
 		ImageProcessor ip = fluoImage.getImageStack().getProcessor(1);
 		fluoStack.addSlice(ip);
+	}
+	
+	public List<String[]> getSpotList(){
+		List<String[]> spotsListString = new ArrayList<String[]>();
+		for (Spot spot : spotList) {
+			Map<String, Double> features = spot.getFeatures();
+//			for (String s : features.keySet()){
+//				ReportingUtils.logMessage(s + "_" + String.valueOf(features.get(s)));
+//			}
+			
+			String[] featuresString = new String[8];
+			featuresString[0] = String.valueOf(features.get("VISIBILITY"));
+			featuresString[1] = String.valueOf(features.get("POSITION_T"));
+			featuresString[2] = String.valueOf(features.get("POSITION_Z"));
+			featuresString[3] = String.valueOf(features.get("POSITION_Y"));
+			featuresString[4] = String.valueOf(features.get("RADIUS"));
+			featuresString[5] = String.valueOf(features.get("FRAME"));
+			featuresString[6] = String.valueOf(features.get("POSITION_X"));
+			featuresString[7] = String.valueOf(this.getCellNumber());
+			spotsListString.add(featuresString);
+		}
+		return spotsListString;
 	}
 }

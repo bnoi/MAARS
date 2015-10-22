@@ -29,7 +29,7 @@ mmc.setAutoShutter(false);
 print("Create main window");
 MaarsMainDialog md = null;
 //String dataDir = "/Volumes/Macintosh/curioData/Virtual/";
-String dataDir = "/media/tong/74CDBC0B2251059E/test/Virtual/";
+//String dataDir = "/media/tong/74CDBC0B2251059E/first_version_2channels";
 //String dataDir = "F:/test/Virtual/";
 try {
 	md = new MaarsMainDialog(gui, mmc, base_dir + "maars_config.txt");
@@ -91,12 +91,24 @@ if(md.isOkClicked()) {
 		mas.setParameters(params);
 //		mas.acquire(false);
 
-		MaarsSegmentation ms = new MaarsSegmentation(param, dataDir+"movie_X0_Y0/MMStack_Pos0.ome.tif");
+		MaarsSegmentation ms = new MaarsSegmentation(param,
+				xPos,
+				yPos);
 		ms.segmentation();
-		ms.writeUsedConfig(dataDir+"movie_X0_Y0");
+		ms.writeUsedConfig();
 		
 		if (ms.roiDetected()){
-			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject());
+			String fluoFolder = AllMaarsParameters.convertPath(param
+													.getParametersAsJsonObject()
+													.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+													.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+													.getAsString()
+													+ "/movie_X"
+													+ Math.round(xPos)
+													+ "_Y"
+													+ Math.round(yPos) +"_FLUO");
+			
+			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject(), xPos, yPos);
 			MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
 			
 			MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
@@ -105,42 +117,11 @@ if(md.isOkClicked()) {
 															mfa.getSetOfCells());
 		int frame = 0;
 
-		List cellsInAllFields = new ArrayList();
-		File dir = new File (pathToResults + "/" + frame);
-		spindleWriter = new FileWriter(dataDir+"movie_X0_Y0_FLUO/spindleAnalysis.csv");
-		writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
-		writer.writeNext(new String[]{
-				"Cell",
-				"Second",
-				"Feature",
-				"NbOfSpotDetected",
-				"CellCenterX",
-				"CellCenterY",
-				"CellAbsoMajAng",
-				"CellMajLength",
-				"CellMinLength",
-				"SpAbsoAng",
-				"SpAngToMaj",
-				"SpLength",
-				"spb1X",
-				"spb1Y",
-				"spb1Z",
-				"spb2X",
-				"spb2Y",
-				"spb2Z",
-				"SpCenterX",
-				"SpCenterY",
-				"SpCenterZ",
-				"CellCenterToSpCenterLen",
-				"CellCenterToSpCenterAng",
-				"fieldX",
-				"fieldY"
-			});
 		while(frame<1){
-			fluoImage = IJ.openImage(dataDir+"movie_X0_Y0_FLUO/"+frame+"/MMStack_Pos0.ome.tif");
+			fluoImage = IJ.openImage(fluoFolder + "/"
+				+frame+ "_CFP" +"/MMStack_Pos0.ome.tif");
 			fluoImage.show();
-			cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(fluoImage,
-									dataDir+"movie_X0_Y0_FLUO/",frame, Math.round(xPos), Math.round(yPos),"CFP"));
+			mfa.analyzeEntireFieldReturnListSp(fluoImage,frame, Math.round(xPos), Math.round(yPos),"CFP");
 			acqNameFluo = null;
 			fluoImage.close();
 			fluoImage = null;
@@ -156,9 +137,6 @@ if(md.isOkClicked()) {
 					.getAsBoolean()) {
 				mfa.saveCroppedImgs();
 		}
-		writer.writeAll(cellsInAllFields);
-		spindleWriter.close();
-		writer.close();
 		}
 		mmc.setAutoShutter(true);
 		mmc.waitForDevice(mmc.getShutterDevice());

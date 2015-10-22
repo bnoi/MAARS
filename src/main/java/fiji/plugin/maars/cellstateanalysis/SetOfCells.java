@@ -35,12 +35,13 @@ public class SetOfCells {
 
 	
 	private Cell[] cellArray;
+	private int maxNbSpotPerCell;
 
 	// output
 	private String pathToSaveResults;
 
 	/**
-	 * Constructor :
+	 * Constructor 1:
 	 * 
 	 * @param bfImage
 	 *            : image containing cells of the set (segmentation was realised
@@ -62,7 +63,7 @@ public class SetOfCells {
 	 */
 	public SetOfCells(ImagePlus bfImage, ImagePlus correaltionImage,
 			ImagePlus fluoImage, int focusSlice, int direction,
-			String pathToRois, String pathToSaveResults) {
+			String pathToRois, String pathToSaveResults, int maxNbSpotPerCell) {
 
 		try {
 			PrintStream ps = new PrintStream(pathToSaveResults
@@ -89,18 +90,19 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Get ROIs as array");
 		roiArray = getRoisAsArray();
 		cellArray = new Cell[roiArray.length];
+		this.maxNbSpotPerCell = maxNbSpotPerCell;
 
 		ReportingUtils.logMessage("Initialize Cells in array");
 		//TODO fluoimage to split
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray[i] = new Cell(bfImage, correaltionImage, fluoImage,
-					focusSlice, direction, roiArray[i],i, rt);
+					focusSlice, direction, roiArray[i],i, rt, maxNbSpotPerCell);
 		}
 		ReportingUtils.logMessage("Done.");
 	}
 
 	/**
-	 * Constructor :
+	 * Constructor 2:
 	 * 
 	 * @param bfImage
 	 *            : image containing cells of the set (segmentation was realised
@@ -119,7 +121,7 @@ public class SetOfCells {
 	 */
 	public SetOfCells(ImagePlus bfImage, ImagePlus correaltionImage,
 			int focusSlice, int direction, String pathToRois,
-			String pathToSaveResults) {
+			String pathToSaveResults, int maxNbSpotPerCell) {
 
 		try {
 			PrintStream ps = new PrintStream(pathToSaveResults
@@ -145,12 +147,13 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Get ROIs as array");
 		roiArray = getRoisAsArray();
 		cellArray = new Cell[roiArray.length];
+		this.maxNbSpotPerCell = maxNbSpotPerCell;
 
 		// roiManager.runCommand("Delete");
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray[i] = new Cell(bfImage, correaltionImage, focusSlice,
-					direction, roiArray[i], i+1, rt);
+					direction, roiArray[i], i+1, rt, maxNbSpotPerCell);
 
 			// just for test
 			// roiManager.addRoi(cellArray[i].getLinearRoi());
@@ -159,7 +162,7 @@ public class SetOfCells {
 	}
 
 	/**
-	 * Constructor :
+	 * Constructor 3:
 	 * 
 	 * @param cellArray
 	 *            : array of cell
