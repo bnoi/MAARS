@@ -12,17 +12,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Vector;
-
 import javax.swing.BoxLayout;
-
 import mmcorej.CMMCore;
-
-import org.apache.commons.lang3.math.NumberUtils;
 import org.micromanager.MMStudio;
 
 import ij.IJ;
 import ij.gui.NonBlockingGenericDialog;
-
 import org.micromanager.utils.ReportingUtils;
 
 /**

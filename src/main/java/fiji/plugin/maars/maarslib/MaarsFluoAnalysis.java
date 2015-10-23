@@ -354,11 +354,6 @@ public class MaarsFluoAnalysis {
 		FileWriter spindleWriter = null;
 		CSVWriter writer = null;
 
-		// try {
-		// File dir = new File(pathToFluoDir + "/" + frame + "_" + channel);
-		// if (!dir.exists()) {
-		// dir.mkdirs();
-		// }
 		try {
 			spindleWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
 					+ channel + "_analysis.csv");
@@ -375,9 +370,6 @@ public class MaarsFluoAnalysis {
 				"spb1Z", "spb2X", "spb2Y", "spb2Z", "SpCenterX", "SpCenterY",
 				"SpCenterZ", "CellCenterToSpCenterLen",
 				"CellCenterToSpCenterAng", "fieldX", "fieldY" });
-		// } catch (IOException e) {
-		// ReportingUtils.logError(e);
-		// }
 		writer.writeAll(cells);
 		try {
 			spindleWriter.close();

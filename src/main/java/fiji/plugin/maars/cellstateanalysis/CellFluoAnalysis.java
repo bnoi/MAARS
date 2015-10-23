@@ -23,9 +23,7 @@ import ij.gui.Roi;
  *
  */
 public class CellFluoAnalysis {
-	private Cell cell;
 	private ArrayList<Spot> res;
-	private double factorForThreshold;
 
 	/**
 	 * Constructor :
@@ -37,7 +35,6 @@ public class CellFluoAnalysis {
 	 */
 
 	public CellFluoAnalysis(Cell cell, double spotRadius) throws InterruptedException {
-		this.cell = cell;
 		
 		ImagePlus fluoCellImg = cell.getFluoImage();
 		Calibration cal = fluoCellImg.getCalibration();
@@ -121,79 +118,70 @@ public class CellFluoAnalysis {
 	 * 
 	 * @param fact
 	 */
-	public void setFactorForThreshold(double fact) {
-		factorForThreshold = fact;
-	}
-
-	/**
-	 * Method to change threshold if necessary
-	 * 
-	 * @param fact
-	 */
 	public ArrayList<Spot> getSpots() {
 		return res;
 	}
 	
-	/**
-	 * Method to find spots
-	 * 
-	 * @return ArrayList<Spot>
-	 */
-	public ArrayList<Spot> findSpots() {
-
-		Calibration cal = cell.getFluoImage().getCalibration();
-		ArrayList<Spot> spotsToKeep = new ArrayList<Spot>();
-
-		java.util.Iterator<Spot> itr1 = res.iterator();
-
-		double[] quality = new double[res.toArray().length];
-		int nb = 0;
-		while (itr1.hasNext()) {
-			Spot spot = itr1.next();
-			Map<String, Double> features = spot.getFeatures();
-			quality[nb] = features.get("QUALITY");
-			nb++;
-			/*
-			 * OvalRoi roi = new OvalRoi(features.get("POSITION_X"),
-			 * features.get("POSITION_Y"), 2* features.get("RADIUS"), 2*
-			 * features.get("RADIUS")); fluoImage.setSlice((int)
-			 * Math.round(features.get("POSITION_Z"))); fluoImage.setRoi(roi);
-			 * Analyzer a = new
-			 * Analyzer(fluoImage,Measurements.CENTROID+Measurements.MEAN ,rt);
-			 * a.measure();
-			 */
-		}
-
-		Statistics stat = new Statistics(quality);
-		double threshold = stat.getMean() + factorForThreshold
-				* stat.getStdDev();
-
-		ReportingUtils.logMessage("threshold for spot filter: " + threshold);
-
-		java.util.Iterator<Spot> itr2 = res.iterator();
-		while (itr2.hasNext()) {
-			Spot spot = itr2.next();
-			Map<String, Double> features = spot.getFeatures();
-
-			if (features.get("QUALITY") > threshold
-					&& cell.getCellShapeRoi().contains(
-							(int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
-							(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight))) {
-				spotsToKeep.add(spot);
-				// ReportingUtils.logMessage(features);
-				/*
-				 * OvalRoi roi = new OvalRoi(features.get("POSITION_X"),
-				 * features.get("POSITION_Y"), features.get("RADIUS"),
-				 * features.get("RADIUS")); cell.getFluoImage().setSlice((int)
-				 * Math.round(features.get("POSITION_Z"))+1);
-				 * cell.getFluoImage().setRoi(roi); IJ.wait(5000);
-				 */
-			}
-
-		}
-		res = null;
-		return spotsToKeep;
-		// rt.show("Measures");
-	}
+//	/**
+//	 * Method to find spots
+//	 * 
+//	 * @return ArrayList<Spot>
+//	 */
+//	public ArrayList<Spot> findSpots() {
+//
+//		Calibration cal = cell.getFluoImage().getCalibration();
+//		ArrayList<Spot> spotsToKeep = new ArrayList<Spot>();
+//
+//		java.util.Iterator<Spot> itr1 = res.iterator();
+//
+//		double[] quality = new double[res.toArray().length];
+//		int nb = 0;
+//		while (itr1.hasNext()) {
+//			Spot spot = itr1.next();
+//			Map<String, Double> features = spot.getFeatures();
+//			quality[nb] = features.get("QUALITY");
+//			nb++;
+//			/*
+//			 * OvalRoi roi = new OvalRoi(features.get("POSITION_X"),
+//			 * features.get("POSITION_Y"), 2* features.get("RADIUS"), 2*
+//			 * features.get("RADIUS")); fluoImage.setSlice((int)
+//			 * Math.round(features.get("POSITION_Z"))); fluoImage.setRoi(roi);
+//			 * Analyzer a = new
+//			 * Analyzer(fluoImage,Measurements.CENTROID+Measurements.MEAN ,rt);
+//			 * a.measure();
+//			 */
+//		}
+//
+//		Statistics stat = new Statistics(quality);
+//		double threshold = stat.getMean() + factorForThreshold
+//				* stat.getStdDev();
+//
+//		ReportingUtils.logMessage("threshold for spot filter: " + threshold);
+//
+//		java.util.Iterator<Spot> itr2 = res.iterator();
+//		while (itr2.hasNext()) {
+//			Spot spot = itr2.next();
+//			Map<String, Double> features = spot.getFeatures();
+//
+//			if (features.get("QUALITY") > threshold
+//					&& cell.getCellShapeRoi().contains(
+//							(int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
+//							(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight))) {
+//				spotsToKeep.add(spot);
+//				// ReportingUtils.logMessage(features);
+//				/*
+//				 * OvalRoi roi = new OvalRoi(features.get("POSITION_X"),
+//				 * features.get("POSITION_Y"), features.get("RADIUS"),
+//				 * features.get("RADIUS")); cell.getFluoImage().setSlice((int)
+//				 * Math.round(features.get("POSITION_Z"))+1);
+//				 * cell.getFluoImage().setRoi(roi); IJ.wait(5000);
+//				 */
+//			}
+//
+//		}
+//		res = null;
+//		return spotsToKeep;
+//		// rt.show("Measures");
+//	}
 
 }

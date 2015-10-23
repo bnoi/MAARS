@@ -101,16 +101,12 @@ if(md.isOkClicked()) {
 													+ Math.round(xPos)
 													+ "_Y"
 													+ Math.round(yPos) +"_FLUO");
-			
 			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject(), xPos, yPos);
-			MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
-			
 			MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
 															xPos,
 															yPos,
 															mfa.getSetOfCells());
 		int frame = 0;
-
 		while(frame<1){
 			String channels = param.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
