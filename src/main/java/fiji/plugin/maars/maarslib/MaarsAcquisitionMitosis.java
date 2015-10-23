@@ -10,8 +10,6 @@ import ij.plugin.RoiScaler;
 import ij.process.ShortProcessor;
 
 import java.awt.Color;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Iterator;
 
 import mmcorej.CMMCore;
@@ -23,8 +21,6 @@ import org.micromanager.api.Autofocus;
 import org.micromanager.utils.MMException;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
-
-import util.opencsv.CSVWriter;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

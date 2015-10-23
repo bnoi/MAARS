@@ -1,5 +1,5 @@
-//base_dir = "D:/Data/Tong/MAARS/";
-base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "D:/Data/Tong/MAARS/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
@@ -24,13 +24,9 @@ import ij.ImagePlus;
 
 double calibration = gui.getMMCore().getPixelSizeUm();
 mmc.setAutoShutter(false);
-//mmc.waitForDevice(mmc.getShutterDevice());
 
 print("Create main window");
 MaarsMainDialog md = null;
-//String dataDir = "/Volumes/Macintosh/curioData/Virtual/";
-//String dataDir = "/media/tong/74CDBC0B2251059E/first_version_2channels";
-//String dataDir = "F:/test/Virtual/";
 try {
 	md = new MaarsMainDialog(gui, mmc, base_dir + "maars_config.txt");
 } catch (IOException e) {
@@ -51,7 +47,6 @@ if(md.isOkClicked()) {
 	AllMaarsParameters param = null;
 	autofocus = gui.getAutofocus();
 	param = md.getParameters();
-	//mmc.setOriginXY(mmc.getXYStageDevice());
 	int nbXField = param
 						.getParametersAsJsonObject()
 						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
@@ -89,7 +84,6 @@ if(md.isOkClicked()) {
 
 		HashMap params = mas.getParametersFromConf(param);
 		mas.setParameters(params);
-//		mas.acquire(false);
 
 		MaarsSegmentation ms = new MaarsSegmentation(param,
 				xPos,
@@ -117,7 +111,7 @@ if(md.isOkClicked()) {
 															mfa.getSetOfCells());
 		int frame = 0;
 
-		while(frame<4){
+		while(frame<1){
 			String channels = param.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
@@ -128,7 +122,7 @@ if(md.isOkClicked()) {
 				fluoImage = IJ.openImage(fluoFolder + "/"
 					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
 				fluoImage.show();
-				mfa.analyzeEntireFieldReturnListSp(fluoImage,frame, Math.round(xPos), Math.round(yPos),channel);
+				mfa.analyzeEntireFieldReturnListSp(fluoImage,frame,channel);
 				fluoImage.close();
 			}
 			acqNameFluo = null;

@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.micromanager.utils.ReportingUtils;
 
@@ -14,8 +13,6 @@ import fiji.plugin.maars.cellboundaries.CellsBoundaries;
 import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
-import fiji.plugin.trackmate.Spot;
-import ij.IJ;
 import ij.ImagePlus;
 
 /**
@@ -29,6 +26,8 @@ public class MaarsFluoAnalysis {
 	private AllMaarsParameters parameters;
 	private SetOfCells soc;
 	private String pathToFluoDir;
+	private double positionX;
+	private double positionY;
 
 	// private String pathToSaveImgs;
 
@@ -44,26 +43,24 @@ public class MaarsFluoAnalysis {
 			double positionX, double positionY) {
 
 		this.parameters = parameters;
+		this.positionX = positionX;
+		this.positionY = positionY;
 		this.pathToFluoDir = AllMaarsParameters.convertPath(parameters
 				.getParametersAsJsonObject()
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString()
 				+ "/movie_X"
-				+ Math.round(positionX)
+				+ Math.round(this.positionX)
 				+ "_Y"
-				+ Math.round(positionY) + "_FLUO");
+				+ Math.round(this.positionY) + "_FLUO");
 		File fluoDir = new File(pathToFluoDir);
 		if (!fluoDir.exists()) {
 			fluoDir.mkdirs();
 		}
 
-		ImagePlus corrImg = IJ.openImage(cB.getPathDirField().getText()
-				+ cB.getImageToAnalyze().getShortTitle()
-				+ "_CorrelationImage.tif");
-
-		soc = new SetOfCells(cB.getImageToAnalyze(), corrImg,
-				(int) Math.round(cB.getImageToAnalyze().getNSlices() / 2), -1,
+		soc = new SetOfCells(cB.getImageToAnalyze(),
+				(int) Math.round(cB.getImageToAnalyze().getNSlices() / 2),
 				cB.getPathDirField().getText()
 						+ cB.getImageToAnalyze().getShortTitle() + "_ROI.zip",
 				cB.getPathDirField().getText(), parameters
@@ -87,15 +84,17 @@ public class MaarsFluoAnalysis {
 			double positionX, double positionY) {
 
 		this.parameters = parameters;
+		this.positionX = positionX;
+		this.positionY = positionY;
 		this.pathToFluoDir = AllMaarsParameters.convertPath(parameters
 				.getParametersAsJsonObject()
 				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString()
 				+ "/movie_X"
-				+ Math.round(positionX)
+				+ Math.round(this.positionX)
 				+ "_Y"
-				+ Math.round(positionY) + "_FLUO");
+				+ Math.round(this.positionY) + "_FLUO");
 		File fluoDir = new File(pathToFluoDir);
 		if (!fluoDir.exists()) {
 			fluoDir.mkdirs();
@@ -303,8 +302,7 @@ public class MaarsFluoAnalysis {
 	 *            : channel used for this fluoimage
 	 */
 	public List<String[]> analyzeEntireFieldReturnListSp(
-			ImagePlus fieldWideImage, int frame,
-			double fieldX, double fieldY, String channel) {
+			ImagePlus fieldWideImage, int frame, String channel) {
 
 		List<String[]> cells = new ArrayList<String[]>();
 		List<String[]> spotStrings = new ArrayList<String[]>();
@@ -328,7 +326,7 @@ public class MaarsFluoAnalysis {
 			}
 			cell.addFluoSlice();
 			cells.add(sp.toList(frame * timeInterval / 1000,
-					Math.round(fieldX), Math.round(fieldY)));
+					Math.round(this.positionX), Math.round(this.positionY)));
 			cell = null;
 		}
 		this.writeAnalysisRes(cells, frame, channel);

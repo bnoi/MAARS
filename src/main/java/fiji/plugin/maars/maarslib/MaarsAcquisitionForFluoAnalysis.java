@@ -7,17 +7,13 @@ import mmcorej.TaggedImage;
 
 import org.micromanager.MMStudio;
 import org.micromanager.acquisition.MMAcquisition;
-import org.micromanager.api.Autofocus;
-import org.micromanager.utils.MMException;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
 
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
 import ij.process.ShortProcessor;
 
@@ -35,7 +31,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 	private AllMaarsParameters parameters;
 	private double positionX;
 	private double positionY;
-	private SetOfCells soc;
 
 	/**
 	 * Constructor :
@@ -61,7 +56,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 		this.parameters = parameters;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.soc = soc;
 	}
 
 	/**
@@ -83,10 +77,9 @@ public class MaarsAcquisitionForFluoAnalysis {
 		parameters = md.getParameters();
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.soc = soc;
 	}
 
-/*	*//**
+	/*	*//**
 	 * Crop image to film only one cell then acquire specific movie
 	 * 
 	 * @param show
@@ -94,61 +87,46 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 * @param cellNumber
 	 *            : index of cell filmed
 	 * @return ImagePlus object
-	 *//*
-	public ImagePlus acquire(boolean show, int cellNumber) {
-
-		try {
-			mmc.clearROI();
-		} catch (Exception e1) {
-			ReportingUtils.logMessage("Could not clear Roi");
-			e1.printStackTrace();
-		}
-
-		String acqName = "movie_X" + Math.round(positionX) + "_Y"
-				+ Math.round(positionY) + "_FLUO_"
-				+ soc.getCell(cellNumber).getCellShapeRoi().getName();
-
-		double wtest = mmc.getImageWidth();
-		double htest = mmc.getImageHeight();
-		int margin = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MARGIN_AROUD_CELL)
-				.getAsInt();
-
-		Roi newroi = RoiScaler.scale(soc.getCell(cellNumber).getCellShapeRoi(),
-				wtest / soc.getBFImage().getWidth(), htest
-						/ soc.getBFImage().getHeight(), false);
-
-		try {
-			mmc.setROI((int) newroi.getXBase() - margin,
-					(int) newroi.getYBase() - margin,
-					(int) newroi.getBounds().width + margin * 2,
-					(int) newroi.getBounds().height + margin * 2);
-		} catch (Exception e) {
-			ReportingUtils.logMessage("could not crop live image");
-			ReportingUtils.logError(e);
-		}
-
-		try {
-			return acquire(show, acqName);
-		} catch (MMScriptException e) {
-			return null;
-		}
-	}*/
+	 */
+	/*
+	 * public ImagePlus acquire(boolean show, int cellNumber) {
+	 * 
+	 * try { mmc.clearROI(); } catch (Exception e1) {
+	 * ReportingUtils.logMessage("Could not clear Roi"); e1.printStackTrace(); }
+	 * 
+	 * String acqName = "movie_X" + Math.round(positionX) + "_Y" +
+	 * Math.round(positionY) + "_FLUO_" +
+	 * soc.getCell(cellNumber).getCellShapeRoi().getName();
+	 * 
+	 * double wtest = mmc.getImageWidth(); double htest = mmc.getImageHeight();
+	 * int margin = parameters.getParametersAsJsonObject()
+	 * .get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+	 * .getAsJsonObject().get(AllMaarsParameters.MARGIN_AROUD_CELL) .getAsInt();
+	 * 
+	 * Roi newroi = RoiScaler.scale(soc.getCell(cellNumber).getCellShapeRoi(),
+	 * wtest / soc.getBFImage().getWidth(), htest /
+	 * soc.getBFImage().getHeight(), false);
+	 * 
+	 * try { mmc.setROI((int) newroi.getXBase() - margin, (int)
+	 * newroi.getYBase() - margin, (int) newroi.getBounds().width + margin * 2,
+	 * (int) newroi.getBounds().height + margin * 2); } catch (Exception e) {
+	 * ReportingUtils.logMessage("could not crop live image");
+	 * ReportingUtils.logError(e); }
+	 * 
+	 * try { return acquire(show, acqName); } catch (MMScriptException e) {
+	 * return null; } }
+	 */
 
 	/**
 	 * Acquire specific movie
 	 * 
 	 * @param show
 	 *            : true to see acquisition in live
-	 * @param acqName
-	 *            : name of acquisition
-	 * @param channel 
-	 *            : marker channel
-	 *            
+	 * @param frame
+	 *            :
 	 * @return ImagePlus object
 	 */
-	public ImagePlus acquire(boolean show, String acqName, String channel)
+	public ImagePlus acquire(boolean show, int frame, String channel)
 			throws MMScriptException {
 
 		boolean save = parameters.getParametersAsJsonObject()
@@ -232,6 +210,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 		int sliceNumber = (int) Math.round(range / step);
 		ReportingUtils.logMessage("- slice number : " + sliceNumber);
 
+		String acqName = "movie_X" + Math.round(positionX) + "_Y"
+				+ Math.round(positionY) + "_FLUO/"+ frame + "_" + channel;
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 
 		ReportingUtils.logMessage("... Set shutter device");
@@ -265,32 +245,33 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logError(e1);
 		}
 		try {
-			gui.openAcquisition(acqName, rootDirName, frameNumber, 1 , sliceNumber+1,show, true);
+			gui.openAcquisition(acqName, rootDirName, frameNumber, 1,
+					sliceNumber + 1, show, true);
 		} catch (MMScriptException e2) {
 			ReportingUtils.logError(e2);
 		}
-//		Autofocus autofocus = gui.getAutofocus();
-//		try {
-//			autofocus.fullFocus();
-//		} catch (MMException e2) {
-//			// TODO Auto-generated catch block
-//			e2.printStackTrace();
-//		}
-		
-//		ReportingUtils.logMessage("... set channel color");
-//		try {
-//			gui.setChannelColor(acqName,0, color);
-//		} catch (MMScriptException e) {
-//			ReportingUtils.logMessage("Could not set channel color");
-//			ReportingUtils.logError(e);
-//		}
-//		ReportingUtils.logMessage("... set channel name");
-//		try {
-//			gui.setChannelName(acqName, 0, channel);
-//		} catch (MMScriptException e) {
-//			ReportingUtils.logMessage("could not set channel name");
-//			ReportingUtils.logError(e);
-//		}
+		// Autofocus autofocus = gui.getAutofocus();
+		// try {
+		// autofocus.fullFocus();
+		// } catch (MMException e2) {
+		// // TODO Auto-generated catch block
+		// e2.printStackTrace();
+		// }
+
+		// ReportingUtils.logMessage("... set channel color");
+		// try {
+		// gui.setChannelColor(acqName,0, color);
+		// } catch (MMScriptException e) {
+		// ReportingUtils.logMessage("Could not set channel color");
+		// ReportingUtils.logError(e);
+		// }
+		// ReportingUtils.logMessage("... set channel name");
+		// try {
+		// gui.setChannelName(acqName, 0, channel);
+		// } catch (MMScriptException e) {
+		// ReportingUtils.logMessage("could not set channel name");
+		// ReportingUtils.logError(e);
+		// }
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -310,9 +291,9 @@ public class MaarsAcquisitionForFluoAnalysis {
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 
 		ReportingUtils.logMessage("... start acquisition");
-		//TODO 
-//		double z = zFocus - (range / 2);
-		double z = zFocus - (range / 2) + 1.5;
+		// TODO
+		// double z = zFocus - (range / 2);
+		double z = zFocus - (range / 2) + 2;
 		ReportingUtils.logMessage("- create imagestack");
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight());
@@ -325,11 +306,9 @@ public class MaarsAcquisitionForFluoAnalysis {
 				ReportingUtils.logError(e);
 			}
 			gui.snapAndAddImage(acqName, 0, 0, k, 0);
-			MMAcquisition acq = gui
-					.getAcquisitionWithName(acqName);
+			MMAcquisition acq = gui.getAcquisitionWithName(acqName);
 
-			TaggedImage img = acq.getImageCache().getImage(
-					0, k, 0, 0);
+			TaggedImage img = acq.getImageCache().getImage(0, k, 0, 0);
 			ShortProcessor shortProcessor = new ShortProcessor(
 					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
 			shortProcessor.setPixels(img.pix);
@@ -348,6 +327,12 @@ public class MaarsAcquisitionForFluoAnalysis {
 		cal.pixelHeight = mmc.getPixelSizeUm();
 		zProjectField.setCalibration(cal);
 		ReportingUtils.logMessage("--- Acquisition done.");
+		try {
+			gui.closeAcquisitionWindow(acqName);
+		} catch (MMScriptException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		gui.closeAllAcquisitions();
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);

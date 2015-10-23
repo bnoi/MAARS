@@ -2,7 +2,6 @@ package fiji.plugin.maars.cellstateanalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.micromanager.utils.ReportingUtils;
@@ -48,7 +47,7 @@ public class CellFluoAnalysis {
 		int nSpotsDetected = 0;
 		double threshold = 0;
 		double lowBound = 0;
-		double highBound = 80;
+		double highBound = 200;
 		int maxNbSpotPerCell = cell.getMaxNbSpotPerCell();
 		double stepFactor = 0.5;
 

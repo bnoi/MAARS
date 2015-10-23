@@ -200,6 +200,12 @@ public class MaarsAcquisitionForSegmentation {
 			ReportingUtils.logError(e1);
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
+		try {
+			gui.closeAcquisitionWindow(acqName);
+		} catch (MMScriptException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		gui.closeAllAcquisitions();
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);

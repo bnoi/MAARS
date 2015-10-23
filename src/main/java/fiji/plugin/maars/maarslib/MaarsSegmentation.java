@@ -8,6 +8,7 @@ import org.micromanager.utils.ReportingUtils;
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;
 import fiji.plugin.maars.cellboundaries.CellsBoundariesIdentification;
 import ij.IJ;
+import ij.ImagePlus;
 
 /**
  * Class to segment an specific type of image and find and record cell shape and
@@ -53,7 +54,7 @@ public class MaarsSegmentation {
 	public void segmentation() {
 
 		ReportingUtils.logMessage("Movie path for segmentation : "+ pathToSegMovie);
-		IJ.open(pathToSegMovie);
+		ImagePlus img = IJ.openImage(pathToSegMovie);
 
 		cB = new CellsBoundaries();
 		cB.setMainWindow();
@@ -78,7 +79,8 @@ public class MaarsSegmentation {
 						.getAsJsonObject()
 						.get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE)
 						.getAsBoolean());
-		cB.getAlreadryOpenedImage();
+		cB.setImageToAnalyze(img);
+		cB.setPathDirField(img.getOriginalFileInfo().directory);
 		cB.getImageToAnalyze().getCalibration().pixelDepth = parameters
 				.getParametersAsJsonObject()
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
@@ -141,7 +143,6 @@ public class MaarsSegmentation {
 			this.roiDetected = true;
 			cBI.getRoiManager().close();
 		}
-		IJ.getImage().close();
 	}
 
 	/**

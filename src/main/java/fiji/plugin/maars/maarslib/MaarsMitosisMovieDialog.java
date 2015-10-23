@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Label;
 
-import javax.swing.JPanel;
-
 import com.google.gson.JsonElement;
 
 import ij.gui.GenericDialog;

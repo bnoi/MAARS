@@ -27,15 +27,7 @@ public class SetOfCells {
 	// Inputs
 	private String pathToRois;
 	private ImagePlus bfImage;
-	private ImagePlus fluoImage;
-	private ImagePlus correaltionImage;
-	private int direction;
-	// -1 -> cell bounds are black then white
-	// 1 -> cell bounds are white then black
-
-	
 	private Cell[] cellArray;
-	private int maxNbSpotPerCell;
 
 	// output
 	private String pathToSaveResults;
@@ -61,8 +53,7 @@ public class SetOfCells {
 	 * @param pathToSaveResults
 	 *            : path indicating where results of analysis should be stored
 	 */
-	public SetOfCells(ImagePlus bfImage, ImagePlus correaltionImage,
-			ImagePlus fluoImage, int focusSlice, int direction,
+	public SetOfCells(ImagePlus bfImage, ImagePlus fluoImage, int focusSlice,
 			String pathToRois, String pathToSaveResults, int maxNbSpotPerCell) {
 
 		try {
@@ -77,11 +68,8 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Set of cells with fluorescent image :");
 		ReportingUtils.logMessage("Get all parameters ...");
 		this.bfImage = bfImage;
-		this.fluoImage = fluoImage;
-		this.correaltionImage = correaltionImage;
 		this.pathToRois = pathToRois;
 		this.pathToSaveResults = pathToSaveResults;
-		this.direction = direction;
 		ReportingUtils.logMessage("Done");
 		ReportingUtils.logMessage("create result table");
 		rt = new ResultsTable();
@@ -90,13 +78,11 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Get ROIs as array");
 		roiArray = getRoisAsArray();
 		cellArray = new Cell[roiArray.length];
-		this.maxNbSpotPerCell = maxNbSpotPerCell;
 
 		ReportingUtils.logMessage("Initialize Cells in array");
-		//TODO fluoimage to split
 		for (int i = 0; i < roiArray.length; i++) {
-			cellArray[i] = new Cell(bfImage, correaltionImage, fluoImage,
-					focusSlice, direction, roiArray[i],i, rt, maxNbSpotPerCell);
+			cellArray[i] = new Cell(bfImage, fluoImage, focusSlice,
+					roiArray[i], i, rt, maxNbSpotPerCell);
 		}
 		ReportingUtils.logMessage("Done.");
 	}
@@ -119,8 +105,7 @@ public class SetOfCells {
 	 * @param pathToSaveResults
 	 *            : path indicating where results of analysis should be stored
 	 */
-	public SetOfCells(ImagePlus bfImage, ImagePlus correaltionImage,
-			int focusSlice, int direction, String pathToRois,
+	public SetOfCells(ImagePlus bfImage, int focusSlice, String pathToRois,
 			String pathToSaveResults, int maxNbSpotPerCell) {
 
 		try {
@@ -135,10 +120,8 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Set of cells without fluorescent image :");
 		ReportingUtils.logMessage("Get all parameters ...");
 		this.bfImage = bfImage;
-		this.correaltionImage = correaltionImage;
 		this.pathToRois = pathToRois;
 		this.pathToSaveResults = pathToSaveResults;
-		this.direction = direction;
 		ReportingUtils.logMessage("Done");
 		ReportingUtils.logMessage("create result table");
 		rt = new ResultsTable();
@@ -147,13 +130,12 @@ public class SetOfCells {
 		ReportingUtils.logMessage("Get ROIs as array");
 		roiArray = getRoisAsArray();
 		cellArray = new Cell[roiArray.length];
-		this.maxNbSpotPerCell = maxNbSpotPerCell;
 
 		// roiManager.runCommand("Delete");
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
-			cellArray[i] = new Cell(bfImage, correaltionImage, focusSlice,
-					direction, roiArray[i], i+1, rt, maxNbSpotPerCell);
+			cellArray[i] = new Cell(bfImage, focusSlice, roiArray[i], i + 1,
+					rt, maxNbSpotPerCell);
 
 			// just for test
 			// roiManager.addRoi(cellArray[i].getLinearRoi());
@@ -279,7 +261,7 @@ public class SetOfCells {
 	public String getPath() {
 		return pathToSaveResults;
 	}
-	
+
 	/**
 	 * 
 	 * @return path where results are stored
