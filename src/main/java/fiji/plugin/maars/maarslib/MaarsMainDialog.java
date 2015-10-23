@@ -17,6 +17,7 @@ import javax.swing.BoxLayout;
 
 import mmcorej.CMMCore;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.micromanager.MMStudio;
 
 import ij.IJ;
@@ -151,17 +152,17 @@ public class MaarsMainDialog {
 				0, 6, "micron");
 		mainDialog.addNumericField("Height", fieldHeight * defaultYFieldNumber,
 				0, 6, "micron");
-		Vector<TextField> numFields = mainDialog.getNumericFields();
+		final Vector<TextField> numFields = mainDialog.getNumericFields();
 		numFields.get(0).addKeyListener(new KeyListener() {
 			
 			@Override
 			public void keyTyped(KeyEvent e) {
-				refreshNumField();
+				// TODO Auto-generated method stub
 			}
 			
 			@Override
 			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
+				refreshNumField();
 			}
 			
 			@Override
@@ -173,12 +174,12 @@ public class MaarsMainDialog {
 			
 			@Override
 			public void keyTyped(KeyEvent e) {
-				refreshNumField();
+				// TODO Auto-generated method stub
 			}
 			
 			@Override
 			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
+				refreshNumField();
 			}
 			
 			@Override
@@ -274,12 +275,17 @@ public class MaarsMainDialog {
 	 * Method to display number of field the program has to scan
 	 */
 	public void refreshNumField() {
-		
+		double newWidth = 0;
+		double newHeigth = 0;
 		Vector<TextField> numFields = mainDialog.getNumericFields();
-			
-		double newWidth = Double.parseDouble(numFields.get(0).getText());
-		double newHeigth = Double.parseDouble(numFields.get(1).getText());
-
+		try{
+			newWidth = Double.parseDouble(numFields.get(0).getText());
+			newHeigth = Double.parseDouble(numFields.get(1).getText());
+		}catch(NumberFormatException e)
+		{
+			  //not a double
+		};
+		
 		int newXFieldNumber = (int) Math.round(newWidth
 				/ (calibration * mmc.getImageWidth()));
 		int newYFieldNumber = (int) Math.round(newHeigth

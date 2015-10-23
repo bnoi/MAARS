@@ -1,5 +1,5 @@
-base_dir = "D:/Data/Tong/MAARS/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "D:/Data/Tong/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
