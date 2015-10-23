@@ -173,7 +173,7 @@ if(md.isOkClicked()) {
 								ImagePlus fluoImage = mafa.acquire(false, acqNameFluo, channel);
 								cellsInAllFields.addAll(
 									mfa.analyzeEntireFieldReturnListSp(fluoImage, frame, Math.round(xPos), Math.round(yPos), channel)
-									);
+								);
 							}
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;

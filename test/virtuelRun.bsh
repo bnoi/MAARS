@@ -117,13 +117,21 @@ if(md.isOkClicked()) {
 															mfa.getSetOfCells());
 		int frame = 0;
 
-		while(frame<1){
-			fluoImage = IJ.openImage(fluoFolder + "/"
-				+frame+ "_CFP" +"/MMStack_Pos0.ome.tif");
-			fluoImage.show();
-			mfa.analyzeEntireFieldReturnListSp(fluoImage,frame, Math.round(xPos), Math.round(yPos),"CFP");
+		while(frame<4){
+			String channels = param.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
+					.getAsString();
+			String[] arrayChannels = channels.split(",", -1);
+			for (String channel:arrayChannels) {
+				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
+				fluoImage = IJ.openImage(fluoFolder + "/"
+					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
+				fluoImage.show();
+				mfa.analyzeEntireFieldReturnListSp(fluoImage,frame, Math.round(xPos), Math.round(yPos),channel);
+				fluoImage.close();
+			}
 			acqNameFluo = null;
-			fluoImage.close();
 			fluoImage = null;
 			// close roi manager
 			mfa.getSetOfCells().closeRoiManager();
