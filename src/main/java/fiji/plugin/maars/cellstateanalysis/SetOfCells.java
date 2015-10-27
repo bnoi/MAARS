@@ -175,9 +175,12 @@ public class SetOfCells {
 	 * @return
 	 */
 	public Roi[] getRoisAsArray() {
-
-		roiManager = new RoiManager();
-		roiManager.runCommand("Open", pathToRois);
+		
+		roiManager = RoiManager.getInstance();
+		if (roiManager == null){
+			roiManager = new RoiManager();
+			roiManager.runCommand("Open", pathToRois);
+		}
 		return roiManager.getRoisAsArray();
 	}
 

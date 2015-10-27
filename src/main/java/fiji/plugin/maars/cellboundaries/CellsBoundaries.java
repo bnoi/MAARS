@@ -60,9 +60,6 @@ public class CellsBoundaries implements PlugIn {
 	// white
 	private JComboBox blackOrWhiteComboBox;
 
-	// to filter shape
-	private JTextField minCellAreaField;
-
 	// to filter unusual cell shape
 	private Checkbox filterUnususalCkb;
 	private JTextField solidityField;
@@ -629,7 +626,7 @@ public class CellsBoundaries implements PlugIn {
 
 	public void getAlreadryOpenedImage() {
 		imageToAnalyze = IJ.getImage().duplicate();
-		setPathDirField(ij.getImage().getOriginalFileInfo().directory);
+		setPathDirField(IJ.getImage().getOriginalFileInfo().directory);
 	}
 
 	public double[] getScale() {

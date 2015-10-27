@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Label;
 import java.awt.Panel;
 import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.FileNotFoundException;
@@ -13,6 +15,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Vector;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
 import mmcorej.CMMCore;
 import org.micromanager.MMStudio;
 
@@ -26,7 +34,7 @@ import org.micromanager.utils.ReportingUtils;
  * @author marie
  *
  */
-public class MaarsMainDialog {
+public class MaarsMainDialog implements ActionListener {
 
 	private final NonBlockingGenericDialog mainDialog;
 	private final Label numFieldLabel;
@@ -35,6 +43,14 @@ public class MaarsMainDialog {
 	private final AllMaarsParameters parameters;
 	private final double calibration;
 	private boolean okClicked;
+	private Button autofocusButton;
+	private Button okMainDialogButton;
+	private Button segmButton;
+	private Button fluoAnalysisButton;
+	private JTextField savePath;
+	private JRadioButton dynamicOpt;
+	private JRadioButton staticOpt;
+	// private Button mitosisMovieButton;
 
 	/**
 	 * Constructor :
@@ -48,9 +64,8 @@ public class MaarsMainDialog {
 	 *            the system (in JSON format)
 	 * @throws IOException
 	 */
-	public MaarsMainDialog(MMStudio gui, CMMCore mmc, String pathConfigFile)
-			throws IOException {
-		//------------initialization of parameters---------------//
+	public MaarsMainDialog(MMStudio gui, CMMCore mmc, String pathConfigFile) throws IOException {
+		// ------------initialization of parameters---------------//
 		try {
 			PrintStream ps = new PrintStream(System.getProperty("user.dir") + "/MAARS.LOG");
 			System.setOut(ps);
@@ -70,14 +85,10 @@ public class MaarsMainDialog {
 
 		ReportingUtils.logMessage("Done.");
 
-		int defaultXFieldNumber = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.X_FIELD_NUMBER)
-				.getAsInt();
-		int defaultYFieldNumber = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.Y_FIELD_NUMBER)
-				.getAsInt();
+		int defaultXFieldNumber = parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.X_FIELD_NUMBER).getAsInt();
+		int defaultYFieldNumber = parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.Y_FIELD_NUMBER).getAsInt();
 
 		ReportingUtils.logMessage("create main dialog ...");
 
@@ -85,16 +96,15 @@ public class MaarsMainDialog {
 		double fieldWidth = mmc.getImageWidth() * calibration;
 		double fieldHeight = mmc.getImageHeight() * calibration;
 
-		//------------set up the dialog---------------//
-		mainDialog = new NonBlockingGenericDialog(
-				"Mitosis Analysing And Recording System - MAARS");
+		// ------------set up the dialog---------------//
+		mainDialog = new NonBlockingGenericDialog("Mitosis Analysing And Recording System - MAARS");
 		mainDialog.setBackground(Color.WHITE);
 		ReportingUtils.logMessage("- set Layout");
 		BoxLayout layout = new BoxLayout(mainDialog, BoxLayout.Y_AXIS);
 		mainDialog.setLayout(layout);
 
 		ReportingUtils.logMessage("- set minimal dimension");
-		Dimension minimumSize = new Dimension(300, 600);
+		Dimension minimumSize = new Dimension(350, 600);
 		mainDialog.setMinimumSize(minimumSize);
 		mainDialog.centerDialog(true);
 
@@ -102,31 +112,24 @@ public class MaarsMainDialog {
 		Panel analysisParamPanel = new Panel();
 
 		analysisParamPanel.setBackground(Color.WHITE);
-		BoxLayout analysisParamLayout = new BoxLayout(analysisParamPanel,
-				BoxLayout.Y_AXIS);
+		BoxLayout analysisParamLayout = new BoxLayout(analysisParamPanel, BoxLayout.Y_AXIS);
 		analysisParamPanel.setLayout(analysisParamLayout);
-		//------------analysis parameters---------------//
+		// ------------analysis parameters---------------//
 		Label analysisParamLabel = new Label("Analysis parameters");
 		analysisParamLabel.setBackground(labelColor);
 
-		ReportingUtils
-				.logMessage("- create OpenSegmentationDialogButtonAction");
-		OpenSegmentationDialogButtonAction openSegAction = new OpenSegmentationDialogButtonAction(
-				parameters);
-		Button segmButton = new Button("Segmentation");
-		segmButton.addActionListener(openSegAction);
+		ReportingUtils.logMessage("- create AutofocusButtonAction");
+		autofocusButton = new Button("Autofocus");
+		autofocusButton.addActionListener(this);
+
+		ReportingUtils.logMessage("- create OpenSegmentationDialogButtonAction");
+		segmButton = new Button("Segmentation");
+		segmButton.addActionListener(this);
 
 		ReportingUtils.logMessage("- create OpenFluoAnalysisDialogAction");
-		OpenFluoAnalysisDialogAction openFluoAnaAction = new OpenFluoAnalysisDialogAction(
-				parameters);
-		Button fluoAnalysisButton = new Button("Fluorescent analysis");
-		fluoAnalysisButton.addActionListener(openFluoAnaAction);
 
-		ReportingUtils.logMessage("- create AutofocusButtonAction");
-		AutofocusButtonAction autofocusButtonAction = new AutofocusButtonAction(
-				this);
-		Button autofocusButton = new Button("Autofocus");
-		autofocusButton.addActionListener(autofocusButtonAction);
+		fluoAnalysisButton = new Button("Fluorescent analysis");
+		fluoAnalysisButton.addActionListener(this);
 
 		ReportingUtils.logMessage("- add buttons to panel");
 		analysisParamPanel.add(analysisParamLabel);
@@ -137,77 +140,105 @@ public class MaarsMainDialog {
 		ReportingUtils.logMessage("- add label for text field");
 		Label explorationLabel = new Label("Area to explore");
 		explorationLabel.setBackground(labelColor);
-		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber
-				* defaultYFieldNumber);
-		//------------area to explore---------------//
-		ReportingUtils
-				.logMessage("- add button, textfield and label to mainDialog");
+		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber * defaultYFieldNumber);
+		// ------------area to explore---------------//
+		ReportingUtils.logMessage("- add button, textfield and label to mainDialog");
 		mainDialog.add(explorationLabel);
-		mainDialog.addNumericField("Width", fieldWidth * defaultXFieldNumber,
-				0, 6, "micron");
-		mainDialog.addNumericField("Height", fieldHeight * defaultYFieldNumber,
-				0, 6, "micron");
+		mainDialog.addNumericField("Width", fieldWidth * defaultXFieldNumber, 0, 6, "micron");
+		mainDialog.addNumericField("Height", fieldHeight * defaultYFieldNumber, 0, 6, "micron");
 		final Vector<TextField> numFields = mainDialog.getNumericFields();
 		numFields.get(0).addKeyListener(new KeyListener() {
-			
+
 			@Override
 			public void keyTyped(KeyEvent e) {
 				// TODO Auto-generated method stub
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				refreshNumField();
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
 			}
 		});
 		numFields.get(1).addKeyListener(new KeyListener() {
-			
+
 			@Override
 			public void keyTyped(KeyEvent e) {
 				// TODO Auto-generated method stub
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				refreshNumField();
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
 			}
 		});
 		mainDialog.add(numFieldLabel);
-		//------------mitosis movies parameters---------------//
+		// ------------mitosis movies parameters---------------//
 		mainDialog.addPanel(analysisParamPanel);
 
-		ReportingUtils.logMessage("- create OpenMitosisMovieParamDialog");
-		Label mitosisMovieLabel = new Label("Mitosis movie parameters");
-		mitosisMovieLabel.setBackground(labelColor);
-		OpenMitosisMovieParamDialog mitosisMovieAction = new OpenMitosisMovieParamDialog(
-				parameters);
-		Button mitosisMovieButton = new Button("Parameters");
-		mitosisMovieButton.addActionListener(mitosisMovieAction);
+		// ReportingUtils.logMessage("- create OpenMitosisMovieParamDialog");
+		// Label mitosisMovieLabel = new Label("Mitosis movie parameters");
+		// mitosisMovieLabel.setBackground(labelColor);
 
-		ReportingUtils.logMessage("- add button and label to panel");
-		mainDialog.add(mitosisMovieLabel);
-		mainDialog.add(mitosisMovieButton);
+		// mitosisMovieButton = new Button("Parameters");
+		// mitosisMovieButton.addActionListener(this);
+
+		// ReportingUtils.logMessage("- add button and label to panel");
+		// mainDialog.add(mitosisMovieLabel);
+		// mainDialog.add(mitosisMovieButton);
+
+		JPanel strategyPanel = new JPanel();
+		dynamicOpt = new JRadioButton("dynamic");
+		dynamicOpt.setSelected(parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC).getAsBoolean());
+		staticOpt = new JRadioButton("static");
+		staticOpt.setSelected(!parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC).getAsBoolean());
+
+		ButtonGroup group = new ButtonGroup();
+		group.add(dynamicOpt);
+		group.add(staticOpt);
+
+		strategyPanel.add(dynamicOpt);
+		strategyPanel.add(staticOpt);
+
+		mainDialog.add(strategyPanel);
+
+		//
 
 		mainDialog.addCheckbox("Save parameters", true);
 		ReportingUtils.logMessage("- create OKMaarsMainDialog");
-		OKMaarsMainDialog maarsOkAction = new OKMaarsMainDialog(this);
-		Button okMainDialogButton = new Button("OK");
-		okMainDialogButton.addActionListener(maarsOkAction);
+
+		JLabel savePathLabel = new JLabel("Save Path :");
+		savePath = new JTextField(
+				parameters.getParametersAsJsonObject().get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString(),
+				20);
+		JPanel savePathPanel = new JPanel();
+		savePathPanel.add(savePathLabel);
+		savePathPanel.add(savePath);
+		mainDialog.add(savePathPanel);
+
+		//
+
+		okMainDialogButton = new Button("OK");
+		okMainDialogButton.addActionListener(this);
 
 		ReportingUtils.logMessage("- add button");
 		mainDialog.add(okMainDialogButton);
 
 		ReportingUtils.logMessage("Done.");
+
+		mainDialog.pack();
 
 	}
 
@@ -273,41 +304,28 @@ public class MaarsMainDialog {
 		double newWidth = 0;
 		double newHeigth = 0;
 		Vector<TextField> numFields = mainDialog.getNumericFields();
-		try{
+		try {
 			newWidth = Double.parseDouble(numFields.get(0).getText());
 			newHeigth = Double.parseDouble(numFields.get(1).getText());
-		}catch(NumberFormatException e)
-		{
-			  //not a double
-		};
-		
-		int newXFieldNumber = (int) Math.round(newWidth
-				/ (calibration * mmc.getImageWidth()));
-		int newYFieldNumber = (int) Math.round(newHeigth
-				/ (calibration * mmc.getImageHeight()));
+		} catch (NumberFormatException e) {
+			// not a double
+		}
+		;
 
-		numFieldLabel.setText("Number of field : " + newXFieldNumber
-				* newYFieldNumber);
+		int newXFieldNumber = (int) Math.round(newWidth / (calibration * mmc.getImageWidth()));
+		int newYFieldNumber = (int) Math.round(newHeigth / (calibration * mmc.getImageHeight()));
 
-		parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().remove(AllMaarsParameters.X_FIELD_NUMBER);
-		parameters
-				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject()
-				.addProperty(AllMaarsParameters.X_FIELD_NUMBER,
-						Integer.valueOf(newXFieldNumber));
+		numFieldLabel.setText("Number of field : " + newXFieldNumber * newYFieldNumber);
 
-		parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().remove(AllMaarsParameters.Y_FIELD_NUMBER);
-		parameters
-				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject()
-				.addProperty(AllMaarsParameters.Y_FIELD_NUMBER,
-						Integer.valueOf(newYFieldNumber));
+		parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS).getAsJsonObject()
+				.remove(AllMaarsParameters.X_FIELD_NUMBER);
+		parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS).getAsJsonObject()
+				.addProperty(AllMaarsParameters.X_FIELD_NUMBER, Integer.valueOf(newXFieldNumber));
+
+		parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS).getAsJsonObject()
+				.remove(AllMaarsParameters.Y_FIELD_NUMBER);
+		parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS).getAsJsonObject()
+				.addProperty(AllMaarsParameters.Y_FIELD_NUMBER, Integer.valueOf(newYFieldNumber));
 	}
 
 	/**
@@ -331,5 +349,37 @@ public class MaarsMainDialog {
 	 */
 	public AllMaarsParameters getParameters() {
 		return parameters;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == autofocusButton) {
+			getGui().showAutofocusDialog();
+		} else if (e.getSource() == okMainDialogButton) {
+			if (dynamicOpt.isSelected()) {
+				AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.DYNAMIC, "true");
+			} else {
+				AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.DYNAMIC, "false");
+			}
+			if (!savePath.getText()
+					.equals(parameters.getParametersAsJsonObject().get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+							.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString())) {
+				parameters.getParametersAsJsonObject().get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.getAsJsonObject().remove(AllMaarsParameters.SAVING_PATH);
+
+				parameters.getParametersAsJsonObject().get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.getAsJsonObject().addProperty(AllMaarsParameters.SAVING_PATH, savePath.getText());
+			}
+			saveParameters();
+			setOkClicked(true);
+			hide();
+		} else if (e.getSource() == segmButton) {
+			new MaarsSegmentationDialog(parameters);
+		} else if (e.getSource() == fluoAnalysisButton) {
+			new MaarsFluoAnalysisDialog(parameters);
+		}
+		// else if (e.getSource() == mitosisMovieButton){
+		// new MaarsMitosisMovieDialog(parameters);
+		// }
 	}
 }

@@ -244,4 +244,42 @@ public class AllMaarsParameters {
 		}
 		}
 	}
+	
+	/**
+	 * update segmentation parameter
+	 * 
+	 * @param parameter
+	 *            : static final String of AllMaarsParameters
+	 * @param value
+	 *            : corresponding value of parameter
+	 */
+	static public void updateSegmentationParameter(AllMaarsParameters paramObject, String parameter, String value) {
+		paramObject.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().remove(parameter);
+
+		paramObject.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().addProperty(parameter, value);
+
+	}
+	
+	/**
+	 * update fluo analysis parameter
+	 * 
+	 * @param parameter
+	 *            : static final String of AllMaarsParameters
+	 * @param value
+	 *            : corresponding value of parameter
+	 */
+	static public void updateFluoParameter(AllMaarsParameters paramObject, String parameter, String value) {
+		paramObject.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().remove(parameter);
+
+		paramObject.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().addProperty(parameter, value);
+
+	}
 }
