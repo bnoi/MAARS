@@ -5,7 +5,6 @@ base_dir = "D:/Data/Tong/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
 
-import org.micromanager.utils.ReportingUtils;
 import au.com.bytecode.opencsv.CSVWriter;
 import java.util.List;
 import fiji.plugin.maars.maarslib.*;
@@ -19,7 +18,6 @@ import java.io.IOException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
-import fiji.plugin.maars.cellstateanalysis.Cell;
 
 double calibration = gui.getMMCore().getPixelSizeUm();
 mmc.setAutoShutter(false);
@@ -134,22 +132,19 @@ if(md.isOkClicked()) {
 					.getAsJsonObject()
 					.get(AllMaarsParameters.DYNAMIC)
 					.getAsBoolean()) {
-					int timeInterval = param.getParametersAsJsonObject()
-							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+					double timeInterval = param.getParametersAsJsonObject()
+							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
-							.getAsInt();
+							.getAsDouble();
 					double startTime = System.currentTimeMillis();
 					int frame = 0;
 					double timeLimit = param.getParametersAsJsonObject()
-							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
-							.getAsJsonObject().get(AllMaarsParameters.VALUES)
+							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
 							.getAsDouble() * 60 * 1000;
 					spindleWriter = new FileWriter(AllMaarsParameters.convertPath(param
 													.getParametersAsJsonObject()
-													.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+													.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 													.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 													.getAsString()
 													+ "/movie_X"

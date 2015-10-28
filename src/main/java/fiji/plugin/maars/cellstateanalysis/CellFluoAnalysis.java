@@ -44,7 +44,7 @@ public class CellFluoAnalysis {
 		int nSpotsDetected = 0;
 		double threshold = 0;
 		double lowBound = 0;
-		double highBound = 200;
+		double highBound = 400;
 		int maxNbSpotPerCell = cell.getMaxNbSpotPerCell();
 		double stepFactor = 0.5;
 
