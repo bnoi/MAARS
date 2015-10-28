@@ -37,6 +37,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private JTextField fluoChannels;
 	private JTextField spotRadius;
 	private JTextField maxNbSpot;
+	private JTextField timeInterval;
 	private JCheckBox saveFlims;
 	private Button okFluoAnaParamButton;
 
@@ -96,6 +97,17 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		//
 
+		JPanel timeIntervalPanel = new JPanel(new GridLayout(1, 2));
+		JLabel timeIntervalTitle = new JLabel("Time Interval (ms) : ", SwingConstants.CENTER);
+		timeInterval = new JTextField(
+				parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL).getAsString(),
+				filedLength);
+		timeIntervalPanel.add(timeIntervalTitle);
+		timeIntervalPanel.add(timeInterval);
+		this.add(timeIntervalPanel);
+		//
+
 		JPanel saveMoviesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		saveFlims = new JCheckBox("Save Movies",
 				parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -137,7 +149,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		okFluoAnaParamButton = new Button("OK");
 		okFluoAnaParamButton.addActionListener(this);
-		
+
 		this.add(okFluoAnaParamButton);
 
 		//
@@ -167,16 +179,16 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		if (e.getSource() == okFluoAnaParamButton) {
 			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.RANGE_SIZE_FOR_MOVIE,
 					range.getText());
-			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.STEP,
-					step.getText());
+			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.STEP, step.getText());
 			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.FLUO_CHANNELS,
 					fluoChannels.getText());
 			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.SAVE_FLUORESCENT_MOVIES,
 					String.valueOf(saveFlims.isSelected()));
-			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.SPOT_RADIUS,
-					spotRadius.getText());
+			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.SPOT_RADIUS, spotRadius.getText());
 			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT,
 					maxNbSpot.getText());
+			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.TIME_INTERVAL,
+					timeInterval.getText());
 			this.setVisible(false);
 		}
 

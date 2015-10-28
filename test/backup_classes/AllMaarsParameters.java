@@ -48,12 +48,50 @@ import com.google.gson.JsonParser;
  *    +-----> FLUO_CHANNELS
  *    +-----> MAXIMUM_NUMBER_OF_SPOT
  *    +-----> DYNAMIC
- *    +-----> TIME_LIMIT
+ *    
+ * MITOSIS_MOVIE_PARAMETERS
+ *    |
+ *    +-----> START_MOVIE_CONDITIONS
+ *    |				|
+ *    |   			+-----> CONDITIONS
+ *    |				|		|
+ *    |				|		+-----> ABSOLUTE_MINIMUM_SPINDLE_SIZE
+ *    |				|		+-----> RELATIVE_SPINDLE_ANGLE
+ *    |				|		+-----> ABSOLUTE_MAXIMUM_SPINDLE_SIZE
+ *    |				|
+ *    |				+-----> VALUES
+ *    |						|
+ *    |						+-----> ABSOLUTE_MINIMUM_SPINDLE_SIZE
+ *    |						+-----> RELATIVE_SPINDLE_ANGLE
+ *    |						+-----> ABSOLUTE_MAXIMUM_SPINDLE_SIZE
+ *    |
+ *    +-----> END_MOVIE_CONDITIONS
+ *    |			|
+ *    |			+-----> CONDITIONS
+ *    |			|			|
+ *    |			|			+-----> ABSOLUTE_MINIMUM_SPINDLE_SIZE
+ *    |			|			+-----> RELATIVE_MAXIMUM_SPINDLE_SIZE
+ *    |			|			+-----> RELATIVE_SPINDLE_ANGLE
+ *    |			|			+-----> TIME_LIMIT
+ *    |			|			+-----> GROWING_SPINDLE
+ *    |			|
+ *    |			+-----> VALUES
+ *    |						|
+ *    |						+-----> ABSOLUTE_MINIMUM_SPINDLE_SIZE
+ *    |						+-----> RELATIVE_MAXIMUM_SPINDLE_SIZE
+ *    |						+-----> RELATIVE_SPINDLE_ANGLE
+ *    |						+-----> TIME_LIMIT
+ *    |						+-----> GROWING_SPINDLE
+ *    |
+ *    +-----> FRAME_NUMBER
  *    +-----> TIME_INTERVAL
+ *    +-----> MARGIN_AROUD_CELL
+ *    +-----> RANGE_SIZE_FOR_MOVIE
+ *    +-----> SAVING_PATH
+ *    +-----> CHANNEL
  *    
  * GENERAL_ACQUISITION_PARAMETERS
  *    |
- *    +-----> SAVING_PATH
  *    +-----> CHANNEL_GROUP
  *    +-----> DEFAULT_CHANNEL_PARAMATERS
  * 					|
@@ -73,6 +111,7 @@ public class AllMaarsParameters {
 	public static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
 	public static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
 	public static final String EXPLORATION_PARAMETERS = "EXPLORATION_PARAMETERS";
+	public static final String MITOSIS_MOVIE_PARAMETERS = "MITOSIS_MOVIE_PARAMETERS";
 
 	public static final String RANGE_SIZE_FOR_MOVIE = "RANGE_SIZE_FOR_MOVIE";
 	public static final String STEP = "STEP";
@@ -94,8 +133,20 @@ public class AllMaarsParameters {
 	public static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
 	public static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
 	
+	
+	public static final String START_MOVIE_CONDITIONS = "START_MOVIE_CONDITIONS";
+	public static final String END_MOVIE_CONDITIONS = "END_MOVIE_CONDITIONS";
 	public static final String TIME_INTERVAL = "TIME_INTERVAL";
+	public static final String MARGIN_AROUD_CELL = "MARGIN_AROUD_CELL";
+	
+	public static final String CONDITIONS = "CONDITIONS";
+	public static final String VALUES = "VALUES";
+	public static final String RELATIVE_MAXIMUM_SPINDLE_SIZE = "RELATIVE_MAXIMUM_SPINDLE_SIZE";
+	public static final String ABSOLUTE_MINIMUM_SPINDLE_SIZE = "ABSOLUTE_MINIMUM_SPINDLE_SIZE";
+	public static final String ABSOLUTE_MAXIMUM_SPINDLE_SIZE = "ABSOLUTE_MAXIMUM_SPINDLE_SIZE";
+	public static final String RELATIVE_SPINDLE_ANGLE= "RELATIVE_SPINDLE_ANGLE";
 	public static final String TIME_LIMIT = "TIME_LIMIT";
+	public static final String GROWING_SPINDLE= "GROWING_SPINDLE";
 	public static final String SAVING_PATH = "SAVING_PATH";
 	
 	public static final String SHUTTER = "SHUTTER";
@@ -229,25 +280,6 @@ public class AllMaarsParameters {
 		paramObject.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().addProperty(parameter, value);
-	}
-	
-	/**
-	 * update general parameters
-	 * 
-	 * @param paramObject
-	 * 			  : current AllMaarsParameters object 
-	 * @param parameter
-	 *            : static final String of AllMaarsParameters
-	 * @param value
-	 *            : corresponding value of parameter
-	 */
-	static public void updateGeneralParameter(AllMaarsParameters paramObject, String parameter, String value) {
-		paramObject.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().remove(parameter);
 
-		paramObject.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().addProperty(parameter, value);
 	}
 }

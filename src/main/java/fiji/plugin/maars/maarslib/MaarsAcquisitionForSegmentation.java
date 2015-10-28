@@ -77,7 +77,7 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("________________________________");
 		ReportingUtils.logMessage("... Initialize parameters :");
 		String rootDirName = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString();
 		ReportingUtils.logMessage("- saving path : " + rootDirName);

@@ -38,7 +38,7 @@ public class MaarsSegmentation {
 		this.parameters = parameters;
 		this.pathToSegDir = AllMaarsParameters.convertPath(parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString()
 				+ "/movie_X"
@@ -167,7 +167,7 @@ public class MaarsSegmentation {
 	 */
 	public void writeUsedConfig() {
 		int timeInterval = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
 				.getAsInt() / 1000;
 		int maxNbSpot = parameters.getParametersAsJsonObject()
@@ -212,7 +212,7 @@ public class MaarsSegmentation {
 				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE)
 				.getAsDouble();
 		String rootDirName = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString();
 		double fluoRange = parameters.getParametersAsJsonObject()

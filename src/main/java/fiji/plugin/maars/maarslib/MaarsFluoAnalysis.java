@@ -29,8 +29,6 @@ public class MaarsFluoAnalysis {
 	private double positionX;
 	private double positionY;
 
-	// private String pathToSaveImgs;
-
 	/**
 	 * Constructor 1:
 	 * 
@@ -47,7 +45,7 @@ public class MaarsFluoAnalysis {
 		this.positionY = positionY;
 		this.pathToFluoDir = AllMaarsParameters.convertPath(parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString()
 				+ "/movie_X"
@@ -88,7 +86,7 @@ public class MaarsFluoAnalysis {
 		this.positionY = positionY;
 		this.pathToFluoDir = AllMaarsParameters.convertPath(parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString()
 				+ "/movie_X"
@@ -122,94 +120,94 @@ public class MaarsFluoAnalysis {
 						.getAsDouble());
 	}
 
-	/**
-	 * Method to check if the system should start to film mitosis (according to
-	 * criteria defined by the user)
-	 * 
-	 * @param sp
-	 *            : Spindle object identified from fluorescent image
-	 * @return true if the system should start to film
-	 */
-	public boolean checkStartConditions(Spindle sp) {
-		boolean conditions = false;
-
-		if (!sp.getFeature().equals(Spindle.NO_SPINDLE)
-				&& !sp.getFeature().equals(Spindle.NO_SPOT)) {
-			conditions = true;
-		}
-
-		if (sp.getNumberOfSpotDetected() > parameters
-				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject()
-				.get(AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt()) {
-			conditions = false;
-		}
-
-		if (parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject()
-				.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
-				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
-				.getAsJsonObject()
-				.get(AllMaarsParameters.ABSOLUTE_MINIMUM_SPINDLE_SIZE)
-				.getAsBoolean()) {
-
-			conditions = conditions
-					&& sp.getLength() >= parameters
-							.getParametersAsJsonObject()
-							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.VALUES)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.ABSOLUTE_MINIMUM_SPINDLE_SIZE)
-							.getAsDouble();
-		}
-		if (parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject()
-				.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
-				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
-				.getAsJsonObject()
-				.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
-				.getAsBoolean()) {
-
-			conditions = conditions
-					&& sp.getLength() <= parameters
-							.getParametersAsJsonObject()
-							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.VALUES)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
-							.getAsDouble();
-		}
-		if (parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject()
-				.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
-				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
-				.getAsJsonObject()
-				.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE).getAsBoolean()) {
-
-			conditions = conditions
-					&& sp.getAngleToMajorAxis() >= parameters
-							.getParametersAsJsonObject()
-							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
-							.getAsJsonObject().get(AllMaarsParameters.VALUES)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE)
-							.getAsDouble();
-		}
-		return conditions;
-	}
-
+//	/**
+//	 * Method to check if the system should start to film mitosis (according to
+//	 * criteria defined by the user)
+//	 * 
+//	 * @param sp
+//	 *            : Spindle object identified from fluorescent image
+//	 * @return true if the system should start to film
+//	 */
+//	public boolean checkStartConditions(Spindle sp) {
+//		boolean conditions = false;
+//
+//		if (!sp.getFeature().equals(Spindle.NO_SPINDLE)
+//				&& !sp.getFeature().equals(Spindle.NO_SPOT)) {
+//			conditions = true;
+//		}
+//
+//		if (sp.getNumberOfSpotDetected() > parameters
+//				.getParametersAsJsonObject()
+//				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+//				.getAsJsonObject()
+//				.get(AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt()) {
+//			conditions = false;
+//		}
+//
+//		if (parameters.getParametersAsJsonObject()
+//				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+//				.getAsJsonObject()
+//				.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+//				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
+//				.getAsJsonObject()
+//				.get(AllMaarsParameters.ABSOLUTE_MINIMUM_SPINDLE_SIZE)
+//				.getAsBoolean()) {
+//
+//			conditions = conditions
+//					&& sp.getLength() >= parameters
+//							.getParametersAsJsonObject()
+//							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.VALUES)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.ABSOLUTE_MINIMUM_SPINDLE_SIZE)
+//							.getAsDouble();
+//		}
+//		if (parameters.getParametersAsJsonObject()
+//				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+//				.getAsJsonObject()
+//				.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+//				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
+//				.getAsJsonObject()
+//				.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
+//				.getAsBoolean()) {
+//
+//			conditions = conditions
+//					&& sp.getLength() <= parameters
+//							.getParametersAsJsonObject()
+//							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.VALUES)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
+//							.getAsDouble();
+//		}
+//		if (parameters.getParametersAsJsonObject()
+//				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+//				.getAsJsonObject()
+//				.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+//				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
+//				.getAsJsonObject()
+//				.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE).getAsBoolean()) {
+//
+//			conditions = conditions
+//					&& sp.getAngleToMajorAxis() >= parameters
+//							.getParametersAsJsonObject()
+//							.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+//							.getAsJsonObject().get(AllMaarsParameters.VALUES)
+//							.getAsJsonObject()
+//							.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE)
+//							.getAsDouble();
+//		}
+//		return conditions;
+//	}
+//
 	// /**
 	// * Method to analyse an entire field and find the cell corresponding to
 	// * criteria with the smallest spindle
@@ -307,7 +305,7 @@ public class MaarsFluoAnalysis {
 		List<String[]> cells = new ArrayList<String[]>();
 		List<String[]> spotStrings = new ArrayList<String[]>();
 		int timeInterval = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
 				.getAsInt();
 		int nbOfCells = soc.length();

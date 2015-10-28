@@ -48,6 +48,7 @@ public class MaarsMainDialog implements ActionListener {
 	private Button segmButton;
 	private Button fluoAnalysisButton;
 	private JTextField savePath;
+	private JTextField fluoAcqDuration;
 	private JRadioButton dynamicOpt;
 	private JRadioButton staticOpt;
 	// private Button mitosisMovieButton;
@@ -182,35 +183,34 @@ public class MaarsMainDialog implements ActionListener {
 			}
 		});
 		mainDialog.add(numFieldLabel);
-		// ------------mitosis movies parameters---------------//
+		
+		// 
+		
 		mainDialog.addPanel(analysisParamPanel);
 
-		// ReportingUtils.logMessage("- create OpenMitosisMovieParamDialog");
-		// Label mitosisMovieLabel = new Label("Mitosis movie parameters");
-		// mitosisMovieLabel.setBackground(labelColor);
-
-		// mitosisMovieButton = new Button("Parameters");
-		// mitosisMovieButton.addActionListener(this);
-
-		// ReportingUtils.logMessage("- add button and label to panel");
-		// mainDialog.add(mitosisMovieLabel);
-		// mainDialog.add(mitosisMovieButton);
-
 		JPanel strategyPanel = new JPanel();
-		dynamicOpt = new JRadioButton("dynamic");
+		dynamicOpt = new JRadioButton("Dynamic");
 		dynamicOpt.setSelected(parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC).getAsBoolean());
-		staticOpt = new JRadioButton("static");
+		staticOpt = new JRadioButton("Static");
 		staticOpt.setSelected(!parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC).getAsBoolean());
+
+		dynamicOpt.addActionListener(this);
+		staticOpt.addActionListener(this);
 
 		ButtonGroup group = new ButtonGroup();
 		group.add(dynamicOpt);
 		group.add(staticOpt);
 
-		strategyPanel.add(dynamicOpt);
 		strategyPanel.add(staticOpt);
-
+		strategyPanel.add(dynamicOpt);
+		fluoAcqDuration = new JTextField(
+				parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT).getAsString(),
+				4);
+		strategyPanel.add(fluoAcqDuration);
+		strategyPanel.add(new JLabel("min"));
 		mainDialog.add(strategyPanel);
 
 		//
@@ -220,7 +220,7 @@ public class MaarsMainDialog implements ActionListener {
 
 		JLabel savePathLabel = new JLabel("Save Path :");
 		savePath = new JTextField(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString(),
 				20);
 		JPanel savePathPanel = new JPanel();
@@ -344,6 +344,18 @@ public class MaarsMainDialog implements ActionListener {
 	}
 
 	/**
+	 * method to set the strategy selected
+	 */
+	public void setAnalysisStrategy() {
+
+		if (dynamicOpt.isSelected()) {
+			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.DYNAMIC, "true");
+		} else if (staticOpt.isSelected()) {
+			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.DYNAMIC, "false");
+		}
+	}
+
+	/**
 	 * 
 	 * @return parameters
 	 */
@@ -356,19 +368,15 @@ public class MaarsMainDialog implements ActionListener {
 		if (e.getSource() == autofocusButton) {
 			getGui().showAutofocusDialog();
 		} else if (e.getSource() == okMainDialogButton) {
-			if (dynamicOpt.isSelected()) {
-				AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.DYNAMIC, "true");
-			} else {
-				AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.DYNAMIC, "false");
-			}
 			if (!savePath.getText()
-					.equals(parameters.getParametersAsJsonObject().get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+					.equals(parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 							.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString())) {
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-						.getAsJsonObject().remove(AllMaarsParameters.SAVING_PATH);
-
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-						.getAsJsonObject().addProperty(AllMaarsParameters.SAVING_PATH, savePath.getText());
+				AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.SAVING_PATH, savePath.getText());			}
+			if (!fluoAcqDuration.getText()
+					.equals(parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
+							.getAsString())) {
+				AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.TIME_LIMIT, fluoAcqDuration.getText());
 			}
 			saveParameters();
 			setOkClicked(true);
@@ -377,9 +385,12 @@ public class MaarsMainDialog implements ActionListener {
 			new MaarsSegmentationDialog(parameters);
 		} else if (e.getSource() == fluoAnalysisButton) {
 			new MaarsFluoAnalysisDialog(parameters);
+		} else if (e.getSource() == dynamicOpt) {
+			setAnalysisStrategy();
+			fluoAcqDuration.setEditable(true);
+		} else if (e.getSource() == staticOpt) {
+			setAnalysisStrategy();
+			fluoAcqDuration.setEditable(false);
 		}
-		// else if (e.getSource() == mitosisMovieButton){
-		// new MaarsMitosisMovieDialog(parameters);
-		// }
 	}
 }
