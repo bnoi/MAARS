@@ -409,7 +409,7 @@ public class Spindle {
 	 *            (second)
 	 * @return
 	 */
-	public String[] toList(int frame, double fieldX, double fieldY) {
+	public String[] toList(double frame, double fieldX, double fieldY) {
 		String[] spindleCoord = new String[25];
 		spindleCoord[0] = cellShapeRoi.getName();
 		spindleCoord[1] = String.valueOf(frame);

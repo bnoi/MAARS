@@ -304,10 +304,10 @@ public class MaarsFluoAnalysis {
 
 		List<String[]> cells = new ArrayList<String[]>();
 		List<String[]> spotStrings = new ArrayList<String[]>();
-		int timeInterval = parameters.getParametersAsJsonObject()
+		double timeInterval = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
-				.getAsInt();
+				.getAsDouble();
 		int nbOfCells = soc.length();
 		for (int i = 0; i < nbOfCells; i++) {
 			Cell cell = soc.getCell(i);

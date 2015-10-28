@@ -166,10 +166,10 @@ public class MaarsSegmentation {
 	 * 
 	 */
 	public void writeUsedConfig() {
-		int timeInterval = parameters.getParametersAsJsonObject()
+		double timeInterval = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
-				.getAsInt() / 1000;
+				.getAsDouble() / 1000;
 		int maxNbSpot = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject()
