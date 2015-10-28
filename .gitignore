@@ -27,3 +27,6 @@ target
 # Maven #
 /target/
 nb-configuration.xml
+
+#runtime dep jars#
+/jars/
