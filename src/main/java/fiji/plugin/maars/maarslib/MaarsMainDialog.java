@@ -28,6 +28,7 @@ import ij.IJ;
 import ij.gui.NonBlockingGenericDialog;
 import org.micromanager.utils.ReportingUtils;
 
+
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
  * 
@@ -38,7 +39,7 @@ public class MaarsMainDialog implements ActionListener {
 
 	private final NonBlockingGenericDialog mainDialog;
 	private final Label numFieldLabel;
-	private final MMStudio gui;
+	private final MMStudio mm;
 	private final CMMCore mmc;
 	private final AllMaarsParameters parameters;
 	private final double calibration;
@@ -56,7 +57,7 @@ public class MaarsMainDialog implements ActionListener {
 	/**
 	 * Constructor :
 	 * 
-	 * @param gui
+	 * @param mm
 	 *            : graphical user interface of Micro-Manager
 	 * @param mmc
 	 *            : Core object of Micro-Manager
@@ -77,7 +78,7 @@ public class MaarsMainDialog implements ActionListener {
 		Color labelColor = Color.ORANGE;
 		okClicked = false;
 
-		this.gui = gui;
+		this.mm = mm;
 		this.mmc = mmc;
 
 		ReportingUtils.logMessage("create parameter object ...");
@@ -93,7 +94,7 @@ public class MaarsMainDialog implements ActionListener {
 
 		ReportingUtils.logMessage("create main dialog ...");
 
-		calibration = gui.getMMCore().getPixelSizeUm();
+		calibration = mm.getCMMCore().getPixelSizeUm();
 		double fieldWidth = mmc.getImageWidth() * calibration;
 		double fieldHeight = mmc.getImageHeight() * calibration;
 
@@ -246,8 +247,8 @@ public class MaarsMainDialog implements ActionListener {
 	 * 
 	 * @return graphical user interface of Micro-Manager
 	 */
-	public MMStudio getGui() {
-		return gui;
+	public MMStudio getMM() {
+		return mm;
 	}
 
 	/**
