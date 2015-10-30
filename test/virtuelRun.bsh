@@ -122,7 +122,7 @@ if(md.isOkClicked()) {
 															yPos,
 															mfa.getSetOfCells());
 		int frame = 0;
-		while(frame<1){
+		while(frame<2){
 			String channels = param.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 					.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
@@ -132,9 +132,10 @@ if(md.isOkClicked()) {
 				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
 				fluoImage = IJ.openImage(fluoFolder + "/"
 					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
-				fluoImage.show();
-				mfa.analyzeEntireFieldReturnListSp(fluoImage,frame,channel);
-				fluoImage.close();
+				mfa.setFluoImage(fluoImage);
+				mfa.zProject();
+				mfa.cropAllCells();
+				mfa.analyzeEntireFieldReturnListSp(frame,channel);
 			}
 			acqNameFluo = null;
 			fluoImage = null;
@@ -151,8 +152,8 @@ if(md.isOkClicked()) {
 				mfa.saveCroppedImgs();
 		}
 		}
-		mmc.setAutoShutter(true);
-		mmc.waitForDevice(mmc.getShutterDevice());
+//		mmc.setAutoShutter(true);
+//		mmc.waitForDevice(mmc.getShutterDevice());
 		gui.message("end "+System.currentTimeMillis());
 		gui.message("it took "+(System.currentTimeMillis()-start));
 		gui.message("DONE.");

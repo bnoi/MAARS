@@ -59,24 +59,19 @@ public class Spindle {
 		this.roiBeforeCrop = roiBeforeCrop;
 		this.measures = measures;
 		int size = spotList.size();
-		if (size == 0) {
+		if (size == 1) {
+			ReportingUtils.logMessage("Cell at interphase");
 			length = 0;
 			lengthToMajorAxis = 0;
 			angleToMajorAxis = 0;
 			coordSPB = null;
-
-			feature = "NO_SPOT";
-		} else if (size == 1) {
-			length = 0;
-			lengthToMajorAxis = 0;
-			angleToMajorAxis = 0;
-			coordSPB = null;
-
 			feature = "NO_SPINDLE";
 		} else if (size == 2) {
+			ReportingUtils.logMessage("Cell at mitosis");
 			double[] coordinates = getCoord(0, 1);
 			setFeatures(coordinates, measures, cellShapeRoi, cal);
 		} else {
+			ReportingUtils.logMessage("Cell with multiple spots");
 			double[] coordinates = findSPBCoordinates();
 			setFeatures(coordinates, measures, cellShapeRoi, cal);
 		}

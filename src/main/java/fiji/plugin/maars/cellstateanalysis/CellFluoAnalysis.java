@@ -36,22 +36,23 @@ public class CellFluoAnalysis {
 
 	public CellFluoAnalysis(Cell cell, double spotRadius) throws InterruptedException {
 		
-		ImagePlus fluoCellImg = cell.getFluoImage();
-		Calibration cal = fluoCellImg.getCalibration();
-		Roi cellShape = fluoCellImg.getRoi();
-		fluoCellImg.deleteRoi();
+		ImagePlus croppedFluoImg = cell.getCroppedFluoImage();
+		Calibration cal = croppedFluoImg.getCalibration();
+		Roi croppedRoi = croppedFluoImg.getRoi();
+		croppedFluoImg.deleteRoi();
+		
 		Boolean thresholdFound = false;
 		int nSpotsDetected = 0;
 		double threshold = 0;
 		double lowBound = 0;
-		double highBound = 400;
+		double highBound = 200;
 		int maxNbSpotPerCell = cell.getMaxNbSpotPerCell();
 		double stepFactor = 0.5;
 
 		while (!thresholdFound){
 			Model model = new Model();
 			Settings settings = new Settings();
-			settings.setFrom(fluoCellImg);
+			settings.setFrom(croppedFluoImg);
 	
 			settings.detectorFactory = new LogDetectorFactory();
 			Map<String, Object> detectorSettings = new HashMap<String, Object>();
@@ -62,8 +63,8 @@ public class CellFluoAnalysis {
 			detectorSettings.put("DO_MEDIAN_FILTERING", false);
 			settings.detectorSettings = detectorSettings;
 	
-			FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
-			settings.addSpotFilter(filter1);
+//			FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
+//			settings.addSpotFilter(filter1);
 	
 			TrackMate trackmate = new TrackMate(model, settings);
 			ReportingUtils.logMessage("Trackmate created");
@@ -82,13 +83,13 @@ public class CellFluoAnalysis {
 			nSpotsDetected = trackmate.getModel().getSpots().getNSpots(true);
 			ReportingUtils.logMessage("Found " + nSpotsDetected + " spots in total");
 			ReportingUtils.logMessage("Threshold = " + threshold +", LowBound = " + lowBound + ", HighBound = " + highBound);
-			
+		
 			res = new ArrayList<Spot>();
 			for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
+				ReportingUtils.logMessage(spot.getFeature(Spot.QUALITY).toString());
 				Map<String, Double> features = spot.getFeatures();
-				if (cellShape.contains(	(int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
-										(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight)))
-				{
+				if (croppedRoi.contains((int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
+										(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight))){
 					if (res.size() > maxNbSpotPerCell ){
 						break;
 					}else{
@@ -97,16 +98,21 @@ public class CellFluoAnalysis {
 				}
 			};
 			ReportingUtils.logMessage("Found " + res.size() + " spots inside the cell");
+			
+			
 			if (res.size() == 0){
 				highBound = threshold;
 				threshold = lowBound + ((highBound - lowBound) * stepFactor);
 			}else if(res.size() > maxNbSpotPerCell){
 				lowBound = threshold;
 				threshold = lowBound + ((highBound - lowBound) * stepFactor);
-				res = new ArrayList<Spot>();
 			}else{
 				thresholdFound = true;
 			}
+			res = null;
+//			if (res.size() == 0 && nSpotsDetected > 0){
+//				thresholdFound = true;
+//			}
 		}
 		ReportingUtils.logMessage("- Done.");
 		//TODO filter factor (between 3 and 4)

@@ -2,6 +2,9 @@ package fiji.plugin.maars.cellstateanalysis;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import org.micromanager.utils.ReportingUtils;
@@ -17,17 +20,17 @@ import ij.plugin.frame.RoiManager;
  * @author marie
  *
  */
-public class SetOfCells {
-
+public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 	// tools to get results
 	private RoiManager roiManager;
 	private Roi[] roiArray;
+	private int count = 0;
 	private ResultsTable rt;
 
 	// Inputs
 	private String pathToRois;
 	private ImagePlus bfImage;
-	private Cell[] cellArray;
+	private ArrayList<Cell> cellArray;
 
 	// output
 	private String pathToSaveResults;
@@ -77,12 +80,11 @@ public class SetOfCells {
 
 		ReportingUtils.logMessage("Get ROIs as array");
 		roiArray = getRoisAsArray();
-		cellArray = new Cell[roiArray.length];
-
+		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
-		for (int i = 0; i < roiArray.length; i++) {
-			cellArray[i] = new Cell(bfImage, fluoImage, focusSlice,
-					roiArray[i], i, rt, maxNbSpotPerCell);
+		for (int i = 0 ; i < roiArray.length; i++) {
+			cellArray.add(i, new Cell(bfImage, fluoImage, focusSlice,
+					roiArray[i], i, rt, maxNbSpotPerCell));
 		}
 		ReportingUtils.logMessage("Done.");
 	}
@@ -129,17 +131,12 @@ public class SetOfCells {
 
 		ReportingUtils.logMessage("Get ROIs as array");
 		roiArray = getRoisAsArray();
-		cellArray = new Cell[roiArray.length];
-
-		// roiManager.runCommand("Delete");
+		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
-		for (int i = 0; i < roiArray.length; i++) {
-			cellArray[i] = new Cell(bfImage, focusSlice, roiArray[i], i + 1,
-					rt, maxNbSpotPerCell);
-
-			// just for test
-			// roiManager.addRoi(cellArray[i].getLinearRoi());
-		}
+		for (int i =0 ; i < roiArray.length; i++) {
+			cellArray.add(i, new Cell(bfImage, focusSlice,
+					roiArray[i], i,rt , maxNbSpotPerCell));
+		}		
 		ReportingUtils.logMessage("Done.");
 	}
 
@@ -149,7 +146,7 @@ public class SetOfCells {
 	 * @param cellArray
 	 *            : array of cell
 	 */
-	public SetOfCells(Cell[] cellArray) {
+	public SetOfCells(ArrayList<Cell> cellArray) {
 		this.cellArray = cellArray;
 	}
 
@@ -163,9 +160,11 @@ public class SetOfCells {
 
 		for (int i = 0; i < n; i++) {
 			int newPosition = i + random.nextInt(n - i);
-			Cell cellTemp = cellArray[i];
-			cellArray[i] = cellArray[newPosition];
-			cellArray[newPosition] = cellTemp;
+			Cell cellTemp = cellArray.get(i);
+			cellArray.remove(i);
+			cellArray.add(i,cellArray.get(newPosition));
+			cellArray.remove(newPosition);
+			cellArray.add(newPosition, cellTemp);
 		}
 	}
 
@@ -193,17 +192,17 @@ public class SetOfCells {
 	 *            : type of ROI to add, must be "cellLinearROI" for linear ROI
 	 *            and "cellShapeROI" for non-linear ones
 	 */
-	public void addRoiToManager(int cellIndex, String roiType) {
-		if (roiType == "cellShapeROI") {
-			roiManager.addRoi(cellArray[cellIndex].getCellShapeRoi());
-		} else {
-			if (roiType == "cellLinearROI") {
-				roiManager.addRoi(cellArray[cellIndex].getLinearRoi());
-			} else {
-				ReportingUtils.logMessage("Not an option");
-			}
-		}
-	}
+//	public void addRoiToManager(int cellIndex, String roiType) {
+//		if (roiType == "cellShapeROI") {
+//			roiManager.addRoi(cellArray.get(cellIndex).getCellShapeRoi());
+//		} else {
+//			if (roiType == "cellLinearROI") {
+//				roiManager.addRoi(cellArray.get(cellIndex).getLinearRoi());
+//			} else {
+//				ReportingUtils.logMessage("Not an option");
+//			}
+//		}
+//	}
 
 	/**
 	 * Closes RoiManager
@@ -219,7 +218,7 @@ public class SetOfCells {
 	 * @return Cell corresponding to index
 	 */
 	public Cell getCell(int index) {
-		return cellArray[index];
+		return cellArray.get(index);
 	}
 
 	/**
@@ -230,12 +229,11 @@ public class SetOfCells {
 	 * @return index of cell if there is any, -1 otherwise
 	 */
 	public int getCellIndex(double xCentroid, double yCentroid) {
-		int index = -1;
-
-		for (int i = 0; i < cellArray.length; i++) {
-			if (cellArray[i].getMeasures().getXCentroid() == xCentroid
-					&& cellArray[i].getMeasures().getYCentroid() == yCentroid) {
-				index = i;
+		int index = 0;
+		for (Cell cell : cellArray) {
+			if (cell.getMeasures().getXCentroid() == xCentroid
+					&& cell.getMeasures().getYCentroid() == yCentroid) {
+				return cell.getCellNumber();
 			}
 		}
 		return index;
@@ -254,7 +252,7 @@ public class SetOfCells {
 	 * @return array length
 	 */
 	public int length() {
-		return cellArray.length;
+		return cellArray.size();
 	}
 
 	/**
@@ -272,4 +270,37 @@ public class SetOfCells {
 	public RoiManager getROIManager() {
 		return this.roiManager;
 	}
+
+	@Override
+	public Iterator<Cell> iterator() {
+        return this;
+	}
+
+	@Override
+	public boolean hasNext() {
+		if (count < cellArray.size()){
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public Cell next() {
+		if (count == cellArray.size())
+		      throw new NoSuchElementException();
+		    count++;
+		return cellArray.get(count - 1);
+	}
+
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException();
+		
+	}
+	
+	public void resetCount(){
+		this.count = 0;
+	}
+	
+	
 }

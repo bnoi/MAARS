@@ -179,6 +179,8 @@ if(md.isOkClicked()) {
 							String[] arrayChannels = channels.split(",", -1);
 							for (String channel:arrayChannels) {
 								ImagePlus fluoImage = mafa.acquire(true, frame, channel);
+								mfa.setFluoImage(fluoImage);
+								mfa.cropAllCells();
 								cellsInAllFields.addAll(
 									mfa.analyzeEntireFieldReturnListSp(fluoImage, frame, channel)
 								);
@@ -204,6 +206,8 @@ if(md.isOkClicked()) {
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel:arrayChannels) {
 						ImagePlus fluoImage = mafa.acquire(true, frame, channel);
+						mfa.setFluoImage(fluoImage);
+						mfa.cropAllCells();
 						cellsInAllFields.addAll(
 							mfa.analyzeEntireFieldReturnListSp(fluoImage, frame, channel)
 						);

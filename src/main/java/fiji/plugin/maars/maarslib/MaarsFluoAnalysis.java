@@ -1,9 +1,12 @@
 package fiji.plugin.maars.maarslib;
 
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.micromanager.utils.ReportingUtils;
@@ -14,6 +17,9 @@ import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import ij.ImagePlus;
+import ij.gui.Roi;
+import ij.plugin.ZProjector;
+import ij.process.ImageProcessor;
 
 /**
  * Class to find and measure mitotic spindle using fluorescence image analysis
@@ -28,6 +34,7 @@ public class MaarsFluoAnalysis {
 	private String pathToFluoDir;
 	private double positionX;
 	private double positionY;
+	private ImagePlus fluoImg;
 
 	/**
 	 * Constructor 1:
@@ -100,25 +107,24 @@ public class MaarsFluoAnalysis {
 		this.soc = soc;
 	}
 
-	/**
-	 * Find spindle in image for cell specified by an index
-	 * 
-	 * @param image
-	 *            : fluorescent image where spindle pole bodies are tagged
-	 * @param cellNumber
-	 *            : cell index
-	 * @return Spindle object
-	 */
-	public Spindle getSpindle(ImagePlus image, Cell cell) {
-
-		cell.addFluoImage(image);
-		return cell.findFluoSpotTempFunction(
-				false,
-				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.SPOT_RADIUS)
-						.getAsDouble());
-	}
+//	/**
+//	 * Find spindle in image for cell specified by an index
+//	 * 
+//	 * @param image
+//	 *            : fluorescent image where spindle pole bodies are tagged
+//	 * @param cellNumber
+//	 *            : cell index
+//	 * @return Spindle object
+//	 */
+//	public Spindle getSpindle(ImagePlus image, Cell cell) {
+//
+//		cell.addFluoImage(image);
+//		return cell.findFluoSpotTempFunction(
+//				parameters.getParametersAsJsonObject()
+//						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+//						.getAsJsonObject().get(AllMaarsParameters.SPOT_RADIUS)
+//						.getAsDouble());
+//	}
 
 //	/**
 //	 * Method to check if the system should start to film mitosis (according to
@@ -292,29 +298,23 @@ public class MaarsFluoAnalysis {
 	/**
 	 * Method to analyse an entire field
 	 * 
-	 * @param fieldWideImage
-	 *            : image of field
 	 * @param pathToResultsdouble
 	 *            positionX, double positionY : path to save results
 	 * @param channel
 	 *            : channel used for this fluoimage
 	 */
-	public List<String[]> analyzeEntireFieldReturnListSp(
-			ImagePlus fieldWideImage, int frame, String channel) {
-
+	public List<String[]> analyzeEntireFieldReturnListSp(int frame, String channel) {
 		List<String[]> cells = new ArrayList<String[]>();
 		List<String[]> spotStrings = new ArrayList<String[]>();
 		double timeInterval = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
 				.getAsDouble();
-		int nbOfCells = soc.length();
-		for (int i = 0; i < nbOfCells; i++) {
-			Cell cell = soc.getCell(i);
-			// TODO
-			cell.addFluoImage(fieldWideImage);
+		Iterator<Cell> itrCells = soc.iterator();
+		ReportingUtils.logMessage("Detecting spots...");
+		while (itrCells.hasNext()) {
+			Cell cell = itrCells.next();
 			Spindle sp = cell.findFluoSpotTempFunction(
-					true,
 					parameters.getParametersAsJsonObject()
 							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject()
@@ -322,11 +322,12 @@ public class MaarsFluoAnalysis {
 			for (String[] s: cell.getSpotList()){
 				spotStrings.add(s);
 			}
-			cell.addFluoSlice();
+			cell.addCroppedFluoSlice();
 			cells.add(sp.toList(frame * timeInterval / 1000,
 					Math.round(this.positionX), Math.round(this.positionY)));
 			cell = null;
 		}
+		ReportingUtils.logMessage("Spots detection done...");
 		this.writeAnalysisRes(cells, frame, channel);
 		this.writeSpotListForOneCell(spotStrings, frame, channel);
 		return cells;
@@ -339,12 +340,48 @@ public class MaarsFluoAnalysis {
 	public SetOfCells getSetOfCells() {
 		return soc;
 	}
+	
+	/**
+	 * set fluo image
+	 */
+	public void setFluoImage(ImagePlus fluoImg){
+		this.fluoImg = fluoImg;
+	}
+	
+	/**
+	 * z-projection of fluoImage with max_intesity
+	 */
+	public void zProject(){
+		
+		ZProjector projector = new ZProjector();
+		projector.setMethod(ZProjector.MAX_METHOD);
+		projector.setImage(this.fluoImg);
+		projector.doProjection();
+		ImagePlus imgProject = projector.getProjection(); 
+		imgProject.setCalibration(fluoImg.getCalibration());
+		this.fluoImg = imgProject;
+		
+	}
+	
+	/**
+	 * crop all cells with cells' roi
+	 */
+	public void cropAllCells(){
+		Iterator<Cell> itrCells = soc.iterator();
+		ReportingUtils.logMessage("Cropping cell");
+		while (itrCells.hasNext()) {
+			Cell cell = itrCells.next();
+			cell.setFluoImage(this.fluoImg);
+			cell.setBfFluocalibFactor();
+			cell.setRescaledFluoRoi();
+			cell.cropFluoImage();
+		}
+		soc.resetCount();
+	}
 
 	public void saveCroppedImgs() {
-		int nbCell = soc.length();
-		for (int i = 0; i < nbCell; i++) {
-			Cell cell = soc.getCell(i);
-			cell.saveFluoImage(pathToFluoDir);
+		for (Cell cell : soc) {
+			cell.saveCroppedImage(pathToFluoDir);
 		}
 	}
 
