@@ -7,6 +7,7 @@ addClassPath(base_dir + "target/MAARS_-1.0.jar");
 //dep_base_dir = "/home/tong/.m2/repository/";
 dep_base_dir = "/Users/tongli/.m2/repository/";
 //addClassPath(dep_base_dir +"sc/fiji/TrackMate_/2.7.2/TrackMate_-2.7.2.jar");
+addClassPath("/Applications/Micro-Manager1.4/jars/TrackMate_-2.8.1-SNAPSHOT.jar");
 addClassPath(dep_base_dir +"net/imglib2/imglib2/2.2.0/imglib2-2.2.0.jar");
 addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm/0.2.0/imglib2-algorithm-0.2.0.jar");
 addClassPath(dep_base_dir +"net/imagej/imagej-common/0.12.2/imagej-common-0.12.2.jar");
@@ -60,7 +61,9 @@ if(md.isOkClicked()) {
 	start = System.currentTimeMillis();
 	gui.message("start "+start);
 	AllMaarsParameters param = null;
+	gui.message("AutoFocusing...");
 	autofocus = gui.getAutofocus();
+	gui.message("Getting parameters...");
 	param = md.getParameters();
 	int nbXField = param
 						.getParametersAsJsonObject()
@@ -88,17 +91,6 @@ if(md.isOkClicked()) {
 		gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
 		double xPos = explo.getX(i);
 		double yPos = explo.getY(i);
-		
-		gui.setXYStagePosition(xPos,yPos);
-		
-		MaarsAcquisitionForSegmentation mas = new MaarsAcquisitionForSegmentation(md,
-				xPos,
-				yPos);
-
-		mmc.waitForDevice(mmc.getXYStageDevice());
-
-		HashMap params = mas.getParametersFromConf(param);
-		mas.setParameters(params);
 
 		MaarsSegmentation ms = new MaarsSegmentation(param,
 				xPos,
@@ -132,17 +124,18 @@ if(md.isOkClicked()) {
 				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
 				fluoImage = IJ.openImage(fluoFolder + "/"
 					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
+
 				mfa.setFluoImage(fluoImage);
 				mfa.zProject();
 				mfa.cropAllCells();
 				mfa.analyzeEntireFieldReturnListSp(frame,channel);
+
 			}
-			acqNameFluo = null;
-			fluoImage = null;
 			// close roi manager
 			mfa.getSetOfCells().closeRoiManager();
-			mas.setParameters(params);
 			frame++;
+			acqNameFluo = null;
+			fluoImage = null;
 		}
 		if (param.getParametersAsJsonObject()
 					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
@@ -150,10 +143,9 @@ if(md.isOkClicked()) {
 					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
 					.getAsBoolean()) {
 				mfa.saveCroppedImgs();
+			}
+		ms = null;
 		}
-		}
-//		mmc.setAutoShutter(true);
-//		mmc.waitForDevice(mmc.getShutterDevice());
 		gui.message("end "+System.currentTimeMillis());
 		gui.message("it took "+(System.currentTimeMillis()-start));
 		gui.message("DONE.");

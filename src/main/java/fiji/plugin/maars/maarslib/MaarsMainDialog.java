@@ -183,9 +183,9 @@ public class MaarsMainDialog implements ActionListener {
 			}
 		});
 		mainDialog.add(numFieldLabel);
-		
-		// 
-		
+
+		//
+
 		mainDialog.addPanel(analysisParamPanel);
 
 		JPanel strategyPanel = new JPanel();
@@ -369,14 +369,17 @@ public class MaarsMainDialog implements ActionListener {
 			getGui().showAutofocusDialog();
 		} else if (e.getSource() == okMainDialogButton) {
 			if (!savePath.getText()
-					.equals(parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-							.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString())) {
-				AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.SAVING_PATH, savePath.getText());			}
+					.equals(parameters.getParametersAsJsonObject()
+							.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
+							.get(AllMaarsParameters.SAVING_PATH).getAsString())) {
+				AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.SAVING_PATH,
+						savePath.getText());
+			}
 			if (!fluoAcqDuration.getText()
 					.equals(parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
-							.getAsString())) {
-				AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.TIME_LIMIT, fluoAcqDuration.getText());
+							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT).getAsString())) {
+				AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.TIME_LIMIT,
+						fluoAcqDuration.getText());
 			}
 			saveParameters();
 			setOkClicked(true);

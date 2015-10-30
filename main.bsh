@@ -180,17 +180,16 @@ if(md.isOkClicked()) {
 							for (String channel:arrayChannels) {
 								ImagePlus fluoImage = mafa.acquire(true, frame, channel);
 								mfa.setFluoImage(fluoImage);
+								mfa.zProject();
 								mfa.cropAllCells();
-								cellsInAllFields.addAll(
-									mfa.analyzeEntireFieldReturnListSp(fluoImage, frame, channel)
-								);
+								cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(frame,channel));
 							}
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
 							double acqTook = System.currentTimeMillis() - beginAcq;
 							gui.sleep((long) (timeInterval - acqTook));	
 							acqNameFluo = null;
-							fluoImage = null;		
+							fluoImage = null;	
 						}
 /////////////////////////write spindle coordinates///////////////////////////////////
 					writer.writeAll(cellsInAllFields);
@@ -207,11 +206,11 @@ if(md.isOkClicked()) {
 					for (String channel:arrayChannels) {
 						ImagePlus fluoImage = mafa.acquire(true, frame, channel);
 						mfa.setFluoImage(fluoImage);
+						mfa.zProject();
 						mfa.cropAllCells();
-						cellsInAllFields.addAll(
-							mfa.analyzeEntireFieldReturnListSp(fluoImage, frame, channel)
-						);
+						cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(frame,channel));
 					}
+					mfa.getSetOfCells().closeRoiManager();
 					acqNameFluo = null;
 					fluoImage = null;
 				}
@@ -224,7 +223,7 @@ if(md.isOkClicked()) {
 					mfa.saveCroppedImgs();
 				}
 				// close roi manager
-				mfa.getSetOfCells().closeRoiManager();
+				// mfa.getSetOfCells().closeRoiManager();
 				mas.setParameters(params);
 			}
 		}

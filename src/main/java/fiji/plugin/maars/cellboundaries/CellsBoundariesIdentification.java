@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-import org.micromanager.utils.ReportingUtils;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -79,19 +77,17 @@ public class CellsBoundariesIdentification {
 	 * steps and errors of the process boolean flushImageToAnalyze : to empty
 	 * the ImageProcessor of image to analyze
 	 */
-	public CellsBoundariesIdentification(CellsBoundaries cB, int sigma,
-			double minParticleSize, double maxParticleSize, int direction,
-			float zf, double solidityThreshold, double meanGrayValueThreshold,
-			boolean makeLogFile, boolean flushImageToAnalyze) {
+	public CellsBoundariesIdentification(CellsBoundaries cB, int sigma, double minParticleSize, double maxParticleSize,
+			int direction, float zf, double solidityThreshold, double meanGrayValueThreshold, boolean makeLogFile,
+			boolean flushImageToAnalyze) {
 
 		this.imageToAnalyze = cB.getImageToAnalyze();
 		this.savingPath = cB.getPathDirField().getText();
 
 		if (makeLogFile) {
 			try {
-				PrintStream ps = new PrintStream(savingPath
-						+ imageToAnalyze.getShortTitle()
-						+ "_BoundariesIdentification.LOG");
+				PrintStream ps = new PrintStream(
+						savingPath + imageToAnalyze.getShortTitle() + "_BoundariesIdentification.LOG");
 				System.setOut(ps);
 				System.setErr(ps);
 			} catch (FileNotFoundException e) {
@@ -102,12 +98,9 @@ public class CellsBoundariesIdentification {
 
 		this.sigma = sigma;
 		this.filterUnusualShape = cB.getFilterUnususalCkb().getState();
-		this.filterWithMeanGrayValue = cB.getFilterWithMeanGreyValueCkb()
-				.getState();
-		this.minParticleSize = minParticleSize
-				/ cB.getImageToAnalyze().getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize
-				/ cB.getImageToAnalyze().getCalibration().pixelWidth;
+		this.filterWithMeanGrayValue = cB.getFilterWithMeanGreyValueCkb().getState();
+		this.minParticleSize = minParticleSize / imageToAnalyze.getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / imageToAnalyze.getCalibration().pixelWidth;
 		this.direction = direction;
 
 		// ResultOptions
@@ -136,20 +129,17 @@ public class CellsBoundariesIdentification {
 	 * notifying if the cells must be filtered according to there shape. Default
 	 * result options are also set : true for all.
 	 */
-	public CellsBoundariesIdentification(ImagePlus imageToAnalyse, int sigma,
-			boolean filterUnusualShape, boolean filterWithMinGrayValue,
-			String savingPath, double minParticleSize, double maxParticleSize,
-			int direction, float zf, double solidityThreshold,
-			double meanGrayValueThreshold) {
+	public CellsBoundariesIdentification(ImagePlus imageToAnalyse, int sigma, boolean filterUnusualShape,
+			boolean filterWithMinGrayValue, String savingPath, double minParticleSize, double maxParticleSize,
+			int direction, float zf, double solidityThreshold, double meanGrayValueThreshold) {
 
 		this.savingPath = savingPath;
 
 		this.imageToAnalyze = imageToAnalyse;
 
 		try {
-			PrintStream ps = new PrintStream(savingPath
-					+ imageToAnalyse.getShortTitle()
-					+ "BoundariesIdentification.LOG");
+			PrintStream ps = new PrintStream(
+					savingPath + imageToAnalyse.getShortTitle() + "BoundariesIdentification.LOG");
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
@@ -175,10 +165,8 @@ public class CellsBoundariesIdentification {
 
 		this.flushImageToAnalyze = true;
 
-		this.minParticleSize = minParticleSize
-				/ imageToAnalyse.getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize
-				/ imageToAnalyse.getCalibration().pixelWidth;
+		this.minParticleSize = minParticleSize / imageToAnalyse.getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / imageToAnalyse.getCalibration().pixelWidth;
 
 		zFocus = zf;
 
@@ -215,15 +203,11 @@ public class CellsBoundariesIdentification {
 	 * create a file with steps and errors of the process boolean
 	 * flushImageToAnalyze : to empty the ImageProcessor of image to analyze
 	 */
-	public CellsBoundariesIdentification(ImagePlus imageToAnalyse, int sigma,
-			int direction,
-			boolean filterUnusualShape, boolean filterWithMinGrayValue,
-			boolean displayCorrelationImg, boolean displayBinaryImg,
-			boolean displayDataFrame, boolean displayFocusImage,
-			boolean saveCorrelationImg, boolean saveBinaryImg,
-			boolean saveDataFrame, boolean saveFocusImage, boolean saveRoi,
-			String savingPath, double minParticleSize, double maxParticleSize,
-			float zf, double solidityThreshold, double meanGrayValueThreshold,
+	public CellsBoundariesIdentification(ImagePlus imageToAnalyse, int sigma, int direction, boolean filterUnusualShape,
+			boolean filterWithMinGrayValue, boolean displayCorrelationImg, boolean displayBinaryImg,
+			boolean displayDataFrame, boolean displayFocusImage, boolean saveCorrelationImg, boolean saveBinaryImg,
+			boolean saveDataFrame, boolean saveFocusImage, boolean saveRoi, String savingPath, double minParticleSize,
+			double maxParticleSize, float zf, double solidityThreshold, double meanGrayValueThreshold,
 			boolean makeLogFile, boolean flushImageToAnalyze) {
 
 		this.savingPath = savingPath;
@@ -232,9 +216,8 @@ public class CellsBoundariesIdentification {
 
 		if (makeLogFile) {
 			try {
-				PrintStream ps = new PrintStream(savingPath
-						+ imageToAnalyse.getShortTitle()
-						+ "BoundariesIdentification.LOG");
+				PrintStream ps = new PrintStream(
+						savingPath + imageToAnalyse.getShortTitle() + "BoundariesIdentification.LOG");
 				System.setOut(ps);
 				System.setErr(ps);
 			} catch (FileNotFoundException e) {
@@ -261,10 +244,8 @@ public class CellsBoundariesIdentification {
 
 		this.flushImageToAnalyze = flushImageToAnalyze;
 
-		this.minParticleSize = minParticleSize
-				/ imageToAnalyse.getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize
-				/ imageToAnalyse.getCalibration().pixelWidth;
+		this.minParticleSize = minParticleSize / imageToAnalyse.getCalibration().pixelWidth;
+		this.maxParticleSize = maxParticleSize / imageToAnalyse.getCalibration().pixelWidth;
 
 		zFocus = zf;
 
@@ -278,12 +259,12 @@ public class CellsBoundariesIdentification {
 
 	// I know it is messy but I have not found an other solution yet
 	public void getFocusImage() {
-		ReportingUtils.logMessage("get Focus Image");
+		System.out.println("get Focus Image");
 
 		imageToAnalyze.setZ((int) Math.round(zFocus) - 1);
 
-		focusImage = new ImagePlus(imageToAnalyze.getShortTitle()
-				+ "FocusImage", imageToAnalyze.getProcessor().duplicate());
+		focusImage = new ImagePlus(imageToAnalyze.getShortTitle() + "FocusImage",
+				imageToAnalyze.getProcessor().duplicate());
 
 		if (imageToAnalyze.getCalibration().scaled()) {
 			focusImage.setCalibration(imageToAnalyze.getCalibration());
@@ -291,8 +272,7 @@ public class CellsBoundariesIdentification {
 
 		if (saveFocusImage) {
 			FileSaver fileSaver = new FileSaver(focusImage);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
-					+ "_FocusImage.tif");
+			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_FocusImage.tif");
 		}
 	}
 
@@ -302,10 +282,9 @@ public class CellsBoundariesIdentification {
 	 */
 	public void createCorrelationImage() {
 
-		ReportingUtils.logMessage("creating correlation image");
+		System.out.println("creating correlation image");
 
-		correlationImage = new FloatProcessor(imageToAnalyze.getWidth(),
-				imageToAnalyze.getHeight());
+		correlationImage = new FloatProcessor(imageToAnalyze.getWidth(), imageToAnalyze.getHeight());
 		// TODO refacto
 		for (int x = 0; x < imageToAnalyze.getWidth(); x++) {
 
@@ -325,14 +304,12 @@ public class CellsBoundariesIdentification {
 
 				}
 
-				ComputeCorrelation computeCorrelationImage = new ComputeCorrelation(
-						iz, zf, sigma, direction);
+				ComputeCorrelation computeCorrelationImage = new ComputeCorrelation(iz, zf, sigma, direction);
 
 				// compute correlation value
 				double correlationPixelValue = 0;
 
-				correlationPixelValue = computeCorrelationImage.integrate(0,
-						imageToAnalyze.getNSlices() - 1);
+				correlationPixelValue = computeCorrelationImage.integrate(0, imageToAnalyze.getNSlices() - 1);
 
 				correlationImage.putPixelValue(x, y, correlationPixelValue);
 
@@ -346,11 +323,10 @@ public class CellsBoundariesIdentification {
 	 */
 	public void convertCorrelationToBinaryImage() {
 
-		ReportingUtils.logMessage("Convert correlation image to binary image");
+		System.out.println("Convert correlation image to binary image");
 
 		byteImage = correlationImage.convertToByteProcessor(true);
-		byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false,
-				BinaryProcessor.BLACK_AND_WHITE_LUT);
+		byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false, BinaryProcessor.BLACK_AND_WHITE_LUT);
 
 		byteImage.dilate();
 		byteImage.erode();
@@ -358,12 +334,11 @@ public class CellsBoundariesIdentification {
 		// if the thresholding and the making binary image produced a white
 		// background, change it
 		if (byteImage.getStatistics().mode > 127) {
-			ReportingUtils.logMessage("Invert image");
+			System.out.println("Invert image");
 			byteImage.invert();
 		}
 		BinaryProcessor binImage = new BinaryProcessor(byteImage);
-		binCorrelationImage = new ImagePlus("binary correlation Image",
-				binImage);
+		binCorrelationImage = new ImagePlus("binary correlation Image", binImage);
 
 		if (imageToAnalyze.getCalibration().scaled()) {
 			binCorrelationImage.setCalibration(imageToAnalyze.getCalibration());
@@ -377,65 +352,57 @@ public class CellsBoundariesIdentification {
 	 */
 	public void analyseAndFilterParticles() {
 
-		ReportingUtils.logMessage("Analyse results");
+		System.out.println("Analyse results");
 
 		resultTable = new ResultsTable();
 
 		roiManager = new RoiManager();
 
-		imgCorrTemp = new ImagePlus("Correlation Image of "
-				+ imageToAnalyze.getShortTitle(), correlationImage);
+		imgCorrTemp = new ImagePlus("Correlation Image of " + imageToAnalyze.getShortTitle(), correlationImage);
 
 		particleAnalyzer = new ParticleAnalyzer(
-				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
-						+ ParticleAnalyzer.SHOW_PROGRESS
+				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.SHOW_PROGRESS
 						+ ParticleAnalyzer.ADD_TO_MANAGER,
-				Measurements.AREA + Measurements.CENTROID
-						+ Measurements.PERIMETER
-						+ Measurements.SHAPE_DESCRIPTORS + Measurements.ELLIPSE,
+				Measurements.AREA + Measurements.CENTROID + Measurements.PERIMETER + Measurements.SHAPE_DESCRIPTORS
+						+ Measurements.ELLIPSE,
 				resultTable, minParticleSize, maxParticleSize);
 
-		ReportingUtils.logMessage("minParticleSize " + minParticleSize
-				+ " maxParticleSize " + maxParticleSize);
-		ReportingUtils.logMessage("Analyse particles on "
-				+ binCorrelationImage.getTitle() + " ...");
+		System.out.println("minParticleSize " + minParticleSize + " maxParticleSize " + maxParticleSize);
+		System.out.println("Analyse particles on " + binCorrelationImage.getTitle() + " ...");
 
 		particleAnalyzer.analyze(binCorrelationImage);
-		ReportingUtils.logMessage("Done");
+		System.out.println("Done");
 
 		if (filterUnusualShape || filterWithMeanGrayValue) {
 
 			if (filterWithMeanGrayValue) {
 
-				ReportingUtils.logMessage("Filtering with mean grey value...");
+				System.out.println("Filtering with mean grey value...");
 				ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
 				int name = 1;
 
-				ReportingUtils.logMessage("- reset result table");
+				System.out.println("- reset result table");
 				resultTable.reset();
 				Integer nbRoi = roiManager.getCount();
 				if (!nbRoi.equals(0)) {
 
-					ReportingUtils.logMessage("- get roi as array");
+					System.out.println("- get roi as array");
 
 					roiArray = roiManager.getRoisAsArray();
-					System.out
-							.println("- select and delete all roi from roi manager");
+					System.out.println("- select and delete all roi from roi manager");
 
 					roiManager.runCommand("Select All");
 					roiManager.runCommand("Delete");
 
-					ReportingUtils.logMessage("- initialize analyser");
+					System.out.println("- initialize analyser");
 
-					analyzer = new Analyzer(imgCorrTemp, Measurements.AREA
-							+ Measurements.STD_DEV + Measurements.MIN_MAX
-							+ Measurements.SHAPE_DESCRIPTORS
-							+ Measurements.MEAN + Measurements.CENTROID
-							+ Measurements.PERIMETER + Measurements.ELLIPSE,
+					analyzer = new Analyzer(imgCorrTemp,
+							Measurements.AREA + Measurements.STD_DEV + Measurements.MIN_MAX
+									+ Measurements.SHAPE_DESCRIPTORS + Measurements.MEAN + Measurements.CENTROID
+									+ Measurements.PERIMETER + Measurements.ELLIPSE,
 							resultTable);
 
-					System.out
-							.println("- analyze each roi and add it to manager if it is wanted");
+					System.out.println("- analyze each roi and add it to manager if it is wanted");
 					for (int i = 0; i < roiArray.length; i++) {
 						roiArray[i].setImage(imgCorrTemp);
 						imgCorrTemp.setRoi(roiArray[i]);
@@ -443,10 +410,8 @@ public class CellsBoundariesIdentification {
 					}
 					imgCorrTemp.deleteRoi();
 
-					System.out
-							.println("- delete from result table roi unwanted");
-					for (int i = 0; i < resultTable
-							.getColumn(ResultsTable.MEAN).length; i++) {
+					System.out.println("- delete from result table roi unwanted");
+					for (int i = 0; i < resultTable.getColumn(ResultsTable.MEAN).length; i++) {
 
 						if (resultTable.getValue("Mean", i) <= meanGreyValueThreshold) {
 							rowTodelete.add(i);
@@ -457,7 +422,7 @@ public class CellsBoundariesIdentification {
 						}
 					}
 					deleteRowOfResultTable(rowTodelete);
-					ReportingUtils.logMessage("Filter done.");
+					System.out.println("Filter done.");
 				} else {
 					setRoiDetectedFalse();
 				}
@@ -465,23 +430,20 @@ public class CellsBoundariesIdentification {
 
 			if (filterUnusualShape) {
 
-				ReportingUtils.logMessage("Filtering with solidity...");
+				System.out.println("Filtering with solidity...");
 				Integer nbRoi = roiManager.getCount();
 				if (!nbRoi.equals(0)) {
-					ReportingUtils.logMessage("- get roi as array");
+					System.out.println("- get roi as array");
 					roiArray = roiManager.getRoisAsArray();
-					System.out
-							.println("- select and delete all roi from roi manager");
+					System.out.println("- select and delete all roi from roi manager");
 					roiManager.runCommand("Select All");
 					roiManager.runCommand("Delete");
 
 					ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
 					int name = 1;
 
-					System.out
-							.println("- delete from result table roi unwanted");
-					for (int i = 0; i < resultTable
-							.getColumn(ResultsTable.SOLIDITY).length; i++) {
+					System.out.println("- delete from result table roi unwanted");
+					for (int i = 0; i < resultTable.getColumn(ResultsTable.SOLIDITY).length; i++) {
 						if (resultTable.getValue("Solidity", i) <= unusualShapeFilteringThreshold) {
 							rowTodelete.add(i);
 						} else {
@@ -492,7 +454,7 @@ public class CellsBoundariesIdentification {
 					}
 
 					deleteRowOfResultTable(rowTodelete);
-					ReportingUtils.logMessage("Filter done.");
+					System.out.println("Filter done.");
 				} else {
 					setRoiDetectedFalse();
 				}
@@ -520,80 +482,74 @@ public class CellsBoundariesIdentification {
 		if (nbRoi.equals(0)) {
 			setRoiDetectedFalse();
 		}
-		ReportingUtils.logMessage("Show and save results");
+		System.out.println("Show and save results");
 
 		if (saveDataFrame && roiDetected) {
-			ReportingUtils.logMessage("saving data frame...");
+			System.out.println("saving data frame...");
 			try {
-				resultTable.saveAs(savingPath + imageToAnalyze.getShortTitle()
-						+ "_Results.csv");
+				resultTable.saveAs(savingPath + imageToAnalyze.getShortTitle() + "_Results.csv");
 			} catch (IOException io) {
 				IJ.error("Error", "Could not save DataFrame");
 			}
 		}
 
 		if (displayDataFrame) {
-			ReportingUtils.logMessage("display data frame");
+			System.out.println("display data frame");
 			resultTable.show("Result");
-			ReportingUtils.logMessage("done.");
+			System.out.println("done.");
 		} else {
-			ReportingUtils.logMessage("reset data frame");
+			System.out.println("reset data frame");
 			resultTable.reset();
 		}
 
 		if (saveRoi && roiDetected) {
-			ReportingUtils.logMessage("saving roi...");
+			System.out.println("saving roi...");
 			roiManager.runCommand("Select All");
-			roiManager.runCommand("Save",
-					savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
-			ReportingUtils.logMessage("Done");
-//			roiManager.runCommand("Select All");
-//			roiManager.runCommand("Delete");
-//			ReportingUtils.logMessage("Close roi manager");
-//			roiManager.close();
+			roiManager.runCommand("Save", savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
+			System.out.println("Done");
+			roiManager.runCommand("Select All");
+			roiManager.runCommand("Delete");
+			System.out.println("Close roi manager");
+			roiManager.close();
 		}
 
 		if (displayFocusImage) {
-			ReportingUtils.logMessage("show focus image");
+			System.out.println("show focus image");
 			focusImage.show();
 		} else {
-			ReportingUtils.logMessage("flush focus image");
+			System.out.println("flush focus image");
 			focusImage.flush();
 		}
 
 		if (saveBinaryImg && roiDetected) {
-			ReportingUtils.logMessage("save binary image");
-			binCorrelationImage.setTitle(imageToAnalyze.getShortTitle()
-					+ "_BinaryImage");
+			System.out.println("save binary image");
+			binCorrelationImage.setTitle(imageToAnalyze.getShortTitle() + "_BinaryImage");
 			FileSaver fileSaver = new FileSaver(binCorrelationImage);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
-					+ "_BinaryImage.tif");
+			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_BinaryImage.tif");
 		}
 		if (displayBinaryImg) {
-			ReportingUtils.logMessage("show binary image");
+			System.out.println("show binary image");
 			binCorrelationImage.show();
 		} else {
-			ReportingUtils.logMessage("flush binary image");
+			System.out.println("flush binary image");
 			binCorrelationImage.flush();
 		}
 
 		if (saveCorrelationImg) {
-			ReportingUtils.logMessage("save correlation image");
-			imgCorrTemp.setTitle(imageToAnalyze.getShortTitle()
-					+ "_CorrelationImage");
+			System.out.println("save correlation image");
+			imgCorrTemp.setTitle(imageToAnalyze.getShortTitle() + "_CorrelationImage");
 			FileSaver fileSaver = new FileSaver(imgCorrTemp);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
-					+ "_CorrelationImage.tif");
+			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_CorrelationImage.tif");
 		}
 		if (displayCorrelationImg) {
-			ReportingUtils.logMessage("show correlation image");
+			System.out.println("show correlation image");
 			imgCorrTemp.show();
 		} else {
-			ReportingUtils.logMessage("flush correlation image");
+			System.out.println("flush correlation image");
 			imgCorrTemp.flush();
 		}
 		if (flushImageToAnalyze) {
-			ReportingUtils.logMessage("flush image to analyze");
+			System.out.println("flush image to analyze");
 			imageToAnalyze.flush();
 		}
 	}
@@ -610,11 +566,17 @@ public class CellsBoundariesIdentification {
 	 * Run algorithm, return true if no roi is detected.
 	 */
 
-	public boolean identifyCellsBoundaries() {
+	public void identifyCellsBoundaries() {
 		createCorrelationImage();
 		convertCorrelationToBinaryImage();
 		analyseAndFilterParticles();
 		showAndSaveResultsAndCleanUp();
+	}
+	
+	/**
+	 * Return if any roi detected
+	 */
+	public boolean roiDetected(){
 		return this.roiDetected;
 	}
 
