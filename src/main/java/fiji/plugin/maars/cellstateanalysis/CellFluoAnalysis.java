@@ -106,10 +106,10 @@ public class CellFluoAnalysis {
 			}else if(res.size() > maxNbSpotPerCell){
 				lowBound = threshold;
 				threshold = lowBound + ((highBound - lowBound) * stepFactor);
+				res = null;
 			}else{
 				thresholdFound = true;
 			}
-			res = null;
 //			if (res.size() == 0 && nSpotsDetected > 0){
 //				thresholdFound = true;
 //			}

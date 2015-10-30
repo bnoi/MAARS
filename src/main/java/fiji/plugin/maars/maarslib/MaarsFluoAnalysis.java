@@ -327,6 +327,7 @@ public class MaarsFluoAnalysis {
 					Math.round(this.positionX), Math.round(this.positionY)));
 			cell = null;
 		}
+		soc.resetCount();
 		ReportingUtils.logMessage("Spots detection done...");
 		this.writeAnalysisRes(cells, frame, channel);
 		this.writeSpotListForOneCell(spotStrings, frame, channel);
