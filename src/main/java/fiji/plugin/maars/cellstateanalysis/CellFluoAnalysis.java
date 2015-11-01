@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Model;

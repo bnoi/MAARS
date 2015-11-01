@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import ij.ImagePlus;
 import ij.gui.Roi;

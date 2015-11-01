@@ -2,10 +2,10 @@ package fiji.plugin.maars.maarslib;
 
 import java.awt.Color;
 import java.util.HashMap;
-import org.micromanager.MMStudio;
+import org.micromanager.internal.MMStudio;
 import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
-import org.micromanager.utils.MMScriptException;
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.MMScriptException;
+import org.micromanager.internal.utils.ReportingUtils;
 import mmcorej.CMMCore;
 
 

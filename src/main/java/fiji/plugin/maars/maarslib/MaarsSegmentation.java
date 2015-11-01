@@ -3,7 +3,7 @@ package fiji.plugin.maars.maarslib;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;
 import fiji.plugin.maars.cellboundaries.CellsBoundariesIdentification;

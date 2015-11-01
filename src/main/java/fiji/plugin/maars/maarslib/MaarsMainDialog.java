@@ -22,11 +22,11 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import mmcorej.CMMCore;
-import org.micromanager.MMStudio;
+import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
 import ij.gui.NonBlockingGenericDialog;
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.ReportingUtils;
 
 
 /**
@@ -66,7 +66,7 @@ public class MaarsMainDialog implements ActionListener {
 	 *            the system (in JSON format)
 	 * @throws IOException
 	 */
-	public MaarsMainDialog(MMStudio gui, CMMCore mmc, String pathConfigFile) throws IOException {
+	public MaarsMainDialog(MMStudio mm, CMMCore mmc, String pathConfigFile) throws IOException {
 		// ------------initialization of parameters---------------//
 		try {
 			PrintStream ps = new PrintStream(System.getProperty("user.dir") + "/MAARS.LOG");
@@ -367,7 +367,7 @@ public class MaarsMainDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == autofocusButton) {
-			getGui().showAutofocusDialog();
+			getMM().showAutofocusDialog();
 		} else if (e.getSource() == okMainDialogButton) {
 			if (!savePath.getText()
 					.equals(parameters.getParametersAsJsonObject()

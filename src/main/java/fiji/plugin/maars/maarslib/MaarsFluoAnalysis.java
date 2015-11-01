@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 import fiji.plugin.maars.cellboundaries.CellsBoundaries;

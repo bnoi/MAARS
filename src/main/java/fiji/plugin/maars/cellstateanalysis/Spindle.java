@@ -6,8 +6,7 @@ import ij.measure.Calibration;
 
 import java.util.ArrayList;
 import java.util.Map;
-
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import fiji.plugin.trackmate.Spot;
 
@@ -52,8 +51,7 @@ public class Spindle {
 	 * @param cal
 	 *            : calibration of image on which spot has been found
 	 */
-	public Spindle(ArrayList<Spot> spotList, Measures measures,
-			Roi cellShapeRoi, Calibration cal, Roi roiBeforeCrop) {
+	public Spindle(ArrayList<Spot> spotList, Measures measures, Roi cellShapeRoi, Calibration cal, Roi roiBeforeCrop) {
 		this.spotList = spotList;
 		this.cellShapeRoi = cellShapeRoi;
 		this.roiBeforeCrop = roiBeforeCrop;
@@ -127,8 +125,7 @@ public class Spindle {
 			for (int j = 0; j < spotList.size(); j++) {
 				if (j > i) {
 					double[] coord = getCoord(i, j);
-					double newLength = MyCoordinatesGeometry
-							.getLengthBetween2Points(coord, true);
+					double newLength = MyCoordinatesGeometry.getLengthBetween2Points(coord, true);
 					if (newLength > lengthTemp) {
 						coordTemp = coord;
 						lengthTemp = newLength;
@@ -147,21 +144,16 @@ public class Spindle {
 	 * @param cellShapeRoi
 	 * @param cal
 	 */
-	public void setFeatures(double[] coordinates, Measures measures,
-			Roi cellShapeRoi, Calibration cal) {
+	public void setFeatures(double[] coordinates, Measures measures, Roi cellShapeRoi, Calibration cal) {
 
 		feature = "SPINDLE";
-		double[] absoluteAngleLengthXYCenter = MyCoordinatesGeometry
-				.getAngleLengthXYCenterFromCoor(coordinates, true);
-		Line spindleLine = new Line(coordinates[0], coordinates[1],
-				coordinates[3], coordinates[4]);
+		double[] absoluteAngleLengthXYCenter = MyCoordinatesGeometry.getAngleLengthXYCenterFromCoor(coordinates, true);
+		Line spindleLine = new Line(coordinates[0], coordinates[1], coordinates[3], coordinates[4]);
 		length = spindleLine.getLength();
 		lengthToMajorAxis = measures.getMajor() / length;
 		spAbsoAng = absoluteAngleLengthXYCenter[0];
-		ReportingUtils.logMessage("cellAngle : " + measures.getAngle() + "\n"
-				+ "spindleAngle : " + spAbsoAng);
-		angleToMajorAxis = MyCoordinatesGeometry.getAngleToAxis(
-				measures.getAngle(), spAbsoAng);
+		ReportingUtils.logMessage("cellAngle : " + measures.getAngle() + "\n" + "spindleAngle : " + spAbsoAng);
+		angleToMajorAxis = MyCoordinatesGeometry.getAngleToAxis(measures.getAngle(), spAbsoAng);
 		if (angleToMajorAxis > 90) {
 			angleToMajorAxis -= 180;
 			angleToMajorAxis = Math.abs(angleToMajorAxis);
@@ -172,14 +164,10 @@ public class Spindle {
 		centerSpX = absoluteAngleLengthXYCenter[2];
 		centerSpY = absoluteAngleLengthXYCenter[3];
 		// center of Roi in um
-		centerCellX = measures.getXCentroid() - roiBeforeCrop.getXBase()
-				* cal.pixelWidth;
-		centerCellY = measures.getYCentroid() - roiBeforeCrop.getYBase()
-				* cal.pixelHeight;
-		ReportingUtils.logMessage("xcentroid " + measures.getXCentroid() + "\n"
-				+ "ycentroid " + measures.getYCentroid() + "\n" + "xbase "
-				+ +roiBeforeCrop.getXBase() + "\n" + "ybase "
-				+ roiBeforeCrop.getYBase());
+		centerCellX = measures.getXCentroid() - roiBeforeCrop.getXBase() * cal.pixelWidth;
+		centerCellY = measures.getYCentroid() - roiBeforeCrop.getYBase() * cal.pixelHeight;
+		ReportingUtils.logMessage("xcentroid " + measures.getXCentroid() + "\n" + "ycentroid " + measures.getYCentroid()
+				+ "\n" + "xbase " + +roiBeforeCrop.getXBase() + "\n" + "ybase " + roiBeforeCrop.getYBase());
 		// pixel
 		Line tempLine = new Line(centerCellX, centerCellY, centerSpX, centerSpY);
 

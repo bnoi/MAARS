@@ -1,13 +1,12 @@
 package fiji.plugin.maars.cellstateanalysis;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.micromanager.utils.ReportingUtils;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import ij.process.ImageProcessor;
 import fiji.plugin.trackmate.Spot;
