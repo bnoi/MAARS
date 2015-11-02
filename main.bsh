@@ -1,7 +1,7 @@
-base_dir = "D:/Data/Tong/MAARS/";
+//base_dir = "D:/Data/Tong/MAARS/";
 //base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
-//base_dir = "/Users/theoli89/Documents/MAARS/";
+base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
 
@@ -34,31 +34,31 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
 
-double calibration = gui.getMMCore().getPixelSizeUm();
+double calibration = mm.core().getPixelSizeUm();
 mmc.setAutoShutter(false);
 mmc.waitForDevice(mmc.getShutterDevice());
 
-gui.message("Create main window");
+print("Create main window");
 MaarsMainDialog md = null;
 
 try {
-	md = new MaarsMainDialog(gui, mmc, base_dir + "maars_config.txt");
+	md = new MaarsMainDialog(mm, mmc, base_dir + "maars_config.txt");
 } catch (IOException e) {
-	gui.message("Error");
+	print("Error");
 }
 
-gui.message("Show main window");
+print("Show main window");
 md.show();
 
 while(md.isVisible()) {
-	gui.sleep(1000);
+	Thread.sleep(1000);
 }
 
 if(md.isOkClicked()) {
 	start = System.currentTimeMillis();
-	gui.message("start "+start);
+	print("start "+start);
 	AllMaarsParameters param = null;
-	autofocus = gui.getAutofocus();
+	autofocus = mm.getAutofocus();
 	param = md.getParameters();
 	mmc.setOriginXY(mmc.getXYStageDevice());
 	int nbXField = param
@@ -73,7 +73,7 @@ if(md.isOkClicked()) {
 						.getAsJsonObject()
 						.get(AllMaarsParameters.Y_FIELD_NUMBER)
 						.getAsInt();
-	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
+	print("nb x field "+nbXField+" nb y field "+nbYField);
 	String[] outputHeader = new String[]{
 		"Cell",
 		"Second",
@@ -107,11 +107,11 @@ if(md.isOkClicked()) {
 														(double) mmc.getImageWidth()*calibration,
 														(double) mmc.getImageHeight()*calibration);
 		for (int i = 0; i < explo.length(); i++) {
-			gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
+			print("x : "+explo.getX(i)+" y : "+explo.getY(i));
 			double xPos = explo.getX(i);
 			double yPos = explo.getY(i);
 			
-			gui.setXYStagePosition(xPos,yPos);
+			mm.core().setXYPosition(xPos,yPos);
 			
 			MaarsAcquisitionForSegmentation mas = new MaarsAcquisitionForSegmentation(md,
 					xPos,
@@ -187,7 +187,7 @@ if(md.isOkClicked()) {
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
 							double acqTook = System.currentTimeMillis() - beginAcq;
-							gui.sleep((long) (timeInterval - acqTook));	
+							Thread.sleep((long) (timeInterval - acqTook));	
 							acqNameFluo = null;
 							fluoImage = null;	
 						}
@@ -229,12 +229,12 @@ if(md.isOkClicked()) {
 		}
 		mmc.setAutoShutter(true);
 		mmc.waitForDevice(mmc.getShutterDevice());
-		gui.message("end "+System.currentTimeMillis());
-		gui.message("it took "+(System.currentTimeMillis()-start));
-		gui.message("DONE.");
+		print("end "+System.currentTimeMillis());
+		print("it took "+(System.currentTimeMillis()-start));
+		print("DONE.");
 	}else{
-		gui.message("Session aborted, 0 field to analyse");
+		print("Session aborted, 0 field to analyse");
 	}
 	}else{
-		gui.message("Session aborted, click 'OK' to start analyse.");
+		print("Session aborted, click 'OK' to start analyse.");
 }

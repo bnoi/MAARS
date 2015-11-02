@@ -101,7 +101,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		ReportingUtils.logMessage("Close all previous acquisitions");
 		mm.closeAllAcquisitions();
 		try {
-			mm.clearMessageWindow();
+			mm.getScriptController().clearMessageWindow();
 		} catch (MMScriptException e) {
 			ReportingUtils.logMessage("could not clear message window");
 			ReportingUtils.logError(e);

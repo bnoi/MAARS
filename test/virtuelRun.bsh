@@ -45,119 +45,119 @@ double calibration = mm.core().getPixelSizeUm();
 print("Create main window");
 MaarsMainDialog md = null;
 try {
-	md = new MaarsMainDialog(mmc, mm, base_dir + "maars_config.txt");
+	md = new MaarsMainDialog(mm, mmc, base_dir + "maars_config.txt");
 } catch (IOException e) {
-	gui.message("Error");
+	print("Error");
 }
 
 print("Show main window");
 
 md.show();
 
-//while(md.isVisible()) {
-//	gui.sleep(1000);
-//}
-//
-//if(md.isOkClicked()) {
-//	start = System.currentTimeMillis();
-//	gui.message("start "+start);
-//	AllMaarsParameters param = null;
-//
-//	gui.message("AutoFocusing...");
-//	autofocus = gui.getAutofocus();
-//	gui.message("Getting parameters...");
-//	param = md.getParameters();
-//
-//	int nbXField = param
-//						.getParametersAsJsonObject()
-//						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-//						.getAsJsonObject()
-//						.get(AllMaarsParameters.X_FIELD_NUMBER)
-//						.getAsInt();
-//	int nbYField = param
-//						.getParametersAsJsonObject()
-//						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-//						.getAsJsonObject()
-//						.get(AllMaarsParameters.Y_FIELD_NUMBER)
-//						.getAsInt();
-//	
-//	gui.message("nb x field "+nbXField+" nb y field "+nbYField);
-//
-//	if (nbXField * nbYField != 0){
-//	ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
-//													nbYField,
-//													(double) mmc.getImageWidth()*calibration,
-//													(double) mmc.getImageHeight()*calibration);
-//
-//	ImagePlus fluoImage = null;
-//	for (int i = 0; i < explo.length(); i++) {
-//		gui.message("x : "+explo.getX(i)+" y : "+explo.getY(i));
-//		double xPos = explo.getX(i);
-//		double yPos = explo.getY(i);
-//
-//		MaarsSegmentation ms = new MaarsSegmentation(param,
-//				xPos,
-//				yPos);
-//		ms.segmentation();
-//		ms.writeUsedConfig();
-//		
-//		if (ms.roiDetected()){
-//			String fluoFolder = AllMaarsParameters.convertPath(param
-//													.getParametersAsJsonObject()
-//													.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-//													.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
-//													.getAsString()
-//													+ "/movie_X"
-//													+ Math.round(xPos)
-//													+ "_Y"
-//													+ Math.round(yPos) +"_FLUO");
-//			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject(), xPos, yPos);
-//			MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
-//															xPos,
-//															yPos,
-//															mfa.getSetOfCells());
-//		int frame = 0;
-//
-//		while(frame<2){
-//			String channels = param.getParametersAsJsonObject()
-//					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-//					.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
-//					.getAsString();
-//			String[] arrayChannels = channels.split(",", -1);
-//			for (String channel:arrayChannels) {
-//				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
-//				fluoImage = IJ.openImage(fluoFolder + "/"
-//					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
-//
-//				mfa.setFluoImage(fluoImage);
-//				mfa.zProject();
-//				mfa.cropAllCells();
-//				mfa.analyzeEntireFieldReturnListSp(frame,channel);
-//
-//			}
-//			// close roi manager
-//			mfa.getSetOfCells().closeRoiManager();
-//			frame++;
-//			acqNameFluo = null;
-//			fluoImage = null;
-//		}
-//		if (param.getParametersAsJsonObject()
-//					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-//					.getAsJsonObject()
-//					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
-//					.getAsBoolean()) {
-//				mfa.saveCroppedImgs();
-//			}
-//		ms = null;
-//		}
-//		gui.message("end "+System.currentTimeMillis());
-//		gui.message("it took "+(System.currentTimeMillis()-start));
-//		gui.message("DONE.");
-//	}
-//
-//	}else{
-//		gui.message("Session aborted, 0 field to analyse");
-//	}
-//	}else{
-//		gui.message("Session aborted, click 'OK' to start analyse.");
-//}
+while(md.isVisible()) {
+	Thread.sleep(1000);
+}
+
+if(md.isOkClicked()) {
+	start = System.currentTimeMillis();
+	print("start "+start);
+	AllMaarsParameters param = null;
+
+	print("AutoFocusing...");
+	autofocus = mm.getAutofocus();
+	print("Getting parameters...");
+	param = md.getParameters();
+
+	int nbXField = param
+						.getParametersAsJsonObject()
+						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.X_FIELD_NUMBER)
+						.getAsInt();
+	int nbYField = param
+						.getParametersAsJsonObject()
+						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.Y_FIELD_NUMBER)
+						.getAsInt();
+	
+	print("nb x field "+nbXField+" nb y field "+nbYField);
+
+	if (nbXField * nbYField != 0){
+	ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
+													nbYField,
+													(double) mmc.getImageWidth()*calibration,
+													(double) mmc.getImageHeight()*calibration);
+
+	ImagePlus fluoImage = null;
+	for (int i = 0; i < explo.length(); i++) {
+		print("x : "+explo.getX(i)+" y : "+explo.getY(i));
+		double xPos = explo.getX(i);
+		double yPos = explo.getY(i);
+
+		MaarsSegmentation ms = new MaarsSegmentation(param,
+				xPos,
+				yPos);
+		ms.segmentation();
+		ms.writeUsedConfig();
+		
+		if (ms.roiDetected()){
+			String fluoFolder = AllMaarsParameters.convertPath(param
+													.getParametersAsJsonObject()
+													.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+													.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+													.getAsString()
+													+ "/movie_X"
+													+ Math.round(xPos)
+													+ "_Y"
+													+ Math.round(yPos) +"_FLUO");
+			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject(), xPos, yPos);
+			MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
+															xPos,
+															yPos,
+															mfa.getSetOfCells());
+		int frame = 0;
+
+		while(frame<2){
+			String channels = param.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
+					.getAsString();
+			String[] arrayChannels = channels.split(",", -1);
+			for (String channel:arrayChannels) {
+				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
+				fluoImage = IJ.openImage(fluoFolder + "/"
+					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
+
+				mfa.setFluoImage(fluoImage);
+				mfa.zProject();
+				mfa.cropAllCells();
+				mfa.analyzeEntireFieldReturnListSp(frame,channel);
+
+			}
+			// close roi manager
+			mfa.getSetOfCells().closeRoiManager();
+			frame++;
+			acqNameFluo = null;
+			fluoImage = null;
+		}
+		if (param.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject()
+					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
+					.getAsBoolean()) {
+				mfa.saveCroppedImgs();
+			}
+		ms = null;
+		}
+		print("end "+System.currentTimeMillis());
+		print("it took "+(System.currentTimeMillis()-start));
+		print("DONE.");
+	}
+
+	}else{
+		print("Session aborted, 0 field to analyse");
+	}
+	}else{
+		print("Session aborted, click 'OK' to start analyse.");
+}

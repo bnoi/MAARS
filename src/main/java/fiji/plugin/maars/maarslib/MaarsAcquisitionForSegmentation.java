@@ -1,10 +1,14 @@
 package fiji.plugin.maars.maarslib;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.util.HashMap;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.acquisition.TaggedImageStorageMultipageTiff;
-import org.micromanager.internal.utils.MMScriptException;
+import org.micromanager.data.Datastore;
+import org.micromanager.data.DatastoreFrozenException;
+import org.micromanager.data.SummaryMetadata;
+import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
+import org.micromanager.display.DisplayWindow;
 import org.micromanager.internal.utils.ReportingUtils;
 import mmcorej.CMMCore;
 
@@ -17,7 +21,7 @@ import mmcorej.CMMCore;
  */
 
 public class MaarsAcquisitionForSegmentation {
-	private MMStudio gui;
+	private MMStudio mm;
 	private CMMCore mmc;
 	private AllMaarsParameters parameters;
 	private double positionX;
@@ -27,7 +31,7 @@ public class MaarsAcquisitionForSegmentation {
 	/**
 	 * Constructor :
 	 *
-	 * @param gui
+	 * @param mm
 	 *            : graphical user interface of Micro-Manager
 	 * @param mmc
 	 *            : Core object of Micro-Manager
@@ -38,9 +42,9 @@ public class MaarsAcquisitionForSegmentation {
 	 * @param positionY
 	 *            : y field position (can be defined by ExplorationXYPositions)
 	 */
-	public MaarsAcquisitionForSegmentation(MMStudio gui, CMMCore mmc,
+	public MaarsAcquisitionForSegmentation(MMStudio mm, CMMCore mmc,
 			AllMaarsParameters parameters, double positionX, double positionY) {
-		this.gui = gui;
+		this.mm = mm;
 		this.mmc = mmc;
 		this.parameters = parameters;
 		this.positionX = positionX;
@@ -51,7 +55,7 @@ public class MaarsAcquisitionForSegmentation {
 	 * Constructor :
 	 *
 	 * @param md
-	 *            : main window of MAARS (contains gui, mmc and parameters)
+	 *            : main window of MAARS (contains mm, mmc and parameters)
 	 * @param positionX
 	 *            : x field position (can be defined by ExplorationXYPositions)
 	 * @param positionY
@@ -59,7 +63,7 @@ public class MaarsAcquisitionForSegmentation {
 	 */
 	public MaarsAcquisitionForSegmentation(MaarsMainDialog md,
 			double positionX, double positionY) {
-		gui = md.getGui();
+		mm = md.getMM();
 		mmc = md.getMMC();
 		parameters = md.getParameters();
 		this.positionX = positionX;
@@ -129,29 +133,34 @@ public class MaarsAcquisitionForSegmentation {
 		}
 		
 		ReportingUtils
-				.logMessage("... Initialize an acquisition");
+				.logMessage("... Initialize a Datastore");
+		Datastore segDS = null;
 		try {
-			gui.openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber, show, true);
-		} catch (MMScriptException e2) {
-			ReportingUtils.logError(e2);
+			segDS = mm.getDataManager().createMultipageTIFFDatastore(pathToMovie, false, true);
+		} catch (IOException e3) {
+			// TODO Auto-generated catch block
+			e3.printStackTrace();
 		}
-		ReportingUtils.logMessage("... Set save format to TIF");
-		try {
-			gui.setImageSavingFormat(TaggedImageStorageMultipageTiff.class);
-		} catch (MMScriptException e3) {
-			ReportingUtils.logError(e3);
-		}
+//			openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber, show, true);
 		
+		DisplayWindow segDW = mm.getDisplayManager().getCurrentWindow().duplicate();
+		SummaryMetadataBuilder summaryMD = segDS.getSummaryMetadata().copy();
+		summaryMD = summaryMD.channelGroup(channelGroup);
+		String[] channels = new String[1];
+		channels[0] = channel;
+		summaryMD = summaryMD.channelNames(channels);
 		ReportingUtils.logMessage("... Set up Channel");
+//			mm.getDisplayManager().getDisplays(segDS)..setChannelColor(acqName,0, color);
+		
+		summaryMD = summaryMD.name(acqName);
+		
+//			mm.setChannelName(acqName, 0, channel);
+		SummaryMetadata newSegMD = summaryMD.build();
 		try {
-			gui.setChannelColor(acqName,0, color);
-		} catch (MMScriptException e4) {
-			ReportingUtils.logError(e4);
-		}
-		try {
-			gui.setChannelName(acqName, 0, channel);
-		} catch (MMScriptException e4) {
-			ReportingUtils.logError(e4);
+			segDS.setSummaryMetadata(newSegMD);
+		} catch (DatastoreFrozenException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
 		ReportingUtils.logMessage("... Set shutter open");
 		try {
@@ -187,26 +196,30 @@ public class MaarsAcquisitionForSegmentation {
 			}
 			ReportingUtils.logMessage("...snap and add images");
 			try {
-				gui.snapAndAddImage(acqName, frameNumber, 0, k, 0);
-			} catch (MMScriptException e) {
-				ReportingUtils.logError(e);
+				segDS.putImage(mm.getSnapLiveManager().snap(true).get(0));
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DatastoreFrozenException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+//				mm.snapAndAddImage(acqName, frameNumber, 0, k, 0);
+			mm.getSnapLiveManager().snap(false).remove(0);
 			z = z + step;
 		}
-		ReportingUtils.logMessage("finish image cache");
-		try {
-			gui.getAcquisitionImageCache(acqName).finished();
-		} catch (MMScriptException e1) {
-			ReportingUtils.logError(e1);
-		}
+		segDS.save(Datastore.SaveMode.MULTIPAGE_TIFF, pathToMovie);
+		
+//		ReportingUtils.logMessage("finish image cache");
+//		try {
+//			mm.getAcquisitionImageCache(acqName).finished();
+//		} catch (MMScriptException e1) {
+//			ReportingUtils.logError(e1);
+//		}
 		ReportingUtils.logMessage("--- Acquisition done.");
-		try {
-			gui.closeAcquisitionWindow(acqName);
-		} catch (MMScriptException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		gui.closeAllAcquisitions();
+		mm.getDisplayManager().getDisplays(segDS).get(0).forceClosed();
+//			mm.closeAcquisitionWindow(acqName);
+//		mm.closeAllAcquisitions();
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.waitForDevice(mmc.getFocusDevice());
@@ -232,13 +245,11 @@ public class MaarsAcquisitionForSegmentation {
 			ReportingUtils.logMessage("Could not clear ROI");
 			e2.printStackTrace();
 		}
-		gui.closeAllAcquisitions();
-		try {
-			gui.clearMessageWindow();
-		} catch (MMScriptException e) {
-			ReportingUtils.logMessage("could not clear message window");
-			e.printStackTrace();
-		}
+//		mm.closeAllAcquisitions();
+		mm.getDataManager().clearPipeline();
+		
+		mm.getScriptController().clearMessageWindow();
+		
 		ReportingUtils.logMessage("... Initialize parameters :");
 		String channelGroup = parameters.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
