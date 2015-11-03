@@ -428,7 +428,7 @@ public class MaarsFluoAnalysis {
 		writer = new CSVWriter(spotListWriter, '\t',
 				CSVWriter.NO_QUOTE_CHARACTER);
 		writer.writeNext(new String[] { "VISIBILITY", "POSITION_T",
-				"POSITION_Z", "POSITION_Y", "RADIUS", "FRAME", "POSITION_X" });
+				"POSITION_Z", "POSITION_Y", "RADIUS", "FRAME", "POSITION_X","cellNumber" });
 
 		writer.writeAll(spotListForOneCell);
 		try {

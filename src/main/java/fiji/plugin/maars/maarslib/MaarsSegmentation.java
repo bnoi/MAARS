@@ -22,7 +22,7 @@ public class MaarsSegmentation {
 	private String pathToSegMovie;
 	private String pathToSegDir;
 	private CellsBoundaries cB;
-	private boolean roiDetected = true;
+	private boolean roiDetected = false;
 
 	/**
 	 * Constructor :
