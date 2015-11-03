@@ -52,7 +52,6 @@ public class MaarsMainDialog implements ActionListener {
 	private JTextField fluoAcqDuration;
 	private JRadioButton dynamicOpt;
 	private JRadioButton staticOpt;
-	// private Button mitosisMovieButton;
 
 	/**
 	 * Constructor :

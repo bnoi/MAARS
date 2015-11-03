@@ -184,27 +184,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 	}
 
 	/**
-	 * Method to add one of the ROI to RoiManager
-	 * 
-	 * @param cellIndex
-	 *            : index of ROI the user want to add to the manager
-	 * @param roiType
-	 *            : type of ROI to add, must be "cellLinearROI" for linear ROI
-	 *            and "cellShapeROI" for non-linear ones
-	 */
-//	public void addRoiToManager(int cellIndex, String roiType) {
-//		if (roiType == "cellShapeROI") {
-//			roiManager.addRoi(cellArray.get(cellIndex).getCellShapeRoi());
-//		} else {
-//			if (roiType == "cellLinearROI") {
-//				roiManager.addRoi(cellArray.get(cellIndex).getLinearRoi());
-//			} else {
-//				ReportingUtils.logMessage("Not an option");
-//			}
-//		}
-//	}
-
-	/**
 	 * Closes RoiManager
 	 */
 	public void closeRoiManager() {

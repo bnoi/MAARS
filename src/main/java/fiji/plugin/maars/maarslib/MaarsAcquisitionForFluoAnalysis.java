@@ -109,7 +109,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 		ReportingUtils.logMessage("________________________________");
 
 		ReportingUtils.logMessage("Close all previous acquisitions");
-//		mm.closeAllAcquisitions();
 		mm.getDataManager().clearPipeline();
 		mm.getScriptController().clearMessageWindow();
 		ReportingUtils.logMessage("... Initialize parameters :");
@@ -216,33 +215,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-//		try {
-//			mmc..openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber + 1, show, true);
-//		} catch (MMScriptException e2) {
-//			ReportingUtils.logError(e2);
-//		}
-		// Autofocus autofocus = gui.getAutofocus();
-		// try {
-		// autofocus.fullFocus();
-		// } catch (MMException e2) {
-		// // TODO Auto-generated catch block
-		// e2.printStackTrace();
-		// }
-
-		// ReportingUtils.logMessage("... set channel color");
-		// try {
-		// gui.setChannelColor(acqName,0, color);
-		// } catch (MMScriptException e) {
-		// ReportingUtils.logMessage("Could not set channel color");
-		// ReportingUtils.logError(e);
-		// }
-		// ReportingUtils.logMessage("... set channel name");
-		// try {
-		// gui.setChannelName(acqName, 0, channel);
-		// } catch (MMScriptException e) {
-		// ReportingUtils.logMessage("could not set channel name");
-		// ReportingUtils.logError(e);
-		// }
 		ReportingUtils.logMessage("... set shutter open");
 		try {
 			mmc.setShutterOpen(true);
@@ -287,13 +259,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 				e.printStackTrace();
 			}
 			mm.getSnapLiveManager().snap(false).remove(0);
-			
-			
-//			gui.snapAndAddImage(acqName, 0, 0, k, 0);
-//			MMAcquisition acq = gui.getAcquisitionWithName(acqName);
-//			ReportingUtils.logMessage("...creat new image coord");
-//			CoordsBuilder newCoord = mm.getDataManager().getCoordsBuilder();
-//			newCoord.z(k);
 			ReportingUtils.logMessage("# of images : " + String.valueOf(fluoDS.getNumImages()));
 			ReportingUtils.logMessage("Max index : " + String.valueOf(fluoDS.getMaxIndices()));
 			
@@ -320,13 +285,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 		zProjectField.setCalibration(cal);
 		ReportingUtils.logMessage("--- Acquisition done.");
 		fluoDS.close();
-//		try {
-//			gui.closeAcquisitionWindow(acqName);
-//		} catch (MMScriptException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//		gui.closeAllAcquisitions();
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.waitForDevice(mmc.getFocusDevice());

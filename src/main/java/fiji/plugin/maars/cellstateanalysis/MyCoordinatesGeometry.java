@@ -341,10 +341,6 @@ public class MyCoordinatesGeometry {
 			double[] XYCenter = new double[2];
 			XYCenter = getCenterBetween2Points(coordinates[0], coordinates[1],
 					coordinates[3], coordinates[4]); 
-			
-//			XYCenter = convertPolarToCartesianCoor(coordinates[0],
-//					coordinates[1], angleLengthXYCenter[1] / 2,
-//					angleLengthXYCenter[0]);
 
 			angleLengthXYCenter[2] = XYCenter[0];
 			angleLengthXYCenter[3] = XYCenter[1];
@@ -361,9 +357,6 @@ public class MyCoordinatesGeometry {
 			double[] XYCenter = new double[2];
 			XYCenter = getCenterBetween2Points(coordinates[0], coordinates[1],
 					coordinates[2], coordinates[3]);
-//			XYCenter = convertPolarToCartesianCoor(coordinates[0],
-//					coordinates[1], angleLengthXYCenter[1] / 2,
-//					angleLengthXYCenter[0]);
 
 			angleLengthXYCenter[2] = XYCenter[0];
 			angleLengthXYCenter[3] = XYCenter[1];

@@ -41,7 +41,6 @@ public class MaarsSegmentation {
 				parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString() + "/movie_X"
 						+ Math.round(positionX) + "_Y" + Math.round(positionY));
-//		this.pathToSegMovie = AllMaarsParameters.convertPath(pathToSegDir + "/MMStack_Pos0.ome.tif");
 		this.pathToSegMovie = AllMaarsParameters.convertPath(pathToSegDir + "/MMStack.ome.tif");
 	}
 

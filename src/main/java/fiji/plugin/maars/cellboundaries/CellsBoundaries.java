@@ -284,8 +284,6 @@ public class CellsBoundaries implements PlugIn {
 
 		// Allow the user to choose the zFocus
 		Panel preciseZFocusPanel = new Panel();
-		// BoxLayout preciseZFocusLayout = new BoxLayout(preciseZFocusPanel,
-		// BoxLayout.X_AXIS);
 
 		preciseZFocusCheckbox = new Checkbox(
 				"Precise the slice corresponding to focus (default is the middle one)");

@@ -124,10 +124,6 @@ public class MaarsAcquisitionForSegmentation {
 		} catch (IOException e3) {
 			ReportingUtils.logMessage("... Can not initialize Datastore");
 		}
-		// openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber,
-		// show, true);
-//		ReportingUtils.logMessage("... Duplicate display window");
-//		DisplayWindow segDW = mm.getDisplayManager().getCurrentWindow().duplicate();
 		ReportingUtils.logMessage("... Update summaryMetadata");
 		SummaryMetadataBuilder summaryMD = segDS.getSummaryMetadata().copy();
 		summaryMD = summaryMD.channelGroup(channelGroup);
@@ -137,10 +133,6 @@ public class MaarsAcquisitionForSegmentation {
 		summaryMD = summaryMD.name(acqName);
 		SummaryMetadata newSegMD = summaryMD.build();
 		
-//		ReportingUtils.logMessage("... Set up Channel");
-		// mm.getDisplayManager().getDisplays(segDS)..setChannelColor(acqName,0,
-		// color);
-		// mm.setChannelName(acqName, 0, channel);
 		try {
 			segDS.setSummaryMetadata(newSegMD);
 		} catch (DatastoreFrozenException e2) {
@@ -190,22 +182,11 @@ public class MaarsAcquisitionForSegmentation {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			// mm.snapAndAddImage(acqName, frameNumber, 0, k, 0);
 			mm.getSnapLiveManager().snap(false).remove(0);
 			z = z + step;
 		}
-//		segDS.save(Datastore.SaveMode.MULTIPAGE_TIFF, rootDirName);
-
-		// ReportingUtils.logMessage("finish image cache");
-		// try {
-		// mm.getAcquisitionImageCache(acqName).finished();
-		// } catch (MMScriptException e1) {
-		// ReportingUtils.logError(e1);
-		// }
 		ReportingUtils.logMessage("--- Acquisition done.");
 		segDS.close();
-		// mm.closeAcquisitionWindow(acqName);
-		// mm.closeAllAcquisitions();
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.waitForDevice(mmc.getFocusDevice());
@@ -229,7 +210,6 @@ public class MaarsAcquisitionForSegmentation {
 			ReportingUtils.logMessage("Could not clear ROI");
 			e2.printStackTrace();
 		}
-		// mm.closeAllAcquisitions();
 		mm.getDataManager().clearPipeline();
 
 		mm.getScriptController().clearMessageWindow();
