@@ -1,12 +1,21 @@
 package fiji.plugin.maars.maarslib;
 
 import java.awt.Color;
+import java.io.IOException;
 
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 
 import org.micromanager.internal.MMStudio;
 import org.micromanager.acquisition.internal.MMAcquisition;
+import org.micromanager.data.Coords;
+import org.micromanager.data.Coords.CoordsBuilder;
+import org.micromanager.data.Datastore;
+import org.micromanager.data.DatastoreFrozenException;
+import org.micromanager.data.Image;
+import org.micromanager.data.ImageJConverter;
+import org.micromanager.data.SummaryMetadata;
+import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
 import org.micromanager.internal.utils.MMScriptException;
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -15,6 +24,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.plugin.ZProjector;
+import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
 /**
@@ -99,13 +109,9 @@ public class MaarsAcquisitionForFluoAnalysis {
 		ReportingUtils.logMessage("________________________________");
 
 		ReportingUtils.logMessage("Close all previous acquisitions");
-		mm.closeAllAcquisitions();
-		try {
-			mm.getScriptController().clearMessageWindow();
-		} catch (MMScriptException e) {
-			ReportingUtils.logMessage("could not clear message window");
-			ReportingUtils.logError(e);
-		}
+//		mm.closeAllAcquisitions();
+		mm.getDataManager().clearPipeline();
+		mm.getScriptController().clearMessageWindow();
 		ReportingUtils.logMessage("... Initialize parameters :");
 
 		String channelGroup = parameters.getParametersAsJsonObject()
@@ -153,6 +159,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 		String acqName = "movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY) + "_FLUO/" + frame + "_"
 				+ channel;
+		
+		String pathToMovie = rootDirName + "/" + acqName;
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 
 		ReportingUtils.logMessage("... Set shutter device");
@@ -185,11 +193,34 @@ public class MaarsAcquisitionForFluoAnalysis {
 		} catch (Exception e1) {
 			ReportingUtils.logError(e1);
 		}
+		
+		ReportingUtils.logMessage("... Initialize a Datastore");
+		Datastore fluoDS = null;
 		try {
-			mmc..openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber + 1, show, true);
-		} catch (MMScriptException e2) {
-			ReportingUtils.logError(e2);
+			fluoDS = mm.getDataManager().createMultipageTIFFDatastore(pathToMovie, false, false);
+		} catch (IOException e3) {
+			ReportingUtils.logMessage("... Can not initialize Datastore");
 		}
+		
+		ReportingUtils.logMessage("... Update summaryMetadata");
+		SummaryMetadataBuilder summaryMD = fluoDS.getSummaryMetadata().copy();
+		summaryMD = summaryMD.channelGroup(channelGroup);
+		String[] channels = new String[1];
+		channels[0] = channel;
+		summaryMD = summaryMD.channelNames(channels);
+		summaryMD = summaryMD.name(acqName);
+		SummaryMetadata newSegMD = summaryMD.build();
+		try {
+			fluoDS.setSummaryMetadata(newSegMD);
+		} catch (DatastoreFrozenException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+//		try {
+//			mmc..openAcquisition(acqName, rootDirName, frameNumber, 1, sliceNumber + 1, show, true);
+//		} catch (MMScriptException e2) {
+//			ReportingUtils.logError(e2);
+//		}
 		// Autofocus autofocus = gui.getAutofocus();
 		// try {
 		// autofocus.fullFocus();
@@ -244,12 +275,35 @@ public class MaarsAcquisitionForFluoAnalysis {
 			} catch (Exception e) {
 				ReportingUtils.logError(e);
 			}
-			gui.snapAndAddImage(acqName, 0, 0, k, 0);
-			MMAcquisition acq = gui.getAcquisitionWithName(acqName);
-
-			TaggedImage img = acq.getImageCache().getImage(0, k, 0, 0);
+			
+			ReportingUtils.logMessage("...snap and add images");
+			try {
+				fluoDS.putImage(mm.getSnapLiveManager().snap(true).get(0));
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DatastoreFrozenException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			mm.getSnapLiveManager().snap(false).remove(0);
+			
+			
+//			gui.snapAndAddImage(acqName, 0, 0, k, 0);
+//			MMAcquisition acq = gui.getAcquisitionWithName(acqName);
+//			ReportingUtils.logMessage("...creat new image coord");
+//			CoordsBuilder newCoord = mm.getDataManager().getCoordsBuilder();
+//			newCoord.z(k);
+			ReportingUtils.logMessage("# of images : " + String.valueOf(fluoDS.getNumImages()));
+			ReportingUtils.logMessage("Max index : " + String.valueOf(fluoDS.getMaxIndices()));
+			
+			Image img = fluoDS.getImage(fluoDS.getMaxIndices());
+			ReportingUtils.logMessage("Convert image to ij.ImageProcessor");
+			ImageProcessor imgProcessor = mm.getDataManager().ij().createProcessor(img);
 			ShortProcessor shortProcessor = new ShortProcessor((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-			shortProcessor.setPixels(img.pix);
+			ReportingUtils.logMessage("Put pixels in new ImagePlus");
+			shortProcessor.setPixels(imgProcessor.getPixels());
+			ReportingUtils.logMessage("Add ImagePlus into a duplicate of DataStore");
 			imageStack.addSlice(shortProcessor);
 			z = z + step;
 		}
@@ -265,13 +319,14 @@ public class MaarsAcquisitionForFluoAnalysis {
 		cal.pixelHeight = mmc.getPixelSizeUm();
 		zProjectField.setCalibration(cal);
 		ReportingUtils.logMessage("--- Acquisition done.");
-		try {
-			gui.closeAcquisitionWindow(acqName);
-		} catch (MMScriptException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		gui.closeAllAcquisitions();
+		fluoDS.close();
+//		try {
+//			gui.closeAcquisitionWindow(acqName);
+//		} catch (MMScriptException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		gui.closeAllAcquisitions();
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.waitForDevice(mmc.getFocusDevice());
