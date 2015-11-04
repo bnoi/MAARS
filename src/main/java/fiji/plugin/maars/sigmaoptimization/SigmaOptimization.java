@@ -5,14 +5,13 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import fiji.plugin.maars.segmentPombe.ComputeCorrelation;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
-
-import fiji.plugin.maars.cellboundaries.ComputeCorrelation;
 
 /**
  * ImajeJ plugin used to optimise sigma parameter used in segmentation process

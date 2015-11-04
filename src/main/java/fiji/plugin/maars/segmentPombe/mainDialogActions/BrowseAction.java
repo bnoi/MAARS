@@ -1,4 +1,4 @@
-package fiji.plugin.maars.cellboundaries;
+package fiji.plugin.maars.segmentPombe.mainDialogActions;
 
 import ij.ImagePlus;
 
@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+import fiji.plugin.maars.segmentPombe.SegPombeMainDialog;
+import fiji.plugin.maars.segmentPombe.SegPombeParameters;
 import loci.formats.FormatException;
 import loci.plugins.LociImporter;
 import loci.plugins.in.DisplayHandler;
@@ -16,7 +18,7 @@ import loci.plugins.in.ImporterOptions;
 
 /**
  * 
- * @author marie
+ * @author Tong LI
  *
  */
 
@@ -26,15 +28,15 @@ public class BrowseAction implements ActionListener {
 	private Importer impt;
 	private ImportProcess imptProcess = null;
 	private ImagePlus imgPlus = null;
-	private CellsBoundaries cB;
-	private CBParameters parameters;
+	private SegPombeMainDialog mainDialog;
+	private SegPombeParameters parameters;
 
 	/**
 	 * 
 	 * @param cB
 	 */
-	public BrowseAction(CellsBoundaries cB, CBParameters parameters) {
-		this.cB = cB;
+	public BrowseAction(SegPombeMainDialog mainDialog, SegPombeParameters parameters) {
+		this.mainDialog = mainDialog;
 		this.parameters = parameters;
 	}
 
@@ -88,9 +90,9 @@ public class BrowseAction implements ActionListener {
 		}
 
 		parameters.setImageToAnalyze(imgPlus);
-		cB.resetFileNameField();
-		cB.setFileNameField(imptProcess.getIdName());
-		cB.setPathDirField(imgPlus.getOriginalFileInfo().directory);
+		mainDialog.resetFileNameField();
+		mainDialog.setFileNameField(imptProcess.getIdName());
+		mainDialog.setPathDirField(imgPlus.getOriginalFileInfo().directory);
 
 	}
 

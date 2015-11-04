@@ -1,4 +1,4 @@
-package fiji.plugin.maars.cellboundaries;
+package fiji.plugin.maars.segmentPombe;
 
 public class ComputeCorrelation {
 	private float[] iz;
