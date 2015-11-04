@@ -20,49 +20,24 @@ import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 
 public class CellsBoundariesIdentification {
-
-	// Parameters for algorithm
+	
+	private CBParameters parameters;
+	private String savingPath;
 	private ImagePlus imageToAnalyze;
-	private ImagePlus focusImage;
-	private ImagePlus imgCorrTemp;
-	private int sigma;
-	private float zFocus;
-	private int direction; // this is the direction of the equation to integrate
-	// it is 1 for image with cell boundaries be black then white
-	// it is -1 for image with cell boundaries be white then black
-
-	// Parameters to filter results
-	private double minParticleSize;
-	private double maxParticleSize;
-	private boolean filterUnusualShape;
-	private double unusualShapeFilteringThreshold;
-	private boolean filterWithMeanGrayValue;
-	private double meanGreyValueThreshold;
-
+	
 	// Variables to get results
 	private FloatProcessor correlationImage = null;
 	private ByteProcessor byteImage;
 	private ImagePlus binCorrelationImage;
+	private ImagePlus imgCorrTemp;
 	private ResultsTable resultTable;
 	private ParticleAnalyzer particleAnalyzer;
 	private Analyzer analyzer;
 	private RoiManager roiManager;
 	private Roi[] roiArray;
+	
 	private boolean roiDetected = true;
-
-	// Result Optionsshuffle [] java
-	private boolean displayCorrelationImg;
-	private boolean displayBinaryImg;
-	private boolean displayDataFrame;
-	private boolean displayFocusImage;
-	private boolean saveCorrelationImg;
-	private boolean saveBinaryImg;
-	private boolean saveDataFrame;
-	private boolean saveFocusImage;
-	private boolean saveRoi;
-	private String savingPath;
-	private boolean flushImageToAnalyze;
-
+	private float zFocus;
 	/**
 	 * Constructor 1 : need a CellsBoundaries object and int sigma : is the
 	 * typical height of the cells you want to get int direction : depends on
@@ -77,12 +52,12 @@ public class CellsBoundariesIdentification {
 	 * steps and errors of the process boolean flushImageToAnalyze : to empty
 	 * the ImageProcessor of image to analyze
 	 */
-	public CellsBoundariesIdentification(CellsBoundaries cB, int sigma, double minParticleSize, double maxParticleSize,
+	public CellsBoundariesIdentification(CBParameters parameters, int sigma, double minParticleSize, double maxParticleSize,
 			int direction, float zf, double solidityThreshold, double meanGrayValueThreshold, boolean makeLogFile,
 			boolean flushImageToAnalyze) {
-
-		this.imageToAnalyze = cB.getImageToAnalyze();
-		this.savingPath = cB.getPathDirField().getText();
+		this.parameters = parameters;
+		this.imageToAnalyze = parameters.getImageToAnalyze();
+		this.savingPath = parameters.getSavingPath();
 
 		if (makeLogFile) {
 			try {
@@ -96,8 +71,8 @@ public class CellsBoundariesIdentification {
 			}
 		}
 
-		this.sigma = sigma;
-		this.filterUnusualShape = cB.getFilterUnususalCkb().getState();
+		this.parameters.setSigma(sigma);
+		this.parameters.willFiltrateUnusualShape = cB.getFilterUnususalCkb().getState();
 		this.filterWithMeanGrayValue = cB.getFilterWithMeanGreyValueCkb().getState();
 		this.minParticleSize = minParticleSize / imageToAnalyze.getCalibration().pixelWidth;
 		this.maxParticleSize = maxParticleSize / imageToAnalyze.getCalibration().pixelWidth;

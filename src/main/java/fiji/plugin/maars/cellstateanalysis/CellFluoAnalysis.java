@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory.ESTIMATED_DIAMETER;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.TrackMate;
 import ij.ImagePlus;
 import ij.measure.Calibration;
@@ -72,7 +72,7 @@ public class CellFluoAnalysis {
 			trackmate.execInitialSpotFiltering();
 			ReportingUtils.logMessage("execInitialSpotFiltering done");
 	
-			trackmate.computeSpotFeatures(false);
+			trackmate.computeSpotFeatures(true);
 			ReportingUtils.logMessage("computeSpotFeatures done");
 	
 			trackmate.execSpotFiltering(true);
@@ -83,7 +83,7 @@ public class CellFluoAnalysis {
 		
 			res = new ArrayList<Spot>();
 			for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
-				ReportingUtils.logMessage(spot.getFeature(Spot.QUALITY).toString());
+
 				Map<String, Double> features = spot.getFeatures();
 				if (croppedRoi.contains((int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
 										(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight))){

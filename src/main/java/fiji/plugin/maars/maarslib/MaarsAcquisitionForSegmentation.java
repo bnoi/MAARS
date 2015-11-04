@@ -8,7 +8,6 @@ import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.SummaryMetadata;
 import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
-//import org.micromanager.display.DisplayWindow;
 import org.micromanager.internal.utils.ReportingUtils;
 import mmcorej.CMMCore;
 

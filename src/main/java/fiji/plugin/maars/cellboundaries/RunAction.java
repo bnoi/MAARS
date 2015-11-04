@@ -14,6 +14,8 @@ import javax.swing.JTextField;
 public class RunAction implements ActionListener {
 
 	private CellsBoundaries cB;
+	private CBParameters parameters;
+	private ImagePlus imgToAnalysis;
 
 	// Parameters of the algorithm
 	private CellsBoundariesIdentification cellBoundId;
@@ -34,10 +36,27 @@ public class RunAction implements ActionListener {
 	// been checked
 	private boolean unitsChecked;
 
-	public RunAction(CellsBoundaries cB) {
+	public RunAction(CellsBoundaries cB, CBParameters parameters) {
 		this.cB = cB;
+		this.parameters = parameters;
+//		String savingPath = cB.getFileNameField().getText();
+//		this.parameters.setSavingPath(savingPath);
+//		this.parameters.setWillFiltrateUnusualShape(cB.getFilterUnususalCkb().getState());
+//		this.parameters.setWillFiltrateWithMeanGrayValue(cB.getFilterWithMeanGreyValueCkb().getState());
+//		this.parameters.setWillSaveBinaryImg(cB.getWillSaveBinaryImgCkb().getState());
+//		this.parameters.setWillSaveCorrelationImg(cB.getWillSaveCorrelationImgCkb().getState());
+//		this.parameters.setWillSaveDataFrame(cB.getWillSaveDataFrameCkb().getState());
+//		this.parameters.setWillSaveFocusImage(cB.getWillSaveFocusImageCkb().getState());
+//		this.parameters.setWillSaveRoi(cB.getwillSaveRoiCkb().getState());
+//		this.parameters.setWillShowBinaryImg(cB.getWillShowBinaryImgCkb().getState());
+//		this.parameters.setWillShowCorrelationImg(cB.getWillShowCorrelationImgCkb().getState());
+//		this.parameters.setWillShowDataFrame(cB.getWillShowDataFrameCkb().getState());
+//		this.parameters.setWillChangeScale(cB.getWillChangeScaleCkb().getState());
+//		this.parameters.setWillShowFocusImage(cB.getWillShowFocusImageCkb().getState());
+		
 		fileNameField = cB.getFileNameField();
 		unitsChecked = false;
+		this.imgToAnalysis = parameters.getImageToAnalyze();
 
 	}
 
@@ -67,7 +86,7 @@ public class RunAction implements ActionListener {
 	public int convertMicronToPixelSize(double micronSize,
 			int widthOrHeightOrDepth) {
 		int pixelSize = (int) Math.round(micronSize
-				/ cB.getScale()[widthOrHeightOrDepth]);
+				/ parameters.getScale(widthOrHeightOrDepth));
 		return pixelSize;
 	}
 
@@ -79,7 +98,7 @@ public class RunAction implements ActionListener {
 	 */
 	public double convertPixelToMicronSize(int pixelSize,
 			int widthOrHeightOrDepth) {
-		double micronSize = (double) cB.getScale()[widthOrHeightOrDepth]
+		double micronSize = (double) parameters.getScale(widthOrHeightOrDepth)
 				* pixelSize;
 
 		return micronSize;
@@ -90,30 +109,25 @@ public class RunAction implements ActionListener {
 	 */
 	public void checkUnitsAndScale() {
 		System.out.println("Check if image is scaled");
-		if (cB.getImageToAnalyze().getCalibration().scaled()) {
+		if (imgToAnalysis.getCalibration().scaled()) {
 
-			if (cB.getImageToAnalyze().getCalibration().getUnit().equals("cm")) {
-				cB.getImageToAnalyze().getCalibration().setUnit("micron");
-				cB.getImageToAnalyze().getCalibration().pixelWidth = cB
-						.getImageToAnalyze().getCalibration().pixelWidth * 10000;
-				cB.getImageToAnalyze().getCalibration().pixelHeight = cB
-						.getImageToAnalyze().getCalibration().pixelHeight * 10000;
+			if (imgToAnalysis.getCalibration().getUnit().equals("cm")) {
+				imgToAnalysis.getCalibration().setUnit("micron");
+				imgToAnalysis.getCalibration().pixelWidth = imgToAnalysis
+						.getCalibration().pixelWidth * 10000;
+				imgToAnalysis.getCalibration().pixelHeight = imgToAnalysis
+						.getCalibration().pixelHeight * 10000;
 			}
 
 			System.out.println("Check if unit of calibration is micron");
-			if (cB.getImageToAnalyze().getCalibration().getUnit()
-					.equals("micron")
-					|| cB.getImageToAnalyze().getCalibration().getUnit()
-							.equals("µm")) {
+			if (imgToAnalysis.getCalibration().getUnit().equals("micron")
+					|| imgToAnalysis.getCalibration().getUnit().equals("µm")) {
 				double[] scale = new double[3];
-				scale[CellsBoundaries.WIDTH] = cB.getImageToAnalyze()
-						.getCalibration().pixelWidth;
-				scale[CellsBoundaries.HEIGHT] = cB.getImageToAnalyze()
-						.getCalibration().pixelHeight;
-				scale[CellsBoundaries.DEPTH] = cB.getImageToAnalyze()
-						.getCalibration().pixelDepth;
+				scale[CBParameters.WIDTH] = imgToAnalysis.getCalibration().pixelWidth;
+				scale[CBParameters.HEIGHT] = imgToAnalysis.getCalibration().pixelHeight;
+				scale[CBParameters.DEPTH] = imgToAnalysis.getCalibration().pixelDepth;
 
-				cB.setScale(scale);
+				parameters.setScale(scale);
 				unitsChecked = true;
 				System.out.println("Get and set calibration as scale");
 			} else {
@@ -139,7 +153,7 @@ public class RunAction implements ActionListener {
 		int newMinParticleSize;
 		Calibration newCal = new Calibration();
 		newCal.setUnit("micron");
-		ImagePlus img = cB.getImageToAnalyze();
+		ImagePlus img = imgToAnalysis;
 		if (img.getWidth() > maxWidth) {
 			System.out
 					.println("Image width is greater than maximum width allowed");
@@ -154,11 +168,11 @@ public class RunAction implements ActionListener {
 
 			if (img.getCalibration().scaled()) {
 
-				newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]
+				newCal.pixelWidth = parameters.getScale(CBParameters.WIDTH)
 						* img.getWidth() / maxWidth;
-				newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]
+				newCal.pixelHeight = parameters.getScale(CBParameters.HEIGHT)
 						* img.getWidth() / maxWidth;
-				newCal.pixelDepth = cB.getScale()[CellsBoundaries.DEPTH];
+				newCal.pixelDepth = parameters.getScale(CBParameters.DEPTH);
 			}
 
 			System.out.println("New values : w = " + newWidth + " h = "
@@ -175,11 +189,13 @@ public class RunAction implements ActionListener {
 						/ img.getHeight();
 
 				if (img.getCalibration().scaled()) {
-					newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]
+					newCal.pixelWidth = parameters.getScale(CBParameters.WIDTH)
 							* img.getHeight() / maxHeight;
-					newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]
-							* img.getHeight() / maxHeight;
-					newCal.pixelDepth = cB.getScale()[CellsBoundaries.DEPTH];
+					newCal.pixelHeight = parameters
+							.getScale(CBParameters.HEIGHT)
+							* img.getHeight()
+							/ maxHeight;
+					newCal.pixelDepth = parameters.getScale(CBParameters.DEPTH);
 				}
 
 				System.out.println("New values : w = " + newWidth + " h = "
@@ -203,11 +219,13 @@ public class RunAction implements ActionListener {
 						/ img.getHeight();
 
 				if (img.getCalibration().scaled()) {
-					newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]
+					newCal.pixelWidth = parameters.getScale(CBParameters.WIDTH)
 							* img.getHeight() / maxHeight;
-					newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]
-							* img.getHeight() / maxHeight;
-					newCal.pixelDepth = cB.getScale()[CellsBoundaries.DEPTH];
+					newCal.pixelHeight = parameters
+							.getScale(CBParameters.HEIGHT)
+							* img.getHeight()
+							/ maxHeight;
+					newCal.pixelDepth = parameters.getScale(CBParameters.DEPTH);
 				}
 
 				System.out.println("New values : w = " + newWidth + " h = "
@@ -222,11 +240,16 @@ public class RunAction implements ActionListener {
 							/ img.getWidth();
 
 					if (img.getCalibration().scaled()) {
-						newCal.pixelWidth = cB.getScale()[CellsBoundaries.WIDTH]
-								* img.getWidth() / maxWidth;
-						newCal.pixelHeight = cB.getScale()[CellsBoundaries.HEIGHT]
-								* img.getWidth() / maxWidth;
-						newCal.pixelDepth = cB.getScale()[CellsBoundaries.DEPTH];
+						newCal.pixelWidth = parameters
+								.getScale(CBParameters.WIDTH)
+								* img.getWidth()
+								/ maxWidth;
+						newCal.pixelHeight = parameters
+								.getScale(CBParameters.HEIGHT)
+								* img.getWidth()
+								/ maxWidth;
+						newCal.pixelDepth = parameters
+								.getScale(CBParameters.DEPTH);
 					}
 
 					System.out.println("New values : w = " + newWidth + " h = "
@@ -260,17 +283,17 @@ public class RunAction implements ActionListener {
 
 		ImageStack newImgStack = new ImageStack(newWidth, newHeight);
 
-		for (int slice = 0; slice < cB.getImageToAnalyze().getNSlices(); slice++) {
-			cB.getImageToAnalyze().setZ(slice);
-			newImgStack.addSlice(cB.getImageToAnalyze().getProcessor()
-					.resize(newWidth, newHeight));
+		for (int slice = 0; slice < imgToAnalysis.getNSlices(); slice++) {
+			imgToAnalysis.setZ(slice);
+			newImgStack.addSlice(imgToAnalysis.getProcessor().resize(newWidth,
+					newHeight));
 		}
 
 		ImagePlus newImagePlus = new ImagePlus("rescaled_"
-				+ cB.getImageToAnalyze().getTitle(), newImgStack);
+				+ imgToAnalysis.getTitle(), newImgStack);
 		newImagePlus.setCalibration(newCal);
 
-		cB.setImageToAnalyze(newImagePlus);
+		parameters.setImageToAnalyze(newImagePlus);
 
 		checkUnitsAndScale();
 	}
@@ -343,7 +366,7 @@ public class RunAction implements ActionListener {
 						if (CellsBoundaries.MICRONS == cB.getSizeComUnit()
 								.getSelectedIndex() && unitsChecked) {
 							sigma = convertMicronToPixelSize(typicalCellSize,
-									CellsBoundaries.DEPTH);
+									CBParameters.DEPTH);
 							System.out
 									.println("typical size is in micron, convert it in pixels : "
 											+ sigma);
@@ -377,9 +400,9 @@ public class RunAction implements ActionListener {
 									&& unitsChecked) {
 								minParticleSize = minParticleSizeTemp
 										* convertMicronToPixelSize(1,
-												CellsBoundaries.WIDTH)
+												CBParameters.WIDTH)
 										* convertMicronToPixelSize(1,
-												CellsBoundaries.HEIGHT);
+												CBParameters.HEIGHT);
 								System.out
 										.println("Cell Area is in micron, convert it in pixels : "
 												+ minParticleSize);
@@ -415,9 +438,9 @@ public class RunAction implements ActionListener {
 										&& unitsChecked) {
 									maxParticleSize = maxParticleSizeTemp
 											* convertMicronToPixelSize(1,
-													CellsBoundaries.WIDTH)
+													CBParameters.WIDTH)
 											* convertMicronToPixelSize(1,
-													CellsBoundaries.HEIGHT);
+													CBParameters.HEIGHT);
 									System.out
 											.println("Cell Area is in micron, convert it in pixels : "
 													+ maxParticleSize);
@@ -477,7 +500,7 @@ public class RunAction implements ActionListener {
 
 												maxWidth = convertMicronToPixelSize(
 														newMaxWidth,
-														CellsBoundaries.WIDTH);
+														CBParameters.WIDTH);
 												System.out
 														.println("Width value is in micron, convert it in pixel : "
 																+ maxWidth);
@@ -495,7 +518,7 @@ public class RunAction implements ActionListener {
 
 												maxHeight = convertMicronToPixelSize(
 														newMaxHeight,
-														CellsBoundaries.HEIGHT);
+														CBParameters.HEIGHT);
 												System.out
 														.println("Height value is in micron, convert it in pixel : "
 																+ maxHeight);
@@ -518,8 +541,7 @@ public class RunAction implements ActionListener {
 										.println("Check if user wants to precise z focus");
 								if (cB.getPreciseZFocusCheckbox().getState()) {
 
-									float zf = (cB.getImageToAnalyze()
-											.getNSlices() / 2);
+									float zf = (imgToAnalysis.getNSlices() / 2);
 
 									System.out
 											.println("Try to read z focus value");
@@ -531,7 +553,7 @@ public class RunAction implements ActionListener {
 										IJ.error(
 												"Wrong parameter",
 												"The slice corresponding to focus\nis supposed to be a number\n1 <= focus slice <= "
-														+ cB.getImageToAnalyze()
+														+ imgToAnalysis
 																.getNSlices()
 														+ "\nProgram will continue with default focus slice");
 										cB.getPreciseZFocusCheckbox().setState(
@@ -541,7 +563,7 @@ public class RunAction implements ActionListener {
 										IJ.error(
 												"Wrong parameter",
 												"If you want to precise focus slice,\nplease fill correctly the field\n1 <= focus slice <= "
-														+ cB.getImageToAnalyze()
+														+ imgToAnalysis
 																.getNSlices()
 														+ "\nProgram will continue with default focus slice");
 										cB.getPreciseZFocusCheckbox().setState(
@@ -551,8 +573,7 @@ public class RunAction implements ActionListener {
 									zFocus = zf - 1;
 
 								} else {
-									zFocus = (cB.getImageToAnalyze()
-											.getNSlices() / 2) - 1;
+									zFocus = (imgToAnalysis.getNSlices() / 2) - 1;
 								}
 
 								System.out
@@ -624,7 +645,7 @@ public class RunAction implements ActionListener {
 								System.out.println("Aaaaand ACTION!");
 
 								cellBoundId = new CellsBoundariesIdentification(
-										cB, sigma, minParticleSize,
+										parameters, sigma, minParticleSize,
 										maxParticleSize, cB.getDirection(),
 										zFocus, solidityThreshold,
 										meanGrayValThreshold, false, true);

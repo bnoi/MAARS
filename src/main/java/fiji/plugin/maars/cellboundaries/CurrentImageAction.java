@@ -9,14 +9,16 @@ import java.awt.event.ActionListener;
 public class CurrentImageAction implements ActionListener {
 
 	private CellsBoundaries cB;
-
-	public CurrentImageAction(CellsBoundaries cB) {
+	private CBParameters parameters;
+	
+	public CurrentImageAction(CellsBoundaries cB, CBParameters parameters) {
 		this.cB = cB;
+		this.parameters = parameters;
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
 		cB.getAlreadryOpenedImage();
 		cB.resetFileNameField();
-		cB.setFileNameField(cB.getImageToAnalyze().getTitle());
+		cB.setFileNameField(parameters.getImageToAnalyze().getTitle());
 	}
 }

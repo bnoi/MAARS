@@ -4,16 +4,11 @@ import java.awt.Color;
 import java.io.IOException;
 
 import mmcorej.CMMCore;
-import mmcorej.TaggedImage;
 
 import org.micromanager.internal.MMStudio;
-import org.micromanager.acquisition.internal.MMAcquisition;
-import org.micromanager.data.Coords;
-import org.micromanager.data.Coords.CoordsBuilder;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.Image;
-import org.micromanager.data.ImageJConverter;
 import org.micromanager.data.SummaryMetadata;
 import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
 import org.micromanager.internal.utils.MMScriptException;

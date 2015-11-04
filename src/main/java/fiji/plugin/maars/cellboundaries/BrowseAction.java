@@ -1,9 +1,11 @@
 package fiji.plugin.maars.cellboundaries;
 
 import ij.ImagePlus;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+
 import loci.formats.FormatException;
 import loci.plugins.LociImporter;
 import loci.plugins.in.DisplayHandler;
@@ -25,13 +27,15 @@ public class BrowseAction implements ActionListener {
 	private ImportProcess imptProcess = null;
 	private ImagePlus imgPlus = null;
 	private CellsBoundaries cB;
+	private CBParameters parameters;
 
 	/**
 	 * 
 	 * @param cB
 	 */
-	public BrowseAction(CellsBoundaries cB) {
+	public BrowseAction(CellsBoundaries cB, CBParameters parameters) {
 		this.cB = cB;
+		this.parameters = parameters;
 	}
 
 	/**
@@ -83,7 +87,7 @@ public class BrowseAction implements ActionListener {
 			e1.printStackTrace();
 		}
 
-		cB.setImageToAnalyze(imgPlus);
+		parameters.setImageToAnalyze(imgPlus);
 		cB.resetFileNameField();
 		cB.setFileNameField(imptProcess.getIdName());
 		cB.setPathDirField(imgPlus.getOriginalFileInfo().directory);

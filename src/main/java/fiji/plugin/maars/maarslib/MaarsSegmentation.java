@@ -53,7 +53,8 @@ public class MaarsSegmentation {
 		ImagePlus img = IJ.openImage(pathToSegMovie);
 
 		cB = new CellsBoundaries();
-		cB.setMainWindow();
+		cB.initRunAction();
+		cB.initCancelAction();
 
 		cB.getDisplayFocusImage().setState(false);
 		cB.getSaveBinaryImg().setState(true);
