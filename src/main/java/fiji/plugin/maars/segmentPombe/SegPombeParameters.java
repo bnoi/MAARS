@@ -15,7 +15,7 @@ public class SegPombeParameters {
 
 	// Parameters of the algorithm
 	private ImagePlus imageToAnalyze;
-	private float sigma = 3;
+	private double sigma = 3;
 	private int focusSlide = 16;
 	private boolean changeScale = true;
 	private int maxWidth = 1500;
@@ -25,10 +25,10 @@ public class SegPombeParameters {
 	// it is -1 for image with cell boundaries be white then black
 	
 	// Parameters to filter results
-	private float minParticleSize = 500;
-	private float maxParticleSize = 40000;
-	private float solidityThreshold = Float.parseFloat("0.84");
-	private float meanGreyValueThreshold = -177660;
+	private double minParticleSize = 500;
+	private double maxParticleSize = 40000;
+	private double solidityThreshold = 0.84;
+	private double meanGreyValueThreshold = -177660;
 	private boolean filterAbnormalShape = true;
 	private boolean filtrateWithMeanGrayValue = true;
 
@@ -67,11 +67,11 @@ public class SegPombeParameters {
 		this.imageToAnalyze = imageToAnalyze;
 	}
 
-	public float getSigma() {
+	public double getSigma() {
 		return sigma;
 	}
 
-	public void setSigma(float sigma) {
+	public void setSigma(double sigma) {
 		this.sigma = sigma;
 	}
 
@@ -191,35 +191,35 @@ public class SegPombeParameters {
 		return this.scales[INDEX];
 	}
 
-	public float getMinParticleSize() {
+	public double getMinParticleSize() {
 		return minParticleSize;
 	}
 
-	public void setMinParticleSize(float minParticleSize) {
+	public void setMinParticleSize(double minParticleSize) {
 		this.minParticleSize = minParticleSize;
 	}
 
-	public float getMaxParticleSize() {
+	public double getMaxParticleSize() {
 		return maxParticleSize;
 	}
 
-	public void setMaxParticleSize(float maxParticleSize) {
+	public void setMaxParticleSize(double maxParticleSize) {
 		this.maxParticleSize = maxParticleSize;
 	}
 
-	public float getSolidityThreshold() {
+	public double getSolidityThreshold() {
 		return solidityThreshold;
 	}
 
-	public void setSolidityThreshold(float solidityThreshold) {
+	public void setSolidityThreshold(double solidityThreshold) {
 		this.solidityThreshold = solidityThreshold;
 	}
 
-	public float getMeanGreyValueThreshold() {
+	public double getMeanGreyValueThreshold() {
 		return meanGreyValueThreshold;
 	}
 
-	public void setMeanGreyValueThreshold(float meanGreyValueThreshold) {
+	public void setMeanGreyValueThreshold(double meanGreyValueThreshold) {
 		this.meanGreyValueThreshold = meanGreyValueThreshold;
 	}
 

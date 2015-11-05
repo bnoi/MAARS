@@ -20,15 +20,25 @@ import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 
 /**
-* @author Tong LI, mail: tongli.bioinfo@gmail.com
-* @version Nov 4, 2015
-*/
+ * @author Tong LI, mail: tongli.bioinfo@gmail.com
+ * @version Nov 4, 2015
+ */
 public class SegPombe {
-	
-	private SegPombeParameters parameters;
+
 	private String savingPath;
 	private ImagePlus imageToAnalyze;
-	
+	private ImagePlus focusImg;
+
+	private double sigma;
+	private double zFocus;
+	private double minParticleInMicron;
+	private double maxParticleInMicron;
+
+	private double solidityThreshold;
+	private double meanGreyValueThreshold;
+	private boolean filterAbnormalShape;
+	private boolean filtrateWithMeanGrayValue;
+
 	// Variables to get results
 	private FloatProcessor correlationImage;
 	private ByteProcessor byteImage;
@@ -39,14 +49,29 @@ public class SegPombe {
 	private Analyzer analyzer;
 	private RoiManager roiManager;
 	private Roi[] roiArray;
-	
+
+	// Options related to display and save
+	private boolean showCorrelationImg;
+	private boolean showBinaryImg;
+	private boolean showDataFrame;
+	private boolean showFocusImage;
+
+	private boolean saveCorrelationImg;
+	private boolean saveBinaryImg;
+	private boolean saveDataFrame;
+	private boolean saveFocusImage;
+	private boolean saveRoi;
+
+	private boolean flushImageToAnalyze = false;
+
+	private int direction;
+
 	private boolean roiDetected = false;
-	private float zFocus;
+
 	/**
 	 * Constructor
 	 */
 	public SegPombe(SegPombeParameters parameters) {
-		this.parameters = parameters;
 		this.imageToAnalyze = parameters.getImageToAnalyze();
 		this.savingPath = parameters.getSavingPath();
 
@@ -60,165 +85,31 @@ public class SegPombe {
 			e.printStackTrace();
 		}
 
-		this.sigma;
-		this.filterAbnormal;
-		this.filterWithMeanGrayValue;
-		this.minParticleSize = minParticleSize / imageToAnalyze.getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize / imageToAnalyze.getCalibration().pixelWidth;
-		this.direction ;
+		this.sigma = parameters.getSigma();
+		this.filterAbnormalShape = parameters.filterAbnormalShape();
+		this.filtrateWithMeanGrayValue = parameters.filtrateWithMeanGrayValue();
+		this.minParticleInMicron = parameters.getMinParticleSize() / imageToAnalyze.getCalibration().pixelWidth;
+		this.maxParticleInMicron = parameters.getMaxParticleSize() / imageToAnalyze.getCalibration().pixelWidth;
+		this.direction = parameters.getDirection();
 
 		// ResultOptions
-		displayCorrelationImg;
-		displayBinaryImg ;
-		displayDataFrame ;
-		displayFocusImage ;
+		this.showCorrelationImg = parameters.showCorrelationImg();
+		this.showBinaryImg = parameters.showBinaryImg();
+		this.showDataFrame = parameters.showDataFrame();
+		this.showFocusImage = parameters.showFocusImage();
 
-		saveCorrelationImg ;
-		saveBinaryImg ;
-		saveDataFrame ;
-		saveFocusImage ;
-		saveRoi ;
-		this.flushImageToAnalyze = false;
-		zFocus ;
-
-		getFocusImage();
-
-		unusualShapeFilteringThreshold = solidityThreshold;
-		this.meanGreyValueThreshold = meanGrayValueThreshold;
-
-	}
-
-	/**
-	 * Constructor 2 : need an ImagePlus object, a sigma value and a boolean
-	 * notifying if the cells must be filtered according to there shape. Default
-	 * result options are also set : true for all.
-	 */
-	public CellsBoundariesIdentification(ImagePlus imageToAnalyse, int sigma, boolean filterUnusualShape,
-			boolean filterWithMinGrayValue, String savingPath, double minParticleSize, double maxParticleSize,
-			int direction, float zf, double solidityThreshold, double meanGrayValueThreshold) {
-
-		this.savingPath = savingPath;
-
-		this.imageToAnalyze = imageToAnalyse;
-
-		try {
-			PrintStream ps = new PrintStream(
-					savingPath + imageToAnalyse.getShortTitle() + "BoundariesIdentification.LOG");
-			System.setOut(ps);
-			System.setErr(ps);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		this.sigma = sigma;
-		this.filterUnusualShape = filterUnusualShape;
-		this.direction = direction;
-
-		// Default ResultOptions
-		displayCorrelationImg = true;
-		displayBinaryImg = true;
-		displayDataFrame = true;
-		displayFocusImage = true;
-
-		saveCorrelationImg = true;
-		saveBinaryImg = true;
-		saveDataFrame = true;
-		saveFocusImage = true;
-		saveRoi = true;
-
-		this.flushImageToAnalyze = true;
-
-		this.minParticleSize = minParticleSize / imageToAnalyse.getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize / imageToAnalyse.getCalibration().pixelWidth;
-
-		zFocus = zf;
-
-		unusualShapeFilteringThreshold = solidityThreshold;
-		this.meanGreyValueThreshold = meanGrayValueThreshold;
-		this.filterWithMeanGrayValue = filterWithMinGrayValue;
+		this.saveCorrelationImg = parameters.saveCorrelationImg();
+		this.saveBinaryImg = parameters.saveBinaryImg();
+		this.saveDataFrame = parameters.saveDataFrame();
+		this.saveFocusImage = parameters.saveFocusImage();
+		this.saveRoi = parameters.saveRoi();
+		this.zFocus = parameters.getFocusSlide();
 
 		getFocusImage();
-	}
 
-	/**
-	 * Constructor 3 : need to enter all the variables. int sigma : is the
-	 * typical height of the cells you want to get int direction : depends on
-	 * how you made you movie -> -1 if the boundaries of the cells are black on
-	 * the first slice and white on the last one -> 1 if the boundaries of the
-	 * cells are white on the first slice and black on the last one IJ ij : IJ
-	 * object to display error message boolean enableDoSomethingElseInParallel :
-	 * this variable is supposed to allow or not to run the program on one
-	 * thread only true means you can do something else during the running
-	 * boolean filterUnusualShape : filter shape with solidity < threshold
-	 * boolean filterWithMinGrayValue : filter background with min >= threshold
-	 * boolean displayCorrelationImg : show correlation image boolean
-	 * displayBinaryImg : show binary image boolean displayDataFrame : show data
-	 * frame boolean displayFocusImage : show focus Image boolean
-	 * saveCorrelationImg : save correlation image boolean saveBinaryImg : save
-	 * binary image boolean saveDataFrame : save data frame boolean
-	 * saveFocusImage : save focus image boolean saveRoi : save Regions of
-	 * Interest in a zip folder String savingPath : path where the data are
-	 * being saved double minParticleSize : minimum area of cells double
-	 * maxParticleSize : maximum area of cells float zf : slice corresponding to
-	 * focus on the movie double solidityThreshold : threshold to filter unusual
-	 * shape using solidity measure double meanGrayValueThreshold : threshold to
-	 * filter background using minimum gray value measure boolean makeLogFile :
-	 * create a file with steps and errors of the process boolean
-	 * flushImageToAnalyze : to empty the ImageProcessor of image to analyze
-	 */
-	public CellsBoundariesIdentification(ImagePlus imageToAnalyse, int sigma, int direction, boolean filterUnusualShape,
-			boolean filterWithMinGrayValue, boolean displayCorrelationImg, boolean displayBinaryImg,
-			boolean displayDataFrame, boolean displayFocusImage, boolean saveCorrelationImg, boolean saveBinaryImg,
-			boolean saveDataFrame, boolean saveFocusImage, boolean saveRoi, String savingPath, double minParticleSize,
-			double maxParticleSize, float zf, double solidityThreshold, double meanGrayValueThreshold,
-			boolean makeLogFile, boolean flushImageToAnalyze) {
+		this.solidityThreshold = parameters.getSolidityThreshold();
+		this.meanGreyValueThreshold = parameters.getMeanGreyValueThreshold();
 
-		this.savingPath = savingPath;
-
-		this.imageToAnalyze = imageToAnalyse;
-
-		if (makeLogFile) {
-			try {
-				PrintStream ps = new PrintStream(
-						savingPath + imageToAnalyse.getShortTitle() + "BoundariesIdentification.LOG");
-				System.setOut(ps);
-				System.setErr(ps);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		this.sigma = sigma;
-		this.filterUnusualShape = filterUnusualShape;
-		this.direction = direction;
-
-		// ResultOptions
-		this.displayCorrelationImg = displayCorrelationImg;
-		this.displayBinaryImg = displayBinaryImg;
-		this.displayDataFrame = displayDataFrame;
-		this.displayFocusImage = displayFocusImage;
-
-		this.saveCorrelationImg = saveCorrelationImg;
-		this.saveBinaryImg = saveBinaryImg;
-		this.saveDataFrame = saveDataFrame;
-		this.saveFocusImage = saveFocusImage;
-		this.saveRoi = saveRoi;
-
-		this.flushImageToAnalyze = flushImageToAnalyze;
-
-		this.minParticleSize = minParticleSize / imageToAnalyse.getCalibration().pixelWidth;
-		this.maxParticleSize = maxParticleSize / imageToAnalyse.getCalibration().pixelWidth;
-
-		zFocus = zf;
-
-		unusualShapeFilteringThreshold = solidityThreshold;
-
-		this.meanGreyValueThreshold = meanGrayValueThreshold;
-		this.filterWithMeanGrayValue = filterWithMinGrayValue;
-
-		getFocusImage();
 	}
 
 	// I know it is messy but I have not found an other solution yet
@@ -227,15 +118,15 @@ public class SegPombe {
 
 		imageToAnalyze.setZ((int) Math.round(zFocus) - 1);
 
-		focusImage = new ImagePlus(imageToAnalyze.getShortTitle() + "FocusImage",
+		focusImg = new ImagePlus(imageToAnalyze.getShortTitle() + "FocusImage",
 				imageToAnalyze.getProcessor().duplicate());
 
 		if (imageToAnalyze.getCalibration().scaled()) {
-			focusImage.setCalibration(imageToAnalyze.getCalibration());
+			focusImg.setCalibration(imageToAnalyze.getCalibration());
 		}
 
 		if (saveFocusImage) {
-			FileSaver fileSaver = new FileSaver(focusImage);
+			FileSaver fileSaver = new FileSaver(focusImg);
 			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_FocusImage.tif");
 		}
 	}
@@ -257,8 +148,8 @@ public class SegPombe {
 
 			for (int y = 0; y < imageToAnalyze.getHeight(); y++) {
 				// initiate variable to compute correlation value
-				float zf = zFocus;
-				float[] iz = new float[imageToAnalyze.getNSlices()];
+				double zf = zFocus;
+				double[] iz = new double[imageToAnalyze.getNSlices()];
 
 				for (int z = 0; z < imageToAnalyze.getNSlices(); z++) {
 					imageToAnalyze.setZ(z);
@@ -329,17 +220,17 @@ public class SegPombe {
 						+ ParticleAnalyzer.ADD_TO_MANAGER,
 				Measurements.AREA + Measurements.CENTROID + Measurements.PERIMETER + Measurements.SHAPE_DESCRIPTORS
 						+ Measurements.ELLIPSE,
-				resultTable, minParticleSize, maxParticleSize);
+				resultTable, minParticleInMicron, maxParticleInMicron);
 
-		System.out.println("minParticleSize " + minParticleSize + " maxParticleSize " + maxParticleSize);
+		System.out.println("minParticleSize " + minParticleInMicron + " maxParticleSize " + maxParticleInMicron);
 		System.out.println("Analyse particles on " + binCorrelationImage.getTitle() + " ...");
 
 		particleAnalyzer.analyze(binCorrelationImage);
 		System.out.println("Done");
 
-		if (filterUnusualShape || filterWithMeanGrayValue) {
+		if (filterAbnormalShape || filtrateWithMeanGrayValue) {
 
-			if (filterWithMeanGrayValue) {
+			if (filtrateWithMeanGrayValue) {
 
 				System.out.println("Filtering with mean grey value...");
 				ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
@@ -392,7 +283,7 @@ public class SegPombe {
 				}
 			}
 
-			if (filterUnusualShape) {
+			if (filterAbnormalShape) {
 
 				System.out.println("Filtering with solidity...");
 				Integer nbRoi = roiManager.getCount();
@@ -408,7 +299,7 @@ public class SegPombe {
 
 					System.out.println("- delete from result table roi unwanted");
 					for (int i = 0; i < resultTable.getColumn(ResultsTable.SOLIDITY).length; i++) {
-						if (resultTable.getValue("Solidity", i) <= unusualShapeFilteringThreshold) {
+						if (resultTable.getValue("Solidity", i) <= solidityThreshold) {
 							rowTodelete.add(i);
 						} else {
 							roiArray[i].setName("" + name);
@@ -457,7 +348,7 @@ public class SegPombe {
 			}
 		}
 
-		if (displayDataFrame) {
+		if (showDataFrame) {
 			System.out.println("display data frame");
 			resultTable.show("Result");
 			System.out.println("done.");
@@ -477,12 +368,12 @@ public class SegPombe {
 			roiManager.close();
 		}
 
-		if (displayFocusImage) {
+		if (showFocusImage) {
 			System.out.println("show focus image");
-			focusImage.show();
+			focusImg.show();
 		} else {
 			System.out.println("flush focus image");
-			focusImage.flush();
+			focusImg.flush();
 		}
 
 		if (saveBinaryImg && roiDetected) {
@@ -491,7 +382,7 @@ public class SegPombe {
 			FileSaver fileSaver = new FileSaver(binCorrelationImage);
 			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_BinaryImage.tif");
 		}
-		if (displayBinaryImg) {
+		if (showBinaryImg) {
 			System.out.println("show binary image");
 			binCorrelationImage.show();
 		} else {
@@ -505,7 +396,7 @@ public class SegPombe {
 			FileSaver fileSaver = new FileSaver(imgCorrTemp);
 			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_CorrelationImage.tif");
 		}
-		if (displayCorrelationImg) {
+		if (showCorrelationImg) {
 			System.out.println("show correlation image");
 			imgCorrTemp.show();
 		} else {
@@ -536,11 +427,11 @@ public class SegPombe {
 		analyseAndFilterParticles();
 		showAndSaveResultsAndCleanUp();
 	}
-	
+
 	/**
 	 * Return if any roi detected
 	 */
-	public boolean roiDetected(){
+	public boolean roiDetected() {
 		return this.roiDetected;
 	}
 

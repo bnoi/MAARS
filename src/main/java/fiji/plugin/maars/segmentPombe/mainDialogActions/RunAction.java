@@ -27,18 +27,4 @@ public class RunAction implements ActionListener {
 		SegPombeParameters parameters = process.getFinalParameters();
 		SegPombe segPombe = new SegPombe(parameters);
 	}
-	// String savingPath = cB.getFileNameField().getText();
-	// this.parameters.setSavingPath(savingPath);
-	// this.parameters.setWillFiltrateUnusualShape(cB.getFilterUnususalCkb().getState());
-	// this.parameters.setWillFiltrateWithMeanGrayValue(cB.getFilterWithMeanGreyValueCkb().getState());
-	// this.parameters.setWillSaveBinaryImg(cB.getWillSaveBinaryImgCkb().getState());
-	// this.parameters.setWillSaveCorrelationImg(cB.getWillSaveCorrelationImgCkb().getState());
-	// this.parameters.setWillSaveDataFrame(cB.getWillSaveDataFrameCkb().getState());
-	// this.parameters.setWillSaveFocusImage(cB.getWillSaveFocusImageCkb().getState());
-	// this.parameters.setWillSaveRoi(cB.getwillSaveRoiCkb().getState());
-	// this.parameters.setWillShowBinaryImg(cB.getWillShowBinaryImgCkb().getState());
-	// this.parameters.setWillShowCorrelationImg(cB.getWillShowCorrelationImgCkb().getState());
-	// this.parameters.setWillShowDataFrame(cB.getWillShowDataFrameCkb().getState());
-	// this.parameters.setWillChangeScale(cB.getWillChangeScaleCkb().getState());
-	// this.parameters.setWillShowFocusImage(cB.getWillShowFocusImageCkb().getState());
 }

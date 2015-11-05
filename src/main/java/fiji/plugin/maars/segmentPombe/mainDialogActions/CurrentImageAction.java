@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 
 import fiji.plugin.maars.segmentPombe.SegPombeMainDialog;
 import fiji.plugin.maars.segmentPombe.SegPombeParameters;
+import ij.IJ;
 
 /*
  * Allow to select current image as the image to process
@@ -22,6 +23,6 @@ public class CurrentImageAction implements ActionListener {
 	public void actionPerformed(ActionEvent arg0) {
 		mainDialog.getAlreadryOpenedImage();
 		mainDialog.resetFileNameField();
-		mainDialog.setFileNameField(parameters.getImageToAnalyze().getTitle());
+		mainDialog.setFileNameField(IJ.getImage().getTitle());
 	}
 }

@@ -19,22 +19,22 @@ public class ParametersProcessing {
 	private String savingPath;
 	private ImagePlus imgToAnalysis;
 	private boolean unitsChecked = false;
-	
+
 	private boolean changeScale;
 	private boolean filterAbnormalShape;
 	private boolean filtrateWithMeanGrayValue;
-	
-	private float sigma;
-	private float solidity;
+
+	private double sigma;
+	private double solidity;
 	private int focusSlide;
-	private float meanGrayValue;
+	private double meanGrayValue;
 
 	private int maxWidth;
 	private int maxHeight;
-	private float minParticleSize;
-	private float maxParticleSize;
+	private double minParticleSize;
+	private double maxParticleSize;
 	private int direction;
-	
+
 	// Options related to display and save
 	private boolean showCorrelationImg;
 	private boolean showBinaryImg;
@@ -45,7 +45,7 @@ public class ParametersProcessing {
 	private boolean saveDataFrame;
 	private boolean saveFocusImage;
 	private boolean saveRoi;
-	
+
 	public ParametersProcessing(SegPombeMainDialog mainDialog) {
 		this.mainDialog = mainDialog;
 	}
@@ -63,7 +63,7 @@ public class ParametersProcessing {
 			mainDialog.getImgNameTf().setBackground(Color.ORANGE);
 			return false;
 		}
-		
+
 		// check if svaing path is validate
 		System.out.println("Checking if path to image is validate");
 		String savePath = mainDialog.getSaveDirTf().getText();
@@ -75,65 +75,56 @@ public class ParametersProcessing {
 
 		// Check sigma value
 		System.out.println("Checking if sigma value is validate");
-		if ((Float) mainDialog.getTypicalSizeTf().getValue() <= 0) {
-			IJ.error("Wrong parameter",
-					"Sigma must be a positive not null value");
+		if ((Double) mainDialog.getTypicalSizeTf().getValue() <= 0) {
+			IJ.error("Wrong parameter", "Sigma must be a positive not null value");
 			return false;
 		}
 
 		// Check new image size value
 		System.out.println("Checking if new image size values are validate");
 		if ((Integer) mainDialog.getMaxHeightTf().getValue() <= 0) {
-			IJ.error("Wrong parameter",
-					"Max height must be a positive not null value");
+			IJ.error("Wrong parameter", "Max height must be a positive not null value");
 			return false;
 		}
 		if ((Integer) mainDialog.getMaxWidthTf().getValue() <= 0) {
-			IJ.error("Wrong parameter",
-					"Max width must be a positive not null value");
+			IJ.error("Wrong parameter", "Max width must be a positive not null value");
 			return false;
 		}
 
 		// Check abnoraml cell shape value
 		System.out.println("Checking if solidity value is validate");
-		if ((Float) mainDialog.getSolidityTf().getValue() <= 0
-				|| (Float) mainDialog.getSolidityTf().getValue() > 1) {
+		if ( (Double) mainDialog.getSolidityTf().getValue() <= 0 || (Double) mainDialog.getSolidityTf().getValue() > 1) {
 			IJ.error("Wrong parameter", "Solidity must be between 0 and 1");
 			return false;
 		}
 
 		// Check minimum cell area
 		System.out.println("Checking if minimum particle size is validate");
-		if ((Float) mainDialog.getMinParticleSizeTf().getValue() <= 0) {
-			IJ.error("Wrong parameter",
-					"The minimum area must be a positive not null value");
+		if ((Double) mainDialog.getMinParticleSizeTf().getValue() <= 0) {
+			IJ.error("Wrong parameter", "The minimum area must be a positive not null value");
 			return false;
 		}
 
 		// Check maximum cell area
 		System.out.println("Checking if maximum particle size is validate");
-		if ((Float) mainDialog.getMaxParticleSizeTf().getValue() <= 0) {
-			IJ.error("Wrong parameter",
-					"The maximum area must be a positive not null value");
+		if ((Double) mainDialog.getMaxParticleSizeTf().getValue() <= 0) {
+			IJ.error("Wrong parameter", "The maximum area must be a positive not null value");
 			return false;
 		}
 
 		// Check z focus value
 		System.out.println("Checking if z focus value is validate");
 		if ((Integer) mainDialog.getManualZFocusTf().getValue() <= 0) {
-			IJ.error("Wrong parameter",
-					"Focus slide must be a positive not null value");
+			IJ.error("Wrong parameter", "Focus slide must be a positive not null value");
 			return false;
 		}
 
 		// Check if none of the result ckeckBox is selected : in this case,
 		// the user would not get any result
-		System.out
-				.println("Checking if none of the result ckeckBox is selected");
+		System.out.println("Checking if none of the result ckeckBox is selected");
 		boolean thereIsAResult = checkResultOptions();
 		if (!thereIsAResult) {
-			IJ.error("No result possible",
-					"You have not selected a way to see your results");
+			IJ.error("No result possible", "You have not selected a way to see your results");
 			return false;
 		}
 
@@ -146,9 +137,9 @@ public class ParametersProcessing {
 
 	public void updateParameters() {
 		int selectedIndex;
-		float tmpFloat;
+		double tmpDouble;
 		int tmpInt;
-		
+
 		this.savingPath = mainDialog.getSaveDirTf().getText();
 		this.direction = mainDialog.getDirection();
 		this.changeScale = mainDialog.getChangeScaleCkb().getState();
@@ -164,99 +155,74 @@ public class ParametersProcessing {
 		this.saveFocusImage = mainDialog.getSaveFocusImageCkb().getState();
 		this.saveRoi = mainDialog.getSaveRoiCkb().getState();
 
-		this.imgToAnalysis = IJ.openImage(
-				mainDialog.getImgNameTf().getText()).duplicate();
+		this.imgToAnalysis = IJ.getImage().duplicate();
 		// if the unit chosen is a micron it must be converted
 		System.out.println("Check if one of the unite used is micron");
-		if (SegPombeParameters.MICRONS == mainDialog.getTypicalSizeUnitCombo()
-				.getSelectedIndex()
-				|| SegPombeParameters.MICRONS == mainDialog
-						.getMaxWidthUnitCombo().getSelectedIndex()
-				|| SegPombeParameters.MICRONS == mainDialog
-						.getMaxHeightUnitCombo().getSelectedIndex()
-				|| SegPombeParameters.MICRONS == mainDialog
-						.getMinParticleSizeUnitCombo().getSelectedIndex()
-				|| SegPombeParameters.MICRONS == mainDialog
-						.getMaxParticleSizeUnitCombo().getSelectedIndex()) {
+		if (SegPombeParameters.MICRONS == mainDialog.getTypicalSizeUnitCombo().getSelectedIndex()
+				|| SegPombeParameters.MICRONS == mainDialog.getMaxWidthUnitCombo().getSelectedIndex()
+				|| SegPombeParameters.MICRONS == mainDialog.getMaxHeightUnitCombo().getSelectedIndex()
+				|| SegPombeParameters.MICRONS == mainDialog.getMinParticleSizeUnitCombo().getSelectedIndex()
+				|| SegPombeParameters.MICRONS == mainDialog.getMaxParticleSizeUnitCombo().getSelectedIndex()) {
 			checkImgUnitsAndScale();
 		}
 
 		// Convert size into pixels
 		selectedIndex = mainDialog.getTypicalSizeUnitCombo().getSelectedIndex();
-		tmpFloat = (Float) mainDialog.getTypicalSizeTf().getValue();
+		tmpDouble = (Double) mainDialog.getTypicalSizeTf().getValue();
 		if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked) {
-			this.sigma = convertMicronToPixel(tmpFloat,
-					SegPombeParameters.DEPTH);
-			System.out
-					.println("typical size is in micron, convert it in pixels : "
-							+ String.valueOf(this.sigma));
+			this.sigma = convertMicronToPixel(tmpDouble, SegPombeParameters.DEPTH);
+			System.out.println("typical size is in micron, convert it in pixels : " + String.valueOf(this.sigma));
 		} else if (selectedIndex == SegPombeParameters.PIXELS) {
-			this.sigma = tmpFloat;
+			this.sigma = tmpDouble;
 		}
 
-		this.solidity = (Float) mainDialog.getSolidityTf().getValue();
+		this.solidity = (Double) mainDialog.getSolidityTf().getValue();
 
 		// Covert minimum area if needed to
-		selectedIndex = mainDialog.getMinParticleSizeUnitCombo()
-				.getSelectedIndex();
-		tmpFloat = (Float) mainDialog.getMinParticleSizeTf().getValue();
+		selectedIndex = mainDialog.getMinParticleSizeUnitCombo().getSelectedIndex();
+		tmpDouble = (Double) mainDialog.getMinParticleSizeTf().getValue();
 		if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked) {
-			this.minParticleSize = tmpFloat
-					* convertMicronToPixel(1, SegPombeParameters.WIDTH)
+			this.minParticleSize = tmpDouble * convertMicronToPixel(1, SegPombeParameters.WIDTH)
 					* convertMicronToPixel(1, SegPombeParameters.HEIGHT);
-			System.out
-					.println("Cell Area is in micron, convert it in pixels : "
-							+ minParticleSize);
+			System.out.println("Cell Area is in micron, convert it in pixels : " + minParticleSize);
 		} else {
 			if (selectedIndex == SegPombeParameters.PIXELS) {
-				this.minParticleSize = tmpFloat;
+				this.minParticleSize = tmpDouble;
 			}
 		}
 
 		// Covert maximum area if needed to
-		selectedIndex = mainDialog.getMaxParticleSizeUnitCombo()
-				.getSelectedIndex();
-		tmpFloat = (Float) mainDialog.getMaxParticleSizeTf().getValue();
+		selectedIndex = mainDialog.getMaxParticleSizeUnitCombo().getSelectedIndex();
+		tmpDouble = (Double) mainDialog.getMaxParticleSizeTf().getValue();
 		if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked) {
-			this.maxParticleSize = tmpFloat
-					* convertMicronToPixel(1, SegPombeParameters.WIDTH)
+			this.maxParticleSize = tmpDouble * convertMicronToPixel(1, SegPombeParameters.WIDTH)
 					* convertMicronToPixel(1, SegPombeParameters.HEIGHT);
-			System.out
-					.println("Cell Area is in micron, convert it in pixels : "
-							+ maxParticleSize);
+			System.out.println("Cell Area is in micron, convert it in pixels : " + maxParticleSize);
 		} else {
 			if (selectedIndex == SegPombeParameters.PIXELS) {
-				this.maxParticleSize = tmpFloat;
+				this.maxParticleSize = tmpDouble;
 			}
 		}
 		// If the user chose to change the scale
 		System.out.println("Check if user wants to change scale");
 		if (mainDialog.getChangeScaleCkb().getState()) {
-			selectedIndex = mainDialog.getMaxWidthUnitCombo()
-					.getSelectedIndex();
+			selectedIndex = mainDialog.getMaxWidthUnitCombo().getSelectedIndex();
 			tmpInt = (Integer) mainDialog.getMaxWidthTf().getValue();
 			if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked) {
-				this.maxWidth = convertMicronToPixel(tmpInt,
-						SegPombeParameters.WIDTH);
-				System.out
-						.println("Width value is in micron, convert it in pixel : "
-								+ maxWidth);
+				this.maxWidth = convertMicronToPixel(tmpInt, SegPombeParameters.WIDTH);
+				System.out.println("Width value is in micron, convert it in pixel : " + maxWidth);
 			} else {
 				if (selectedIndex == SegPombeParameters.PIXELS) {
 					this.maxWidth = (int) tmpInt;
 				}
 			}
 
-			selectedIndex = mainDialog.getMaxHeightUnitCombo()
-					.getSelectedIndex();
+			selectedIndex = mainDialog.getMaxHeightUnitCombo().getSelectedIndex();
 			tmpInt = (Integer) mainDialog.getMaxHeightTf().getValue();
 			if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked) {
 
-				maxHeight = convertMicronToPixel(tmpInt,
-						SegPombeParameters.HEIGHT);
-				System.out
-						.println("Height value is in micron, convert it in pixel : "
-								+ maxHeight);
+				maxHeight = convertMicronToPixel(tmpInt, SegPombeParameters.HEIGHT);
+				System.out.println("Height value is in micron, convert it in pixel : " + maxHeight);
 			} else {
 				if (selectedIndex == SegPombeParameters.PIXELS) {
 					maxHeight = (int) tmpInt;
@@ -275,11 +241,9 @@ public class ParametersProcessing {
 			this.focusSlide = (imgToAnalysis.getNSlices() / 2) - 1;
 		}
 
-		System.out
-				.println("Check if user want to filter background using mean gray value");
+		System.out.println("Check if user want to filter background using mean gray value");
 		if (mainDialog.getFilterWithMeanGreyValueCkb().getState()) {
-			this.meanGrayValue = (Float) mainDialog.getMeanGreyValueField()
-					.getValue();
+			this.meanGrayValue = (Double) mainDialog.getMeanGreyValueField().getValue();
 		} else {
 			this.meanGrayValue = 0;
 		}
@@ -287,8 +251,8 @@ public class ParametersProcessing {
 	}
 
 	/**
-	 * Method to change the image scale if it is bigger than supposed to the
-	 * maximum width an height are in pixels
+	 * Method to shrink the image scale if it is bigger than supposed to the
+	 * maximum width an height that are in pixels
 	 */
 	public void changeScale(int maxWidth, int maxHeight) {
 		int newWidth;
@@ -299,120 +263,79 @@ public class ParametersProcessing {
 		newCal.setUnit("micron");
 		ImagePlus img = imgToAnalysis;
 		if (img.getWidth() > maxWidth) {
-			System.out
-					.println("Image width is greater than maximum width allowed");
+			System.out.println("Image width is greater than maximum width allowed");
 
 			newWidth = maxWidth;
 			newHeight = (int) img.getHeight() * maxWidth / img.getWidth();
 
-			newMinParticleSize = (int) minParticleSize * maxWidth
-					/ img.getWidth();
-			newMaxParticleSize = (int) maxParticleSize * maxWidth
-					/ img.getWidth();
+			newMinParticleSize = (int) minParticleSize * maxWidth / img.getWidth();
+			newMaxParticleSize = (int) maxParticleSize * maxWidth / img.getWidth();
 
 			if (img.getCalibration().scaled()) {
 
-				newCal.pixelWidth = parameters
-						.getScale(SegPombeParameters.WIDTH)
-						* img.getWidth()
-						/ maxWidth;
-				newCal.pixelHeight = parameters
-						.getScale(SegPombeParameters.HEIGHT)
-						* img.getWidth()
-						/ maxWidth;
-				newCal.pixelDepth = parameters
-						.getScale(SegPombeParameters.DEPTH);
+				newCal.pixelWidth = parameters.getScale(SegPombeParameters.WIDTH) * img.getWidth() / maxWidth;
+				newCal.pixelHeight = parameters.getScale(SegPombeParameters.HEIGHT) * img.getWidth() / maxWidth;
+				newCal.pixelDepth = parameters.getScale(SegPombeParameters.DEPTH);
 			}
 
-			System.out.println("New values : w = " + newWidth + " h = "
-					+ newHeight);
+			System.out.println("New values : w = " + newWidth + " h = " + newHeight);
 			if (newHeight > maxHeight) {
-				System.out
-						.println("New height is still greater than maximum height allowed");
+				System.out.println("New height is still greater than maximum height allowed");
 				newHeight = maxHeight;
 				newWidth = (int) img.getWidth() * maxHeight / img.getHeight();
 
-				newMinParticleSize = (int) minParticleSize * maxHeight
-						/ img.getHeight();
-				newMaxParticleSize = (int) maxParticleSize * maxHeight
-						/ img.getHeight();
+				newMinParticleSize = (int) minParticleSize * maxHeight / img.getHeight();
+				newMaxParticleSize = (int) maxParticleSize * maxHeight / img.getHeight();
 
 				if (img.getCalibration().scaled()) {
-					newCal.pixelWidth = parameters
-							.getScale(SegPombeParameters.WIDTH)
-							* img.getHeight() / maxHeight;
-					newCal.pixelHeight = parameters
-							.getScale(SegPombeParameters.HEIGHT)
-							* img.getHeight() / maxHeight;
-					newCal.pixelDepth = parameters
-							.getScale(SegPombeParameters.DEPTH);
+					newCal.pixelWidth = parameters.getScale(SegPombeParameters.WIDTH) * img.getHeight() / maxHeight;
+					newCal.pixelHeight = parameters.getScale(SegPombeParameters.HEIGHT) * img.getHeight() / maxHeight;
+					newCal.pixelDepth = parameters.getScale(SegPombeParameters.DEPTH);
 				}
 
-				System.out.println("New values : w = " + newWidth + " h = "
-						+ newHeight);
+				System.out.println("New values : w = " + newWidth + " h = " + newHeight);
 
 			}
 
-			rescale(newWidth, newHeight, newMinParticleSize,
-					newMaxParticleSize, newCal);
+			rescale(newWidth, newHeight, newMinParticleSize, newMaxParticleSize, newCal);
 		} else {
 			if (img.getHeight() > maxHeight) {
-				System.out
-						.println("Image height is greater than maximum width allowed");
+				System.out.println("Image height is greater than maximum width allowed");
 
 				newHeight = maxHeight;
 				newWidth = (int) img.getWidth() * maxHeight / img.getHeight();
 
-				newMinParticleSize = (int) minParticleSize * maxHeight
-						/ img.getHeight();
-				newMaxParticleSize = (int) maxParticleSize * maxHeight
-						/ img.getHeight();
+				newMinParticleSize = (int) minParticleSize * maxHeight / img.getHeight();
+				newMaxParticleSize = (int) maxParticleSize * maxHeight / img.getHeight();
 
 				if (img.getCalibration().scaled()) {
-					newCal.pixelWidth = parameters
-							.getScale(SegPombeParameters.WIDTH)
-							* img.getHeight() / maxHeight;
-					newCal.pixelHeight = parameters
-							.getScale(SegPombeParameters.HEIGHT)
-							* img.getHeight() / maxHeight;
-					newCal.pixelDepth = parameters
-							.getScale(SegPombeParameters.DEPTH);
+					newCal.pixelWidth = parameters.getScale(SegPombeParameters.WIDTH) * img.getHeight() / maxHeight;
+					newCal.pixelHeight = parameters.getScale(SegPombeParameters.HEIGHT) * img.getHeight() / maxHeight;
+					newCal.pixelDepth = parameters.getScale(SegPombeParameters.DEPTH);
 				}
 
-				System.out.println("New values : w = " + newWidth + " h = "
-						+ newHeight);
+				System.out.println("New values : w = " + newWidth + " h = " + newHeight);
 
 				if (newWidth > maxWidth) {
-					System.out
-							.println("New Width is still greater than maximum height allowed");
+					System.out.println("New Width is still greater than maximum height allowed");
 
 					newWidth = maxWidth;
-					newHeight = (int) img.getHeight() * maxWidth
-							/ img.getWidth();
+					newHeight = (int) img.getHeight() * maxWidth / img.getWidth();
 
 					if (img.getCalibration().scaled()) {
-						newCal.pixelWidth = parameters
-								.getScale(SegPombeParameters.WIDTH)
-								* img.getWidth() / maxWidth;
-						newCal.pixelHeight = parameters
-								.getScale(SegPombeParameters.HEIGHT)
-								* img.getWidth() / maxWidth;
-						newCal.pixelDepth = parameters
-								.getScale(SegPombeParameters.DEPTH);
+						newCal.pixelWidth = parameters.getScale(SegPombeParameters.WIDTH) * img.getWidth() / maxWidth;
+						newCal.pixelHeight = parameters.getScale(SegPombeParameters.HEIGHT) * img.getWidth() / maxWidth;
+						newCal.pixelDepth = parameters.getScale(SegPombeParameters.DEPTH);
 					}
 
-					System.out.println("New values : w = " + newWidth + " h = "
-							+ newHeight);
+					System.out.println("New values : w = " + newWidth + " h = " + newHeight);
 
-					newMinParticleSize = (int) minParticleSize * maxWidth
-							/ img.getWidth();
-					newMaxParticleSize = (int) maxParticleSize * maxWidth
-							/ img.getWidth();
+					newMinParticleSize = (int) minParticleSize * maxWidth / img.getWidth();
+					newMaxParticleSize = (int) maxParticleSize * maxWidth / img.getWidth();
 
 				}
 
-				rescale(newWidth, newHeight, newMinParticleSize,
-						newMaxParticleSize, newCal);
+				rescale(newWidth, newHeight, newMinParticleSize, newMaxParticleSize, newCal);
 			}
 		}
 	}
@@ -421,25 +344,22 @@ public class ParametersProcessing {
 	 * Method to change size and scale of the image to analyze : need to compute
 	 * parameters before so it can be coherent
 	 */
-	public void rescale(int newWidth, int newHeight, int newMinParticleSize,
-			int newMaxParticleSize, Calibration newCal) {
+	public void rescale(int newWidth, int newHeight, int newMinParticleSize, int newMaxParticleSize,
+			Calibration newCal) {
 
 		minParticleSize = newMinParticleSize;
 		maxParticleSize = newMaxParticleSize;
 
-		System.out.println("min area = " + newMinParticleSize + " max area = "
-				+ newMaxParticleSize);
+		System.out.println("min area = " + newMinParticleSize + " max area = " + newMaxParticleSize);
 
 		ImageStack newImgStack = new ImageStack(newWidth, newHeight);
 
 		for (int slice = 0; slice < imgToAnalysis.getNSlices(); slice++) {
 			imgToAnalysis.setZ(slice);
-			newImgStack.addSlice(imgToAnalysis.getProcessor().resize(newWidth,
-					newHeight));
+			newImgStack.addSlice(imgToAnalysis.getProcessor().resize(newWidth, newHeight));
 		}
 
-		ImagePlus newImagePlus = new ImagePlus("rescaled_"
-				+ imgToAnalysis.getTitle(), newImgStack);
+		ImagePlus newImagePlus = new ImagePlus("rescaled_" + imgToAnalysis.getTitle(), newImgStack);
 		newImagePlus.setCalibration(newCal);
 
 		parameters.setImageToAnalyze(newImagePlus);
@@ -456,34 +376,27 @@ public class ParametersProcessing {
 
 			if (imgToAnalysis.getCalibration().getUnit().equals("cm")) {
 				imgToAnalysis.getCalibration().setUnit("micron");
-				imgToAnalysis.getCalibration().pixelWidth = imgToAnalysis
-						.getCalibration().pixelWidth * 10000;
-				imgToAnalysis.getCalibration().pixelHeight = imgToAnalysis
-						.getCalibration().pixelHeight * 10000;
+				imgToAnalysis.getCalibration().pixelWidth = imgToAnalysis.getCalibration().pixelWidth * 10000;
+				imgToAnalysis.getCalibration().pixelHeight = imgToAnalysis.getCalibration().pixelHeight * 10000;
 			}
 
 			System.out.println("Check if unit of calibration is micron");
 			if (imgToAnalysis.getCalibration().getUnit().equals("micron")
 					|| imgToAnalysis.getCalibration().getUnit().equals("µm")) {
 				double[] scale = new double[3];
-				scale[SegPombeParameters.WIDTH] = imgToAnalysis
-						.getCalibration().pixelWidth;
-				scale[SegPombeParameters.HEIGHT] = imgToAnalysis
-						.getCalibration().pixelHeight;
-				scale[SegPombeParameters.DEPTH] = imgToAnalysis
-						.getCalibration().pixelDepth;
+				scale[SegPombeParameters.WIDTH] = imgToAnalysis.getCalibration().pixelWidth;
+				scale[SegPombeParameters.HEIGHT] = imgToAnalysis.getCalibration().pixelHeight;
+				scale[SegPombeParameters.DEPTH] = imgToAnalysis.getCalibration().pixelDepth;
 
 				parameters.setScale(scale);
 				unitsChecked = true;
 				System.out.println("Get and set calibration as scale");
 			} else {
-				IJ.error(
-						"Wrong scale unit",
+				IJ.error("Wrong scale unit",
 						"The scale of your image must be in microns.\nTo change it you can go to Properties ...");
 			}
 		} else {
-			IJ.error(
-					"No scale",
+			IJ.error("No scale",
 					"You must set a scale to your image\nif you want to enter measures in micron.\nYou can go to Properties ...");
 		}
 	}
@@ -494,15 +407,11 @@ public class ParametersProcessing {
 	 */
 	public boolean checkResultOptions() {
 
-		return (mainDialog.getShowCorrelationImgCkb().getState()
-				|| mainDialog.getSaveBinaryImgCkb().getState()
-				|| mainDialog.getShowDataFrameCkb().getState()
-				|| mainDialog.getSaveCorrelationImgCkb().getState()
-				|| mainDialog.getSaveBinaryImgCkb().getState()
-				|| mainDialog.getSaveDataFrameCkb().getState()
-				|| mainDialog.getShowFocusImageCkb().getState()
-				|| mainDialog.getSaveFocusImageCkb().getState() || mainDialog
-				.getSaveRoiCkb().getState());
+		return (mainDialog.getShowCorrelationImgCkb().getState() || mainDialog.getSaveBinaryImgCkb().getState()
+				|| mainDialog.getShowDataFrameCkb().getState() || mainDialog.getSaveCorrelationImgCkb().getState()
+				|| mainDialog.getSaveBinaryImgCkb().getState() || mainDialog.getSaveDataFrameCkb().getState()
+				|| mainDialog.getShowFocusImageCkb().getState() || mainDialog.getSaveFocusImageCkb().getState()
+				|| mainDialog.getSaveRoiCkb().getState());
 	}
 
 	/**
@@ -511,26 +420,24 @@ public class ParametersProcessing {
 	 * CellsBoundaries constants : WIDTH and HEIGHT and DEPTH. Return an int
 	 * width or height in pixels.
 	 */
-	public int convertMicronToPixel(float micronSize, int widthOrHeightOrDepth) {
-		int pixelSize = (int) Math.round(micronSize
-				/ parameters.getScale(widthOrHeightOrDepth));
+	public int convertMicronToPixel(double micronSize, int widthOrHeightOrDepth) {
+		int pixelSize = (int) Math.round(micronSize / parameters.getScale(widthOrHeightOrDepth));
 		return pixelSize;
 	}
 
 	/**
 	 * Allows to convert width or height or depth of a size in pixels to a size
 	 * in microns. To choose if you want to convert width or height you can use
-	 * CellsBoundaries constants : WIDTH and HEIGHT and DEPTH. Return an float
+	 * CellsBoundaries constants : WIDTH and HEIGHT and DEPTH. Return an double
 	 * width or height in microns.
 	 */
-	public float convertPixelToMicron(int pixelSize, int widthOrHeightOrDepth) {
-		float micronSize = (float) parameters.getScale(widthOrHeightOrDepth)
-				* pixelSize;
+	public double convertPixelToMicron(int pixelSize, int widthOrHeightOrDepth) {
+		double micronSize = (double) parameters.getScale(widthOrHeightOrDepth) * pixelSize;
 
 		return micronSize;
 	}
-	
-	public SegPombeParameters getFinalParameters(){
+
+	public SegPombeParameters getFinalParameters() {
 		parameters.setImageToAnalyze(this.imgToAnalysis);
 		parameters.setSavingPath(this.savingPath);
 		parameters.setSigma(this.sigma);
@@ -555,7 +462,7 @@ public class ParametersProcessing {
 		parameters.setSaveFocusImage(this.saveFocusImage);
 		parameters.setSaveRoi(this.saveRoi);
 		parameters.setSaveCorrelationImg(this.saveCorrelationImg);
-		
+
 		return parameters;
 	}
 
