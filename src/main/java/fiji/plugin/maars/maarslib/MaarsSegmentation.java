@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.micromanager.internal.utils.ReportingUtils;
 
-import fiji.plugin.maars.segmentPombe.ParametersProcessing;
 import fiji.plugin.maars.segmentPombe.SegPombeParameters;
 import ij.IJ;
 import ij.ImagePlus;
@@ -65,13 +64,35 @@ public class MaarsSegmentation {
 				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject().get(AllMaarsParameters.STEP)
 				.getAsDouble();
 
-		ParametersProcessing process = new ParametersProcessing(segPombeParam);
-		process.checkUnitsAndScale();
+		segPombeParam.checkUnitsAndScale();
 		cB.getRunAction().changeScale(
 				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
 						.get(AllMaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE).getAsInt(),
 				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
 						.get(AllMaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE).getAsInt());
+
+		int cellSizePixel = (int) Math
+				.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE).getAsDouble()
+						/ parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+								.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble());
+
+		int minSize = (int) Math
+				.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.MINIMUM_CELL_AREA).getAsDouble()
+						/ cB.getImageToAnalyze().getCalibration().pixelWidth);
+
+		int maxSize = (int) Math
+				.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_CELL_AREA).getAsDouble()
+						/ cB.getImageToAnalyze().getCalibration().pixelWidth);
+
+		double solidity = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SOLIDITY).getAsDouble();
+
+		double meanGrey = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE).getAsDouble();
+
 		CellsBoundariesIdentification cBI = new CellsBoundariesIdentification(cB, cellSizePixel, minSize, maxSize, -1,
 				(int) Math.round(cB.getImageToAnalyze().getNSlices() / 2), solidity, meanGrey, true, false);
 		// cBI.identifyCellesBoundaries() return true, if no ROI detected.
