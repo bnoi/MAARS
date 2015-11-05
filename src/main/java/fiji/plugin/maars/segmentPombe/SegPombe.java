@@ -30,7 +30,7 @@ public class SegPombe {
 	private ImagePlus imageToAnalyze;
 	
 	// Variables to get results
-	private FloatProcessor correlationImage = null;
+	private FloatProcessor correlationImage;
 	private ByteProcessor byteImage;
 	private ImagePlus binCorrelationImage;
 	private ImagePlus imgCorrTemp;
@@ -40,61 +40,46 @@ public class SegPombe {
 	private RoiManager roiManager;
 	private Roi[] roiArray;
 	
-	private boolean roiDetected = true;
+	private boolean roiDetected = false;
 	private float zFocus;
 	/**
-	 * Constructor 1 : need a CellsBoundaries object and int sigma : is the
-	 * typical height of the cells you want to get int direction : depends on
-	 * how you made your movie -> -1 if the boundaries of the cells are black on
-	 * the first slice and white on the last one -> 1 if the boundaries of the
-	 * cells are white on the first slice and black on the last one double
-	 * minParticleSize : minimum area of cells double maxParticleSize : maximum
-	 * area of cells float zf : slice corresponding to focus on the movie double
-	 * solidityThreshold : threshold to filter unusual shape using solidity
-	 * measure double meanGrayValueThreshold : threshold to filter background
-	 * using minimum gray value measure boolean makeLogFile : create a file with
-	 * steps and errors of the process boolean flushImageToAnalyze : to empty
-	 * the ImageProcessor of image to analyze
+	 * Constructor
 	 */
-	public SegPombe(SegPombeParameters parameters, int sigma, double minParticleSize, double maxParticleSize,
-			int direction, float zf, double solidityThreshold, double meanGrayValueThreshold, boolean makeLogFile,
-			boolean flushImageToAnalyze) {
+	public SegPombe(SegPombeParameters parameters) {
 		this.parameters = parameters;
 		this.imageToAnalyze = parameters.getImageToAnalyze();
 		this.savingPath = parameters.getSavingPath();
 
-		if (makeLogFile) {
-			try {
-				PrintStream ps = new PrintStream(
-						savingPath + imageToAnalyze.getShortTitle() + "_BoundariesIdentification.LOG");
-				System.setOut(ps);
-				System.setErr(ps);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			PrintStream ps = new PrintStream(
+					savingPath + imageToAnalyze.getShortTitle() + "_BoundariesIdentification.LOG");
+			System.setOut(ps);
+			System.setErr(ps);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		this.parameters.setSigma(sigma);
-		this.parameters.willFiltrateUnusualShape = cB.getFilterUnususalCkb().getState();
-		this.filterWithMeanGrayValue = cB.getFilterWithMeanGreyValueCkb().getState();
+		this.sigma;
+		this.filterAbnormal;
+		this.filterWithMeanGrayValue;
 		this.minParticleSize = minParticleSize / imageToAnalyze.getCalibration().pixelWidth;
 		this.maxParticleSize = maxParticleSize / imageToAnalyze.getCalibration().pixelWidth;
-		this.direction = direction;
+		this.direction ;
 
 		// ResultOptions
-		displayCorrelationImg = cB.getDisplayCorrelationImg().getState();
-		displayBinaryImg = cB.getDisplayBinaryImg().getState();
-		displayDataFrame = cB.getDisplayDataFrame().getState();
-		displayFocusImage = cB.getDisplayFocusImage().getState();
+		displayCorrelationImg;
+		displayBinaryImg ;
+		displayDataFrame ;
+		displayFocusImage ;
 
-		saveCorrelationImg = cB.getSaveCorrelationImg().getState();
-		saveBinaryImg = cB.getSaveBinaryImg().getState();
-		saveDataFrame = cB.getSaveDataFrame().getState();
-		saveFocusImage = cB.getSaveFocusImage().getState();
-		saveRoi = cB.getSaveRoi().getState();
-		this.flushImageToAnalyze = flushImageToAnalyze;
-		zFocus = zf;
+		saveCorrelationImg ;
+		saveBinaryImg ;
+		saveDataFrame ;
+		saveFocusImage ;
+		saveRoi ;
+		this.flushImageToAnalyze = false;
+		zFocus ;
 
 		getFocusImage();
 

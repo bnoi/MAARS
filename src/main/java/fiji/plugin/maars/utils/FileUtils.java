@@ -9,8 +9,8 @@ import java.io.IOException;
 */
 public class FileUtils {
 
-	public static boolean isFilenameValid(String file) {
-		File f = new File(file);
+	public static boolean isValid(String path) {
+		File f = new File(path);
 		try {
 		   f.getCanonicalPath();
 		   return true;

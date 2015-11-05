@@ -15,16 +15,24 @@ public class SegPombeParameters {
 
 	// Parameters of the algorithm
 	private ImagePlus imageToAnalyze;
-	private ImagePlus focusImage;
 	private float sigma = 3;
+	private int focusSlide = 16;
 	private boolean changeScale = true;
 	private int maxWidth = 1500;
 	private int maxHeight = 1500;
 	private int direction; // this is the direction of the equation to integrate
 	// it is 1 for image with cell boundaries be black then white
 	// it is -1 for image with cell boundaries be white then black
+	
+	// Parameters to filter results
+	private float minParticleSize = 500;
+	private float maxParticleSize = 40000;
+	private float solidityThreshold = Float.parseFloat("0.84");
+	private float meanGreyValueThreshold = -177660;
+	private boolean filterAbnormalShape = true;
+	private boolean filtrateWithMeanGrayValue = true;
 
-	// Options related to display and sava
+	// Options related to display and save
 	private boolean showCorrelationImg = false;
 	private boolean showBinaryImg = false;
 	private boolean showDataFrame = false;
@@ -34,7 +42,6 @@ public class SegPombeParameters {
 	private boolean saveDataFrame = true;
 	private boolean saveFocusImage = true;
 	private boolean saveRoi = true;
-	private boolean flushImageToAnalyze = false;
 
 	// Width and Height indexes used in resolution array
 	private double[] scales;
@@ -43,14 +50,6 @@ public class SegPombeParameters {
 	public static final int DEPTH = 2;
 	public static final int PIXELS = 0;
 	public static final int MICRONS = 1;
-
-	// Parameters to filter results
-	private double minParticleSize = 500;
-	private double maxParticleSize = 40000;
-	private double solidityThreshold = 0.84;
-	private double meanGreyValueThreshold = -177660;
-	private boolean filterAbnormalShape = true;
-	private boolean filtrateWithMeanGrayValue = true;
 
 	public String getSavingPath() {
 		return savingPath;
@@ -66,14 +65,6 @@ public class SegPombeParameters {
 
 	public void setImageToAnalyze(ImagePlus imageToAnalyze) {
 		this.imageToAnalyze = imageToAnalyze;
-	}
-
-	public ImagePlus getFocusImage() {
-		return focusImage;
-	}
-
-	public void setFocusImage(ImagePlus focusImage) {
-		this.focusImage = focusImage;
 	}
 
 	public float getSigma() {
@@ -188,14 +179,6 @@ public class SegPombeParameters {
 		this.saveRoi = saveRoi;
 	}
 
-	public boolean flushImageToAnalyze() {
-		return flushImageToAnalyze;
-	}
-
-	public void setFlushImageToAnalyze(boolean flushImageToAnalyze) {
-		this.flushImageToAnalyze = flushImageToAnalyze;
-	}
-
 	public double[] getScales() {
 		return scales;
 	}
@@ -208,35 +191,35 @@ public class SegPombeParameters {
 		return this.scales[INDEX];
 	}
 
-	public double getMinParticleSize() {
+	public float getMinParticleSize() {
 		return minParticleSize;
 	}
 
-	public void setMinParticleSize(double minParticleSize) {
+	public void setMinParticleSize(float minParticleSize) {
 		this.minParticleSize = minParticleSize;
 	}
 
-	public double getMaxParticleSize() {
+	public float getMaxParticleSize() {
 		return maxParticleSize;
 	}
 
-	public void setMaxParticleSize(double maxParticleSize) {
+	public void setMaxParticleSize(float maxParticleSize) {
 		this.maxParticleSize = maxParticleSize;
 	}
 
-	public double getSolidityThreshold() {
+	public float getSolidityThreshold() {
 		return solidityThreshold;
 	}
 
-	public void setSolidityThreshold(double solidityThreshold) {
+	public void setSolidityThreshold(float solidityThreshold) {
 		this.solidityThreshold = solidityThreshold;
 	}
 
-	public double getMeanGreyValueThreshold() {
+	public float getMeanGreyValueThreshold() {
 		return meanGreyValueThreshold;
 	}
 
-	public void setMeanGreyValueThreshold(double meanGreyValueThreshold) {
+	public void setMeanGreyValueThreshold(float meanGreyValueThreshold) {
 		this.meanGreyValueThreshold = meanGreyValueThreshold;
 	}
 
@@ -254,5 +237,13 @@ public class SegPombeParameters {
 
 	public void setFiltrateWithMeanGrayValue(boolean filtrateWithMeanGrayValue) {
 		this.filtrateWithMeanGrayValue = filtrateWithMeanGrayValue;
+	}
+	
+	public int getFocusSlide() {
+		return focusSlide;
+	}
+
+	public void setFocusSlide(int focusSlide) {
+		this.focusSlide = focusSlide;
 	}
 }

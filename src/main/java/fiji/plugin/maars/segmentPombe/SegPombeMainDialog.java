@@ -9,6 +9,7 @@ import java.awt.Panel;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -30,24 +31,24 @@ public class SegPombeMainDialog implements PlugIn{
 	// Main window
 	private NonBlockingGenericDialog mainWindow;
 
-	// pombeSegmentor parameter object
-	SegPombeParameters parameters = new SegPombeParameters();
+	// pombeSegmentor parameter object (with predefined values)
+	SegPombeParameters defaultParameters = new SegPombeParameters();
 
 	// Component allowing to receive parameters from user
 	// to get sigma : typical cell size
-	private JTextField typicalSizeTf;
+	private JFormattedTextField typicalSizeTf;
 	private JComboBox typicalSizeUnitCombo;
 
 	// to change image scale (number of pixels)
 	private Checkbox changeScaleCkb;
-	private JTextField maxWidthTf;
-	private JTextField maxHeightTf;
+	private JFormattedTextField maxWidthTf;
+	private JFormattedTextField maxHeightTf;
 	private JComboBox maxWidthUnitCombo;
 	private JComboBox maxHeightUnitCombo;
 
 	// to filter particles during the analysis and detect only cells
-	private JTextField minParticleSizeTf;
-	private JTextField maxParticleSizeTf;
+	private JFormattedTextField minParticleSizeTf;
+	private JFormattedTextField maxParticleSizeTf;
 	private JComboBox minParticleSizeUnitCombo;
 	private JComboBox maxParticleSizeUnitCombo;
 
@@ -57,11 +58,11 @@ public class SegPombeMainDialog implements PlugIn{
 
 	// to filter abnormal cell shape
 	private Checkbox filterAbnormalShapeCkb;
-	private JTextField solidityTf;
+	private JFormattedTextField solidityTf;
 
 	// to filter background using min gray value
 	private Checkbox filterWithMeanGreyValueCkb;
-	private JTextField meanGreyValueField;
+	private JFormattedTextField meanGreyValueField;
 
 	// to select what result should be displayed or saved
 	private Checkbox showCorrelationImgCkb;
@@ -79,7 +80,7 @@ public class SegPombeMainDialog implements PlugIn{
 
 	// To allow the user to choose the zFocus
 	private Checkbox manualZFocusCkb;
-	private JTextField manualZFocusTf;
+	private JFormattedTextField manualZFocusTf;
 
 	// Allow to display the name of the file used in the algorithm
 	// meaning file currently selected or file found with browser
@@ -118,8 +119,9 @@ public class SegPombeMainDialog implements PlugIn{
 
 		Label sizeLabel = new Label("Typical cell Z size");
 
-		typicalSizeTf = new JTextField(String.valueOf(parameters.getSigma()), 5);
-
+		typicalSizeTf = new JFormattedTextField(Float.class);
+		typicalSizeTf.setValue(defaultParameters.getSigma());
+		
 		// displays units of size
 		typicalSizeUnitCombo = new JComboBox(unitList);
 		typicalSizeUnitCombo.setSelectedIndex(SegPombeParameters.MICRONS);
@@ -135,15 +137,18 @@ public class SegPombeMainDialog implements PlugIn{
 		changeScalePanel.setLayout(changeScaleBoxLayout);
 
 		changeScaleCkb = new Checkbox("Change image size",
-				parameters.changeScale());
+				defaultParameters.changeScale());
 
 		Label maxWidthLabel = new Label();
 		maxWidthLabel.setText("maximum  width");
 		Label maxHLabel = new Label();
 		maxHLabel.setText("maximum height");
-		maxWidthTf = new JTextField(String.valueOf(parameters.getMaxWidth()), 5);
-		maxHeightTf = new JTextField(String.valueOf(parameters.getMaxHeight()),
-				5);
+		maxWidthTf = new JFormattedTextField(int.class);
+		maxWidthTf.setValue(defaultParameters.getMaxWidth());
+		
+		maxHeightTf = new JFormattedTextField(int.class);
+		maxHeightTf.setValue(defaultParameters.getMaxHeight());
+		
 		maxWidthUnitCombo = new JComboBox(unitList);
 		maxHeightUnitCombo = new JComboBox(unitList);
 
@@ -179,9 +184,9 @@ public class SegPombeMainDialog implements PlugIn{
 		filterAbnormalShapePanel.setLayout(filterAbnormalShapeLayout);
 		filterAbnormalShapeCkb = new Checkbox(
 				"Filter abnormal shape using solidity",
-				parameters.filterAbnormalShape());
-		solidityTf = new JTextField(String.valueOf(parameters
-				.getSolidityThreshold()), 5);
+				defaultParameters.filterAbnormalShape());
+		solidityTf = new JFormattedTextField(Float.class);
+		solidityTf.setValue(defaultParameters.getSolidityThreshold());
 		filterAbnormalShapePanel.add(filterAbnormalShapeCkb);
 		filterAbnormalShapePanel.add(solidityTf);
 
@@ -192,9 +197,9 @@ public class SegPombeMainDialog implements PlugIn{
 		filterWithMinGreyValuePanel.setLayout(filterWithMinGrayValueLayout);
 		filterWithMeanGreyValueCkb = new Checkbox(
 				"Filter background using mean grey value on correlation image",
-				parameters.filterAbnormalShape());
-		meanGreyValueField = new JTextField(String.valueOf(parameters
-				.getMeanGreyValueThreshold()), 5);
+				defaultParameters.filterAbnormalShape());
+		meanGreyValueField = new JFormattedTextField(Float.class);
+		meanGreyValueField.setValue(defaultParameters.getMeanGreyValueThreshold());
 		filterWithMinGreyValuePanel.add(filterWithMeanGreyValueCkb);
 		filterWithMinGreyValuePanel.add(meanGreyValueField);
 
@@ -217,8 +222,8 @@ public class SegPombeMainDialog implements PlugIn{
 		minSizePanel.setLayout(minSizeLayout);
 
 		Label minSizeLabel = new Label("minimum ");
-		minParticleSizeTf = new JTextField(String.valueOf(parameters
-				.getMinParticleSize()), 5);
+		minParticleSizeTf = new JFormattedTextField(Float.class);
+		minParticleSizeTf.setValue(defaultParameters.getMinParticleSize());
 		minParticleSizeUnitCombo = new JComboBox(unitList);
 		minSizePanel.add(minSizeLabel);
 		minSizePanel.add(minParticleSizeTf);
@@ -228,8 +233,8 @@ public class SegPombeMainDialog implements PlugIn{
 		maxSizePanel.setLayout(maxSizeLayout);
 
 		Label maxSizeLabel = new Label("maximum");
-		maxParticleSizeTf = new JTextField(String.valueOf(parameters
-				.getMaxParticleSize()), 5);
+		maxParticleSizeTf = new JFormattedTextField(Float.class);
+		maxParticleSizeTf.setValue(defaultParameters.getMaxParticleSize());
 		maxParticleSizeUnitCombo = new JComboBox(unitList);
 		maxSizePanel.add(maxSizeLabel);
 		maxSizePanel.add(maxParticleSizeTf);
@@ -263,7 +268,8 @@ public class SegPombeMainDialog implements PlugIn{
 
 		manualZFocusCkb = new Checkbox(
 				"Precise the slice corresponding to focus (default is the middle one)");
-		manualZFocusTf = new JTextField(2);
+		manualZFocusTf = new JFormattedTextField(int.class);
+		manualZFocusTf.setValue(0);
 
 		manualZFocusPanel.add(manualZFocusCkb);
 		manualZFocusPanel.add(manualZFocusTf);
@@ -389,12 +395,12 @@ public class SegPombeMainDialog implements PlugIn{
 		imgNameTf.setEditable(false);
 		
 		browseButton = new Button("Browse");
-		browseAction = new BrowseAction(this, parameters);
+		browseAction = new BrowseAction(this, defaultParameters);
 		browseButton.addActionListener(browseAction);
 		
 		Panel currentImagePanel = new Panel();
 		currentImageButton = new Button("Current Image");
-		currentImageAction = new CurrentImageAction(this, parameters);
+		currentImageAction = new CurrentImageAction(this, defaultParameters);
 		currentImageButton.addActionListener(currentImageAction);
 		currentImagePanel.add(currentImageButton);
 
@@ -437,7 +443,7 @@ public class SegPombeMainDialog implements PlugIn{
 	 * Initialize Run action
 	 */
 	public RunAction initRunAction() {
-		return new RunAction(this, parameters);
+		return new RunAction(this);
 	}
 
 	/*
@@ -486,7 +492,7 @@ public class SegPombeMainDialog implements PlugIn{
 		}
 	}
 
-	public JTextField getFileNameField() {
+	public JTextField getImgNameTf() {
 		return imgNameTf;
 	}
 
@@ -526,7 +532,7 @@ public class SegPombeMainDialog implements PlugIn{
 		return saveDataFrameCkb;
 	}
 
-	public JTextField getTypicalSizeTf() {
+	public JFormattedTextField getTypicalSizeTf() {
 		return typicalSizeTf;
 	}
 
@@ -538,15 +544,15 @@ public class SegPombeMainDialog implements PlugIn{
 		return changeScaleCkb;
 	}
 
-	public JTextField getMaxWTextField() {
+	public JFormattedTextField getMaxWidthTf() {
 		return maxWidthTf;
 	}
 
-	public JTextField getMaxHeightTf() {
+	public JFormattedTextField getMaxHeightTf() {
 		return maxHeightTf;
 	}
 
-	public JComboBox getmaxWidthUnitCombo() {
+	public JComboBox getMaxWidthUnitCombo() {
 		return maxWidthUnitCombo;
 	}
 
@@ -554,7 +560,7 @@ public class SegPombeMainDialog implements PlugIn{
 		return maxHeightUnitCombo;
 	}
 
-	public Checkbox getFilterUnususalCkb() {
+	public Checkbox getFilterAbnormalShapeCkb() {
 		return filterAbnormalShapeCkb;
 	}
 
@@ -562,15 +568,15 @@ public class SegPombeMainDialog implements PlugIn{
 		return filterWithMeanGreyValueCkb;
 	}
 
-	public JTextField getPathDirField() {
+	public JTextField getSaveDirTf() {
 		return saveDirTf;
 	}
 
-	public JTextField getMinParticleSizeTf() {
+	public JFormattedTextField getMinParticleSizeTf() {
 		return minParticleSizeTf;
 	}
 
-	public JTextField getMaxParticleSizeTf() {
+	public JFormattedTextField getMaxParticleSizeTf() {
 		return maxParticleSizeTf;
 	}
 
@@ -578,7 +584,7 @@ public class SegPombeMainDialog implements PlugIn{
 		return minParticleSizeUnitCombo;
 	}
 
-	public JTextField getManualZFocusTf() {
+	public JFormattedTextField getManualZFocusTf() {
 		return manualZFocusTf;
 	}
 
@@ -599,11 +605,11 @@ public class SegPombeMainDialog implements PlugIn{
 		}
 	}
 
-	public JTextField getSolidityTf() {
+	public JFormattedTextField getSolidityTf() {
 		return solidityTf;
 	}
 
-	public JTextField getMeanGreyValueField() {
+	public JFormattedTextField getMeanGreyValueField() {
 		return meanGreyValueField;
 	}
 
@@ -612,7 +618,6 @@ public class SegPombeMainDialog implements PlugIn{
 	 * segmentation produced images named with <<DUP>>
 	 */
 	public void getAlreadryOpenedImage() {
-		parameters.setImageToAnalyze(IJ.getImage().duplicate());
 		setPathDirField(IJ.getImage().getOriginalFileInfo().directory);
 	}
 
@@ -655,5 +660,10 @@ public class SegPombeMainDialog implements PlugIn{
 		// Math.round(imageToAnalyze.getSlice()/2),0.84 ,-177660);
 		// cBI.identifyCellesBoundaries();
 	}
-
+//	public static void main(String[] args) {
+//        SegPombeMainDialog md = new SegPombeMainDialog();
+//        md.setMainWindow();
+//        md.showMainWindow();
+//    }
 }
+
