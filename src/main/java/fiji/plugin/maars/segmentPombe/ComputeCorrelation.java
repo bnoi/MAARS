@@ -1,9 +1,9 @@
 package fiji.plugin.maars.segmentPombe;
 
 public class ComputeCorrelation {
-	private int[] iz;
-	private int zf;
-	private double sigma;
+	private float[] iz;
+	private float zf;
+	private float sigma;
 	private int direction;
 
 	// it is -1 for image with cell boundaries be black then white
@@ -15,7 +15,7 @@ public class ComputeCorrelation {
 	 * CorrelationPixVal(iz, zf, sigma);
 	 */
 
-	public ComputeCorrelation(int[] iz, int zf, double sigma, int direction) {
+	public ComputeCorrelation(float[] iz, float zf, float sigma, int direction) {
 		this.iz = iz;
 		this.zf = zf;
 		this.sigma = sigma;

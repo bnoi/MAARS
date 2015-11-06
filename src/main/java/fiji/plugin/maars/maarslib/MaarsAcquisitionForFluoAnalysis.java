@@ -268,16 +268,11 @@ public class MaarsAcquisitionForFluoAnalysis {
 			z = z + step;
 		}
 		ImagePlus imagePlus = new ImagePlus("Maars", imageStack);
-		ZProjector projector = new ZProjector();
-		projector.setMethod(ZProjector.MAX_METHOD);
-		projector.setImage(imagePlus);
-		projector.doProjection();
-		ImagePlus zProjectField = projector.getProjection();
 		Calibration cal = new Calibration();
 		cal.setUnit("micron");
 		cal.pixelWidth = mmc.getPixelSizeUm();
 		cal.pixelHeight = mmc.getPixelSizeUm();
-		zProjectField.setCalibration(cal);
+		imagePlus.setCalibration(cal);
 		ReportingUtils.logMessage("--- Acquisition done.");
 		fluoDS.close();
 		try {
@@ -289,9 +284,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
 			ReportingUtils.logError(e);
 		}
-		projector = null;
 		cal = null;
 		imageStack = null;
-		return zProjectField;
+		return imagePlus;
 	}
 }

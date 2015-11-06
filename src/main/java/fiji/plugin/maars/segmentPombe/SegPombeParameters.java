@@ -15,13 +15,13 @@ public class SegPombeParameters {
 
 	// Parameters of the algorithm
 	private ImagePlus imageToAnalyze;
-	private double sigma = 3;
-	public static double acquisitionStep = 0.3;
+	private float sigma = 3;
+//	public static double acquisitionStep = 0.3;
 	private int focusSlide = 16;
 	private boolean changeScale = true;
 	private int maxWidth = 1500;
 	private int maxHeight = 1500;
-	private int direction; // this is the direction of the equation to integrate
+	private int direction = -1; // this is the direction of the equation to integrate
 	// it is 1 for image with cell boundaries be black then white
 	// it is -1 for image with cell boundaries be white then black
 	
@@ -68,11 +68,11 @@ public class SegPombeParameters {
 		this.imageToAnalyze = imageToAnalyze;
 	}
 
-	public double getSigma() {
+	public float getSigma() {
 		return sigma;
 	}
 
-	public void setSigma(double sigma) {
+	public void setSigma(float sigma) {
 		this.sigma = sigma;
 	}
 

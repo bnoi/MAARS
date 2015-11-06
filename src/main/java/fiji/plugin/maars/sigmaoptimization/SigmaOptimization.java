@@ -155,7 +155,7 @@ public class SigmaOptimization implements PlugIn {
 			for (int roi = 0; roi < rois.length; roi++) {
 				double x = rois[roi].getXBase();
 				double y = rois[roi].getYBase();
-				int[] iz = new int[image.getNSlices()];
+				float[] iz = new float[image.getNSlices()];
 
 				System.out.println("for pixel x : " + x + " y : " + y);
 

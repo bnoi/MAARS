@@ -133,7 +133,7 @@ if(md.isOkClicked()) {
 			ms.writeUsedConfig();
 			if(ms.roiDetected()){
 			//----------------if got ROI, start fluo-acquisition --------//
-				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegmentationObject(), xPos, yPos);
+				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.ms.getSegPombeParam(), xPos, yPos);
 //				MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
 				MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
 																xPos,
