@@ -269,7 +269,7 @@ public class SegPombeMainDialog implements PlugIn{
 		manualZFocusCkb = new Checkbox(
 				"Precise the slice corresponding to focus (default is the middle one)");
 		manualZFocusTf = new JFormattedTextField(int.class);
-		manualZFocusTf.setValue(0);
+		manualZFocusTf.setValue(defaultParameters.getFocusSlide());
 
 		manualZFocusPanel.add(manualZFocusCkb);
 		manualZFocusPanel.add(manualZFocusTf);
@@ -400,7 +400,7 @@ public class SegPombeMainDialog implements PlugIn{
 		
 		Panel currentImagePanel = new Panel();
 		currentImageButton = new Button("Current Image");
-		currentImageAction = new CurrentImageAction(this, defaultParameters);
+		currentImageAction = new CurrentImageAction(this);
 		currentImageButton.addActionListener(currentImageAction);
 		currentImagePanel.add(currentImageButton);
 

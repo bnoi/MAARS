@@ -16,6 +16,7 @@ public class SegPombeParameters {
 	// Parameters of the algorithm
 	private ImagePlus imageToAnalyze;
 	private double sigma = 3;
+	public static double acquisitionStep = 0.3;
 	private int focusSlide = 16;
 	private boolean changeScale = true;
 	private int maxWidth = 1500;

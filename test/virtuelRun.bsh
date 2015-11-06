@@ -101,7 +101,7 @@ if(md.isOkClicked()) {
 				yPos);
 		ms.segmentation();
 		ms.writeUsedConfig();
-		
+
 		if (ms.roiDetected()){
 			String fluoFolder = AllMaarsParameters.convertPath(param
 													.getParametersAsJsonObject()

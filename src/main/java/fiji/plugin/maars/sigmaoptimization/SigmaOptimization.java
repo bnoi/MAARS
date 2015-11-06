@@ -15,7 +15,7 @@ import ij.plugin.frame.RoiManager;
 
 /**
  * ImajeJ plugin used to optimise sigma parameter used in segmentation process
- * of CellBoundaries_
+ * of SegmentPombe
  * 
  * @author marie
  *
@@ -26,7 +26,7 @@ public class SigmaOptimization implements PlugIn {
 	private double lowerSigma = 1;
 	private double upperSigma = 9;
 	private double step = 0.2;
-	private float zf;
+	private int zf;
 	private int direction = 1;
 	private ImagePlus image;
 	private String pathToSaveResult;
@@ -96,7 +96,7 @@ public class SigmaOptimization implements PlugIn {
 	 * 
 	 * @param zf
 	 */
-	public void setZFocus(float zf) {
+	public void setZFocus(int zf) {
 		this.zf = zf;
 	}
 
@@ -155,7 +155,7 @@ public class SigmaOptimization implements PlugIn {
 			for (int roi = 0; roi < rois.length; roi++) {
 				double x = rois[roi].getXBase();
 				double y = rois[roi].getYBase();
-				float[] iz = new float[image.getNSlices()];
+				int[] iz = new int[image.getNSlices()];
 
 				System.out.println("for pixel x : " + x + " y : " + y);
 

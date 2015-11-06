@@ -10,10 +10,10 @@ import java.util.List;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
-import fiji.plugin.maars.cellboundaries.CellsBoundaries;
 import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
+import fiji.plugin.maars.segmentPombe.SegPombeParameters;
 import ij.ImagePlus;
 import ij.plugin.ZProjector;
 
@@ -40,8 +40,8 @@ public class MaarsFluoAnalysis {
 	 * @param cB
 	 *            : CellsBoundaries object (used for segmentation)
 	 */
-	public MaarsFluoAnalysis(AllMaarsParameters parameters, CellsBoundaries cB,
-			double positionX, double positionY) {
+	public MaarsFluoAnalysis(AllMaarsParameters parameters,
+			SegPombeParameters segParam, double positionX, double positionY) {
 
 		this.parameters = parameters;
 		this.positionX = positionX;
@@ -60,11 +60,12 @@ public class MaarsFluoAnalysis {
 			fluoDir.mkdirs();
 		}
 
-		soc = new SetOfCells(cB.getImageToAnalyze(),
-				(int) Math.round(cB.getImageToAnalyze().getNSlices() / 2),
-				cB.getPathDirField().getText()
-						+ cB.getImageToAnalyze().getShortTitle() + "_ROI.zip",
-				cB.getPathDirField().getText(), parameters
+		soc = new SetOfCells(
+				segParam.getImageToAnalyze(),
+				(int) Math.round(segParam.getImageToAnalyze().getNSlices() / 2),
+				segParam.getSavingPath()
+						+ segParam.getImageToAnalyze().getShortTitle()
+						+ "_ROI.zip", segParam.getSavingPath(), parameters
 						.getParametersAsJsonObject()
 						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 						.getAsJsonObject()
@@ -111,7 +112,8 @@ public class MaarsFluoAnalysis {
 	 * @param channel
 	 *            : channel used for this fluoimage
 	 */
-	public List<String[]> analyzeEntireFieldReturnListSp(int frame, String channel) {
+	public List<String[]> analyzeEntireFieldReturnListSp(int frame,
+			String channel) {
 		List<String[]> cells = new ArrayList<String[]>();
 		List<String[]> spotStrings = new ArrayList<String[]>();
 		double timeInterval = parameters.getParametersAsJsonObject()
@@ -122,12 +124,12 @@ public class MaarsFluoAnalysis {
 		ReportingUtils.logMessage("Detecting spots...");
 		while (itrCells.hasNext()) {
 			Cell cell = itrCells.next();
-			Spindle sp = cell.findFluoSpotTempFunction(
-					parameters.getParametersAsJsonObject()
-							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-							.getAsJsonObject()
-							.get(AllMaarsParameters.SPOT_RADIUS).getAsDouble());
-			for (String[] s: cell.getSpotList()){
+			Spindle sp = cell.findFluoSpotTempFunction(parameters
+					.getParametersAsJsonObject()
+					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject().get(AllMaarsParameters.SPOT_RADIUS)
+					.getAsDouble());
+			for (String[] s : cell.getSpotList()) {
 				spotStrings.add(s);
 			}
 			cell.addCroppedFluoSlice();
@@ -149,33 +151,33 @@ public class MaarsFluoAnalysis {
 	public SetOfCells getSetOfCells() {
 		return soc;
 	}
-	
+
 	/**
 	 * set fluo image
 	 */
-	public void setFluoImage(ImagePlus fluoImg){
+	public void setFluoImage(ImagePlus fluoImg) {
 		this.fluoImg = fluoImg;
 	}
-	
+
 	/**
 	 * z-projection of fluoImage with max_intesity
 	 */
-	public void zProject(){
-		
+	public void zProject() {
+
 		ZProjector projector = new ZProjector();
 		projector.setMethod(ZProjector.MAX_METHOD);
 		projector.setImage(this.fluoImg);
 		projector.doProjection();
-		ImagePlus imgProject = projector.getProjection(); 
+		ImagePlus imgProject = projector.getProjection();
 		imgProject.setCalibration(fluoImg.getCalibration());
 		this.fluoImg = imgProject;
-		
+
 	}
-	
+
 	/**
 	 * crop all cells with cells' roi
 	 */
-	public void cropAllCells(){
+	public void cropAllCells() {
 		Iterator<Cell> itrCells = soc.iterator();
 		ReportingUtils.logMessage("Cropping cell");
 		while (itrCells.hasNext()) {
@@ -223,7 +225,8 @@ public class MaarsFluoAnalysis {
 		}
 	}
 
-	public void writeSpotListForOneCell(List<String[]> spotListForOneCell, int frame, String channel) {
+	public void writeSpotListForOneCell(List<String[]> spotListForOneCell,
+			int frame, String channel) {
 		FileWriter spotListWriter = null;
 		CSVWriter writer = null;
 		try {
@@ -236,7 +239,8 @@ public class MaarsFluoAnalysis {
 		writer = new CSVWriter(spotListWriter, '\t',
 				CSVWriter.NO_QUOTE_CHARACTER);
 		writer.writeNext(new String[] { "VISIBILITY", "POSITION_T",
-				"POSITION_Z", "POSITION_Y", "RADIUS", "FRAME", "POSITION_X","cellNumber" });
+				"POSITION_Z", "POSITION_Y", "RADIUS", "FRAME", "POSITION_X",
+				"cellNumber" });
 
 		writer.writeAll(spotListForOneCell);
 		try {

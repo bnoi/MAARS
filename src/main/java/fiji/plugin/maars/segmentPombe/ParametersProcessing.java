@@ -15,39 +15,24 @@ import ij.measure.Calibration;
 public class ParametersProcessing {
 
 	SegPombeMainDialog mainDialog;
-	SegPombeParameters parameters = new SegPombeParameters();
-	private String savingPath;
-	private ImagePlus imgToAnalysis;
-	private boolean unitsChecked = false;
+	SegPombeParameters parameters;
 
-	private boolean changeScale;
-	private boolean filterAbnormalShape;
-	private boolean filtrateWithMeanGrayValue;
+	private boolean unitsChecked;
 
-	private double sigma;
-	private double solidity;
-	private int focusSlide;
-	private double meanGrayValue;
-
-	private int maxWidth;
-	private int maxHeight;
-	private double minParticleSize;
-	private double maxParticleSize;
-	private int direction;
-
-	// Options related to display and save
-	private boolean showCorrelationImg;
-	private boolean showBinaryImg;
-	private boolean showDataFrame;
-	private boolean showFocusImage;
-	private boolean saveCorrelationImg;
-	private boolean saveBinaryImg;
-	private boolean saveDataFrame;
-	private boolean saveFocusImage;
-	private boolean saveRoi;
-
+	/*
+	 * constructor 1: Call this constructor when using SegmentPomobe interface
+	 */
 	public ParametersProcessing(SegPombeMainDialog mainDialog) {
 		this.mainDialog = mainDialog;
+		this.parameters = new SegPombeParameters();
+		this.unitsChecked = false;
+	}
+	
+	/*
+	 * constructor 2: Call this constructor when using MAARS 
+	 */
+	public ParametersProcessing(SegPombeParameters parameters) {
+		this.parameters = parameters;
 	}
 
 	/*
@@ -55,69 +40,78 @@ public class ParametersProcessing {
 	 */
 	public boolean checkParameters() {
 
-		// check if image path is validate
-		System.out.println("Checking if path to image is validate");
-		String pathToImg = mainDialog.getImgNameTf().getText();
-		if (!FileUtils.isValid(pathToImg)) {
-			IJ.error("Invalid movie path");
-			mainDialog.getImgNameTf().setBackground(Color.ORANGE);
-			return false;
-		}
-
-		// check if svaing path is validate
-		System.out.println("Checking if path to image is validate");
+		// check if saving path is valid
+		System.out.println("Checking if saving path is valid");
 		String savePath = mainDialog.getSaveDirTf().getText();
 		if (!FileUtils.isValid(savePath)) {
 			IJ.error("Invalid saving path");
 			mainDialog.getSaveDirTf().setBackground(Color.ORANGE);
 			return false;
 		}
+		System.out.println("...OK!");
 
+		// check if image path is valid
+		System.out.println("Checking if path to image is valid");
+		String pathToImg = savePath + mainDialog.getImgNameTf().getText();
+		if (!FileUtils.isValid(pathToImg)) {
+			IJ.error("Invalid movie path");
+			mainDialog.getImgNameTf().setBackground(Color.ORANGE);
+			return false;
+		}
+		System.out.println("...OK!");
+		
 		// Check sigma value
-		System.out.println("Checking if sigma value is validate");
+		System.out.println("Checking if sigma value is valid");
 		if ((Double) mainDialog.getTypicalSizeTf().getValue() <= 0) {
 			IJ.error("Wrong parameter", "Sigma must be a positive not null value");
 			return false;
 		}
+		System.out.println("...OK!");
 
 		// Check new image size value
-		System.out.println("Checking if new image size values are validate");
+		System.out.println("Checking if new image size values are valid");
 		if ((Integer) mainDialog.getMaxHeightTf().getValue() <= 0) {
 			IJ.error("Wrong parameter", "Max height must be a positive not null value");
 			return false;
 		}
+		System.out.println("...OK!");
 		if ((Integer) mainDialog.getMaxWidthTf().getValue() <= 0) {
 			IJ.error("Wrong parameter", "Max width must be a positive not null value");
 			return false;
 		}
+		System.out.println("...OK!");
 
 		// Check abnoraml cell shape value
-		System.out.println("Checking if solidity value is validate");
+		System.out.println("Checking if solidity value is valid");
 		if ( (Double) mainDialog.getSolidityTf().getValue() <= 0 || (Double) mainDialog.getSolidityTf().getValue() > 1) {
 			IJ.error("Wrong parameter", "Solidity must be between 0 and 1");
 			return false;
 		}
+		System.out.println("...OK!");
 
 		// Check minimum cell area
-		System.out.println("Checking if minimum particle size is validate");
+		System.out.println("Checking if minimum particle size is valid");
 		if ((Double) mainDialog.getMinParticleSizeTf().getValue() <= 0) {
 			IJ.error("Wrong parameter", "The minimum area must be a positive not null value");
 			return false;
 		}
+		System.out.println("...OK!");
 
 		// Check maximum cell area
-		System.out.println("Checking if maximum particle size is validate");
+		System.out.println("Checking if maximum particle size is valid");
 		if ((Double) mainDialog.getMaxParticleSizeTf().getValue() <= 0) {
 			IJ.error("Wrong parameter", "The maximum area must be a positive not null value");
 			return false;
 		}
+		System.out.println("...OK!");
 
 		// Check z focus value
-		System.out.println("Checking if z focus value is validate");
+		System.out.println("Checking if z focus value is valid");
 		if ((Integer) mainDialog.getManualZFocusTf().getValue() <= 0) {
 			IJ.error("Wrong parameter", "Focus slide must be a positive not null value");
 			return false;
 		}
+		System.out.println("...OK!");
 
 		// Check if none of the result ckeckBox is selected : in this case,
 		// the user would not get any result
@@ -127,6 +121,7 @@ public class ParametersProcessing {
 			IJ.error("No result possible", "You have not selected a way to see your results");
 			return false;
 		}
+		System.out.println("...OK!");
 
 		return true;
 	}
@@ -140,20 +135,20 @@ public class ParametersProcessing {
 		double tmpDouble;
 		int tmpInt;
 
-		this.savingPath = mainDialog.getSaveDirTf().getText();
-		this.direction = mainDialog.getDirection();
-		this.changeScale = mainDialog.getChangeScaleCkb().getState();
-		this.filterAbnormalShape = mainDialog.getFilterAbnormalShapeCkb().getState();
-		this.filtrateWithMeanGrayValue = mainDialog.getFilterWithMeanGreyValueCkb().getState();
-		this.showCorrelationImg = mainDialog.getShowCorrelationImgCkb().getState();
-		this.showBinaryImg = mainDialog.getShowBinaryImgCkb().getState();
-		this.showDataFrame = mainDialog.getShowDataFrameCkb().getState();
-		this.showFocusImage = mainDialog.getShowFocusImageCkb().getState();
-		this.saveCorrelationImg = mainDialog.getShowCorrelationImgCkb().getState();
-		this.saveBinaryImg = mainDialog.getSaveBinaryImgCkb().getState();
-		this.saveDataFrame = mainDialog.getSaveDataFrameCkb().getState();
-		this.saveFocusImage = mainDialog.getSaveFocusImageCkb().getState();
-		this.saveRoi = mainDialog.getSaveRoiCkb().getState();
+		parameters.setSavingPath(mainDialog.getSaveDirTf().getText());
+		parameters.setDirection(mainDialog.getDirection());
+		parameters.setChangeScale(mainDialog.getChangeScaleCkb().getState());
+		parameters.setFilterAbnormalShape(mainDialog.getFilterAbnormalShapeCkb().getState());
+		parameters.setFiltrateWithMeanGrayValue(mainDialog.getFilterWithMeanGreyValueCkb().getState());
+		parameters.setShowCorrelationImg(mainDialog.getShowCorrelationImgCkb().getState());
+		parameters.showBinaryImg = mainDialog.getShowBinaryImgCkb().getState();
+		parameters.showDataFrame = mainDialog.getShowDataFrameCkb().getState();
+		parameters.showFocusImage = mainDialog.getShowFocusImageCkb().getState();
+		parameters.saveCorrelationImg = mainDialog.getShowCorrelationImgCkb().getState();
+		parameters.saveBinaryImg = mainDialog.getSaveBinaryImgCkb().getState();
+		parameters.saveDataFrame = mainDialog.getSaveDataFrameCkb().getState();
+		parameters.saveFocusImage = mainDialog.getSaveFocusImageCkb().getState();
+		parameters.saveRoi = mainDialog.getSaveRoiCkb().getState();
 
 		this.imgToAnalysis = IJ.getImage().duplicate();
 		// if the unit chosen is a micron it must be converted
@@ -170,10 +165,10 @@ public class ParametersProcessing {
 		selectedIndex = mainDialog.getTypicalSizeUnitCombo().getSelectedIndex();
 		tmpDouble = (Double) mainDialog.getTypicalSizeTf().getValue();
 		if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked) {
-			this.sigma = convertMicronToPixel(tmpDouble, SegPombeParameters.DEPTH);
+			this.sigma = convertMicronToPixel(tmpDouble, SegPombeParameters.DEPTH)/SegPombeParameters.acquisitionStep;
 			System.out.println("typical size is in micron, convert it in pixels : " + String.valueOf(this.sigma));
 		} else if (selectedIndex == SegPombeParameters.PIXELS) {
-			this.sigma = tmpDouble;
+			this.sigma = tmpDouble / SegPombeParameters.acquisitionStep;
 		}
 
 		this.solidity = (Double) mainDialog.getSolidityTf().getValue();
@@ -437,7 +432,7 @@ public class ParametersProcessing {
 		return micronSize;
 	}
 
-	public SegPombeParameters getFinalParameters() {
+	public SegPombeParameters initalizeParameters() {
 		parameters.setImageToAnalyze(this.imgToAnalysis);
 		parameters.setSavingPath(this.savingPath);
 		parameters.setSigma(this.sigma);
@@ -464,6 +459,10 @@ public class ParametersProcessing {
 		parameters.setSaveCorrelationImg(this.saveCorrelationImg);
 
 		return parameters;
+	}
+	
+	public SegPombeParameters getParameters(){
+		return this.parameters;
 	}
 
 }

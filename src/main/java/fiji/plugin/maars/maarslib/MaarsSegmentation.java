@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import org.micromanager.internal.utils.ReportingUtils;
 
+import fiji.plugin.maars.segmentPombe.ParametersProcessing;
+import fiji.plugin.maars.segmentPombe.SegPombe;
 import fiji.plugin.maars.segmentPombe.SegPombeParameters;
 import ij.IJ;
 import ij.ImagePlus;
@@ -13,7 +15,7 @@ import ij.ImagePlus;
  * Class to segment a multiple z-stack bright field image then find and record
  * cell shape Rois
  * 
- * @author marie
+ * @author Tong LI
  *
  */
 public class MaarsSegmentation {
@@ -33,14 +35,21 @@ public class MaarsSegmentation {
 	 * @param positionY
 	 *            : current Y coordinate of microscope's view.
 	 */
-	public MaarsSegmentation(AllMaarsParameters parameters, double positionX, double positionY) {
+	public MaarsSegmentation(AllMaarsParameters parameters, double positionX,
+			double positionY) {
 
 		this.parameters = parameters;
-		this.pathToSegDir = AllMaarsParameters.convertPath(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString() + "/movie_X"
-						+ Math.round(positionX) + "_Y" + Math.round(positionY));
-		this.pathToSegMovie = AllMaarsParameters.convertPath(pathToSegDir + "/MMStack.ome.tif");
+		this.pathToSegDir = AllMaarsParameters.convertPath(parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.getAsString()
+				+ "/movie_X"
+				+ Math.round(positionX)
+				+ "_Y"
+				+ Math.round(positionY));
+		this.pathToSegMovie = AllMaarsParameters.convertPath(pathToSegDir
+				+ "/MMStack.ome.tif");
 	}
 
 	/**
@@ -48,67 +57,106 @@ public class MaarsSegmentation {
 	 */
 	public void segmentation() {
 
-		ReportingUtils.logMessage("Movie path for segmentation : " + pathToSegMovie);
+		ReportingUtils.logMessage("Movie path for segmentation : "
+				+ pathToSegMovie);
 		ImagePlus img = IJ.openImage(pathToSegMovie);
 
 		segPombeParam = new SegPombeParameters();
 
-		segPombeParam.setFilterAbnormalShape(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.FILTER_SOLIDITY).getAsBoolean());
-		
-		segPombeParam.setFiltrateWithMeanGrayValue(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean());
-		
 		segPombeParam.setImageToAnalyze(img);
-		segPombeParam.getImageToAnalyze().getCalibration().pixelDepth = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject().get(AllMaarsParameters.STEP)
-				.getAsDouble();
 
-		segPombeParam.checkUnitsAndScale();
-		cB.getRunAction().changeScale(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(AllMaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE).getAsInt(),
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(AllMaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE).getAsInt());
+		segPombeParam.setFilterAbnormalShape(parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.FILTER_SOLIDITY)
+				.getAsBoolean());
 
-		int cellSizePixel = (int) Math
-				.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE).getAsDouble()
-						/ parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-								.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble());
+		segPombeParam.setFiltrateWithMeanGrayValue(parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean());
 
-		int minSize = (int) Math
-				.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.MINIMUM_CELL_AREA).getAsDouble()
-						/ cB.getImageToAnalyze().getCalibration().pixelWidth);
+		segPombeParam.getImageToAnalyze().getCalibration().pixelDepth = parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
 
-		int maxSize = (int) Math
-				.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_CELL_AREA).getAsDouble()
-						/ cB.getImageToAnalyze().getCalibration().pixelWidth);
+		segPombeParam
+				.setMinParticleSize((int) Math
+						.round(parameters
+								.getParametersAsJsonObject()
+								.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+								.getAsJsonObject()
+								.get(AllMaarsParameters.MINIMUM_CELL_AREA)
+								.getAsDouble()
+								/ segPombeParam.getImageToAnalyze()
+										.getCalibration().pixelWidth)
+						/ segPombeParam.getImageToAnalyze().getCalibration().pixelHeight);
 
-		double solidity = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.SOLIDITY).getAsDouble();
+		segPombeParam
+				.setMaxParticleSize((int) Math
+						.round(parameters
+								.getParametersAsJsonObject()
+								.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+								.getAsJsonObject()
+								.get(AllMaarsParameters.MAXIMUM_CELL_AREA)
+								.getAsDouble()
+								/ segPombeParam.getImageToAnalyze()
+										.getCalibration().pixelWidth)
+						/ segPombeParam.getImageToAnalyze().getCalibration().pixelHeight);
 
-		double meanGrey = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE).getAsDouble();
+		ParametersProcessing process = new ParametersProcessing(segPombeParam);
 
-		CellsBoundariesIdentification cBI = new CellsBoundariesIdentification(cB, cellSizePixel, minSize, maxSize, -1,
-				(int) Math.round(cB.getImageToAnalyze().getNSlices() / 2), solidity, meanGrey, true, false);
-		// cBI.identifyCellesBoundaries() return true, if no ROI detected.
-		cBI.identifyCellsBoundaries();
-		if (cBI.roiDetected()){
+		process.checkImgUnitsAndScale();
+		process.changeScale(
+				parameters.getParametersAsJsonObject()
+						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE)
+						.getAsInt(),
+				parameters
+						.getParametersAsJsonObject()
+						.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject()
+						.get(AllMaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE)
+						.getAsInt());
+
+		segPombeParam = process.getParameters();
+
+		segPombeParam
+				.setSigma((int) Math
+						.round(parameters
+								.getParametersAsJsonObject()
+								.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+								.getAsJsonObject()
+								.get(AllMaarsParameters.CELL_SIZE)
+								.getAsDouble()
+								/ segPombeParam.getImageToAnalyze()
+										.getCalibration().pixelDepth));
+
+		segPombeParam.setSolidityThreshold(parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SOLIDITY)
+				.getAsDouble());
+
+		segPombeParam.setMeanGreyValueThreshold(parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE)
+				.getAsDouble());
+		
+		System.out.println(segPombeParam.saveFocusImage() + "");
+		SegPombe segPombe = new SegPombe(segPombeParam);
+		segPombe.createCorrelationImage();
+		segPombe.convertCorrelationToBinaryImage();
+		segPombe.analyseAndFilterParticles();
+		segPombe.showAndSaveResultsAndCleanUp();
+		if (segPombe.roiDetected()) {
 			this.roiDetected = true;
-			cBI.getRoiManager().close();
+			segPombe.getRoiManager().close();
 		}
-	}
-
-	/**
-	 * 
-	 * @return CellsBoundaries object
-	 */
-	public CellsBoundaries getSegmentationObject() {
-		return cB;
 	}
 
 	/**
@@ -124,60 +172,104 @@ public class MaarsSegmentation {
 	 * 
 	 */
 	public void writeUsedConfig() {
-		double timeInterval = parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL).getAsDouble() / 1000;
-		int maxNbSpot = parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt();
-		int maxWidth = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE).getAsInt();
-		int maxHeight = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE).getAsInt();
-		double cellSize = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE).getAsDouble();
-		double segRange = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
-		double segStep = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+		double timeInterval = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
+				.getAsDouble() / 1000;
+		int maxNbSpot = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt();
+		int maxWidth = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE)
+				.getAsInt();
+		int maxHeight = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
+				.get(AllMaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE)
+				.getAsInt();
+		double cellSize = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE)
+				.getAsDouble();
+		double segRange = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
+				.getAsDouble();
+		double segStep = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
-		double minCellArea = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MINIMUM_CELL_AREA).getAsDouble();
-		double maxCellArea = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_CELL_AREA).getAsDouble();
-		double solidity = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.SOLIDITY).getAsDouble();
-		double meanGrey = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE).getAsDouble();
+		double minCellArea = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.MINIMUM_CELL_AREA)
+				.getAsDouble();
+		double maxCellArea = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_CELL_AREA)
+				.getAsDouble();
+		double solidity = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SOLIDITY)
+				.getAsDouble();
+		double meanGrey = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE)
+				.getAsDouble();
 		String rootDirName = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.get(AllMaarsParameters.SAVING_PATH).getAsString();
-		double fluoRange = parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
-		double fluoStep = parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.getAsString();
+		double fluoRange = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
+				.getAsDouble();
+		double fluoStep = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
 		boolean filterUnusualShape = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-				.get(AllMaarsParameters.FILTER_SOLIDITY).getAsBoolean();
-		boolean filterWithMeanGrayValue = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.FILTER_SOLIDITY)
+				.getAsBoolean();
+		boolean filterWithMeanGrayValue = parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject()
 				.get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean();
 		FileWriter configFile = null;
 		try {
-			configFile = new FileWriter(AllMaarsParameters.convertPath(pathToSegDir + "/configUsed.txt"));
+			configFile = new FileWriter(
+					AllMaarsParameters.convertPath(pathToSegDir
+							+ "/configUsed.txt"));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		try {
-			configFile.write("Interval between 2 frames:\t" + String.valueOf(timeInterval) + "\n"
-					+ "Max number of spot:\t" + String.valueOf(maxNbSpot) + "\n" + "Max width of bright field:\t"
-					+ String.valueOf(maxWidth) + "\n" + "Max height of bright field:\t" + String.valueOf(maxHeight)
-					+ "\n" + "Typical cell size:\t" + String.valueOf(cellSize) + "\n" + "Segmentation range:\t"
-					+ String.valueOf(segRange) + "\n" + "Segmentation step size:\t" + String.valueOf(segStep) + "\n"
-					+ "Fluo acquisition range:\t" + String.valueOf(fluoRange) + "\n" + "Fluo acquisition step size:\t"
-					+ String.valueOf(fluoStep) + "\n" + "Minimum cell area:\t" + String.valueOf(minCellArea) + "\n"
-					+ "Maximum cell area:\t" + String.valueOf(maxCellArea) + "\n" + "Solidity thresold enable:\t"
-					+ String.valueOf(filterUnusualShape) + "\n" + "Solidity thresold:\t" + String.valueOf(solidity)
-					+ "\n" + "Gray level thresold enable:\t" + String.valueOf(filterWithMeanGrayValue) + "\n"
-					+ "Gray level thresold:\t" + String.valueOf(meanGrey) + "\n" + "Root dir:\t" + rootDirName + "\n");
+			configFile.write("Interval between 2 frames:\t"
+					+ String.valueOf(timeInterval) + "\n"
+					+ "Max number of spot:\t" + String.valueOf(maxNbSpot)
+					+ "\n" + "Max width of bright field:\t"
+					+ String.valueOf(maxWidth) + "\n"
+					+ "Max height of bright field:\t"
+					+ String.valueOf(maxHeight) + "\n" + "Typical cell size:\t"
+					+ String.valueOf(cellSize) + "\n" + "Segmentation range:\t"
+					+ String.valueOf(segRange) + "\n"
+					+ "Segmentation step size:\t" + String.valueOf(segStep)
+					+ "\n" + "Fluo acquisition range:\t"
+					+ String.valueOf(fluoRange) + "\n"
+					+ "Fluo acquisition step size:\t"
+					+ String.valueOf(fluoStep) + "\n" + "Minimum cell area:\t"
+					+ String.valueOf(minCellArea) + "\n"
+					+ "Maximum cell area:\t" + String.valueOf(maxCellArea)
+					+ "\n" + "Solidity thresold enable:\t"
+					+ String.valueOf(filterUnusualShape) + "\n"
+					+ "Solidity thresold:\t" + String.valueOf(solidity) + "\n"
+					+ "Gray level thresold enable:\t"
+					+ String.valueOf(filterWithMeanGrayValue) + "\n"
+					+ "Gray level thresold:\t" + String.valueOf(meanGrey)
+					+ "\n" + "Root dir:\t" + rootDirName + "\n");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

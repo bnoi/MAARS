@@ -33,7 +33,7 @@ public class OkAction implements ActionListener {
 		so.setUpperSigma(dialog.getNextNumber());
 		so.setStep(dialog.getNextNumber());
 		so.setPath(dialog.getNextString());
-		so.setZFocus((float) dialog.getNextNumber());
+		so.setZFocus((int) dialog.getNextNumber());
 		so.setDirection((int) dialog.getNextNumber());
 		dialog.setVisible(false);
 	}

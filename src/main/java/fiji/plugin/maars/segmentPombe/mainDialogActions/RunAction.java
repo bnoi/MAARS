@@ -22,9 +22,14 @@ public class RunAction implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		ParametersProcessing process = new ParametersProcessing(mainDialog);
-		process.checkParameters();
-		process.updateParameters();
-		SegPombeParameters parameters = process.getFinalParameters();
-		SegPombe segPombe = new SegPombe(parameters);
+		if (process.checkParameters()) {
+			process.updateParameters();
+			SegPombeParameters parameters = process.initalizeParameters();
+			SegPombe segPombe = new SegPombe(parameters);
+			segPombe.createCorrelationImage();
+			segPombe.convertCorrelationToBinaryImage();
+			segPombe.analyseAndFilterParticles();
+			segPombe.showAndSaveResultsAndCleanUp();
+		}
 	}
 }
