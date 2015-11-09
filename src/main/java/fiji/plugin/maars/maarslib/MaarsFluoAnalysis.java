@@ -14,13 +14,14 @@ import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import fiji.plugin.maars.segmentPombe.SegPombeParameters;
+import fiji.plugin.maars.utils.FileUtils;
 import ij.ImagePlus;
 import ij.plugin.ZProjector;
 
 /**
  * Class to find and measure mitotic spindle using fluorescence image analysis
  * 
- * @author marie
+ * @author Tong LI
  *
  */
 public class MaarsFluoAnalysis {
@@ -46,7 +47,7 @@ public class MaarsFluoAnalysis {
 		this.parameters = parameters;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.pathToFluoDir = AllMaarsParameters.convertPath(parameters
+		this.pathToFluoDir = FileUtils.convertPath(parameters
 				.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
@@ -88,7 +89,7 @@ public class MaarsFluoAnalysis {
 		this.parameters = parameters;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.pathToFluoDir = AllMaarsParameters.convertPath(parameters
+		this.pathToFluoDir = FileUtils.convertPath(parameters
 				.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)

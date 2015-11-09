@@ -5,9 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.micromanager.internal.utils.ReportingUtils;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.io.TmXmlWriter;
+import ij.IJ;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
@@ -50,5 +52,20 @@ public class FileUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Convert an unix path in windows path if program is running on windows OS
+	 * @param unixPath
+	 * @return String path
+	 */
+	public static String convertPath(String unixPath) {
+		String path = unixPath;
+		ReportingUtils.logMessage("program running on windows : "+IJ.isWindows());
+		ReportingUtils.logMessage("path is containing '/' : "+path.contains("/"));
+		if (IJ.isWindows() && path.contains("/")) {
+			path = path.replace("/", "\\\\");
+		}
+		return path;
 	}
 }

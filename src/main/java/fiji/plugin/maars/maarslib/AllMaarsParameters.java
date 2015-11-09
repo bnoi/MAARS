@@ -145,21 +145,6 @@ public class AllMaarsParameters {
 	}
 	
 	/**
-	 * Convert an unix path in windows path if program is running on windows OS
-	 * @param unixPath
-	 * @return String path
-	 */
-	public static String convertPath(String unixPath) {
-		String path = unixPath;
-		ReportingUtils.logMessage("program running on windows : "+IJ.isWindows());
-		ReportingUtils.logMessage("path is containing '/' : "+path.contains("/"));
-		if (IJ.isWindows() && path.contains("/")) {
-			path = path.replace("/", "\\\\");
-		}
-		return path;
-	}
-	
-	/**
 	 * The few following colors are return as Color object : GREEN, CYAN, RED, BLUE, WHITE
 	 * NB : return GRAY if unknown color
 	 * @param colorName
@@ -221,7 +206,7 @@ public class AllMaarsParameters {
 	 * @param value
 	 *            : corresponding value of parameter
 	 */
-	static public void updateFluoParameter(AllMaarsParameters paramObject, String parameter, String value) {
+	static public AllMaarsParameters updateFluoParameter(AllMaarsParameters paramObject, String parameter, String value) {
 		paramObject.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().remove(parameter);
@@ -229,6 +214,7 @@ public class AllMaarsParameters {
 		paramObject.getParametersAsJsonObject()
 				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 				.getAsJsonObject().addProperty(parameter, value);
+		return paramObject;
 	}
 	
 	/**
@@ -241,7 +227,7 @@ public class AllMaarsParameters {
 	 * @param value
 	 *            : corresponding value of parameter
 	 */
-	static public void updateGeneralParameter(AllMaarsParameters paramObject, String parameter, String value) {
+	static public AllMaarsParameters updateGeneralParameter(AllMaarsParameters paramObject, String parameter, String value) {
 		paramObject.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().remove(parameter);
@@ -249,5 +235,10 @@ public class AllMaarsParameters {
 		paramObject.getParametersAsJsonObject()
 				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 				.getAsJsonObject().addProperty(parameter, value);
+		return paramObject;
+	}
+	
+	public static void addFluoChannel(String channelName){
+		asas
 	}
 }

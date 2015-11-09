@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -32,14 +33,26 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private AllMaarsParameters parameters;
 	private int filedLength = 8;
+	private int count = 2;
 	private JTextField range;
 	private JTextField step;
 	private JTextField fluoChannels;
 	private JTextField spotRadius;
 	private JTextField maxNbSpot;
 	private JTextField timeInterval;
+	private JTextField tfield;
+	private String nameTField = "channel_";
 	private JCheckBox saveFlims;
 	private Button okFluoAnaParamButton;
+	private Button addChannelButton;
+	private Button delChannelButton;
+	private JPanel channelNbSpotPanel;
+	private JComboBox channel1;
+	private JComboBox channel2;
+	private JComboBox channel3;
+	
+	String channelList[] = { "GFP", "CFP","TxRed","DAPI"};
+	
 
 	/**
 	 * Constructor :
@@ -85,18 +98,6 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		//
 
-		JPanel fluoChannelsPanel = new JPanel(new GridLayout(1, 2));
-		JLabel fluoChannelsTitle = new JLabel("Fluo-channel(s) used : ", SwingConstants.CENTER);
-		fluoChannels = new JTextField(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS).getAsString(),
-				filedLength);
-		fluoChannelsPanel.add(fluoChannelsTitle);
-		fluoChannelsPanel.add(fluoChannels);
-		this.add(fluoChannelsPanel);
-
-		//
-
 		JPanel timeIntervalPanel = new JPanel(new GridLayout(1, 2));
 		JLabel timeIntervalTitle = new JLabel("Time Interval (ms) : ", SwingConstants.CENTER);
 		timeInterval = new JTextField(
@@ -134,17 +135,45 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		this.add(spotRadiusPanel);
 
 		//
-
-		JPanel maxNbSpotPanel = new JPanel(new GridLayout(1, 2));
+		
+		channelNbSpotPanel = new JPanel(new GridLayout(0,2));
+		JLabel fluoChannelsTitle = new JLabel("Fluo-channel(s) used", SwingConstants.CENTER);
 		JLabel maxNbSpotTitle = new JLabel("Max number of spot(s)", SwingConstants.CENTER);
+		channelNbSpotPanel.add(fluoChannelsTitle);
+		channelNbSpotPanel.add(maxNbSpotTitle);
+		//
+		
+		channel1 = new JComboBox(channelList);
+		fluoChannels = new JTextField(
+				parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+						.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS).getAsString(),
+				filedLength);
+		channelNbSpotPanel.add(fluoChannels);
+		
+		//
+		
 		maxNbSpot = new JTextField(
 				parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsString(),
 				filedLength);
-		maxNbSpotPanel.add(maxNbSpotTitle);
-		maxNbSpotPanel.add(maxNbSpot);
-		this.add(maxNbSpotPanel);
-
+		channelNbSpotPanel.add(maxNbSpot);
+		
+		//
+		
+		addChannelButton = new Button("Add channel");
+		addChannelButton.addActionListener(this);
+		channelNbSpotPanel.add(addChannelButton);
+		
+		//
+		
+		delChannelButton = new Button("Delete channel");
+		delChannelButton.addActionListener(this);
+		channelNbSpotPanel.add(delChannelButton);
+		
+		//
+		
+		this.add(channelNbSpotPanel);
+		
 		//
 
 		okFluoAnaParamButton = new Button("OK");
@@ -176,7 +205,8 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == okFluoAnaParamButton) {
+		Object src = e.getSource();
+		if (src == okFluoAnaParamButton) {
 			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.RANGE_SIZE_FOR_MOVIE,
 					range.getText());
 			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.STEP, step.getText());
@@ -190,6 +220,44 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.TIME_INTERVAL,
 					timeInterval.getText());
 			this.setVisible(false);
+		}else if(src == addChannelButton){
+			channelNbSpotPanel.remove(addChannelButton);
+			channelNbSpotPanel.remove(delChannelButton);
+			for (int i = 0;i<2; i++){
+				tfield = new JTextField();
+	            tfield.setName(nameTField + count);
+	            channelNbSpotPanel.add(tfield);
+	            count++;
+			}
+			channelNbSpotPanel.add(addChannelButton);
+			channelNbSpotPanel.add(delChannelButton);
+			if(count >=6 ){
+				addChannelButton.setEnabled(false);
+			}
+			if (count > 2){
+				delChannelButton.setEnabled(true);
+			}
+            channelNbSpotPanel.revalidate();  // For JDK 1.7 or above.
+            //frame.getContentPane().revalidate(); // For JDK 1.6 or below.
+            channelNbSpotPanel.repaint();
+		}else if(src == delChannelButton){
+			channelNbSpotPanel.remove(addChannelButton);
+			channelNbSpotPanel.remove(delChannelButton);
+			for (int i = 0;i<2; i++){
+				channelNbSpotPanel.remove(count);
+	            count--;
+			}
+			channelNbSpotPanel.add(addChannelButton);
+			channelNbSpotPanel.add(delChannelButton);
+			if(count < 6 ){
+				addChannelButton.setEnabled(true);
+			}
+			if (count <= 2){
+				delChannelButton.setEnabled(false);
+			}
+            channelNbSpotPanel.revalidate();  // For JDK 1.7 or above.
+            //frame.getContentPane().revalidate(); // For JDK 1.6 or below.
+            channelNbSpotPanel.repaint();
 		}
 
 	}

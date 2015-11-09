@@ -39,11 +39,11 @@ public class MaarsSegmentation {
 	public MaarsSegmentation(AllMaarsParameters parameters, double positionX, double positionY) {
 
 		this.parameters = parameters;
-		this.pathToSegDir = AllMaarsParameters.convertPath(
+		this.pathToSegDir = FileUtils.convertPath(
 				parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString() + "/movie_X"
 						+ Math.round(positionX) + "_Y" + Math.round(positionY) + "/");
-		this.pathToSegMovie = AllMaarsParameters.convertPath(pathToSegDir + "MMStack.ome.tif");
+		this.pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class MaarsSegmentation {
 				.get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean();
 		FileWriter configFile = null;
 		try {
-			configFile = new FileWriter(AllMaarsParameters.convertPath(pathToSegDir + "/configUsed.txt"));
+			configFile = new FileWriter(FileUtils.convertPath(pathToSegDir + "/configUsed.txt"));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

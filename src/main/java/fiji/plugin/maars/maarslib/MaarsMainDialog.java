@@ -32,7 +32,7 @@ import org.micromanager.internal.utils.ReportingUtils;
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
  * 
- * @author marie
+ * @author Tong LI
  *
  */
 public class MaarsMainDialog implements ActionListener {
@@ -41,7 +41,7 @@ public class MaarsMainDialog implements ActionListener {
 	private final Label numFieldLabel;
 	private final MMStudio mm;
 	private final CMMCore mmc;
-	private final AllMaarsParameters parameters;
+	private AllMaarsParameters parameters;
 	private final double calibration;
 	private boolean okClicked;
 	private Button autofocusButton;
@@ -333,13 +333,11 @@ public class MaarsMainDialog implements ActionListener {
 	 */
 	public void saveParameters() {
 
-		if (mainDialog.getNextBoolean()) {
-			try {
-				parameters.save();
-			} catch (IOException e) {
-				e.printStackTrace();
-				IJ.error("Could not save parameters");
-			}
+		try {
+			parameters.save();
+		} catch (IOException e) {
+			e.printStackTrace();
+			IJ.error("Could not save parameters");
 		}
 	}
 
@@ -372,13 +370,13 @@ public class MaarsMainDialog implements ActionListener {
 					.equals(parameters.getParametersAsJsonObject()
 							.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
 							.get(AllMaarsParameters.SAVING_PATH).getAsString())) {
-				AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.SAVING_PATH,
+				parameters = AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.SAVING_PATH,
 						savePath.getText());
 			}
 			if (!fluoAcqDuration.getText()
 					.equals(parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT).getAsString())) {
-				AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.TIME_LIMIT,
+				parameters = AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.TIME_LIMIT,
 						fluoAcqDuration.getText());
 			}
 			saveParameters();
