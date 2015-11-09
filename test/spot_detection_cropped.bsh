@@ -14,19 +14,36 @@ import ij.measure.Calibration;
 import ij.plugin.ZProjector;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.maars.utils.FileUtils;
+import java.util.ArrayList;
+import java.io.File;
+import fiji.plugin.trackmate.features.spot.SpotContrastAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
+import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
 
-IJ.open("/media/tong/74CDBC0B2251059E/test/movie_X0_Y0/MMStack.ome.tif");
-//ImagePlus imp = IJ.openImage("D:/Data/Tong/Movies/0_FLUO/MMStack_Pos0.ome.tif");
-//IJ.openImage("/Users/theoli89/Desktop/curioData/single_field/102_4/movie_X0_Y0_FLUO/15/MMStack_Pos0.ome.tif");
+import fiji.plugin.trackmate.io.TmXmlWriter;
 
-ImagePlus imp =IJ.getImage();
+//base_dir = "D:/Data/Tong/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
+//base_dir = "/Volumes/Macintosh/Documents/MAARS/";
+
+addClassPath(base_dir + "target/MAARS_-1.0.jar");
+String imgFloder = "/media/tong/74CDBC0B2251059E/test/movie_X0_Y0_FLUO/croppedImgs";
+File folder = new File(imgFloder);
+ArrayList listFile = FileUtils.listFilesForFolder(folder);
+//for ( File fileEntry : listFile) {
+//print(fileEntry);
+ImagePlus imp =IJ.openImage(imgFloder + "/41.tif");
 ZProjector projector = new ZProjector();
 projector.setMethod(ZProjector.MAX_METHOD);
 projector.setImage(imp);
 projector.doProjection();
 
 ImagePlus zprojection = projector.getProjection();
-zprojection.show();
+//zprojection.show();
 Calibration cal = imp.getCalibration();
 print(cal.pixelWidth + "");
 Model model = new Model();
@@ -34,6 +51,11 @@ Model model = new Model();
 Settings settings = new Settings();
 
 settings.setFrom(zprojection);
+settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory());
+settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory());
+settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory());
+settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory());
+settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory());
 
 settings.detectorFactory = new LogDetectorFactory();
 Map detectorSettings = new HashMap();
@@ -63,13 +85,16 @@ trackmate.execSpotFiltering(true);
 print("execSpotFiltering done");
 
 print("Found " + trackmate.getModel().getSpots().getNSpots(false) + " spots");
+FileUtils.writeSpotFeatures(new File(imgFloder + "/41.tif"),model);
+	
+//}
 
 //for(Spot spot : trackmate.getModel().getSpots().iterable(true)) {
  //  print(spot.getFeature(Spot.RADIUS));
 //}
 
 // Show
-SelectionModel selectionModel = new SelectionModel(model);
-HyperStackDisplayer displayer= new HyperStackDisplayer(model, selectionModel, zprojection);
-displayer.render();
-displayer.refresh();
+//SelectionModel selectionModel = new SelectionModel(model);
+//HyperStackDisplayer displayer= new HyperStackDisplayer(model, selectionModel, zprojection);
+//displayer.render();
+//displayer.refresh();
