@@ -2,10 +2,12 @@ package fiji.plugin.maars.maarslib;
 
 import java.awt.Button;
 import java.awt.Color;
+
 import java.awt.Dimension;
+
+import java.awt.GridLayout;
 import java.awt.Label;
-import java.awt.Panel;
-import java.awt.TextField;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -13,21 +15,25 @@ import java.awt.event.KeyListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Vector;
+
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import mmcorej.CMMCore;
+
 import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
-import ij.gui.NonBlockingGenericDialog;
-import org.micromanager.internal.utils.ReportingUtils;
 
+import org.micromanager.internal.utils.ReportingUtils;
 
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
@@ -37,7 +43,7 @@ import org.micromanager.internal.utils.ReportingUtils;
  */
 public class MaarsMainDialog implements ActionListener {
 
-	private final NonBlockingGenericDialog mainDialog;
+	private JFrame mainDialog;
 	private final Label numFieldLabel;
 	private final MMStudio mm;
 	private final CMMCore mmc;
@@ -48,8 +54,11 @@ public class MaarsMainDialog implements ActionListener {
 	private Button okMainDialogButton;
 	private Button segmButton;
 	private Button fluoAnalysisButton;
-	private JTextField savePath;
-	private JTextField fluoAcqDuration;
+	private JFormattedTextField savePathTf;
+	private JFormattedTextField widthTf;
+	private JFormattedTextField heightTf;
+	private JFormattedTextField fluoAcqDurationTf;
+	private JCheckBox saveParametersChk;
 	private JRadioButton dynamicOpt;
 	private JRadioButton staticOpt;
 
@@ -65,136 +74,168 @@ public class MaarsMainDialog implements ActionListener {
 	 *            the system (in JSON format)
 	 * @throws IOException
 	 */
-	public MaarsMainDialog(MMStudio mm, CMMCore mmc, String pathConfigFile) throws IOException {
+	public MaarsMainDialog(MMStudio mm, CMMCore mmc, String pathConfigFile) {
+
 		// ------------initialization of parameters---------------//
 		try {
-			PrintStream ps = new PrintStream(System.getProperty("user.dir") + "/MAARS.LOG");
+			PrintStream ps = new PrintStream(System.getProperty("user.dir")
+					+ "/MAARS.LOG");
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
 			ReportingUtils.logError(e);
 		}
 		Color labelColor = Color.ORANGE;
+		Color bgColor = Color.WHITE;
 		okClicked = false;
 
 		this.mm = mm;
 		this.mmc = mmc;
 
-		ReportingUtils.logMessage("create parameter object ...");
-
-		parameters = new AllMaarsParameters(pathConfigFile);
-
-		ReportingUtils.logMessage("Done.");
-
-		int defaultXFieldNumber = parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.X_FIELD_NUMBER).getAsInt();
-		int defaultYFieldNumber = parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.Y_FIELD_NUMBER).getAsInt();
+		// initialize mainFrame
 
 		ReportingUtils.logMessage("create main dialog ...");
+		mainDialog = new JFrame(
+				"Mitosis Analysing And Recording System - MAARS");
+		JFrame.setDefaultLookAndFeelDecorated(true);
+		mainDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+		// set minimal dimension of mainDialog
+
+		ReportingUtils.logMessage("- set minimal dimension");
+		int maxDialogWidth = 350;
+		int maxDialogHeight = 600;
+		Dimension minimumSize = new Dimension(maxDialogWidth, maxDialogHeight);
+		mainDialog.setMinimumSize(minimumSize);
+
+		// Read config file
+
+		ReportingUtils.logMessage("create parameter object ...");
+		try {
+			parameters = new AllMaarsParameters(pathConfigFile);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		ReportingUtils.logMessage("Done.");
+
+		// Get number of field to explore
+
+		int defaultXFieldNumber = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.X_FIELD_NUMBER)
+				.getAsInt();
+		int defaultYFieldNumber = parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.Y_FIELD_NUMBER)
+				.getAsInt();
+
+		// Calculate width and height for each field
 
 		calibration = mm.getCMMCore().getPixelSizeUm();
 		double fieldWidth = mmc.getImageWidth() * calibration;
 		double fieldHeight = mmc.getImageHeight() * calibration;
 
-		// ------------set up the dialog---------------//
-		mainDialog = new NonBlockingGenericDialog("Mitosis Analysing And Recording System - MAARS");
-		mainDialog.setBackground(Color.WHITE);
-		ReportingUtils.logMessage("- set Layout");
-		BoxLayout layout = new BoxLayout(mainDialog, BoxLayout.Y_AXIS);
-		mainDialog.setLayout(layout);
+		// Exploration Label
 
-		ReportingUtils.logMessage("- set minimal dimension");
-		Dimension minimumSize = new Dimension(350, 600);
-		mainDialog.setMinimumSize(minimumSize);
-		mainDialog.centerDialog(true);
+		Label explorationLabel = new Label("Area to explore");
+		explorationLabel.setBackground(labelColor);
 
-		ReportingUtils.logMessage("- create panel");
-		Panel analysisParamPanel = new Panel();
+		// field width Panel (Label + textfield)
 
-		analysisParamPanel.setBackground(Color.WHITE);
-		BoxLayout analysisParamLayout = new BoxLayout(analysisParamPanel, BoxLayout.Y_AXIS);
-		analysisParamPanel.setLayout(analysisParamLayout);
-		// ------------analysis parameters---------------//
-		Label analysisParamLabel = new Label("Analysis parameters");
+		JPanel widthPanel = new JPanel(new GridLayout(1, 0));
+		widthPanel.setBackground(bgColor);
+		JLabel widthLabel = new JLabel("Width :", SwingConstants.CENTER);
+		widthTf = new JFormattedTextField(Double.class);
+		widthTf.setValue(fieldWidth * defaultXFieldNumber);
+		widthTf.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				refreshNumField();
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+		});
+		widthPanel.add(widthLabel);
+		widthPanel.add(widthTf);
+
+		// field Height Panel (Label + textfield)
+
+		JPanel heightPanel = new JPanel(new GridLayout(1, 0));
+		heightPanel.setBackground(bgColor);
+		JLabel heightLabel = new JLabel("Height :", SwingConstants.CENTER);
+		heightTf = new JFormattedTextField(Double.class);
+		heightTf.setValue(fieldHeight * defaultYFieldNumber);
+		heightTf.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				refreshNumField();
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+		});
+		heightPanel.add(heightLabel);
+		heightPanel.add(heightTf);
+
+		// number of field label
+
+		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber
+				* defaultYFieldNumber);
+
+		// analysis parameters label
+
+		Label analysisParamLabel = new Label("Analysis parameters",
+				SwingConstants.CENTER);
 		analysisParamLabel.setBackground(labelColor);
 
-		ReportingUtils.logMessage("- create AutofocusButtonAction");
+		// autofocus button
+
+		ReportingUtils.logMessage("- create AutofocusButton");
 		autofocusButton = new Button("Autofocus");
 		autofocusButton.addActionListener(this);
 
-		ReportingUtils.logMessage("- create OpenSegmentationDialogButtonAction");
+		// segmentation button
+
+		ReportingUtils.logMessage("- create OpenSegmentationDialogButton");
 		segmButton = new Button("Segmentation");
 		segmButton.addActionListener(this);
 
-		ReportingUtils.logMessage("- create OpenFluoAnalysisDialogAction");
+		// fluo analysis button
 
+		ReportingUtils.logMessage("- create OpenFluoAnalysisDialog");
 		fluoAnalysisButton = new Button("Fluorescent analysis");
 		fluoAnalysisButton.addActionListener(this);
 
-		ReportingUtils.logMessage("- add buttons to panel");
-		analysisParamPanel.add(analysisParamLabel);
-		analysisParamPanel.add(autofocusButton);
-		analysisParamPanel.add(segmButton);
-		analysisParamPanel.add(fluoAnalysisButton);
+		// strategy panel (2 radio button + 1 textfield + 1 label)
 
-		ReportingUtils.logMessage("- add label for text field");
-		Label explorationLabel = new Label("Area to explore");
-		explorationLabel.setBackground(labelColor);
-		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber * defaultYFieldNumber);
-		// ------------area to explore---------------//
-		ReportingUtils.logMessage("- add button, textfield and label to mainDialog");
-		mainDialog.add(explorationLabel);
-		mainDialog.addNumericField("Width", fieldWidth * defaultXFieldNumber, 0, 6, "micron");
-		mainDialog.addNumericField("Height", fieldHeight * defaultYFieldNumber, 0, 6, "micron");
-		final Vector<TextField> numFields = mainDialog.getNumericFields();
-		numFields.get(0).addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				refreshNumField();
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
-			}
-		});
-		numFields.get(1).addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				refreshNumField();
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
-			}
-		});
-		mainDialog.add(numFieldLabel);
-
-		//
-
-		mainDialog.addPanel(analysisParamPanel);
-
-		JPanel strategyPanel = new JPanel();
+		JPanel strategyPanel = new JPanel(new GridLayout(1, 0));
+		strategyPanel.setBackground(bgColor);
 		dynamicOpt = new JRadioButton("Dynamic");
-		dynamicOpt.setSelected(parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC).getAsBoolean());
+		dynamicOpt.setSelected(parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC)
+				.getAsBoolean());
 		staticOpt = new JRadioButton("Static");
-		staticOpt.setSelected(!parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC).getAsBoolean());
+		staticOpt.setSelected(!parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC)
+				.getAsBoolean());
 
 		dynamicOpt.addActionListener(this);
 		staticOpt.addActionListener(this);
@@ -205,41 +246,65 @@ public class MaarsMainDialog implements ActionListener {
 
 		strategyPanel.add(staticOpt);
 		strategyPanel.add(dynamicOpt);
-		fluoAcqDuration = new JTextField(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT).getAsString(),
-				4);
-		strategyPanel.add(fluoAcqDuration);
-		strategyPanel.add(new JLabel("min"));
-		mainDialog.add(strategyPanel);
+		fluoAcqDurationTf = new JFormattedTextField(Double.class);
+		fluoAcqDurationTf.setValue(parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
+				.getAsDouble());
+		strategyPanel.add(fluoAcqDurationTf);
+		strategyPanel.add(new JLabel("min", SwingConstants.CENTER));
 
-		//
+		// checkbox : update or not MAARS parameters
 
-		mainDialog.addCheckbox("Save parameters", true);
-		ReportingUtils.logMessage("- create OKMaarsMainDialog");
+		JPanel savingPathChkPanel = new JPanel(new GridLayout(1, 0));
+		savingPathChkPanel.setBackground(bgColor);
+		saveParametersChk = new JCheckBox("Save parameters", true);
+		savingPathChkPanel.add(saveParametersChk);
 
+		// Saving path Panel
+
+		JPanel savePathLabelPanel = new JPanel(new GridLayout(1, 0));
+		savePathLabelPanel.setBackground(bgColor);
 		JLabel savePathLabel = new JLabel("Save Path :");
-		savePath = new JTextField(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString(),
-				20);
-		JPanel savePathPanel = new JPanel();
-		savePathPanel.add(savePathLabel);
-		savePathPanel.add(savePath);
-		mainDialog.add(savePathPanel);
+		savePathLabelPanel.add(savePathLabel);
 
-		//
+		// Saving Path textfield
+
+		JPanel savePathTfPanel = new JPanel(new GridLayout(1, 0));
+		savePathTf = new JFormattedTextField(parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.getAsString());
+		savePathTf.setMaximumSize(new Dimension(maxDialogWidth, 1));
+		savePathTfPanel.add(savePathTf);
+
+		// Ok button to run
 
 		okMainDialogButton = new Button("OK");
 		okMainDialogButton.addActionListener(this);
 
-		ReportingUtils.logMessage("- add button");
-		mainDialog.add(okMainDialogButton);
+		// ------------set up and add components to Panel then to Frame---------------//
 
+		JPanel mainPanel = new JPanel();
+		mainPanel.setBackground(bgColor);
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		mainPanel.add(explorationLabel);
+		mainPanel.add(widthPanel);
+		mainPanel.add(heightPanel);
+		mainPanel.add(numFieldLabel);
+		mainPanel.add(analysisParamLabel);
+		mainPanel.add(autofocusButton);
+		mainPanel.add(segmButton);
+		mainPanel.add(fluoAnalysisButton);
+		mainPanel.add(strategyPanel);
+		mainPanel.add(savingPathChkPanel);
+		mainPanel.add(savePathLabelPanel);
+		mainPanel.add(savePathTfPanel);
+		mainPanel.add(okMainDialogButton);
+		mainDialog.add(mainPanel);
 		ReportingUtils.logMessage("Done.");
-
 		mainDialog.pack();
-
 	}
 
 	/**
@@ -273,14 +338,6 @@ public class MaarsMainDialog implements ActionListener {
 	}
 
 	/**
-	 * 
-	 * @return true if dialog is visible
-	 */
-	public boolean isVisible() {
-		return mainDialog.isVisible();
-	}
-
-	/**
 	 * Method to record if the user has clicked on "ok" button
 	 * 
 	 * @param ok
@@ -303,29 +360,39 @@ public class MaarsMainDialog implements ActionListener {
 	public void refreshNumField() {
 		double newWidth = 0;
 		double newHeigth = 0;
-		Vector<TextField> numFields = mainDialog.getNumericFields();
-		try {
-			newWidth = Double.parseDouble(numFields.get(0).getText());
-			newHeigth = Double.parseDouble(numFields.get(1).getText());
-		} catch (NumberFormatException e) {
-			// not a double
-		}
+
+		newWidth = (Double) widthTf.getValue();
+		newHeigth = (Double) widthTf.getValue();
+
 		;
 
-		int newXFieldNumber = (int) Math.round(newWidth / (calibration * mmc.getImageWidth()));
-		int newYFieldNumber = (int) Math.round(newHeigth / (calibration * mmc.getImageHeight()));
+		int newXFieldNumber = (int) Math.round(newWidth
+				/ (calibration * mmc.getImageWidth()));
+		int newYFieldNumber = (int) Math.round(newHeigth
+				/ (calibration * mmc.getImageHeight()));
 
-		numFieldLabel.setText("Number of field : " + newXFieldNumber * newYFieldNumber);
+		numFieldLabel.setText("Number of field : " + newXFieldNumber
+				* newYFieldNumber);
 
-		parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS).getAsJsonObject()
-				.remove(AllMaarsParameters.X_FIELD_NUMBER);
-		parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS).getAsJsonObject()
-				.addProperty(AllMaarsParameters.X_FIELD_NUMBER, Integer.valueOf(newXFieldNumber));
+		parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().remove(AllMaarsParameters.X_FIELD_NUMBER);
+		parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject()
+				.addProperty(AllMaarsParameters.X_FIELD_NUMBER,
+						Integer.valueOf(newXFieldNumber));
 
-		parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS).getAsJsonObject()
-				.remove(AllMaarsParameters.Y_FIELD_NUMBER);
-		parameters.getParametersAsJsonObject().get(AllMaarsParameters.EXPLORATION_PARAMETERS).getAsJsonObject()
-				.addProperty(AllMaarsParameters.Y_FIELD_NUMBER, Integer.valueOf(newYFieldNumber));
+		parameters.getParametersAsJsonObject()
+				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().remove(AllMaarsParameters.Y_FIELD_NUMBER);
+		parameters
+				.getParametersAsJsonObject()
+				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject()
+				.addProperty(AllMaarsParameters.Y_FIELD_NUMBER,
+						Integer.valueOf(newYFieldNumber));
 	}
 
 	/**
@@ -347,9 +414,11 @@ public class MaarsMainDialog implements ActionListener {
 	public void setAnalysisStrategy() {
 
 		if (dynamicOpt.isSelected()) {
-			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.DYNAMIC, "true");
+			AllMaarsParameters.updateFluoParameter(parameters,
+					AllMaarsParameters.DYNAMIC, "true");
 		} else if (staticOpt.isSelected()) {
-			AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.DYNAMIC, "false");
+			AllMaarsParameters.updateFluoParameter(parameters,
+					AllMaarsParameters.DYNAMIC, "false");
 		}
 	}
 
@@ -366,18 +435,25 @@ public class MaarsMainDialog implements ActionListener {
 		if (e.getSource() == autofocusButton) {
 			getMM().showAutofocusDialog();
 		} else if (e.getSource() == okMainDialogButton) {
-			if (!savePath.getText()
-					.equals(parameters.getParametersAsJsonObject()
-							.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
+			if (!savePathTf
+					.getText()
+					.equals(parameters
+							.getParametersAsJsonObject()
+							.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+							.getAsJsonObject()
 							.get(AllMaarsParameters.SAVING_PATH).getAsString())) {
-				parameters = AllMaarsParameters.updateGeneralParameter(parameters, AllMaarsParameters.SAVING_PATH,
-						savePath.getText());
+				AllMaarsParameters.updateGeneralParameter(
+						parameters, AllMaarsParameters.SAVING_PATH,
+						savePathTf.getText());
 			}
-			if (!fluoAcqDuration.getText()
-					.equals(parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT).getAsString())) {
-				parameters = AllMaarsParameters.updateFluoParameter(parameters, AllMaarsParameters.TIME_LIMIT,
-						fluoAcqDuration.getText());
+			if (!fluoAcqDurationTf.getText().equals(
+					parameters.getParametersAsJsonObject()
+							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+							.getAsJsonObject()
+							.get(AllMaarsParameters.TIME_LIMIT).getAsString())) {
+				AllMaarsParameters.updateFluoParameter(parameters,
+						AllMaarsParameters.TIME_LIMIT,
+						fluoAcqDurationTf.getText());
 			}
 			saveParameters();
 			setOkClicked(true);
@@ -388,10 +464,10 @@ public class MaarsMainDialog implements ActionListener {
 			new MaarsFluoAnalysisDialog(parameters);
 		} else if (e.getSource() == dynamicOpt) {
 			setAnalysisStrategy();
-			fluoAcqDuration.setEditable(true);
+			fluoAcqDurationTf.setEditable(true);
 		} else if (e.getSource() == staticOpt) {
 			setAnalysisStrategy();
-			fluoAcqDuration.setEditable(false);
+			fluoAcqDurationTf.setEditable(false);
 		}
 	}
 }
