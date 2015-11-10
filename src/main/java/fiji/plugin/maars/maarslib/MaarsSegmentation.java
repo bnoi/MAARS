@@ -20,7 +20,7 @@ import ij.ImagePlus;
  *
  */
 public class MaarsSegmentation {
-	private AllMaarsParameters parameters;
+	private MaarsParameters parameters;
 	private String pathToSegMovie;
 	private String pathToSegDir;
 	private SegPombeParameters segPombeParam;
@@ -30,18 +30,18 @@ public class MaarsSegmentation {
 	 * Constructor :
 	 * 
 	 * @param parameters
-	 *            : MAARS parameters (see class AllMaarsParameters)
+	 *            : MAARS parameters (see class MaarsParameters)
 	 * @param positionX
 	 *            : current X coordinate of microscope's view.
 	 * @param positionY
 	 *            : current Y coordinate of microscope's view.
 	 */
-	public MaarsSegmentation(AllMaarsParameters parameters, double positionX, double positionY) {
+	public MaarsSegmentation(MaarsParameters parameters, double positionX, double positionY) {
 
 		this.parameters = parameters;
 		this.pathToSegDir = FileUtils.convertPath(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH).getAsString() + "/movie_X"
+				parameters.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+						.getAsJsonObject().get(MaarsParameters.SAVING_PATH).getAsString() + "/movie_X"
 						+ Math.round(positionX) + "_Y" + Math.round(positionY) + "/");
 		this.pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
 	}
@@ -65,53 +65,53 @@ public class MaarsSegmentation {
 		segPombeParam.setSavingPath(pathToSegDir);
 
 		segPombeParam.setFilterAbnormalShape(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(AllMaarsParameters.FILTER_SOLIDITY).getAsBoolean());
+				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+						.get(MaarsParameters.FILTER_SOLIDITY).getAsBoolean());
 
 		segPombeParam.setFiltrateWithMeanGrayValue(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean());
+				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+						.get(MaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean());
 
 		segPombeParam.getImageToAnalyze().getCalibration().pixelDepth = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject().get(AllMaarsParameters.STEP)
+				.get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject().get(MaarsParameters.STEP)
 				.getAsDouble();
 
 		ParametersProcessing process = new ParametersProcessing(segPombeParam);
 
 		process.checkImgUnitsAndScale();
 		process.changeScale(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(AllMaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE).getAsInt(),
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(AllMaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE).getAsInt());
+				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+						.get(MaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE).getAsInt(),
+				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+						.get(MaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE).getAsInt());
 
 		segPombeParam = process.getParameters();
 
 		segPombeParam.setSigma(
-				(int) Math.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE).getAsDouble()
-						/ parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble()));
+				(int) Math.round(parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject().get(MaarsParameters.CELL_SIZE).getAsDouble()
+						/ parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject().get(MaarsParameters.STEP).getAsDouble()));
 
 		segPombeParam.setMinParticleSize(
-				(int) Math.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.MINIMUM_CELL_AREA).getAsDouble()
+				(int) Math.round(parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject().get(MaarsParameters.MINIMUM_CELL_AREA).getAsDouble()
 						/ segPombeParam.getImageToAnalyze().getCalibration().pixelWidth)
 				/ segPombeParam.getImageToAnalyze().getCalibration().pixelHeight);
 
 		segPombeParam.setMaxParticleSize(
-				(int) Math.round(parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_CELL_AREA).getAsDouble()
+				(int) Math.round(parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+						.getAsJsonObject().get(MaarsParameters.MAXIMUM_CELL_AREA).getAsDouble()
 						/ segPombeParam.getImageToAnalyze().getCalibration().pixelWidth)
 				/ segPombeParam.getImageToAnalyze().getCalibration().pixelHeight);
 
 		segPombeParam.setSolidityThreshold(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(AllMaarsParameters.SOLIDITY).getAsDouble());
+				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+						.get(MaarsParameters.SOLIDITY).getAsDouble());
 
 		segPombeParam.setMeanGreyValueThreshold(
-				parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(AllMaarsParameters.MEAN_GREY_VALUE).getAsDouble());
+				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+						.get(MaarsParameters.MEAN_GREY_VALUE).getAsDouble());
 
 		SegPombe segPombe = new SegPombe(segPombeParam);
 		segPombe.createCorrelationImage();
@@ -137,41 +137,41 @@ public class MaarsSegmentation {
 	 * 
 	 */
 	public void writeUsedConfig() {
-		double timeInterval = parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL).getAsDouble() / 1000;
-		int maxNbSpot = parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt();
-		int maxWidth = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE).getAsInt();
-		int maxHeight = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE).getAsInt();
-		double cellSize = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.CELL_SIZE).getAsDouble();
-		double segRange = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
-		double segStep = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
-		double minCellArea = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MINIMUM_CELL_AREA).getAsDouble();
-		double maxCellArea = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MAXIMUM_CELL_AREA).getAsDouble();
-		double solidity = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.SOLIDITY).getAsDouble();
-		double meanGrey = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.MEAN_GREY_VALUE).getAsDouble();
+		double timeInterval = parameters.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.TIME_INTERVAL).getAsDouble() / 1000;
+		int maxNbSpot = parameters.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt();
+		int maxWidth = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE).getAsInt();
+		int maxHeight = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE).getAsInt();
+		double cellSize = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.CELL_SIZE).getAsDouble();
+		double segRange = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
+		double segStep = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.STEP).getAsDouble();
+		double minCellArea = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.MINIMUM_CELL_AREA).getAsDouble();
+		double maxCellArea = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.MAXIMUM_CELL_AREA).getAsDouble();
+		double solidity = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.SOLIDITY).getAsDouble();
+		double meanGrey = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.MEAN_GREY_VALUE).getAsDouble();
 		String rootDirName = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.get(AllMaarsParameters.SAVING_PATH).getAsString();
-		double fluoRange = parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
-		double fluoStep = parameters.getParametersAsJsonObject().get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
+				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
+				.get(MaarsParameters.SAVING_PATH).getAsString();
+		double fluoRange = parameters.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
+		double fluoStep = parameters.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.STEP).getAsDouble();
 		boolean filterUnusualShape = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-				.get(AllMaarsParameters.FILTER_SOLIDITY).getAsBoolean();
+				.get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+				.get(MaarsParameters.FILTER_SOLIDITY).getAsBoolean();
 		boolean filterWithMeanGrayValue = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-				.get(AllMaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean();
+				.get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
+				.get(MaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean();
 		FileWriter configFile = null;
 		try {
 			configFile = new FileWriter(FileUtils.convertPath(pathToSegDir + "/configUsed.txt"));

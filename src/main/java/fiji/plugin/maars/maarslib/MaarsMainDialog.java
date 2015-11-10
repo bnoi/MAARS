@@ -47,7 +47,7 @@ public class MaarsMainDialog implements ActionListener {
 	private final Label numFieldLabel;
 	private final MMStudio mm;
 	private final CMMCore mmc;
-	private AllMaarsParameters parameters;
+	private MaarsParameters parameters;
 	private final double calibration;
 	private boolean okClicked;
 	private Button autofocusButton;
@@ -112,7 +112,7 @@ public class MaarsMainDialog implements ActionListener {
 
 		ReportingUtils.logMessage("create parameter object ...");
 		try {
-			parameters = new AllMaarsParameters(pathConfigFile);
+			parameters = new MaarsParameters(pathConfigFile);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -122,12 +122,12 @@ public class MaarsMainDialog implements ActionListener {
 		// Get number of field to explore
 
 		int defaultXFieldNumber = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.X_FIELD_NUMBER)
+				.get(MaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.X_FIELD_NUMBER)
 				.getAsInt();
 		int defaultYFieldNumber = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.Y_FIELD_NUMBER)
+				.get(MaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.Y_FIELD_NUMBER)
 				.getAsInt();
 
 		// Calculate width and height for each field
@@ -228,13 +228,13 @@ public class MaarsMainDialog implements ActionListener {
 		strategyPanel.setBackground(bgColor);
 		dynamicOpt = new JRadioButton("Dynamic");
 		dynamicOpt.setSelected(parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC)
+				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.DYNAMIC)
 				.getAsBoolean());
 		staticOpt = new JRadioButton("Static");
 		staticOpt.setSelected(!parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.DYNAMIC)
+				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.DYNAMIC)
 				.getAsBoolean());
 
 		dynamicOpt.addActionListener(this);
@@ -248,8 +248,8 @@ public class MaarsMainDialog implements ActionListener {
 		strategyPanel.add(dynamicOpt);
 		fluoAcqDurationTf = new JFormattedTextField(Double.class);
 		fluoAcqDurationTf.setValue(parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
+				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.TIME_LIMIT)
 				.getAsDouble());
 		strategyPanel.add(fluoAcqDurationTf);
 		strategyPanel.add(new JLabel("min", SwingConstants.CENTER));
@@ -273,8 +273,8 @@ public class MaarsMainDialog implements ActionListener {
 		JPanel savePathTfPanel = new JPanel(new GridLayout(1, 0));
 		savePathTf = new JFormattedTextField(parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.SAVING_PATH)
 				.getAsString());
 		savePathTf.setMaximumSize(new Dimension(maxDialogWidth, 1));
 		savePathTfPanel.add(savePathTf);
@@ -375,23 +375,23 @@ public class MaarsMainDialog implements ActionListener {
 				* newYFieldNumber);
 
 		parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().remove(AllMaarsParameters.X_FIELD_NUMBER);
+				.get(MaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().remove(MaarsParameters.X_FIELD_NUMBER);
 		parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.get(MaarsParameters.EXPLORATION_PARAMETERS)
 				.getAsJsonObject()
-				.addProperty(AllMaarsParameters.X_FIELD_NUMBER,
+				.addProperty(MaarsParameters.X_FIELD_NUMBER,
 						Integer.valueOf(newXFieldNumber));
 
 		parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-				.getAsJsonObject().remove(AllMaarsParameters.Y_FIELD_NUMBER);
+				.get(MaarsParameters.EXPLORATION_PARAMETERS)
+				.getAsJsonObject().remove(MaarsParameters.Y_FIELD_NUMBER);
 		parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
+				.get(MaarsParameters.EXPLORATION_PARAMETERS)
 				.getAsJsonObject()
-				.addProperty(AllMaarsParameters.Y_FIELD_NUMBER,
+				.addProperty(MaarsParameters.Y_FIELD_NUMBER,
 						Integer.valueOf(newYFieldNumber));
 	}
 
@@ -414,11 +414,11 @@ public class MaarsMainDialog implements ActionListener {
 	public void setAnalysisStrategy() {
 
 		if (dynamicOpt.isSelected()) {
-			AllMaarsParameters.updateFluoParameter(parameters,
-					AllMaarsParameters.DYNAMIC, "true");
+			MaarsParameters.updateFluoParameter(parameters,
+					MaarsParameters.DYNAMIC, "true");
 		} else if (staticOpt.isSelected()) {
-			AllMaarsParameters.updateFluoParameter(parameters,
-					AllMaarsParameters.DYNAMIC, "false");
+			MaarsParameters.updateFluoParameter(parameters,
+					MaarsParameters.DYNAMIC, "false");
 		}
 	}
 
@@ -426,7 +426,7 @@ public class MaarsMainDialog implements ActionListener {
 	 * 
 	 * @return parameters
 	 */
-	public AllMaarsParameters getParameters() {
+	public MaarsParameters getParameters() {
 		return parameters;
 	}
 
@@ -439,20 +439,20 @@ public class MaarsMainDialog implements ActionListener {
 					.getText()
 					.equals(parameters
 							.getParametersAsJsonObject()
-							.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+							.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
 							.getAsJsonObject()
-							.get(AllMaarsParameters.SAVING_PATH).getAsString())) {
-				AllMaarsParameters.updateGeneralParameter(
-						parameters, AllMaarsParameters.SAVING_PATH,
+							.get(MaarsParameters.SAVING_PATH).getAsString())) {
+				MaarsParameters.updateGeneralParameter(
+						parameters, MaarsParameters.SAVING_PATH,
 						savePathTf.getText());
 			}
 			if (!fluoAcqDurationTf.getText().equals(
 					parameters.getParametersAsJsonObject()
-							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+							.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 							.getAsJsonObject()
-							.get(AllMaarsParameters.TIME_LIMIT).getAsString())) {
-				AllMaarsParameters.updateFluoParameter(parameters,
-						AllMaarsParameters.TIME_LIMIT,
+							.get(MaarsParameters.TIME_LIMIT).getAsString())) {
+				MaarsParameters.updateFluoParameter(parameters,
+						MaarsParameters.TIME_LIMIT,
 						fluoAcqDurationTf.getText());
 			}
 			saveParameters();

@@ -21,7 +21,7 @@ import mmcorej.CMMCore;
 public class MaarsAcquisitionForSegmentation {
 	private MMStudio mm;
 	private CMMCore mmc;
-	private AllMaarsParameters parameters;
+	private MaarsParameters parameters;
 	private double positionX;
 	private double positionY;
 	private String pathToMovie;
@@ -40,7 +40,7 @@ public class MaarsAcquisitionForSegmentation {
 	 * @param positionY
 	 *            : y field position (can be defined by ExplorationXYPositions)
 	 */
-	public MaarsAcquisitionForSegmentation(MMStudio mm, CMMCore mmc, AllMaarsParameters parameters, double positionX,
+	public MaarsAcquisitionForSegmentation(MMStudio mm, CMMCore mmc, MaarsParameters parameters, double positionX,
 			double positionY) {
 		this.mm = mm;
 		this.mmc = mmc;
@@ -78,29 +78,29 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("________________________________");
 		ReportingUtils.logMessage("... Initialize parameters :");
 		String rootDirName = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.get(AllMaarsParameters.SAVING_PATH).getAsString()+"/";
+				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
+				.get(MaarsParameters.SAVING_PATH).getAsString()+"/";
 		ReportingUtils.logMessage("- saving path : " + rootDirName);
 		String channelGroup = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.get(AllMaarsParameters.CHANNEL_GROUP).getAsString();
+				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
+				.get(MaarsParameters.CHANNEL_GROUP).getAsString();
 		ReportingUtils.logMessage("- channel group : " + channelGroup);
-		String channel = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.CHANNEL).getAsString();
+		String channel = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.CHANNEL).getAsString();
 		ReportingUtils.logMessage("- channel : " + channel);
-		Color color = AllMaarsParameters
-				.getColor(parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject()
-						.get(channel).getAsJsonObject().get(AllMaarsParameters.COLOR).getAsString());
+		Color color = MaarsParameters
+				.getColor(parameters.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+						.getAsJsonObject().get(MaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject()
+						.get(channel).getAsJsonObject().get(MaarsParameters.COLOR).getAsString());
 		ReportingUtils.logMessage("- color : " + color.toString());
-		int frameNumber = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.FRAME_NUMBER).getAsInt();
+		int frameNumber = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.FRAME_NUMBER).getAsInt();
 		ReportingUtils.logMessage("- frame number : " + frameNumber);
-		double range = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
+		double range = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
 		ReportingUtils.logMessage("- range size : " + range);
-		double step = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
+		double step = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.STEP).getAsDouble();
 		ReportingUtils.logMessage("- step : " + step);
 		int sliceNumber = (int) Math.round(range / step);
 		ReportingUtils.logMessage("- slice number : " + sliceNumber);
@@ -201,7 +201,7 @@ public class MaarsAcquisitionForSegmentation {
 	/**
 	 * Get parameters for acquisition
 	 */
-	public HashMap<String, String> getParametersFromConf(AllMaarsParameters parameters) {
+	public HashMap<String, String> getParametersFromConf(MaarsParameters parameters) {
 		HashMap<String, String> params = new HashMap<String, String>();
 		try {
 			mmc.clearROI();
@@ -215,28 +215,28 @@ public class MaarsAcquisitionForSegmentation {
 
 		ReportingUtils.logMessage("... Initialize parameters :");
 		String channelGroup = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.get(AllMaarsParameters.CHANNEL_GROUP).getAsString();
+				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
+				.get(MaarsParameters.CHANNEL_GROUP).getAsString();
 		ReportingUtils.logMessage("- channel group : " + channelGroup);
 		params.put("channelGroup", channelGroup);
-		String channel = parameters.getParametersAsJsonObject().get(AllMaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.CHANNEL).getAsString();
+		String channel = parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.CHANNEL).getAsString();
 		ReportingUtils.logMessage("- channel : " + channel);
 		params.put("channel", channel);
-		String shutter = parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject().get(channel)
-				.getAsJsonObject().get(AllMaarsParameters.SHUTTER).getAsString();
+		String shutter = parameters.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject().get(channel)
+				.getAsJsonObject().get(MaarsParameters.SHUTTER).getAsString();
 		ReportingUtils.logMessage("- shutter : " + shutter);
 		params.put("shutter", shutter);
-		Color color = AllMaarsParameters
-				.getColor(parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-						.getAsJsonObject().get(AllMaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject()
-						.get(channel).getAsJsonObject().get(AllMaarsParameters.COLOR).getAsString());
+		Color color = MaarsParameters
+				.getColor(parameters.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+						.getAsJsonObject().get(MaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject()
+						.get(channel).getAsJsonObject().get(MaarsParameters.COLOR).getAsString());
 		ReportingUtils.logMessage("- color : " + color.toString());
 		params.put("color", color.toString());
-		String exposure = parameters.getParametersAsJsonObject().get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject().get(channel)
-				.getAsJsonObject().get(AllMaarsParameters.EXPOSURE).getAsString();
+		String exposure = parameters.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject().get(channel)
+				.getAsJsonObject().get(MaarsParameters.EXPOSURE).getAsString();
 		ReportingUtils.logMessage("- exposure : " + exposure);
 		params.put("exposure", exposure);
 		return params;

@@ -26,7 +26,7 @@ import ij.plugin.ZProjector;
  */
 public class MaarsFluoAnalysis {
 
-	private AllMaarsParameters parameters;
+	private MaarsParameters parameters;
 	private SetOfCells soc;
 	private String pathToFluoDir;
 	private double positionX;
@@ -41,7 +41,7 @@ public class MaarsFluoAnalysis {
 	 * @param cB
 	 *            : CellsBoundaries object (used for segmentation)
 	 */
-	public MaarsFluoAnalysis(AllMaarsParameters parameters,
+	public MaarsFluoAnalysis(MaarsParameters parameters,
 			SegPombeParameters segParam, double positionX, double positionY) {
 
 		this.parameters = parameters;
@@ -49,8 +49,8 @@ public class MaarsFluoAnalysis {
 		this.positionY = positionY;
 		this.pathToFluoDir = FileUtils.convertPath(parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.SAVING_PATH)
 				.getAsString()
 				+ "/movie_X"
 				+ Math.round(this.positionX)
@@ -68,9 +68,9 @@ public class MaarsFluoAnalysis {
 						+ segParam.getImageToAnalyze().getShortTitle()
 						+ "_ROI.zip", segParam.getSavingPath(), parameters
 						.getParametersAsJsonObject()
-						.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+						.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.MAXIMUM_NUMBER_OF_SPOT)
+						.get(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT)
 						.getAsInt());
 
 	}
@@ -83,7 +83,7 @@ public class MaarsFluoAnalysis {
 	 * @param soc
 	 *            : SetOfCells found by segmentation
 	 */
-	public MaarsFluoAnalysis(AllMaarsParameters parameters, SetOfCells soc,
+	public MaarsFluoAnalysis(MaarsParameters parameters, SetOfCells soc,
 			double positionX, double positionY) {
 
 		this.parameters = parameters;
@@ -91,8 +91,8 @@ public class MaarsFluoAnalysis {
 		this.positionY = positionY;
 		this.pathToFluoDir = FileUtils.convertPath(parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
+				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.SAVING_PATH)
 				.getAsString()
 				+ "/movie_X"
 				+ Math.round(this.positionX)
@@ -118,8 +118,8 @@ public class MaarsFluoAnalysis {
 		List<String[]> cells = new ArrayList<String[]>();
 		List<String[]> spotStrings = new ArrayList<String[]>();
 		double timeInterval = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
+				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+				.getAsJsonObject().get(MaarsParameters.TIME_INTERVAL)
 				.getAsDouble();
 		Iterator<Cell> itrCells = soc.iterator();
 		ReportingUtils.logMessage("Detecting spots...");
@@ -127,8 +127,8 @@ public class MaarsFluoAnalysis {
 			Cell cell = itrCells.next();
 			Spindle sp = cell.findFluoSpotTempFunction(parameters
 					.getParametersAsJsonObject()
-					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-					.getAsJsonObject().get(AllMaarsParameters.SPOT_RADIUS)
+					.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+					.getAsJsonObject().get(MaarsParameters.SPOT_RADIUS)
 					.getAsDouble());
 			for (String[] s : cell.getSpotList()) {
 				spotStrings.add(s);
