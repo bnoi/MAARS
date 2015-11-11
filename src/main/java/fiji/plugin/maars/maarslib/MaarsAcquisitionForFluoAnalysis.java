@@ -53,8 +53,9 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 * @param soc
 	 *            : Set of cells (object from CellStateAnalysis)
 	 */
-	public MaarsAcquisitionForFluoAnalysis(MMStudio mm, CMMCore mmc, MaarsParameters parameters, double positionX,
-			double positionY, SetOfCells soc) {
+	public MaarsAcquisitionForFluoAnalysis(MMStudio mm, CMMCore mmc,
+			MaarsParameters parameters, double positionX, double positionY,
+			SetOfCells soc) {
 		this.mm = mm;
 		this.mmc = mmc;
 		this.parameters = parameters;
@@ -74,7 +75,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 * @param soc
 	 *            : Set of cells (object from CellStateAnalysis_)
 	 */
-	public MaarsAcquisitionForFluoAnalysis(MaarsMainDialog md, double positionX, double positionY, SetOfCells soc) {
+	public MaarsAcquisitionForFluoAnalysis(MaarsMainDialog md,
+			double positionX, double positionY, SetOfCells soc) {
 		mm = md.getMM();
 		mmc = md.getMMC();
 		parameters = md.getParameters();
@@ -91,10 +93,11 @@ public class MaarsAcquisitionForFluoAnalysis {
 	 *            :
 	 * @return ImagePlus object
 	 */
-	public ImagePlus acquire(boolean show, int frame, String channel) throws MMScriptException {
+	public ImagePlus acquire(boolean show, int frame, String channel)
+			throws MMScriptException {
 
-		boolean save = parameters.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.SAVE_FLUORESCENT_MOVIES).getAsBoolean();
+		boolean save = Boolean.parseBoolean(parameters
+				.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
 
 		if (!save) {
 			show = false;
@@ -108,70 +111,59 @@ public class MaarsAcquisitionForFluoAnalysis {
 		mm.getScriptController().clearMessageWindow();
 		ReportingUtils.logMessage("... Initialize parameters :");
 
-		String channelGroup = parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.get(MaarsParameters.CHANNEL_GROUP).getAsString();
+		String channelGroup = parameters.getChannelGroup();
 		ReportingUtils.logMessage("- channel group : " + channelGroup);
 
-		String rootDirName = parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.get(MaarsParameters.SAVING_PATH).getAsString();
+		String rootDirName = parameters.getSavingPath();
 		ReportingUtils.logMessage("- saving path : " + rootDirName);
 
 		ReportingUtils.logMessage("- channel : " + channel);
 
-		String shutter = parameters.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject().get(channel)
-				.getAsJsonObject().get(MaarsParameters.SHUTTER).getAsString();
+		String shutter = parameters.getChShutter(channel);
 		ReportingUtils.logMessage("- shutter : " + shutter);
 
-		Color color = MaarsParameters
-				.getColor(parameters.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-						.getAsJsonObject().get(MaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject()
-						.get(channel).getAsJsonObject().get(MaarsParameters.COLOR).getAsString());
+		Color color = MaarsParameters.getColor(parameters.getChColor(channel));
 		ReportingUtils.logMessage("- color : " + color.toString());
 
-		int exposure = parameters.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.DEFAULT_CHANNEL_PARAMATERS).getAsJsonObject().get(channel)
-				.getAsJsonObject().get(MaarsParameters.EXPOSURE).getAsInt();
+		int exposure = Integer.parseInt(parameters.getChExposure(channel));
 		ReportingUtils.logMessage("- exposure : " + exposure);
 
-		int frameNumber = parameters.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.FRAME_NUMBER).getAsInt();
+		int frameNumber = Integer.parseInt(parameters
+				.getFluoParameter(MaarsParameters.FRAME_NUMBER));
 		ReportingUtils.logMessage("- frame number : " + frameNumber);
 
-		double range = parameters.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsDouble();
+		double range = Double.parseDouble(parameters
+				.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
 		ReportingUtils.logMessage("- range size : " + range);
 
-		double step = parameters.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.STEP).getAsDouble();
+		double step = Double.parseDouble(parameters
+				.getFluoParameter(MaarsParameters.STEP));
 		ReportingUtils.logMessage("- step : " + step);
 
 		int sliceNumber = (int) Math.round(range / step);
 		ReportingUtils.logMessage("- slice number : " + sliceNumber);
 
-		String acqName = "movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY) + "_FLUO/" + frame + "_"
-				+ channel;
-		
+		String acqName = "movie_X" + Math.round(positionX) + "_Y"
+				+ Math.round(positionY) + "_FLUO/" + frame + "_" + channel;
+
 		String pathToMovie = rootDirName + "/" + acqName;
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 
 		ReportingUtils.logMessage("... Set shutter device");
-		try {
-			mmc.setShutterDevice(shutter);
-		} catch (Exception e1) {
-			ReportingUtils.logMessage("Could not set shutter device");
-			e1.printStackTrace();
-		}
-
-		ReportingUtils.logMessage("... Set exposure");
-		try {
-			mmc.setExposure(exposure);
-		} catch (Exception e1) {
-			ReportingUtils.logMessage("could not set exposure");
-			e1.printStackTrace();
-		}
+//		try {
+//			mmc.setShutterDevice(shutter);
+//		} catch (Exception e1) {
+//			ReportingUtils.logMessage("Could not set shutter device");
+//			e1.printStackTrace();
+//		}
+//
+//		ReportingUtils.logMessage("... Set exposure");
+//		try {
+//			mmc.setExposure(exposure);
+//		} catch (Exception e1) {
+//			ReportingUtils.logMessage("could not set exposure");
+//			e1.printStackTrace();
+//		}
 
 		ReportingUtils.logMessage("... set config");
 		try {
@@ -187,15 +179,16 @@ public class MaarsAcquisitionForFluoAnalysis {
 		} catch (Exception e1) {
 			ReportingUtils.logError(e1);
 		}
-		
+
 		ReportingUtils.logMessage("... Initialize a Datastore");
 		Datastore fluoDS = null;
 		try {
-			fluoDS = mm.getDataManager().createMultipageTIFFDatastore(pathToMovie, false, false);
+			fluoDS = mm.getDataManager().createMultipageTIFFDatastore(
+					pathToMovie, false, false);
 		} catch (IOException e3) {
 			ReportingUtils.logMessage("... Can not initialize Datastore");
 		}
-		
+
 		ReportingUtils.logMessage("... Update summaryMetadata");
 		SummaryMetadataBuilder summaryMD = fluoDS.getSummaryMetadata().copy();
 		summaryMD = summaryMD.channelGroup(channelGroup);
@@ -233,7 +226,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 		// double z = zFocus - (range / 2);
 		double z = zFocus - (range / 2) + 2;
 		ReportingUtils.logMessage("- create imagestack");
-		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
+				(int) mmc.getImageHeight());
 
 		for (int k = 0; k <= sliceNumber; k++) {
 			try {
@@ -242,7 +236,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			} catch (Exception e) {
 				ReportingUtils.logError(e);
 			}
-			
+
 			ReportingUtils.logMessage("...snap and add images");
 			try {
 				fluoDS.putImage(mm.getSnapLiveManager().snap(true).get(0));
@@ -254,16 +248,21 @@ public class MaarsAcquisitionForFluoAnalysis {
 				e.printStackTrace();
 			}
 			mm.getSnapLiveManager().snap(false).remove(0);
-			ReportingUtils.logMessage("# of images : " + String.valueOf(fluoDS.getNumImages()));
-			ReportingUtils.logMessage("Max index : " + String.valueOf(fluoDS.getMaxIndices()));
-			
+			ReportingUtils.logMessage("# of images : "
+					+ String.valueOf(fluoDS.getNumImages()));
+			ReportingUtils.logMessage("Max index : "
+					+ String.valueOf(fluoDS.getMaxIndices()));
+
 			Image img = fluoDS.getImage(fluoDS.getMaxIndices());
 			ReportingUtils.logMessage("Convert image to ij.ImageProcessor");
-			ImageProcessor imgProcessor = mm.getDataManager().ij().createProcessor(img);
-			ShortProcessor shortProcessor = new ShortProcessor((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+			ImageProcessor imgProcessor = mm.getDataManager().ij()
+					.createProcessor(img);
+			ShortProcessor shortProcessor = new ShortProcessor(
+					(int) mmc.getImageWidth(), (int) mmc.getImageHeight());
 			ReportingUtils.logMessage("Put pixels in new ImagePlus");
 			shortProcessor.setPixels(imgProcessor.getPixels());
-			ReportingUtils.logMessage("Add ImagePlus into a duplicate of DataStore");
+			ReportingUtils
+					.logMessage("Add ImagePlus into a duplicate of DataStore");
 			imageStack.addSlice(shortProcessor);
 			z = z + step;
 		}
@@ -281,7 +280,8 @@ public class MaarsAcquisitionForFluoAnalysis {
 			mmc.setShutterOpen(false);
 			mmc.waitForDevice(mmc.getShutterDevice());
 		} catch (Exception e) {
-			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
+			ReportingUtils
+					.logMessage("could not set focus device back to position and close shutter");
 			ReportingUtils.logError(e);
 		}
 		cal = null;

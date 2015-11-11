@@ -45,7 +45,7 @@ double calibration = mm.core().getPixelSizeUm();
 print("Create main window");
 MaarsMainDialog md = null;
 
-md = new MaarsMainDialog(mm, mmc, base_dir + "maars_config.txt");
+md = new MaarsMainDialog(mm, mmc, base_dir + "maars_config.xml");
 
 
 print("Show main window");

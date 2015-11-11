@@ -8,6 +8,7 @@ import java.awt.Dialog;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -83,10 +84,10 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		JPanel fluoRangePanel = new JPanel(new GridLayout(1, 2));
 		JLabel rangeTitle = new JLabel("Range (micron) : ",
 				SwingConstants.CENTER);
-		range = new JTextField(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.RANGE_SIZE_FOR_MOVIE)
-				.getAsString(), filedLength);
+		range = new JTextField(
+				parameters
+						.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE),
+				filedLength);
 		fluoRangePanel.add(rangeTitle);
 		fluoRangePanel.add(range);
 
@@ -94,10 +95,8 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		JPanel fluoStepPanel = new JPanel(new GridLayout(1, 2));
 		JLabel stepTitle = new JLabel("Step (micron) : ", SwingConstants.CENTER);
-		step = new JTextField(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.STEP).getAsString(),
-				filedLength);
+		step = new JTextField(
+				parameters.getFluoParameter(MaarsParameters.STEP), filedLength);
 		fluoStepPanel.add(stepTitle);
 		fluoStepPanel.add(step);
 
@@ -106,21 +105,19 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		JPanel timeIntervalPanel = new JPanel(new GridLayout(1, 2));
 		JLabel timeIntervalTitle = new JLabel("Time Interval (ms) : ",
 				SwingConstants.CENTER);
-		timeInterval = new JTextField(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.TIME_INTERVAL)
-				.getAsString(), filedLength);
+		timeInterval = new JTextField(
+				parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL),
+				filedLength);
 		timeIntervalPanel.add(timeIntervalTitle);
 		timeIntervalPanel.add(timeInterval);
 
 		//
 
 		JPanel saveMoviesChkPanel = new JPanel(new GridLayout(1, 0));
-		saveFlims = new JCheckBox("Save Movies", parameters
-				.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject()
-				.get(MaarsParameters.SAVE_FLUORESCENT_MOVIES).getAsBoolean());
+		saveFlims = new JCheckBox(
+				"Save Movies",
+				Boolean.parseBoolean(parameters
+						.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
 		saveMoviesChkPanel.add(saveFlims);
 
 		//
@@ -146,19 +143,9 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		JPanel channel1Panel = new JPanel(new GridLayout(1, 0));
 		channel1Combo = new JComboBox(channelList);
 		maxNumberSpotCh1Tf = new JFormattedTextField(Integer.class);
-		maxNumberSpotCh1Tf.setValue(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS)
-				.getAsJsonObject().get(MaarsParameters.GFP)
-				.getAsJsonObject()
-				.get(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt());
+		maxNumberSpotCh1Tf.setValue(parameters.getChMaxNbSpot(MaarsParameters.GFP));
 		spotRadiusCh1Tf = new JFormattedTextField(Double.class);
-		spotRadiusCh1Tf.setValue(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS)
-				.getAsJsonObject().get(MaarsParameters.GFP)
-				.getAsJsonObject()
-				.get(MaarsParameters.SPOT_RADIUS).getAsDouble());
+		spotRadiusCh1Tf.setValue(parameters.getChSpotRaius(MaarsParameters.GFP));
 		channel1Panel.add(channel1Combo);
 		channel1Panel.add(maxNumberSpotCh1Tf);
 		channel1Panel.add(spotRadiusCh1Tf);
@@ -170,19 +157,9 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		channel2Combo.setSelectedItem(MaarsParameters.CFP);
 		channel2Combo.addActionListener(this);
 		maxNumberSpotCh2Tf = new JFormattedTextField(Integer.class);
-		maxNumberSpotCh2Tf.setValue(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS)
-				.getAsJsonObject().get(MaarsParameters.CFP)
-				.getAsJsonObject()
-				.get(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt());
+		maxNumberSpotCh2Tf.setValue(parameters.getChMaxNbSpot(MaarsParameters.CFP));
 		spotRadiusCh2Tf = new JFormattedTextField(Double.class);
-		spotRadiusCh2Tf.setValue(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS)
-				.getAsJsonObject().get(MaarsParameters.CFP)
-				.getAsJsonObject()
-				.get(MaarsParameters.SPOT_RADIUS).getAsDouble());
+		spotRadiusCh2Tf.setValue(parameters.getChSpotRaius(MaarsParameters.CFP));
 		maxNumberSpotCh2Tf.setEditable(false);
 		spotRadiusCh2Tf.setEditable(false);
 		channel2Panel.add(channel2Combo);
@@ -196,19 +173,9 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		channel3Combo.setSelectedItem(MaarsParameters.DAPI);
 		channel3Combo.addActionListener(this);
 		maxNumberSpotCh3Tf = new JFormattedTextField(Integer.class);
-		maxNumberSpotCh3Tf.setValue(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS)
-				.getAsJsonObject().get(MaarsParameters.DAPI)
-				.getAsJsonObject()
-				.get(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt());
+		maxNumberSpotCh3Tf.setValue(parameters.getChMaxNbSpot(MaarsParameters.DAPI));
 		spotRadiusCh3Tf = new JFormattedTextField(Double.class);
-		spotRadiusCh3Tf.setValue(parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS)
-				.getAsJsonObject().get(MaarsParameters.DAPI)
-				.getAsJsonObject()
-				.get(MaarsParameters.SPOT_RADIUS).getAsDouble());
+		spotRadiusCh3Tf.setValue(parameters.getChSpotRaius(MaarsParameters.DAPI));
 		channel3Combo.setEnabled(false);
 		maxNumberSpotCh3Tf.setEditable(false);
 		spotRadiusCh3Tf.setEditable(false);
@@ -263,42 +230,42 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	}
 
 	/**
-	 * Method be called every time combobox changed value.
-	 * Update
+	 * Method be called every time combobox changed value. Update
 	 * 
 	 * @param channel
 	 */
-	 public void updateFluoChParameters(String channel){
-		channel
-		 parameters.getParametersAsJsonObject()
-			.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-			.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS)
-			.getAsJsonObject().get(MaarsParameters.DAPI)
-			.getAsJsonObject()
-			.get(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt()
-	
-	 }
+//	public void updateFluoChParameters(String channel){
+//		channel
+//		 parameters.getParametersAsJsonObject()
+//			.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
+//			.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS)
+//			.getAsJsonObject().get(MaarsParameters.DAPI)
+//			.getAsJsonObject()
+//			.get(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT).getAsInt()
+//	
+//	 }
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		if (src == okFluoAnaParamButton) {
-			MaarsParameters.updateFluoParameter(parameters,
-					MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
-			MaarsParameters.updateFluoParameter(parameters,
-					MaarsParameters.STEP, step.getText());
-			MaarsParameters.updateFluoParameter(parameters,
+			parameters.setFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE,
+					range.getText());
+			parameters.setFluoParameter(MaarsParameters.STEP, step.getText());
+			parameters.setFluoParameter(
 					MaarsParameters.SAVE_FLUORESCENT_MOVIES,
 					String.valueOf(saveFlims.isSelected()));
-			MaarsParameters.updateFluoParameter(parameters,
-					MaarsParameters.SPOT_RADIUS, spotRadius.getText());
-			MaarsParameters.updateFluoParameter(parameters,
-					MaarsParameters.MAXIMUM_NUMBER_OF_SPOT,
-					maxNbSpot.getText());
-			MaarsParameters.updateFluoParameter(parameters,
-					MaarsParameters.TIME_INTERVAL, timeInterval.getText());
-			// ArrayList<JComboBox>
-			// for ()
+			parameters.setFluoParameter(MaarsParameters.TIME_INTERVAL,
+					timeInterval.getText());
+			String channels = channel1Combo.getSelectedItem().toString();
+			parameters.setChMaxNbSpot(channels, maxNumberSpotCh1Tf.getText());
+			parameters.setChSpotRaius(channels, spotRadiusCh1Tf.getText());
+			try {
+				parameters.save();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			this.dispose();
 		} else if (src == channel2Combo) {
 			if (channel2Combo.getSelectedItem() != "None") {

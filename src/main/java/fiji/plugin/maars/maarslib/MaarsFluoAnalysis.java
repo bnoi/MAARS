@@ -48,10 +48,7 @@ public class MaarsFluoAnalysis {
 		this.positionX = positionX;
 		this.positionY = positionY;
 		this.pathToFluoDir = FileUtils.convertPath(parameters
-				.getParametersAsJsonObject()
-				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.SAVING_PATH)
-				.getAsString()
+				.getSavingPath()
 				+ "/movie_X"
 				+ Math.round(this.positionX)
 				+ "_Y"
@@ -90,10 +87,7 @@ public class MaarsFluoAnalysis {
 		this.positionX = positionX;
 		this.positionY = positionY;
 		this.pathToFluoDir = FileUtils.convertPath(parameters
-				.getParametersAsJsonObject()
-				.get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.SAVING_PATH)
-				.getAsString()
+				.getSavingPath()
 				+ "/movie_X"
 				+ Math.round(this.positionX)
 				+ "_Y"
@@ -117,10 +111,7 @@ public class MaarsFluoAnalysis {
 			String channel) {
 		List<String[]> cells = new ArrayList<String[]>();
 		List<String[]> spotStrings = new ArrayList<String[]>();
-		double timeInterval = parameters.getParametersAsJsonObject()
-				.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.TIME_INTERVAL)
-				.getAsDouble();
+		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 		Iterator<Cell> itrCells = soc.iterator();
 		ReportingUtils.logMessage("Detecting spots...");
 		while (itrCells.hasNext()) {

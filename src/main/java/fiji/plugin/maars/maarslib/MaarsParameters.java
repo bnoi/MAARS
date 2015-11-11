@@ -1,8 +1,11 @@
 package fiji.plugin.maars.maarslib;
+
 /**
-* @author Tong LI, mail: tongli.bioinfo@gmail.com
-* @version Nov 10, 2015
-*/
+ * @author Tong LI, mail: tongli.bioinfo@gmail.com
+ * @version Nov 10, 2015
+ */
+
+import ij.IJ;
 
 import java.awt.Color;
 import java.io.FileWriter;
@@ -14,64 +17,65 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+
 /*
-* MaarsParameters reads a configuration file written as a JsonObject,
-* then allows to access values thanks to all constants defined.
-* 
-* SEGMENTATION_PARAMETERS
-*    |
-*    +-----> CHANNEL
-*    +-----> NEW_MAX_WIDTH_FOR_CHANGE_SCALE
-*    +-----> NEW_MAX_HEIGTH_FOR_CHANGE_SCALE
-*    +-----> FRAME_NUMBER
-*    +-----> RANGE_SIZE_FOR_MOVIE
-*    +-----> STEP
-*    +-----> CELL_SIZE
-*    +-----> MINIMUM_CELL_AREA
-*    +-----> MEAN_GREY_VALUE
-*    +-----> SOLIDITY
-*    +-----> FILTER_MEAN_GREY_VALUE
-*    +-----> FILTER_SOLIDITY
-*    +-----> MAXIMUM_CELL_AREA
-*    
-* EXPLORATION_PARAMETERS
-*    |
-*    +-----> X_FIELD_NUMBER
-*    +-----> Y_FIELD_NUMBER
-*   
-* FLUO_ANALYSIS_PARAMETERS
-*    |
-*    +-----> FRAME_NUMBER
-*    +-----> RANGE_SIZE_FOR_MOVIE
-*    +-----> STEP
-*    +-----> SAVE_FLUORESCENT_MOVIES
-*    +-----> FLUO_CHANNELS
-*    		|
-*    		+----->USING
-*    				|
-*    				+----->channel name
-*    		+----->channel name
-*    				|
-*    				+-----> SPOT_RADIUS
-*    				+-----> MAXIMUM_NUMBER_OF_SPOT
-*    +-----> DYNAMIC
-*    +-----> TIME_LIMIT
-*    +-----> TIME_INTERVAL
-*    
-* GENERAL_ACQUISITION_PARAMETERS
-*    |
-*    +-----> SAVING_PATH
-*    +-----> CHANNEL_GROUP
-*    +-----> DEFAULT_CHANNEL_PARAMATERS
-* 					|
-* 					+-----> channel name
-* 								|
-* 								+-----> COLOR
-* 								+-----> EXPOSURE
-* 								+-----> SHUTTER
-* @author Tong LI
-*
-*/
+ * MaarsParameters reads a configuration file written as a JsonObject,
+ * then allows to access values thanks to all constants defined.
+ * 
+ * SEGMENTATION_PARAMETERS
+ *    |
+ *    +-----> CHANNEL
+ *    +-----> NEW_MAX_WIDTH_FOR_CHANGE_SCALE
+ *    +-----> NEW_MAX_HEIGTH_FOR_CHANGE_SCALE
+ *    +-----> FRAME_NUMBER
+ *    +-----> RANGE_SIZE_FOR_MOVIE
+ *    +-----> STEP
+ *    +-----> CELL_SIZE
+ *    +-----> MINIMUM_CELL_AREA
+ *    +-----> MEAN_GREY_VALUE
+ *    +-----> SOLIDITY
+ *    +-----> FILTER_MEAN_GREY_VALUE
+ *    +-----> FILTER_SOLIDITY
+ *    +-----> MAXIMUM_CELL_AREA
+ *    
+ * EXPLORATION_PARAMETERS
+ *    |
+ *    +-----> X_FIELD_NUMBER
+ *    +-----> Y_FIELD_NUMBER
+ *   
+ * FLUO_ANALYSIS_PARAMETERS
+ *    |
+ *    +-----> FRAME_NUMBER
+ *    +-----> RANGE_SIZE_FOR_MOVIE
+ *    +-----> STEP
+ *    +-----> SAVE_FLUORESCENT_MOVIES
+ *    +-----> FLUO_CHANNELS
+ *    		|
+ *    		+----->USING
+ *    				|
+ *    				+----->channel name
+ *    		+----->channel name
+ *    				|
+ *    				+-----> SPOT_RADIUS
+ *    				+-----> MAXIMUM_NUMBER_OF_SPOT
+ *    +-----> DYNAMIC
+ *    +-----> TIME_LIMIT
+ *    +-----> TIME_INTERVAL
+ *    
+ * GENERAL_ACQUISITION_PARAMETERS
+ *    |
+ *    +-----> SAVING_PATH
+ *    +-----> CHANNEL_GROUP
+ *    +-----> DEFAULT_CHANNEL_PARAMATERS
+ * 					|
+ * 					+-----> channel name
+ * 								|
+ * 								+-----> COLOR
+ * 								+-----> EXPOSURE
+ * 								+-----> SHUTTER
+ * @author Tong LI
+ *
+ */
 public class MaarsParameters {
 
 	private String defaultParametersFile;
@@ -111,6 +115,7 @@ public class MaarsParameters {
 	public static final String EXPOSURE = "EXPOSURE";
 	public static final String CHANNEL = "CHANNEL";
 	public static final String FLUO_CHANNELS = "FLUO_CHANNELS";
+	public static final String USING = "USING";
 	public static final String GFP = "GFP";
 	public static final String CFP = "CFP";
 	public static final String TXRED = "TXRED";
@@ -129,7 +134,7 @@ public class MaarsParameters {
 	 * @param defaultParametersFile
 	 * @throws IOException
 	 */
-	public MaarsParameters(String defaultParametersFile) throws IOException {
+	public MaarsParameters(String defaultParametersFile) {
 
 		this.defaultParametersFile = defaultParametersFile;
 		final SAXBuilder sb = new SAXBuilder();
@@ -138,8 +143,11 @@ public class MaarsParameters {
 		} catch (JDOMException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		root =  (Element) doc.getContent(0);
+		root = (Element) doc.getContent(0);
 	}
 
 	/**
@@ -157,6 +165,7 @@ public class MaarsParameters {
 	 * @throws IOException
 	 */
 	public void save() throws IOException {
+		doc.setContent(root);
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
 		xmlOutput.output(doc, new FileWriter(defaultParametersFile));
@@ -193,67 +202,186 @@ public class MaarsParameters {
 		}
 	}
 
+	// Getter
 	/**
-	 * update segmentation parameter
+	 * 
+	 * @param xOrY
+	 *            : is a final static string in MaarsParameters
+	 * @return : the value of X or Y field
+	 */
+	public int getFieldNb(final String xOrY) {
+		return Integer.parseInt(root.getChild(EXPLORATION_PARAMETERS)
+				.getChildText(xOrY));
+	}
+	
+	/**
+	 * 
+	 * @return analysis with dynamic or not
+	 */
+	public boolean getStrategy(){
+		return Boolean.parseBoolean(root
+				.getChild(FLUO_ANALYSIS_PARAMETERS)
+				.getChildText(DYNAMIC));
+	}
+
+	/**
+	 * 
+	 * @return saving folder of MAARS output
+	 */
+	public String getSavingPath(){
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
+				.getChildText(SAVING_PATH);
+	}
+	
+	/**
+	 * 
+	 * @return time limit of fluorescence acquisition for one acquisition
+	 */
+	public String getFluoParameter(final String parameter){
+		return root
+				.getChild(FLUO_ANALYSIS_PARAMETERS)
+				.getChildText(parameter);
+	}
+	
+	/**
+	 * 
+	 * @return time limit of fluorescence acquisition for one acquisition
+	 */
+	public String getSegmentationParameter(final String parameter){
+		return root
+				.getChild(SEGMENTATION_PARAMETERS)
+				.getChildText(parameter);
+	}
+	
+	/**
+	 * 
+	 * @return the name of channel group set in micromanager
+	 */
+	public String getChannelGroup(){
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
+				.getChildText(CHANNEL_GROUP);
+	}
+	
+	/**
+	 * 
+	 * @param ch : GFP, CFP, DAPI, TXRED
+	 * @return corresponding channel shutter
+	 */
+	public String getChShutter(String ch){
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
+		.getChild(DEFAULT_CHANNEL_PARAMATERS)
+		.getChild(ch).getChildText(SHUTTER);
+	}
+	
+	/**
+	 * 
+	 * @param ch : GFP, CFP, DAPI, TXRED
+	 * @return corresponding channel color
+	 */
+	public String getChColor(String ch){
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
+		.getChild(DEFAULT_CHANNEL_PARAMATERS)
+		.getChild(ch).getChildText(COLOR);
+	}
+	
+	/**
+	 * 
+	 * @param ch : GFP, CFP, DAPI, TXRED
+	 * @return corresponding channel color
+	 */
+	public String getChExposure(String ch){
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
+		.getChild(DEFAULT_CHANNEL_PARAMATERS)
+		.getChild(ch).getChildText(EXPOSURE);
+	}
+	
+	/**
+	 * 
+	 * @param ch: GFP, CFP, DAPI, TXRED
+	 * @return 	MAXIMUM_NUMBER_OF_SPOT of corresponding channel
+	 */
+	public String getChMaxNbSpot(String ch){
+		return root
+				.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch)
+				.getChildText(MAXIMUM_NUMBER_OF_SPOT);
+	}
+	
+	/**
+	 * 
+	 * @param ch: GFP, CFP, DAPI, TXRED
+	 * @return 	SPOT_RADIUS of corresponding channel
+	 */
+	public String getChSpotRaius(String ch){
+		return root
+				.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch)
+				.getChildText(SPOT_RADIUS);
+	}
+	//Setters
+	
+	public void setFieldNb(final String xOrY, String value){
+		root.getChild(EXPLORATION_PARAMETERS)
+			.getChild(xOrY).setText(value);
+	}
+	
+	/**
+	 * set segmentation parameter
 	 * 
 	 * @param parameter
 	 *            : static final String of MaarsParameters
 	 * @param value
 	 *            : corresponding value of parameter
 	 */
-	static public void updateSegmentationParameter(Element rootElement, String parameter, String value) {
-		rootElement.getChild(MaarsParameters.SEGMENTATION_PARAMETERS)
-			.removeChild(parameter);
-		rootElement.getChild(MaarsParameters.SEGMENTATION_PARAMETERS)
-			.addContent(new Element(parameter).setText(value));
+	public void setSegmentationParameter(String parameter, String value) {
+		root.getChild(SEGMENTATION_PARAMETERS).getChild(parameter)
+				.setText(value);
 	}
 
 	/**
-	 * update fluo analysis parameter
+	 * set fluo analysis parameter
 	 * 
 	 * @param parameter
 	 *            : static final String of MaarsParameters
 	 * @param value
 	 *            : corresponding value of parameter
 	 */
-	static public void updateFluoParameter(Element rootElement, String parameter, String value) {
-		rootElement.getChild(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.removeChild(parameter);
-		rootElement.getChild(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.addContent(new Element(parameter).setText(value));
+	public void setFluoParameter(String parameter, String value) {
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(parameter)
+				.setText(value);
 	}
 
 	/**
-	 * update general parameters
+	 * set saving path
 	 * 
-	 * @param paramObject
-	 *            : current MaarsParameters object
-	 * @param parameter
-	 *            : static final String of MaarsParameters
 	 * @param value
 	 *            : corresponding value of parameter
 	 */
-	static public void updateGeneralParameter(MaarsParameters paramObject, String parameter, String value) {
-		paramObject.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.remove(parameter);
-
-		paramObject.getParametersAsJsonObject().get(MaarsParameters.GENERAL_ACQUISITION_PARAMETERS).getAsJsonObject()
-				.addProperty(parameter, value);
+	public void setSavingPath(String path) {
+		root.getChild(GENERAL_ACQUISITION_PARAMETERS)
+			.getChild(SAVING_PATH)
+			.setText(path);
 	}
 
-	public static void updateFluoChannel(MaarsParameters paramObject, String channelName, int maxNbSpot,
-			double spotRaius) {
-		JsonObject channelObj = paramObject.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.FLUO_CHANNELS).getAsJsonObject().get(channelName)
-				.getAsJsonObject();
-		channelObj.remove(MaarsParameters.SPOT_RADIUS);
-		channelObj.remove(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT);
-		channelObj.addProperty(MaarsParameters.SPOT_RADIUS, spotRaius);
-		channelObj.addProperty(MaarsParameters.MAXIMUM_NUMBER_OF_SPOT, maxNbSpot);
-		paramObject.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS).getAsJsonObject()
-				.get(MaarsParameters.FLUO_CHANNELS).getAsJsonObject().remove(channelName);
-		paramObject.getParametersAsJsonObject().get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS).getAsJsonObject()
-				.get(MaarsParameters.FLUO_CHANNELS).getAsJsonObject().add(channelName, channelObj);
-
+	/**
+	 * 
+	 * @param ch: GFP, CFP, DAPI, TXRED
+	 * @return 	MAXIMUM_NUMBER_OF_SPOT of corresponding channel
+	 */
+	public void setChMaxNbSpot(String ch, String maxNbSpot){
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
+		.getChild(ch)
+		.getChild(MAXIMUM_NUMBER_OF_SPOT).setText(maxNbSpot);
 	}
+	
+	/**
+	 * 
+	 * @param ch: GFP, CFP, DAPI, TXRED
+	 * @return 	SPOT_RADIUS of corresponding channel
+	 */
+	public void setChSpotRaius(String ch, String spotRaidus){
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
+		.getChild(ch).getChild(SPOT_RADIUS)
+		.setText(spotRaidus);
+	}
+
+	
 }

@@ -67,9 +67,12 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 		//
 
 		JPanel segRangePanel = new JPanel(new GridLayout(1, 2));
-		JLabel rangeTitle = new JLabel("Range (micron) : ", SwingConstants.CENTER);
-		range = new JTextField(parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.RANGE_SIZE_FOR_MOVIE).getAsString(), filedLength);
+		JLabel rangeTitle = new JLabel("Range (micron) : ",
+				SwingConstants.CENTER);
+		range = new JTextField(
+				parameters
+						.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE),
+				filedLength);
 		segRangePanel.add(rangeTitle);
 		segRangePanel.add(range);
 		this.add(segRangePanel);
@@ -78,25 +81,28 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
 		JPanel segStepPanel = new JPanel(new GridLayout(1, 2));
 		JLabel stepTitle = new JLabel("Step (micron) : ", SwingConstants.CENTER);
-		step = new JTextField(parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.STEP).getAsString(), filedLength);
+		step = new JTextField(
+				parameters.getSegmentationParameter(MaarsParameters.STEP),
+				filedLength);
 		segStepPanel.add(stepTitle);
 		segStepPanel.add(step);
 		this.add(segStepPanel);
 
 		//
 
-		Label segmParemLabel = new Label("Segementation parameters", Label.CENTER);
+		Label segmParemLabel = new Label("Segementation parameters",
+				Label.CENTER);
 		segmParemLabel.setBackground(labelColor);
 		this.add(segmParemLabel);
 
 		//
 
 		JPanel minCellAreaPanel = new JPanel(new GridLayout(1, 2));
-		JLabel minCellAreaTitle = new JLabel("Min cell Area (micron) : ", SwingConstants.CENTER);
+		JLabel minCellAreaTitle = new JLabel("Min cell Area (micron) : ",
+				SwingConstants.CENTER);
 		minCellArea = new JTextField(
-				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(MaarsParameters.MINIMUM_CELL_AREA).getAsString(),
+				parameters
+						.getSegmentationParameter(MaarsParameters.MINIMUM_CELL_AREA),
 				filedLength);
 		minCellAreaPanel.add(minCellAreaTitle);
 		minCellAreaPanel.add(minCellArea);
@@ -105,11 +111,12 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 		//
 
 		JPanel maxCellAreaPanel = new JPanel(new GridLayout(1, 2));
-		JLabel maxCellAreaTitle = new JLabel("Max cell Area (micron) : ", SwingConstants.CENTER);
+		JLabel maxCellAreaTitle = new JLabel("Max cell Area (micron) : ",
+				SwingConstants.CENTER);
 
 		maxCellArea = new JTextField(
-				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(MaarsParameters.MAXIMUM_CELL_AREA).getAsString(),
+				parameters
+						.getSegmentationParameter(MaarsParameters.MAXIMUM_CELL_AREA),
 				filedLength);
 		maxCellAreaPanel.add(maxCellAreaTitle);
 		maxCellAreaPanel.add(maxCellArea);
@@ -118,9 +125,10 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 		//
 
 		JPanel greyValueFilterCheckPanel = new JPanel();
-		greyValueFilter = new JCheckBox("Mean grey value background filter",
-				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(MaarsParameters.FILTER_MEAN_GREY_VALUE).getAsBoolean());
+		greyValueFilter = new JCheckBox(
+				"Mean grey value background filter",
+				Boolean.parseBoolean(parameters
+						.getSegmentationParameter(MaarsParameters.FILTER_MEAN_GREY_VALUE)));
 		greyValueFilter.addActionListener(this);
 		greyValueFilterCheckPanel.add(greyValueFilter);
 		this.add(greyValueFilterCheckPanel);
@@ -128,10 +136,11 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 		//
 
 		JPanel greyValueFilterPanel = new JPanel(new GridLayout(1, 2));
-		JLabel greyValueFilterTitle = new JLabel("Mean grey value : ", SwingConstants.CENTER);
+		JLabel greyValueFilterTitle = new JLabel("Mean grey value : ",
+				SwingConstants.CENTER);
 		greyValue = new JTextField(
-				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(MaarsParameters.MEAN_GREY_VALUE).getAsString(),
+				parameters
+						.getSegmentationParameter(MaarsParameters.MEAN_GREY_VALUE),
 				filedLength);
 		greyValue.setEditable(greyValueFilter.isSelected());
 		greyValueFilterPanel.add(greyValueFilterTitle);
@@ -141,9 +150,10 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 		//
 
 		JPanel shapeCheckPanel = new JPanel();
-		shapeFilter = new JCheckBox("Filter unusual shape using solidity",
-				parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS).getAsJsonObject()
-						.get(MaarsParameters.FILTER_SOLIDITY).getAsBoolean());
+		shapeFilter = new JCheckBox(
+				"Filter unusual shape using solidity",
+				Boolean.parseBoolean(parameters
+						.getSegmentationParameter(MaarsParameters.FILTER_SOLIDITY)));
 		shapeFilter.addActionListener(this);
 		shapeCheckPanel.add(shapeFilter);
 		this.add(shapeCheckPanel);
@@ -152,8 +162,9 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
 		JPanel shapePanel = new JPanel(new GridLayout(1, 2));
 		JLabel solidityTitle = new JLabel("Solidity: ", SwingConstants.CENTER);
-		solidity = new JTextField(parameters.getParametersAsJsonObject().get(MaarsParameters.SEGMENTATION_PARAMETERS)
-				.getAsJsonObject().get(MaarsParameters.SOLIDITY).getAsString(), filedLength);
+		solidity = new JTextField(
+				parameters.getSegmentationParameter(MaarsParameters.SOLIDITY),
+				filedLength);
 		solidity.setEditable(shapeFilter.isSelected());
 		shapePanel.add(solidityTitle);
 		shapePanel.add(solidity);
@@ -202,20 +213,24 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 			}
 			;
 		} else if (e.getSource() == okBut) {
-			MaarsParameters.updateSegmentationParameter(parameters, MaarsParameters.RANGE_SIZE_FOR_MOVIE,
-					range.getText());
-			MaarsParameters.updateSegmentationParameter(parameters, MaarsParameters.STEP, step.getText());
-			MaarsParameters.updateSegmentationParameter(parameters, MaarsParameters.MINIMUM_CELL_AREA,
-					minCellArea.getText());
-			MaarsParameters.updateSegmentationParameter(parameters, MaarsParameters.MAXIMUM_CELL_AREA,
-					maxCellArea.getText());
-			MaarsParameters.updateSegmentationParameter(parameters, MaarsParameters.FILTER_MEAN_GREY_VALUE,
+			parameters.setSegmentationParameter(
+					MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
+			parameters.setSegmentationParameter(MaarsParameters.STEP,
+					step.getText());
+			parameters.setSegmentationParameter(
+					MaarsParameters.MINIMUM_CELL_AREA, minCellArea.getText());
+			parameters.setSegmentationParameter(
+					MaarsParameters.MAXIMUM_CELL_AREA, maxCellArea.getText());
+			parameters.setSegmentationParameter(
+					MaarsParameters.FILTER_MEAN_GREY_VALUE,
 					String.valueOf(greyValueFilter.isSelected()));
-			MaarsParameters.updateSegmentationParameter(parameters, MaarsParameters.MEAN_GREY_VALUE,
-					greyValue.getText());
-			MaarsParameters.updateSegmentationParameter(parameters, MaarsParameters.FILTER_SOLIDITY,
+			parameters.setSegmentationParameter(
+					MaarsParameters.MEAN_GREY_VALUE, greyValue.getText());
+			parameters.setSegmentationParameter(
+					MaarsParameters.FILTER_SOLIDITY,
 					String.valueOf(shapeFilter.isSelected()));
-			MaarsParameters.updateSegmentationParameter(parameters, MaarsParameters.SOLIDITY, solidity.getText());
+			parameters.setSegmentationParameter(MaarsParameters.SOLIDITY,
+					solidity.getText());
 			this.setVisible(false);
 			;
 		}
