@@ -24,8 +24,9 @@ import au.com.bytecode.opencsv.CSVWriter;
 import java.util.List;
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
-import fiji.plugin.maars.maarslib.AllMaarsParameters;
+import fiji.plugin.maars.maarslib.MaarsParameters;
 import fiji.plugin.maars.maarslib.ExplorationXYPositions;
+import fiji.plugin.maars.utils.FileUtils;
 import mmcorej.*;
 import org.micromanager.api.*;
 import ij.*;
@@ -57,50 +58,13 @@ while(md.isVisible()) {
 if(md.isOkClicked()) {
 	start = System.currentTimeMillis();
 	print("start "+start);
-	AllMaarsParameters param = null;
+	MaarsParameters param = null;
 	autofocus = mm.getAutofocus();
 	param = md.getParameters();
 	mmc.setOriginXY(mmc.getXYStageDevice());
-	int nbXField = param
-						.getParametersAsJsonObject()
-						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-						.getAsJsonObject()
-						.get(AllMaarsParameters.X_FIELD_NUMBER)
-						.getAsInt();
-	int nbYField = param
-						.getParametersAsJsonObject()
-						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-						.getAsJsonObject()
-						.get(AllMaarsParameters.Y_FIELD_NUMBER)
-						.getAsInt();
+	int nbXField = param.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
+	int nbYField = param.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
 	print("nb x field "+nbXField+" nb y field "+nbYField);
-	String[] outputHeader = new String[]{
-		"Cell",
-		"Second",
-		"Feature",
-		"NbOfSpotDetected",
-		"CellCenterX",
-		"CellCenterY",
-		"CellAbsoMajAng",
-		"CellMajLength",
-		"CellMinLength",
-		"SpAbsoAng",
-		"SpAngToMaj",
-		"SpLength",
-		"spb1X",
-		"spb1Y",
-		"spb1Z",
-		"spb2X",
-		"spb2Y",
-		"spb2Z",
-		"SpCenterX",
-		"SpCenterY",
-		"SpCenterZ",
-		"CellCenterToSpCenterLen",
-		"CellCenterToSpCenterAng",
-		"fieldX",
-		"fieldY"
-	};
 	if (nbXField * nbYField != 0){
 		ExplorationXYPositions explo = new ExplorationXYPositions(nbXField,
 														nbYField,
@@ -130,59 +94,41 @@ if(md.isOkClicked()) {
 				xPos,
 				yPos);
 			ms.segmentation();
-			ms.writeUsedConfig();
 			if(ms.roiDetected()){
 			//----------------if got ROI, start fluo-acquisition --------//
-				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.ms.getSegPombeParam(), xPos, yPos);
+				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegPombeParam(), xPos, yPos);
 //				MaarsAcquisitionMitosis mmad = new MaarsAcquisitionMitosis(md, mfa, xPos, yPos);
 				MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
 																xPos,
 																yPos,
 																mfa.getSetOfCells());
-				List cellsInAllFields = new ArrayList();	
 //////////////////////////multiple snapshot per field//////////////////////////////
-				if(param
-					.getParametersAsJsonObject()
-					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-					.getAsJsonObject()
-					.get(AllMaarsParameters.DYNAMIC)
-					.getAsBoolean()) {
-					double timeInterval = param.getParametersAsJsonObject()
-							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-							.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
-							.getAsDouble();
+				if(param.useDynamic()) {
+					double timeInterval = 
+						Double.parseDouble(param.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 					double startTime = System.currentTimeMillis();
 					int frame = 0;
-					double timeLimit = param.getParametersAsJsonObject()
-							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-							.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
-							.getAsDouble() * 60 * 1000;
-					spindleWriter = new FileWriter(AllMaarsParameters.convertPath(param
-													.getParametersAsJsonObject()
-													.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-													.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
-													.getAsString()
+					double timeLimit = 
+						Double.parseDouble(param.getFluoParameter(MaarsParameters.TIME_LIMIT))
+						* 60 * 1000;
+					spindleWriter = new FileWriter(FileUtils.convertPath(param
+													.getSavingPath()
 													+ "/movie_X"
 													+ Math.round(xPos)
 													+ "_Y"
 													+ Math.round(yPos) + "_FLUO/spindleAnalysis.csv"));
-					writer = new CSVWriter(spindleWriter,'\t',CSVWriter.NO_QUOTE_CHARACTER);
-					writer.writeNext(outputHeader);
 					while (System.currentTimeMillis() - startTime <= timeLimit)
 						{
 							double beginAcq = System.currentTimeMillis();
 
-							String channels = param.getParametersAsJsonObject()
-								.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-								.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
-								.getAsString();
+							String channels = param.getUsingChannels();
 							String[] arrayChannels = channels.split(",", -1);
 							for (String channel:arrayChannels) {
 								ImagePlus fluoImage = mafa.acquire(true, frame, channel);
 								mfa.setFluoImage(fluoImage);
 								mfa.zProject();
 								mfa.cropAllCells();
-								cellsInAllFields.addAll(mfa.analyzeEntireFieldReturnListSp(frame,channel));
+								mfa.analyzeEntireFieldReturnListSp(frame,channel);
 							}
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
@@ -191,17 +137,10 @@ if(md.isOkClicked()) {
 							acqNameFluo = null;
 							fluoImage = null;	
 						}
-/////////////////////////write spindle coordinates///////////////////////////////////
-					writer.writeAll(cellsInAllFields);
-					spindleWriter.close();
-					writer.close();
 ////////////////////////////one snapshot per field/////////////////////////////////																			
 				}else {
 					int frame = 0;
-					String channels = param.getParametersAsJsonObject()
-							.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-							.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
-							.getAsString();
+					String channels = param.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel:arrayChannels) {
 						ImagePlus fluoImage = mafa.acquire(true, frame, channel);
@@ -215,11 +154,8 @@ if(md.isOkClicked()) {
 					fluoImage = null;
 				}
 ///////////////////////////save cropped images//////////////////////////////////////
-				if (param.getParametersAsJsonObject()
-					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-					.getAsJsonObject()
-					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
-					.getAsBoolean()) {
+				if (Boolean.parseBoolean(param.getFluoParameter(
+					MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
 					mfa.saveCroppedImgs();
 				}
 				// close roi manager

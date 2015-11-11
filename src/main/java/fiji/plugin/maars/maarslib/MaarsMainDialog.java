@@ -220,9 +220,9 @@ public class MaarsMainDialog implements ActionListener {
 		JPanel strategyPanel = new JPanel(new GridLayout(1, 0));
 		strategyPanel.setBackground(bgColor);
 		dynamicOpt = new JRadioButton("Dynamic");
-		dynamicOpt.setSelected(parameters.getStrategy());
+		dynamicOpt.setSelected(parameters.useDynamic());
 		staticOpt = new JRadioButton("Static");
-		staticOpt.setSelected(!parameters.getStrategy());
+		staticOpt.setSelected(!parameters.useDynamic());
 
 		dynamicOpt.addActionListener(this);
 		staticOpt.addActionListener(this);

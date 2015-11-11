@@ -49,10 +49,11 @@ public class Cell {
 	private CellFluoAnalysis fluoAnalysis;
 	private SpotCollection spotCollection;
 
-	private boolean isAlive;
-
-	public static final String CELLSHAPE = "cellShapeROI";
-	public static final String CELLLINE = "cellLinearROI";
+	private String currentChannel;
+	
+//	private boolean isAlive;
+//	public static final String CELLSHAPE = "cellShapeROI";
+//	public static final String CELLLINE = "cellLinearROI";
 
 	/**
 	 * Constructor :
@@ -128,15 +129,13 @@ public class Cell {
 	 * Method to find fluorescent spots on cell image and create a Spindle
 	 * object
 	 * 
-	 * @param spotRadius
-	 *            : typical spot radius
 	 * @return Spindle object
 	 */
-	public Spindle findFluoSpotTempFunction(double spotRadius) {
+	public Spindle findFluoSpotTempFunction() {
 
 		ReportingUtils.logMessage("Create CellFluoAnalysis object");
 		this.fluoAnalysis = new CellFluoAnalysis(this, spotRadius);
-		ReportingUtils.logMessage("Can't create CellFluoAnalysis object");
+		fluoAnalysis.
 		ReportingUtils.logMessage("Get fluorescent spot on image");
 		spotCollection = fluoAnalysis.getSpots();
 		// TODO
@@ -212,6 +211,10 @@ public class Cell {
 		croppedfluoImage.setRoi(croppedRoi);
 		ReportingUtils.logMessage("Done");
 
+	}
+	
+	public void setCurrentChannel(String ch){
+		this.currentChannel = ch;
 	}
 
 	/**

@@ -218,7 +218,7 @@ public class MaarsParameters {
 	 * 
 	 * @return analysis with dynamic or not
 	 */
-	public boolean getStrategy(){
+	public boolean useDynamic(){
 		return Boolean.parseBoolean(root
 				.getChild(FLUO_ANALYSIS_PARAMETERS)
 				.getChildText(DYNAMIC));
@@ -316,8 +316,22 @@ public class MaarsParameters {
 				.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch)
 				.getChildText(SPOT_RADIUS);
 	}
-	//Setters
 	
+	/**
+	 * 
+	 * @return get channels used for fluo analysis
+	 */
+	public String getUsingChannels(){
+		return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
+				.getChildText(USING);
+	}
+	
+	////////////Setters
+	/**
+	 * update value of x or y field number of exloration
+	 * @param xOrY
+	 * @param value
+	 */
 	public void setFieldNb(final String xOrY, String value){
 		root.getChild(EXPLORATION_PARAMETERS)
 			.getChild(xOrY).setText(value);
@@ -381,6 +395,15 @@ public class MaarsParameters {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
 		.getChild(ch).getChild(SPOT_RADIUS)
 		.setText(spotRaidus);
+	}
+	
+	/**
+	 * set channels to USING channel
+	 * @param channels 
+	 */
+	public void setUsingChannels(String channels){
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
+				.getChild(USING).setText(channels);
 	}
 
 	

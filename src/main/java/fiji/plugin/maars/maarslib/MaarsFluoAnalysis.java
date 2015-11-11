@@ -32,6 +32,8 @@ public class MaarsFluoAnalysis {
 	private double positionX;
 	private double positionY;
 	private ImagePlus fluoImg;
+	private String currentChannel;
+	private String currentFrame;
 
 	/**
 	 * Constructor 1:
@@ -100,43 +102,6 @@ public class MaarsFluoAnalysis {
 	}
 
 	/**
-	 * Method to analyse an entire field
-	 * 
-	 * @param pathToResultsdouble
-	 *            positionX, double positionY : path to save results
-	 * @param channel
-	 *            : channel used for this fluoimage
-	 */
-	public List<String[]> analyzeEntireFieldReturnListSp(int frame,
-			String channel) {
-		List<String[]> cells = new ArrayList<String[]>();
-		List<String[]> spotStrings = new ArrayList<String[]>();
-		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-		Iterator<Cell> itrCells = soc.iterator();
-		ReportingUtils.logMessage("Detecting spots...");
-		while (itrCells.hasNext()) {
-			Cell cell = itrCells.next();
-			Spindle sp = cell.findFluoSpotTempFunction(parameters
-					.getParametersAsJsonObject()
-					.get(MaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-					.getAsJsonObject().get(MaarsParameters.SPOT_RADIUS)
-					.getAsDouble());
-			for (String[] s : cell.getSpotList()) {
-				spotStrings.add(s);
-			}
-			cell.addCroppedFluoSlice();
-			cells.add(sp.toList(frame * timeInterval / 1000,
-					Math.round(this.positionX), Math.round(this.positionY)));
-			cell = null;
-		}
-		soc.resetCount();
-		ReportingUtils.logMessage("Spots detection done...");
-		this.writeAnalysisRes(cells, frame, channel);
-		this.writeSpotListForOneCell(spotStrings, frame, channel);
-		return cells;
-	}
-
-	/**
 	 * 
 	 * @return Set of cells
 	 */
@@ -150,12 +115,27 @@ public class MaarsFluoAnalysis {
 	public void setFluoImage(ImagePlus fluoImg) {
 		this.fluoImg = fluoImg;
 	}
+	
+	/**
+	 * 
+	 * @param channelName
+	 */
+	public void setCurrentChannel(String channelName){
+		this.currentChannel = channelName;
+	}
+	
+	/**
+	 * 
+	 * @param frame
+	 */
+	public void setCurrentFrame(String frame){
+		this.currentFrame = frame;
+	}
 
 	/**
 	 * z-projection of fluoImage with max_intesity
 	 */
 	public void zProject() {
-
 		ZProjector projector = new ZProjector();
 		projector.setMethod(ZProjector.MAX_METHOD);
 		projector.setImage(this.fluoImg);
@@ -175,13 +155,47 @@ public class MaarsFluoAnalysis {
 		while (itrCells.hasNext()) {
 			Cell cell = itrCells.next();
 			cell.setFluoImage(this.fluoImg);
+			cell.setCurrentChannel(this.currentChannel);
 			cell.setBfFluocalibFactor();
 			cell.setRescaledFluoRoi();
 			cell.cropFluoImage();
 		}
 		soc.resetCount();
 	}
-
+	
+	/**
+	 * Method to analyse an entire field
+	 * 
+	 * @param pathToResultsdouble
+	 *            positionX, double positionY : path to save results
+	 * @param channel
+	 *            : channel used for this fluoimage
+	 */
+	public List<String[]> analyzeEachCell() {
+//		List<String[]> cells = new ArrayList<String[]>();
+//		List<String[]> spotStrings = new ArrayList<String[]>();
+//		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+//		
+		Iterator<Cell> itrCells = soc.iterator();
+		ReportingUtils.logMessage("Detecting spots...");
+		while (itrCells.hasNext()) {
+			Cell cell = itrCells.next();
+			Spindle sp = cell.findFluoSpotTempFunction();
+//			for (String[] s : cell.getSpotList()) {
+//				spotStrings.add(s);
+//			}
+			cell.addCroppedFluoSlice();
+//			cells.add(sp.toList(frame * timeInterval / 1000,
+//					Math.round(this.positionX), Math.round(this.positionY)));
+//			cell = null;
+		}
+		soc.resetCount();
+		ReportingUtils.logMessage("Spots detection done...");
+//		this.writeAnalysisRes(cells, frame, channel);
+//		this.writeSpotListForOneCell(spotStrings, frame, channel);
+		return cells;
+	}
+	
 	public void saveCroppedImgs() {
 		for (Cell cell : soc) {
 			cell.saveCroppedImage(pathToFluoDir);

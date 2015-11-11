@@ -40,20 +40,13 @@ public class CellFluoAnalysis {
 
 	public CellFluoAnalysis(Cell cell, double spotRadius) {
 		
-		ImagePlus croppedFluoImg = cell.getCroppedFluoImage();
-		Calibration cal = croppedFluoImg.getCalibration();
-		Roi croppedRoi = croppedFluoImg.getRoi();
-		croppedFluoImg.deleteRoi();
-		
-		Boolean thresholdFound = false;
-		int nSpotsDetected = 0;
-		double threshold = 0;
-		double lowBound = 0;
-		double highBound = 200;
-		int maxNbSpotPerCell = cell.getMaxNbSpotPerCell();
-		double stepFactor = 0.5;
-
-		while (!thresholdFound){
+			ImagePlus croppedFluoImg = cell.getCroppedFluoImage();
+			Calibration cal = croppedFluoImg.getCalibration();
+			Roi croppedRoi = croppedFluoImg.getRoi();
+			croppedFluoImg.deleteRoi();
+			
+			int nSpotsDetected = 0;
+	
 			final Model model = new Model();
 			Settings settings = new Settings();
 			settings.setFrom(croppedFluoImg);
@@ -69,28 +62,29 @@ public class CellFluoAnalysis {
 			detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
 			detectorSettings.put("RADIUS", spotRadius);
 			detectorSettings.put("TARGET_CHANNEL", 1);
-			detectorSettings.put("THRESHOLD", threshold);
+			detectorSettings.put("THRESHOLD", 0);
 			detectorSettings.put("DO_MEDIAN_FILTERING", false);
 			settings.detectorSettings = detectorSettings;
 			
 			TrackMate trackmate = new TrackMate(model, settings);
 			ReportingUtils.logMessage("Trackmate created");
-
+	
 			trackmate.execDetection();
 			ReportingUtils.logMessage("execDetection done");
 			
 			trackmate.execInitialSpotFiltering();
 			ReportingUtils.logMessage("execInitialSpotFiltering done");
 	
-			trackmate.computeSpotFeatures(true);
+			trackmate.computeSpotFeatures(false);
 			ReportingUtils.logMessage("computeSpotFeatures done");
 	
 			trackmate.execSpotFiltering(true);
 			ReportingUtils.logMessage("execSpotFiltering done");
 			nSpotsDetected = trackmate.getModel().getSpots().getNSpots(true);
 			ReportingUtils.logMessage("Found " + nSpotsDetected + " spots in total");
-			ReportingUtils.logMessage("Threshold = " + threshold +", LowBound = " + lowBound + ", HighBound = " + highBound);
 			res = trackmate.getModel().getSpots();
+			ReportingUtils.logMessage("- Done.");
+		}
 			
 //			res = new ArrayList<Spot>();
 //			for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
@@ -118,9 +112,13 @@ public class CellFluoAnalysis {
 //			}else{
 //				thresholdFound = true;
 //			}
-		}
-		ReportingUtils.logMessage("- Done.");
+	public SpotCollection findBestNSpotInCell(){
+		SpotCollection newCollection = new SpotCollection();
+		for (Spot s : res.iterable(false)){
+			s.getFeature(")
+		};
 	}
+		
 
 	/**
 	 * Method to get detected spots.

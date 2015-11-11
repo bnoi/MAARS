@@ -1,11 +1,11 @@
 //base_dir = "D:/Data/Tong/MAARS/";
-base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
-//base_dir = "/Volumes/Macintosh/Documents/MAARS/";
+base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
-dep_base_dir = "/home/tong/.m2/repository/";
-//dep_base_dir = "/Users/tongli/.m2/repository/";
+//dep_base_dir = "/home/tong/.m2/repository/";
+dep_base_dir = "/Users/tongli/.m2/repository/";
 //dep_base_dir = "C:\\Users\\NIKON\\.m2\\repository\\";
 addClassPath("/Applications/Micro-Manager1.4/jars/TrackMate_-2.8.1-SNAPSHOT.jar");
 addClassPath(dep_base_dir +"net/imglib2/imglib2/2.2.0/imglib2-2.2.0.jar");
@@ -26,7 +26,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 import java.util.List;
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
-import fiji.plugin.maars.maarslib.AllMaarsParameters;
+import fiji.plugin.maars.maarslib.MaarsParameters;
 import fiji.plugin.maars.maarslib.ExplorationXYPositions;
 import mmcorej.CMMCore;
 import org.micromanager.*;
@@ -47,7 +47,6 @@ MaarsMainDialog md = null;
 
 md = new MaarsMainDialog(mm, mmc, base_dir + "maars_config.xml");
 
-
 print("Show main window");
 
 md.show();
@@ -59,25 +58,17 @@ while(!md.isOkClicked()) {
 if(md.isOkClicked()) {
 	start = System.currentTimeMillis();
 	print("start "+start);
-	AllMaarsParameters param = null;
+	MaarsParameters param = null;
 
 	print("AutoFocusing...");
 	autofocus = mm.getAutofocus();
 	print("Getting parameters...");
 	param = md.getParameters();
 
-	int nbXField = param
-						.getParametersAsJsonObject()
-						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-						.getAsJsonObject()
-						.get(AllMaarsParameters.X_FIELD_NUMBER)
-						.getAsInt();
-	int nbYField = param
-						.getParametersAsJsonObject()
-						.get(AllMaarsParameters.EXPLORATION_PARAMETERS)
-						.getAsJsonObject()
-						.get(AllMaarsParameters.Y_FIELD_NUMBER)
-						.getAsInt();
+	int nbXField = Integer.parseInteger(param
+			.getFieldNb(MaarsParameters.X_FIELD_NUMBER));
+	int nbYField = Integer.parseInteger(param
+			.getFieldNb(MaarsParameters.Y_FIELD_NUMBER));
 	
 	print("nb x field "+nbXField+" nb y field "+nbYField);
 
@@ -100,11 +91,8 @@ if(md.isOkClicked()) {
 		ms.writeUsedConfig();
 
 		if (ms.roiDetected()){
-			String fluoFolder = AllMaarsParameters.convertPath(param
-													.getParametersAsJsonObject()
-													.get(AllMaarsParameters.GENERAL_ACQUISITION_PARAMETERS)
-													.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
-													.getAsString()
+			String fluoFolder = MaarsParameters.convertPath(param
+													.getSavingPath()
 													+ "/movie_X"
 													+ Math.round(xPos)
 													+ "_Y"
@@ -117,17 +105,14 @@ if(md.isOkClicked()) {
 		int frame = 0;
 
 		while(frame<2){
-			String channels = param.getParametersAsJsonObject()
-					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-					.getAsJsonObject().get(AllMaarsParameters.FLUO_CHANNELS)
-					.getAsString();
+			String channels = param.getUsingChannels();
 			String[] arrayChannels = channels.split(",", -1);
 			for (String channel:arrayChannels) {
 				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
 				fluoImage = IJ.openImage(fluoFolder + "/"
 					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
-
 				mfa.setFluoImage(fluoImage);
+				mfa.setCurrentChannel(channel);
 				mfa.zProject();
 				mfa.cropAllCells();
 				mfa.analyzeEntireFieldReturnListSp(frame,channel);
@@ -139,11 +124,9 @@ if(md.isOkClicked()) {
 			acqNameFluo = null;
 			fluoImage = null;
 		}
-		if (param.getParametersAsJsonObject()
-					.get(AllMaarsParameters.FLUO_ANALYSIS_PARAMETERS)
-					.getAsJsonObject()
-					.get(AllMaarsParameters.SAVE_FLUORESCENT_MOVIES)
-					.getAsBoolean()) {
+		if (Boolean.parseBoolean(
+			param.getFluoParameter(
+				MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
 				mfa.saveCroppedImgs();
 			}
 		ms = null;
