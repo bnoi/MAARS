@@ -91,19 +91,14 @@ public class CellFluoAnalysis {
 	public void doDetection() {
 		int nSpotsDetected = 0;
 		TrackMate trackmate = new TrackMate(model, settings);
-		ReportingUtils.logMessage("Trackmate created");
 
 		trackmate.execDetection();
-		ReportingUtils.logMessage("execDetection done");
 
 		trackmate.execInitialSpotFiltering();
-		ReportingUtils.logMessage("execInitialSpotFiltering done");
 
 		trackmate.computeSpotFeatures(false);
-		ReportingUtils.logMessage("computeSpotFeatures done");
 
 		trackmate.execSpotFiltering(false);
-		ReportingUtils.logMessage("execSpotFiltering done");
 
 		nSpotsDetected = trackmate.getModel().getSpots().getNSpots(false);
 		ReportingUtils
@@ -125,6 +120,7 @@ public class CellFluoAnalysis {
 		for (Spot s : factory.getCollection().iterable(visibleOnly)) {
 			if (cell.croppedRoiContains(s)) {
 				newCollection.add(s, 0);
+				ReportingUtils.logMessage("" + s.getFeatures().keySet().toString());
 			}
 		}
 		factory.setCollection(newCollection);
@@ -169,7 +165,8 @@ public class CellFluoAnalysis {
 		}
 	}
 	
-	public CellChannelFactory getFactory(){
-		return this.factory;
+	public Model getModel(){
+		model.setSpots(factory.getCollection(), true);
+		return this.model;
 	}
 }
