@@ -1,7 +1,10 @@
 package fiji.plugin.maars.cellstateanalysis;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import net.imglib2.type.numeric.real.FloatType;
 
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -15,116 +18,158 @@ import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_MEDIAN_FILTERING;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCALIZATION;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_MEDIAN_FILTERING;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_SUBPIXEL_LOCALIZATION;
+import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import fiji.plugin.trackmate.TrackMate;
 import ij.ImagePlus;
-import ij.measure.Calibration;
-import ij.gui.Roi;
 
 /**
  * This class is to find fluorescent spots in an image using LogDetector
  * 
- * @author marie
+ * @author Tong LI
  *
  */
 public class CellFluoAnalysis {
-	private SpotCollection res;
+
+	private Cell cell;
+	private Model model;
+	private Settings settings;
+	private CellChannelFactory factory;
 
 	/**
 	 * Constructor :
 	 * 
 	 * @param cell
-	 *            : Cell object (the cell you want to analyse)
-	 * @param spotRadius
-	 *            : spot typical radius
+	 * @param factory
 	 */
 
-	public CellFluoAnalysis(Cell cell, double spotRadius) {
-		
-			ImagePlus croppedFluoImg = cell.getCroppedFluoImage();
-			Calibration cal = croppedFluoImg.getCalibration();
-			Roi croppedRoi = croppedFluoImg.getRoi();
-			croppedFluoImg.deleteRoi();
-			
-			int nSpotsDetected = 0;
-	
-			final Model model = new Model();
-			Settings settings = new Settings();
-			settings.setFrom(croppedFluoImg);
-			settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory());
-			settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory());
-			settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory());
-			settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory());
-			settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory());
-			
-	
-			settings.detectorFactory = new LogDetectorFactory();
-			Map<String, Object> detectorSettings = new HashMap<String, Object>();
-			detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-			detectorSettings.put("RADIUS", spotRadius);
-			detectorSettings.put("TARGET_CHANNEL", 1);
-			detectorSettings.put("THRESHOLD", 0);
-			detectorSettings.put("DO_MEDIAN_FILTERING", false);
-			settings.detectorSettings = detectorSettings;
-			
-			TrackMate trackmate = new TrackMate(model, settings);
-			ReportingUtils.logMessage("Trackmate created");
-	
-			trackmate.execDetection();
-			ReportingUtils.logMessage("execDetection done");
-			
-			trackmate.execInitialSpotFiltering();
-			ReportingUtils.logMessage("execInitialSpotFiltering done");
-	
-			trackmate.computeSpotFeatures(false);
-			ReportingUtils.logMessage("computeSpotFeatures done");
-	
-			trackmate.execSpotFiltering(true);
-			ReportingUtils.logMessage("execSpotFiltering done");
-			nSpotsDetected = trackmate.getModel().getSpots().getNSpots(true);
-			ReportingUtils.logMessage("Found " + nSpotsDetected + " spots in total");
-			res = trackmate.getModel().getSpots();
-			ReportingUtils.logMessage("- Done.");
-		}
-			
-//			res = new ArrayList<Spot>();
-//			for (Spot spot : trackmate.getModel().getSpots().iterable(true)) {
-//
-//				Map<String, Double> features = spot.getFeatures();
-//				if (croppedRoi.contains((int) Math.round(features.get("POSITION_X")/cal.pixelWidth),
-//										(int) Math.round(features.get("POSITION_Y")/cal.pixelHeight))){
-//					if (res.size() > maxNbSpotPerCell ){
-//						break;
-//					}else{
-//						res.add(spot);
-//					}
-//				}
-//			};
-//			ReportingUtils.logMessage("Found " + res.size() + " spots inside the cell");
-//			
-//			
-//			if (res.size() == 0){
-//				highBound = threshold;
-//				threshold = lowBound + ((highBound - lowBound) * stepFactor);
-//			}else if(res.size() > maxNbSpotPerCell){
-//				lowBound = threshold;
-//				threshold = lowBound + ((highBound - lowBound) * stepFactor);
-//				res = null;
-//			}else{
-//				thresholdFound = true;
-//			}
-	public SpotCollection findBestNSpotInCell(){
-		SpotCollection newCollection = new SpotCollection();
-		for (Spot s : res.iterable(false)){
-			s.getFeature(")
-		};
+	public CellFluoAnalysis(Cell cell, CellChannelFactory factory) {
+
+		this.cell = cell;
+		this.factory = factory;
+		ImagePlus croppedFluoImg = cell.getCroppedFluoImage();
+		croppedFluoImg.deleteRoi();
+		model = new Model();
+
+		settings = new Settings();
+		settings.setFrom(croppedFluoImg);
+
+		// Computer different features (in order)
+
+		settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory<FloatType>());
+		settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory<FloatType>());
+		settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<FloatType>());
+		settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
+		settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
+
+		// Set up detectino parameters.
+
+		settings.detectorFactory = new LogDetectorFactory<FloatType>();
+		Map<String, Object> detectorSettings = new HashMap<String, Object>();
+		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION,
+				DEFAULT_DO_SUBPIXEL_LOCALIZATION);
+		detectorSettings.put(KEY_RADIUS, factory.getSpotRadius());
+		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
+		// TODO to figure out what value to use, 2 seems ok for now.
+		detectorSettings.put(KEY_THRESHOLD, (double) 2);
+		detectorSettings.put(KEY_DO_MEDIAN_FILTERING,
+				DEFAULT_DO_MEDIAN_FILTERING);
+		settings.detectorSettings = detectorSettings;
+
 	}
-		
 
 	/**
-	 * Method to get detected spots.
+	 * Take parameters in the constructor then initalize trakemate object to get
+	 * unfiltered spots.
 	 */
-	public SpotCollection getSpots() {
-		return res;
+	public void doDetection() {
+		int nSpotsDetected = 0;
+		TrackMate trackmate = new TrackMate(model, settings);
+		ReportingUtils.logMessage("Trackmate created");
+
+		trackmate.execDetection();
+		ReportingUtils.logMessage("execDetection done");
+
+		trackmate.execInitialSpotFiltering();
+		ReportingUtils.logMessage("execInitialSpotFiltering done");
+
+		trackmate.computeSpotFeatures(false);
+		ReportingUtils.logMessage("computeSpotFeatures done");
+
+		trackmate.execSpotFiltering(false);
+		ReportingUtils.logMessage("execSpotFiltering done");
+
+		nSpotsDetected = trackmate.getModel().getSpots().getNSpots(false);
+		ReportingUtils
+				.logMessage("Found " + nSpotsDetected + " spots in total");
+		factory.setCollection(trackmate.getModel().getSpots());
+		trackmate = null;
+		ReportingUtils.logMessage("- Done.");
 	}
 
+	/**
+	 * discard all the spots out of cell shape roi
+	 * 
+	 * @param currentFrame
+	 * @param visibleOnly
+	 *            : iterate only on visible cells or not (see @SpotCollection)
+	 */
+	public void filterOnlyInCell(Boolean visibleOnly) {
+		SpotCollection newCollection = new SpotCollection();
+		for (Spot s : factory.getCollection().iterable(visibleOnly)) {
+			if (cell.croppedRoiContains(s)) {
+				newCollection.add(s, 0);
+			}
+		}
+		factory.setCollection(newCollection);
+	}
+
+	/**
+	 * if number of spot still higher than expected number of spot in the
+	 * channel get the n highest quality spot(s)
+	 * 
+	 * @param visibleOnly
+	 */
+	public void findBestNSpotInCell(Boolean visibleOnly) {
+		Spot tmpSpot = null;
+		ArrayList<Integer> idToSkip = new ArrayList<Integer>();
+		SpotCollection newCollection = new SpotCollection();
+		if (factory.getCollection().getNSpots(visibleOnly) > factory
+				.getMaxNbSpot()) {
+			ReportingUtils.logMessage("Found more spot than waiting number");
+			for (int i = 0; i < factory.getMaxNbSpot(); i++) {
+				for (Spot s : factory.getCollection().iterable(visibleOnly)) {
+					if (tmpSpot == null) {
+						tmpSpot = s;
+					} else {
+						if (Spot.featureComparator("QUALITY").compare(s,
+								tmpSpot) == 1
+								&& !idToSkip.contains(s.ID())) {
+							tmpSpot = s;
+						}
+					}
+				}
+				newCollection.add(tmpSpot, 0);
+				if (tmpSpot != null) {
+					idToSkip.add(tmpSpot.ID());
+				}
+				tmpSpot = null;
+			}
+			factory.setCollection(newCollection);
+			idToSkip = null;
+			newCollection = null;
+		} else {
+			// do nothing
+		}
+	}
+	
+	public CellChannelFactory getFactory(){
+		return this.factory;
+	}
 }

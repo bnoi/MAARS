@@ -20,7 +20,7 @@ import ij.plugin.frame.RoiManager;
  * @author marie
  *
  */
-public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
+public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	// tools to get results
 	private RoiManager roiManager;
 	private Roi[] roiArray;
@@ -57,7 +57,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 	 *            : path indicating where results of analysis should be stored
 	 */
 	public SetOfCells(ImagePlus bfImage, ImagePlus fluoImage, int focusSlice,
-			String pathToRois, String pathToSaveResults, int maxNbSpotPerCell) {
+			String pathToRois, String pathToSaveResults) {
 
 		try {
 			PrintStream ps = new PrintStream(pathToSaveResults
@@ -82,9 +82,9 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 		roiArray = getRoisAsArray();
 		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
-		for (int i = 0 ; i < roiArray.length; i++) {
+		for (int i = 0; i < roiArray.length; i++) {
 			cellArray.add(i, new Cell(bfImage, fluoImage, focusSlice,
-					roiArray[i], i, rt, maxNbSpotPerCell));
+					roiArray[i], i, rt));
 		}
 		ReportingUtils.logMessage("Done.");
 	}
@@ -108,7 +108,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 	 *            : path indicating where results of analysis should be stored
 	 */
 	public SetOfCells(ImagePlus bfImage, int focusSlice, String pathToRois,
-			String pathToSaveResults, int maxNbSpotPerCell) {
+			String pathToSaveResults) {
 
 		try {
 			PrintStream ps = new PrintStream(pathToSaveResults
@@ -133,10 +133,9 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 		roiArray = getRoisAsArray();
 		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
-		for (int i =0 ; i < roiArray.length; i++) {
-			cellArray.add(i, new Cell(bfImage, focusSlice,
-					roiArray[i], i,rt , maxNbSpotPerCell));
-		}		
+		for (int i = 0; i < roiArray.length; i++) {
+			cellArray.add(i, new Cell(bfImage, focusSlice, roiArray[i], i, rt));
+		}
 		ReportingUtils.logMessage("Done.");
 	}
 
@@ -162,7 +161,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 			int newPosition = i + random.nextInt(n - i);
 			Cell cellTemp = cellArray.get(i);
 			cellArray.remove(i);
-			cellArray.add(i,cellArray.get(newPosition));
+			cellArray.add(i, cellArray.get(newPosition));
 			cellArray.remove(newPosition);
 			cellArray.add(newPosition, cellTemp);
 		}
@@ -174,9 +173,9 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 	 * @return
 	 */
 	public Roi[] getRoisAsArray() {
-		
+
 		roiManager = RoiManager.getInstance();
-		if (roiManager == null){
+		if (roiManager == null) {
 			roiManager = new RoiManager();
 			roiManager.runCommand("Open", pathToRois);
 		}
@@ -252,12 +251,13 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 
 	@Override
 	public Iterator<Cell> iterator() {
-        return this;
+		resetCount();
+		return this;
 	}
 
 	@Override
 	public boolean hasNext() {
-		if (count < cellArray.size()){
+		if (count < cellArray.size()) {
 			return true;
 		}
 		return false;
@@ -266,20 +266,19 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>{
 	@Override
 	public Cell next() {
 		if (count == cellArray.size())
-		      throw new NoSuchElementException();
-		    count++;
+			throw new NoSuchElementException();
+		count++;
 		return cellArray.get(count - 1);
 	}
 
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException();
-		
+
 	}
-	
-	public void resetCount(){
+
+	public void resetCount() {
 		this.count = 0;
 	}
-	
-	
+
 }

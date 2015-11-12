@@ -1,13 +1,13 @@
 //base_dir = "D:/Data/Tong/MAARS/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
-base_dir = "/Volumes/Macintosh/Documents/MAARS/";
+//base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
-//dep_base_dir = "/home/tong/.m2/repository/";
-dep_base_dir = "/Users/tongli/.m2/repository/";
+dep_base_dir = "/home/tong/.m2/repository/";
+//dep_base_dir = "/Users/tongli/.m2/repository/";
 //dep_base_dir = "C:\\Users\\NIKON\\.m2\\repository\\";
-addClassPath("/Applications/Micro-Manager1.4/jars/TrackMate_-2.8.1-SNAPSHOT.jar");
+//addClassPath("/Applications/Micro-Manager1.4/jars/TrackMate_-2.8.1-SNAPSHOT.jar");
 addClassPath(dep_base_dir +"net/imglib2/imglib2/2.2.0/imglib2-2.2.0.jar");
 addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm/0.2.0/imglib2-algorithm-0.2.0.jar");
 addClassPath(dep_base_dir +"net/imagej/imagej-common/0.12.2/imagej-common-0.12.2.jar");
@@ -24,6 +24,7 @@ addClassPath(dep_base_dir +"gov/nist/math/jama/1.0.3/jama-1.0.3.jar");
 
 import au.com.bytecode.opencsv.CSVWriter;
 import java.util.List;
+import fiji.plugin.maars.utils.FileUtils;
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
 import fiji.plugin.maars.maarslib.MaarsParameters;
@@ -65,10 +66,8 @@ if(md.isOkClicked()) {
 	print("Getting parameters...");
 	param = md.getParameters();
 
-	int nbXField = Integer.parseInteger(param
-			.getFieldNb(MaarsParameters.X_FIELD_NUMBER));
-	int nbYField = Integer.parseInteger(param
-			.getFieldNb(MaarsParameters.Y_FIELD_NUMBER));
+	int nbXField = param.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
+	int nbYField = param.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
 	
 	print("nb x field "+nbXField+" nb y field "+nbYField);
 
@@ -88,10 +87,9 @@ if(md.isOkClicked()) {
 				xPos,
 				yPos);
 		ms.segmentation();
-		ms.writeUsedConfig();
-
+		print("Roi detected");
 		if (ms.roiDetected()){
-			String fluoFolder = MaarsParameters.convertPath(param
+			String fluoFolder = FileUtils.convertPath(param
 													.getSavingPath()
 													+ "/movie_X"
 													+ Math.round(xPos)
@@ -104,18 +102,21 @@ if(md.isOkClicked()) {
 															mfa.getSetOfCells());
 		int frame = 0;
 
-		while(frame<2){
+		while(frame<3){
+			print("fluo analysing");
 			String channels = param.getUsingChannels();
 			String[] arrayChannels = channels.split(",", -1);
 			for (String channel:arrayChannels) {
 				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
 				fluoImage = IJ.openImage(fluoFolder + "/"
 					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
+				print(channel);
 				mfa.setFluoImage(fluoImage);
-				mfa.setCurrentChannel(channel);
+				mfa.createCellChannelFactory(channel);
+				mfa.setCurrentFrame(frame);
 				mfa.zProject();
 				mfa.cropAllCells();
-				mfa.analyzeEntireFieldReturnListSp(frame,channel);
+				mfa.analyzeEachCell();
 
 			}
 			// close roi manager

@@ -2,14 +2,14 @@ package fiji.plugin.maars.cellstateanalysis;
 
 import java.awt.Rectangle;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
 
 import org.micromanager.internal.utils.ReportingUtils;
 
 import ij.process.ImageProcessor;
+import fiji.plugin.maars.maarslib.MaarsParameters;
+import fiji.plugin.maars.utils.FileUtils;
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import ij.IJ;
@@ -17,6 +17,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.RoiScaler;
 
@@ -42,18 +43,16 @@ public class Cell {
 
 	// informations
 	private int cellNumber;
-	private int maxNbSpotPerCell;
 	private Measures measures;
 	private Spindle lastSpindleComputed;
 
 	private CellFluoAnalysis fluoAnalysis;
-	private SpotCollection spotCollection;
-
-	private String currentChannel;
-	
-//	private boolean isAlive;
-//	public static final String CELLSHAPE = "cellShapeROI";
-//	public static final String CELLLINE = "cellLinearROI";
+	private CellChannelFactory factory;
+	private SpotCollection gfpCollection;
+	private SpotCollection cfpCollection;
+	private SpotCollection dapiCollection;
+	private SpotCollection txredCollection;
+	private int currentFrame;
 
 	/**
 	 * Constructor :
@@ -76,7 +75,7 @@ public class Cell {
 	 *            : maximum number of spots in each cell.
 	 */
 	public Cell(ImagePlus bfImage, ImagePlus fluoImage, int focusSlice,
-			Roi roiCellShape, int cellNb, ResultsTable rt, int maxNbSpotPerCell) {
+			Roi roiCellShape, int cellNb, ResultsTable rt) {
 
 		this.bfImage = bfImage;
 		lastSpindleComputed = null;
@@ -84,7 +83,6 @@ public class Cell {
 		rt.reset();
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
 		this.cellNumber = cellNb;
-		this.maxNbSpotPerCell = maxNbSpotPerCell;
 		updateFluoImage(fluoImage);
 	}
 
@@ -103,10 +101,10 @@ public class Cell {
 	 *            : result table used to display result of analysis (measures on
 	 *            cell)
 	 * @param maxNbSpotPerCell
-	 *            : maximum number of spots in each cell.
+	 *            : maximum number of spots in each ccurrentFrameell.
 	 */
 	public Cell(ImagePlus bfImage, int focusSlice, Roi roiCellShape,
-			int cellNb, ResultsTable rt, int maxNbSpotPerCell) {
+			int cellNb, ResultsTable rt) {
 
 		ReportingUtils.logMessage("Cell " + roiCellShape.getName());
 		ReportingUtils.logMessage("Get parameters");
@@ -122,7 +120,6 @@ public class Cell {
 		ReportingUtils.logMessage("Create Measure object");
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
 		ReportingUtils.logMessage("done");
-		this.maxNbSpotPerCell = maxNbSpotPerCell;
 	}
 
 	/**
@@ -131,24 +128,30 @@ public class Cell {
 	 * 
 	 * @return Spindle object
 	 */
-	public Spindle findFluoSpotTempFunction() {
-
+	public void findFluoSpotTempFunction() {
+		Boolean visibleOnly = true;
 		ReportingUtils.logMessage("Create CellFluoAnalysis object");
-		this.fluoAnalysis = new CellFluoAnalysis(this, spotRadius);
-		fluoAnalysis.
-		ReportingUtils.logMessage("Get fluorescent spot on image");
-		spotCollection = fluoAnalysis.getSpots();
-		// TODO
-		ReportingUtils.logMessage("Create spindle using spots found");
-		Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
-				fluoImage.getCalibration(), cellShapeRoi);
+		this.fluoAnalysis = new CellFluoAnalysis(this, factory);
+		fluoAnalysis.doDetection();
+		fluoAnalysis.filterOnlyInCell(visibleOnly);
+		fluoAnalysis.findBestNSpotInCell(visibleOnly);
+		for (Spot s : fluoAnalysis.getFactory().getCollection().iterable(visibleOnly)){
+			ReportingUtils.logMessage("adding spot to channel collection");
+			gfpCollection.add(s, currentFrame);qsftze
+//			getCollectionOf(factory.getChannel()).add(s, currentFrame);
+		};
 
-		ReportingUtils.logMessage("Cell : " + croppedRoi.getName()
-				+ " spots nb : " + spotCollection.getNSpots(true));
-		ReportingUtils.logMessage("Done.");
-		ReportingUtils.logMessage("Return spindle");
-		lastSpindleComputed = spindle;
-		return spindle;
+
+		// ReportingUtils.logMessage("Create spindle using spots found");
+		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
+		// fluoImage.getCalibration(), cellShapeRoi);
+		//
+		// ReportingUtils.logMessage("Cell : " + croppedRoi.getName()
+		// + " spots nb : " + spotCollection.getNSpots(true));
+		// ReportingUtils.logMessage("Done.");
+		// ReportingUtils.logMessage("Return spindle");
+		// lastSpindleComputed = spindle;
+		// return spindle;
 	}
 
 	/**
@@ -212,9 +215,9 @@ public class Cell {
 		ReportingUtils.logMessage("Done");
 
 	}
-	
-	public void setCurrentChannel(String ch){
-		this.currentChannel = ch;
+
+	public void setCurrentFrame(int frame) {
+		this.currentFrame = frame;
 	}
 
 	/**
@@ -232,27 +235,20 @@ public class Cell {
 	}
 
 	/**
+	 * calculate scale factor from BF to Fluo image, the rescale the
+	 * cellShapeRoi by using these factors
+	 */
+	public void rescaleRoiForFluoImg() {
+		setBfFluocalibFactor();
+		setRescaledFluoRoi();
+	}
+
+	/**
 	 * 
 	 * @return Measure object
 	 */
 	public Measures getMeasures() {
 		return measures;
-	}
-
-	/**
-	 * 
-	 * @return true if the cell is alive
-	 */
-	public boolean isAlive() {
-		return isAlive;
-	}
-
-	/**
-	 * 
-	 * @return linear ROI of cell (major axis of cell)
-	 */
-	public int getMaxNbSpotPerCell() {
-		return maxNbSpotPerCell;
 	}
 
 	/**
@@ -332,7 +328,6 @@ public class Cell {
 	}
 
 	public void saveCroppedImage(String path) {
-		// TODO no path convert??
 		String pathToCroppedImgDir = path + "/croppedImgs/";
 		String pathToCroppedImg = pathToCroppedImgDir + "/"
 				+ String.valueOf(this.getCellNumber());
@@ -354,34 +349,39 @@ public class Cell {
 		croppedFluoStack.addSlice(ip);
 	}
 
-	// public List<String[]> getSpotList() {
-	// List<String[]> spotsListString = new ArrayList<String[]>();
-	// for (Spot spot : spotCollection) {
-	// Map<String, Double> features = spot.getFeatures();
-	//
-	// String[] featuresString = new String[8];
-	// featuresString[0] = String.valueOf(features.get("VISIBILITY"));
-	// featuresString[1] = String.valueOf(features.get("POSITION_T"));
-	// featuresString[2] = String.valueOf(features.get("POSITION_Z"));
-	// featuresString[3] = String.valueOf(features.get("POSITION_Y"));
-	// featuresString[4] = String.valueOf(features.get("RADIUS"));
-	// featuresString[5] = String.valueOf(features.get("FRAME"));
-	// featuresString[6] = String.valueOf(features.get("POSITION_X"));
-	// featuresString[7] = String.valueOf(this.getCellNumber());
-	// spotsListString.add(featuresString);
-	// }
-	// return spotsListString;
-	// }
-
-	public SpotCollection getNBestOfFeature(SpotCollection collection, String feature, int n){
-		SpotCollection newCollection;
-		double max = 0;
-		for (int i=0; i<n;i++){
-			if (inCell(s)) {
-				Spot bestSpot = getTheBestOfFeature(collection, feature);
+	public void setCellChannelFactory(CellChannelFactory factory) {
+		this.factory = factory;
+		if (factory.getChannel() == MaarsParameters.GFP) {
+			if (gfpCollection == null){
+				gfpCollection = new SpotCollection();
+			}
+		} else if (factory.getChannel() == MaarsParameters.CFP) {
+			if (cfpCollection == null){
+				cfpCollection = new SpotCollection();
+			}
+		} else if (factory.getChannel() == MaarsParameters.DAPI) {
+			if (dapiCollection == null){
+				dapiCollection = new SpotCollection();
+			}
+		} else if (factory.getChannel() == MaarsParameters.TXRED) {
+			if (txredCollection == null){
+				txredCollection = new SpotCollection();
 			}
 		}
-		return 
+	}
+	
+	public SpotCollection getCollectionOf(String channel){
+		if (channel == MaarsParameters.GFP){
+			return gfpCollection;
+		}else if(channel == MaarsParameters.CFP){
+			return cfpCollection;
+		}else if(channel == MaarsParameters.DAPI){
+			return dapiCollection;
+		}else if(channel == MaarsParameters.TXRED){
+			return txredCollection;
+		}else{
+			return null;
+		}
 	}
 
 	public Spot getTheBestOfFeature(SpotCollection collection, String feature) {
@@ -396,9 +396,21 @@ public class Cell {
 		return best;
 	}
 
-	public boolean inCell(Spot s) {
+	public boolean croppedRoiContains(Spot s) {
+		Calibration cal = croppedfluoImage.getCalibration();
 		return this.croppedRoi.contains(
-				(int) Math.round(s.getFeature("POSITION_X")),
-				(int) Math.round(s.getFeature("POSITION_Y")));
+				(int) Math.round(s.getFeature("POSITION_X") / cal.pixelWidth),
+				(int) Math.round(s.getFeature("POSITION_Y") / cal.pixelHeight));
+	}
+
+	/**
+	 * XML write of Trackmate need model instead of SpotCollection
+	 * @param	: channel name
+	 * @return model of Trackmate (see @Model in @Trakmate)
+	 */
+	public Model getModelOf(String channel) {
+		Model model = new Model();
+		model.setSpots(getCollectionOf(channel), true);
+		return model;
 	}
 }

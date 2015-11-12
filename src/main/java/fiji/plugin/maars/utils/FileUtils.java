@@ -39,8 +39,8 @@ public class FileUtils {
 	}
 	
 	public static void writeSpotFeatures(File file, Model model){
-		File newFile = new File(file.getParentFile() + "_" + file.getName() +".xml");
-
+		File newFile = new File(file.getParentFile() + "/" + file.getName() +".xml");
+		ReportingUtils.logMessage("Writing to :" + newFile.toString());
 		TmXmlWriter writer = new TmXmlWriter( newFile , model.getLogger() );
 		writer.appendModel( model );
 		try {
