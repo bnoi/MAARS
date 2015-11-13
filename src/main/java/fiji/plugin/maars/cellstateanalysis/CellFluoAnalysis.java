@@ -41,6 +41,7 @@ public class CellFluoAnalysis {
 	private Model model;
 	private Settings settings;
 	private CellChannelFactory factory;
+	private SpotCollection tmpCollection;
 
 	/**
 	 * Constructor :
@@ -103,7 +104,7 @@ public class CellFluoAnalysis {
 		nSpotsDetected = trackmate.getModel().getSpots().getNSpots(false);
 		ReportingUtils
 				.logMessage("Found " + nSpotsDetected + " spots in total");
-		factory.setCollection(trackmate.getModel().getSpots());
+		tmpCollection = trackmate.getModel().getSpots();
 		trackmate = null;
 		ReportingUtils.logMessage("- Done.");
 	}
@@ -117,13 +118,12 @@ public class CellFluoAnalysis {
 	 */
 	public void filterOnlyInCell(Boolean visibleOnly) {
 		SpotCollection newCollection = new SpotCollection();
-		for (Spot s : factory.getCollection().iterable(visibleOnly)) {
+		for (Spot s : tmpCollection.iterable(visibleOnly)) {
 			if (cell.croppedRoiContains(s)) {
 				newCollection.add(s, 0);
-				ReportingUtils.logMessage("" + s.getFeatures().keySet().toString());
 			}
 		}
-		factory.setCollection(newCollection);
+		tmpCollection = newCollection;
 	}
 
 	/**
@@ -136,11 +136,10 @@ public class CellFluoAnalysis {
 		Spot tmpSpot = null;
 		ArrayList<Integer> idToSkip = new ArrayList<Integer>();
 		SpotCollection newCollection = new SpotCollection();
-		if (factory.getCollection().getNSpots(visibleOnly) > factory
-				.getMaxNbSpot()) {
+		if (tmpCollection.getNSpots(visibleOnly) > factory.getMaxNbSpot()) {
 			ReportingUtils.logMessage("Found more spot than waiting number");
 			for (int i = 0; i < factory.getMaxNbSpot(); i++) {
-				for (Spot s : factory.getCollection().iterable(visibleOnly)) {
+				for (Spot s : tmpCollection.iterable(visibleOnly)) {
 					if (tmpSpot == null) {
 						tmpSpot = s;
 					} else {
@@ -157,16 +156,17 @@ public class CellFluoAnalysis {
 				}
 				tmpSpot = null;
 			}
-			factory.setCollection(newCollection);
+			tmpCollection = newCollection;
 			idToSkip = null;
 			newCollection = null;
 		} else {
 			// do nothing
 		}
 	}
-	
-	public Model getModel(){
-		model.setSpots(factory.getCollection(), true);
-		return this.model;
+
+	public Model getModel() {
+		model.setSpots(tmpCollection, true);
+		return model;
 	}
+
 }

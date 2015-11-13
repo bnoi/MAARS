@@ -43,23 +43,26 @@ public class MaarsFluoAnalysis {
 	 * @param parameters
 	 *            : parameters used for algorithm
 	 */
-	public MaarsFluoAnalysis(MaarsParameters parameters, SegPombeParameters segParam, double positionX,
-			double positionY) {
+	public MaarsFluoAnalysis(MaarsParameters parameters,
+			SegPombeParameters segParam, double positionX, double positionY) {
 
 		this.parameters = parameters;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(this.positionX)
-				+ "_Y" + Math.round(this.positionY) + "_FLUO");
+		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath()
+				+ "/movie_X" + Math.round(this.positionX) + "_Y"
+				+ Math.round(this.positionY) + "_FLUO");
 		File fluoDir = new File(pathToFluoDir);
 		if (!fluoDir.exists()) {
 			fluoDir.mkdirs();
 		}
 
-		soc = new SetOfCells(segParam.getImageToAnalyze(),
+		soc = new SetOfCells(
+				segParam.getImageToAnalyze(),
 				(int) Math.round(segParam.getImageToAnalyze().getNSlices() / 2),
-				segParam.getSavingPath() + segParam.getImageToAnalyze().getShortTitle() + "_ROI.zip",
-				segParam.getSavingPath());
+				segParam.getSavingPath()
+						+ segParam.getImageToAnalyze().getShortTitle()
+						+ "_ROI.zip", segParam.getSavingPath());
 
 	}
 
@@ -71,13 +74,15 @@ public class MaarsFluoAnalysis {
 	 * @param soc
 	 *            : SetOfCells found by segmentation
 	 */
-	public MaarsFluoAnalysis(MaarsParameters parameters, SetOfCells soc, double positionX, double positionY) {
+	public MaarsFluoAnalysis(MaarsParameters parameters, SetOfCells soc,
+			double positionX, double positionY) {
 
 		this.parameters = parameters;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(this.positionX)
-				+ "_Y" + Math.round(this.positionY) + "_FLUO");
+		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath()
+				+ "/movie_X" + Math.round(this.positionX) + "_Y"
+				+ Math.round(this.positionY) + "_FLUO");
 		File fluoDir = new File(pathToFluoDir);
 		if (!fluoDir.exists()) {
 			fluoDir.mkdirs();
@@ -153,31 +158,23 @@ public class MaarsFluoAnalysis {
 	 *            : channel used for this fluoimage
 	 */
 	public void analyzeEachCell() {
-		// List<String[]> cells = new ArrayList<String[]>();
-		// List<String[]> spotStrings = new ArrayList<String[]>();
-		// double timeInterval =
-		// Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-		//
-
 		ReportingUtils.logMessage("Detecting spots...");
 		for (Cell cell : soc) {
 			cell.setCellChannelFactory(currentFactory);
 			cell.setCurrentFrame(currentFrame);
 			cell.findFluoSpotTempFunction();
-			FileUtils.writeSpotFeatures(new File(parameters.getSavingPath() + "/" + String.valueOf(cell.getCellNumber())
-					+ "_" + currentFactory.getChannel()), cell.getModelOf(currentFactory.getChannel()));
+			FileUtils.writeSpotFeatures(parameters.getSavingPath(),
+					cell.getCellNumber(), currentFactory.getChannel(),
+					cell.getModelOf(currentFactory.getChannel()));
 			// for (String[] s : cell.getSpotList()) {
 			// spotStrings.add(s);
 			// }
 			// cells.add(sp.toList(frame * timeInterval / 1000,
 			// Math.round(this.positionX), Math.round(this.positionY)));
-			// cell = null;
+			// cell = null;/media/tong/74CDBC0B2251059E/test/spots
 		}
-		// soc.resetCount();
 		ReportingUtils.logMessage("Spots detection done...");
 		// this.writeAnalysisRes(cells, frame, channel);
-		// this.writeSpotListForOneCell(spotStrings, frame, channel);
-		// return cells;
 	}
 
 	public void createCellChannelFactory(String currentChannel) {
@@ -198,16 +195,21 @@ public class MaarsFluoAnalysis {
 		CSVWriter writer = null;
 
 		try {
-			spindleWriter = new FileWriter(pathToFluoDir + "/" + frame + "_" + channel + "_analysis.csv");
+			spindleWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
+					+ channel + "_analysis.csv");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		writer = new CSVWriter(spindleWriter, '\t', CSVWriter.NO_QUOTE_CHARACTER);
-		writer.writeNext(new String[] { "Cell", "Second", "Feature", "NbOfSpotDetected", "CellCenterX", "CellCenterY",
-				"CellAbsoMajAng", "CellMajLength", "CellMinLength", "SpAbsoAng", "SpAngToMaj", "SpLength", "spb1X",
-				"spb1Y", "spb1Z", "spb2X", "spb2Y", "spb2Z", "SpCenterX", "SpCenterY", "SpCenterZ",
-				"CellCenterToSpCenterLen", "CellCenterToSpCenterAng", "fieldX", "fieldY" });
+		writer = new CSVWriter(spindleWriter, '\t',
+				CSVWriter.NO_QUOTE_CHARACTER);
+		writer.writeNext(new String[] { "Cell", "Second", "Feature",
+				"NbOfSpotDetected", "CellCenterX", "CellCenterY",
+				"CellAbsoMajAng", "CellMajLength", "CellMinLength",
+				"SpAbsoAng", "SpAngToMaj", "SpLength", "spb1X", "spb1Y",
+				"spb1Z", "spb2X", "spb2Y", "spb2Z", "SpCenterX", "SpCenterY",
+				"SpCenterZ", "CellCenterToSpCenterLen",
+				"CellCenterToSpCenterAng", "fieldX", "fieldY" });
 		writer.writeAll(cells);
 		try {
 			spindleWriter.close();
@@ -217,18 +219,22 @@ public class MaarsFluoAnalysis {
 		}
 	}
 
-	public void writeSpotListForOneCell(List<String[]> spotListForOneCell, int frame, String channel) {
+	public void writeSpotListForOneCell(List<String[]> spotListForOneCell,
+			int frame, String channel) {
 		FileWriter spotListWriter = null;
 		CSVWriter writer = null;
 		try {
-			spotListWriter = new FileWriter(pathToFluoDir + "/" + frame + "_" + channel + "_spotList.csv");
+			spotListWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
+					+ channel + "_spotList.csv");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		writer = new CSVWriter(spotListWriter, '\t', CSVWriter.NO_QUOTE_CHARACTER);
-		writer.writeNext(new String[] { "VISIBILITY", "POSITION_T", "POSITION_Z", "POSITION_Y", "RADIUS", "FRAME",
-				"POSITION_X", "cellNumber" });
+		writer = new CSVWriter(spotListWriter, '\t',
+				CSVWriter.NO_QUOTE_CHARACTER);
+		writer.writeNext(new String[] { "VISIBILITY", "POSITION_T",
+				"POSITION_Z", "POSITION_Y", "RADIUS", "FRAME", "POSITION_X",
+				"cellNumber" });
 
 		writer.writeAll(spotListForOneCell);
 		try {

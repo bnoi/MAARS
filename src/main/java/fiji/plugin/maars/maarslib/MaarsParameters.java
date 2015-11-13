@@ -5,8 +5,6 @@ package fiji.plugin.maars.maarslib;
  * @version Nov 10, 2015
  */
 
-import ij.IJ;
-
 import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;

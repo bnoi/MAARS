@@ -25,24 +25,30 @@ public class FileUtils {
 			return false;
 		}
 	}
-	
-	public static ArrayList<File> listFilesForFolder( File folder) {
+
+	public static ArrayList<File> listFilesForFolder(File folder) {
 		ArrayList<File> list = new ArrayList<File>();
-	    for ( File fileEntry : folder.listFiles()) {
-	        if (fileEntry.isDirectory()) {
-	            listFilesForFolder(fileEntry);
-	        } else {
-	            list.add(fileEntry);
-	        }
-	    }
-	    return list;
+		for (File fileEntry : folder.listFiles()) {
+			if (fileEntry.isDirectory()) {
+				listFilesForFolder(fileEntry);
+			} else {
+				list.add(fileEntry);
+			}
+		}
+		return list;
 	}
-	
-	public static void writeSpotFeatures(File file, Model model){
-		File newFile = new File(file.getParentFile() + "/" + file.getName() +".xml");
+
+	public static void writeSpotFeatures(String path, int cellNb,
+			String channel, Model model) {
+		String spotsFolder = path + "/spots/";
+		if (!isValid(spotsFolder)) {
+			new File(spotsFolder).mkdir();
+		}
+		File newFile = new File(spotsFolder + String.valueOf(cellNb) + "_"
+				+ channel + ".xml");
 		ReportingUtils.logMessage("Writing to :" + newFile.toString());
-		TmXmlWriter writer = new TmXmlWriter( newFile , model.getLogger() );
-		writer.appendModel( model );
+		TmXmlWriter writer = new TmXmlWriter(newFile);
+		writer.appendModel(model);
 		try {
 			writer.writeToFile();
 		} catch (FileNotFoundException e) {
@@ -53,16 +59,19 @@ public class FileUtils {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Convert an unix path in windows path if program is running on windows OS
+	 * 
 	 * @param unixPath
 	 * @return String path
 	 */
 	public static String convertPath(String unixPath) {
 		String path = unixPath;
-		ReportingUtils.logMessage("program running on windows : "+IJ.isWindows());
-		ReportingUtils.logMessage("path is containing '/' : "+path.contains("/"));
+		ReportingUtils.logMessage("program running on windows : "
+				+ IJ.isWindows());
+		ReportingUtils.logMessage("path is containing '/' : "
+				+ path.contains("/"));
 		if (IJ.isWindows() && path.contains("/")) {
 			path = path.replace("/", "\\\\");
 		}

@@ -73,7 +73,8 @@ public class Cell {
 	 * @param maxNbSpotPerCell
 	 *            : maximum number of spots in each cell.
 	 */
-	public Cell(ImagePlus bfImage, ImagePlus fluoImage, int focusSlice, Roi roiCellShape, int cellNb, ResultsTable rt) {
+	public Cell(ImagePlus bfImage, ImagePlus fluoImage, int focusSlice,
+			Roi roiCellShape, int cellNb, ResultsTable rt) {
 
 		this.bfImage = bfImage;
 		lastSpindleComputed = null;
@@ -101,7 +102,8 @@ public class Cell {
 	 * @param maxNbSpotPerCell
 	 *            : maximum number of spots in each ccurrentFrameell.
 	 */
-	public Cell(ImagePlus bfImage, int focusSlice, Roi roiCellShape, int cellNb, ResultsTable rt) {
+	public Cell(ImagePlus bfImage, int focusSlice, Roi roiCellShape,
+			int cellNb, ResultsTable rt) {
 
 		ReportingUtils.logMessage("Cell " + roiCellShape.getName());
 		ReportingUtils.logMessage("Get parameters");
@@ -132,12 +134,10 @@ public class Cell {
 		fluoAnalysis.doDetection();
 		fluoAnalysis.filterOnlyInCell(visibleOnly);
 		fluoAnalysis.findBestNSpotInCell(visibleOnly);
-//		for (Spot s : fluoAnalysis.getFactory().getCollection().iterable(visibleOnly)) {
-//			ReportingUtils.logMessage("adding spot to channel collection");
-//			// getCollectionOf(factory.getChannel()).add(s, currentFrame);
-//		}
-//		setCollection(factory.getChannel(),
-//				SpotCollection.fromCollection(fluoAnalysis.getFactory().getCollection().iterable(visibleOnly)));
+		for (Spot s : fluoAnalysis.getModel().getSpots().iterable(visibleOnly)) {
+			ReportingUtils.logMessage("adding spot to channel collection");
+			getCollectionOf(factory.getChannel()).add(s, currentFrame);
+		}
 
 		// ReportingUtils.logMessage("Create spindle using spots found");
 		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
@@ -176,8 +176,10 @@ public class Cell {
 			bf2FluoWidthFac = 1;
 			bf2FluoHeightFac = 1;
 		} else {
-			bf2FluoWidthFac = bfImage.getCalibration().pixelWidth / fluoImage.getCalibration().pixelWidth;
-			bf2FluoHeightFac = bfImage.getCalibration().pixelHeight / fluoImage.getCalibration().pixelHeight;
+			bf2FluoWidthFac = bfImage.getCalibration().pixelWidth
+					/ fluoImage.getCalibration().pixelWidth;
+			bf2FluoHeightFac = bfImage.getCalibration().pixelHeight
+					/ fluoImage.getCalibration().pixelHeight;
 		}
 	}
 
@@ -190,8 +192,10 @@ public class Cell {
 	public void cropFluoImage() {
 		ImageProcessor imgProcessor = fluoImage.getProcessor();
 		imgProcessor.setInterpolationMethod(ImageProcessor.BILINEAR);
-		Rectangle newRectangle = new Rectangle((int) rescaledCellShapeRoi.getXBase(),
-				(int) rescaledCellShapeRoi.getYBase(), (int) rescaledCellShapeRoi.getBounds().width,
+		Rectangle newRectangle = new Rectangle(
+				(int) rescaledCellShapeRoi.getXBase(),
+				(int) rescaledCellShapeRoi.getYBase(),
+				(int) rescaledCellShapeRoi.getBounds().width,
 				(int) rescaledCellShapeRoi.getBounds().height);
 		imgProcessor.setRoi(newRectangle);
 
@@ -222,7 +226,8 @@ public class Cell {
 	 */
 	public void setRescaledFluoRoi() {
 		ReportingUtils.logMessage("change ROI scale");
-		rescaledCellShapeRoi = RoiScaler.scale(cellShapeRoi, bf2FluoWidthFac, bf2FluoHeightFac, false);
+		rescaledCellShapeRoi = RoiScaler.scale(cellShapeRoi, bf2FluoWidthFac,
+				bf2FluoHeightFac, false);
 		rescaledCellShapeRoi.setName("rescaledCellShapeRoi");
 	}
 
@@ -285,6 +290,7 @@ public class Cell {
 	}
 
 	/**
+	 * CellChannelFactory
 	 * 
 	 * @return Last Spindle object computed
 	 */
@@ -321,18 +327,21 @@ public class Cell {
 
 	public void saveCroppedImage(String path) {
 		String pathToCroppedImgDir = path + "/croppedImgs/";
-		String pathToCroppedImg = pathToCroppedImgDir + "/" + String.valueOf(this.getCellNumber());
+		String pathToCroppedImg = pathToCroppedImgDir + "/"
+				+ String.valueOf(this.getCellNumber());
 		if (!new File(pathToCroppedImgDir).exists()) {
 			new File(pathToCroppedImgDir).mkdirs();
 		}
-		ImagePlus imp = new ImagePlus("cell" + getCellNumber(), croppedFluoStack);
+		ImagePlus imp = new ImagePlus("cell" + getCellNumber(),
+				croppedFluoStack);
 		imp.setCalibration(getFluoImage().getCalibration());
 		IJ.saveAsTiff(imp, pathToCroppedImg);
 	}
 
 	public void addCroppedFluoSlice() {
 		if (croppedFluoStack.getSize() == 0) {
-			croppedFluoStack = new ImageStack(croppedfluoImage.getWidth(), croppedfluoImage.getHeight());
+			croppedFluoStack = new ImageStack(croppedfluoImage.getWidth(),
+					croppedfluoImage.getHeight());
 		}
 		ImageProcessor ip = croppedfluoImage.getImageStack().getProcessor(1);
 		croppedFluoStack.addSlice(ip);
@@ -399,19 +408,19 @@ public class Cell {
 
 	public boolean croppedRoiContains(Spot s) {
 		Calibration cal = croppedfluoImage.getCalibration();
-		return this.croppedRoi.contains((int) Math.round(s.getFeature("POSITION_X") / cal.pixelWidth),
+		return this.croppedRoi.contains(
+				(int) Math.round(s.getFeature("POSITION_X") / cal.pixelWidth),
 				(int) Math.round(s.getFeature("POSITION_Y") / cal.pixelHeight));
 	}
 
 	/**
 	 * XML write of Trackmate need model instead of SpotCollection
 	 * 
-	 * @param :
-	 *            channel name
+	 * @param : channel name
 	 * @return model of Trackmate (see @Model in @Trakmate)
 	 */
 	public Model getModelOf(String channel) {
-		Model model = fluoAnalysis.getModel();asdf
+		Model model = fluoAnalysis.getModel();
 		model.setSpots(getCollectionOf(channel), true);
 		return model;
 	}

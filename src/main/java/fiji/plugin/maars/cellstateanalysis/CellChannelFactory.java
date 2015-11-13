@@ -1,24 +1,21 @@
 package fiji.plugin.maars.cellstateanalysis;
 
-import fiji.plugin.trackmate.SpotCollection;
-
 /**
- *@author Tong LI, mail:tongli.bioinfo@gmail.com
- *@version Nov 12, 2015
+ * @author Tong LI, mail:tongli.bioinfo@gmail.com
+ * @version Nov 12, 2015
  */
 public class CellChannelFactory {
 	private String channel;
 	private int maxNbSpot;
 	private double spotRadius;
-	private SpotCollection collection;
-	
-	public CellChannelFactory(String channelName, int maxNbSpot, double spotRadius){
+
+	public CellChannelFactory(String channelName, int maxNbSpot,
+			double spotRadius) {
 		this.channel = channelName;
 		this.maxNbSpot = maxNbSpot;
 		this.spotRadius = spotRadius;
-		this.collection = new SpotCollection();
 	}
-	
+
 	/**
 	 * @return the channel
 	 */
@@ -27,7 +24,8 @@ public class CellChannelFactory {
 	}
 
 	/**
-	 * @param channel the channel to set
+	 * @param channel
+	 *            the channel to set
 	 */
 	public void setChannel(String channel) {
 		this.channel = channel;
@@ -41,24 +39,11 @@ public class CellChannelFactory {
 	}
 
 	/**
-	 * @param maxNbSpot the maxNbSpot to set
+	 * @param maxNbSpot
+	 *            the maxNbSpot to set
 	 */
 	public void setMaxNbSpot(int maxNbSpot) {
 		this.maxNbSpot = maxNbSpot;
-	}
-
-	/**
-	 * @return the collection
-	 */
-	public SpotCollection getCollection() {
-		return collection;
-	}
-
-	/**
-	 * @param collection the collection to set
-	 */
-	public void setCollection(SpotCollection collection) {
-		this.collection = collection;
 	}
 
 	/**
@@ -69,7 +54,8 @@ public class CellChannelFactory {
 	}
 
 	/**
-	 * @param spotRadius the spotRadius to set
+	 * @param spotRadius
+	 *            the spotRadius to set
 	 */
 	public void setSpotRadius(double spotRadius) {
 		this.spotRadius = spotRadius;
