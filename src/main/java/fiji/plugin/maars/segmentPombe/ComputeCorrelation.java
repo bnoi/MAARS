@@ -1,13 +1,11 @@
 package fiji.plugin.maars.segmentPombe;
 
-import java.util.concurrent.Callable;
-
-public class ComputeCorrelation implements Callable<Double>{
+public class ComputeCorrelation {
 	private float[] iz;
 	private float zf;
 	private float sigma;
-	private int sliceNb;
 	private int direction;
+
 	// it is -1 for image with cell boundaries be black then white
 	// it is 1 for image with cell boundaries be white then black
 
@@ -17,11 +15,10 @@ public class ComputeCorrelation implements Callable<Double>{
 	 * CorrelationPixVal(iz, zf, sigma);
 	 */
 
-	public ComputeCorrelation(float[] iz, float zf, float sigma, int direction, int sliceNb) {
+	public ComputeCorrelation(float[] iz, float zf, float sigma, int direction) {
 		this.iz = iz;
 		this.zf = zf;
 		this.sigma = sigma;
-		this.sliceNb = sliceNb;
 		this.direction = direction;
 	}
 
@@ -58,10 +55,5 @@ public class ComputeCorrelation implements Callable<Double>{
 		}
 
 		return sum * h;
-	}
-
-	@Override
-	public Double call() throws Exception {
-		return integrate(0, sliceNb);
 	}
 }

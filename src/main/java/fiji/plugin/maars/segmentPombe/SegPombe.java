@@ -4,12 +4,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -45,7 +45,7 @@ public class SegPombe {
 	private boolean filtrateWithMeanGrayValue;
 
 	// Variables to get results
-	private FloatProcessor correlationImage;
+	private FloatProcessor imgCorrTempProcessor;
 	private ByteProcessor byteImage;
 	private ImagePlus binCorrelationImage;
 	private ImagePlus imgCorrTemp;
@@ -144,41 +144,46 @@ public class SegPombe {
 		System.out.println("creating correlation image");
 		System.out.println("Width : " + String.valueOf(imageToAnalyze.getWidth()) + ", Height : "
 				+ String.valueOf(imageToAnalyze.getHeight()));
-		correlationImage = new FloatProcessor(imageToAnalyze.getWidth(), imageToAnalyze.getHeight());
-		// TODO refacto
-		int processors = Runtime.getRuntime().availableProcessors();
-		ExecutorService executor = Executors.newFixedThreadPool(processors);
-		for (int x = 0; x < imageToAnalyze.getWidth(); x++) {
+		int nbProcessor = Runtime.getRuntime().availableProcessors();
+		System.out.println("analyse with" + nbProcessor + "processor");
+		ImageSplitter splitter = new ImageSplitter(imageToAnalyze, nbProcessor);
+		int xPosition = 0;
+		ImagePlus subImg;
+		ExecutorService executor = Executors.newFixedThreadPool(nbProcessor);
+		Map<Integer, Future<FloatProcessor>> map = new HashMap<Integer, Future<FloatProcessor>>();
+		Future<FloatProcessor> task = null;
+		double[] widths = splitter.getWidths();
+		for (int i = 0; i < nbProcessor; i++) {
+			if (widths[0] == widths[1] || i != nbProcessor - 1) {
+				subImg = splitter.crop(xPosition, (int) widths[0]);
+				task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
+				map.put(xPosition, task);
+				xPosition += widths[0];
+			} else {
+				subImg = splitter.crop(xPosition, (int) widths[1]);
+				task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
+				map.put(xPosition, task);
 
-			double progress = (x + 1) * 100 / imageToAnalyze.getWidth();
-			IJ.showStatus("Computing correlation image : " + progress + "%");
-
-			for (int y = 0; y < imageToAnalyze.getHeight(); y++) {
-				// initiate variable to compute correlation value
-				float zf = zFocus;
-				float[] iz = new float[imageToAnalyze.getNSlices()];
-
-				for (int z = 0; z < imageToAnalyze.getNSlices(); z++) {
-					imageToAnalyze.setZ(z);
-					iz[z] = imageToAnalyze.getPixel(x, y)[0];
-					// the first element returned by the getPixel function is
-					// the grayscale values
-				}
-//			    System.out.println("Queue length " + ((ThreadPoolExecutor) executor).getQueue().size());
-			    Future<Double> task = executor.submit(new ComputeCorrelation(iz, zf, sigma, direction, imageToAnalyze.getNSlices() - 1));
-
-				try {
-					correlationImage.putPixelValue(x, y, task.get());
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 		}
-		executor.shutdownNow();
+		imgCorrTempProcessor = new FloatProcessor(imageToAnalyze.getWidth(), imageToAnalyze.getHeight());
+		try {
+			for (int xPos : map.keySet()) {
+				FloatProcessor processor = map.get(xPos).get();
+				for (int x = 0; x < processor.getWidth(); x++) {
+					for (int y = 0; y < processor.getHeight(); y++) {
+						imgCorrTempProcessor.putPixel(x + xPos, y, processor.get(x, y));
+					}
+				}
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		executor.shutdown();
 	}
 
 	/**
@@ -189,7 +194,7 @@ public class SegPombe {
 
 		System.out.println("Convert correlation image to binary image");
 
-		byteImage = correlationImage.convertToByteProcessor(true);
+		byteImage = imgCorrTempProcessor.convertToByteProcessor(true);
 		byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false, BinaryProcessor.BLACK_AND_WHITE_LUT);
 
 		byteImage.dilate();
@@ -222,8 +227,8 @@ public class SegPombe {
 
 		roiManager = new RoiManager();
 
-		imgCorrTemp = new ImagePlus("Correlation Image of " + imageToAnalyze.getShortTitle(), correlationImage);
-
+		imgCorrTemp = new ImagePlus("Correlation Image of " + imageToAnalyze.getShortTitle(), imgCorrTempProcessor);
+		imgCorrTemp.show();
 		particleAnalyzer = new ParticleAnalyzer(
 				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.SHOW_PROGRESS
 						+ ParticleAnalyzer.ADD_TO_MANAGER,
