@@ -1,24 +1,24 @@
-//base_dir = "D:/Data/Tong/MAARS/";
-base_dir = "/home/tong/Documents/code/MAARS/";
+base_dir = "D:/Data/Tong/MAARS/";
+//base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
-dep_base_dir = "/home/tong/.m2/repository/";
+//dep_base_dir = "/home/tong/.m2/repository/";
 //dep_base_dir = "/Users/tongli/.m2/repository/";
-//dep_base_dir = "C:\\Users\\NIKON\\.m2\\repository\\";
+dep_base_dir = "C:\\Users\\NIKON\\.m2\\repository\\";
 //addClassPath("/Applications/Micro-Manager1.4/jars/TrackMate_-2.8.1-SNAPSHOT.jar");
-addClassPath(dep_base_dir +"net/imglib2/imglib2/2.2.0/imglib2-2.2.0.jar");
-addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm/0.2.0/imglib2-algorithm-0.2.0.jar");
-addClassPath(dep_base_dir +"net/imagej/imagej-common/0.12.2/imagej-common-0.12.2.jar");
-addClassPath(dep_base_dir +"net/imglib2/imglib2-ij/2.0.0-beta-29/imglib2-ij-2.0.0-beta-29.jar");
-addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm-fft/0.1.1/imglib2-algorithm-fft-0.1.1.jar");
-addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm-gpl/0.1.2/imglib2-algorithm-gpl-0.1.2.jar");
-addClassPath(dep_base_dir +"net/sf/opencsv/opencsv/2.0/opencsv-2.0.jar");
-addClassPath(dep_base_dir +"org/scijava/scijava-common/2.38.2/scijava-common-2.38.2.jar");
-addClassPath(dep_base_dir +"net/sf/jgrapht/jgrapht/0.8.3/jgrapht-0.8.3.jar");
-addClassPath(dep_base_dir +"edu/mines/mines-jtk/20100113/mines-jtk-20100113.jar");
-addClassPath(dep_base_dir +"gov/nist/math/jama/1.0.3/jama-1.0.3.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2/2.2.0/imglib2-2.2.0.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm/0.2.0/imglib2-algorithm-0.2.0.jar");
+//addClassPath(dep_base_dir +"net/imagej/imagej-common/0.12.2/imagej-common-0.12.2.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2-ij/2.0.0-beta-29/imglib2-ij-2.0.0-beta-29.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm-fft/0.1.1/imglib2-algorithm-fft-0.1.1.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm-gpl/0.1.2/imglib2-algorithm-gpl-0.1.2.jar");
+//addClassPath(dep_base_dir +"net/sf/opencsv/opencsv/2.0/opencsv-2.0.jar");
+//addClassPath(dep_base_dir +"org/scijava/scijava-common/2.38.2/scijava-common-2.38.2.jar");
+//addClassPath(dep_base_dir +"net/sf/jgrapht/jgrapht/0.8.3/jgrapht-0.8.3.jar");
+//addClassPath(dep_base_dir +"edu/mines/mines-jtk/20100113/mines-jtk-20100113.jar");
+//addClassPath(dep_base_dir +"gov/nist/math/jama/1.0.3/jama-1.0.3.jar");
 
 //reloadClasses();
 
@@ -102,14 +102,14 @@ if(md.isOkClicked()) {
 															mfa.getSetOfCells());
 		int frame = 0;
 
-		while(frame<3){
+		while(frame<49){
 			print("fluo analysing");
 			String channels = param.getUsingChannels();
 			String[] arrayChannels = channels.split(",", -1);
 			for (String channel:arrayChannels) {
 				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
 				fluoImage = IJ.openImage(fluoFolder + "/"
-					+frame+ "_" + channel +"/MMStack_Pos0.ome.tif");
+					+frame+ "_" + channel +"/MMStack.ome.tif");
 				print(channel);
 				mfa.setFluoImage(fluoImage);
 				mfa.createCellChannelFactory(channel);
