@@ -163,15 +163,12 @@ public class MaarsFluoAnalysis {
 			cell.setCellChannelFactory(currentFactory);
 			cell.setCurrentFrame(currentFrame);
 			cell.findFluoSpotTempFunction();
+			
+			//can be optional
 			FileUtils.writeSpotFeatures(parameters.getSavingPath(),
 					cell.getCellNumber(), currentFactory.getChannel(),
 					cell.getModelOf(currentFactory.getChannel()));
-			// for (String[] s : cell.getSpotList()) {
-			// spotStrings.add(s);
-			// }
-			// cells.add(sp.toList(frame * timeInterval / 1000,
-			// Math.round(this.positionX), Math.round(this.positionY)));
-			// cell = null;/media/tong/74CDBC0B2251059E/test/spots
+			 cell = null;
 		}
 		ReportingUtils.logMessage("Spots detection done...");
 		// this.writeAnalysisRes(cells, frame, channel);

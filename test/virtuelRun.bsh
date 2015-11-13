@@ -1,12 +1,12 @@
-base_dir = "D:/Data/Tong/MAARS/";
-//base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "D:/Data/Tong/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
 //base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
 //dep_base_dir = "/home/tong/.m2/repository/";
 //dep_base_dir = "/Users/tongli/.m2/repository/";
-dep_base_dir = "C:\\Users\\NIKON\\.m2\\repository\\";
+//dep_base_dir = "C:\\Users\\NIKON\\.m2\\repository\\";
 //addClassPath("/Applications/Micro-Manager1.4/jars/TrackMate_-2.8.1-SNAPSHOT.jar");
 //addClassPath(dep_base_dir +"net/imglib2/imglib2/2.2.0/imglib2-2.2.0.jar");
 //addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm/0.2.0/imglib2-algorithm-0.2.0.jar");

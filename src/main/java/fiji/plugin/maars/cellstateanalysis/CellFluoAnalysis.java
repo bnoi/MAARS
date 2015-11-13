@@ -44,7 +44,7 @@ public class CellFluoAnalysis {
 	private SpotCollection tmpCollection;
 
 	/**
-	 * Constructor :
+	 * Constructor : prepare parameters for trackmate : model and setting
 	 * 
 	 * @param cell
 	 * @param factory

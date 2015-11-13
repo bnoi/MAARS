@@ -125,7 +125,6 @@ public class Cell {
 	 * Method to find fluorescent spots on cell image and create a Spindle
 	 * object
 	 * 
-	 * @return Spindle object
 	 */
 	public void findFluoSpotTempFunction() {
 		Boolean visibleOnly = true;
@@ -142,13 +141,6 @@ public class Cell {
 		// ReportingUtils.logMessage("Create spindle using spots found");
 		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
 		// fluoImage.getCalibration(), cellShapeRoi);
-		//
-		// ReportingUtils.logMessage("Cell : " + croppedRoi.getName()
-		// + " spots nb : " + spotCollection.getNSpots(true));
-		// ReportingUtils.logMessage("Done.");
-		// ReportingUtils.logMessage("Return spindle");
-		// lastSpindleComputed = spindle;
-		// return spindle;
 	}
 
 	/**

@@ -16,7 +16,12 @@ import ij.IJ;
  * @version Nov 4, 2015
  */
 public class FileUtils {
-
+	/**
+	 * test if the path exists
+	 * 
+	 * @param path
+	 * @return : true or false
+	 */
 	public static boolean isValid(String path) {
 		File f = new File(path);
 		if (f.exists()) {
@@ -26,6 +31,9 @@ public class FileUtils {
 		}
 	}
 
+	/*
+	 * file name searching in depth
+	 */
 	public static ArrayList<File> listFilesForFolder(File folder) {
 		ArrayList<File> list = new ArrayList<File>();
 		for (File fileEntry : folder.listFiles()) {
@@ -38,6 +46,14 @@ public class FileUtils {
 		return list;
 	}
 
+	/**
+	 * write spots into spots folder which is at the same level or acquisitions
+	 * 
+	 * @param path : acquisition root folder
+	 * @param cellNb : current cell number
+	 * @param channel : current channel
+	 * @param model : @Trackmate object @Model which stocks @SpotCollection
+	 */
 	public static void writeSpotFeatures(String path, int cellNb,
 			String channel, Model model) {
 		String spotsFolder = path + "/spots/";
