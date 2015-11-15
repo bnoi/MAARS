@@ -228,7 +228,7 @@ public class SegPombe {
 		roiManager = new RoiManager();
 
 		imgCorrTemp = new ImagePlus("Correlation Image of " + imageToAnalyze.getShortTitle(), imgCorrTempProcessor);
-		imgCorrTemp.show();
+
 		particleAnalyzer = new ParticleAnalyzer(
 				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.SHOW_PROGRESS
 						+ ParticleAnalyzer.ADD_TO_MANAGER,

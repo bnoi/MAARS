@@ -2,7 +2,6 @@ package fiji.plugin.maars.cellstateanalysis;
 
 import java.awt.Rectangle;
 import java.io.File;
-import java.util.Collection;
 
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -24,7 +23,7 @@ import ij.plugin.RoiScaler;
  * Cell is a class containing information about cell image, including its
  * mitotic state, its shape, ...
  * 
- * @author marie
+ * @author Tong LI && marie
  *
  */
 public class Cell {
@@ -137,7 +136,8 @@ public class Cell {
 			ReportingUtils.logMessage("adding spot to channel collection");
 			getCollectionOf(factory.getChannel()).add(s, currentFrame);
 		}
-
+		//
+		getCollectionOf(factory.getChannel());
 		// ReportingUtils.logMessage("Create spindle using spots found");
 		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
 		// fluoImage.getCalibration(), cellShapeRoi);

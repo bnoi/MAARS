@@ -1,23 +1,23 @@
 package fiji.plugin.maars.maarslib;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+//import java.io.FileWriter;
+//import java.io.IOException;
+//import java.util.ArrayList;
+//import java.util.Iterator;
+//import java.util.List;
 
 import org.micromanager.internal.utils.ReportingUtils;
 
-import au.com.bytecode.opencsv.CSVWriter;
+//import au.com.bytecode.opencsv.CSVWriter;
 import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.CellChannelFactory;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
-import fiji.plugin.maars.cellstateanalysis.Spindle;
+//import fiji.plugin.maars.cellstateanalysis.Spindle;
 import fiji.plugin.maars.segmentPombe.SegPombeParameters;
 import fiji.plugin.maars.utils.FileUtils;
 import ij.ImagePlus;
-import ij.gui.Roi;
+//import ij.gui.Roi;
 import ij.plugin.ZProjector;
 
 /**
@@ -187,58 +187,58 @@ public class MaarsFluoAnalysis {
 		// soc.resetCount();
 	}
 
-	public void writeAnalysisRes(List<String[]> cells, int frame, String channel) {
-		FileWriter spindleWriter = null;
-		CSVWriter writer = null;
-
-		try {
-			spindleWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
-					+ channel + "_analysis.csv");
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		writer = new CSVWriter(spindleWriter, '\t',
-				CSVWriter.NO_QUOTE_CHARACTER);
-		writer.writeNext(new String[] { "Cell", "Second", "Feature",
-				"NbOfSpotDetected", "CellCenterX", "CellCenterY",
-				"CellAbsoMajAng", "CellMajLength", "CellMinLength",
-				"SpAbsoAng", "SpAngToMaj", "SpLength", "spb1X", "spb1Y",
-				"spb1Z", "spb2X", "spb2Y", "spb2Z", "SpCenterX", "SpCenterY",
-				"SpCenterZ", "CellCenterToSpCenterLen",
-				"CellCenterToSpCenterAng", "fieldX", "fieldY" });
-		writer.writeAll(cells);
-		try {
-			spindleWriter.close();
-			writer.close();
-		} catch (IOException e) {
-			ReportingUtils.logError(e);
-		}
-	}
-
-	public void writeSpotListForOneCell(List<String[]> spotListForOneCell,
-			int frame, String channel) {
-		FileWriter spotListWriter = null;
-		CSVWriter writer = null;
-		try {
-			spotListWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
-					+ channel + "_spotList.csv");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		writer = new CSVWriter(spotListWriter, '\t',
-				CSVWriter.NO_QUOTE_CHARACTER);
-		writer.writeNext(new String[] { "VISIBILITY", "POSITION_T",
-				"POSITION_Z", "POSITION_Y", "RADIUS", "FRAME", "POSITION_X",
-				"cellNumber" });
-
-		writer.writeAll(spotListForOneCell);
-		try {
-			spotListWriter.close();
-			writer.close();
-		} catch (IOException e) {
-			ReportingUtils.logError(e);
-		}
-	}
+//	public void writeAnalysisRes(List<String[]> cells, int frame, String channel) {
+//		FileWriter spindleWriter = null;
+//		CSVWriter writer = null;
+//
+//		try {
+//			spindleWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
+//					+ channel + "_analysis.csv");
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		writer = new CSVWriter(spindleWriter, '\t',
+//				CSVWriter.NO_QUOTE_CHARACTER);
+//		writer.writeNext(new String[] { "Cell", "Second", "Feature",
+//				"NbOfSpotDetected", "CellCenterX", "CellCenterY",
+//				"CellAbsoMajAng", "CellMajLength", "CellMinLength",
+//				"SpAbsoAng", "SpAngToMaj", "SpLength", "spb1X", "spb1Y",
+//				"spb1Z", "spb2X", "spb2Y", "spb2Z", "SpCenterX", "SpCenterY",
+//				"SpCenterZ", "CellCenterToSpCenterLen",
+//				"CellCenterToSpCenterAng", "fieldX", "fieldY" });
+//		writer.writeAll(cells);
+//		try {
+//			spindleWriter.close();
+//			writer.close();
+//		} catch (IOException e) {
+//			ReportingUtils.logError(e);
+//		}
+//	}
+//
+//	public void writeSpotListForOneCell(List<String[]> spotListForOneCell,
+//			int frame, String channel) {
+//		FileWriter spotListWriter = null;
+//		CSVWriter writer = null;
+//		try {
+//			spotListWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
+//					+ channel + "_spotList.csv");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		writer = new CSVWriter(spotListWriter, '\t',
+//				CSVWriter.NO_QUOTE_CHARACTER);
+//		writer.writeNext(new String[] { "VISIBILITY", "POSITION_T",
+//				"POSITION_Z", "POSITION_Y", "RADIUS", "FRAME", "POSITION_X",
+//				"cellNumber" });
+//
+//		writer.writeAll(spotListForOneCell);
+//		try {
+//			spotListWriter.close();
+//			writer.close();
+//		} catch (IOException e) {
+//			ReportingUtils.logError(e);
+//		}
+//	}
 }
