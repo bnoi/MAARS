@@ -155,6 +155,7 @@ public class SegPombe {
 		double[] widths = splitter.getWidths();
 		for (int i = 0; i < nbProcessor; i++) {
 			if (widths[0] == widths[1] || i != nbProcessor - 1) {
+				IJ.showStatus("Computing correlation image");
 				subImg = splitter.crop(xPosition, (int) widths[0]);
 				task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
 				map.put(xPosition, task);
@@ -171,6 +172,7 @@ public class SegPombe {
 			for (int xPos : map.keySet()) {
 				FloatProcessor processor = map.get(xPos).get();
 				for (int x = 0; x < processor.getWidth(); x++) {
+					IJ.showStatus("Computing correlation image");
 					for (int y = 0; y < processor.getHeight(); y++) {
 						imgCorrTempProcessor.putPixel(x + xPos, y, processor.get(x, y));
 					}
