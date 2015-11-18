@@ -23,8 +23,6 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_DO_SUBPIXEL_LOCAL
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_RADIUS;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_THRESHOLD;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_MEDIAN_FILTERING;
-import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_DO_SUBPIXEL_LOCALIZATION;
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import fiji.plugin.trackmate.TrackMate;
 import ij.ImagePlus;
@@ -73,14 +71,12 @@ public class CellFluoAnalysis {
 
 		settings.detectorFactory = new LogDetectorFactory<FloatType>();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
-		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION,
-				DEFAULT_DO_SUBPIXEL_LOCALIZATION);
+		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
 		detectorSettings.put(KEY_RADIUS, factory.getSpotRadius());
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
 		// TODO to figure out what value to use, 2 seems ok for now.
 		detectorSettings.put(KEY_THRESHOLD, (double) 2);
-		detectorSettings.put(KEY_DO_MEDIAN_FILTERING,
-				DEFAULT_DO_MEDIAN_FILTERING);
+		detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
 		settings.detectorSettings = detectorSettings;
 
 	}

@@ -16,7 +16,7 @@ import mmcorej.CMMCore;
 /**
  * Acquisition calibrated for image segmentation using package CellsBoundaries_
  *
- * @author marie
+ * @author Tong & marie
  *
  */
 

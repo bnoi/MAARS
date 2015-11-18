@@ -150,20 +150,20 @@ public class MaarsAcquisitionForFluoAnalysis {
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 
 		ReportingUtils.logMessage("... Set shutter device");
-//		try {
-//			mmc.setShutterDevice(shutter);
-//		} catch (Exception e1) {
-//			ReportingUtils.logMessage("Could not set shutter device");
-//			e1.printStackTrace();
-//		}
-//
-//		ReportingUtils.logMessage("... Set exposure");
-//		try {
-//			mmc.setExposure(exposure);
-//		} catch (Exception e1) {
-//			ReportingUtils.logMessage("could not set exposure");
-//			e1.printStackTrace();
-//		}
+		try {
+			mmc.setShutterDevice(shutter);
+		} catch (Exception e1) {
+			ReportingUtils.logMessage("Could not set shutter device");
+			e1.printStackTrace();
+		}
+		
+		ReportingUtils.logMessage("... Set exposure");
+		try {
+			mmc.setExposure(exposure);
+		} catch (Exception e1) {
+			ReportingUtils.logMessage("could not set exposure");
+			e1.printStackTrace();
+		}
 
 		ReportingUtils.logMessage("... set config");
 		try {
@@ -248,11 +248,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 				e.printStackTrace();
 			}
 			mm.getSnapLiveManager().snap(false).remove(0);
-			ReportingUtils.logMessage("# of images : "
-					+ String.valueOf(fluoDS.getNumImages()));
-			ReportingUtils.logMessage("Max index : "
-					+ String.valueOf(fluoDS.getMaxIndices()));
-
 			Image img = fluoDS.getImage(fluoDS.getMaxIndices());
 			ReportingUtils.logMessage("Convert image to ij.ImageProcessor");
 			ImageProcessor imgProcessor = mm.getDataManager().ij()
@@ -262,7 +257,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 			ReportingUtils.logMessage("Put pixels in new ImagePlus");
 			shortProcessor.setPixels(imgProcessor.getPixels());
 			ReportingUtils
-					.logMessage("Add ImagePlus into a duplicate of DataStore");
+					.logMessage("Add slice into a duplicate of DataStore");
 			imageStack.addSlice(shortProcessor);
 			z = z + step;
 		}
