@@ -20,7 +20,6 @@ addClassPath(base_dir + "target/MAARS_-1.0.jar");
 //addClassPath(dep_base_dir +"edu/mines/mines-jtk/20100113/mines-jtk-20100113.jar");
 //addClassPath(dep_base_dir +"gov/nist/math/jama/1.0.3/jama-1.0.3.jar");
 
-import au.com.bytecode.opencsv.CSVWriter;
 import java.util.List;
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
@@ -32,8 +31,6 @@ import mmcorej.*;
 import org.micromanager.api.*;
 import ij.*;
 import java.io.IOException;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import java.util.HashMap;
 
 double calibration = mm.core().getPixelSizeUm();
