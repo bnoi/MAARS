@@ -1,23 +1,15 @@
 package fiji.plugin.maars.maarslib;
 
-import java.io.File;
-//import java.io.FileWriter;
-//import java.io.IOException;
-//import java.util.ArrayList;
-//import java.util.Iterator;
-//import java.util.List;
-
 import org.micromanager.internal.utils.ReportingUtils;
 
-//import au.com.bytecode.opencsv.CSVWriter;
 import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.CellChannelFactory;
 import fiji.plugin.maars.cellstateanalysis.SetOfCells;
-//import fiji.plugin.maars.cellstateanalysis.Spindle;
+
 import fiji.plugin.maars.segmentPombe.SegPombeParameters;
 import fiji.plugin.maars.utils.FileUtils;
 import ij.ImagePlus;
-//import ij.gui.Roi;
+
 import ij.plugin.ZProjector;
 
 /**
@@ -38,7 +30,7 @@ public class MaarsFluoAnalysis {
 	private int currentFrame;
 
 	/**
-	 * Constructor 1:
+	 * Constructor
 	 * 
 	 * @param parameters
 	 *            : parameters used for algorithm
@@ -52,42 +44,9 @@ public class MaarsFluoAnalysis {
 		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath()
 				+ "/movie_X" + Math.round(this.positionX) + "_Y"
 				+ Math.round(this.positionY) + "_FLUO");
-		File fluoDir = new File(pathToFluoDir);
-		if (!fluoDir.exists()) {
-			fluoDir.mkdirs();
-		}
+		FileUtils.createFolder(pathToFluoDir);
+		soc = new SetOfCells(segParam);
 
-		soc = new SetOfCells(
-				segParam.getImageToAnalyze(),
-				(int) Math.round(segParam.getImageToAnalyze().getNSlices() / 2),
-				segParam.getSavingPath()
-						+ segParam.getImageToAnalyze().getShortTitle()
-						+ "_ROI.zip", segParam.getSavingPath());
-
-	}
-
-	/**
-	 * Constructor 2:
-	 * 
-	 * @param parameters
-	 *            : parameters used for algorithm
-	 * @param soc
-	 *            : SetOfCells found by segmentation
-	 */
-	public MaarsFluoAnalysis(MaarsParameters parameters, SetOfCells soc,
-			double positionX, double positionY) {
-
-		this.parameters = parameters;
-		this.positionX = positionX;
-		this.positionY = positionY;
-		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath()
-				+ "/movie_X" + Math.round(this.positionX) + "_Y"
-				+ Math.round(this.positionY) + "_FLUO");
-		File fluoDir = new File(pathToFluoDir);
-		if (!fluoDir.exists()) {
-			fluoDir.mkdirs();
-		}
-		this.soc = soc;
 	}
 
 	/**
@@ -146,7 +105,6 @@ public class MaarsFluoAnalysis {
 			cell.cropFluoImage();
 			cell.addCroppedFluoSlice();
 		}
-		// soc.resetCount();
 	}
 
 	/**
@@ -163,12 +121,11 @@ public class MaarsFluoAnalysis {
 			cell.setCellChannelFactory(currentFactory);
 			cell.setCurrentFrame(currentFrame);
 			cell.findFluoSpotTempFunction();
-			
-			//can be optional
+
+			// can be optional
 			FileUtils.writeSpotFeatures(parameters.getSavingPath(),
 					cell.getCellNumber(), currentFactory.getChannel(),
 					cell.getModelOf(currentFactory.getChannel()));
-			 cell = null;
 		}
 		ReportingUtils.logMessage("Spots detection done...");
 		// this.writeAnalysisRes(cells, frame, channel);
@@ -184,61 +141,5 @@ public class MaarsFluoAnalysis {
 		for (Cell cell : soc) {
 			cell.saveCroppedImage(pathToFluoDir);
 		}
-		// soc.resetCount();
 	}
-
-//	public void writeAnalysisRes(List<String[]> cells, int frame, String channel) {
-//		FileWriter spindleWriter = null;
-//		CSVWriter writer = null;
-//
-//		try {
-//			spindleWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
-//					+ channel + "_analysis.csv");
-//		} catch (IOException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//		writer = new CSVWriter(spindleWriter, '\t',
-//				CSVWriter.NO_QUOTE_CHARACTER);
-//		writer.writeNext(new String[] { "Cell", "Second", "Feature",
-//				"NbOfSpotDetected", "CellCenterX", "CellCenterY",
-//				"CellAbsoMajAng", "CellMajLength", "CellMinLength",
-//				"SpAbsoAng", "SpAngToMaj", "SpLength", "spb1X", "spb1Y",
-//				"spb1Z", "spb2X", "spb2Y", "spb2Z", "SpCenterX", "SpCenterY",
-//				"SpCenterZ", "CellCenterToSpCenterLen",
-//				"CellCenterToSpCenterAng", "fieldX", "fieldY" });
-//		writer.writeAll(cells);
-//		try {
-//			spindleWriter.close();
-//			writer.close();
-//		} catch (IOException e) {
-//			ReportingUtils.logError(e);
-//		}
-//	}
-//
-//	public void writeSpotListForOneCell(List<String[]> spotListForOneCell,
-//			int frame, String channel) {
-//		FileWriter spotListWriter = null;
-//		CSVWriter writer = null;
-//		try {
-//			spotListWriter = new FileWriter(pathToFluoDir + "/" + frame + "_"
-//					+ channel + "_spotList.csv");
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		writer = new CSVWriter(spotListWriter, '\t',
-//				CSVWriter.NO_QUOTE_CHARACTER);
-//		writer.writeNext(new String[] { "VISIBILITY", "POSITION_T",
-//				"POSITION_Z", "POSITION_Y", "RADIUS", "FRAME", "POSITION_X",
-//				"cellNumber" });
-//
-//		writer.writeAll(spotListForOneCell);
-//		try {
-//			spotListWriter.close();
-//			writer.close();
-//		} catch (IOException e) {
-//			ReportingUtils.logError(e);
-//		}
-//	}
 }

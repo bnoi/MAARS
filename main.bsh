@@ -25,6 +25,7 @@ import java.util.List;
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
 import fiji.plugin.maars.maarslib.MaarsParameters;
+import fiji.plugin.maars.maarslib.FluoAnalyzer;
 import fiji.plugin.maars.maarslib.ExplorationXYPositions;
 import fiji.plugin.maars.utils.FileUtils;
 import mmcorej.*;
@@ -115,12 +116,7 @@ if(md.isOkClicked()) {
 							String[] arrayChannels = channels.split(",", -1);
 							for (String channel:arrayChannels) {
 								ImagePlus fluoImage = mafa.acquire(true, frame, channel);
-								mfa.setFluoImage(fluoImage);
-								mfa.createCellChannelFactory(channel);
-								mfa.setCurrentFrame(frame);
-								mfa.zProject();
-								mfa.cropAllCells();
-								mfa.analyzeEachCell();
+								new FluoAnalyzer(mfa, fluoImage, channel, frame).start();
 							}
 							mfa.getSetOfCells().closeRoiManager();
 							frame++;
@@ -136,12 +132,7 @@ if(md.isOkClicked()) {
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel:arrayChannels) {
 						ImagePlus fluoImage = mafa.acquire(true, frame, channel);
-						mfa.setFluoImage(fluoImage);
-						mfa.createCellChannelFactory(channel);
-						mfa.setCurrentFrame(frame);
-						mfa.zProject();
-						mfa.cropAllCells();
-						mfa.analyzeEachCell();
+						new FluoAnalyzer(mfa, fluoImage, channel, frame).start();
 					}
 					mfa.getSetOfCells().closeRoiManager();
 					acqNameFluo = null;

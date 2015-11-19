@@ -103,21 +103,12 @@ public class Cell {
 	 */
 	public Cell(ImagePlus bfImage, int focusSlice, Roi roiCellShape,
 			int cellNb, ResultsTable rt) {
-
-		ReportingUtils.logMessage("Cell " + roiCellShape.getName());
-		ReportingUtils.logMessage("Get parameters");
 		this.bfImage = bfImage;
 		this.cellShapeRoi = roiCellShape;
-		ReportingUtils.logMessage("Done");
-		ReportingUtils.logMessage("Reset result table");
 		rt.reset();
-		ReportingUtils.logMessage("Done.");
-
 		lastSpindleComputed = null;
 		this.cellNumber = cellNb;
-		ReportingUtils.logMessage("Create Measure object");
 		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
-		ReportingUtils.logMessage("done");
 	}
 
 	/**
@@ -132,12 +123,13 @@ public class Cell {
 		fluoAnalysis.doDetection();
 		fluoAnalysis.filterOnlyInCell(visibleOnly);
 		fluoAnalysis.findBestNSpotInCell(visibleOnly);
+		
+		SpotCollection currentCollection = getCollectionOf(factory.getChannel());
 		for (Spot s : fluoAnalysis.getModel().getSpots().iterable(visibleOnly)) {
-			ReportingUtils.logMessage("adding spot to channel collection");
-			getCollectionOf(factory.getChannel()).add(s, currentFrame);
+			currentCollection.add(s, currentFrame);
 		}
 		//
-		getCollectionOf(factory.getChannel());
+//		currentCollection.
 		// ReportingUtils.logMessage("Create spindle using spots found");
 		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
 		// fluoImage.getCalibration(), cellShapeRoi);

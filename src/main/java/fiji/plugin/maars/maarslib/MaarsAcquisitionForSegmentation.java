@@ -4,11 +4,13 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.apache.batik.css.engine.value.css2.DisplayManager;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.SummaryMetadata;
 import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
+import org.micromanager.display.DisplaySettings;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import mmcorej.CMMCore;
@@ -137,7 +139,6 @@ public class MaarsAcquisitionForSegmentation {
 		summaryMD = summaryMD.channelNames(channels);
 		summaryMD = summaryMD.name(acqName);
 		SummaryMetadata newSegMD = summaryMD.build();
-
 		try {
 			segDS.setSummaryMetadata(newSegMD);
 		} catch (DatastoreFrozenException e2) {
@@ -203,7 +204,6 @@ public class MaarsAcquisitionForSegmentation {
 					.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
-
 	}
 
 	/**

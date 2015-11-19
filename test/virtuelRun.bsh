@@ -26,6 +26,7 @@ import fiji.plugin.maars.utils.FileUtils;
 import fiji.plugin.maars.maarslib.*;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
 import fiji.plugin.maars.maarslib.MaarsParameters;
+import fiji.plugin.maars.maarslib.FluoAnalyzer;
 import fiji.plugin.maars.maarslib.ExplorationXYPositions;
 import mmcorej.CMMCore;
 import org.micromanager.*;
@@ -85,48 +86,33 @@ if(md.isOkClicked()) {
 		ms.segmentation();
 		print("Roi detected");
 		if (ms.roiDetected()){
-			String fluoFolder = FileUtils.convertPath(param
-													.getSavingPath()
-													+ "/movie_X"
-													+ Math.round(xPos)
-													+ "_Y"
-													+ Math.round(yPos) +"_FLUO");
 			MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegPombeParam(), xPos, yPos);
 			MaarsAcquisitionForFluoAnalysis mafa = new MaarsAcquisitionForFluoAnalysis(md,
 															xPos,
 															yPos,
 															mfa.getSetOfCells());
-		int frame = 0;
-
-		while(frame<2){
-			print("fluo analysing");
-			String channels = param.getUsingChannels();
-			String[] arrayChannels = channels.split(",", -1);
-			for (String channel:arrayChannels) {
-				String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
-				fluoImage = IJ.openImage(fluoFolder + "/"
-					+frame+ "_" + channel +"/MMStack.ome.tif");
-				print(channel);
-				mfa.setFluoImage(fluoImage);
-				mfa.createCellChannelFactory(channel);
-				mfa.setCurrentFrame(frame);
-				mfa.zProject();
-				mfa.cropAllCells();
-				mfa.analyzeEachCell();
-
+			int frame = 0;
+			while(frame<2){
+				print("fluo analysing field : " + frame);
+				String channels = param.getUsingChannels();
+				String[] arrayChannels = channels.split(",", -1);
+				for (String channel:arrayChannels) {
+					String acqNameFluo = acqNameFluo + "/" + frame + "_" + channel;
+					fluoImage = IJ.openImage(fluoFolder + "/"
+						+frame+ "_" + channel +"/MMStack.ome.tif");
+					new FluoAnalyzer(mfa, fluoImage, channel, frame).start();
+				}
+				// close roi manager
+				mfa.getSetOfCells().closeRoiManager();
+				frame++;
+				acqNameFluo = null;
+				fluoImage = null;
 			}
-			// close roi manager
-			mfa.getSetOfCells().closeRoiManager();
-			frame++;
-			acqNameFluo = null;
-			fluoImage = null;
-		}
-		if (Boolean.parseBoolean(
-			param.getFluoParameter(
-				MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
-				mfa.saveCroppedImgs();
-			}
-		ms = null;
+			if (Boolean.parseBoolean(
+				param.getFluoParameter(
+					MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
+					mfa.saveCroppedImgs();
+				}
 		}
 		print("end "+System.currentTimeMillis());
 		print("it took "+(System.currentTimeMillis()-start));

@@ -31,8 +31,11 @@ public class FileUtils {
 		}
 	}
 
-	/*
+	/**
 	 * file name searching in depth
+	 * 
+	 * @param folder
+	 * @return
 	 */
 	public static ArrayList<File> listFilesForFolder(File folder) {
 		ArrayList<File> list = new ArrayList<File>();
@@ -92,5 +95,16 @@ public class FileUtils {
 			path = path.replace("/", "\\\\");
 		}
 		return path;
+	}
+	
+	/**
+	 * if current path do not exists, create a new one
+	 * @param pathToFluoDir
+	 */
+	public static void createFolder(String pathToFluoDir){
+		File fluoDir = new File(pathToFluoDir);
+		if (!fluoDir.exists()) {
+			fluoDir.mkdirs();
+		}
 	}
 }

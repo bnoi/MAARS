@@ -108,7 +108,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 
 		ReportingUtils.logMessage("Close all previous acquisitions");
 		mm.getDataManager().clearPipeline();
-		mm.getScriptController().clearMessageWindow();
 		ReportingUtils.logMessage("... Initialize parameters :");
 
 		String channelGroup = parameters.getChannelGroup();
