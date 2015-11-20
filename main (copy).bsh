@@ -35,11 +35,12 @@ import java.util.HashMap;
 
 mmc.setAutoShutter(false);
 
+//read parameters
+MaarsParameters parameters = new MaarsParameters(base_dir + "maars_config.xml");
+
+
 print("Create main window");
-MaarsMainDialog md = null;
-
-md = new MaarsMainDialog(mm, mmc, base_dir + "maars_config.xml");
-
+MaarsMainDialog md = new MaarsMainDialog(mm, mmc, parameters);
 print("Show main window");
 md.show();
 
@@ -50,7 +51,6 @@ while(!md.isOkClicked()) {
 if(md.isOkClicked()) {
 	start = System.currentTimeMillis();
 	print("start "+start);
-	MaarsParameters parameters = md.getParameters();
 	
 	autofocus = mm.getAutofocus();
 	

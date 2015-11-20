@@ -74,7 +74,7 @@ public class MaarsMainDialog implements ActionListener {
 	 *            the system (in JSON format)
 	 * @throws IOException
 	 */
-	public MaarsMainDialog(MMStudio mm, CMMCore mmc, String pathConfigFile) {
+	public MaarsMainDialog(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 
 		// ------------initialization of parameters---------------//
 		try {
@@ -111,8 +111,6 @@ public class MaarsMainDialog implements ActionListener {
 		// Read config file
 
 		ReportingUtils.logMessage("create parameter object ...");
-
-		parameters = new MaarsParameters(pathConfigFile);
 
 		ReportingUtils.logMessage("Done.");
 
@@ -370,7 +368,6 @@ public class MaarsMainDialog implements ActionListener {
 		try {
 			parameters.save();
 		} catch (IOException e) {
-			e.printStackTrace();
 			IJ.error("Could not save parameters");
 		}
 	}
@@ -400,6 +397,9 @@ public class MaarsMainDialog implements ActionListener {
 		if (e.getSource() == autofocusButton) {
 			getMM().showAutofocusDialog();
 		} else if (e.getSource() == okMainDialogButton) {
+			if ((Double) widthTf.getValue() * (Double) heightTf.getValue() == 0) {
+				IJ.error("Session aborted, 0 field to analyse");
+			}
 			if (!savePathTf.getText().equals(parameters.getSavingPath())) {
 				parameters.setSavingPath(savePathTf.getText());
 			}

@@ -1,0 +1,38 @@
+//base_dir = "D:/Data/Tong/MAARS/";
+base_dir = "/home/tong/Documents/code/MAARS/";
+//base_dir = "/home/hadim/Documents/phd/dev/MAARS/";
+//base_dir = "/Volumes/Macintosh/Documents/MAARS/";
+
+addClassPath(base_dir + "target/MAARS_-1.0.jar");
+
+//dep_base_dir = "/home/tong/.m2/repository/";
+//dep_base_dir = "/Users/tongli/.m2/repository/";
+//addClassPath(dep_base_dir +"sc/fiji/TrackMate_/2.7.2/TrackMate_-2.7.2.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2/2.2.0/imglib2-2.2.0.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm/0.2.0/imglib2-algorithm-0.2.0.jar");
+//addClassPath(dep_base_dir +"net/imagej/imagej-common/0.12.2/imagej-common-0.12.2.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2-ij/2.0.0-beta-29/imglib2-ij-2.0.0-beta-29.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm-fft/0.1.1/imglib2-algorithm-fft-0.1.1.jar");
+//addClassPath(dep_base_dir +"net/imglib2/imglib2-algorithm-gpl/0.1.2/imglib2-algorithm-gpl-0.1.2.jar");
+//addClassPath(dep_base_dir +"net/sf/opencsv/opencsv/2.0/opencsv-2.0.jar");
+//addClassPath(dep_base_dir +"org/scijava/scijava-common/2.38.2/scijava-common-2.38.2.jar");
+//addClassPath(dep_base_dir +"net/sf/jgrapht/jgrapht/0.8.3/jgrapht-0.8.3.jar");
+//addClassPath(dep_base_dir +"edu/mines/mines-jtk/20100113/mines-jtk-20100113.jar");
+//addClassPath(dep_base_dir +"gov/nist/math/jama/1.0.3/jama-1.0.3.jar");
+
+import fiji.plugin.maars.maarslib.*;
+import fiji.plugin.maars.maarslib.MaarsMainDialog;
+import fiji.plugin.maars.maarslib.MaarsParameters;
+
+//read parameters
+MaarsParameters parameters = new MaarsParameters(base_dir + "maars_config.xml");
+
+print("Create main window");
+new MAARS(mm, mmc, parameters);
+print("Show main window");
+md.show();
+
+while(!md.isOkClicked()) {
+	Thread.sleep(1000);
+}
+

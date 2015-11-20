@@ -43,6 +43,7 @@ public class FluoAcquisition extends SuperClassAcquisition {
 	public FluoAcquisition(MMStudio mm, CMMCore mmc,
 			MaarsParameters parameters, double positionX, double positionY, int frame, String channel) {
 		super(mm, mmc, parameters, positionX, positionY, frame, channel);
+		mm.
 	}
 
 	public void acquire() {

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
+import org.micromanager.data.Image;
 import org.micromanager.data.SummaryMetadata;
 import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
 import org.micromanager.display.DisplaySettings.DisplaySettingsBuilder;
@@ -22,18 +23,16 @@ import ij.IJ;
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
  * @version Nov 19, 2015
  */
+
 public class SuperClassAcquisition {
 
 	private MMStudio mm;
 	private CMMCore mmc;
-	private String channelName;
+	private MaarsParameters parameters;
 	private String channelGroup;
-	private String shutterLable;
-	private int exposure;
-	private String acqName;
-	private String pathToMovie;
-
-	private Color chColor;
+	private String rootDirName;
+	private double positionX;
+	private double positionY;
 
 	/**
 	 * Constructor :
@@ -49,24 +48,16 @@ public class SuperClassAcquisition {
 	 * @param positionY
 	 *            : y field position (can be defined by ExplorationXYPositions)
 	 */
-	public SuperClassAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, double positionX,
-			double positionY, int frame, String channelName) {
+
+	public SuperClassAcquisition(MMStudio mm, CMMCore mmc,
+			MaarsParameters parameters, double positionX, double positionY) {
 		this.mm = mm;
 		this.mmc = mmc;
+		this.parameters = parameters;
+		this.positionX = positionX;
+		this.positionY = positionY;
 		this.channelGroup = parameters.getChannelGroup();
-		this.channelName = channelName;
-		this.shutterLable = parameters.getChShutter(channelName);
-		this.range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
-		this.step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
-		this.sliceNumber = (int) Math.round(range / step);
-		this.exposure = Integer.parseInt(parameters.getChExposure(channelName));
-		this.acqName = "movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY) + "_FLUO/" + frame + "_"
-				+ channelName;
-		String rootDirName = parameters.getSavingPath();
-		pathToMovie = rootDirName + "/" + acqName;
-
-		this.chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
-		IJ.im
+		this.rootDirName = parameters.getSavingPath();
 	}
 
 	/**
@@ -86,9 +77,9 @@ public class SuperClassAcquisition {
 	/**
 	 * Set shutter used for current acquisition
 	 * 
-	 * @param shutter
+	 * @param shutterLable
 	 */
-	public void setShutter() {
+	public void setShutter(String shutterLable) {
 		ReportingUtils.logMessage("... Set shutter");
 		try {
 			mmc.setShutterDevice(shutterLable);
@@ -101,14 +92,15 @@ public class SuperClassAcquisition {
 	/**
 	 * set channel exposure while acquisition
 	 * 
+	 * @param exposure
 	 */
-	public void setChExposure() {
+	public void setChExposure(double exposure) {
 		ReportingUtils.logMessage("... Set exposure");
 		try {
 			mmc.setExposure(exposure);
-		} catch (Exception e1) {
-			ReportingUtils.logMessage("could not set exposure");
-			e1.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -118,13 +110,14 @@ public class SuperClassAcquisition {
 	 * @param pathToMovie
 	 * @return
 	 */
-	public Datastore createDataStore() {
+	public Datastore createDataStore(String pathToMovie) {
 		ReportingUtils.logMessage("... Initialize a Datastore");
 		Datastore ds = null;
 		try {
 			// 1st false = do not generate separate metadata
 			// 2nd false = do not split positions
-			ds = mm.getDataManager().createMultipageTIFFDatastore(pathToMovie, false, false);
+			ds = mm.getDataManager().createMultipageTIFFDatastore(pathToMovie,
+					false, false);
 		} catch (IOException e3) {
 			ReportingUtils.logMessage("... Can not initialize Datastore");
 			e3.printStackTrace();
@@ -135,7 +128,8 @@ public class SuperClassAcquisition {
 	/**
 	 * Set DataStore metadata by using parameters in class
 	 */
-	public Datastore setDatastoreMetadata(Datastore ds) {
+	public Datastore setDatastoreMetadata(Datastore ds, String channelName,
+			String acqName, double step) {
 		ReportingUtils.logMessage("... Update summaryMetadata");
 		SummaryMetadataBuilder summaryMD = ds.getSummaryMetadata().copy();
 		summaryMD = summaryMD.channelGroup(channelGroup);
@@ -159,13 +153,107 @@ public class SuperClassAcquisition {
 	 * 
 	 * @param ds
 	 */
-	public void setDisplay(Datastore ds) {
+	public void setDisplay(Color chColor) {
 		Color[] chColors = new Color[1];
 		chColors[0] = chColor;
-		DisplaySettingsBuilder displayBuilder = mm.getDisplayManager().getStandardDisplaySettings().copy();
+		DisplaySettingsBuilder displayBuilder = mm.getDisplayManager()
+				.getStandardDisplaySettings().copy();
 		displayBuilder.shouldAutostretch(true);
 		displayBuilder.channelColors(chColors);
-		List<DisplayWindow> setting = mm.getDisplayManager().getDisplays(ds);
-		setting.get(0).setDisplaySettings(displayBuilder.build());
+		DisplayWindow liveWindow = mm.live().getDisplay();
+		liveWindow.setDisplaySettings(displayBuilder.build());
 	};
+
+	/**
+	 * Do acquisition
+	 */
+	public void acquire(int frame, String channelName) {
+		String acqName = null;
+		if (channelName != parameters
+				.getSegmentationParameter(MaarsParameters.CHANNEL)) {
+			acqName = "movie_X" + Math.round(positionX) + "_Y"
+					+ Math.round(positionY) + "_FLUO/" + frame + "_"
+					+ channelName;
+		} else {
+			acqName = "movie_X" + Math.round(positionX) + "_Y"
+					+ Math.round(positionY);
+		}
+
+		String shutterLable = parameters.getChShutter(channelName);
+		double range = Double.parseDouble(parameters
+				.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+		double step = Double.parseDouble(parameters
+				.getFluoParameter(MaarsParameters.STEP));
+		int sliceNumber = (int) Math.round(range / step);
+		int exposure = Integer.parseInt(parameters.getChExposure(channelName));
+		String pathToMovie = rootDirName + "/" + acqName;
+		Color chColor = MaarsParameters.getColor(parameters
+				.getChColor(channelName));
+
+		cleanUp();
+		setShutter(shutterLable);
+		setChExposure(exposure);
+		Datastore ds = createDataStore(pathToMovie);
+		setDatastoreMetadata(ds, channelName, acqName, step);
+		setDisplay(chColor);
+
+		try {
+			mmc.setShutterOpen(true);
+			mmc.waitForSystem();
+		} catch (Exception e) {
+			ReportingUtils.logMessage("Can not open shutter");
+			e.printStackTrace();
+		}
+		double zFocus = 0;
+		try {
+			zFocus = mmc.getPosition(mmc.getFocusDevice());
+		} catch (Exception e) {
+			ReportingUtils.logMessage("could not get z current position");
+			e.printStackTrace();
+		}
+		ReportingUtils.logMessage("-> z focus is " + zFocus);
+		ReportingUtils.logMessage("... start acquisition");
+		/*
+		 * important to add 2 µm. Depends on different microscopes. in our case,
+		 * the z-focus position is not in the middle of z range. It is often
+		 * lower than the real medium plan. So we add 2. This parameter needs to
+		 * be defined by testing on your own microscope.
+		 */
+		double z = zFocus - (range / 2) + 2;
+		for (int k = 0; k <= sliceNumber; k++) {
+			ReportingUtils.logMessage("- set focus device at position " + z);
+			try {
+				mmc.setPosition(mmc.getFocusDevice(), z);
+				// mmc.waitForDevice(mmc.getFocusDevice());
+			} catch (Exception e) {
+				ReportingUtils
+						.logMessage("could not set focus device at position");
+			}
+			mm.live().snap(true);
+			z = z + step;
+		}
+		ReportingUtils.logMessage("--- Acquisition done.");
+		for (Image img : mm.live().snap(false)) {
+			try {
+				ds.putImage(img);
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DatastoreFrozenException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		ds.freeze();
+		ds.close();
+		mm.getDisplayManager().closeAllDisplayWindows(false);
+		try {
+			mmc.setPosition(mmc.getFocusDevice(), zFocus);
+			mmc.setShutterOpen(false);
+		} catch (Exception e) {
+			ReportingUtils
+					.logMessage("could not set focus device back to position and close shutter");
+			e.printStackTrace();
+		}
+	}
 }
