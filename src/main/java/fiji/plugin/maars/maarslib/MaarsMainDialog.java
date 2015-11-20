@@ -2,12 +2,9 @@ package fiji.plugin.maars.maarslib;
 
 import java.awt.Button;
 import java.awt.Color;
-
 import java.awt.Dimension;
-
 import java.awt.GridLayout;
 import java.awt.Label;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -29,6 +26,8 @@ import javax.swing.SwingConstants;
 
 import mmcorej.CMMCore;
 
+import org.micromanager.MMPlugin;
+import org.micromanager.Studio;
 import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
@@ -41,7 +40,7 @@ import org.micromanager.internal.utils.ReportingUtils;
  * @author Tong LI
  *
  */
-public class MaarsMainDialog implements ActionListener {
+public class MaarsMainDialog implements MMPlugin,ActionListener {
 
 	private JFrame mainDialog;
 	private final Label numFieldLabel;
@@ -422,5 +421,35 @@ public class MaarsMainDialog implements ActionListener {
 			setAnalysisStrategy();
 			fluoAcqDurationTf.setEditable(false);
 		}
+	}
+
+	@Override
+	public String getCopyright() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getHelpText() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getVersion() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setContext(Studio arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }
