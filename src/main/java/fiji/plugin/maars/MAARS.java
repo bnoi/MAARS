@@ -1,8 +1,14 @@
+package fiji.plugin.maars;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 import mmcorej.CMMCore;
 
+import org.micromanager.MenuPlugin;
+import org.micromanager.Studio;
 import org.micromanager.internal.MMStudio;
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
 
 import fiji.plugin.maars.maarslib.MaarsAcquisitionForSegmentation;
 import fiji.plugin.maars.maarslib.MaarsMainDialog;
@@ -13,10 +19,12 @@ import fiji.plugin.maars.maarslib.MaarsSegmentation;
  *@author Tong LI, mail:tongli.bioinfo@gmail.com
  *@version Nov 20, 2015
  */
-public class MAARS {
-	
+@Plugin(type = MenuPlugin.class)
+public class MAARS implements MenuPlugin,SciJavaPlugin{
+	private MMStudio mmStudio;
+	private CMMCore mmc;
+	private MaarsParameters parameters;
 	public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters){
-		new MaarsMainDialog(mm, mmc, parameters).show();
 //		autofocus = mm.getAutofocus();
 //
 //		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
@@ -38,11 +46,10 @@ public class MAARS {
 //			//--------------------------BF acquisition-----------------------------//
 //			mas.acquire(true);
 			//--------------------------segmentation-----------------------------//
-		Thread.currentThread().is
-			MaarsSegmentation ms = new MaarsSegmentation(parameters,
-				0,
-				0);
-			ms.segmentation();
+//			MaarsSegmentation ms = new MaarsSegmentation(parameters,
+//				0,
+//				0);
+//			ms.segmentation();
 //			if(ms.roiDetected()){
 //			//----------------if got ROI, start fluo-acquisition --------//
 //				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(param, ms.getSegPombeParam(), xPos, yPos);
@@ -107,5 +114,48 @@ public class MAARS {
 //	}else{
 //		print("Session aborted, click 'OK' to start analyse.");
 //	}
+	}
+
+	@Override
+	public String getCopyright() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getHelpText() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getName() {
+		return "MAARS";
+	}
+
+	@Override
+	public String getVersion() {
+		// TODO Auto-generated method stub
+		return "1.0";
+	}
+
+	@Override
+	public void setContext(Studio mmStudio) {
+		// TODO Auto-generated method stub
+		this.mmStudio = (MMStudio) mmStudio;
+		this.mmc = mmStudio.core();
+		String base_dir = "/home/tong/Documents/code/MAARS/";
+		parameters = new MaarsParameters(base_dir + "maars_config.xml");
+		
+	}
+
+	@Override
+	public String getSubMenu() {
+		return null;
+	}
+
+	@Override
+	public void onPluginSelected() {
+		new MaarsMainDialog(mmStudio, mmc, parameters).show();
 	}
 }

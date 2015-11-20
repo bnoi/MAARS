@@ -1,4 +1,4 @@
-package acquisition;
+package fiji.plugin.maars.acquisition;
 
 import mmcorej.CMMCore;
 

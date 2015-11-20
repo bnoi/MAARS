@@ -27,12 +27,16 @@ import javax.swing.SwingConstants;
 import mmcorej.CMMCore;
 
 import org.micromanager.MMPlugin;
+import org.micromanager.MenuPlugin;
 import org.micromanager.Studio;
+import org.micromanager.acquisition.internal.AcquisitionEngine;
 import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
 
 import org.micromanager.internal.utils.ReportingUtils;
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
 
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
@@ -40,7 +44,8 @@ import org.micromanager.internal.utils.ReportingUtils;
  * @author Tong LI
  *
  */
-public class MaarsMainDialog implements MMPlugin,ActionListener {
+
+public class MaarsMainDialog implements ActionListener {
 
 	private JFrame mainDialog;
 	private final Label numFieldLabel;
@@ -423,33 +428,4 @@ public class MaarsMainDialog implements MMPlugin,ActionListener {
 		}
 	}
 
-	@Override
-	public String getCopyright() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getHelpText() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getVersion() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setContext(Studio arg0) {
-		// TODO Auto-generated method stub
-		
-	}
 }

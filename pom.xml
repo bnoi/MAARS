@@ -12,7 +12,6 @@
         <relativePath />
     </parent>
     
-    <groupId>sc.fiji.plugin.maars</groupId>
     <artifactId>MAARS_</artifactId>
     <version>1.0</version>
 
