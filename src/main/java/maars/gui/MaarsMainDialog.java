@@ -29,6 +29,8 @@ import mmcorej.CMMCore;
 import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
+import maars.MAARS;
+import maars.MAARSNoAcq;
 import maars.MaarsParameters;
 
 import org.micromanager.internal.utils.ReportingUtils;
@@ -48,7 +50,6 @@ public class MaarsMainDialog implements ActionListener {
 	private final CMMCore mmc;
 	private MaarsParameters parameters;
 	private final double calibration;
-	private boolean okClicked;
 	private Button autofocusButton;
 	private Button okMainDialogButton;
 	private Button segmButton;
@@ -62,30 +63,20 @@ public class MaarsMainDialog implements ActionListener {
 	private JRadioButton staticOpt;
 
 	/**
-	 * Constructor :
+	 * Constructor
 	 * 
 	 * @param mm
 	 *            : graphical user interface of Micro-Manager
 	 * @param mmc
 	 *            : Core object of Micro-Manager
-	 * @param pathConfigFile
-	 *            : path to maars_config.txt file containing all parameters of
-	 *            the system (in JSON format)
-	 * @throws IOException
+	 * @param parameters
+	 *            :MaarsParameters
 	 */
 	public MaarsMainDialog(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 
 		// ------------initialization of parameters---------------//
-		try {
-			PrintStream ps = new PrintStream(System.getProperty("user.dir") + "/MAARS.LOG");
-			System.setOut(ps);
-			System.setErr(ps);
-		} catch (FileNotFoundException e) {
-			ReportingUtils.logError(e);
-		}
 		Color labelColor = Color.ORANGE;
 		Color bgColor = Color.WHITE;
-		okClicked = false;
 
 		this.mm = mm;
 		this.mmc = mmc;
@@ -100,17 +91,10 @@ public class MaarsMainDialog implements ActionListener {
 
 		// set minimal dimension of mainDialog
 
-		ReportingUtils.logMessage("- set minimal dimension");
 		int maxDialogWidth = 350;
 		int maxDialogHeight = 600;
 		Dimension minimumSize = new Dimension(maxDialogWidth, maxDialogHeight);
 		mainDialog.setMinimumSize(minimumSize);
-
-		// Read config file
-
-		ReportingUtils.logMessage("create parameter object ...");
-
-		ReportingUtils.logMessage("Done.");
 
 		// Get number of field to explore
 
@@ -191,19 +175,16 @@ public class MaarsMainDialog implements ActionListener {
 
 		// autofocus button
 
-		ReportingUtils.logMessage("- create AutofocusButton");
 		autofocusButton = new Button("Autofocus");
 		autofocusButton.addActionListener(this);
 
 		// segmentation button
 
-		ReportingUtils.logMessage("- create OpenSegmentationDialogButton");
 		segmButton = new Button("Segmentation");
 		segmButton.addActionListener(this);
 
 		// fluo analysis button
 
-		ReportingUtils.logMessage("- create OpenFluoAnalysisDialog");
 		fluoAnalysisButton = new Button("Fluorescent analysis");
 		fluoAnalysisButton.addActionListener(this);
 
@@ -307,24 +288,7 @@ public class MaarsMainDialog implements ActionListener {
 	 * Hide dialog
 	 */
 	public void hide() {
-		mainDialog.setVisible(false);
-	}
-
-	/**
-	 * Method to record if the user has clicked on "ok" button
-	 * 
-	 * @param ok
-	 */
-	public void setOkClicked(boolean ok) {
-		okClicked = ok;
-	}
-
-	/**
-	 * 
-	 * @return true if "ok" button is clicked
-	 */
-	public boolean isOkClicked() {
-		return okClicked;
+		mainDialog.dispose();
 	}
 
 	/**
@@ -337,12 +301,16 @@ public class MaarsMainDialog implements ActionListener {
 		newWidth = (Double) widthTf.getValue();
 		newHeigth = (Double) widthTf.getValue();
 
-		;
-
 		int newXFieldNumber = (int) Math.round(newWidth / (calibration * mmc.getImageWidth()));
 		int newYFieldNumber = (int) Math.round(newHeigth / (calibration * mmc.getImageHeight()));
-
-		numFieldLabel.setText("Number of field : " + newXFieldNumber * newYFieldNumber);
+		int totoalNbField = newXFieldNumber * newYFieldNumber;
+		if (totoalNbField == 0) {
+			numFieldLabel.setForeground(Color.red);
+			numFieldLabel.setText("Number of field : " + totoalNbField);
+		} else {
+			numFieldLabel.setForeground(Color.black);
+			numFieldLabel.setText("Number of field : " + totoalNbField);
+		}
 
 		parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, "" + newXFieldNumber);
 		parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, "" + newYFieldNumber);
@@ -352,7 +320,12 @@ public class MaarsMainDialog implements ActionListener {
 	 * method to save the parameters entered
 	 */
 	public void saveParameters() {
-
+		if (!savePathTf.getText().equals(parameters.getSavingPath())) {
+			parameters.setSavingPath(savePathTf.getText());
+		}
+		if (!fluoAcqDurationTf.getText().equals(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
+			parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
+		}
 		try {
 			parameters.save();
 		} catch (IOException e) {
@@ -372,14 +345,6 @@ public class MaarsMainDialog implements ActionListener {
 		}
 	}
 
-	/**
-	 * 
-	 * @return parameters
-	 */
-	public MaarsParameters getParameters() {
-		return parameters;
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == autofocusButton) {
@@ -387,20 +352,26 @@ public class MaarsMainDialog implements ActionListener {
 		} else if (e.getSource() == okMainDialogButton) {
 			if ((Double) widthTf.getValue() * (Double) heightTf.getValue() == 0) {
 				IJ.error("Session aborted, 0 field to analyse");
+			} else {
+				saveParameters();
+				hide();
+				try{
+					new MAARS(mm, mmc, parameters);
+//					new MAARSNoAcq(mm, mmc, parameters);
+				}catch (Exception e1){
+					System.out.println("Errors : reset MM configuration");
+					try {
+						getMMC().reset();
+					} catch (Exception e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+				}
 			}
-			if (!savePathTf.getText().equals(parameters.getSavingPath())) {
-				parameters.setSavingPath(savePathTf.getText());
-			}
-			if (!fluoAcqDurationTf.getText().equals(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
-				parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
-			}
-			saveParameters();
-			setOkClicked(true);
-			hide();
 		} else if (e.getSource() == segmButton) {
-			new MaarsSegmentationDialog(getParameters());
+			new MaarsSegmentationDialog(parameters);
 		} else if (e.getSource() == fluoAnalysisButton) {
-			new MaarsFluoAnalysisDialog(getParameters());
+			new MaarsFluoAnalysisDialog(parameters);
 		} else if (e.getSource() == dynamicOpt) {
 			setAnalysisStrategy();
 			fluoAcqDurationTf.setEditable(true);

@@ -67,7 +67,7 @@ public class SegPombe {
 	private boolean saveFocusImage;
 	private boolean saveRoi;
 
-	private boolean flushImageToAnalyze = false;
+	private boolean flushImageToAnalyze = true;
 
 	private int direction;
 
@@ -116,7 +116,6 @@ public class SegPombe {
 
 	}
 
-	// I know it is messy but I have not found an other solution yet
 	public void getFocusImage() {
 		System.out.println("get Focus Image");
 
@@ -133,6 +132,7 @@ public class SegPombe {
 			FileSaver fileSaver = new FileSaver(focusImg);
 			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_FocusImage.tif");
 		}
+		System.out.println("FocusImage saved.");
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class SegPombe {
 		System.out.println("Width : " + String.valueOf(imageToAnalyze.getWidth()) + ", Height : "
 				+ String.valueOf(imageToAnalyze.getHeight()));
 		int nbProcessor = Runtime.getRuntime().availableProcessors();
-		System.out.println("analyse with" + nbProcessor + "processor");
+		System.out.println("Compute correlation with " + nbProcessor + " processor");
 		ImageSplitter splitter = new ImageSplitter(imageToAnalyze, nbProcessor);
 		int xPosition = 0;
 		ImagePlus subImg;
@@ -199,6 +199,7 @@ public class SegPombe {
 		byteImage = imgCorrTempProcessor.convertToByteProcessor(true);
 		byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false, BinaryProcessor.BLACK_AND_WHITE_LUT);
 
+		// image pre-processing
 		byteImage.dilate();
 		byteImage.erode();
 		byteImage.applyLut();
@@ -223,7 +224,7 @@ public class SegPombe {
 	 */
 	public void analyseAndFilterParticles() {
 
-		System.out.println("Analyse results");
+		System.out.println("Segment and filtrate");
 
 		resultTable = new ResultsTable();
 
@@ -243,27 +244,26 @@ public class SegPombe {
 
 		particleAnalyzer.analyze(binCorrelationImage);
 		System.out.println("Done");
+		Integer nbRoi = roiManager.getCount();
+		if (!nbRoi.equals(0)) {
+			if (filterAbnormalShape || filtrateWithMeanGrayValue) {
 
-		if (filterAbnormalShape || filtrateWithMeanGrayValue) {
+				if (filtrateWithMeanGrayValue) {
 
-			if (filtrateWithMeanGrayValue) {
-
-				System.out.println("Filtering with mean grey value...");
-				ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
-				int name = 1;
-
-				System.out.println("- reset result table");
-				resultTable.reset();
-				Integer nbRoi = roiManager.getCount();
-				if (!nbRoi.equals(0)) {
+					System.out.println("Filtering with mean grey value...");
+					ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
+					int name = 1;
+					System.out.println("- reset result table");
+					resultTable.reset();
 
 					System.out.println("- get roi as array");
 
 					roiArray = roiManager.getRoisAsArray();
 					System.out.println("- select and delete all roi from roi manager");
 
-					roiManager.runCommand("Select All");
-					roiManager.runCommand("Delete");
+					roiManager.removeAll();
+//					roiManager.runCommand("Select All");
+//					roiManager.runCommand("Delete");
 
 					System.out.println("- initialize analyser");
 
@@ -274,11 +274,17 @@ public class SegPombe {
 							resultTable);
 
 					System.out.println("- analyze each roi and add it to manager if it is wanted");
-					for (int i = 0; i < roiArray.length; i++) {
-						roiArray[i].setImage(imgCorrTemp);
-						imgCorrTemp.setRoi(roiArray[i]);
+					for (Roi roi :roiArray) {
+						roi.setImage(imgCorrTemp);
+						imgCorrTemp.setRoi(roi);
 						analyzer.measure();
 					}
+
+//					for (int i = 0; i < roiArray.length; i++) {
+//						roiArray[i].setImage(imgCorrTemp);
+//						imgCorrTemp.setRoi(roiArray[i]);
+//						analyzer.measure();
+//					}
 					imgCorrTemp.deleteRoi();
 
 					System.out.println("- delete from result table roi unwanted");
@@ -294,16 +300,11 @@ public class SegPombe {
 					}
 					deleteRowOfResultTable(rowTodelete);
 					System.out.println("Filter done.");
-				} else {
-					setRoiDetectedFalse();
 				}
-			}
 
-			if (filterAbnormalShape) {
+				if (filterAbnormalShape) {
 
-				System.out.println("Filtering with solidity...");
-				Integer nbRoi = roiManager.getCount();
-				if (!nbRoi.equals(0)) {
+					System.out.println("Filtering with solidity...");
 					System.out.println("- get roi as array");
 					roiArray = roiManager.getRoisAsArray();
 					System.out.println("- select and delete all roi from roi manager");
@@ -326,11 +327,10 @@ public class SegPombe {
 
 					deleteRowOfResultTable(rowTodelete);
 					System.out.println("Filter done.");
-				} else {
-					setRoiDetectedFalse();
 				}
 			}
-
+		} else {
+			setRoiDetectedFalse();
 		}
 	}
 
@@ -353,7 +353,6 @@ public class SegPombe {
 		if (nbRoi.equals(0)) {
 			setRoiDetectedFalse();
 		}
-		System.out.println("Show and save results_" + String.valueOf(nbRoi));
 
 		if (saveDataFrame && roiDetected) {
 			System.out.println("saving data frame...");
@@ -378,8 +377,9 @@ public class SegPombe {
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Save", savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
 			System.out.println("Done");
-			roiManager.runCommand("Select All");
-			roiManager.runCommand("Delete");
+			roiManager.removeAll();
+//			roiManager.runCommand("Select All");
+//			roiManager.runCommand("Delete");
 			System.out.println("Close roi manager");
 			roiManager.close();
 		}

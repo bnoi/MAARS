@@ -34,7 +34,7 @@ public class MAARSPlugin implements MenuPlugin,SciJavaPlugin {
 
 	@Override
 	public String getName() {
-		return "MAARS";
+		return "Main";
 	}
 
 	@Override

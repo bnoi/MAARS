@@ -56,25 +56,6 @@ public class MaarsAcquisitionForSegmentation {
 	}
 
 	/**
-	 * Constructor :
-	 *
-	 * @param md
-	 *            : main window of MAARS (contains mm, mmc and parameters)
-	 * @param positionX
-	 *            : x field position (can be defined by ExplorationXYPositions)
-	 * @param positionY
-	 *            : y field position (can be defined by ExplorationXYPositions)
-	 */
-	public MaarsAcquisitionForSegmentation(MaarsMainDialog md,
-			double positionX, double positionY) {
-		mm = md.getMM();
-		mmc = md.getMMC();
-		parameters = md.getParameters();
-		this.positionX = positionX;
-		this.positionY = positionY;
-	}
-
-	/**
 	 * Acquire movie for segmentation
 	 *
 	 * @param show

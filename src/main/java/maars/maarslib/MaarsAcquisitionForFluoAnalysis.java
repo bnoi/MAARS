@@ -66,27 +66,6 @@ public class MaarsAcquisitionForFluoAnalysis {
 	}
 
 	/**
-	 * Constructor :
-	 * 
-	 * @param md
-	 *            : main window of MAARS (contains gui, mmc and parameters)
-	 * @param positionX
-	 *            : x field position (can be defined by ExplorationXYPositions)
-	 * @param positionY
-	 *            : y field position (can be defined by ExplorationXYPositions)
-	 * @param soc
-	 *            : Set of cells (object from CellStateAnalysis_)
-	 */
-	public MaarsAcquisitionForFluoAnalysis(MaarsMainDialog md,
-			double positionX, double positionY, SetOfCells soc) {
-		mm = md.getMM();
-		mmc = md.getMMC();
-		parameters = md.getParameters();
-		this.positionX = positionX;
-		this.positionY = positionY;
-	}
-
-	/**
 	 * Acquire specific movie
 	 * 
 	 * @param show
