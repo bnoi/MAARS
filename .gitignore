@@ -30,3 +30,4 @@ nb-configuration.xml
 
 #runtime dep jars#
 /jars/
+nbactions.xml

@@ -13,6 +13,9 @@ set -e
 
 CURR_DIR=$(pwd)
 
+# rm -fr $CURR_DIR/ImageJ
+# unzip ij149.zip
+
 cd micromanager/
 git pull
 GIT_HASH=$(git rev-parse --short HEAD)
@@ -22,7 +25,7 @@ GIT_HASH=$(git rev-parse --short HEAD)
 ./configure --enable-imagej-plugin=$CURR_DIR/ImageJ JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
 make fetchdeps
 make
-rm -fr $CURR_DIR/ImageJ
+
 make install
 
 cd ../
