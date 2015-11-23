@@ -14,6 +14,7 @@ if [ ! -d "ImageJ" ]; then
   wget $IJ_ZIP
   unzip ij*.zip
   wget https://raw.githubusercontent.com/micro-manager/micro-manager/master/bindist/any-platform/MMConfig_demo.cfg -O ImageJ/MMConfig_demo.cfg
+  rm ij*.zip
 fi
 
 cd micro-manager/
