@@ -6,15 +6,20 @@ set -e
 # Dependencies (ubuntu / debian)
 # sudo apt-get install subversion build-essential autoconf automake libtool pkg-config libboost1.54-all-dev zlib1g-dev swig openjdk-7-jdk ant python-dev python-numpy-dev
 
-IJ_ZIP="http://rsb.info.nih.gov/ij/download/zips/ij149.zip"
 
 CURR_DIR=$(pwd)
 
+if [ ! -f "ij149.zip" ]; then
+    echo "Please download ij149.zip with wget http://rsb.info.nih.gov/ij/download/zips/ij149.zip"
+    exit 1
+fi
+
 if [ ! -d "ImageJ" ]; then
-  wget $IJ_ZIP
   unzip ij*.zip
+fi
+
+if [ ! -f "ImageJ/MMConfig_demo.cfg" ]; then
   wget https://raw.githubusercontent.com/micro-manager/micro-manager/master/bindist/any-platform/MMConfig_demo.cfg -O ImageJ/MMConfig_demo.cfg
-  rm ij*.zip
 fi
 
 cd micro-manager/
