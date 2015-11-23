@@ -6,23 +6,23 @@ set -e
 # Dependencies (ubuntu / debian)
 # sudo apt-get install subversion build-essential autoconf automake libtool pkg-config libboost1.54-all-dev zlib1g-dev swig openjdk-7-jdk ant python-dev python-numpy-dev
 
-# The directory which contains this file should have
-# - an ImageJ/ folder with a valid ij49.zip installation)
-# - 3rdpartypublic : svn co https://valelab.ucsf.edu/svn/3rdpartypublic
-# - micromanager/ folder : git clone https://github.com/hadim/micromanager.git
+IJ_ZIP="http://rsb.info.nih.gov/ij/download/zips/ij149.zip"
 
 CURR_DIR=$(pwd)
 
-# rm -fr $CURR_DIR/ImageJ
-# unzip ij149.zip
+if [ ! -d "ImageJ" ]; then
+  wget $IJ_ZIP
+  unzip ij*.zip
+  wget https://raw.githubusercontent.com/micro-manager/micro-manager/master/bindist/any-platform/MMConfig_demo.cfg -O ImageJ/MMConfig_demo.cfg
+fi
 
-cd micromanager/
+cd micro-manager/
 git pull
 GIT_HASH=$(git rev-parse --short HEAD)
 
 # Build MM
 ./autogen.sh
-./configure --enable-imagej-plugin=$CURR_DIR/ImageJ JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/
+./configure --enable-imagej-plugin=$CURR_DIR/ImageJ JAVA_HOME=/usr/lib/jvm/default-java/
 make fetchdeps
 make
 
