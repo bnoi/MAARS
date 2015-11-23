@@ -10,7 +10,6 @@ import java.util.List;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.Image;
-import org.micromanager.data.SummaryMetadata;
 import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
 import org.micromanager.display.DisplaySettings.DisplaySettingsBuilder;
 import org.micromanager.display.DisplayWindow;
@@ -23,7 +22,6 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -55,8 +53,8 @@ public class SuperClassAcquisition {
 	 *            : y field position (can be defined by ExplorationXYPositions)
 	 */
 
-	public SuperClassAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, double positionX,
-			double positionY) {
+	public SuperClassAcquisition(MMStudio mm, CMMCore mmc,
+			MaarsParameters parameters, double positionX, double positionY) {
 		this.mm = mm;
 		this.mmc = mmc;
 		this.parameters = parameters;
@@ -125,7 +123,8 @@ public class SuperClassAcquisition {
 		try {
 			// 1st false = do not generate separate metadata
 			// 2nd false = do not split positions
-			ds = mm.getDataManager().createMultipageTIFFDatastore(pathToMovie, false, false);
+			ds = mm.getDataManager().createMultipageTIFFDatastore(pathToMovie,
+					false, false);
 		} catch (IOException e3) {
 			ReportingUtils.logMessage("... Can not initialize Datastore");
 			e3.printStackTrace();
@@ -136,7 +135,8 @@ public class SuperClassAcquisition {
 	/**
 	 * Set DataStore metadata by using parameters in class
 	 */
-	public Datastore setDatastoreMetadata(Datastore ds, String channelName, String acqName, double step) {
+	public Datastore setDatastoreMetadata(Datastore ds, String channelName,
+			String acqName, double step) {
 		ReportingUtils.logMessage("... Update summaryMetadata");
 		SummaryMetadataBuilder summaryMD = ds.getSummaryMetadata().copy();
 		summaryMD = summaryMD.channelGroup(channelGroup);
@@ -145,9 +145,8 @@ public class SuperClassAcquisition {
 		summaryMD = summaryMD.channelNames(channels);
 		summaryMD = summaryMD.name(acqName);
 		summaryMD = summaryMD.zStepUm(step);
-		SummaryMetadata newSegMD = summaryMD.build();
 		try {
-			ds.setSummaryMetadata(newSegMD);
+			ds.setSummaryMetadata(summaryMD.build());
 		} catch (DatastoreFrozenException e2) {
 			System.out.println("Can not update datastore metadata");
 			e2.printStackTrace();
@@ -163,7 +162,8 @@ public class SuperClassAcquisition {
 	public void setDisplay(Color chColor) {
 		Color[] chColors = new Color[1];
 		chColors[0] = chColor;
-		DisplaySettingsBuilder displayBuilder = mm.getDisplayManager().getStandardDisplaySettings().copy();
+		DisplaySettingsBuilder displayBuilder = mm.getDisplayManager()
+				.getStandardDisplaySettings().copy();
 		displayBuilder.shouldAutostretch(true);
 		displayBuilder.channelColors(chColors);
 		DisplayWindow liveWindow = mm.live().getDisplay();
@@ -175,32 +175,44 @@ public class SuperClassAcquisition {
 	 */
 	public ImagePlus acquire(int frame, String channelName) {
 		String acqName = null;
+		String imgName = null;
 		double range = 0;
 		double step = 0;
-		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
-			acqName = "movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY) + "_FLUO/" + frame + "_"
+		if (channelName != parameters
+				.getSegmentationParameter(MaarsParameters.CHANNEL)) {
+			acqName = "movie_X" + Math.round(positionX) + "_Y"
+					+ Math.round(positionY) + "_FLUO/" + frame + "_"
 					+ channelName;
-			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
-			step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
+			range = Double.parseDouble(parameters
+					.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+			step = Double.parseDouble(parameters
+					.getFluoParameter(MaarsParameters.STEP));
+			imgName = channelName;
 		} else {
-			acqName = "movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY);
-			range = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
-			step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
+			acqName = "movie_X" + Math.round(positionX) + "_Y"
+					+ Math.round(positionY);
+			range = Double
+					.parseDouble(parameters
+							.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+			step = Double.parseDouble(parameters
+					.getSegmentationParameter(MaarsParameters.STEP));
+			imgName = parameters
+					.getSegmentationParameter(MaarsParameters.CHANNEL);
 		}
 
 		String shutterLable = parameters.getChShutter(channelName);
 		int sliceNumber = (int) Math.round(range / step);
 		int exposure = Integer.parseInt(parameters.getChExposure(channelName));
 		String pathToMovie = rootDirName + "/" + acqName;
-		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
+		Color chColor = MaarsParameters.getColor(parameters
+				.getChColor(channelName));
 
 		cleanUp();
 		setShutter(shutterLable);
 		setChExposure(exposure);
 		Datastore ds = createDataStore(pathToMovie);
 		setDatastoreMetadata(ds, channelName, acqName, step);
-//		setDisplay(chColor);
-		System.out.println("Open shutter");
+		// setDisplay(chColor);
 		try {
 			mmc.setShutterOpen(true);
 			mmc.waitForSystem();
@@ -230,7 +242,8 @@ public class SuperClassAcquisition {
 			try {
 				mmc.setPosition(mmc.getFocusDevice(), z);
 			} catch (Exception e) {
-				ReportingUtils.logMessage("could not set focus device at position");
+				ReportingUtils
+						.logMessage("could not set focus device at position");
 			}
 			listImg = mm.live().snap(true);
 			z = z + step;
@@ -241,21 +254,23 @@ public class SuperClassAcquisition {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.setShutterOpen(false);
 		} catch (Exception e) {
-			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
+			ReportingUtils
+					.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
 		// add images into Datastore and imageplus
 		System.out.println("add images into Datastore and imageplus");
-		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
+				(int) mmc.getImageHeight());
 		for (Image img : listImg) {
+			// Prepare a imagePlus (for analysis)
+			ImageProcessor imgProcessor = mm.getDataManager()
+					.getImageJConverter().createProcessor(img);
+			System.out.println("Add into imageplus ");
+			imageStack.addSlice(imgProcessor.convertToShortProcessor());
 			try {
-				// Prepare a imagePlus (for analysis)
-				ImageProcessor imgProcessor = mm.getDataManager().ij().createProcessor(img);
-				ShortProcessor shortProcessor = new ShortProcessor((int) mmc.getImageWidth(),
-						(int) mmc.getImageHeight());
-				shortProcessor.setPixels(imgProcessor.getPixels());
-				imageStack.addSlice(shortProcessor);
 				// Datastore (for save)
+				System.out.println("Add into datastore");
 				ds.putImage(img);
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
@@ -265,17 +280,17 @@ public class SuperClassAcquisition {
 				e.printStackTrace();
 			}
 		}
+		mm.data().createRAMDatastore().getSummaryMetadata();
 		ds.freeze();
 		// ImagePlus for analysis
-		ImagePlus imagePlus = new ImagePlus("", imageStack);
+		ImagePlus imagePlus = new ImagePlus(imgName, imageStack);
 		Calibration cal = new Calibration();
 		cal.setUnit("micron");
 		cal.pixelWidth = mmc.getPixelSizeUm();
 		cal.pixelHeight = mmc.getPixelSizeUm();
+		cal.pixelDepth = ds.getSummaryMetadata().getZStepUm();
 		imagePlus.setCalibration(cal);
 		ds.close();
-		mm.getDisplayManager().closeAllDisplayWindows(false);
-		imagePlus.show();
 		return imagePlus;
 	}
 }
