@@ -11,7 +11,7 @@
         <version>16.2.0</version>
         <relativePath />
     </parent>
-    
+
     <artifactId>MAARS_</artifactId>
     <version>1.0</version>
 
@@ -46,7 +46,7 @@
             <artifactId>TrackMate_</artifactId>
             <version>2.8.1</version>
         </dependency>
-        
+
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>imagej-common</artifactId>
@@ -61,7 +61,7 @@
             <optional>true</optional>
             <scope>system</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.mm</groupId>
             <artifactId>mmj</artifactId>
@@ -70,7 +70,7 @@
             <optional>true</optional>
             <scope>system</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
@@ -84,23 +84,5 @@
             <url>http://maven.imagej.net/content/groups/public</url>
         </repository>
     </repositories>
-
-	<build> 
-		<plugins> 
-			<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-dependency-plugin</artifactId>
-		    <executions>
-		      <execution>
-		        <id>copy-dependencies</id>
-		        <phase>package</phase>
-		        <goals>
-		          <goal>copy-dependencies</goal>
-		        </goals>
-		      </execution>
-		    </executions>
-		</plugin>
-		</plugins> 
-	</build> 
 
 </project>
