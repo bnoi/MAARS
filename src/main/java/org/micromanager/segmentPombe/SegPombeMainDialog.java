@@ -14,7 +14,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
-import org.micromanager.segmentPombe.mainDialogActions.BrowseAction;
+// import org.micromanager.segmentPombe.mainDialogActions.BrowseAction;
 import org.micromanager.segmentPombe.mainDialogActions.CancelAction;
 import org.micromanager.segmentPombe.mainDialogActions.CurrentImageAction;
 import org.micromanager.segmentPombe.mainDialogActions.RunAction;
@@ -95,7 +95,7 @@ public class SegPombeMainDialog implements PlugIn{
 
 	// Action associated with buttons
 	private RunAction runAction;
-	private BrowseAction browseAction;
+	//private BrowseAction browseAction;
 	private CurrentImageAction currentImageAction;
 	private CancelAction cancelAction;
 
@@ -396,8 +396,8 @@ public class SegPombeMainDialog implements PlugIn{
 		imgNameTf.setEditable(false);
 		
 		browseButton = new Button("Browse");
-		browseAction = new BrowseAction(this, defaultParameters);
-		browseButton.addActionListener(browseAction);
+//		browseAction = new BrowseAction(this, defaultParameters);
+//		browseButton.addActionListener(browseAction);
 		
 		Panel currentImagePanel = new Panel();
 		currentImageButton = new Button("Current Image");
