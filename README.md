@@ -9,7 +9,7 @@ MAARS modules are Fiji and Micro-Manager libraries. Modules are:
 
 ## Install (to complete)
 
-- Copy the jars inside `jars/lib` inside `Micro Manager folder/plugins`
+- Copy the jars inside `jars/lib` inside `Micro Manager folder/plugins/jars`
 - Add MAARS plugin (`jars/MAARS_-1.0.jar`) inside `Micro Manager folder/plugins`
 
 That's all !
