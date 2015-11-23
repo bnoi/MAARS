@@ -9,6 +9,10 @@ import org.scijava.plugin.SciJavaPlugin;
 
 import mmcorej.CMMCore;
 
+import java.io.InputStream;
+
+import org.micromanager.maars.*;
+
 /**
 * @author Tong LI, mail: tongli.bioinfo@gmail.com
 * @version Nov 21, 2015
@@ -57,9 +61,8 @@ public class MAARSPlugin implements MenuPlugin,SciJavaPlugin {
 
 	@Override
 	public void onPluginSelected() {
-//		String base_dir = "/Volumes/Macintosh/mm_source/micro-manager/plugins/MAARS/";
-		String base_dir = "/home/tong/Documents/code/MAARS/";
-		parameters = new MaarsParameters(base_dir + "maars_config.xml");
+		InputStream inStream = ClassLoader.getSystemResourceAsStream("org/micromanager/maars_config.xml");
+		parameters = new MaarsParameters(inStream);
 		new MaarsMainDialog(mmStudio, mmc, parameters).show();
 	}
 }

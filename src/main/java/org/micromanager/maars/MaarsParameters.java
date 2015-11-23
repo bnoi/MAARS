@@ -8,6 +8,7 @@ package org.micromanager.maars;
 import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -132,12 +133,11 @@ public class MaarsParameters {
 	 * @param defaultParametersFile
 	 * @throws IOException
 	 */
-	public MaarsParameters(String defaultParametersFile) {
+	public MaarsParameters(InputStream defaultParametersStream) {
 
-		this.defaultParametersFile = defaultParametersFile;
 		final SAXBuilder sb = new SAXBuilder();
 		try {
-			doc = sb.build(defaultParametersFile);
+			doc = sb.build(defaultParametersStream);
 		} catch (JDOMException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -166,7 +166,7 @@ public class MaarsParameters {
 		doc.setContent(root);
 		XMLOutputter xmlOutput = new XMLOutputter();
 		xmlOutput.setFormat(Format.getPrettyFormat());
-		xmlOutput.output(doc, new FileWriter(defaultParametersFile));
+		xmlOutput.output(doc, new FileWriter("maars_config.xml"));
 	}
 
 	/**
