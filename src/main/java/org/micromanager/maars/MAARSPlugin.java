@@ -9,21 +9,23 @@ import org.scijava.plugin.SciJavaPlugin;
 
 import mmcorej.CMMCore;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import org.micromanager.maars.*;
+import org.micromanager.utils.FileUtils;
 
 /**
-* @author Tong LI, mail: tongli.bioinfo@gmail.com
-* @version Nov 21, 2015
-*/
+ * @author Tong LI, mail: tongli.bioinfo@gmail.com
+ * @version Nov 21, 2015
+ */
 @Plugin(type = MenuPlugin.class)
-public class MAARSPlugin implements MenuPlugin,SciJavaPlugin {
+public class MAARSPlugin implements MenuPlugin, SciJavaPlugin {
 
 	private MMStudio mmStudio;
 	private CMMCore mmc;
 	private MaarsParameters parameters;
-	
+
 	@Override
 	public String getCopyright() {
 		// TODO Auto-generated method stub
@@ -61,7 +63,19 @@ public class MAARSPlugin implements MenuPlugin,SciJavaPlugin {
 
 	@Override
 	public void onPluginSelected() {
-		InputStream inStream = ClassLoader.getSystemResourceAsStream("org/micromanager/maars_config.xml");
+		String configFileName = "maars_config.xml";
+		InputStream inStream = null;
+		if (FileUtils.isValid(configFileName)) {
+			try {
+				inStream = new FileInputStream(configFileName);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} else {
+			inStream = ClassLoader.getSystemResourceAsStream("org/micromanager/" + configFileName);
+		}
 		parameters = new MaarsParameters(inStream);
 		new MaarsMainDialog(mmStudio, mmc, parameters).show();
 	}
