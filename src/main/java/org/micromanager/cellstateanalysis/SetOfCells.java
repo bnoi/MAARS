@@ -52,6 +52,10 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		ImagePlus bfImage = parameters.getImageToAnalyze();
 		int focusSlice = (int) Math.round(parameters.getImageToAnalyze()
 				.getNSlices() / 2);
+
+		ImagePlus focusImg = new ImagePlus(bfImage.getShortTitle(), bfImage
+				.getStack().getProcessor(focusSlice));
+		focusImg.setCalibration(bfImage.getCalibration());
 		try {
 			PrintStream ps = new PrintStream(parameters.getSavingPath()
 					+ "CellStateAnalysis.LOG");
@@ -60,6 +64,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		// rt will be reset after analysis of each cell
 		rt = new ResultsTable();
 		ReportingUtils.logMessage("Get ROIs as array");
 		roiArray = getRoisAsArray(parameters.getSavingPath()
@@ -67,7 +72,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
-			cellArray.add(i, new Cell(bfImage, focusSlice, roiArray[i], i, rt));
+			cellArray.add(i, new Cell(focusImg, roiArray[i], i, rt));
 		}
 		ReportingUtils.logMessage("Done.");
 	}

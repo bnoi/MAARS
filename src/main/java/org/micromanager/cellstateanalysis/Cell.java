@@ -29,7 +29,7 @@ import ij.plugin.RoiScaler;
 public class Cell {
 
 	// tools
-	private ImagePlus bfImage;
+	private ImagePlus focusImg;
 	private ImagePlus fluoImage;
 	private ImagePlus croppedfluoImage;
 	public double bf2FluoWidthFac;
@@ -42,73 +42,32 @@ public class Cell {
 	// informations
 	private int cellNumber;
 	private Measures measures;
-	private Spindle lastSpindleComputed;
 
 	private CellFluoAnalysis fluoAnalysis;
 	private CellChannelFactory factory;
-	private SpotCollection gfpCollection;
-	private SpotCollection cfpCollection;
-	private SpotCollection dapiCollection;
-	private SpotCollection txredCollection;
+	private SpotCollection gfpSpotCollection;
+	private SpotCollection cfpSpotCollection;
+	private SpotCollection dapiSpotCollection;
+	private SpotCollection txredSpotCollection;
 	private int currentFrame;
 
 	/**
-	 * Constructor :
-	 * 
-	 * @param bfImage
-	 *            : the brightfield image used for segmentation
-	 * @param fluoImage
-	 *            : the fluorescent image to determine mitotic state of the cell
-	 * @param focusSlice
-	 *            : focus slice of brightfield image
-	 * @param direction
-	 *            : direction : -1 -> cell bounds are black then white 1 -> cell
-	 *            bounds are white then black
+	 * @param focusImg
+	 *            :the brightfield image used for segmentation
 	 * @param roiCellShape
 	 *            : ROI that correspond to segmented cell
+	 * @param cellNb
 	 * @param rt
 	 *            : result table used to display result of analysis (measures on
 	 *            cell)
-	 * @param maxNbSpotPerCell
-	 *            : maximum number of spots in each cell.
 	 */
-	public Cell(ImagePlus bfImage, ImagePlus fluoImage, int focusSlice,
-			Roi roiCellShape, int cellNb, ResultsTable rt) {
-
-		this.bfImage = bfImage;
-		lastSpindleComputed = null;
+	public Cell(ImagePlus focusImg, Roi roiCellShape, int cellNb,
+			ResultsTable rt) {
+		this.focusImg = focusImg;
 		this.cellShapeRoi = roiCellShape;
 		rt.reset();
-		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
 		this.cellNumber = cellNb;
-		updateFluoImage(fluoImage);
-	}
-
-	/**
-	 * 
-	 * @param bfImage
-	 *            : the brightfield image used for segmentation
-	 * @param focusSlice
-	 *            : focus slice of brightfield image
-	 * @param direction
-	 *            direction : -1 -> cell bounds are black then white 1 -> cell
-	 *            bounds are white then black
-	 * @param roiCellShape
-	 *            : ROI that correspond to segmented cell
-	 * @param rt
-	 *            : result table used to display result of analysis (measures on
-	 *            cell)
-	 * @param maxNbSpotPerCell
-	 *            : maximum number of spots in each ccurrentFrameell.
-	 */
-	public Cell(ImagePlus bfImage, int focusSlice, Roi roiCellShape,
-			int cellNb, ResultsTable rt) {
-		this.bfImage = bfImage;
-		this.cellShapeRoi = roiCellShape;
-		rt.reset();
-		lastSpindleComputed = null;
-		this.cellNumber = cellNb;
-		measures = new Measures(bfImage, focusSlice, roiCellShape, rt);
+		measures = new Measures(focusImg, roiCellShape, rt);
 	}
 
 	/**
@@ -123,13 +82,27 @@ public class Cell {
 		fluoAnalysis.doDetection();
 		fluoAnalysis.filterOnlyInCell(visibleOnly);
 		fluoAnalysis.findBestNSpotInCell(visibleOnly);
-		
+
 		SpotCollection currentCollection = getCollectionOf(factory.getChannel());
 		for (Spot s : fluoAnalysis.getModel().getSpots().iterable(visibleOnly)) {
 			currentCollection.add(s, currentFrame);
+
+			int nSpotDetected = currentCollection.getNSpots(currentFrame,
+					visibleOnly);
+			if (nSpotDetected == 1) {
+				// interphase
+			} else if (nSpotDetected == 2) {
+				// SPBs
+			} else if (nSpotDetected > 2 && nSpotDetected <= 4) {
+				// SPBs + Cen2 or SPBs + telomeres
+			} else if (nSpotDetected > 4 && nSpotDetected <= 6) {
+				// SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
+			} else if (nSpotDetected > 6 && nSpotDetected <= 8) {
+				// SPBs + NDC80 incomplete
+			} else {
+				// not manageable
+			}
 		}
-		//
-//		currentCollection.
 		// ReportingUtils.logMessage("Create spindle using spots found");
 		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
 		// fluoImage.getCalibration(), cellShapeRoi);
@@ -156,13 +129,13 @@ public class Cell {
 			fluoImage.getCalibration().pixelWidth = fluoImage.getCalibration().pixelWidth * 10000;
 			fluoImage.getCalibration().pixelHeight = fluoImage.getCalibration().pixelHeight * 10000;
 		}
-		if (bfImage.getCalibration().equals(fluoImage.getCalibration())) {
+		if (focusImg.getCalibration().equals(fluoImage.getCalibration())) {
 			bf2FluoWidthFac = 1;
 			bf2FluoHeightFac = 1;
 		} else {
-			bf2FluoWidthFac = bfImage.getCalibration().pixelWidth
+			bf2FluoWidthFac = focusImg.getCalibration().pixelWidth
 					/ fluoImage.getCalibration().pixelWidth;
-			bf2FluoHeightFac = bfImage.getCalibration().pixelHeight
+			bf2FluoHeightFac = focusImg.getCalibration().pixelHeight
 					/ fluoImage.getCalibration().pixelHeight;
 		}
 	}
@@ -172,9 +145,8 @@ public class Cell {
 	 * Crop filed-wide image with cell roi
 	 * 
 	 */
-
-	public void cropFluoImage() {
-		ImageProcessor imgProcessor = fluoImage.getProcessor();
+	public ImagePlus cropImage(ImagePlus img) {
+		ImageProcessor imgProcessor = img.getProcessor();
 		imgProcessor.setInterpolationMethod(ImageProcessor.BILINEAR);
 		Rectangle newRectangle = new Rectangle(
 				(int) rescaledCellShapeRoi.getXBase(),
@@ -184,10 +156,10 @@ public class Cell {
 		imgProcessor.setRoi(newRectangle);
 
 		ReportingUtils.logMessage("Create cropped fluo image");
-		croppedfluoImage = new ImagePlus("croppedImage", imgProcessor.crop());
+		ImagePlus croppedImg = new ImagePlus("croppedImage", imgProcessor.crop());
 
 		ReportingUtils.logMessage("Put new calibration newly cropped image");
-		croppedfluoImage.setCalibration(fluoImage.getCalibration());
+		croppedfluoImage.setCalibration(img.getCalibration());
 		ReportingUtils.logMessage("Done.");
 
 		centerCroppedRoi();
@@ -273,15 +245,6 @@ public class Cell {
 		return croppedfluoImage;
 	}
 
-	/**
-	 * CellChannelFactory
-	 * 
-	 * @return Last Spindle object computed
-	 */
-	public Spindle getLastSpindleComputed() {
-		return lastSpindleComputed;
-	}
-
 	public int getCellNumber() {
 		return cellNumber;
 	}
@@ -331,52 +294,52 @@ public class Cell {
 		croppedFluoStack.addSlice(ip);
 	}
 
-	public void setCellChannelFactory(CellChannelFactory factory) {
+	public void setChannelRelated(CellChannelFactory factory) {
 		this.factory = factory;
 		if (factory.getChannel().equals(MaarsParameters.GFP)) {
-			if (gfpCollection == null) {
-				gfpCollection = new SpotCollection();
+			if (gfpSpotCollection == null) {
+				gfpSpotCollection = new SpotCollection();
 			}
 		} else if (factory.getChannel().equals(MaarsParameters.CFP)) {
-			if (cfpCollection == null) {
-				cfpCollection = new SpotCollection();
+			if (cfpSpotCollection == null) {
+				cfpSpotCollection = new SpotCollection();
 			}
 		} else if (factory.getChannel().equals(MaarsParameters.DAPI)) {
-			if (dapiCollection == null) {
-				dapiCollection = new SpotCollection();
+			if (dapiSpotCollection == null) {
+				dapiSpotCollection = new SpotCollection();
 			}
 		} else if (factory.getChannel().equals(MaarsParameters.TXRED)) {
-			if (txredCollection == null) {
-				txredCollection = new SpotCollection();
+			if (txredSpotCollection == null) {
+				txredSpotCollection = new SpotCollection();
 			}
 		}
 	}
 
 	public SpotCollection getCollectionOf(String channel) {
 		if (channel.equals(MaarsParameters.GFP)) {
-			return gfpCollection;
+			return gfpSpotCollection;
 		} else if (channel.equals(MaarsParameters.CFP)) {
-			return cfpCollection;
+			return cfpSpotCollection;
 		} else if (channel.equals(MaarsParameters.DAPI)) {
-			return dapiCollection;
+			return dapiSpotCollection;
 		} else if (channel.equals(MaarsParameters.TXRED)) {
-			return txredCollection;
+			return txredSpotCollection;
 		} else {
 			return null;
 		}
 	}
 
-	public void setCollection(String channel, SpotCollection collection) {
-		if (channel.equals(MaarsParameters.GFP)) {
-			gfpCollection = collection;
-		} else if (channel.equals(MaarsParameters.CFP)) {
-			cfpCollection = collection;
-		} else if (channel.equals(MaarsParameters.DAPI)) {
-			dapiCollection = collection;
-		} else if (channel.equals(MaarsParameters.TXRED)) {
-			txredCollection = collection;
-		}
-	}
+	// public void setCollection(String channel, SpotCollection collection) {
+	// if (channel.equals(MaarsParameters.GFP)) {
+	// gfpCollection = collection;
+	// } else if (channel.equals(MaarsParameters.CFP)) {
+	// cfpCollection = collection;
+	// } else if (channel.equals(MaarsParameters.DAPI)) {
+	// dapiCollection = collection;
+	// } else if (channel.equals(MaarsParameters.TXRED)) {
+	// txredCollection = collection;
+	// }
+	// }
 
 	public Spot getTheBestOfFeature(SpotCollection collection, String feature) {
 		double max = 0;

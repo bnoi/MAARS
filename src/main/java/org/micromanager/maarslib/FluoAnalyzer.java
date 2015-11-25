@@ -22,9 +22,9 @@ public class FluoAnalyzer extends Thread {
 	
 	public void run(){
 		mfa.setFluoImage(fluoImage);
+		mfa.zProject();
 		mfa.createCellChannelFactory(channel);
 		mfa.setCurrentFrame(frame);
-		mfa.zProject();
 		mfa.cropAllCells();
 		mfa.analyzeEachCell();
 	}

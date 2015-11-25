@@ -105,6 +105,7 @@ public class MaarsFluoAnalysis {
 			cell.setFluoImage(this.fluoImg);
 			cell.rescaleRoiForFluoImg();
 			cell.cropFluoImage();
+			
 			cell.addCroppedFluoSlice();
 		}
 	}
@@ -120,7 +121,7 @@ public class MaarsFluoAnalysis {
 	public void analyzeEachCell() {
 		ReportingUtils.logMessage("Detecting spots...");
 		for (Cell cell : soc) {
-			cell.setCellChannelFactory(currentFactory);
+			cell.setChannelRelated(currentFactory);
 			cell.setCurrentFrame(currentFrame);
 			cell.findFluoSpotTempFunction();
 
@@ -130,7 +131,6 @@ public class MaarsFluoAnalysis {
 					cell.getModelOf(currentFactory.getChannel()));
 		}
 		ReportingUtils.logMessage("Spots detection done...");
-		// this.writeAnalysisRes(cells, frame, channel);
 	}
 
 	public void createCellChannelFactory(String currentChannel) {

@@ -52,16 +52,13 @@ public class Measures {
 	 * @param rt
 	 *            : result table (containing results of analysis)
 	 */
-	public Measures(ImagePlus bfImage, int focusSlice, Roi cellShapeRoi,
+	public Measures(ImagePlus focusImg, Roi cellShapeRoi,
 			ResultsTable rt) {
 
-		System.out.println("- set focus slice");
-		bfImage.setSlice(focusSlice);
-		System.out.println("- set roi on bf image");
-		bfImage.setRoi(cellShapeRoi);
+		focusImg.setRoi(cellShapeRoi);
 
 		System.out.println("- create analyzer");
-		bfAnalyzer = new Analyzer(bfImage, Measurements.AREA
+		bfAnalyzer = new Analyzer(focusImg, Measurements.AREA
 				+ Measurements.STD_DEV + Measurements.MIN_MAX
 				+ Measurements.SHAPE_DESCRIPTORS + Measurements.CENTROID
 				+ Measurements.PERIMETER + Measurements.ELLIPSE, rt);
@@ -87,7 +84,6 @@ public class Measures {
 		measures[SOLIDITY] = rt.getValue("Solidity", 0);
 		System.out.println("- Done.");
 		System.out.println("- reset table");
-		rt.reset();
 	}
 
 	public double getArea() {
