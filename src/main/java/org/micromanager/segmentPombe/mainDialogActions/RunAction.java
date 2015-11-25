@@ -3,7 +3,7 @@ package org.micromanager.segmentPombe.mainDialogActions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.micromanager.segmentPombe.ParametersProcessing;
+import org.micromanager.segmentPombe.ParametersProcessor;
 import org.micromanager.segmentPombe.SegPombe;
 import org.micromanager.segmentPombe.SegPombeMainDialog;
 import org.micromanager.segmentPombe.SegPombeParameters;
@@ -21,7 +21,7 @@ public class RunAction implements ActionListener {
 	 * then run Algorithm.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		ParametersProcessing process = new ParametersProcessing(mainDialog);
+		ParametersProcessor process = new ParametersProcessor(mainDialog);
 		if (process.checkParameters()) {
 			process.updateParameters();
 			SegPombeParameters parameters = process.getParameters();

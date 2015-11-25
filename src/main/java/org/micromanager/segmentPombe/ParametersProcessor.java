@@ -13,7 +13,7 @@ import ij.measure.Calibration;
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
  * @version Nov 5, 2015
  */
-public class ParametersProcessing {
+public class ParametersProcessor {
 
 	SegPombeMainDialog mainDialog;
 	SegPombeParameters parameters;
@@ -24,7 +24,7 @@ public class ParametersProcessing {
 	/*
 	 * constructor 1: Call this constructor when using SegmentPomobe interface
 	 */
-	public ParametersProcessing(SegPombeMainDialog mainDialog) {
+	public ParametersProcessor(SegPombeMainDialog mainDialog) {
 		this.mainDialog = mainDialog;
 		this.parameters = new SegPombeParameters();
 		this.unitsChecked = false;
@@ -33,7 +33,7 @@ public class ParametersProcessing {
 	/*
 	 * constructor 2: Call this constructor when using MAARS
 	 */
-	public ParametersProcessing(SegPombeParameters parameters) {
+	public ParametersProcessor(SegPombeParameters parameters) {
 		this.parameters = parameters;
 		this.imgToAnalysis = parameters.getImageToAnalyze();
 	}

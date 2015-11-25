@@ -122,7 +122,7 @@ public class MAARS {
 					mfa.saveCroppedImgs();
 				}
 				// close roi manager
-				// mfa.getSetOfCells().closeRoiManager();
+				mfa.getSetOfCells().closeRoiManager();
 			}
 		}
 		mmc.setAutoShutter(true);

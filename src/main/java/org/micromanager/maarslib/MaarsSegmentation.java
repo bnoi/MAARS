@@ -1,7 +1,7 @@
 package org.micromanager.maarslib;
 
 import org.micromanager.maars.MaarsParameters;
-import org.micromanager.segmentPombe.ParametersProcessing;
+import org.micromanager.segmentPombe.ParametersProcessor;
 import org.micromanager.segmentPombe.SegPombe;
 import org.micromanager.segmentPombe.SegPombeParameters;
 import org.micromanager.utils.FileUtils;
@@ -70,7 +70,7 @@ public class MaarsSegmentation {
 		segPombeParam.getImageToAnalyze().getCalibration().pixelDepth = Double
 				.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 		//Calibrate parameters
-		ParametersProcessing process = new ParametersProcessing(segPombeParam);
+		ParametersProcessor process = new ParametersProcessor(segPombeParam);
 
 		process.checkImgUnitsAndScale();
 		process.changeScale(
