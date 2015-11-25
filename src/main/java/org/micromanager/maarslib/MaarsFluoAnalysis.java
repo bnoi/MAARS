@@ -43,7 +43,7 @@ public class MaarsFluoAnalysis {
 		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath()
 				+ "/movie_X" + Math.round(this.positionX) + "_Y"
 				+ Math.round(this.positionY) + "_FLUO");
-		if (!FileUtils.isValid(pathToFluoDir)){
+		if (!FileUtils.exists(pathToFluoDir)){
 			FileUtils.createFolder(pathToFluoDir);
 		}
 		System.out.println("Initialize set of cells...");

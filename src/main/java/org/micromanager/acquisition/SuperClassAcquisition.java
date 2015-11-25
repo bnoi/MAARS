@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.Image;
@@ -18,6 +21,7 @@ import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.FileUtils;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -111,19 +115,19 @@ public class SuperClassAcquisition {
 	/**
 	 * create a Datastore (a .tiff file with metadata in most of the case)
 	 * 
-	 * @param pathToMovie
+	 * @param pathToMovieFolder
 	 * @return
 	 */
-	public Datastore createDataStore(String pathToMovie) {
+	public Datastore createDataStore(String pathToMovieFolder) {
 		ReportingUtils.logMessage("... Initialize a Datastore");
 		Datastore ds = null;
-		if (!FileUtils.isValid(pathToMovie)) {
-			FileUtils.createFolder(pathToMovie);
+		if (!FileUtils.exists(pathToMovieFolder)) {
+			FileUtils.createFolder(pathToMovieFolder);
 		}
 		try {
 			// 1st false = do not generate separate metadata
 			// 2nd false = do not split positions
-			ds = mm.getDataManager().createMultipageTIFFDatastore(pathToMovie,
+			ds = mm.getDataManager().createMultipageTIFFDatastore(pathToMovieFolder,
 					false, false);
 		} catch (IOException e3) {
 			ReportingUtils.logMessage("... Can not initialize Datastore");

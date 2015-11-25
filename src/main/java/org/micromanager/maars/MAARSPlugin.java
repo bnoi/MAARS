@@ -65,7 +65,7 @@ public class MAARSPlugin implements MenuPlugin, SciJavaPlugin {
 	public void onPluginSelected() {
 		String configFileName = "maars_config.xml";
 		InputStream inStream = null;
-		if (FileUtils.isValid(configFileName)) {
+		if (FileUtils.exists(configFileName)) {
 			try {
 				inStream = new FileInputStream(configFileName);
 			} catch (FileNotFoundException e) {

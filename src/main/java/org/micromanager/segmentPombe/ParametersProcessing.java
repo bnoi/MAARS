@@ -46,7 +46,7 @@ public class ParametersProcessing {
 		// check if saving path is valid
 		System.out.println("Checking if saving path is valid");
 		String savePath = mainDialog.getSaveDirTf().getText();
-		if (!FileUtils.isValid(savePath)) {
+		if (!FileUtils.exists(savePath)) {
 			IJ.error("Invalid saving path");
 			mainDialog.getSaveDirTf().setBackground(Color.ORANGE);
 			return false;
@@ -56,7 +56,7 @@ public class ParametersProcessing {
 		// check if image path is valid
 		System.out.println("Checking if path to image is valid");
 		String pathToImg = savePath + mainDialog.getImgNameTf().getText();
-		if (!FileUtils.isValid(pathToImg)) {
+		if (!FileUtils.exists(pathToImg)) {
 			IJ.error("Invalid movie path");
 			mainDialog.getImgNameTf().setBackground(Color.ORANGE);
 			return false;

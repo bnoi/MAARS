@@ -1,6 +1,5 @@
 package org.micromanager.gui;
 
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -13,11 +12,13 @@ import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
@@ -32,6 +33,7 @@ import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MAARS;
 import org.micromanager.maars.MAARSNoAcq;
 import org.micromanager.maars.MaarsParameters;
+import org.micromanager.utils.FileUtils;
 
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
@@ -48,16 +50,16 @@ public class MaarsMainDialog implements ActionListener {
 	private final CMMCore mmc;
 	private MaarsParameters parameters;
 	private final double calibration;
-	private Button autofocusButton;
-	private Button okMainDialogButton;
-	private Button segmButton;
-	private Button fluoAnalysisButton;
+	private JButton autofocusButton;
+	private JButton okMainDialogButton;
+	private JButton segmButton;
+	private JButton fluoAnalysisButton;
 	private JFormattedTextField savePathTf;
 	private JFormattedTextField widthTf;
 	private JFormattedTextField heightTf;
 	private JFormattedTextField fluoAcqDurationTf;
 	private JCheckBox saveParametersChk;
-	private JCheckBox withOutAcq;
+	private JCheckBox withOutAcqChk;
 	private JRadioButton dynamicOpt;
 	private JRadioButton staticOpt;
 
@@ -179,18 +181,24 @@ public class MaarsMainDialog implements ActionListener {
 
 		// autofocus button
 
-		autofocusButton = new Button("Autofocus");
+		JPanel autoFocusPanel = new JPanel(new GridLayout(1, 0));
+		autofocusButton = new JButton("Autofocus");
 		autofocusButton.addActionListener(this);
+		autoFocusPanel.add(autofocusButton);
 
 		// segmentation button
 
-		segmButton = new Button("Segmentation");
+		JPanel segPanel = new JPanel(new GridLayout(1, 0));
+		segmButton = new JButton("Segmentation");
 		segmButton.addActionListener(this);
+		segPanel.add(segmButton);
 
 		// fluo analysis button
 
-		fluoAnalysisButton = new Button("Fluorescent analysis");
+		JPanel fluoAnalysisPanel = new JPanel(new GridLayout(1, 0));
+		fluoAnalysisButton = new JButton("Fluorescent analysis");
 		fluoAnalysisButton.addActionListener(this);
+		fluoAnalysisPanel.add(fluoAnalysisButton);
 
 		// strategy panel (2 radio button + 1 textfield + 1 label)
 
@@ -218,10 +226,12 @@ public class MaarsMainDialog implements ActionListener {
 
 		// checkbox : update or not MAARS parameters
 
-		JPanel savingPathChkPanel = new JPanel(new GridLayout(1, 0));
-		savingPathChkPanel.setBackground(bgColor);
+		JPanel chkPanel = new JPanel(new GridLayout(1, 0));
+		chkPanel.setBackground(bgColor);
 		saveParametersChk = new JCheckBox("Save parameters", true);
-		savingPathChkPanel.add(saveParametersChk);
+		withOutAcqChk = new JCheckBox("Don't do acquisition", true);
+		chkPanel.add(withOutAcqChk);
+		chkPanel.add(saveParametersChk);
 
 		// Saving path Panel
 
@@ -237,14 +247,13 @@ public class MaarsMainDialog implements ActionListener {
 		savePathTf.setMaximumSize(new Dimension(maxDialogWidth, 1));
 		savePathTfPanel.add(savePathTf);
 
-		//
-
-		withOutAcq = new JCheckBox();
-
 		// Ok button to run
 
-		okMainDialogButton = new Button("OK");
+		JPanel okPanel = new JPanel(new GridLayout(1, 0));
+		okMainDialogButton = new JButton("OK");
 		okMainDialogButton.addActionListener(this);
+		mainDialog.getRootPane().setDefaultButton(okMainDialogButton);
+		okPanel.add(okMainDialogButton);
 
 		// ------------set up and add components to Panel then to
 		// Frame---------------//
@@ -257,14 +266,14 @@ public class MaarsMainDialog implements ActionListener {
 		mainPanel.add(heightPanel);
 		mainPanel.add(numFieldLabel);
 		mainPanel.add(analysisParamLabel);
-		mainPanel.add(autofocusButton);
-		mainPanel.add(segmButton);
-		mainPanel.add(fluoAnalysisButton);
+		mainPanel.add(autoFocusPanel);
+		mainPanel.add(segPanel);
+		mainPanel.add(fluoAnalysisPanel);
 		mainPanel.add(strategyPanel);
-		mainPanel.add(savingPathChkPanel);
+		mainPanel.add(chkPanel);
 		mainPanel.add(savePathLabelPanel);
 		mainPanel.add(savePathTfPanel);
-		mainPanel.add(okMainDialogButton);
+		mainPanel.add(okPanel);
 		mainDialog.add(mainPanel);
 		ReportingUtils.logMessage("Done.");
 		mainDialog.pack();
@@ -360,6 +369,15 @@ public class MaarsMainDialog implements ActionListener {
 		}
 	}
 
+	public int overWriteOrNot(String path) {
+		int decision = 0;
+		if (FileUtils.exists(path + "/movie_X0_Y0/MMStack.ome.tif")) {
+			decision = JOptionPane.showConfirmDialog(mainDialog,
+					"Overwrite existing files?");
+		}
+		return decision;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == autofocusButton) {
@@ -369,10 +387,16 @@ public class MaarsMainDialog implements ActionListener {
 				IJ.error("Session aborted, 0 field to analyse");
 			} else {
 				saveParameters();
-				hide();
 				try {
-					new MAARS(mm, mmc, parameters);
-					// new MAARSNoAcq(mmc, parameters);
+					if (withOutAcqChk.isSelected()) {
+						hide();
+						new MAARSNoAcq(mmc, parameters);
+					} else {
+						if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
+							hide();
+							new MAARS(mm, mmc, parameters);
+						}
+					}
 				} catch (Exception e1) {
 					System.out.println("Errors : reset MM configuration");
 					try {

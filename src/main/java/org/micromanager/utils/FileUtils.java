@@ -16,19 +16,15 @@ import ij.IJ;
  * @version Nov 4, 2015
  */
 public class FileUtils {
+	
 	/**
 	 * test if the path exists
 	 * 
 	 * @param path
 	 * @return : true or false
 	 */
-	public static boolean isValid(String path) {
-		File f = new File(path);
-		if (f.exists()) {
-			return true;
-		} else {
-			return false;
-		}
+	public  static boolean exists(String path){
+		return new File(path).exists();
 	}
 
 	/**
@@ -60,7 +56,7 @@ public class FileUtils {
 	public static void writeSpotFeatures(String path, int cellNb,
 			String channel, Model model) {
 		String spotsFolder = path + "/spots/";
-		if (!isValid(spotsFolder)) {
+		if (!exists(spotsFolder)) {
 			new File(spotsFolder).mkdir();
 		}
 		File newFile = new File(spotsFolder + String.valueOf(cellNb) + "_"
