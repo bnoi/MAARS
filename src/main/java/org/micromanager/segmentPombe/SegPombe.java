@@ -73,6 +73,10 @@ public class SegPombe {
 
 	private boolean roiDetected = true;
 
+	private PrintStream ps;
+	private PrintStream curr_err;
+	private PrintStream curr_out;
+
 	/**
 	 * Constructor
 	 */
@@ -81,7 +85,10 @@ public class SegPombe {
 		this.savingPath = parameters.getSavingPath();
 
 		try {
-			PrintStream ps = new PrintStream(savingPath + imageToAnalyze.getShortTitle() + "_Segmentation.LOG");
+			ps = new PrintStream(savingPath + imageToAnalyze.getShortTitle()
+					+ "_Segmentation.LOG");
+			curr_err = System.err;
+			curr_out = System.out;
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
@@ -130,7 +137,8 @@ public class SegPombe {
 
 		if (saveFocusImage) {
 			FileSaver fileSaver = new FileSaver(focusImg);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_FocusImage.tif");
+			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
+					+ "_FocusImage.tif");
 		}
 		System.out.println("FocusImage saved.");
 	}
@@ -142,10 +150,12 @@ public class SegPombe {
 	public void createCorrelationImage() {
 
 		System.out.println("creating correlation image");
-		System.out.println("Width : " + String.valueOf(imageToAnalyze.getWidth()) + ", Height : "
+		System.out.println("Width : "
+				+ String.valueOf(imageToAnalyze.getWidth()) + ", Height : "
 				+ String.valueOf(imageToAnalyze.getHeight()));
 		int nbProcessor = Runtime.getRuntime().availableProcessors();
-		System.out.println("Compute correlation with " + nbProcessor + " processor");
+		System.out.println("Compute correlation with " + nbProcessor
+				+ " processor");
 		ImageSplitter splitter = new ImageSplitter(imageToAnalyze, nbProcessor);
 		int xPosition = 0;
 		ImagePlus subImg;
@@ -157,24 +167,28 @@ public class SegPombe {
 			if (widths[0] == widths[1] || i != nbProcessor - 1) {
 				IJ.showStatus("Computing correlation image");
 				subImg = splitter.crop(xPosition, (int) widths[0]);
-				task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
+				task = executor.submit(new ComputeImageCorrelation(subImg,
+						zFocus, sigma, direction));
 				map.put(xPosition, task);
 				xPosition += widths[0];
 			} else {
 				subImg = splitter.crop(xPosition, (int) widths[1]);
-				task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
+				task = executor.submit(new ComputeImageCorrelation(subImg,
+						zFocus, sigma, direction));
 				map.put(xPosition, task);
 
 			}
 		}
-		imgCorrTempProcessor = new FloatProcessor(imageToAnalyze.getWidth(), imageToAnalyze.getHeight());
+		imgCorrTempProcessor = new FloatProcessor(imageToAnalyze.getWidth(),
+				imageToAnalyze.getHeight());
 		try {
 			for (int xPos : map.keySet()) {
 				FloatProcessor processor = map.get(xPos).get();
 				for (int x = 0; x < processor.getWidth(); x++) {
 					IJ.showStatus("Computing correlation image");
 					for (int y = 0; y < processor.getHeight(); y++) {
-						imgCorrTempProcessor.putPixel(x + xPos, y, processor.get(x, y));
+						imgCorrTempProcessor.putPixel(x + xPos, y,
+								processor.get(x, y));
 					}
 				}
 			}
@@ -197,7 +211,8 @@ public class SegPombe {
 		System.out.println("Convert correlation image to binary image");
 
 		byteImage = imgCorrTempProcessor.convertToByteProcessor(true);
-		byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false, BinaryProcessor.BLACK_AND_WHITE_LUT);
+		byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false,
+				BinaryProcessor.BLACK_AND_WHITE_LUT);
 
 		// image pre-processing
 		byteImage.dilate();
@@ -230,17 +245,22 @@ public class SegPombe {
 
 		roiManager = new RoiManager();
 
-		imgCorrTemp = new ImagePlus("Correlation Image of " + imageToAnalyze.getShortTitle(), imgCorrTempProcessor);
+		imgCorrTemp = new ImagePlus("Correlation Image of "
+				+ imageToAnalyze.getShortTitle(), imgCorrTempProcessor);
 
 		particleAnalyzer = new ParticleAnalyzer(
-				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.SHOW_PROGRESS
+				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
+						+ ParticleAnalyzer.SHOW_PROGRESS
 						+ ParticleAnalyzer.ADD_TO_MANAGER,
-				Measurements.AREA + Measurements.CENTROID + Measurements.PERIMETER + Measurements.SHAPE_DESCRIPTORS
-						+ Measurements.ELLIPSE,
+				Measurements.AREA + Measurements.CENTROID
+						+ Measurements.PERIMETER
+						+ Measurements.SHAPE_DESCRIPTORS + Measurements.ELLIPSE,
 				resultTable, minParticleInMicron, maxParticleInMicron);
 
-		System.out.println("minParticleSize " + minParticleInMicron + " maxParticleSize " + maxParticleInMicron);
-		System.out.println("Analyse particles on " + binCorrelationImage.getTitle() + " ...");
+		System.out.println("minParticleSize " + minParticleInMicron
+				+ " maxParticleSize " + maxParticleInMicron);
+		System.out.println("Analyse particles on "
+				+ binCorrelationImage.getTitle() + " ...");
 
 		particleAnalyzer.analyze(binCorrelationImage);
 		System.out.println("Done");
@@ -259,36 +279,34 @@ public class SegPombe {
 					System.out.println("- get roi as array");
 
 					roiArray = roiManager.getRoisAsArray();
-					System.out.println("- select and delete all roi from roi manager");
+					System.out
+							.println("- select and delete all roi from roi manager");
 
-					roiManager.removeAll();
-//					roiManager.runCommand("Select All");
-//					roiManager.runCommand("Delete");
+					roiManager.runCommand("Select All");
+					roiManager.runCommand("Delete");
 
 					System.out.println("- initialize analyser");
 
-					analyzer = new Analyzer(imgCorrTemp,
-							Measurements.AREA + Measurements.STD_DEV + Measurements.MIN_MAX
-									+ Measurements.SHAPE_DESCRIPTORS + Measurements.MEAN + Measurements.CENTROID
-									+ Measurements.PERIMETER + Measurements.ELLIPSE,
+					analyzer = new Analyzer(imgCorrTemp, Measurements.AREA
+							+ Measurements.STD_DEV + Measurements.MIN_MAX
+							+ Measurements.SHAPE_DESCRIPTORS
+							+ Measurements.MEAN + Measurements.CENTROID
+							+ Measurements.PERIMETER + Measurements.ELLIPSE,
 							resultTable);
 
-					System.out.println("- analyze each roi and add it to manager if it is wanted");
-					for (Roi roi :roiArray) {
+					System.out
+							.println("- analyze each roi and add it to manager if it is wanted");
+					for (Roi roi : roiArray) {
 						roi.setImage(imgCorrTemp);
 						imgCorrTemp.setRoi(roi);
 						analyzer.measure();
 					}
-
-//					for (int i = 0; i < roiArray.length; i++) {
-//						roiArray[i].setImage(imgCorrTemp);
-//						imgCorrTemp.setRoi(roiArray[i]);
-//						analyzer.measure();
-//					}
 					imgCorrTemp.deleteRoi();
 
-					System.out.println("- delete from result table roi unwanted");
-					for (int i = 0; i < resultTable.getColumn(ResultsTable.MEAN).length; i++) {
+					System.out
+							.println("- delete from result table roi unwanted");
+					for (int i = 0; i < resultTable
+							.getColumn(ResultsTable.MEAN).length; i++) {
 
 						if (resultTable.getValue("Mean", i) <= meanGreyValueThreshold) {
 							rowTodelete.add(i);
@@ -307,15 +325,18 @@ public class SegPombe {
 					System.out.println("Filtering with solidity...");
 					System.out.println("- get roi as array");
 					roiArray = roiManager.getRoisAsArray();
-					System.out.println("- select and delete all roi from roi manager");
+					System.out
+							.println("- select and delete all roi from roi manager");
 					roiManager.runCommand("Select All");
 					roiManager.runCommand("Delete");
 
 					ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
 					int name = 1;
 
-					System.out.println("- delete from result table roi unwanted");
-					for (int i = 0; i < resultTable.getColumn(ResultsTable.SOLIDITY).length; i++) {
+					System.out
+							.println("- delete from result table roi unwanted");
+					for (int i = 0; i < resultTable
+							.getColumn(ResultsTable.SOLIDITY).length; i++) {
 						if (resultTable.getValue("Solidity", i) <= solidityThreshold) {
 							rowTodelete.add(i);
 						} else {
@@ -357,7 +378,8 @@ public class SegPombe {
 		if (saveDataFrame && roiDetected) {
 			System.out.println("saving data frame...");
 			try {
-				resultTable.saveAs(savingPath + imageToAnalyze.getShortTitle() + "_Results.csv");
+				resultTable.saveAs(savingPath + imageToAnalyze.getShortTitle()
+						+ "_Results.csv");
 			} catch (IOException io) {
 				IJ.error("Error", "Could not save DataFrame");
 			}
@@ -375,13 +397,13 @@ public class SegPombe {
 		if (saveRoi && roiDetected) {
 			System.out.println("saving roi...");
 			roiManager.runCommand("Select All");
-			roiManager.runCommand("Save", savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
+			roiManager.runCommand("Save",
+					savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
 			System.out.println("Done");
-			roiManager.removeAll();
-//			roiManager.runCommand("Select All");
-//			roiManager.runCommand("Delete");
+			roiManager.runCommand("Select All");
+			roiManager.runCommand("Delete");
 			System.out.println("Close roi manager");
-			roiManager.close();
+			// roiManager.close();
 		}
 
 		if (showFocusImage) {
@@ -394,9 +416,11 @@ public class SegPombe {
 
 		if (saveBinaryImg) {
 			System.out.println("save binary image");
-			binCorrelationImage.setTitle(imageToAnalyze.getShortTitle() + "_BinaryImage");
+			binCorrelationImage.setTitle(imageToAnalyze.getShortTitle()
+					+ "_BinaryImage");
 			FileSaver fileSaver = new FileSaver(binCorrelationImage);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_BinaryImage.tif");
+			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
+					+ "_BinaryImage.tif");
 		}
 		if (showBinaryImg) {
 			System.out.println("show binary image");
@@ -408,9 +432,11 @@ public class SegPombe {
 
 		if (saveCorrelationImg) {
 			System.out.println("save correlation image");
-			imgCorrTemp.setTitle(imageToAnalyze.getShortTitle() + "_CorrelationImage");
+			imgCorrTemp.setTitle(imageToAnalyze.getShortTitle()
+					+ "_CorrelationImage");
 			FileSaver fileSaver = new FileSaver(imgCorrTemp);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle() + "_CorrelationImage.tif");
+			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
+					+ "_CorrelationImage.tif");
 		}
 		if (showCorrelationImg) {
 			System.out.println("show correlation image");
@@ -423,6 +449,9 @@ public class SegPombe {
 			System.out.println("flush image to analyze");
 			imageToAnalyze.flush();
 		}
+		ps.close();
+		System.setOut(curr_out);
+		System.setErr(curr_err);
 	}
 
 	public int getDirection() {

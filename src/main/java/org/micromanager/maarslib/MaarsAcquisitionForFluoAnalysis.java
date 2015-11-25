@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import mmcorej.CMMCore;
 
-import org.micromanager.gui.MaarsMainDialog;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.data.Datastore;
@@ -20,7 +19,6 @@ import org.micromanager.maars.MaarsParameters;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
-import ij.plugin.ZProjector;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 

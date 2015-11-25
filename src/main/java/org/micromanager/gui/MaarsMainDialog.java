@@ -9,9 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -59,6 +57,7 @@ public class MaarsMainDialog implements ActionListener {
 	private JFormattedTextField heightTf;
 	private JFormattedTextField fluoAcqDurationTf;
 	private JCheckBox saveParametersChk;
+	private JCheckBox withOutAcq;
 	private JRadioButton dynamicOpt;
 	private JRadioButton staticOpt;
 
@@ -85,7 +84,8 @@ public class MaarsMainDialog implements ActionListener {
 		// initialize mainFrame
 
 		ReportingUtils.logMessage("create main dialog ...");
-		mainDialog = new JFrame("Mitosis Analysing And Recording System - MAARS");
+		mainDialog = new JFrame(
+				"Mitosis Analysing And Recording System - MAARS");
 		JFrame.setDefaultLookAndFeelDecorated(true);
 		mainDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -98,8 +98,10 @@ public class MaarsMainDialog implements ActionListener {
 
 		// Get number of field to explore
 
-		int defaultXFieldNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
-		int defaultYFieldNumber = parameters.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
+		int defaultXFieldNumber = parameters
+				.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
+		int defaultYFieldNumber = parameters
+				.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
 
 		// Calculate width and height for each field
 
@@ -166,11 +168,13 @@ public class MaarsMainDialog implements ActionListener {
 
 		// number of field label
 
-		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber * defaultYFieldNumber);
+		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber
+				* defaultYFieldNumber);
 
 		// analysis parameters label
 
-		Label analysisParamLabel = new Label("Analysis parameters", SwingConstants.CENTER);
+		Label analysisParamLabel = new Label("Analysis parameters",
+				SwingConstants.CENTER);
 		analysisParamLabel.setBackground(labelColor);
 
 		// autofocus button
@@ -207,7 +211,8 @@ public class MaarsMainDialog implements ActionListener {
 		strategyPanel.add(staticOpt);
 		strategyPanel.add(dynamicOpt);
 		fluoAcqDurationTf = new JFormattedTextField(Double.class);
-		fluoAcqDurationTf.setValue(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT));
+		fluoAcqDurationTf.setValue(parameters
+				.getFluoParameter(MaarsParameters.TIME_LIMIT));
 		strategyPanel.add(fluoAcqDurationTf);
 		strategyPanel.add(new JLabel("min", SwingConstants.CENTER));
 
@@ -231,6 +236,10 @@ public class MaarsMainDialog implements ActionListener {
 		savePathTf = new JFormattedTextField(parameters.getSavingPath());
 		savePathTf.setMaximumSize(new Dimension(maxDialogWidth, 1));
 		savePathTfPanel.add(savePathTf);
+
+		//
+
+		withOutAcq = new JCheckBox();
 
 		// Ok button to run
 
@@ -301,8 +310,10 @@ public class MaarsMainDialog implements ActionListener {
 		newWidth = (Double) widthTf.getValue();
 		newHeigth = (Double) widthTf.getValue();
 
-		int newXFieldNumber = (int) Math.round(newWidth / (calibration * mmc.getImageWidth()));
-		int newYFieldNumber = (int) Math.round(newHeigth / (calibration * mmc.getImageHeight()));
+		int newXFieldNumber = (int) Math.round(newWidth
+				/ (calibration * mmc.getImageWidth()));
+		int newYFieldNumber = (int) Math.round(newHeigth
+				/ (calibration * mmc.getImageHeight()));
 		int totoalNbField = newXFieldNumber * newYFieldNumber;
 		if (totoalNbField == 0) {
 			numFieldLabel.setForeground(Color.red);
@@ -312,8 +323,10 @@ public class MaarsMainDialog implements ActionListener {
 			numFieldLabel.setText("Number of field : " + totoalNbField);
 		}
 
-		parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, "" + newXFieldNumber);
-		parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, "" + newYFieldNumber);
+		parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, ""
+				+ newXFieldNumber);
+		parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, ""
+				+ newYFieldNumber);
 	}
 
 	/**
@@ -323,8 +336,10 @@ public class MaarsMainDialog implements ActionListener {
 		if (!savePathTf.getText().equals(parameters.getSavingPath())) {
 			parameters.setSavingPath(savePathTf.getText());
 		}
-		if (!fluoAcqDurationTf.getText().equals(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
-			parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
+		if (!fluoAcqDurationTf.getText().equals(
+				parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
+			parameters.setFluoParameter(MaarsParameters.TIME_LIMIT,
+					fluoAcqDurationTf.getText());
 		}
 		try {
 			parameters.save();
@@ -355,10 +370,10 @@ public class MaarsMainDialog implements ActionListener {
 			} else {
 				saveParameters();
 				hide();
-				try{
+				try {
 					new MAARS(mm, mmc, parameters);
-//					new MAARSNoAcq(mm, mmc, parameters);
-				}catch (Exception e1){
+					// new MAARSNoAcq(mmc, parameters);
+				} catch (Exception e1) {
 					System.out.println("Errors : reset MM configuration");
 					try {
 						getMMC().reset();

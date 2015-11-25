@@ -4,14 +4,11 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.apache.batik.css.engine.value.css2.DisplayManager;
-import org.micromanager.gui.MaarsMainDialog;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.SummaryMetadata;
 import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
-import org.micromanager.display.DisplaySettings;
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 

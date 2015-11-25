@@ -2,11 +2,7 @@ package org.micromanager.acquisition;
 
 import mmcorej.CMMCore;
 
-import org.micromanager.data.Datastore;
-import org.micromanager.data.DatastoreFrozenException;
-import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 
 import ij.ImagePlus;
@@ -40,7 +36,7 @@ public class FluoAcquisition extends SuperClassAcquisition {
 		super(mm, mmc, parameters, positionX, positionY);
 	}
 
-	public ImagePlus acquire(int frame, String channelName){
+	public ImagePlus acquire(int frame, String channelName) {
 		return super.acquire(frame, channelName);
 	}
 }

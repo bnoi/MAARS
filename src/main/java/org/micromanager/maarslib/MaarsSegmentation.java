@@ -109,7 +109,7 @@ public class MaarsSegmentation {
 		System.out.println("Segmentation done");
 		if (segPombe.roiDetected()) {
 			this.roiDetected = true;
-			segPombe.getRoiManager().close();
+//			segPombe.getRoiManager().close();
 		}else{
 			System.out.println("No ROI detected!! Stop here!");
 		}

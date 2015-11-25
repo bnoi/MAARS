@@ -1,5 +1,4 @@
 package org.micromanager.cellstateanalysis;
-//package fiji.plugin.maars.cellstateanalysis;
 //
 ///**
 // *@author Tong LI, mail:tongli.bioinfo@gmail.com

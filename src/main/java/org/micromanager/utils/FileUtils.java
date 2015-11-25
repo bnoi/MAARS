@@ -103,8 +103,6 @@ public class FileUtils {
 	 */
 	public static void createFolder(String pathToFluoDir){
 		File fluoDir = new File(pathToFluoDir);
-		if (!fluoDir.exists()) {
-			fluoDir.mkdirs();
-		}
+		fluoDir.mkdirs();
 	}
 }

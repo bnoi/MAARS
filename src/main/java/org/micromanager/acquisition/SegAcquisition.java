@@ -2,11 +2,7 @@ package org.micromanager.acquisition;
 
 import mmcorej.CMMCore;
 
-import org.micromanager.data.Datastore;
-import org.micromanager.data.DatastoreFrozenException;
-import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 
 import ij.ImagePlus;
@@ -16,12 +12,6 @@ import ij.ImagePlus;
  * @version Nov 19, 2015
  */
 public class SegAcquisition extends SuperClassAcquisition {
-
-//	private MMStudio mm;
-//	private CMMCore mmc;;
-//	private double range;
-//	private double step;
-//	private int sliceNumber;
 
 	/**
 	 * Constructor :
@@ -37,14 +27,12 @@ public class SegAcquisition extends SuperClassAcquisition {
 	 * @param positionY
 	 *            : y field position (can be defined by ExplorationXYPositions)
 	 */
-	public SegAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, double positionX, double positionY) {
+	public SegAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters,
+			double positionX, double positionY) {
 		super(mm, mmc, parameters, positionX, positionY);
-//		this.range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
-//		this.step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
-//		this.sliceNumber = (int) Math.round(range / step);
 	}
-	
-	public ImagePlus acquire(String channelName){
+
+	public ImagePlus acquire(String channelName) {
 		return super.acquire(0, channelName);
 	}
 }
