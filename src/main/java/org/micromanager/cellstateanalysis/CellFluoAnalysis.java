@@ -52,12 +52,12 @@ public class CellFluoAnalysis {
 
 		this.cell = cell;
 		this.factory = factory;
-		ImagePlus croppedFluoImg = cell.getCroppedFluoImage();
-		croppedFluoImg.deleteRoi();
+		ImagePlus fluoImg = cell.getFluoImage();
+		fluoImg.deleteRoi();
 		model = new Model();
 
 		settings = new Settings();
-		settings.setFrom(croppedFluoImg);
+		settings.setFrom(fluoImg);
 
 		// Computer different features (in order)
 

@@ -253,7 +253,7 @@ public class SuperClassAcquisition {
 			z = z + step;
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
-		mm.getDisplayManager().closeAllDisplayWindows(false);
+//		mm.getDisplayManager().closeAllDisplayWindows(false);
 		try {
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.setShutterOpen(false);
@@ -284,7 +284,6 @@ public class SuperClassAcquisition {
 				e.printStackTrace();
 			}
 		}
-		mm.data().createRAMDatastore().getSummaryMetadata();
 		ds.freeze();
 		// ImagePlus for analysis
 		ImagePlus imagePlus = new ImagePlus(imgName, imageStack);

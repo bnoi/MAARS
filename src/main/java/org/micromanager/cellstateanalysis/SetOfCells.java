@@ -49,13 +49,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 *            : path indicating where results of analysis should be stored
 	 */
 	public SetOfCells(SegPombeParameters parameters) {
-		ImagePlus bfImage = parameters.getImageToAnalyze();
-		int focusSlice = (int) Math.round(parameters.getImageToAnalyze()
-				.getNSlices() / 2);
-
-		ImagePlus focusImg = new ImagePlus(bfImage.getShortTitle(), bfImage
-				.getStack().getProcessor(focusSlice));
-		focusImg.setCalibration(bfImage.getCalibration());
 		try {
 			PrintStream ps = new PrintStream(parameters.getSavingPath()
 					+ "CellStateAnalysis.LOG");
@@ -72,7 +65,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
-			cellArray.add(i, new Cell(focusImg, roiArray[i], i, rt));
+			cellArray.add(i, new Cell(roiArray[i], i, rt));
 		}
 		ReportingUtils.logMessage("Done.");
 	}
@@ -125,24 +118,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 */
 	public Cell getCell(int index) {
 		return cellArray.get(index);
-	}
-
-	/**
-	 * Method to get Cell index using coordinates of centroid
-	 * 
-	 * @param xCentroid
-	 * @param yCentroid
-	 * @return index of cell if there is any, -1 otherwise
-	 */
-	public int getCellIndex(double xCentroid, double yCentroid) {
-		int index = 0;
-		for (Cell cell : cellArray) {
-			if (cell.getMeasures().getXCentroid() == xCentroid
-					&& cell.getMeasures().getYCentroid() == yCentroid) {
-				return cell.getCellNumber();
-			}
-		}
-		return index;
 	}
 
 	public RoiManager getROIManager() {

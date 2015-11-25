@@ -2,13 +2,17 @@ package org.micromanager.maarslib;
 
 import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.CellChannelFactory;
+import org.micromanager.cellstateanalysis.Measures;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.segmentPombe.SegPombeParameters;
 import org.micromanager.utils.FileUtils;
+import org.micromanager.utils.ImgUtils;
 
 import ij.ImagePlus;
+import ij.gui.Roi;
+import ij.measure.Calibration;
 import ij.plugin.ZProjector;
 
 /**
@@ -25,6 +29,8 @@ public class MaarsFluoAnalysis {
 	private double positionX;
 	private double positionY;
 	private ImagePlus fluoImg;
+	private ImagePlus focusImg;
+	private Calibration bfImgCal;
 	private CellChannelFactory currentFactory;
 	private int currentFrame;
 
@@ -34,18 +40,23 @@ public class MaarsFluoAnalysis {
 	 * @param parameters
 	 *            : parameters used for algorithm
 	 */
-	public MaarsFluoAnalysis(MaarsParameters parameters,
-			SegPombeParameters segParam, double positionX, double positionY) {
-
+	public MaarsFluoAnalysis(MaarsParameters parameters, SegPombeParameters segParam, double positionX,
+			double positionY) {
 		this.parameters = parameters;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath()
-				+ "/movie_X" + Math.round(this.positionX) + "_Y"
-				+ Math.round(this.positionY) + "_FLUO");
-		if (!FileUtils.exists(pathToFluoDir)){
+		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(this.positionX)
+				+ "_Y" + Math.round(this.positionY) + "_FLUO");
+		if (!FileUtils.exists(pathToFluoDir)) {
 			FileUtils.createFolder(pathToFluoDir);
 		}
+		this.bfImgCal = segParam.getImageToAnalyze().getCalibration();
+		ImagePlus bfImage = segParam.getImageToAnalyze();
+		int focusSlice = (int) Math.round(segParam.getImageToAnalyze().getNSlices() / 2);
+
+		focusImg = new ImagePlus(bfImage.getShortTitle(), bfImage.getStack().getProcessor(focusSlice));
+		focusImg.setCalibration(bfImage.getCalibration());
+
 		System.out.println("Initialize set of cells...");
 		soc = new SetOfCells(segParam);
 
@@ -82,30 +93,18 @@ public class MaarsFluoAnalysis {
 	}
 
 	/**
-	 * z-projection of fluoImage with max_intesity
-	 */
-	public void zProject() {
-		ZProjector projector = new ZProjector();
-		projector.setMethod(ZProjector.MAX_METHOD);
-		projector.setImage(this.fluoImg);
-		projector.doProjection();
-		ImagePlus imgProject = projector.getProjection();
-		imgProject.setCalibration(fluoImg.getCalibration());
-		this.fluoImg = imgProject;
-
-	}
-
-	/**
 	 * crop all cells with cells' roi
 	 */
 	public void cropAllCells() {
 
 		ReportingUtils.logMessage("Cropping cell");
 		for (Cell cell : soc) {
+			cell.setFocusImage(ImgUtils.cropImgWithRoi(this.focusImg, cell.getCellShapeRoi()));
+			this.fluoImg = ImgUtils.unitCmToMicron(this.fluoImg);
+			double[] factors = ImgUtils.getRescaleFactor(bfImgCal, this.fluoImg.getCalibration());
+			Roi rescaledRoi = cell.rescaleRoi(factors);
+			this.fluoImg = ImgUtils.cropImgWithRoi(this.fluoImg, rescaledRoi);
 			cell.setFluoImage(this.fluoImg);
-			cell.rescaleRoiForFluoImg();
-			cell.cropFluoImage();
-			
 			cell.addCroppedFluoSlice();
 		}
 	}
@@ -123,11 +122,10 @@ public class MaarsFluoAnalysis {
 		for (Cell cell : soc) {
 			cell.setChannelRelated(currentFactory);
 			cell.setCurrentFrame(currentFrame);
+			cell.measureBfRoi();
 			cell.findFluoSpotTempFunction();
-
 			// can be optional
-			FileUtils.writeSpotFeatures(parameters.getSavingPath(),
-					cell.getCellNumber(), currentFactory.getChannel(),
+			FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(), currentFactory.getChannel(),
 					cell.getModelOf(currentFactory.getChannel()));
 		}
 		ReportingUtils.logMessage("Spots detection done...");

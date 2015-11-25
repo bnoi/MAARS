@@ -1,6 +1,9 @@
 package org.micromanager.maarslib;
 
+import org.micromanager.utils.ImgUtils;
+
 import ij.ImagePlus;
+import net.imglib2.util.ImgUtil;
 
 /**
  *@author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -21,8 +24,7 @@ public class FluoAnalyzer extends Thread {
 	}
 	
 	public void run(){
-		mfa.setFluoImage(fluoImage);
-		mfa.zProject();
+		mfa.setFluoImage(ImgUtils.zProject(fluoImage));
 		mfa.createCellChannelFactory(channel);
 		mfa.setCurrentFrame(frame);
 		mfa.cropAllCells();

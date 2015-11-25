@@ -1,0 +1,103 @@
+package org.micromanager.utils;
+
+import java.awt.Rectangle;
+
+import ij.ImagePlus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.plugin.RoiScaler;
+import ij.plugin.ZProjector;
+import ij.process.ImageProcessor;
+
+/**
+ * @author Tong LI, mail: tongli.bioinfo@gmail.com
+ * @version Nov 25, 2015
+ */
+public class ImgUtils {
+	/**
+	 * Do projection by using Max method to create a projection
+	 * 
+	 * @param img
+	 * @return
+	 */
+	public static ImagePlus zProject(ImagePlus img) {
+		ZProjector projector = new ZProjector();
+		projector.setMethod(ZProjector.MAX_METHOD);
+		projector.setImage(img);
+		projector.doProjection();
+		ImagePlus imgProject = projector.getProjection();
+		imgProject.setCalibration(img.getCalibration());
+		imgProject.setTitle(img.getTitle());
+		return imgProject;
+	}
+
+	public static ImagePlus unitCmToMicron(ImagePlus img) {
+		if (img.getCalibration().getUnit().equals("cm")) {
+			img.getCalibration().setUnit("micron");
+			img.getCalibration().pixelWidth = img.getCalibration().pixelWidth * 10000;
+			img.getCalibration().pixelHeight = img.getCalibration().pixelHeight * 10000;
+		}
+		return img;
+	}
+
+	public static ImagePlus cropImgWithRoi(ImagePlus img, Roi roi) {
+		ImageProcessor imgProcessor = img.getProcessor();
+		imgProcessor.setInterpolationMethod(ImageProcessor.BILINEAR);
+		Rectangle newRectangle = new Rectangle((int) roi.getXBase(), (int) roi.getYBase(), (int) roi.getBounds().width,
+				(int) roi.getBounds().height);
+		imgProcessor.setRoi(newRectangle);
+		ImagePlus croppedImg = new ImagePlus("croppedImage", imgProcessor.crop());
+		croppedImg.setCalibration(img.getCalibration());
+		Roi centeredRoi = centerCroppedRoi(roi);
+		croppedImg.setRoi(centeredRoi);
+		return croppedImg;
+	}
+
+	public static Roi centerCroppedRoi(Roi roi) {
+		int[] newXs = roi.getPolygon().xpoints;
+		int[] newYs = roi.getPolygon().ypoints;
+		int nbPoints = roi.getPolygon().npoints;
+		for (int i = 0; i < nbPoints; i++) {
+			newXs[i] = newXs[i] - (int) roi.getXBase();
+			newYs[i] = newYs[i] - (int) roi.getYBase();
+		}
+		;
+		float[] newXsF = new float[nbPoints];
+		float[] newYsF = new float[nbPoints];
+		for (int i = 0; i < nbPoints; i++) {
+			newXsF[i] = (float) newXs[i];
+			newYsF[i] = (float) newYs[i];
+		}
+		;
+		Roi croppedRoi = new PolygonRoi(newXsF, newYsF, Roi.POLYGON);
+		return croppedRoi;
+	}
+
+	public static double[] getRescaleFactor(Calibration cal1, Calibration cal2) {
+		double[] factors = new double[2];
+		if (cal1.equals(cal2)) {
+			factors[0] = 1;
+			factors[1] = 1;
+		} else {
+			factors[0] = cal1.pixelWidth / cal2.pixelWidth;
+			factors[1] = cal1.pixelHeight / cal2.pixelHeight;
+		}
+		return factors;
+	}
+
+	/**
+	 * 
+	 * @param oldRoi
+	 *            :roi to rescale
+	 * @param factors
+	 *            : double[] where first one is a factor to change width and
+	 *            second one is a factor to change height
+	 * @return
+	 */
+	public static Roi rescaleRoi(Roi oldRoi, double[] factors) {
+		Roi roi = RoiScaler.scale(oldRoi, factors[0], factors[1], false);
+		roi.setName("rescaledRoi");
+		return roi;
+	}
+}
