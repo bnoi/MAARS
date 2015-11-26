@@ -20,23 +20,16 @@ public class MAARSNoAcq {
 		long start = System.currentTimeMillis();
 
 		// Acquisition path arrangement
-		ExplorationXYPositions explo = new ExplorationXYPositions(mmc,
-				parameters);
+		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
 
 		for (int i = 0; i < explo.length(); i++) {
-			System.out
-					.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
+			System.out.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			double xPos = explo.getX(i);
 			double yPos = explo.getY(i);
 
-			String pathToSegDir = FileUtils.convertPath(parameters
-					.getSavingPath()
-					+ "/movie_X"
-					+ Math.round(xPos)
-					+ "_Y"
-					+ Math.round(yPos) + "/");
-			String pathToSegMovie = FileUtils.convertPath(pathToSegDir
-					+ "MMStack.ome.tif");
+			String pathToSegDir = FileUtils.convertPath(
+					parameters.getSavingPath() + "/movie_X" + Math.round(xPos) + "_Y" + Math.round(yPos) + "/");
+			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
 			ImagePlus segImg = null;
 			try {
 				segImg = IJ.openImage(pathToSegMovie);
@@ -47,32 +40,26 @@ public class MAARSNoAcq {
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
-			System.out.println(segImg.getStack().getSize());
 			if (ms.roiDetected()) {
 				// ----------------if got ROI, start analysis --------//
 				System.out.println("Initialize fluo analysis...");
-				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(parameters,
-						ms.getSegPombeParam(), xPos, yPos);
+				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(parameters, ms.getSegPombeParam(), xPos, yPos);
 				int frame = 0;
 				while (frame < 1) {
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
-						String pathToFluoMovie = parameters.getSavingPath()
-								+ "movie_X" + Math.round(xPos) + "_Y"
-								+ Math.round(yPos) + "_FLUO/" + frame + "_"
-								+ channel + "/MMStack.ome.tif";
+						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + Math.round(xPos) + "_Y"
+								+ Math.round(yPos) + "_FLUO/" + frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
-						new FluoAnalyzer(mfa, fluoImage, channel, frame)
-								.start();
+						System.out.println(pathToFluoMovie);
+						new FluoAnalyzer(mfa, fluoImage, channel, frame).start();
 					}
 					frame++;
 					mfa.getSetOfCells().closeRoiManager();
 				}
 				// save cropped
-				if (Boolean
-						.parseBoolean(parameters
-								.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
+				if (Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
 					mfa.saveCroppedImgs();
 				}
 			}

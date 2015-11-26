@@ -52,16 +52,13 @@ public class Measures {
 	 * @param rt
 	 *            : result table (containing results of analysis)
 	 */
-	public Measures(ImagePlus focusImg, Roi cellShapeRoi,
-			ResultsTable rt) {
-
-		focusImg.setRoi(cellShapeRoi);
+	public Measures(ImagePlus focusImg, ResultsTable rt) {
 
 		System.out.println("- create analyzer");
-		bfAnalyzer = new Analyzer(focusImg, Measurements.AREA
-				+ Measurements.STD_DEV + Measurements.MIN_MAX
-				+ Measurements.SHAPE_DESCRIPTORS + Measurements.CENTROID
-				+ Measurements.PERIMETER + Measurements.ELLIPSE, rt);
+		bfAnalyzer = new Analyzer(focusImg,
+				Measurements.AREA + Measurements.STD_DEV + Measurements.MIN_MAX + Measurements.SHAPE_DESCRIPTORS
+						+ Measurements.CENTROID + Measurements.PERIMETER + Measurements.ELLIPSE,
+				rt);
 
 		System.out.println("- measure");
 		bfAnalyzer.measure();
@@ -141,10 +138,12 @@ public class Measures {
 	public double getSolidity() {
 		return measures[SOLIDITY];
 	}
-	public void setXCentroid(double centroX){
+
+	public void setXCentroid(double centroX) {
 		measures[X_CENTROID] = centroX;
 	}
-	public void setYCentroid(double centroY){
+
+	public void setYCentroid(double centroY) {
 		measures[Y_CENTROID] = centroY;
 	}
 }

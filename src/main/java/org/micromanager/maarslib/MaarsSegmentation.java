@@ -17,7 +17,6 @@ import ij.ImagePlus;
  */
 public class MaarsSegmentation {
 	private MaarsParameters parameters;
-//	private String pathToSegMovie;
 	private String pathToSegDir;
 	private SegPombeParameters segPombeParam;
 	private boolean roiDetected = false;
@@ -37,25 +36,16 @@ public class MaarsSegmentation {
 		this.parameters = parameters;
 		this.pathToSegDir = FileUtils.convertPath(
 				parameters.getSavingPath() + "/movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY) + "/");
-//		this.pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
 	}
 
 	/**
 	 * Get the parameters and use them to segment cells
 	 * 
-	 * @param segDS
+	 * @param img
+	 *            : image to segmente
 	 */
 	public void segmentation(ImagePlus img) {
 
-//		ReportingUtils.logMessage("Segmentation movie path : " + pathToSegMovie);
-//		ImagePlus img = null;
-//		if (FileUtils.isValid(pathToSegMovie)) {
-//			img = IJ.openImage(pathToSegMovie);
-//		} else {
-//			IJ.error("Path not valid");
-//		}
-		
-		//Prepare parameters
 		System.out.println("Prepare parameters for segmentation...");
 		segPombeParam = new SegPombeParameters();
 
@@ -69,7 +59,7 @@ public class MaarsSegmentation {
 				Boolean.parseBoolean(parameters.getSegmentationParameter(MaarsParameters.FILTER_MEAN_GREY_VALUE)));
 		segPombeParam.getImageToAnalyze().getCalibration().pixelDepth = Double
 				.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
-		//Calibrate parameters
+		// Calibrate parameters
 		ParametersProcessor process = new ParametersProcessor(segPombeParam);
 
 		process.checkImgUnitsAndScale();
@@ -99,7 +89,7 @@ public class MaarsSegmentation {
 		segPombeParam.setMeanGreyValueThreshold(
 				Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.MEAN_GREY_VALUE)));
 		System.out.println("Done.");
-		//Main segmentation process
+		// Main segmentation process
 		System.out.println("Begin segmentation...");
 		SegPombe segPombe = new SegPombe(segPombeParam);
 		segPombe.createCorrelationImage();
@@ -109,7 +99,7 @@ public class MaarsSegmentation {
 		System.out.println("Segmentation done");
 		if (segPombe.roiDetected()) {
 			this.roiDetected = true;
-		}else{
+		} else {
 			System.out.println("No ROI detected!! Stop here!");
 		}
 	}

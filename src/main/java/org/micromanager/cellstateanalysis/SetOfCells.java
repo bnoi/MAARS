@@ -97,8 +97,8 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		roiManager = RoiManager.getInstance();
 		if (roiManager == null) {
 			roiManager = new RoiManager();
-			roiManager.runCommand("Open", pathToRois);
 		}
+		roiManager.runCommand("Open", pathToRois);
 		return roiManager.getRoisAsArray();
 	}
 
@@ -132,15 +132,12 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 
 	@Override
 	public boolean hasNext() {
-		if (count < cellArray.size()) {
-			return true;
-		}
-		return false;
+		return count < cellArray.size();
 	}
 
 	@Override
 	public Cell next() {
-		if (count == cellArray.size())
+		if (count >= cellArray.size())
 			throw new NoSuchElementException();
 		count++;
 		return cellArray.get(count - 1);

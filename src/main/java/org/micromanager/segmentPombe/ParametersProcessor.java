@@ -39,7 +39,8 @@ public class ParametersProcessor {
 	}
 
 	/*
-	 * Check validity of all text fields
+	 * Check validity of all text fields, this method is called only when using
+	 * segpombe plugin
 	 */
 	public boolean checkParameters() {
 

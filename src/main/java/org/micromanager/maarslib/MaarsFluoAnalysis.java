@@ -59,7 +59,6 @@ public class MaarsFluoAnalysis {
 
 		System.out.println("Initialize set of cells...");
 		soc = new SetOfCells(segParam);
-
 	}
 
 	/**
@@ -96,7 +95,7 @@ public class MaarsFluoAnalysis {
 	 * crop all cells with cells' roi
 	 */
 	public void cropAllCells() {
-
+		
 		ReportingUtils.logMessage("Cropping cell");
 		for (Cell cell : soc) {
 			cell.setFocusImage(ImgUtils.cropImgWithRoi(this.focusImg,
@@ -109,6 +108,7 @@ public class MaarsFluoAnalysis {
 			cell.setFluoImage(this.fluoImg);
 			cell.addCroppedFluoSlice();
 		}
+		ReportingUtils.logMessage("Cells cropped");
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class MaarsFluoAnalysis {
 		for (Cell cell : soc) {
 			cell.setChannelRelated(currentFactory);
 			cell.setCurrentFrame(currentFrame);
-			cell.measureBfRoi();
+//			cell.measureBfRoi();
 			cell.findFluoSpotTempFunction();
 			// can be optional
 			FileUtils.writeSpotFeatures(parameters.getSavingPath(),

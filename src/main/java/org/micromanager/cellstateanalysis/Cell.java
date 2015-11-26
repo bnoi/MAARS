@@ -145,7 +145,7 @@ public class Cell {
 	}
 
 	public void measureBfRoi() {
-		this.measures = new Measures(focusImg, focusImg.getRoi(), rt);
+		this.measures = new Measures(focusImg, rt);
 		System.out.println(measures);
 	}
 

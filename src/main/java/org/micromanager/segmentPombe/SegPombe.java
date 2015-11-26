@@ -67,8 +67,6 @@ public class SegPombe {
 	private boolean saveFocusImage;
 	private boolean saveRoi;
 
-	private boolean flushImageToAnalyze = true;
-
 	private int direction;
 
 	private boolean roiDetected = true;
@@ -140,6 +138,7 @@ public class SegPombe {
 			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
 					+ "_FocusImage.tif");
 		}
+		imageToAnalyze.flatten();
 		System.out.println("FocusImage saved.");
 	}
 
@@ -444,10 +443,6 @@ public class SegPombe {
 		} else {
 			System.out.println("flush correlation image");
 			imgCorrTemp.flush();
-		}
-		if (flushImageToAnalyze) {
-			System.out.println("flush image to analyze");
-			imageToAnalyze.flush();
 		}
 		ps.close();
 		System.setOut(curr_out);
