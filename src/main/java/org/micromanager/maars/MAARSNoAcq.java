@@ -47,6 +47,7 @@ public class MAARSNoAcq {
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
+			System.out.println(segImg.getStack().getSize());
 			if (ms.roiDetected()) {
 				// ----------------if got ROI, start analysis --------//
 				System.out.println("Initialize fluo analysis...");

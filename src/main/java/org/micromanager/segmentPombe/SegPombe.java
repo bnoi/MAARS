@@ -126,7 +126,7 @@ public class SegPombe {
 	public void getFocusImage() {
 		System.out.println("get Focus Image");
 
-		imageToAnalyze.setZ((int) Math.round(zFocus) - 1);
+		imageToAnalyze.setZ((int) Math.round(zFocus));
 
 		focusImg = new ImagePlus(imageToAnalyze.getShortTitle() + "FocusImage",
 				imageToAnalyze.getProcessor().duplicate());
@@ -402,8 +402,8 @@ public class SegPombe {
 			System.out.println("Done");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Delete");
-			System.out.println("Close roi manager");
-			// roiManager.close();
+//			System.out.println("Close roi manager");
+//			roiManager.close();
 		}
 
 		if (showFocusImage) {

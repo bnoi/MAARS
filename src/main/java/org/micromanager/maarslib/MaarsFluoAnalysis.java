@@ -10,6 +10,7 @@ import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 
@@ -49,14 +50,12 @@ public class MaarsFluoAnalysis {
 		if (!FileUtils.exists(pathToFluoDir)) {
 			FileUtils.createFolder(pathToFluoDir);
 		}
-		this.bfImgCal = segParam.getImageToAnalyze().getCalibration();
-		ImagePlus bfImage = segParam.getImageToAnalyze();
-		int focusSlice = (int) Math.round(segParam.getImageToAnalyze()
-				.getNSlices() / 2);
-
-		focusImg = new ImagePlus(bfImage.getShortTitle(), bfImage.getStack()
-				.getProcessor(focusSlice));
-		focusImg.setCalibration(bfImage.getCalibration());
+		ImagePlus bfImg = segParam.getImageToAnalyze();
+		this.bfImgCal = bfImg.getCalibration();
+		ImageStack stack = bfImg.getStack();
+		focusImg = new ImagePlus(bfImg.getShortTitle(),
+				stack.getProcessor(segParam.getFocusSlide()));
+		focusImg.setCalibration(bfImg.getCalibration());
 
 		System.out.println("Initialize set of cells...");
 		soc = new SetOfCells(segParam);
