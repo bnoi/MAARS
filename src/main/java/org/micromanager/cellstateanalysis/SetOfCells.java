@@ -10,7 +10,6 @@ import java.util.Random;
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.segmentPombe.SegPombeParameters;
 
-import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;

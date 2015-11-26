@@ -3,7 +3,6 @@ package org.micromanager.maarslib;
 import org.micromanager.utils.ImgUtils;
 
 import ij.ImagePlus;
-import net.imglib2.util.ImgUtil;
 
 /**
  *@author Tong LI, mail:tongli.bioinfo@gmail.com

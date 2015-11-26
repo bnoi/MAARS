@@ -1,6 +1,5 @@
 package org.micromanager.cellstateanalysis;
 
-import java.awt.Rectangle;
 import java.io.File;
 
 import org.micromanager.internal.utils.ReportingUtils;
@@ -14,11 +13,9 @@ import fiji.plugin.trackmate.SpotCollection;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
-import ij.plugin.RoiScaler;
 
 /**
  * Cell is a class containing information about cell image, including its
@@ -70,9 +67,9 @@ public class Cell {
 	 * 
 	 */
 	public void findFluoSpotTempFunction() {
-		//Roi related computation
-//		measures;
-		//Spot related computation
+		// Roi related computation
+		// measures;
+		// Spot related computation
 		Boolean visibleOnly = true;
 		ReportingUtils.logMessage("Create CellFluoAnalysis object");
 		this.fluoAnalysis = new CellFluoAnalysis(this, factory);
@@ -83,7 +80,8 @@ public class Cell {
 		for (Spot s : fluoAnalysis.getModel().getSpots().iterable(visibleOnly)) {
 			currentCollection.add(s, currentFrame);
 
-			int nSpotDetected = currentCollection.getNSpots(currentFrame, visibleOnly);
+			int nSpotDetected = currentCollection.getNSpots(currentFrame,
+					visibleOnly);
 			if (nSpotDetected == 1) {
 				// interphase
 			} else if (nSpotDetected == 2) {
@@ -165,18 +163,21 @@ public class Cell {
 
 	public void saveCroppedImage(String path) {
 		String pathToCroppedImgDir = path + "/croppedImgs/";
-		String pathToCroppedImg = pathToCroppedImgDir + "/" + String.valueOf(this.getCellNumber());
+		String pathToCroppedImg = pathToCroppedImgDir + "/"
+				+ String.valueOf(this.getCellNumber());
 		if (!new File(pathToCroppedImgDir).exists()) {
 			new File(pathToCroppedImgDir).mkdirs();
 		}
-		ImagePlus imp = new ImagePlus("cell" + getCellNumber(), croppedFluoStack);
+		ImagePlus imp = new ImagePlus("cell" + getCellNumber(),
+				croppedFluoStack);
 		imp.setCalibration(getFluoImage().getCalibration());
 		IJ.saveAsTiff(imp, pathToCroppedImg);
 	}
 
 	public void addCroppedFluoSlice() {
 		if (croppedFluoStack.getSize() == 0) {
-			croppedFluoStack = new ImageStack(fluoImage.getWidth(), fluoImage.getHeight());
+			croppedFluoStack = new ImageStack(fluoImage.getWidth(),
+					fluoImage.getHeight());
 		}
 		ImageProcessor ip = fluoImage.getImageStack().getProcessor(1);
 		croppedFluoStack.addSlice(ip);
@@ -231,15 +232,15 @@ public class Cell {
 
 	public boolean croppedRoiContains(Spot s) {
 		Calibration cal = fluoImage.getCalibration();
-		return fluoImage.getRoi().contains((int) Math.round(s.getFeature("POSITION_X") / cal.pixelWidth),
+		return fluoImage.getRoi().contains(
+				(int) Math.round(s.getFeature("POSITION_X") / cal.pixelWidth),
 				(int) Math.round(s.getFeature("POSITION_Y") / cal.pixelHeight));
 	}
 
 	/**
 	 * XML write of Trackmate need model instead of SpotCollection
 	 * 
-	 * @param :
-	 *            channel name
+	 * @param : channel name
 	 * @return model of Trackmate (see @Model in @Trakmate)
 	 */
 	public Model getModelOf(String channel) {

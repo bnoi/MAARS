@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.Image;
@@ -21,7 +18,6 @@ import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.FileUtils;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
@@ -249,7 +245,7 @@ public class SuperClassAcquisition {
 				ReportingUtils
 						.logMessage("could not set focus device at position");
 			}
-			listImg = mm.live().snap(true);
+			listImg.add(mm.live().snap(false).get(0));
 			z = z + step;
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
@@ -266,6 +262,7 @@ public class SuperClassAcquisition {
 		System.out.println("add images into Datastore and imageplus");
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight());
+		System.out.println("length : "+listImg.size());
 		for (Image img : listImg) {
 			// Prepare a imagePlus (for analysis)
 			ImageProcessor imgProcessor = mm.getDataManager()

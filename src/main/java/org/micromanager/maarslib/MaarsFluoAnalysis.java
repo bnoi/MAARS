@@ -2,7 +2,6 @@ package org.micromanager.maarslib;
 
 import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.CellChannelFactory;
-import org.micromanager.cellstateanalysis.Measures;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
@@ -13,7 +12,6 @@ import org.micromanager.utils.ImgUtils;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.plugin.ZProjector;
 
 /**
  * Class to find and measure mitotic spindle using fluorescence image analysis
@@ -40,21 +38,24 @@ public class MaarsFluoAnalysis {
 	 * @param parameters
 	 *            : parameters used for algorithm
 	 */
-	public MaarsFluoAnalysis(MaarsParameters parameters, SegPombeParameters segParam, double positionX,
-			double positionY) {
+	public MaarsFluoAnalysis(MaarsParameters parameters,
+			SegPombeParameters segParam, double positionX, double positionY) {
 		this.parameters = parameters;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(this.positionX)
-				+ "_Y" + Math.round(this.positionY) + "_FLUO");
+		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath()
+				+ "/movie_X" + Math.round(this.positionX) + "_Y"
+				+ Math.round(this.positionY) + "_FLUO");
 		if (!FileUtils.exists(pathToFluoDir)) {
 			FileUtils.createFolder(pathToFluoDir);
 		}
 		this.bfImgCal = segParam.getImageToAnalyze().getCalibration();
 		ImagePlus bfImage = segParam.getImageToAnalyze();
-		int focusSlice = (int) Math.round(segParam.getImageToAnalyze().getNSlices() / 2);
+		int focusSlice = (int) Math.round(segParam.getImageToAnalyze()
+				.getNSlices() / 2);
 
-		focusImg = new ImagePlus(bfImage.getShortTitle(), bfImage.getStack().getProcessor(focusSlice));
+		focusImg = new ImagePlus(bfImage.getShortTitle(), bfImage.getStack()
+				.getProcessor(focusSlice));
 		focusImg.setCalibration(bfImage.getCalibration());
 
 		System.out.println("Initialize set of cells...");
@@ -99,9 +100,11 @@ public class MaarsFluoAnalysis {
 
 		ReportingUtils.logMessage("Cropping cell");
 		for (Cell cell : soc) {
-			cell.setFocusImage(ImgUtils.cropImgWithRoi(this.focusImg, cell.getCellShapeRoi()));
+			cell.setFocusImage(ImgUtils.cropImgWithRoi(this.focusImg,
+					cell.getCellShapeRoi()));
 			this.fluoImg = ImgUtils.unitCmToMicron(this.fluoImg);
-			double[] factors = ImgUtils.getRescaleFactor(bfImgCal, this.fluoImg.getCalibration());
+			double[] factors = ImgUtils.getRescaleFactor(bfImgCal,
+					this.fluoImg.getCalibration());
 			Roi rescaledRoi = cell.rescaleRoi(factors);
 			this.fluoImg = ImgUtils.cropImgWithRoi(this.fluoImg, rescaledRoi);
 			cell.setFluoImage(this.fluoImg);
@@ -125,7 +128,8 @@ public class MaarsFluoAnalysis {
 			cell.measureBfRoi();
 			cell.findFluoSpotTempFunction();
 			// can be optional
-			FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(), currentFactory.getChannel(),
+			FileUtils.writeSpotFeatures(parameters.getSavingPath(),
+					cell.getCellNumber(), currentFactory.getChannel(),
 					cell.getModelOf(currentFactory.getChannel()));
 		}
 		ReportingUtils.logMessage("Spots detection done...");

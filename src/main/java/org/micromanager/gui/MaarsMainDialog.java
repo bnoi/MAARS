@@ -387,23 +387,13 @@ public class MaarsMainDialog implements ActionListener {
 				IJ.error("Session aborted, 0 field to analyse");
 			} else {
 				saveParameters();
-				try {
-					if (withOutAcqChk.isSelected()) {
+				if (withOutAcqChk.isSelected()) {
+					hide();
+					new MAARSNoAcq(mmc, parameters);
+				} else {
+					if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
 						hide();
-						new MAARSNoAcq(mmc, parameters);
-					} else {
-						if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-							hide();
-							new MAARS(mm, mmc, parameters);
-						}
-					}
-				} catch (Exception e1) {
-					System.out.println("Errors : reset MM configuration");
-					try {
-						getMMC().reset();
-					} catch (Exception e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
+						new MAARS(mm, mmc, parameters);
 					}
 				}
 			}

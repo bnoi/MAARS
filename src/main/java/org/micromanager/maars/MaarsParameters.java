@@ -77,7 +77,6 @@ import org.jdom2.output.XMLOutputter;
  */
 public class MaarsParameters {
 
-	private String defaultParametersFile;
 	Document doc;
 	Element root;
 
