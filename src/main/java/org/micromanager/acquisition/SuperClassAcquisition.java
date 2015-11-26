@@ -123,8 +123,8 @@ public class SuperClassAcquisition {
 		try {
 			// 1st false = do not generate separate metadata
 			// 2nd false = do not split positions
-			ds = mm.getDataManager().createMultipageTIFFDatastore(pathToMovieFolder,
-					false, false);
+			ds = mm.getDataManager().createMultipageTIFFDatastore(
+					pathToMovieFolder, false, false);
 		} catch (IOException e3) {
 			ReportingUtils.logMessage("... Can not initialize Datastore");
 			e3.printStackTrace();
@@ -214,6 +214,7 @@ public class SuperClassAcquisition {
 		setDatastoreMetadata(ds, channelName, acqName, step);
 		// setDisplay(chColor);
 		try {
+			mmc.setAutoShutter(false);
 			mmc.setShutterOpen(true);
 			mmc.waitForSystem();
 		} catch (Exception e) {
@@ -249,10 +250,9 @@ public class SuperClassAcquisition {
 			z = z + step;
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
-//		mm.getDisplayManager().closeAllDisplayWindows(false);
 		try {
-			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 			mmc.setShutterOpen(false);
+			mmc.setPosition(mmc.getFocusDevice(), zFocus);
 		} catch (Exception e) {
 			ReportingUtils
 					.logMessage("could not set focus device back to position and close shutter");
@@ -262,16 +262,13 @@ public class SuperClassAcquisition {
 		System.out.println("add images into Datastore and imageplus");
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(),
 				(int) mmc.getImageHeight());
-		System.out.println("length : "+listImg.size());
 		for (Image img : listImg) {
 			// Prepare a imagePlus (for analysis)
 			ImageProcessor imgProcessor = mm.getDataManager()
 					.getImageJConverter().createProcessor(img);
-			System.out.println("Add into imageplus ");
 			imageStack.addSlice(imgProcessor.convertToShortProcessor());
 			try {
 				// Datastore (for save)
-				System.out.println("Add into datastore");
 				ds.putImage(img);
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
@@ -291,6 +288,7 @@ public class SuperClassAcquisition {
 		cal.pixelDepth = ds.getSummaryMetadata().getZStepUm();
 		imagePlus.setCalibration(cal);
 		ds.close();
+		System.out.println("slice nb " + imagePlus.getStackSize());
 		return imagePlus;
 	}
 }

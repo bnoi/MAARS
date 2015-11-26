@@ -17,7 +17,7 @@ public class SegPombeParameters {
 	private ImagePlus imageToAnalyze;
 	private float sigma = 3;
 //	public static double acquisitionStep = 0.3;
-	private int focusSlide = 16;
+	private int focusSlide = 17;
 	private boolean changeScale = true;
 	private int maxWidth = 1500;
 	private int maxHeight = 1500;
