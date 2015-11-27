@@ -39,24 +39,21 @@ public class MaarsFluoAnalysis {
 	 * @param parameters
 	 *            : parameters used for algorithm
 	 */
-	public MaarsFluoAnalysis(MaarsParameters parameters,
-			SegPombeParameters segParam, double positionX, double positionY) {
+	public MaarsFluoAnalysis(MaarsParameters parameters, SegPombeParameters segParam, double positionX,
+			double positionY) {
 		this.parameters = parameters;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath()
-				+ "/movie_X" + Math.round(this.positionX) + "_Y"
-				+ Math.round(this.positionY) + "_FLUO");
+		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(this.positionX)
+				+ "_Y" + Math.round(this.positionY) + "_FLUO");
 		if (!FileUtils.exists(pathToFluoDir)) {
 			FileUtils.createFolder(pathToFluoDir);
 		}
 		ImagePlus bfImg = segParam.getImageToAnalyze();
 		this.bfImgCal = bfImg.getCalibration();
 		ImageStack stack = bfImg.getStack();
-		focusImg = new ImagePlus(bfImg.getShortTitle(),
-				stack.getProcessor(segParam.getFocusSlide()));
+		focusImg = new ImagePlus(bfImg.getShortTitle(), stack.getProcessor(segParam.getFocusSlide()));
 		focusImg.setCalibration(bfImg.getCalibration());
-
 		System.out.println("Initialize set of cells...");
 		soc = new SetOfCells(segParam);
 	}
@@ -95,17 +92,14 @@ public class MaarsFluoAnalysis {
 	 * crop all cells with cells' roi
 	 */
 	public void cropAllCells() {
-		
+
 		ReportingUtils.logMessage("Cropping cell");
+		this.fluoImg = ImgUtils.unitCmToMicron(this.fluoImg);
+		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, this.fluoImg.getCalibration());
 		for (Cell cell : soc) {
-			cell.setFocusImage(ImgUtils.cropImgWithRoi(this.focusImg,
-					cell.getCellShapeRoi()));
-			this.fluoImg = ImgUtils.unitCmToMicron(this.fluoImg);
-			double[] factors = ImgUtils.getRescaleFactor(bfImgCal,
-					this.fluoImg.getCalibration());
+			cell.setFocusImage(ImgUtils.cropImgWithRoi(this.focusImg, cell.getCellShapeRoi()));
 			Roi rescaledRoi = cell.rescaleRoi(factors);
-			this.fluoImg = ImgUtils.cropImgWithRoi(this.fluoImg, rescaledRoi);
-			cell.setFluoImage(this.fluoImg);
+			cell.setFluoImage(ImgUtils.cropImgWithRoi(this.fluoImg, rescaledRoi));
 			cell.addCroppedFluoSlice();
 		}
 		ReportingUtils.logMessage("Cells cropped");
@@ -124,12 +118,11 @@ public class MaarsFluoAnalysis {
 		for (Cell cell : soc) {
 			cell.setChannelRelated(currentFactory);
 			cell.setCurrentFrame(currentFrame);
-//			cell.measureBfRoi();
+			cell.measureBfRoi();
 			cell.findFluoSpotTempFunction();
 			// can be optional
-			FileUtils.writeSpotFeatures(parameters.getSavingPath(),
-					cell.getCellNumber(), currentFactory.getChannel(),
-					cell.getModelOf(currentFactory.getChannel()));
+//			FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(), currentFactory.getChannel(),
+//					cell.getModelOf(currentFactory.getChannel()));
 		}
 		ReportingUtils.logMessage("Spots detection done...");
 	}

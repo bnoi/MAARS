@@ -25,7 +25,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private RoiManager roiManager;
 	private Roi[] roiArray;
 	private int count = 0;
-	private ResultsTable rt;
 
 	private ArrayList<Cell> cellArray;
 
@@ -56,15 +55,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		// rt will be reset after analysis of each cell
-		rt = new ResultsTable();
+		
 		ReportingUtils.logMessage("Get ROIs as array");
 		roiArray = getRoisAsArray(parameters.getSavingPath()
 				+ parameters.getImageToAnalyze().getShortTitle() + "_ROI.zip");
 		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
-			cellArray.add(i, new Cell(roiArray[i], i, rt));
+			cellArray.add(i, new Cell(roiArray[i], i));
 		}
 		ReportingUtils.logMessage("Done.");
 	}
@@ -102,12 +100,12 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return roiManager.getRoisAsArray();
 	}
 
-	/**
-	 * Closes RoiManager
-	 */
-	public void closeRoiManager() {
-		roiManager.close();
-	}
+//	/**
+//	 * Closes RoiManager
+//	 */
+//	public void closeRoiManager() {
+//		roiManager.close();
+//	}
 
 	/**
 	 * Method to get Cell corresponding to index

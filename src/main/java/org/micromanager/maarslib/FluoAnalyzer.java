@@ -27,6 +27,7 @@ public class FluoAnalyzer extends Thread {
 		mfa.createCellChannelFactory(channel);
 		mfa.setCurrentFrame(frame);
 		mfa.cropAllCells();
+		mfa.saveCroppedImgs();
 		mfa.analyzeEachCell();
 	}
 }

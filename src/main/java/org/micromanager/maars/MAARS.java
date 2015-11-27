@@ -47,10 +47,12 @@ public class MAARS {
 		}
 
 		// Acquisition path arrangement
-		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
+		ExplorationXYPositions explo = new ExplorationXYPositions(mmc,
+				parameters);
 
 		for (int i = 0; i < explo.length(); i++) {
-			System.out.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
+			System.out
+					.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			double xPos = explo.getX(i);
 			double yPos = explo.getY(i);
 
@@ -68,33 +70,38 @@ public class MAARS {
 				e1.printStackTrace();
 			}
 
-			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
+			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters,
+					xPos, yPos);
 			System.out.println("Acquire bright field image...");
-			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL));
+			ImagePlus segImg = segAcq.acquire(parameters
+					.getSegmentationParameter(MaarsParameters.CHANNEL));
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
 				// ----------------if got ROI, start fluo-acquisition --------//
-				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(parameters, ms.getSegPombeParam(), xPos, yPos);
-				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
+				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(parameters,
+						ms.getSegPombeParam(), xPos, yPos);
+				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc,
+						parameters, xPos, yPos);
 				if (parameters.useDynamic()) {
-					double timeInterval = Double
-							.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+					double timeInterval = Double.parseDouble(parameters
+							.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 					double startTime = System.currentTimeMillis();
 					int frame = 0;
-					double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
-							* 1000;
+					double timeLimit = Double.parseDouble(parameters
+							.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60 * 1000;
 					while (System.currentTimeMillis() - startTime <= timeLimit) {
 						double beginAcq = System.currentTimeMillis();
 
 						String channels = parameters.getUsingChannels();
 						String[] arrayChannels = channels.split(",", -1);
 						for (String channel : arrayChannels) {
-							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-							new FluoAnalyzer(mfa, fluoImage, channel, frame).start();
+							ImagePlus fluoImage = fluoAcq.acquire(frame,
+									channel);
+							new FluoAnalyzer(mfa, fluoImage, channel, frame)
+									.start();
 						}
-						mfa.getSetOfCells().closeRoiManager();
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
 						try {
@@ -104,29 +111,34 @@ public class MAARS {
 							e.printStackTrace();
 						}
 					}
-					//////////////////////////// one snapshot per
-					//////////////////////////// field/////////////////////////////////
+					// ////////////////////////// one snapshot per
+					// //////////////////////////
+					// field/////////////////////////////////
 				} else {
 					int frame = 0;
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-						new FluoAnalyzer(mfa, fluoImage, channel, frame).start();
+						new FluoAnalyzer(mfa, fluoImage, channel, frame)
+								.start();
 					}
-					mfa.getSetOfCells().closeRoiManager();
 				}
-				/////////////////////////// save cropped
-				/////////////////////////// images//////////////////////////////////////
-				if (Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
+				// ///////////////////////// save cropped
+				// /////////////////////////
+				// images//////////////////////////////////////
+				if (Boolean
+						.parseBoolean(parameters
+								.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
 					mfa.saveCroppedImgs();
 				}
-				// close roi manager
-				mfa.getSetOfCells().closeRoiManager();
 			}
 		}
 		mmc.setAutoShutter(true);
-		System.out.println("it took " + (double) (System.currentTimeMillis() - start)/1000 + " sec");
+		System.out
+				.println("it took "
+						+ (double) (System.currentTimeMillis() - start) / 1000
+						+ " sec");
 		System.out.println("DONE.");
 	}
 }

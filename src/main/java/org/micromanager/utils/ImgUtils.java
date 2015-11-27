@@ -3,6 +3,7 @@ package org.micromanager.utils;
 import java.awt.Rectangle;
 
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
@@ -42,12 +43,9 @@ public class ImgUtils {
 	}
 
 	public static ImagePlus cropImgWithRoi(ImagePlus img, Roi roi) {
-		ImageProcessor imgProcessor = img.getProcessor();
-		imgProcessor.setInterpolationMethod(ImageProcessor.BILINEAR);
-		Rectangle newRectangle = new Rectangle((int) roi.getXBase(), (int) roi.getYBase(), (int) roi.getBounds().width,
-				(int) roi.getBounds().height);
-		imgProcessor.setRoi(newRectangle);
-		ImagePlus croppedImg = new ImagePlus("croppedImage", imgProcessor.crop());
+		ImageStack stack = img.getStack().crop((int) roi.getXBase(), (int) roi.getYBase(), 0,
+				(int) roi.getBounds().width, (int) roi.getBounds().height, img.getStack().getSize());
+		ImagePlus croppedImg = new ImagePlus("cropped_" + img.getShortTitle(), stack);
 		croppedImg.setCalibration(img.getCalibration());
 		Roi centeredRoi = centerCroppedRoi(roi);
 		croppedImg.setRoi(centeredRoi);
@@ -62,14 +60,12 @@ public class ImgUtils {
 			newXs[i] = newXs[i] - (int) roi.getXBase();
 			newYs[i] = newYs[i] - (int) roi.getYBase();
 		}
-		;
 		float[] newXsF = new float[nbPoints];
 		float[] newYsF = new float[nbPoints];
 		for (int i = 0; i < nbPoints; i++) {
 			newXsF[i] = (float) newXs[i];
 			newYsF[i] = (float) newYs[i];
 		}
-		;
 		Roi croppedRoi = new PolygonRoi(newXsF, newYsF, Roi.POLYGON);
 		return croppedRoi;
 	}

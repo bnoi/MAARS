@@ -74,8 +74,8 @@ public class CellFluoAnalysis {
 		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
 		detectorSettings.put(KEY_RADIUS, factory.getSpotRadius());
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
-		// TODO to figure out what value to use, 2 seems ok for now.
-		detectorSettings.put(KEY_THRESHOLD, (double) 0);
+		// TODO to figure out what value to use, 15 seems ok for now.
+		detectorSettings.put(KEY_THRESHOLD, (double) 15);
 		detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
 		settings.detectorSettings = detectorSettings;
 

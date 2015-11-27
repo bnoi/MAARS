@@ -53,7 +53,6 @@ public class Measures {
 	 *            : result table (containing results of analysis)
 	 */
 	public Measures(ImagePlus focusImg, ResultsTable rt) {
-
 		System.out.println("- create analyzer");
 		bfAnalyzer = new Analyzer(focusImg,
 				Measurements.AREA + Measurements.STD_DEV + Measurements.MIN_MAX + Measurements.SHAPE_DESCRIPTORS

@@ -56,11 +56,6 @@ public class MAARSNoAcq {
 						new FluoAnalyzer(mfa, fluoImage, channel, frame).start();
 					}
 					frame++;
-					mfa.getSetOfCells().closeRoiManager();
-				}
-				// save cropped
-				if (Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES))) {
-					mfa.saveCroppedImgs();
 				}
 			}
 		}
