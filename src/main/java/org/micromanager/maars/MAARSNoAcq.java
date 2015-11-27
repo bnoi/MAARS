@@ -2,12 +2,12 @@ package org.micromanager.maars;
 
 import org.micromanager.maarslib.ExplorationXYPositions;
 import org.micromanager.maarslib.FluoAnalyzer;
-import org.micromanager.maarslib.MaarsFluoAnalysis;
 import org.micromanager.maarslib.MaarsSegmentation;
 import org.micromanager.utils.FileUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.measure.Calibration;
 import mmcorej.CMMCore;
 
 /**
@@ -39,11 +39,12 @@ public class MAARSNoAcq {
 			}
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
+			Calibration bfCal = segImg.getCalibration();
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
 				// ----------------if got ROI, start analysis --------//
 				System.out.println("Initialize fluo analysis...");
-				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(parameters, ms.getSegPombeParam(), xPos, yPos);
+//				MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(parameters, ms.getSegPombeParam(), xPos, yPos);
 				int frame = 0;
 				while (frame < 1) {
 					String channels = parameters.getUsingChannels();
@@ -53,7 +54,8 @@ public class MAARSNoAcq {
 								+ Math.round(yPos) + "_FLUO/" + frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						System.out.println(pathToFluoMovie);
-						new FluoAnalyzer(mfa, fluoImage, channel, frame).start();
+						new FluoAnalyzer(parameters, ms.getSegPombeParam(), fluoImage, segImg, channel, frame, xPos,
+								yPos).start();
 					}
 					frame++;
 				}

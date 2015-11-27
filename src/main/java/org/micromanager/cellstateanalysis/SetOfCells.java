@@ -11,7 +11,6 @@ import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.segmentPombe.SegPombeParameters;
 
 import ij.gui.Roi;
-import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
 
 /**
@@ -74,7 +73,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 
 		int n = cellArray.size();
 		Random random = new Random();
-
 		for (int i = 0; i < n; i++) {
 			int newPosition = i + random.nextInt(n - i);
 			Cell cellTemp = cellArray.get(i);
@@ -100,13 +98,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return roiManager.getRoisAsArray();
 	}
 
-//	/**
-//	 * Closes RoiManager
-//	 */
-//	public void closeRoiManager() {
-//		roiManager.close();
-//	}
-
 	/**
 	 * Method to get Cell corresponding to index
 	 * 
@@ -115,6 +106,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 */
 	public Cell getCell(int index) {
 		return cellArray.get(index);
+	}
+	
+	/**
+	 * total number of cell
+	 * @return
+	 */
+	public int size(){
+		return cellArray.size();
 	}
 
 	public RoiManager getROIManager() {

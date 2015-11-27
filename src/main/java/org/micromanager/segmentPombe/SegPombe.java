@@ -163,19 +163,19 @@ public class SegPombe {
 		Future<FloatProcessor> task = null;
 		double[] widths = splitter.getWidths();
 		for (int i = 0; i < nbProcessor; i++) {
-			if (widths[0] == widths[1] || i != nbProcessor - 1) {
+			if (i == 0){
+				subImg = splitter.crop(xPosition, (int) widths[1]);
+				task = executor.submit(new ComputeImageCorrelation(subImg,
+						zFocus, sigma, direction));
+				map.put(xPosition, task);
+				xPosition += widths[1];
+			}else{
 				IJ.showStatus("Computing correlation image");
 				subImg = splitter.crop(xPosition, (int) widths[0]);
 				task = executor.submit(new ComputeImageCorrelation(subImg,
 						zFocus, sigma, direction));
 				map.put(xPosition, task);
 				xPosition += widths[0];
-			} else {
-				subImg = splitter.crop(xPosition, (int) widths[1]);
-				task = executor.submit(new ComputeImageCorrelation(subImg,
-						zFocus, sigma, direction));
-				map.put(xPosition, task);
-
 			}
 		}
 		imgCorrTempProcessor = new FloatProcessor(imageToAnalyze.getWidth(),
