@@ -5,7 +5,7 @@
     <parent>
         <groupId>sc.fiji</groupId>
         <artifactId>pom-fiji</artifactId>
-        <version>16.2.0</version>
+        <version>17.0.0</version>
     </parent>
     
     <artifactId>MAARS_</artifactId>
@@ -13,6 +13,10 @@
     <name>MAARS</name>
     
     <description>A set of Fiji plugin for cell biology analysis</description>
+    
+    <properties>
+        <scijava.jvm.version>1.7</scijava.jvm.version>
+    </properties>
     
     <developers>
         
@@ -135,15 +139,6 @@
         <plugins>
         <plugin>
             <artifactId>maven-enforcer-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>enforce-rules</id>
-                    <phase>validate</phase>
-                    <goals>
-                        <goal>enforce</goal>
-                    </goals>
-                </execution>
-            </executions>
             <configuration>
                 <rules>
                     <banClasses implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
@@ -159,6 +154,12 @@
                                 <artifactId>MMCoreJ</artifactId>
                                 <ignoreClasses>
                                     <ignoreClass>org/json/*</ignoreClass>
+                                </ignoreClasses>
+                            </dependency>
+                            <dependency>
+                                <artifactId>mines-jtk</artifactId>
+                                <ignoreClasses>
+                                    <ignoreClass>edu/mines/jtk/*</ignoreClass>
                                 </ignoreClasses>
                             </dependency>
                         </dependencies>
