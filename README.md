@@ -6,8 +6,9 @@ The plugin is designed to be flexible and easy to use whatever the hardware and 
 
 ## Installation
 
-- Copy the jars inside `jars/lib` inside `Micro Manager folder/plugins/jars`
-- Add MAARS plugin (`jars/MAARS_-1.0-SNAPSHOT.jar`) inside `Micro Manager folder/plugins`
+- Copy MAARS plugin (`jars/MAARS_-1.0-SNAPSHOT.jar`) inside `Micro Manager folder/mmplugins`.
+
+- Copy dependencies (`jars/maars_dependencies/`) inside `Micro Manager folder/plugins/maars_dependencies`.
 
 That's all !
 

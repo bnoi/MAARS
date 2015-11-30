@@ -113,8 +113,8 @@
       
         <dependency>
             <groupId>com.miglayout</groupId>
-            <artifactId>miglayout</artifactId>
-            <version>3.6.3</version>
+            <artifactId>miglayout-swing</artifactId>
+            <version>4.2</version>
         </dependency>
         
     </dependencies>
