@@ -42,5 +42,5 @@ cd ../
 
 # Generate zip bundle
 mkdir -p bundles/
-BUNDLE_NAME="$(date +"%Y.%m.%d").MicroManager-$GIT_HASH.zip"
+BUNDLE_NAME="$(date +"%Y.%m.%d.%H.%M").MicroManager-$GIT_HASH.zip"
 zip -r bundles/$BUNDLE_NAME ImageJ/

@@ -4,7 +4,7 @@ set -e
 
 if [ -z "$1" ]
 then
-    echo "Usage :  ./update-mm.sh /path/to/mm/folder"
+    echo "Usage : ./update-mm.sh /path/to/mm/folder"
     exit 1
 fi
 
@@ -31,8 +31,8 @@ do
     mvn install:install-file -Dfile=$JAR_FILE \
                              -DgroupId=org.micromanager \
                              -DartifactId=$JAR_NAME \
-                             -Dversion=2.0.0 \
+                             -Dversion=$MM_VERSION \
                              -Dpackaging=jar \
-                            -DlocalRepositoryPath=repo
+                             -DlocalRepositoryPath=repo
 
 done
