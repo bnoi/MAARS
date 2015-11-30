@@ -26,57 +26,59 @@ public class MAARSPlugin implements MenuPlugin, SciJavaPlugin {
 	private CMMCore mmc;
 	private MaarsParameters parameters;
 
-	@Override
-	public String getCopyright() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getHelpText() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getName() {
-		return "Main";
-	}
-
-	@Override
-	public String getVersion() {
-		// TODO Auto-generated method stub
-		return "1.0";
-	}
+        static public final String VERSION_INFO = "1.0.0";
+        static private final String COPYRIGHT_NOTICE = "BSD License, 2015";
+        static private final String DESCRIPTION = "Micro-Manager plugin for Mitotic Analysing And Recording System";
+        static private final String NAME = "MAARS";
 
 	@Override
 	public void setContext(Studio mmStudio) {
-		// TODO Auto-generated method stub
-		this.mmStudio = (MMStudio) mmStudio;
-		this.mmc = mmStudio.core();
+            // TODO Auto-generated method stub
+            this.mmStudio = (MMStudio) mmStudio;
+            this.mmc = mmStudio.core();
 	}
 
-	@Override
-	public String getSubMenu() {
-		return "MAARS";
-	}
+        @Override
+        public String getCopyright() {
+           return COPYRIGHT_NOTICE;
+        }
+
+        @Override
+        public String getHelpText() {
+           return DESCRIPTION;
+        }
+
+        @Override
+        public String getName() {
+           return NAME;
+        }
+
+        @Override
+        public String getVersion() {
+           return VERSION_INFO;
+        }
+        
+        @Override
+        public String getSubMenu() {
+           return "";
+        }
 
 	@Override
 	public void onPluginSelected() {
-		String configFileName = "maars_config.xml";
-		InputStream inStream = null;
-		if (FileUtils.exists(configFileName)) {
-			try {
-				inStream = new FileInputStream(configFileName);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+            String configFileName = "maars_config.xml";
+            InputStream inStream = null;
+            if (FileUtils.exists(configFileName)) {
+                try {
+                    inStream = new FileInputStream(configFileName);
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 
-		} else {
-			inStream = ClassLoader.getSystemResourceAsStream("org/micromanager/" + configFileName);
-		}
-		parameters = new MaarsParameters(inStream);
-		new MaarsMainDialog(mmStudio, mmc, parameters).show();
+            } else {
+                inStream = ClassLoader.getSystemResourceAsStream("maars_default_config.xml");
+            }
+            parameters = new MaarsParameters(inStream);
+            new MaarsMainDialog(mmStudio, mmc, parameters).show();
 	}
 }

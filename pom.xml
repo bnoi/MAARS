@@ -6,13 +6,10 @@
         <groupId>sc.fiji</groupId>
         <artifactId>pom-fiji</artifactId>
         <version>16.2.0</version>
-        <relativePath/>
     </parent>
     
     <artifactId>MAARS_</artifactId>
-    
     <version>1.0-SNAPSHOT</version>
-    
     <name>MAARS</name>
     
     <description>A set of Fiji plugin for cell biology analysis</description>
