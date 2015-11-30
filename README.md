@@ -1,13 +1,10 @@
 # Mitotic Analysing And Recording System
 
-MAARS modules are Fiji and Micro-Manager libraries. Modules are :
+MAARS (Mitotic Analysing And Recording System) is a Micro-Manager plugin designed to automatically record cells in mitosis.
 
-- CellStateAnalysis_ : measure, save and load cell features
-- CellBoundaries_ : detect and segment fission yeast cells in bright field.
-- SigmaOptimization_ : optimize parameters in segmentation algorithm from CellBoundaries_.
-- MaarsLib : core library for controlling microscop with Micro-Manager.
+The plugin is designed to be flexible and easy to use whatever the hardware and the type of cells you have.
 
-## Install (to complete)
+## Installation
 
 - Copy the jars inside `jars/lib` inside `Micro Manager folder/plugins/jars`
 - Add MAARS plugin (`jars/MAARS_-1.0-SNAPSHOT.jar`) inside `Micro Manager folder/plugins`
@@ -24,13 +21,13 @@ That's all !
 
 ## License
 
-BSD License.
+[BSD License](LICENSE).
 
 ## Authors
 
 - Mainteners and contact
     - Hadrien Mary (hadrien.mary@gmail.com)
-    - Tong Li (tongli.bioinfo@gmail.com )
+    - Tong Li (tongli.bioinfo@gmail.com)
 
 - Original author
     - Marie Grosjean (marie.grosjean.31@gmail.com)
