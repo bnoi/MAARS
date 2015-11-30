@@ -123,18 +123,18 @@
         
     </dependencies>
     
-    <repositories>
-        <repository>
-            <id>imagej.public</id>
-            <url>http://maven.imagej.net/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>project.local</id>
-            <name>project</name>
-            <url>file:${project.basedir}/repo</url>
-        </repository>
-    </repositories>
-    
+   <repositories>
+      <repository>
+         <id>project.local</id>
+         <name>project</name>
+         <url>file:${project.basedir}/repo</url>
+      </repository>
+      <repository>
+         <id>imagej.public</id>
+         <url>http://maven.imagej.net/content/groups/public</url>
+      </repository>
+   </repositories>
+            
     <build>
         <plugins>
         <plugin>
