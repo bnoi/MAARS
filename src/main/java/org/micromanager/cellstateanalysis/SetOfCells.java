@@ -65,22 +65,13 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		}
 		ReportingUtils.logMessage("Done.");
 	}
-
-	/**
-	 * Method to shuffle set of cell (put them in random order)
-	 */
-	public void shuffle() {
-
-		int n = cellArray.size();
-		Random random = new Random();
-		for (int i = 0; i < n; i++) {
-			int newPosition = i + random.nextInt(n - i);
-			Cell cellTemp = cellArray.get(i);
-			cellArray.remove(i);
-			cellArray.add(i, cellArray.get(newPosition));
-			cellArray.remove(newPosition);
-			cellArray.add(newPosition, cellTemp);
+	
+	public ArrayList<Cell> getSubArray(int begin, int end){
+		ArrayList<Cell> subSet = new ArrayList<Cell>();
+		for (int i = begin; i < end;i++){
+			subSet.add(cellArray.get(i));
 		}
+		return subSet;
 	}
 
 	/**
@@ -96,6 +87,23 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		}
 		roiManager.runCommand("Open", pathToRois);
 		return roiManager.getRoisAsArray();
+	}
+	
+	/**
+	 * Method to shuffle set of cell (put them in random order)
+	 */
+	public void shuffle() {
+
+		int n = cellArray.size();
+		Random random = new Random();
+		for (int i = 0; i < n; i++) {
+			int newPosition = i + random.nextInt(n - i);
+			Cell cellTemp = cellArray.get(i);
+			cellArray.remove(i);
+			cellArray.add(i, cellArray.get(newPosition));
+			cellArray.remove(newPosition);
+			cellArray.add(newPosition, cellTemp);
+		}
 	}
 
 	/**

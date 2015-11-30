@@ -1,14 +1,18 @@
 package org.micromanager.maarslib;
 
+import java.util.ArrayList;
+
 import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.CellChannelFactory;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
+import org.micromanager.segmentPombe.ComputeImageCorrelation;
 import org.micromanager.segmentPombe.SegPombeParameters;
 import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -55,10 +59,25 @@ public class FluoAnalyzer extends Thread {
 		double[] nbOfCellEachThread = new double[2];
 		nbOfCellEachThread[0] = nbCell / nThread;
 		nbOfCellEachThread[1] = nbCell - (nbOfCellEachThread[0] * (nThread - 1));
-		ReportingUtils.logMessage("Cropping cell");
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
+		int cursor = 0;
 		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
 		// TODO to split soc
+		for (int i = 0; i < nThread; i++) {
+			if (i == 0) {
+				ArrayList<Cell> subSet = soc.getSubArray(cursor, (int) Math.round(i + nbOfCellEachThread[1]));
+				new 
+				.start();
+				cursor += (int) Math.round(i + nbOfCellEachThread[1]);
+			} else {
+				ArrayList<Cell> subSet = soc.getSubSet(cursor, (int) Math.round(i + nbOfCellEachThread[0]));
+				subImg = splitter.crop(xPosition, (int) widths[0]);
+				task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
+				map.put(xPosition, task);
+				cursor += (int) Math.round(i + nbOfCellEachThread[0]);
+			}
+		}
+
 		for (Cell cell : soc) {
 			cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
 			Roi rescaledRoi = cell.rescaleRoi(factors);
