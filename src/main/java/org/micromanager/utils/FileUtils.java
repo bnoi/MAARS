@@ -61,7 +61,6 @@ public class FileUtils {
 		}
 		File newFile = new File(spotsFolder + String.valueOf(cellNb) + "_"
 				+ channel + ".xml");
-		ReportingUtils.logMessage("Writing to :" + newFile.toString());
 		TmXmlWriter writer = new TmXmlWriter(newFile);
 		writer.appendModel(model);
 		try {

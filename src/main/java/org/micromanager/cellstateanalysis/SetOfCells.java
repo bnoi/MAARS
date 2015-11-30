@@ -5,7 +5,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Random;
 
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.segmentPombe.SegPombeParameters;
@@ -47,29 +46,28 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 */
 	public SetOfCells(SegPombeParameters parameters) {
 		try {
-			PrintStream ps = new PrintStream(parameters.getSavingPath()
-					+ "CellStateAnalysis.LOG");
+			PrintStream ps = new PrintStream(parameters.getSavingPath() + "CellStateAnalysis.LOG");
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		ReportingUtils.logMessage("Get ROIs as array");
-		roiArray = getRoisAsArray(parameters.getSavingPath()
-				+ parameters.getImageToAnalyze().getShortTitle() + "_ROI.zip");
+		roiArray = getRoisAsArray(
+				parameters.getSavingPath() + parameters.getImageToAnalyze().getShortTitle() + "_ROI.zip");
 		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
-			cellArray.add(i, new Cell(roiArray[i], i));
+			cellArray.add(i, new Cell(roiArray[i], i + 1));
 		}
 		ReportingUtils.logMessage("Done.");
 	}
-	
-	public ArrayList<Cell> getSubArray(int begin, int end){
+
+	public ArrayList<Cell> getSubArray(int begin, int end) {
 		ArrayList<Cell> subSet = new ArrayList<Cell>();
-		for (int i = begin; i < end;i++){
-			subSet.add(cellArray.get(i));
+		for (int i = begin; i < end; i++) {
+			subSet.add((Cell) cellArray.get(i));
 		}
 		return subSet;
 	}
@@ -85,25 +83,10 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		if (roiManager == null) {
 			roiManager = new RoiManager();
 		}
-		roiManager.runCommand("Open", pathToRois);
-		return roiManager.getRoisAsArray();
-	}
-	
-	/**
-	 * Method to shuffle set of cell (put them in random order)
-	 */
-	public void shuffle() {
-
-		int n = cellArray.size();
-		Random random = new Random();
-		for (int i = 0; i < n; i++) {
-			int newPosition = i + random.nextInt(n - i);
-			Cell cellTemp = cellArray.get(i);
-			cellArray.remove(i);
-			cellArray.add(i, cellArray.get(newPosition));
-			cellArray.remove(newPosition);
-			cellArray.add(newPosition, cellTemp);
+		if (roiManager.getCount() == 0) {
+			roiManager.runCommand("Open", pathToRois);
 		}
+		return roiManager.getRoisAsArray();
 	}
 
 	/**
@@ -115,12 +98,13 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	public Cell getCell(int index) {
 		return cellArray.get(index);
 	}
-	
+
 	/**
 	 * total number of cell
+	 * 
 	 * @return
 	 */
-	public int size(){
+	public int size() {
 		return cellArray.size();
 	}
 

@@ -66,7 +66,7 @@ public class Cell {
 	 * object
 	 * 
 	 */
-	public void findFluoSpotTempFunction() {
+	public synchronized void findFluoSpotTempFunction() {
 		// Roi related computation
 		// measures;
 		// Spot related computation
@@ -99,11 +99,11 @@ public class Cell {
 		// fluoImage.getCalibration(), cellShapeRoi);
 	}
 
-	public void setCurrentFrame(int frame) {
+	public synchronized void setCurrentFrame(int frame) {
 		this.currentFrame = frame;
 	}
 
-	public void setFocusImage(ImagePlus focusImg) {
+	public synchronized void setFocusImage(ImagePlus focusImg) {
 		this.focusImg = focusImg;
 	}
 
@@ -111,7 +111,7 @@ public class Cell {
 	 * 
 	 * @return ROI corresponding to segmented cell
 	 */
-	public Roi getCellShapeRoi() {
+	public synchronized Roi getCellShapeRoi() {
 		return cellShapeRoi;
 	}
 
@@ -120,7 +120,7 @@ public class Cell {
 	 * 
 	 * @param fluoImage
 	 */
-	public void setFluoImage(ImagePlus fluoImage) {
+	public synchronized void setFluoImage(ImagePlus fluoImage) {
 		this.fluoImage = fluoImage;
 		this.cellShapeRoi = fluoImage.getRoi();
 	}
@@ -129,27 +129,27 @@ public class Cell {
 	 * 
 	 * @return fluorescent image corresponding to cell
 	 */
-	public ImagePlus getFluoImage() {
+	public synchronized ImagePlus getFluoImage() {
 		return fluoImage;
 	}
 
-	public void measureBfRoi() {
+	public synchronized void measureBfRoi() {
 		this.measures = new Measures(focusImg, rt);
 	}
 
-	public Roi rescaleRoi(double[] factors) {
+	public synchronized Roi rescaleRoi(double[] factors) {
 		return ImgUtils.rescaleRoi(cellShapeRoi, factors);
 	}
 
-	public int getCellNumber() {
+	public synchronized int getCellNumber() {
 		return cellNumber;
 	}
 
-	public void setCellShapeRoi(Roi cellShapeRoi) {
+	public synchronized void setCellShapeRoi(Roi cellShapeRoi) {
 		this.cellShapeRoi = cellShapeRoi;
 	}
 
-	public void saveCroppedImage(String path) {
+	public synchronized void saveCroppedImage(String path) {
 		String pathToCroppedImgDir = path + "/croppedImgs/";
 		String pathToCroppedImg = pathToCroppedImgDir + "/" + String.valueOf(this.getCellNumber());
 		if (!new File(pathToCroppedImgDir).exists()) {
@@ -160,7 +160,7 @@ public class Cell {
 		IJ.saveAsTiff(imp, pathToCroppedImg);
 	}
 
-	public void addCroppedFluoSlice() {
+	public synchronized void addCroppedFluoSlice() {
 		if (croppedFluoStack == null) {
 			croppedFluoStack = new ImageStack(fluoImage.getWidth(), fluoImage.getHeight());
 		}
@@ -168,7 +168,7 @@ public class Cell {
 		croppedFluoStack.addSlice(ip);
 	}
 
-	public void setChannelRelated(CellChannelFactory factory) {
+	public synchronized void setChannelRelated(CellChannelFactory factory) {
 		this.factory = factory;
 		if (factory.getChannel().equals(MaarsParameters.GFP)) {
 			if (gfpSpotCollection == null) {
@@ -189,7 +189,7 @@ public class Cell {
 		}
 	}
 
-	public SpotCollection getCollectionOf(String channel) {
+	public synchronized SpotCollection getCollectionOf(String channel) {
 		if (channel.equals(MaarsParameters.GFP)) {
 			return gfpSpotCollection;
 		} else if (channel.equals(MaarsParameters.CFP)) {
@@ -203,7 +203,7 @@ public class Cell {
 		}
 	}
 
-	public Spot getTheBestOfFeature(SpotCollection collection, String feature) {
+	public synchronized Spot getTheBestOfFeature(SpotCollection collection, String feature) {
 		double max = 0;
 		Spot best = null;
 		for (Spot s : collection.iterable(false)) {
@@ -215,7 +215,7 @@ public class Cell {
 		return best;
 	}
 
-	public boolean croppedRoiContains(Spot s) {
+	public synchronized boolean croppedRoiContains(Spot s) {
 		Calibration cal = fluoImage.getCalibration();
 		return cellShapeRoi.contains((int) Math.round(s.getFeature("POSITION_X") / cal.pixelWidth),
 				(int) Math.round(s.getFeature("POSITION_Y") / cal.pixelHeight));
@@ -228,7 +228,7 @@ public class Cell {
 	 *            channel name
 	 * @return model of Trackmate (see @Model in @Trakmate)
 	 */
-	public Model getModelOf(String channel) {
+	public synchronized Model getModelOf(String channel) {
 		Model model = fluoAnalysis.getModel();
 		model.setSpots(getCollectionOf(channel), true);
 		return model;

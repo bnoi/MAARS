@@ -5,6 +5,7 @@ import mmcorej.CMMCore;
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
 import org.micromanager.acquisition.SegAcquisition;
+import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.maarslib.ExplorationXYPositions;
@@ -74,6 +75,7 @@ public class MAARS {
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
+				SetOfCells soc = new SetOfCells(ms.getSegPombeParam());
 				// ----------------if got ROI, start fluo-acquisition --------//
 				// MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(parameters,
 				// ms.getSegPombeParam(), xPos, yPos);
@@ -92,8 +94,8 @@ public class MAARS {
 						String[] arrayChannels = channels.split(",", -1);
 						for (String channel : arrayChannels) {
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-							new FluoAnalyzer(parameters, ms.getSegPombeParam(), fluoImage, segImg, channel, frame, xPos,
-									yPos).start();
+							new FluoAnalyzer(parameters, ms.getSegPombeParam(), fluoImage, segImg, soc, channel, frame,
+									xPos, yPos).start();
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
@@ -113,8 +115,8 @@ public class MAARS {
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-						new FluoAnalyzer(parameters, ms.getSegPombeParam(), fluoImage, segImg, channel, frame, xPos,
-								yPos).start();
+						new FluoAnalyzer(parameters, ms.getSegPombeParam(), fluoImage, segImg, soc, channel, frame,
+								xPos, yPos).start();
 					}
 				}
 			}

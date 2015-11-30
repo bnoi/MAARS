@@ -25,13 +25,13 @@ public class ImageSplitter {
 
 	/**
 	 * 
-	 * @return double[]: if divided evenly double[0] == double[1] else double[1]
+	 * @return double[]: if divided evenly, double[0] == double[1] else double[1]
 	 *         take the rest of width
 	 */
-	public double[] getWidths() {
-		double[] coord = new double[2];
-		coord[0] = img.getWidth() / numberToSplit;
-		coord[1] = img.getWidth() - (coord[0] * (numberToSplit - 1));
+	public int[] getWidths() {
+		int[] coord = new int[2];
+		coord[0] = (int) img.getWidth() / numberToSplit;
+		coord[1] = (int) coord[0] + img.getWidth() % numberToSplit;
 		return coord;
 	}
 

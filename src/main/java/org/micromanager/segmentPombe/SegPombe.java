@@ -161,17 +161,17 @@ public class SegPombe {
 		ExecutorService executor = Executors.newFixedThreadPool(nbProcessor);
 		Map<Integer, Future<FloatProcessor>> map = new HashMap<Integer, Future<FloatProcessor>>();
 		Future<FloatProcessor> task = null;
-		double[] widths = splitter.getWidths();
+		int[] widths = splitter.getWidths();
 		for (int i = 0; i < nbProcessor; i++) {
 			if (i == 0){
-				subImg = splitter.crop(xPosition, (int) widths[1]);
+				subImg = splitter.crop(xPosition, widths[1]);
 				task = executor.submit(new ComputeImageCorrelation(subImg,
 						zFocus, sigma, direction));
 				map.put(xPosition, task);
 				xPosition += widths[1];
 			}else{
 				IJ.showStatus("Computing correlation image");
-				subImg = splitter.crop(xPosition, (int) widths[0]);
+				subImg = splitter.crop(xPosition, widths[0]);
 				task = executor.submit(new ComputeImageCorrelation(subImg,
 						zFocus, sigma, direction));
 				map.put(xPosition, task);

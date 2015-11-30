@@ -1,18 +1,16 @@
 package org.micromanager.maarslib;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.CellChannelFactory;
 import org.micromanager.cellstateanalysis.SetOfCells;
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
-import org.micromanager.segmentPombe.ComputeImageCorrelation;
 import org.micromanager.segmentPombe.SegPombeParameters;
 import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -32,10 +30,13 @@ public class FluoAnalyzer extends Thread {
 	private ImagePlus zProjectedFluoImg;
 	private Calibration bfImgCal;
 	private SetOfCells soc;
+	private double[] factors;
+	private Thread thread;
 
 	public FluoAnalyzer(MaarsParameters parameters, SegPombeParameters segParam, ImagePlus fluoImage, ImagePlus bfImage,
-			String channel, int frame, double positionX, double positionY) {
+			SetOfCells soc, String channel, int frame, double positionX, double positionY) {
 		zProjectedFluoImg = ImgUtils.zProject(fluoImage);
+		this.parameters = parameters;
 		createCellChannelFactory(channel);
 		this.frame = frame;
 		this.bfImgCal = bfImage.getCalibration();
@@ -44,7 +45,8 @@ public class FluoAnalyzer extends Thread {
 		focusImage.setCalibration(bfImgCal);
 		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(positionX)
 				+ "_Y" + Math.round(positionY) + "_FLUO");
-		soc = new SetOfCells(segParam);
+		this.soc = soc;
+		factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
 	}
 
 	public void createCellChannelFactory(String currentChannel) {
@@ -56,44 +58,69 @@ public class FluoAnalyzer extends Thread {
 	public void run() {
 		int nThread = Runtime.getRuntime().availableProcessors();
 		int nbCell = soc.size();
-		double[] nbOfCellEachThread = new double[2];
-		nbOfCellEachThread[0] = nbCell / nThread;
-		nbOfCellEachThread[1] = nbCell - (nbOfCellEachThread[0] * (nThread - 1));
+		final int[] nbOfCellEachThread = new int[2];
+		nbOfCellEachThread[0] = (int) nbCell / nThread;
+		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
 		int cursor = 0;
-		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
-		// TODO to split soc
 		for (int i = 0; i < nThread; i++) {
 			if (i == 0) {
-				ArrayList<Cell> subSet = soc.getSubArray(cursor, (int) Math.round(i + nbOfCellEachThread[1]));
-				new 
-				.start();
-				cursor += (int) Math.round(i + nbOfCellEachThread[1]);
+				final int begin = cursor;
+				final int end = cursor + nbOfCellEachThread[1];
+				class Analyzer implements Runnable {
+					@Override
+					public void run() {
+						for (int j = begin; j < end; j++) {
+							final Cell cell = soc.getCell(j);
+							cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
+							Roi rescaledRoi = cell.rescaleRoi(factors);
+							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
+							cell.addCroppedFluoSlice();
+							// save cropped cells
+							cell.saveCroppedImage(pathToFluoDir);
+							// fluoanalysis
+							cell.setChannelRelated(currentFactory);
+							cell.setCurrentFrame(frame);
+							cell.measureBfRoi();
+							cell.findFluoSpotTempFunction();
+							// can be optional
+							FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(),
+									currentFactory.getChannel(), cell.getModelOf(currentFactory.getChannel()));
+						}
+					}
+				}
+				thread = new Thread(new Analyzer(), "SubSet_" + i);
+				thread.start();
+				cursor += nbOfCellEachThread[1];
 			} else {
-				ArrayList<Cell> subSet = soc.getSubSet(cursor, (int) Math.round(i + nbOfCellEachThread[0]));
-				subImg = splitter.crop(xPosition, (int) widths[0]);
-				task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
-				map.put(xPosition, task);
-				cursor += (int) Math.round(i + nbOfCellEachThread[0]);
+				final int begin = cursor;
+				final int end = cursor + nbOfCellEachThread[0];
+				class Analyzer implements Runnable {
+					@Override
+					public void run() {
+						for (int x = begin; x < end; x++) {
+							final Cell cell = soc.getCell(x);
+							cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
+							Roi rescaledRoi = cell.rescaleRoi(factors);
+							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
+							cell.addCroppedFluoSlice();
+							// save cropped cells
+							cell.saveCroppedImage(pathToFluoDir);
+							// fluoanalysis
+							cell.setChannelRelated(currentFactory);
+							cell.setCurrentFrame(frame);
+							cell.measureBfRoi();
+							cell.findFluoSpotTempFunction();
+							// can be optional
+							FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(),
+									currentFactory.getChannel(), cell.getModelOf(currentFactory.getChannel()));
+						}
+					}
+				}
+				thread = new Thread(new Analyzer(), "SubSet_" + i);
+				thread.start();
+				cursor += nbOfCellEachThread[0];
 			}
-		}
-
-		for (Cell cell : soc) {
-			cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
-			Roi rescaledRoi = cell.rescaleRoi(factors);
-			cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
-			cell.addCroppedFluoSlice();
-			// save cropped cells
-			cell.saveCroppedImage(pathToFluoDir);
-			// fluoanalysis
-			cell.setChannelRelated(currentFactory);
-			cell.setCurrentFrame(frame);
-			cell.measureBfRoi();
-			cell.findFluoSpotTempFunction();
-			// can be optional
-			// FileUtils.writeSpotFeatures(parameters.getSavingPath(),
-			// cell.getCellNumber(), currentFactory.getChannel(),
-			// cell.getModelOf(currentFactory.getChannel()));
 		}
 	}
 }
