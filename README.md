@@ -20,6 +20,8 @@ That's all !
 
 - `update-libs.sh` : use Maven to build MAARS and copy all dependencies to `jars/`. It allows "basic users" to copy the required .jar file to a standard Micro-Manager installation.
 
+- `install.sh` : Use to install MAARS plugin and its dependencies to Micro-Manager installation.
+
 ## License
 
 [BSD License](LICENSE).
