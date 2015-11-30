@@ -14,6 +14,7 @@ if [ ! -f "ij149.zip" ]; then
     exit 1
 fi
 
+rm -fr ImageJ/
 if [ ! -d "ImageJ" ]; then
   unzip ij*.zip
 fi
