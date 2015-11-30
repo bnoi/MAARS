@@ -22,8 +22,11 @@ if [ ! -f "ImageJ/MMConfig_demo.cfg" ]; then
   wget https://raw.githubusercontent.com/micro-manager/micro-manager/master/bindist/any-platform/MMConfig_demo.cfg -O ImageJ/MMConfig_demo.cfg
 fi
 
+if [ ! -d "micro-manager" ]; then
+  git clone https://github.com/micro-manager/micro-manager.git
+fi
+
 cd micro-manager/
-git pull
 GIT_HASH=$(git rev-parse --short HEAD)
 
 # Build MM
