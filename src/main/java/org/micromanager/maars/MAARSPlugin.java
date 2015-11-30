@@ -76,7 +76,7 @@ public class MAARSPlugin implements MenuPlugin, SciJavaPlugin {
                 }
 
             } else {
-                inStream = ClassLoader.getSystemResourceAsStream("maars_default_config.xml");
+                inStream = getClass().getResourceAsStream("/maars_default_config.xml");
             }
             parameters = new MaarsParameters(inStream);
             new MaarsMainDialog(mmStudio, mmc, parameters).show();
