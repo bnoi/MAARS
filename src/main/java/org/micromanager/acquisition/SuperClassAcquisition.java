@@ -188,6 +188,7 @@ public class SuperClassAcquisition {
 			step = Double.parseDouble(parameters
 					.getFluoParameter(MaarsParameters.STEP));
 			imgName = channelName;
+			mmc.setAutoShutter(true);
 		} else {
 			acqName = "movie_X" + Math.round(positionX) + "_Y"
 					+ Math.round(positionY);
@@ -198,6 +199,7 @@ public class SuperClassAcquisition {
 					.getSegmentationParameter(MaarsParameters.STEP));
 			imgName = parameters
 					.getSegmentationParameter(MaarsParameters.CHANNEL);
+			mmc.setAutoShutter(false);
 		}
 
 		String shutterLable = parameters.getChShutter(channelName);
@@ -214,7 +216,6 @@ public class SuperClassAcquisition {
 		setDatastoreMetadata(ds, channelName, acqName, step);
 		// setDisplay(chColor);
 		try {
-			mmc.setAutoShutter(false);
 			mmc.setShutterOpen(true);
 			mmc.waitForSystem();
 		} catch (Exception e) {
