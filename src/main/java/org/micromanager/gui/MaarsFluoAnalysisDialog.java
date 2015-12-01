@@ -35,7 +35,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	 */
 	private static final long serialVersionUID = 1L;
 	private MaarsParameters parameters;
-	private int filedLength = 8;
+	private int fieldLength = 8;
 	private JTextField range;
 	private JTextField step;
 	private JTextField timeInterval;
@@ -90,7 +90,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		range = new JTextField(
 				parameters
 						.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE),
-				filedLength);
+				fieldLength);
 		fluoRangePanel.add(rangeTitle);
 		fluoRangePanel.add(range);
 
@@ -99,7 +99,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		JPanel fluoStepPanel = new JPanel(new GridLayout(1, 2));
 		JLabel stepTitle = new JLabel("Step (micron) : ", SwingConstants.CENTER);
 		step = new JTextField(
-				parameters.getFluoParameter(MaarsParameters.STEP), filedLength);
+				parameters.getFluoParameter(MaarsParameters.STEP), fieldLength);
 		fluoStepPanel.add(stepTitle);
 		fluoStepPanel.add(step);
 
@@ -110,7 +110,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 				SwingConstants.CENTER);
 		timeInterval = new JTextField(
 				parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL),
-				filedLength);
+				fieldLength);
 		timeIntervalPanel.add(timeIntervalTitle);
 		timeIntervalPanel.add(timeInterval);
 

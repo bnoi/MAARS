@@ -1,8 +1,5 @@
-package org.micromanager.maarslib;
+package org.micromanager.cellstateanalysis;
 
-import org.micromanager.cellstateanalysis.Cell;
-import org.micromanager.cellstateanalysis.CellChannelFactory;
-import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.segmentPombe.SegPombeParameters;
 import org.micromanager.utils.FileUtils;

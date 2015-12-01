@@ -1,8 +1,8 @@
 package org.micromanager.maars;
 
+import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.maarslib.ExplorationXYPositions;
-import org.micromanager.maarslib.FluoAnalyzer;
 import org.micromanager.maarslib.MaarsSegmentation;
 import org.micromanager.utils.FileUtils;
 

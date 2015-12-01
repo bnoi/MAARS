@@ -5,11 +5,11 @@ import mmcorej.CMMCore;
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
 import org.micromanager.acquisition.SegAcquisition;
+import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.maarslib.ExplorationXYPositions;
-import org.micromanager.maarslib.FluoAnalyzer;
 import org.micromanager.maarslib.MaarsSegmentation;
 
 import ij.ImagePlus;

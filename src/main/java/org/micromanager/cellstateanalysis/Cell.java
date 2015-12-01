@@ -18,42 +18,40 @@ import ij.measure.ResultsTable;
 
 /**
  * Cell is a class containing information about cell image, including its
- * mitotic state, its shape, ...
+ * mitotic state, its shape, ... TODO
  * 
  * @author Tong LI && marie
  *
  */
 public class Cell {
 
-	// tools
+	private int cellNumber;
+	private int currentFrame;
+
+	// image related
 	private ImagePlus fluoImage;
 	private ImagePlus focusImg;
 	private ImageStack croppedFluoStack = null;
 	private Roi cellShapeRoi;
 	private Roi croppedCellRoi;
 
-	// informations
-	private int cellNumber;
+	// analysis informations
+	private CellFluoAnalysis fluoAnalysis;
 	private Measures measures;
 	private ResultsTable rt;
 
-	private CellFluoAnalysis fluoAnalysis;
+	// Data containers
 	private CellChannelFactory factory;
 	private SpotCollection gfpSpotCollection;
 	private SpotCollection cfpSpotCollection;
 	private SpotCollection dapiSpotCollection;
 	private SpotCollection txredSpotCollection;
-	private int currentFrame;
 
 	/**
-	 * @param focusImg
-	 *            :the brightfield image used for segmentation
 	 * @param roiCellShape
 	 *            : ROI that correspond to segmented cell
 	 * @param cellNb
-	 * @param rt
-	 *            : result table used to display result of analysis (measures on
-	 *            cell)
+	 *            ：cell instance index in array
 	 */
 	public Cell(Roi roiCellShape, int cellNb) {
 		this.cellShapeRoi = roiCellShape;
@@ -78,22 +76,21 @@ public class Cell {
 		SpotCollection currentCollection = getCollectionOf(factory.getChannel());
 		for (Spot s : fluoAnalysis.getModel().getSpots().iterable(visibleOnly)) {
 			currentCollection.add(s, currentFrame);
-
-			int nSpotDetected = currentCollection.getNSpots(currentFrame, visibleOnly);
-			if (nSpotDetected == 1) {
-				// interphase
-			} else if (nSpotDetected == 2) {
-				// SPBs
-			} else if (nSpotDetected > 2 && nSpotDetected <= 4) {
-				// SPBs + Cen2 or SPBs + telomeres
-			} else if (nSpotDetected > 4 && nSpotDetected <= 6) {
-				// SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
-			} else if (nSpotDetected > 6 && nSpotDetected <= 8) {
-				// SPBs + NDC80 incomplete
-			} else {
-				// not manageable
-			}
 		}
+//		int nSpotDetected = currentCollection.getNSpots(currentFrame, visibleOnly);
+//		if (nSpotDetected == 1) {
+//			// interphase
+//		} else if (nSpotDetected == 2) {
+//			// SPBs
+//		} else if (nSpotDetected > 2 && nSpotDetected <= 4) {
+//			// SPBs + Cen2 or SPBs + telomeres
+//		} else if (nSpotDetected > 4 && nSpotDetected <= 6) {
+//			// SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
+//		} else if (nSpotDetected > 6 && nSpotDetected <= 8) {
+//			// SPBs + NDC80 incomplete
+//		} else {
+//			// not manageable
+//		}
 		// ReportingUtils.logMessage("Create spindle using spots found");
 		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
 		// fluoImage.getCalibration(), cellShapeRoi);
