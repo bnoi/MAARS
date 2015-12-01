@@ -2,7 +2,6 @@ package org.micromanager.cellstateanalysis;
 
 import java.io.File;
 
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.ImgUtils;
 
@@ -31,6 +30,7 @@ public class Cell {
 	private ImagePlus focusImg;
 	private ImageStack croppedFluoStack = null;
 	private Roi cellShapeRoi;
+	private Roi croppedCellRoi;
 
 	// informations
 	private int cellNumber;
@@ -99,11 +99,11 @@ public class Cell {
 		// fluoImage.getCalibration(), cellShapeRoi);
 	}
 
-	public synchronized void setCurrentFrame(int frame) {
+	public void setCurrentFrame(int frame) {
 		this.currentFrame = frame;
 	}
 
-	public synchronized void setFocusImage(ImagePlus focusImg) {
+	public void setFocusImage(ImagePlus focusImg) {
 		this.focusImg = focusImg;
 	}
 
@@ -111,7 +111,7 @@ public class Cell {
 	 * 
 	 * @return ROI corresponding to segmented cell
 	 */
-	public synchronized Roi getCellShapeRoi() {
+	public Roi getCellShapeRoi() {
 		return cellShapeRoi;
 	}
 
@@ -120,36 +120,32 @@ public class Cell {
 	 * 
 	 * @param fluoImage
 	 */
-	public synchronized void setFluoImage(ImagePlus fluoImage) {
+	public void setFluoImage(ImagePlus fluoImage) {
 		this.fluoImage = fluoImage;
-		this.cellShapeRoi = fluoImage.getRoi();
+		this.croppedCellRoi = fluoImage.getRoi();
 	}
 
 	/**
 	 * 
 	 * @return fluorescent image corresponding to cell
 	 */
-	public synchronized ImagePlus getFluoImage() {
+	public ImagePlus getFluoImage() {
 		return fluoImage;
 	}
 
-	public synchronized void measureBfRoi() {
+	public void measureBfRoi() {
 		this.measures = new Measures(focusImg, rt);
 	}
 
-	public synchronized Roi rescaleRoi(double[] factors) {
+	public Roi rescaleRoi(double[] factors) {
 		return ImgUtils.rescaleRoi(cellShapeRoi, factors);
 	}
 
-	public synchronized int getCellNumber() {
+	public int getCellNumber() {
 		return cellNumber;
 	}
 
-	public synchronized void setCellShapeRoi(Roi cellShapeRoi) {
-		this.cellShapeRoi = cellShapeRoi;
-	}
-
-	public synchronized void saveCroppedImage(String path) {
+	public void saveCroppedImage(String path) {
 		String pathToCroppedImgDir = path + "/croppedImgs/";
 		String pathToCroppedImg = pathToCroppedImgDir + "/" + String.valueOf(this.getCellNumber());
 		if (!new File(pathToCroppedImgDir).exists()) {
@@ -160,7 +156,7 @@ public class Cell {
 		IJ.saveAsTiff(imp, pathToCroppedImg);
 	}
 
-	public synchronized void addCroppedFluoSlice() {
+	public void addCroppedFluoSlice() {
 		if (croppedFluoStack == null) {
 			croppedFluoStack = new ImageStack(fluoImage.getWidth(), fluoImage.getHeight());
 		}
@@ -168,7 +164,7 @@ public class Cell {
 		croppedFluoStack.addSlice(ip);
 	}
 
-	public synchronized void setChannelRelated(CellChannelFactory factory) {
+	public void setChannelRelated(CellChannelFactory factory) {
 		this.factory = factory;
 		if (factory.getChannel().equals(MaarsParameters.GFP)) {
 			if (gfpSpotCollection == null) {
@@ -189,7 +185,7 @@ public class Cell {
 		}
 	}
 
-	public synchronized SpotCollection getCollectionOf(String channel) {
+	public SpotCollection getCollectionOf(String channel) {
 		if (channel.equals(MaarsParameters.GFP)) {
 			return gfpSpotCollection;
 		} else if (channel.equals(MaarsParameters.CFP)) {
@@ -203,7 +199,7 @@ public class Cell {
 		}
 	}
 
-	public synchronized Spot getTheBestOfFeature(SpotCollection collection, String feature) {
+	public Spot getTheBestOfFeature(SpotCollection collection, String feature) {
 		double max = 0;
 		Spot best = null;
 		for (Spot s : collection.iterable(false)) {
@@ -215,9 +211,9 @@ public class Cell {
 		return best;
 	}
 
-	public synchronized boolean croppedRoiContains(Spot s) {
+	public boolean croppedRoiContains(Spot s) {
 		Calibration cal = fluoImage.getCalibration();
-		return cellShapeRoi.contains((int) Math.round(s.getFeature("POSITION_X") / cal.pixelWidth),
+		return croppedCellRoi.contains((int) Math.round(s.getFeature("POSITION_X") / cal.pixelWidth),
 				(int) Math.round(s.getFeature("POSITION_Y") / cal.pixelHeight));
 	}
 
@@ -228,7 +224,7 @@ public class Cell {
 	 *            channel name
 	 * @return model of Trackmate (see @Model in @Trakmate)
 	 */
-	public synchronized Model getModelOf(String channel) {
+	public Model getModelOf(String channel) {
 		Model model = fluoAnalysis.getModel();
 		model.setSpots(getCollectionOf(channel), true);
 		return model;

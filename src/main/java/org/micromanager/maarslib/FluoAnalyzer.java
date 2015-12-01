@@ -1,8 +1,5 @@
 package org.micromanager.maarslib;
 
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.CellChannelFactory;
 import org.micromanager.cellstateanalysis.SetOfCells;
@@ -37,6 +34,7 @@ public class FluoAnalyzer extends Thread {
 			SetOfCells soc, String channel, int frame, double positionX, double positionY) {
 		zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		this.parameters = parameters;
+		this.soc = soc;
 		createCellChannelFactory(channel);
 		this.frame = frame;
 		this.bfImgCal = bfImage.getCalibration();
@@ -45,7 +43,6 @@ public class FluoAnalyzer extends Thread {
 		focusImage.setCalibration(bfImgCal);
 		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(positionX)
 				+ "_Y" + Math.round(positionY) + "_FLUO");
-		this.soc = soc;
 		factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
 	}
 

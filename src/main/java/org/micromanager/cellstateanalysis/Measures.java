@@ -1,7 +1,6 @@
 package org.micromanager.cellstateanalysis;
 
 import ij.ImagePlus;
-import ij.gui.Roi;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
@@ -43,12 +42,8 @@ public class Measures {
 	/**
 	 * Constructor :
 	 * 
-	 * @param bfImage
-	 *            : image the measures are taken from
-	 * @param focusSlice
-	 *            : slice of the image the measures are taken from
-	 * @param cellShapeRoi
-	 *            : ROI of object measured
+	 * @param focusImg
+	 *            : image the measures are taken from (with Roi on it)
 	 * @param rt
 	 *            : result table (containing results of analysis)
 	 */
