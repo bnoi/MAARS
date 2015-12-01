@@ -13,26 +13,7 @@ import ij.ImagePlus;
  */
 public class FluoAcquisition extends SuperClassAcquisition {
 
-	/**
-	 * Constructor :
-	 * 
-	 * @param mm
-	 *            : graphical user interface of Micro-Manager
-	 * @param mmc
-	 *            : Core object of Micro-Manager
-	 * @param parameters
-	 *            : parameters used for algorithm
-	 * @param positionX
-	 *            : x field position (can be defined by ExplorationXYPositions)
-	 * @param positionY
-	 *            : y field position (can be defined by ExplorationXYPositions)
-	 * @param frame
-	 *            :current frame
-	 * @param channel
-	 *            : current channel
-	 */
-	public FluoAcquisition(MMStudio mm, CMMCore mmc,
-			MaarsParameters parameters, double positionX, double positionY) {
+	public FluoAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, double positionX, double positionY) {
 		super(mm, mmc, parameters, positionX, positionY);
 	}
 

@@ -53,7 +53,7 @@ public class FileUtils {
 	 * @param channel : current channel
 	 * @param model : @Trackmate object @Model which stocks @SpotCollection
 	 */
-	public static void writeSpotFeatures(String path, int cellNb,
+	public synchronized static void writeSpotFeatures(String path, int cellNb,
 			String channel, Model model) {
 		String spotsFolder = path + "/spots/";
 		if (!exists(spotsFolder)) {

@@ -70,7 +70,7 @@ public class FluoAnalyzer extends Thread {
 						for (int j = begin; j < end; j++) {
 							final Cell cell = soc.getCell(j);
 							cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
-							Roi rescaledRoi = cell.rescaleRoi(factors);
+							Roi rescaledRoi = cell.rescaleCellShapeRoi(factors);
 							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
 							cell.addCroppedFluoSlice();
 							// save cropped cells
@@ -98,7 +98,7 @@ public class FluoAnalyzer extends Thread {
 						for (int x = begin; x < end; x++) {
 							final Cell cell = soc.getCell(x);
 							cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
-							Roi rescaledRoi = cell.rescaleRoi(factors);
+							Roi rescaledRoi = cell.rescaleCellShapeRoi(factors);
 							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
 							cell.addCroppedFluoSlice();
 							// save cropped cells

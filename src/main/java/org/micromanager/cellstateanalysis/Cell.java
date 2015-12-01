@@ -137,7 +137,7 @@ public class Cell {
 		this.measures = new Measures(focusImg, rt);
 	}
 
-	public Roi rescaleRoi(double[] factors) {
+	public Roi rescaleCellShapeRoi(double[] factors) {
 		return ImgUtils.rescaleRoi(cellShapeRoi, factors);
 	}
 

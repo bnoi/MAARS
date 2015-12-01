@@ -24,26 +24,10 @@ public class CellChannelFactory {
 	}
 
 	/**
-	 * @param channel
-	 *            the channel to set
-	 */
-	public void setChannel(String channel) {
-		this.channel = channel;
-	}
-
-	/**
 	 * @return the maxNbSpot
 	 */
 	public int getMaxNbSpot() {
 		return maxNbSpot;
-	}
-
-	/**
-	 * @param maxNbSpot
-	 *            the maxNbSpot to set
-	 */
-	public void setMaxNbSpot(int maxNbSpot) {
-		this.maxNbSpot = maxNbSpot;
 	}
 
 	/**
@@ -53,11 +37,4 @@ public class CellChannelFactory {
 		return spotRadius;
 	}
 
-	/**
-	 * @param spotRadius
-	 *            the spotRadius to set
-	 */
-	public void setSpotRadius(double spotRadius) {
-		this.spotRadius = spotRadius;
-	}
 }
