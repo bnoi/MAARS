@@ -47,17 +47,15 @@ public class Measures {
 	 * @param rt
 	 *            : result table (containing results of analysis)
 	 */
-	public Measures(ImagePlus focusImg, ResultsTable rt) {
-		System.out.println("- create analyzer");
+	public Measures(ImagePlus focusImg) {
+		ResultsTable rt = new ResultsTable();
 		bfAnalyzer = new Analyzer(focusImg,
 				Measurements.AREA + Measurements.STD_DEV + Measurements.MIN_MAX + Measurements.SHAPE_DESCRIPTORS
 						+ Measurements.CENTROID + Measurements.PERIMETER + Measurements.ELLIPSE,
 				rt);
 
-		System.out.println("- measure");
 		bfAnalyzer.measure();
 
-		System.out.println("- put results in array");
 		measures = new double[14];
 		measures[AREA] = rt.getValue("Area", 0);
 		measures[STD_DEV] = rt.getValue("StdDev", 0);
@@ -73,8 +71,6 @@ public class Measures {
 		measures[ASPECT_RATIO] = rt.getValue("AR", 0);
 		measures[ROUND] = rt.getValue("Round", 0);
 		measures[SOLIDITY] = rt.getValue("Solidity", 0);
-		System.out.println("- Done.");
-		System.out.println("- reset table");
 	}
 
 	public double getArea() {

@@ -1,13 +1,19 @@
 package org.micromanager.maars;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
+import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.maarslib.ExplorationXYPositions;
 import org.micromanager.maarslib.MaarsSegmentation;
 import org.micromanager.utils.FileUtils;
+import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.measure.Calibration;
 import mmcorej.CMMCore;
 
 /**
@@ -15,7 +21,7 @@ import mmcorej.CMMCore;
  * @version Nov 22, 2015
  */
 public class MAARSNoAcq {
-	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters) {
+	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
 		// Start time
 		long start = System.currentTimeMillis();
 
@@ -41,11 +47,26 @@ public class MAARSNoAcq {
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
-				SetOfCells soc = new SetOfCells(ms.getSegPombeParam());
-				// ----------------if got ROI, start analysis --------//
-				System.out.println("Initialize fluo analysis...");
-				// MaarsFluoAnalysis mfa = new MaarsFluoAnalysis(parameters,
-				// ms.getSegPombeParam(), xPos, yPos);
+				// from Roi initialize a set of cell
+				soc.loadCells(ms.getSegPombeParam());
+				// Get the focus slice of BF image
+				Calibration bfImgCal = segImg.getCalibration();
+				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
+						segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
+				focusImage.setCalibration(bfImgCal);
+				// measure parameters of ROI
+				for (Cell cell : soc) {
+					cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
+					cell.measureBfRoi();
+				}
+				// ----------------start acquisition and analysis --------//
+				try {
+					PrintStream ps = new PrintStream(parameters.getSavingPath() + "CellStateAnalysis.LOG");
+					System.setOut(ps);
+					System.setErr(ps);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
 				int frame = 0;
 				while (frame < 1) {
 					String channels = parameters.getUsingChannels();
@@ -55,8 +76,7 @@ public class MAARSNoAcq {
 								+ Math.round(yPos) + "_FLUO/" + frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						System.out.println(pathToFluoMovie);
-						new FluoAnalyzer(parameters, ms.getSegPombeParam(), fluoImage, segImg, soc, channel, frame,
-								xPos, yPos).start();
+						new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, channel, frame, xPos, yPos).start();
 					}
 					frame++;
 				}

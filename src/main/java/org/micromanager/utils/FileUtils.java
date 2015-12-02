@@ -82,10 +82,6 @@ public class FileUtils {
 	 */
 	public static String convertPath(String unixPath) {
 		String path = unixPath;
-		ReportingUtils.logMessage("program running on windows : "
-				+ IJ.isWindows());
-		ReportingUtils.logMessage("path is containing '/' : "
-				+ path.contains("/"));
 		if (IJ.isWindows() && path.contains("/")) {
 			path = path.replace("/", "\\\\");
 		}

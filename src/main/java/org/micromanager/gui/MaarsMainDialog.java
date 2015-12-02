@@ -25,6 +25,7 @@ import javax.swing.SwingConstants;
 
 import mmcorej.CMMCore;
 
+import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
@@ -86,8 +87,7 @@ public class MaarsMainDialog implements ActionListener {
 		// initialize mainFrame
 
 		ReportingUtils.logMessage("create main dialog ...");
-		mainDialog = new JFrame(
-				"Mitosis Analysing And Recording System - MAARS");
+		mainDialog = new JFrame("Mitosis Analysing And Recording System - MAARS");
 		JFrame.setDefaultLookAndFeelDecorated(true);
 		mainDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -100,10 +100,8 @@ public class MaarsMainDialog implements ActionListener {
 
 		// Get number of field to explore
 
-		int defaultXFieldNumber = parameters
-				.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
-		int defaultYFieldNumber = parameters
-				.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
+		int defaultXFieldNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
+		int defaultYFieldNumber = parameters.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
 
 		// Calculate width and height for each field
 
@@ -170,13 +168,11 @@ public class MaarsMainDialog implements ActionListener {
 
 		// number of field label
 
-		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber
-				* defaultYFieldNumber);
+		numFieldLabel = new Label("Number of field : " + defaultXFieldNumber * defaultYFieldNumber);
 
 		// analysis parameters label
 
-		Label analysisParamLabel = new Label("Analysis parameters",
-				SwingConstants.CENTER);
+		Label analysisParamLabel = new Label("Analysis parameters", SwingConstants.CENTER);
 		analysisParamLabel.setBackground(labelColor);
 
 		// autofocus button
@@ -219,8 +215,7 @@ public class MaarsMainDialog implements ActionListener {
 		strategyPanel.add(staticOpt);
 		strategyPanel.add(dynamicOpt);
 		fluoAcqDurationTf = new JFormattedTextField(Double.class);
-		fluoAcqDurationTf.setValue(parameters
-				.getFluoParameter(MaarsParameters.TIME_LIMIT));
+		fluoAcqDurationTf.setValue(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT));
 		strategyPanel.add(fluoAcqDurationTf);
 		strategyPanel.add(new JLabel("min", SwingConstants.CENTER));
 
@@ -319,10 +314,8 @@ public class MaarsMainDialog implements ActionListener {
 		newWidth = (Double) widthTf.getValue();
 		newHeigth = (Double) widthTf.getValue();
 
-		int newXFieldNumber = (int) Math.round(newWidth
-				/ (calibration * mmc.getImageWidth()));
-		int newYFieldNumber = (int) Math.round(newHeigth
-				/ (calibration * mmc.getImageHeight()));
+		int newXFieldNumber = (int) Math.round(newWidth / (calibration * mmc.getImageWidth()));
+		int newYFieldNumber = (int) Math.round(newHeigth / (calibration * mmc.getImageHeight()));
 		int totoalNbField = newXFieldNumber * newYFieldNumber;
 		if (totoalNbField == 0) {
 			numFieldLabel.setForeground(Color.red);
@@ -332,10 +325,8 @@ public class MaarsMainDialog implements ActionListener {
 			numFieldLabel.setText("Number of field : " + totoalNbField);
 		}
 
-		parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, ""
-				+ newXFieldNumber);
-		parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, ""
-				+ newYFieldNumber);
+		parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, "" + newXFieldNumber);
+		parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, "" + newYFieldNumber);
 	}
 
 	/**
@@ -345,10 +336,8 @@ public class MaarsMainDialog implements ActionListener {
 		if (!savePathTf.getText().equals(parameters.getSavingPath())) {
 			parameters.setSavingPath(savePathTf.getText());
 		}
-		if (!fluoAcqDurationTf.getText().equals(
-				parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
-			parameters.setFluoParameter(MaarsParameters.TIME_LIMIT,
-					fluoAcqDurationTf.getText());
+		if (!fluoAcqDurationTf.getText().equals(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
+			parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
 		}
 		try {
 			parameters.save();
@@ -372,8 +361,7 @@ public class MaarsMainDialog implements ActionListener {
 	public int overWriteOrNot(String path) {
 		int decision = 0;
 		if (FileUtils.exists(path + "/movie_X0_Y0/MMStack.ome.tif")) {
-			decision = JOptionPane.showConfirmDialog(mainDialog,
-					"Overwrite existing files?");
+			decision = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing files?");
 		}
 		return decision;
 	}
@@ -386,15 +374,20 @@ public class MaarsMainDialog implements ActionListener {
 			if ((Double) widthTf.getValue() * (Double) heightTf.getValue() == 0) {
 				IJ.error("Session aborted, 0 field to analyse");
 			} else {
+				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
 				saveParameters();
-				if (withOutAcqChk.isSelected()) {
-					hide();
-					new MAARSNoAcq(mmc, parameters);
-				} else {
-					if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
+				try {
+					if (withOutAcqChk.isSelected()) {
 						hide();
-						new MAARS(mm, mmc, parameters);
+						new MAARSNoAcq(mmc, parameters, soc);
+					} else {
+						if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
+							hide();
+							new MAARS(mm, mmc, parameters, soc);
+						}
 					}
+				} catch (Exception e1) {
+
 				}
 			}
 		} else if (e.getSource() == segmButton) {

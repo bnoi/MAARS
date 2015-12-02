@@ -20,24 +20,18 @@ public class FluoAnalyzer extends Thread {
 	private String pathToFluoDir;
 	private int frame;
 	private CellChannelFactory currentFactory;
-	private ImagePlus focusImage;
 	private ImagePlus zProjectedFluoImg;
-	private Calibration bfImgCal;
 	private SetOfCells soc;
 	private double[] factors;
 	private Thread thread;
 
-	public FluoAnalyzer(MaarsParameters parameters, SegPombeParameters segParam, ImagePlus fluoImage, ImagePlus bfImage,
-			SetOfCells soc, String channel, int frame, double positionX, double positionY) {
+	public FluoAnalyzer(MaarsParameters parameters, ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc,
+			String channel, int frame, double positionX, double positionY) {
 		zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		this.parameters = parameters;
 		this.soc = soc;
 		createCellChannelFactory(channel);
 		this.frame = frame;
-		this.bfImgCal = bfImage.getCalibration();
-		ImageStack stack = bfImage.getStack();
-		this.focusImage = new ImagePlus(bfImage.getShortTitle(), stack.getProcessor(segParam.getFocusSlide()));
-		focusImage.setCalibration(bfImgCal);
 		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(positionX)
 				+ "_Y" + Math.round(positionY) + "_FLUO");
 		factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
@@ -66,7 +60,6 @@ public class FluoAnalyzer extends Thread {
 					public void run() {
 						for (int j = begin; j < end; j++) {
 							final Cell cell = soc.getCell(j);
-							cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
 							Roi rescaledRoi = cell.rescaleCellShapeRoi(factors);
 							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
 							cell.addCroppedFluoSlice();
@@ -75,7 +68,6 @@ public class FluoAnalyzer extends Thread {
 							// fluoanalysis
 							cell.setChannelRelated(currentFactory);
 							cell.setCurrentFrame(frame);
-							cell.measureBfRoi();
 							cell.findFluoSpotTempFunction();
 							// can be optional
 							FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(),
@@ -94,16 +86,14 @@ public class FluoAnalyzer extends Thread {
 					public void run() {
 						for (int x = begin; x < end; x++) {
 							final Cell cell = soc.getCell(x);
-							cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
 							Roi rescaledRoi = cell.rescaleCellShapeRoi(factors);
 							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
 							cell.addCroppedFluoSlice();
-							// save cropped cells
+							// can be optional
 							cell.saveCroppedImage(pathToFluoDir);
 							// fluoanalysis
 							cell.setChannelRelated(currentFactory);
 							cell.setCurrentFrame(frame);
-							cell.measureBfRoi();
 							cell.findFluoSpotTempFunction();
 							// can be optional
 							FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(),

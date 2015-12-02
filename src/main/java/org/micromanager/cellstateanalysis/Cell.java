@@ -38,7 +38,6 @@ public class Cell {
 	// analysis informations
 	private CellFluoAnalysis fluoAnalysis;
 	private Measures measures;
-	private ResultsTable rt;
 
 	// Data containers
 	private CellChannelFactory factory;
@@ -55,7 +54,7 @@ public class Cell {
 	 */
 	public Cell(Roi roiCellShape, int cellNb) {
 		this.cellShapeRoi = roiCellShape;
-		rt = new ResultsTable();
+
 		this.cellNumber = cellNb;
 	}
 
@@ -77,20 +76,21 @@ public class Cell {
 		for (Spot s : fluoAnalysis.getModel().getSpots().iterable(visibleOnly)) {
 			currentCollection.add(s, currentFrame);
 		}
-//		int nSpotDetected = currentCollection.getNSpots(currentFrame, visibleOnly);
-//		if (nSpotDetected == 1) {
-//			// interphase
-//		} else if (nSpotDetected == 2) {
-//			// SPBs
-//		} else if (nSpotDetected > 2 && nSpotDetected <= 4) {
-//			// SPBs + Cen2 or SPBs + telomeres
-//		} else if (nSpotDetected > 4 && nSpotDetected <= 6) {
-//			// SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
-//		} else if (nSpotDetected > 6 && nSpotDetected <= 8) {
-//			// SPBs + NDC80 incomplete
-//		} else {
-//			// not manageable
-//		}
+		// int nSpotDetected = currentCollection.getNSpots(currentFrame,
+		// visibleOnly);
+		// if (nSpotDetected == 1) {
+		// // interphase
+		// } else if (nSpotDetected == 2) {
+		// // SPBs
+		// } else if (nSpotDetected > 2 && nSpotDetected <= 4) {
+		// // SPBs + Cen2 or SPBs + telomeres
+		// } else if (nSpotDetected > 4 && nSpotDetected <= 6) {
+		// // SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
+		// } else if (nSpotDetected > 6 && nSpotDetected <= 8) {
+		// // SPBs + NDC80 incomplete
+		// } else {
+		// // not manageable
+		// }
 		// ReportingUtils.logMessage("Create spindle using spots found");
 		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
 		// fluoImage.getCalibration(), cellShapeRoi);
@@ -131,7 +131,7 @@ public class Cell {
 	}
 
 	public void measureBfRoi() {
-		this.measures = new Measures(focusImg, rt);
+		this.measures = new Measures(focusImg);
 	}
 
 	public Roi rescaleCellShapeRoi(double[] factors) {
@@ -142,12 +142,8 @@ public class Cell {
 		return cellNumber;
 	}
 
-	public void saveCroppedImage(String path) {
-		String pathToCroppedImgDir = path + "/croppedImgs/";
-		String pathToCroppedImg = pathToCroppedImgDir + "/" + String.valueOf(this.getCellNumber());
-		if (!new File(pathToCroppedImgDir).exists()) {
-			new File(pathToCroppedImgDir).mkdirs();
-		}
+	public void saveCroppedImage(String croppedImgDir) {
+		String pathToCroppedImg = croppedImgDir + "/" + String.valueOf(this.getCellNumber());
 		ImagePlus imp = new ImagePlus("cell_" + getCellNumber(), croppedFluoStack);
 		imp.setCalibration(getFluoImage().getCalibration());
 		IJ.saveAsTiff(imp, pathToCroppedImg);

@@ -196,14 +196,12 @@ public class SuperClassAcquisition {
 			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
 			step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
 			imgName = channelName;
-			mmc.setAutoShutter(true);
 		} else {
 			//initialize parameters for Bright-Field Acquisitions
 			acqName = "movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY);
 			range = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
 			step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 			imgName = parameters.getSegmentationParameter(MaarsParameters.CHANNEL);
-			mmc.setAutoShutter(false);
 		}
 
 		String shutterLable = parameters.getChShutter(channelName);
@@ -213,6 +211,7 @@ public class SuperClassAcquisition {
 		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
 
 		cleanUp();
+		mmc.setAutoShutter(false);
 		setShutter(shutterLable);
 		setChExposure(exposure);
 		Datastore ds = createDataStore(pathToMovie);
