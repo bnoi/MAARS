@@ -1,13 +1,13 @@
 package org.micromanager.cellstateanalysis;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.micromanager.internal.utils.ReportingUtils;
+import org.micromanager.maars.MaarsParameters;
 import org.micromanager.segmentPombe.SegPombeParameters;
 
 import ij.gui.Roi;
@@ -27,6 +27,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 
 	private ArrayList<Cell> cellArray;
 	private String rootSavingPath;
+	private ConcurrentHashMap<String, Object> acquisitionMeta;
 
 	public SetOfCells(String savingPath) {
 		this.rootSavingPath = savingPath;
@@ -39,7 +40,9 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 */
 	public void loadCells(SegPombeParameters parameters) {
 		ReportingUtils.logMessage("Get ROIs as array");
-		roiArray = getRoisAsArray(rootSavingPath + parameters.getImageToAnalyze().getShortTitle() + "_ROI.zip");
+		roiArray = getRoisAsArray(rootSavingPath + "/movie_X" + acquisitionMeta.get(MaarsParameters.X_POS) + "_Y"
+				+ acquisitionMeta.get(MaarsParameters.Y_POS) + "/" + parameters.getImageToAnalyze().getShortTitle()
+				+ "_ROI.zip");
 		cellArray = new ArrayList<Cell>();
 		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
@@ -96,14 +99,27 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return this.roiManager;
 	}
 
-	public void saveResults() {
-		String pathToCroppedImgDir = rootSavingPath + "/croppedImgs/";
-		if (!new File(pathToCroppedImgDir).exists()) {
-			new File(pathToCroppedImgDir).mkdirs();
+	public void writeResults() {
+		String fluoDir = rootSavingPath + "/movie_X" + acquisitionMeta.get(MaarsParameters.X_POS) + "_Y"
+				+ acquisitionMeta.get(MaarsParameters.Y_POS) + "_FLUO";
+		String croppedImgDir = fluoDir + "/croppedImgs/";
+		String spotsXmlDir = fluoDir + "/spots/";
+		if (!new File(croppedImgDir).exists()) {
+			new File(croppedImgDir).mkdirs();
+		}
+		if (!new File(spotsXmlDir).exists()) {
+			new File(spotsXmlDir).mkdirs();
 		}
 		for (Cell cell : this) {
-			cell.saveCroppedImage(pathToCroppedImgDir);
+			// save cropped cells
+			cell.saveCroppedImage(croppedImgDir);
+			// can be optional
+			cell.writeSpotFeatures(spotsXmlDir);
 		}
+	}
+
+	public void setAcquisitionMeta(ConcurrentHashMap<String, Object> acquisitionMeta) {
+		this.acquisitionMeta = acquisitionMeta;
 	}
 
 	// iterator related

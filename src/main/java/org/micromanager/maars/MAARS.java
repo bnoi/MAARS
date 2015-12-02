@@ -4,6 +4,7 @@ import mmcorej.CMMCore;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
@@ -37,6 +38,7 @@ public class MAARS {
 	 * @param parameters
 	 */
 	public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
+		Thread analyzerThr = null;
 		// Start time
 		long start = System.currentTimeMillis();
 
@@ -56,17 +58,16 @@ public class MAARS {
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
 
 		for (int i = 0; i < explo.length(); i++) {
-			System.out.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
-			double xPos = explo.getX(i);
-			double yPos = explo.getY(i);
-
 			try {
-				mm.core().setXYPosition(xPos, yPos);
+				mm.core().setXYPosition(explo.getX(i), explo.getY(i));
 				mmc.waitForDevice(mmc.getXYStageDevice());
 			} catch (Exception e) {
 				System.out.println("Can't set XY stage devie");
 				e.printStackTrace();
 			}
+			String xPos = String.valueOf(Math.round(explo.getX(i)));
+			String yPos = String.valueOf(Math.round(explo.getY(i)));
+			System.out.println("x : " + xPos + " y : " + yPos);
 			try {
 				autofocus.fullFocus();
 			} catch (MMException e1) {
@@ -102,6 +103,7 @@ public class MAARS {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
+				ConcurrentHashMap<String, Object> acquisitionMeta = new ConcurrentHashMap<String, Object>();
 				if (parameters.useDynamic()) {
 					double timeInterval = Double
 							.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
@@ -111,12 +113,21 @@ public class MAARS {
 							* 1000;
 					while (System.currentTimeMillis() - startTime <= timeLimit) {
 						double beginAcq = System.currentTimeMillis();
-
 						String channels = parameters.getUsingChannels();
 						String[] arrayChannels = channels.split(",", -1);
 						for (String channel : arrayChannels) {
+							acquisitionMeta.put(MaarsParameters.X_POS, xPos);
+							acquisitionMeta.put(MaarsParameters.Y_POS, yPos);
+							acquisitionMeta.put(MaarsParameters.FRAME, frame);
+							acquisitionMeta.put(MaarsParameters.CUR_CHANNEL, channel);
+							acquisitionMeta.put(MaarsParameters.CUR_MAX_NB_SPOT,
+									Integer.parseInt(parameters.getChMaxNbSpot(channel)));
+							acquisitionMeta.put(MaarsParameters.CUR_SPOT_RADIUS,
+									Double.parseDouble(parameters.getChSpotRaius(channel)));
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-							new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, channel, frame, xPos, yPos).start();
+							analyzerThr = new Thread(
+									new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, acquisitionMeta));
+							analyzerThr.start();
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
@@ -133,13 +144,29 @@ public class MAARS {
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
+						acquisitionMeta.put(MaarsParameters.X_POS, xPos);
+						acquisitionMeta.put(MaarsParameters.Y_POS, yPos);
+						acquisitionMeta.put(MaarsParameters.FRAME, frame);
+						acquisitionMeta.put(MaarsParameters.CUR_CHANNEL, channel);
+						acquisitionMeta.put(MaarsParameters.CUR_MAX_NB_SPOT,
+								Integer.parseInt(parameters.getChMaxNbSpot(channel)));
+						acquisitionMeta.put(MaarsParameters.CUR_SPOT_RADIUS,
+								Double.parseDouble(parameters.getChSpotRaius(channel)));
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-						new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, channel, frame, xPos, yPos).start();
+						analyzerThr = new Thread(
+								new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, acquisitionMeta));
+						analyzerThr.start();
 					}
 				}
 			}
 		}
 		mmc.setAutoShutter(true);
+		try {
+			analyzerThr.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec");
 		System.out.println("DONE.");
 	}

@@ -31,13 +31,11 @@ public class MaarsSegmentation {
 	 * @param positionY
 	 *            : current Y coordinate of microscope's view.
 	 */
-	public MaarsSegmentation(MaarsParameters parameters, double positionX,
-			double positionY) {
+	public MaarsSegmentation(MaarsParameters parameters, String positionX, String positionY) {
 
 		this.parameters = parameters;
-		this.pathToSegDir = FileUtils.convertPath(parameters.getSavingPath()
-				+ "/movie_X" + Math.round(positionX) + "_Y"
-				+ Math.round(positionY) + "/");
+		this.pathToSegDir = FileUtils
+				.convertPath(parameters.getSavingPath() + "/movie_X" + positionX + "_Y" + positionY + "/");
 	}
 
 	/**
@@ -54,49 +52,42 @@ public class MaarsSegmentation {
 		segPombeParam.setImageToAnalyze(img);
 		segPombeParam.setSavingPath(pathToSegDir);
 
-		segPombeParam.setFilterAbnormalShape(Boolean.parseBoolean(parameters
-				.getSegmentationParameter(MaarsParameters.FILTER_SOLIDITY)));
+		segPombeParam.setFilterAbnormalShape(
+				Boolean.parseBoolean(parameters.getSegmentationParameter(MaarsParameters.FILTER_SOLIDITY)));
 
-		segPombeParam
-				.setFiltrateWithMeanGrayValue(Boolean.parseBoolean(parameters
-						.getSegmentationParameter(MaarsParameters.FILTER_MEAN_GREY_VALUE)));
+		segPombeParam.setFiltrateWithMeanGrayValue(
+				Boolean.parseBoolean(parameters.getSegmentationParameter(MaarsParameters.FILTER_MEAN_GREY_VALUE)));
 		segPombeParam.getImageToAnalyze().getCalibration().pixelDepth = Double
-				.parseDouble(parameters
-						.getSegmentationParameter(MaarsParameters.STEP));
+				.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 		// Calibrate parameters
 		ParametersProcessor process = new ParametersProcessor(segPombeParam);
 
 		process.checkImgUnitsAndScale();
 		process.changeScale(
-				Integer.parseInt(parameters
-						.getSegmentationParameter(MaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE)),
-				Integer.parseInt(parameters
-						.getSegmentationParameter(MaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE)));
+				Integer.parseInt(parameters.getSegmentationParameter(MaarsParameters.NEW_MAX_WIDTH_FOR_CHANGE_SCALE)),
+				Integer.parseInt(parameters.getSegmentationParameter(MaarsParameters.NEW_MAX_HEIGTH_FOR_CHANGE_SCALE)));
 
 		segPombeParam = process.getParameters();
 
-		segPombeParam.setSigma((int) Math.round(Double.parseDouble(parameters
-				.getSegmentationParameter(MaarsParameters.CELL_SIZE))
-				/ Double.parseDouble(parameters
-						.getSegmentationParameter(MaarsParameters.STEP))));
+		segPombeParam.setSigma(
+				(int) Math.round(Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.CELL_SIZE))
+						/ Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP))));
 
-		segPombeParam
-				.setMinParticleSize((int) Math.round(Double.parseDouble(parameters
-						.getSegmentationParameter(MaarsParameters.MINIMUM_CELL_AREA))
+		segPombeParam.setMinParticleSize((int) Math
+				.round(Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.MINIMUM_CELL_AREA))
 						/ segPombeParam.getImageToAnalyze().getCalibration().pixelWidth)
-						/ segPombeParam.getImageToAnalyze().getCalibration().pixelHeight);
+				/ segPombeParam.getImageToAnalyze().getCalibration().pixelHeight);
 
-		segPombeParam
-				.setMaxParticleSize((int) Math.round(Double.parseDouble(parameters
-						.getSegmentationParameter(MaarsParameters.MAXIMUM_CELL_AREA))
+		segPombeParam.setMaxParticleSize((int) Math
+				.round(Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.MAXIMUM_CELL_AREA))
 						/ segPombeParam.getImageToAnalyze().getCalibration().pixelWidth)
-						/ segPombeParam.getImageToAnalyze().getCalibration().pixelHeight);
+				/ segPombeParam.getImageToAnalyze().getCalibration().pixelHeight);
 
-		segPombeParam.setSolidityThreshold(Double.parseDouble(parameters
-				.getSegmentationParameter(MaarsParameters.SOLIDITY)));
+		segPombeParam.setSolidityThreshold(
+				Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.SOLIDITY)));
 
-		segPombeParam.setMeanGreyValueThreshold(Double.parseDouble(parameters
-				.getSegmentationParameter(MaarsParameters.MEAN_GREY_VALUE)));
+		segPombeParam.setMeanGreyValueThreshold(
+				Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.MEAN_GREY_VALUE)));
 		System.out.println("Done.");
 		// Main segmentation process
 		System.out.println("Begin segmentation...");

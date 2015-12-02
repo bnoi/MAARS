@@ -374,8 +374,8 @@ public class MaarsMainDialog implements ActionListener {
 			if ((Double) widthTf.getValue() * (Double) heightTf.getValue() == 0) {
 				IJ.error("Session aborted, 0 field to analyse");
 			} else {
-				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
 				saveParameters();
+				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
 				try {
 					if (withOutAcqChk.isSelected()) {
 						hide();
@@ -387,8 +387,14 @@ public class MaarsMainDialog implements ActionListener {
 						}
 					}
 				} catch (Exception e1) {
-
+					if (soc.size()!= 0){
+						soc.writeResults();
+					}
 				}
+				if (soc.size()!= 0){
+					soc.writeResults();
+				}
+				System.out.println("MAARS Done its job!!");
 			}
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);

@@ -118,14 +118,19 @@ public class MaarsParameters {
 	public static final String CFP = "CFP";
 	public static final String TXRED = "TXRED";
 	public static final String DAPI = "DAPI";
-	public static final String FRAME_NUMBER = "FRAME_NUMBER";
 
 	public static final String GENERAL_ACQUISITION_PARAMETERS = "GENERAL_ACQUISITION_PARAMETERS";
 
 	public static final String DEFAULT_CHANNEL_PARAMATERS = "DEFAULT_CHANNEL_PARAMATERS";
 
 	public static final String CHANNEL_GROUP = "CHANNEL_GROUP";
-
+	
+	public static final String X_POS = "X_POS";
+	public static final String Y_POS = "Y_POS";
+	public static final String FRAME = "FRAME";
+	public static final String CUR_CHANNEL = "CHANNEL";
+	public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
+	public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
 	/**
 	 * Constructor of Element need path to configuration file
 	 * 

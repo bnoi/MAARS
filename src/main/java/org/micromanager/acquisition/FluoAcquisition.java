@@ -13,7 +13,7 @@ import ij.ImagePlus;
  */
 public class FluoAcquisition extends SuperClassAcquisition {
 
-	public FluoAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, double positionX, double positionY) {
+	public FluoAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, String positionX, String positionY) {
 		super(mm, mmc, parameters, positionX, positionY);
 	}
 
