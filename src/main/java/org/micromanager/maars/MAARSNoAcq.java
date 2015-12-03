@@ -9,8 +9,6 @@ import java.util.concurrent.Executors;
 import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
-import org.micromanager.maarslib.ExplorationXYPositions;
-import org.micromanager.maarslib.MaarsSegmentation;
 import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
@@ -26,6 +24,7 @@ import mmcorej.CMMCore;
 public class MAARSNoAcq {
 	private PrintStream curr_err;
 	private PrintStream curr_out;
+
 	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
 		ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		// Start time
@@ -105,7 +104,7 @@ public class MAARSNoAcq {
 			}
 		}
 		es.shutdown();
-		while (!es.isTerminated()){
+		while (!es.isTerminated()) {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -115,7 +114,7 @@ public class MAARSNoAcq {
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
-		System.out.println("it took " + (System.currentTimeMillis() - start));
+		System.out.println("it took " + (System.currentTimeMillis() - start) + " sec for analysing");
 		System.out.println("DONE.");
 
 	}

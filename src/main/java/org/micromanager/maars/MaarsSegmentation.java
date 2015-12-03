@@ -1,6 +1,5 @@
-package org.micromanager.maarslib;
+package org.micromanager.maars;
 
-import org.micromanager.maars.MaarsParameters;
 import org.micromanager.segmentPombe.ParametersProcessor;
 import org.micromanager.segmentPombe.SegPombe;
 import org.micromanager.segmentPombe.SegPombeParameters;

@@ -20,7 +20,6 @@ public class FluoAnalyzer implements Runnable {
 	private ImagePlus zProjectedFluoImg;
 	private SetOfCells soc;
 	private double[] factors;
-	private Thread thread;
 	private ConcurrentHashMap<String, Object> acquisitionMeta;
 
 	public FluoAnalyzer(MaarsParameters parameters, ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc,
@@ -56,7 +55,7 @@ public class FluoAnalyzer implements Runnable {
 							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
 							cell.addCroppedFluoSlice();
 							// fluoanalysis
-							cell.findFluoSpotTempFunction();
+							cell.detectSpots();
 						}
 					}
 				});
@@ -75,7 +74,7 @@ public class FluoAnalyzer implements Runnable {
 							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
 							cell.addCroppedFluoSlice();
 							// fluoanalysis
-							cell.findFluoSpotTempFunction();
+							cell.detectSpots();
 						}
 					}
 				});

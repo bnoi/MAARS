@@ -21,24 +21,6 @@ public class FileUtils {
 	}
 
 	/**
-	 * file name searching in depth
-	 * 
-	 * @param folder
-	 * @return
-	 */
-	public static ArrayList<File> listFilesForFolder(File folder) {
-		ArrayList<File> list = new ArrayList<File>();
-		for (File fileEntry : folder.listFiles()) {
-			if (fileEntry.isDirectory()) {
-				listFilesForFolder(fileEntry);
-			} else {
-				list.add(fileEntry);
-			}
-		}
-		return list;
-	}
-
-	/**
 	 * Convert an unix path in windows path if program is running on windows OS
 	 * 
 	 * @param unixPath

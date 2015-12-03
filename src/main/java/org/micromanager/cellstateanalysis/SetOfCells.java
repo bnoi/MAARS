@@ -20,7 +20,6 @@ import ij.plugin.frame.RoiManager;
  *
  */
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
-	// tools to get results
 	private RoiManager roiManager;
 	private Roi[] roiArray;
 	private int count = 0;
@@ -29,34 +28,37 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private String rootSavingPath;
 	private ConcurrentHashMap<String, Object> acquisitionMeta;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param savingPath
+	 *            :root directory of acquisitions
+	 */
 	public SetOfCells(String savingPath) {
 		this.rootSavingPath = savingPath;
 	}
 
 	/**
-	 * 
+	 * @param acquisitionMeta
+	 */
+	public void setAcquisitionMeta(ConcurrentHashMap<String, Object> acquisitionMeta) {
+		this.acquisitionMeta = acquisitionMeta;
+	}
+
+	/**
 	 * @param parameters
 	 *            : parameters that used in
 	 */
 	public void loadCells(SegPombeParameters parameters) {
-		ReportingUtils.logMessage("Get ROIs as array");
+		ReportingUtils.logMessage("Loading Cells");
 		roiArray = getRoisAsArray(rootSavingPath + "/movie_X" + acquisitionMeta.get(MaarsParameters.X_POS) + "_Y"
 				+ acquisitionMeta.get(MaarsParameters.Y_POS) + "/" + parameters.getImageToAnalyze().getShortTitle()
 				+ "_ROI.zip");
 		cellArray = new ArrayList<Cell>();
-		ReportingUtils.logMessage("Initialize Cells in array");
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray.add(i, new Cell(roiArray[i], i + 1));
 		}
 		ReportingUtils.logMessage("Done.");
-	}
-
-	public ArrayList<Cell> getSubArray(int begin, int end) {
-		ArrayList<Cell> subSet = new ArrayList<Cell>();
-		for (int i = begin; i < end; i++) {
-			subSet.add((Cell) cellArray.get(i));
-		}
-		return subSet;
 	}
 
 	/**
@@ -95,10 +97,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return cellArray.size();
 	}
 
-	public RoiManager getROIManager() {
-		return this.roiManager;
-	}
-
 	public void writeResults() {
 		String fluoDir = rootSavingPath + "/movie_X" + acquisitionMeta.get(MaarsParameters.X_POS) + "_Y"
 				+ acquisitionMeta.get(MaarsParameters.Y_POS) + "_FLUO";
@@ -116,10 +114,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			// can be optional
 			cell.writeSpotFeatures(spotsXmlDir);
 		}
-	}
-
-	public void setAcquisitionMeta(ConcurrentHashMap<String, Object> acquisitionMeta) {
-		this.acquisitionMeta = acquisitionMeta;
 	}
 
 	// iterator related

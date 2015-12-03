@@ -32,6 +32,7 @@ public class Cell {
 
 	private int cellNumber;
 	private int currentFrame;
+	private Boolean visibleOnly;
 
 	// image related
 	private ImagePlus fluoImage;
@@ -60,20 +61,15 @@ public class Cell {
 	 */
 	public Cell(Roi roiCellShape, int cellNb) {
 		this.cellShapeRoi = roiCellShape;
-		this.channelUsed = new ArrayList<String>();
 		this.cellNumber = cellNb;
+		this.channelUsed = new ArrayList<String>();
+		visibleOnly = true;
 	}
 
 	/**
-	 * Method to find fluorescent spots on cell image and create a Spindle
-	 * object
-	 * 
+	 * Find fluorescent spots on cell images
 	 */
-	public synchronized void findFluoSpotTempFunction() {
-		// Roi related computation
-		// measures;
-		// Spot related computation
-		Boolean visibleOnly = true;
+	public synchronized void detectSpots() {
 		this.fluoAnalysis = new CellFluoAnalysis(this, acquisitionMeta);
 		fluoAnalysis.doDetection();
 		fluoAnalysis.filterOnlyInCell(visibleOnly);
@@ -81,24 +77,25 @@ public class Cell {
 		for (Spot s : fluoAnalysis.getModel().getSpots().iterable(visibleOnly)) {
 			getCollectionOf((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL)).add(s, currentFrame);
 		}
-		// int nSpotDetected = currentCollection.getNSpots(currentFrame,
-		// visibleOnly);
-		// if (nSpotDetected == 1) {
-		// // interphase
-		// } else if (nSpotDetected == 2) {
-		// // SPBs
-		// } else if (nSpotDetected > 2 && nSpotDetected <= 4) {
-		// // SPBs + Cen2 or SPBs + telomeres
-		// } else if (nSpotDetected > 4 && nSpotDetected <= 6) {
-		// // SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
-		// } else if (nSpotDetected > 6 && nSpotDetected <= 8) {
-		// // SPBs + NDC80 incomplete
-		// } else {
-		// // not manageable
-		// }
-		// ReportingUtils.logMessage("Create spindle using spots found");
-		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
-		// fluoImage.getCalibration(), cellShapeRoi);
+	}
+
+	//TODO
+	public void analyzeSpots() {
+		int nSpotDetected = getCollectionOf((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL))
+				.getNSpots(currentFrame, visibleOnly);
+		if (nSpotDetected == 1) {
+			// interphase
+		} else if (nSpotDetected == 2) {
+			// SPBs or cen2
+		} else if (nSpotDetected > 2 && nSpotDetected <= 4) {
+			// SPBs + Cen2 or SPBs + telomeres
+		} else if (nSpotDetected > 4 && nSpotDetected <= 6) {
+			// SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
+		} else if (nSpotDetected > 6 && nSpotDetected <= 8) {
+			// SPBs + NDC80 incomplete
+		} else {
+			// not manageable
+		}
 	}
 
 	public void setFocusImage(ImagePlus focusImg) {
