@@ -15,6 +15,7 @@ import org.micromanager.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.measure.ResultsTable;
 import mmcorej.CMMCore;
 
 /**
@@ -38,7 +39,7 @@ public class MAARSNoAcq {
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 
-			ConcurrentHashMap<String, Object> acquisitionMeta = new ConcurrentHashMap<String, Object>();
+			final ConcurrentHashMap<String, Object> acquisitionMeta = new ConcurrentHashMap<String, Object>();
 			acquisitionMeta.put(MaarsParameters.X_POS, xPos);
 			acquisitionMeta.put(MaarsParameters.Y_POS, yPos);
 
@@ -55,20 +56,13 @@ public class MAARSNoAcq {
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
+			soc.setRoiMeasurement(ms.getRoiMeasurements());
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
 				soc.setAcquisitionMeta(acquisitionMeta);
 				soc.loadCells(ms.getSegPombeParam());
 				// Get the focus slice of BF image
 				Calibration bfImgCal = segImg.getCalibration();
-				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
-						segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
-				focusImage.setCalibration(bfImgCal);
-				// measure parameters of ROI
-				for (Cell cell : soc) {
-					cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
-					cell.measureBfRoi();
-				}
 				// ----------------start acquisition and analysis --------//
 				try {
 					PrintStream ps = new PrintStream(parameters.getSavingPath() + "CellStateAnalysis.LOG");

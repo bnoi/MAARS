@@ -364,6 +364,10 @@ public class SegPombe {
 	public RoiManager getRoiManager() {
 		return roiManager;
 	}
+	
+	public ResultsTable getRoiMeasurements(){
+		return this.resultTable;
+	}
 
 	/**
 	 * Method to show and saved specified results and flush unwanted results

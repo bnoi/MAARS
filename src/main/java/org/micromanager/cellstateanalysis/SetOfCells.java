@@ -11,6 +11,7 @@ import org.micromanager.maars.MaarsParameters;
 import org.micromanager.segmentPombe.SegPombeParameters;
 
 import ij.gui.Roi;
+import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
 
 /**
@@ -20,10 +21,12 @@ import ij.plugin.frame.RoiManager;
  *
  */
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
+	
+	public static final String CELL_NUMBER = "Cell_Number";
 	private RoiManager roiManager;
 	private Roi[] roiArray;
 	private int count = 0;
-
+	private ResultsTable rt;
 	private ArrayList<Cell> cellArray;
 	private String rootSavingPath;
 	private ConcurrentHashMap<String, Object> acquisitionMeta;
@@ -95,6 +98,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 */
 	public int size() {
 		return cellArray.size();
+	}
+
+	public void setRoiMeasurement(ResultsTable rt) {
+		this.rt = rt;
+	}
+
+	public ResultsTable getRoiMeasurement() {
+		return this.rt;
 	}
 
 	public void writeResults() {
