@@ -1,13 +1,10 @@
 package org.micromanager.cellstateanalysis;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.ImgUtils;
 
@@ -27,16 +24,22 @@ public class FluoAnalyzer implements Runnable {
 	private ImagePlus fluoImage;
 	private SetOfCells soc;
 	private double[] factors;
-	private ConcurrentHashMap<String, Object> acquisitionMeta;
 	private Calibration bfImgCal;
 	private SpotCollection spots;
+	private String channel;
+	private int maxNbSpot;
+	private double radius;
+	private int frame;
 
-	public FluoAnalyzer(MaarsParameters parameters, ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc,
-			ConcurrentHashMap<String, Object> acquisitionMeta) {
-		this.acquisitionMeta = acquisitionMeta;
+	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
+			double radius, int frame) {
 		this.fluoImage = fluoImage;
 		this.soc = soc;
 		this.bfImgCal = bfImgCal;
+		this.channel = channel;
+		this.maxNbSpot = maxNbSpot;
+		this.radius = radius;
+		this.frame = frame;
 	}
 
 	// /**
@@ -80,13 +83,12 @@ public class FluoAnalyzer implements Runnable {
 	// }
 
 	public void run() {
-		soc.setAcquisitionMeta(acquisitionMeta);
-		soc.addChSpotContainer();
+		soc.addChSpotContainer(channel);
 		final ResultsTable roiMeasurements = soc.getRoiMeasurement();
 		// TODO project or not
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
-		SpotsDetector detector = new SpotsDetector(zProjectedFluoImg, acquisitionMeta);
+		SpotsDetector detector = new SpotsDetector(zProjectedFluoImg, radius);
 		spots = detector.doDetection();
 
 		this.factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
@@ -98,12 +100,12 @@ public class FluoAnalyzer implements Runnable {
 		nbOfCellEachThread[0] = (int) nbCell / nThread;
 		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
 		for (int i = 0; i < nThread; i++) {
+			System.out.println("Allocating thread : " + i + "_" + channel);
 			if (i == 0) {
 				es.execute(new AnalyseBlockCells(i, nbOfCellEachThread));
 			} else {
 				es.execute(new AnalyseBlockCells(i, nbOfCellEachThread));
 			}
-			System.out.println("Allocating thread : " + i + "_" + acquisitionMeta.get(MaarsParameters.CUR_CHANNEL));
 		}
 		es.shutdown();
 		try {
@@ -148,20 +150,23 @@ public class FluoAnalyzer implements Runnable {
 					tmpRoi = cell.getCellShapeRoi();
 				}
 				for (Spot s : spots.iterable(false)) {
+//					System.out.println("Spot X " + (int) Math.round(s.getFeature(Spot.POSITION_X)));
+//					System.out.println("Spot Y " + (int) Math.round(s.getFeature(Spot.POSITION_Y)));
+//					System.out.println("Spot X calibrated " + (int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImage.getCalibration().pixelWidth));
+//					System.out.println("Spot Y calibrated " + (int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImage.getCalibration().pixelHeight));
 					if (tmpRoi.contains(
 							(int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImage.getCalibration().pixelWidth),
 							(int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImage.getCalibration().pixelHeight))) {
-						if (soc.getCurrentFrameNbOfSpot(
-								currCellNb) >= (int) acquisitionMeta.get(MaarsParameters.CUR_MAX_NB_SPOT)) {
-							Spot lowesetQulitySpot = soc.findLowestQualitySpot(currCellNb);
+						if (soc.getNbOfSpot(channel, currCellNb, frame) >= maxNbSpot) {
+							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, currCellNb, frame);
 							if (s.getFeature(Spot.QUALITY) > lowesetQulitySpot.getFeature(Spot.QUALITY)) {
-								soc.getCurrentCollectionOfSpot(currCellNb).remove(lowesetQulitySpot,
-										Integer.parseInt(MaarsParameters.FRAME));
-								soc.putSpot(currCellNb, s);
+								soc.getCollectionOfSpotInChannel(channel, currCellNb).remove(lowesetQulitySpot, frame);
+								soc.putSpot(channel, currCellNb, frame, s);
 							}
 						} else {
-							soc.putSpot(currCellNb, s);
+							soc.putSpot(channel, currCellNb, frame, s);
 						}
+						System.out.println("Found 1 spot inside cell " + currCellNb);
 					}
 				}
 			}

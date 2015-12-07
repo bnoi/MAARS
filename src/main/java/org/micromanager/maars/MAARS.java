@@ -4,19 +4,17 @@ import mmcorej.CMMCore;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
 import org.micromanager.acquisition.SegAcquisition;
-import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
-import org.micromanager.utils.ImgUtils;
 
 import ij.ImagePlus;
 import ij.measure.Calibration;
@@ -70,9 +68,6 @@ public class MAARS {
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			System.out.println("x : " + xPos + " y : " + yPos);
-			ConcurrentHashMap<String, Object> acquisitionMeta = new ConcurrentHashMap<String, Object>();
-			acquisitionMeta.put(MaarsParameters.X_POS, xPos);
-			acquisitionMeta.put(MaarsParameters.Y_POS, yPos);
 			try {
 				autofocus.fullFocus();
 			} catch (MMException e1) {
@@ -89,8 +84,7 @@ public class MAARS {
 			soc.setRoiMeasurement(ms.getRoiMeasurements());
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
-				soc.setAcquisitionMeta(acquisitionMeta);
-				soc.loadCells(ms.getSegPombeParam());
+				soc.loadCells(xPos, yPos);
 				// Get the focus slice of BF image
 				Calibration bfImgCal = segImg.getCalibration();
 				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
@@ -112,34 +106,30 @@ public class MAARS {
 					int frame = 0;
 					double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
 							* 1000;
-					acquisitionMeta.put(MaarsParameters.FRAME, frame);
 					while (System.currentTimeMillis() - startTime <= timeLimit) {
 						String channels = parameters.getUsingChannels();
 						String[] arrayChannels = channels.split(",", -1);
 						for (String channel : arrayChannels) {
-							acquisitionMeta.put(MaarsParameters.CUR_CHANNEL, channel);
-							acquisitionMeta.put(MaarsParameters.CUR_MAX_NB_SPOT,
-									Integer.parseInt(parameters.getChMaxNbSpot(channel)));
-							acquisitionMeta.put(MaarsParameters.CUR_SPOT_RADIUS,
-									Double.parseDouble(parameters.getChSpotRaius(channel)));
+							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
+							soc.addAcqIDs(id);
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-							es.execute(new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, acquisitionMeta));
+							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+									Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
 						}
 						frame++;
 					}
 				} else {
 					int frame = 0;
-					acquisitionMeta.put(MaarsParameters.FRAME, frame);
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
-						acquisitionMeta.put(MaarsParameters.CUR_CHANNEL, channel);
-						acquisitionMeta.put(MaarsParameters.CUR_MAX_NB_SPOT,
-								Integer.parseInt(parameters.getChMaxNbSpot(channel)));
-						acquisitionMeta.put(MaarsParameters.CUR_SPOT_RADIUS,
-								Double.parseDouble(parameters.getChSpotRaius(channel)));
+						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
+						soc.addAcqIDs(id);
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-						es.execute(new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, acquisitionMeta));
+						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+								Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
 					}
 				}
 			}

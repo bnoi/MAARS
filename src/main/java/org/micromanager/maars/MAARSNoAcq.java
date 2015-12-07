@@ -2,20 +2,17 @@ package org.micromanager.maars;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.utils.FileUtils;
-import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
-import ij.measure.ResultsTable;
 import mmcorej.CMMCore;
 
 /**
@@ -38,11 +35,6 @@ public class MAARSNoAcq {
 			System.out.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
-
-			final ConcurrentHashMap<String, Object> acquisitionMeta = new ConcurrentHashMap<String, Object>();
-			acquisitionMeta.put(MaarsParameters.X_POS, xPos);
-			acquisitionMeta.put(MaarsParameters.Y_POS, yPos);
-
 			String pathToSegDir = FileUtils
 					.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "/");
 			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
@@ -59,8 +51,7 @@ public class MAARSNoAcq {
 			soc.setRoiMeasurement(ms.getRoiMeasurements());
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
-				soc.setAcquisitionMeta(acquisitionMeta);
-				soc.loadCells(ms.getSegPombeParam());
+				soc.loadCells(xPos, yPos);
 				// Get the focus slice of BF image
 				Calibration bfImgCal = segImg.getCalibration();
 				// ----------------start acquisition and analysis --------//
@@ -75,23 +66,18 @@ public class MAARSNoAcq {
 				}
 				int frame = 0;
 				while (frame < 1) {
-					acquisitionMeta.put(MaarsParameters.FRAME, frame);
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
-						acquisitionMeta.put(MaarsParameters.CUR_CHANNEL, channel);
-						acquisitionMeta.put(MaarsParameters.CUR_MAX_NB_SPOT,
-								Integer.parseInt(parameters.getChMaxNbSpot(channel)));
-						acquisitionMeta.put(MaarsParameters.CUR_SPOT_RADIUS,
-								Double.parseDouble(parameters.getChSpotRaius(channel)));
-						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X"
-								+ acquisitionMeta.get(MaarsParameters.X_POS) + "_Y"
-								+ acquisitionMeta.get(MaarsParameters.Y_POS) + "_FLUO/"
-								+ acquisitionMeta.get(MaarsParameters.FRAME) + "_"
-								+ acquisitionMeta.get(MaarsParameters.CUR_CHANNEL) + "/MMStack.ome.tif";
+						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
+						soc.addAcqIDs(id);
+						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
+								+ frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						System.out.println(pathToFluoMovie);
-						es.execute(new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, acquisitionMeta));
+						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+								Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
 					}
 					frame++;
 				}

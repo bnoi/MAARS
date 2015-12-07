@@ -7,11 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.micromanager.internal.utils.ReportingUtils;
-import org.micromanager.maars.MaarsParameters;
-import org.micromanager.segmentPombe.SegPombeParameters;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -24,7 +21,7 @@ import ij.plugin.frame.RoiManager;
 /**
  * Class to manipulate a set of cells which corresponds to cells of one field
  * 
- * @author Tong LI && marie
+ * @author Tong LI
  *
  */
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
@@ -36,8 +33,8 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private ResultsTable rt;
 	private ArrayList<Cell> cellArray;
 	private String rootSavingPath;
-	private ConcurrentHashMap<String, Object> acquisitionMeta;
 	private HashMap<String, HashMap<Integer, SpotCollection>> spotsInCells;
+	private ArrayList<String[]> acqIDs;
 
 	/**
 	 * Constructor
@@ -50,21 +47,12 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	/**
-	 * @param acquisitionMeta
-	 */
-	public void setAcquisitionMeta(ConcurrentHashMap<String, Object> acquisitionMeta) {
-		this.acquisitionMeta = acquisitionMeta;
-	}
-
-	/**
 	 * @param parameters
 	 *            : parameters that used in
 	 */
-	public void loadCells(SegPombeParameters parameters) {
+	public void loadCells(String xPos, String yPos) {
 		ReportingUtils.logMessage("Loading Cells");
-		roiArray = getRoisAsArray(rootSavingPath + "/movie_X" + acquisitionMeta.get(MaarsParameters.X_POS) + "_Y"
-				+ acquisitionMeta.get(MaarsParameters.Y_POS) + "/" + parameters.getImageToAnalyze().getShortTitle()
-				+ "_ROI.zip");
+		roiArray = getRoisAsArray(rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "/" + "ROI.zip");
 		cellArray = new ArrayList<Cell>();
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray.add(i, new Cell(roiArray[i], i + 1));
@@ -108,48 +96,49 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return cellArray.size();
 	}
 
-	public void addChSpotContainer() {
-		String currentChannel = (String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL);
+	public void addChSpotContainer(String channel) {
 		if (spotsInCells == null) {
 			spotsInCells = new HashMap<String, HashMap<Integer, SpotCollection>>();
 		}
-		if (!spotsInCells.containsKey(currentChannel)) {
-			spotsInCells.put(currentChannel, new HashMap<Integer, SpotCollection>());
+		if (!spotsInCells.containsKey(channel)) {
+			spotsInCells.put(channel, new HashMap<Integer, SpotCollection>());
 		}
 	}
 
-	public void putSpot(int cellNb, Spot spot) {
-		if (spotsInCells.get((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL)).get(cellNb) == null) {
-			spotsInCells.get((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL)).put(cellNb,
-					new SpotCollection());
+	public void putSpot(String channel, int cellNb, int frame, Spot spot) {
+		if (spotsInCells.get(channel).get(cellNb) == null) {
+			spotsInCells.get(channel).put(cellNb, new SpotCollection());
 		}
-		spotsInCells.get((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL)).get(cellNb).add(spot,
-				(int) acquisitionMeta.get(MaarsParameters.FRAME));
+		spotsInCells.get(channel).get(cellNb).add(spot, frame);
 	}
 
-	public SpotCollection getCurrentCollectionOfSpot(int cellNb) {
-		return spotsInCells.get((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL)).get(cellNb);
+	public HashMap<Integer, SpotCollection> getChannelSpots(String channel) {
+		return spotsInCells.get(channel);
 	}
 
-	public int getCurrentFrameNbOfSpot(int cellNb) {
-		return getCurrentCollectionOfSpot(cellNb).getNSpots((int) acquisitionMeta.get(MaarsParameters.FRAME), true);
+	public SpotCollection getCollectionOfSpotInChannel(String channel, int cellNb) {
+		return getChannelSpots(channel).get(cellNb);
 	}
 
-	public Spot findLowestQualitySpot(int cellNb) {
-		SpotCollection collection = getCurrentCollectionOfSpot(cellNb);
-		double[] quality = collection.collectValues(Spot.QUALITY, true);
-		double min = quality[0];
-		for (int i = 0; i < quality.length; i++) {
-			if (quality[i] < min) {
-				min = quality[i];
+	public Iterable<Spot> getSpotsInFrame(String channel, int cellNb, int frame) {
+		return getChannelSpots(channel).get(cellNb).iterable(frame, true);
+	}
+
+	public int getNbOfSpot(String channel, int cellNb, int frame) {
+		return getCollectionOfSpotInChannel(channel, cellNb).getNSpots(frame, true);
+	}
+
+	public Spot findLowestQualitySpot(String channel, int cellNb, int frame) {
+		Iterable<Spot> spotsInFrame = getSpotsInFrame(channel, cellNb, frame);
+		double min = 1000;
+		Spot lowestQualitySpot = null;
+		for (Spot s : spotsInFrame) {
+			if (s.getFeature(Spot.QUALITY) < min) {
+				min = s.getFeature(Spot.QUALITY);
+				lowestQualitySpot = s;
 			}
 		}
-		for (Spot s : collection.iterable(Integer.parseInt(MaarsParameters.CUR_CHANNEL), true)) {
-			if (s.getFeature(Spot.QUALITY) == min) {
-				return s;
-			}
-		}
-		return null;
+		return lowestQualitySpot;
 	}
 
 	public void setRoiMeasurement(ResultsTable rt) {
@@ -161,41 +150,49 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	public void writeResults() {
-		String fluoDir = rootSavingPath + "/movie_X" + acquisitionMeta.get(MaarsParameters.X_POS) + "_Y"
-				+ acquisitionMeta.get(MaarsParameters.Y_POS) + "_FLUO";
-		String croppedImgDir = fluoDir + "/croppedImgs/";
-		String spotsXmlDir = fluoDir + "/spots/";
-		if (!new File(croppedImgDir).exists()) {
-			new File(croppedImgDir).mkdirs();
-		}
-		if (!new File(spotsXmlDir).exists()) {
-			new File(spotsXmlDir).mkdirs();
-		}
-		// save cropped cells
-		// cell.saveCroppedImage(croppedImgDir);
-		// can be optional
-		Model model = new Model();
-		System.out.println(this.spotsInCells.size());
-		System.out.println(this.spotsInCells.get("GFP").size());
-		System.out.println(this.spotsInCells.get("GFP").get(1).getNSpots(false));
-		for (String channel : spotsInCells.keySet()) {
-			for (int cellNb : spotsInCells.get(channel).keySet()) {
-				File newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
-				TmXmlWriter writer = new TmXmlWriter(newFile);
-				model.setSpots(spotsInCells.get(channel).get(cellNb), true);
-				writer.appendModel(model);
-				System.out.println("Writing to " + newFile);
-				try {
-					writer.writeToFile();
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		for (String[] id : acqIDs) {
+			String fluoDir = rootSavingPath + "/movie_X" + id[0] + "_Y" + id[1] + "_FLUO";
+			String croppedImgDir = fluoDir + "/croppedImgs/";
+			String spotsXmlDir = fluoDir + "/spots/";
+			if (!new File(croppedImgDir).exists()) {
+				new File(croppedImgDir).mkdirs();
+			}
+			if (!new File(spotsXmlDir).exists()) {
+				new File(spotsXmlDir).mkdirs();
+			}
+			// save cropped cells
+			// cell.saveCroppedImage(croppedImgDir);
+			// can be optional
+			Model model = new Model();
+			System.out.println(this.spotsInCells.size());
+			System.out.println(this.spotsInCells.get("GFP").size());
+			System.out.println(this.spotsInCells.get("GFP").get(1).getNSpots(false));
+			for (String channel : spotsInCells.keySet()) {
+				for (int cellNb : spotsInCells.get(channel).keySet()) {
+					File newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
+					TmXmlWriter writer = new TmXmlWriter(newFile);
+					model.setSpots(spotsInCells.get(channel).get(cellNb), true);
+					writer.appendModel(model);
+					System.out.println("Writing to " + newFile);
+					try {
+						writer.writeToFile();
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
+	}
+
+	public void addAcqIDs(String[] id) {
+		if (acqIDs == null) {
+			acqIDs = new ArrayList<String[]>();
+		}
+		acqIDs.add(id);
 	}
 
 	// iterator related

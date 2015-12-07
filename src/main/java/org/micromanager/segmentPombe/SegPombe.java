@@ -401,12 +401,10 @@ public class SegPombe {
 			System.out.println("saving roi...");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Save",
-					savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
+					savingPath + "ROI.zip");
 			System.out.println("Done");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Delete");
-//			System.out.println("Close roi manager");
-//			roiManager.close();
 		}
 
 		if (showFocusImage) {

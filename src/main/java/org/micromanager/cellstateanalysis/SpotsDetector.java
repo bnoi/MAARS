@@ -30,7 +30,7 @@ public class SpotsDetector {
 	private Model model;
 	private Settings settings;
 
-	public SpotsDetector(ImagePlus img, Map<String, Object> acquisitionMeta) {
+	public SpotsDetector(ImagePlus img, double radius) {
 		img.deleteRoi();
 		model = new Model();
 
@@ -50,10 +50,10 @@ public class SpotsDetector {
 		settings.detectorFactory = new LogDetectorFactory<FloatType>();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
 		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
-		detectorSettings.put(KEY_RADIUS, (double) acquisitionMeta.get(MaarsParameters.CUR_SPOT_RADIUS));
+		detectorSettings.put(KEY_RADIUS, radius);
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
 		// TODO to figure out what value to use, 2 seems ok for now.
-		detectorSettings.put(KEY_THRESHOLD, (double) 15);
+		detectorSettings.put(KEY_THRESHOLD, (double) 2);
 		detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
 		settings.detectorSettings = detectorSettings;
 	}
