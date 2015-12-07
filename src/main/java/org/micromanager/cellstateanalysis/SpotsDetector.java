@@ -53,7 +53,7 @@ public class SpotsDetector {
 		detectorSettings.put(KEY_RADIUS, (double) acquisitionMeta.get(MaarsParameters.CUR_SPOT_RADIUS));
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
 		// TODO to figure out what value to use, 2 seems ok for now.
-		detectorSettings.put(KEY_THRESHOLD, (double) 2);
+		detectorSettings.put(KEY_THRESHOLD, (double) 15);
 		detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
 		settings.detectorSettings = detectorSettings;
 	}

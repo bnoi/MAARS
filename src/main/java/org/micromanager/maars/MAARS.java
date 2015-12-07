@@ -86,6 +86,7 @@ public class MAARS {
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
+			soc.setRoiMeasurement(ms.getRoiMeasurements());
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
 				soc.setAcquisitionMeta(acquisitionMeta);
@@ -95,11 +96,6 @@ public class MAARS {
 				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
 						segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
 				focusImage.setCalibration(bfImgCal);
-				// measure parameters of ROI
-				for (Cell cell : soc) {
-					cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
-					cell.measureBfRoi();
-				}
 				// ----------------start acquisition and analysis --------//
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
 				try {

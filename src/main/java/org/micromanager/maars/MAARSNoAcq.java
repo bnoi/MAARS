@@ -65,7 +65,7 @@ public class MAARSNoAcq {
 				Calibration bfImgCal = segImg.getCalibration();
 				// ----------------start acquisition and analysis --------//
 				try {
-					PrintStream ps = new PrintStream(parameters.getSavingPath() + "CellStateAnalysis.LOG");
+					PrintStream ps = new PrintStream(pathToSegDir + "CellStateAnalysis.LOG");
 					curr_err = System.err;
 					curr_out = System.err;
 					System.setOut(ps);
@@ -108,7 +108,7 @@ public class MAARSNoAcq {
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
-		System.out.println("it took " + (System.currentTimeMillis() - start) + " sec for analysing");
+		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
 		System.out.println("DONE.");
 
 	}
