@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
@@ -84,18 +85,14 @@ public class MAARSNoAcq {
 			}
 		}
 		es.shutdown();
-		while (!es.isTerminated()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			es.awaitTermination(1, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
 		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
-		System.out.println("DONE.");
-
 	}
 }

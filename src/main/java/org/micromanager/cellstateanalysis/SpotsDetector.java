@@ -53,7 +53,7 @@ public class SpotsDetector {
 		detectorSettings.put(KEY_RADIUS, radius);
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
 		// TODO to figure out what value to use, 2 seems ok for now.
-		detectorSettings.put(KEY_THRESHOLD, (double) 2);
+		detectorSettings.put(KEY_THRESHOLD, (double) 10);
 		detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
 		settings.detectorSettings = detectorSettings;
 	}
@@ -62,7 +62,7 @@ public class SpotsDetector {
 	 * Take parameters in the constructor then initalize trakemate object to get
 	 * unfiltered spots.
 	 */
-	public SpotCollection doDetection() {
+	public Model doDetection() {
 		TrackMate trackmate = new TrackMate(model, settings);
 
 		trackmate.execDetection();
@@ -71,6 +71,6 @@ public class SpotsDetector {
 
 		trackmate.computeSpotFeatures(false);
 
-		return trackmate.getModel().getSpots();
+		return trackmate.getModel();
 	}
 }

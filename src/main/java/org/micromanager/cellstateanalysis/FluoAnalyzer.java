@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.ImgUtils;
 
+import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import ij.ImagePlus;
@@ -89,7 +90,9 @@ public class FluoAnalyzer implements Runnable {
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
 		SpotsDetector detector = new SpotsDetector(zProjectedFluoImg, radius);
-		spots = detector.doDetection();
+		Model model = detector.doDetection();
+		soc.setTrackmateModel(model);
+		spots = model.getSpots();
 
 		this.factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
 
@@ -109,7 +112,7 @@ public class FluoAnalyzer implements Runnable {
 		}
 		es.shutdown();
 		try {
-			es.awaitTermination(15, TimeUnit.SECONDS);
+			es.awaitTermination(1, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -141,7 +144,7 @@ public class FluoAnalyzer implements Runnable {
 			System.out.println("sites :" + begin + " - " + end);
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
-				int currCellNb = cell.getCellNumber();
+				int cellNb = cell.getCellNumber();
 
 				Roi tmpRoi = null;
 				if (factors[0] != factors[1]) {
@@ -150,23 +153,16 @@ public class FluoAnalyzer implements Runnable {
 					tmpRoi = cell.getCellShapeRoi();
 				}
 				for (Spot s : spots.iterable(false)) {
-//					System.out.println("Spot X " + (int) Math.round(s.getFeature(Spot.POSITION_X)));
-//					System.out.println("Spot Y " + (int) Math.round(s.getFeature(Spot.POSITION_Y)));
-//					System.out.println("Spot X calibrated " + (int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImage.getCalibration().pixelWidth));
-//					System.out.println("Spot Y calibrated " + (int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImage.getCalibration().pixelHeight));
 					if (tmpRoi.contains(
 							(int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImage.getCalibration().pixelWidth),
 							(int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImage.getCalibration().pixelHeight))) {
-						if (soc.getNbOfSpot(channel, currCellNb, frame) >= maxNbSpot) {
-							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, currCellNb, frame);
-							if (s.getFeature(Spot.QUALITY) > lowesetQulitySpot.getFeature(Spot.QUALITY)) {
-								soc.getCollectionOfSpotInChannel(channel, currCellNb).remove(lowesetQulitySpot, frame);
-								soc.putSpot(channel, currCellNb, frame, s);
-							}
-						} else {
-							soc.putSpot(channel, currCellNb, frame, s);
+						System.out.println("Added 1 spot in cell " + cellNb);
+						soc.putSpot(channel, cellNb, frame, s);
+						if (soc.getNbOfSpot(channel, cellNb, frame) == maxNbSpot) {
+							System.out.println("remove 1 spot from cell " + cellNb);
+							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, cellNb, frame);
+							soc.getCollectionOfSpotInChannel(channel, cellNb).remove(lowesetQulitySpot, frame);
 						}
-						System.out.println("Found 1 spot inside cell " + currCellNb);
 					}
 				}
 			}

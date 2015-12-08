@@ -35,6 +35,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private String rootSavingPath;
 	private HashMap<String, HashMap<Integer, SpotCollection>> spotsInCells;
 	private ArrayList<String[]> acqIDs;
+	private Model trackmateModel;
 
 	/**
 	 * Constructor
@@ -106,26 +107,26 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	public void putSpot(String channel, int cellNb, int frame, Spot spot) {
-		if (spotsInCells.get(channel).get(cellNb) == null) {
+		if (!spotsInCells.get(channel).containsKey(cellNb)) {
 			spotsInCells.get(channel).put(cellNb, new SpotCollection());
 		}
 		spotsInCells.get(channel).get(cellNb).add(spot, frame);
 	}
 
-	public HashMap<Integer, SpotCollection> getChannelSpots(String channel) {
+	public HashMap<Integer, SpotCollection> getSpotsInCh(String channel) {
 		return spotsInCells.get(channel);
 	}
 
 	public SpotCollection getCollectionOfSpotInChannel(String channel, int cellNb) {
-		return getChannelSpots(channel).get(cellNb);
+		return getSpotsInCh(channel).get(cellNb);
 	}
 
 	public Iterable<Spot> getSpotsInFrame(String channel, int cellNb, int frame) {
-		return getChannelSpots(channel).get(cellNb).iterable(frame, true);
+		return getCollectionOfSpotInChannel(channel, cellNb).iterable(frame, false);
 	}
 
 	public int getNbOfSpot(String channel, int cellNb, int frame) {
-		return getCollectionOfSpotInChannel(channel, cellNb).getNSpots(frame, true);
+		return getCollectionOfSpotInChannel(channel, cellNb).getNSpots(frame, false);
 	}
 
 	public Spot findLowestQualitySpot(String channel, int cellNb, int frame) {
@@ -149,6 +150,11 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return this.rt;
 	}
 
+	public void setTrackmateModel(Model model) {
+		if (this.trackmateModel == null)
+			this.trackmateModel = model;
+	}
+
 	public void writeResults() {
 		for (String[] id : acqIDs) {
 			String fluoDir = rootSavingPath + "/movie_X" + id[0] + "_Y" + id[1] + "_FLUO";
@@ -163,16 +169,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			// save cropped cells
 			// cell.saveCroppedImage(croppedImgDir);
 			// can be optional
-			Model model = new Model();
-			System.out.println(this.spotsInCells.size());
-			System.out.println(this.spotsInCells.get("GFP").size());
-			System.out.println(this.spotsInCells.get("GFP").get(1).getNSpots(false));
 			for (String channel : spotsInCells.keySet()) {
+				System.out.println(
+						"Find " + spotsInCells.get(channel).size() + " cells with spots in channel " + channel);
 				for (int cellNb : spotsInCells.get(channel).keySet()) {
 					File newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
 					TmXmlWriter writer = new TmXmlWriter(newFile);
-					model.setSpots(spotsInCells.get(channel).get(cellNb), true);
-					writer.appendModel(model);
+					trackmateModel.setSpots(spotsInCells.get(channel).get(cellNb), false);
+					writer.appendModel(trackmateModel);
 					System.out.println("Writing to " + newFile);
 					try {
 						writer.writeToFile();

@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
@@ -136,13 +137,11 @@ public class MAARS {
 		}
 		mmc.setAutoShutter(true);
 		es.shutdown();
-		while (!es.isTerminated()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			es.awaitTermination(1, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
