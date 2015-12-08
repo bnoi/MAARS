@@ -9,11 +9,15 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.micromanager.internal.utils.ReportingUtils;
+import org.micromanager.utils.ImgUtils;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlWriter;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
@@ -36,6 +40,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private HashMap<String, HashMap<Integer, SpotCollection>> spotsInCells;
 	private ArrayList<String[]> acqIDs;
 	private Model trackmateModel;
+	private HashMap<Integer, ImageStack> croppedStacks;
 
 	/**
 	 * Constructor
@@ -56,7 +61,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		roiArray = getRoisAsArray(rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "/" + "ROI.zip");
 		cellArray = new ArrayList<Cell>();
 		for (int i = 0; i < roiArray.length; i++) {
-			cellArray.add(i, new Cell(roiArray[i], i + 1));
+			cellArray.add(i, new Cell(roiArray[i], i));
 		}
 		ReportingUtils.logMessage("Done.");
 	}
@@ -156,39 +161,71 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	public void writeResults() {
+		croppedStacks = new HashMap<Integer, ImageStack>();
 		for (String[] id : acqIDs) {
-			String fluoDir = rootSavingPath + "/movie_X" + id[0] + "_Y" + id[1] + "_FLUO";
-			String croppedImgDir = fluoDir + "/croppedImgs/";
-			String spotsXmlDir = fluoDir + "/spots/";
+			String xPos = id[0];
+			String yPos = id[1];
+			String frame = id[2];
+			String channel = id[3];
+			String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
+			String croppedImgDir = fluoDir + "croppedImgs/";
+			String spotsXmlDir = fluoDir + "spots/";
 			if (!new File(croppedImgDir).exists()) {
 				new File(croppedImgDir).mkdirs();
 			}
 			if (!new File(spotsXmlDir).exists()) {
 				new File(spotsXmlDir).mkdirs();
 			}
+			ImagePlus fluoImg = IJ.openImage(fluoDir + frame + "_" + channel + "/MMStack.ome.tif");
+			ImagePlus zprojectImg = ImgUtils.zProject(fluoImg);
 			// save cropped cells
-			// cell.saveCroppedImage(croppedImgDir);
-			// can be optional
-			for (String channel : spotsInCells.keySet()) {
-				System.out.println(
-						"Find " + spotsInCells.get(channel).size() + " cells with spots in channel " + channel);
-				for (int cellNb : spotsInCells.get(channel).keySet()) {
-					File newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
-					TmXmlWriter writer = new TmXmlWriter(newFile);
-					trackmateModel.setSpots(spotsInCells.get(channel).get(cellNb), false);
-					writer.appendModel(trackmateModel);
-					System.out.println("Writing to " + newFile);
-					try {
-						writer.writeToFile();
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+			for (int i = 0; i < roiArray.length; i++) {
+				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(zprojectImg, roiArray[i]);
+				if (!croppedStacks.containsKey(i)) {
+					croppedStacks.put(i, croppedImg.getStack());
+				} else {
+					ImageStack tmpStack = croppedStacks.get(i);
+					tmpStack.addSlice(croppedImg.getStack().getProcessor(1));
+					croppedStacks.put(i, tmpStack);
 				}
 			}
+			for (int j = 0; j < croppedStacks.size(); j++) {
+				String pathToCroppedImg = croppedImgDir + String.valueOf(j);
+				ImagePlus imp = new ImagePlus("cell_" + j, croppedStacks.get(j));
+				imp.setCalibration(zprojectImg.getCalibration());
+				IJ.saveAsTiff(imp, pathToCroppedImg);
+			}
+			// save spots detected
+			System.out.println("Find " + spotsInCells.get(channel).size() + " cells with spots in channel " + channel);
+			for (int cellNb : spotsInCells.get(channel).keySet()) {
+				File newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
+				TmXmlWriter writer = new TmXmlWriter(newFile);
+				SpotCollection centeredSpots = new SpotCollection();
+				for (Spot s : spotsInCells.get(channel).get(cellNb).iterable(false)) {
+					double xPosBeforeCrop = s.getFeature(Spot.POSITION_X);
+					double yPosBeforeCrop = s.getFeature(Spot.POSITION_Y);
+					s.putFeature(Spot.POSITION_X,
+							xPosBeforeCrop - (roiArray[cellNb].getXBase() * zprojectImg.getCalibration().pixelWidth));
+					s.putFeature(Spot.POSITION_Y,
+							yPosBeforeCrop - (roiArray[cellNb].getYBase() * zprojectImg.getCalibration().pixelHeight));
+//					System.out.println("x, y before : " + xPosBeforeCrop + "_" + yPosBeforeCrop);
+//					System.out
+//							.println("x, y base : " + roiArray[cellNb].getXBase() + "_" + roiArray[cellNb].getYBase());
+					centeredSpots.add(s, (int) Math.round(s.getFeature(Spot.FRAME)));
+				}
+				trackmateModel.setSpots(centeredSpots, false);
+				writer.appendModel(trackmateModel);
+				try {
+					writer.writeToFile();
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
 		}
 	}
 
@@ -222,7 +259,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException();
-
 	}
 
 	public void resetCount() {
