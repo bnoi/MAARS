@@ -1,20 +1,42 @@
 package org.micromanager.cellstateanalysis;
 
-import fiji.plugin.trackmate.SpotCollection;
+import com.google.common.collect.Iterables;
+
+import fiji.plugin.trackmate.Spot;
+import ij.measure.ResultsTable;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
  * @version Nov 19, 2015
  */
 
-public class SpotCollectionAnalysis {
+public class AnalyzeSetOfSpot {
 
-	private SpotCollection collection;
+	private Iterable<Spot> spotSet;
+	private int size;
+	private ResultsTable roiMeasurements;
 
-	public SpotCollectionAnalysis(SpotCollection collection) {
-		this.collection = collection;
+	public AnalyzeSetOfSpot(Iterable<Spot> set, ResultsTable roiMeasurements) {
+		this.spotSet = set;
+		this.size = Iterables.size(spotSet);
+		this.roiMeasurements = roiMeasurements;
 	}
 
+	public void analyse(){
+		if (this.size == 1) {
+			// interphase
+		} else if (this.size == 2) {
+			// SPBs or cen2
+		} else if (this.size > 2 && this.size <= 4) {
+			// SPBs + Cen2 or SPBs + telomeres
+		} else if (this.size > 4 && this.size <= 6) {
+			// SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
+		} else if (this.size > 6 && this.size <= 8) {
+			// SPBs + NDC80 incomplete
+		} else {
+			// not manageable
+		}
+	}
 }
 //
 // // feature related to spindle

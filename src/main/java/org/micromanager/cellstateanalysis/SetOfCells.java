@@ -30,7 +30,6 @@ import ij.plugin.frame.RoiManager;
  */
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 
-	public static final String CELL_NUMBER = "Cell_Number";
 	private RoiManager roiManager;
 	private Roi[] roiArray;
 	private int count = 0;
@@ -38,6 +37,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private ArrayList<Cell> cellArray;
 	private String rootSavingPath;
 	private HashMap<String, HashMap<Integer, SpotCollection>> spotsInCells;
+	private HashMap<String, HashMap<Integer, GeometryCollection>> geometriesOfCells;
 	private ArrayList<String[]> acqIDs;
 	private Model trackmateModel;
 	private HashMap<Integer, ImageStack> croppedStacks;
@@ -118,20 +118,20 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		spotsInCells.get(channel).get(cellNb).add(spot, frame);
 	}
 
-	public HashMap<Integer, SpotCollection> getSpotsInCh(String channel) {
+	public HashMap<Integer, SpotCollection> getSpots(String channel) {
 		return spotsInCells.get(channel);
 	}
 
-	public SpotCollection getCollectionOfSpotInChannel(String channel, int cellNb) {
-		return getSpotsInCh(channel).get(cellNb);
+	public SpotCollection getSpotsOfCell(String channel, int cellNb) {
+		return getSpots(channel).get(cellNb);
 	}
 
 	public Iterable<Spot> getSpotsInFrame(String channel, int cellNb, int frame) {
-		return getCollectionOfSpotInChannel(channel, cellNb).iterable(frame, false);
+		return getSpotsOfCell(channel, cellNb).iterable(frame, false);
 	}
 
 	public int getNbOfSpot(String channel, int cellNb, int frame) {
-		return getCollectionOfSpotInChannel(channel, cellNb).getNSpots(frame, false);
+		return getSpotsOfCell(channel, cellNb).getNSpots(frame, false);
 	}
 
 	public Spot findLowestQualitySpot(String channel, int cellNb, int frame) {
@@ -208,9 +208,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 							xPosBeforeCrop - (roiArray[cellNb].getXBase() * zprojectImg.getCalibration().pixelWidth));
 					s.putFeature(Spot.POSITION_Y,
 							yPosBeforeCrop - (roiArray[cellNb].getYBase() * zprojectImg.getCalibration().pixelHeight));
-//					System.out.println("x, y before : " + xPosBeforeCrop + "_" + yPosBeforeCrop);
-//					System.out
-//							.println("x, y base : " + roiArray[cellNb].getXBase() + "_" + roiArray[cellNb].getYBase());
 					centeredSpots.add(s, (int) Math.round(s.getFeature(Spot.FRAME)));
 				}
 				trackmateModel.setSpots(centeredSpots, false);
@@ -225,7 +222,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 					e.printStackTrace();
 				}
 			}
-
 		}
 	}
 

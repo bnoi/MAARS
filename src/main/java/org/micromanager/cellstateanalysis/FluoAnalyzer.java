@@ -31,6 +31,7 @@ public class FluoAnalyzer implements Runnable {
 	private int maxNbSpot;
 	private double radius;
 	private int frame;
+	private ResultsTable roiMeasurements;
 
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
 			double radius, int frame) {
@@ -85,7 +86,7 @@ public class FluoAnalyzer implements Runnable {
 
 	public void run() {
 		soc.addChSpotContainer(channel);
-		final ResultsTable roiMeasurements = soc.getRoiMeasurement();
+		roiMeasurements = soc.getRoiMeasurement();
 		// TODO project or not
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
@@ -103,7 +104,6 @@ public class FluoAnalyzer implements Runnable {
 		nbOfCellEachThread[0] = (int) nbCell / nThread;
 		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
 		for (int i = 0; i < nThread; i++) {
-			System.out.println("Allocating thread : " + i + "_" + channel);
 			if (i == 0) {
 				es.execute(new AnalyseBlockCells(i, nbOfCellEachThread));
 			} else {
@@ -141,7 +141,6 @@ public class FluoAnalyzer implements Runnable {
 				begin = index * deltas[0] + (deltas[1] - deltas[0]);
 				end = begin + deltas[0];
 			}
-			System.out.println("sites :" + begin + " - " + end);
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
 				int cellNb = cell.getCellNumber();
@@ -156,15 +155,14 @@ public class FluoAnalyzer implements Runnable {
 					if (tmpRoi.contains(
 							(int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImage.getCalibration().pixelWidth),
 							(int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImage.getCalibration().pixelHeight))) {
-						System.out.println("Added 1 spot in cell " + cellNb);
 						soc.putSpot(channel, cellNb, frame, s);
-						if (soc.getNbOfSpot(channel, cellNb, frame) == maxNbSpot) {
-							System.out.println("remove 1 spot from cell " + cellNb);
+						if (soc.getNbOfSpot(channel, cellNb, frame) > maxNbSpot) {
 							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, cellNb, frame);
-							soc.getCollectionOfSpotInChannel(channel, cellNb).remove(lowesetQulitySpot, frame);
+							soc.getSpotsOfCell(channel, cellNb).remove(lowesetQulitySpot, frame);
 						}
 					}
 				}
+				new AnalyzeSetOfSpot(soc.getSpotsInFrame(channel, cellNb, frame), roiMeasurements);
 			}
 		}
 	}
