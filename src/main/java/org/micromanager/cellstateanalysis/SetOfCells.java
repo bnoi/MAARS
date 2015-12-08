@@ -147,6 +147,15 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return lowestQualitySpot;
 	}
 
+	public void addGeometryContainer(String channel) {
+		if (this.geometriesOfCells == null) {
+			this.geometriesOfCells = new HashMap<String, HashMap<Integer, GeometryCollection>>();
+		}
+		if (!geometriesOfCells.containsKey(channel)) {
+			geometriesOfCells.put(channel, new HashMap<Integer, GeometryCollection>());
+		}
+	}
+
 	public void setRoiMeasurement(ResultsTable rt) {
 		this.rt = rt;
 	}

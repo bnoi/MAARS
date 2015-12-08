@@ -10,21 +10,26 @@ import ij.measure.ResultsTable;
  * @version Nov 19, 2015
  */
 
-public class AnalyzeSetOfSpot {
+public class SpotsAnalyzer {
 
 	private Iterable<Spot> spotSet;
 	private int size;
 	private ResultsTable roiMeasurements;
+	private int frame;
 
-	public AnalyzeSetOfSpot(Iterable<Spot> set, ResultsTable roiMeasurements) {
+	public SpotsAnalyzer(int frame, Iterable<Spot> set, ResultsTable roiMeasurements) {
 		this.spotSet = set;
 		this.size = Iterables.size(spotSet);
 		this.roiMeasurements = roiMeasurements;
+		this.frame = frame;
 	}
 
-	public void analyse(){
+	public GeometryCollection analyse(){
 		if (this.size == 1) {
 			// interphase
+			for (Spot s: spotSet){
+				return new GeometryCollection(frame,s);
+			}
 		} else if (this.size == 2) {
 			// SPBs or cen2
 		} else if (this.size > 2 && this.size <= 4) {
@@ -36,6 +41,7 @@ public class AnalyzeSetOfSpot {
 		} else {
 			// not manageable
 		}
+		return 
 	}
 }
 //

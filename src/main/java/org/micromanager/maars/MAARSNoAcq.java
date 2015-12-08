@@ -66,7 +66,7 @@ public class MAARSNoAcq {
 					e.printStackTrace();
 				}
 				int frame = 0;
-				while (frame < 1) {
+				while (frame < 6) {
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {

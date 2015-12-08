@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.ImgUtils;
 
+import com.google.common.collect.Iterables;
+
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -162,7 +164,7 @@ public class FluoAnalyzer implements Runnable {
 						}
 					}
 				}
-				new AnalyzeSetOfSpot(soc.getSpotsInFrame(channel, cellNb, frame), roiMeasurements);
+				new SpotsAnalyzer(frame, soc.getSpotsInFrame(channel, cellNb, frame), roiMeasurements);
 			}
 		}
 	}
