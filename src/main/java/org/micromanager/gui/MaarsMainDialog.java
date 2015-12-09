@@ -74,16 +74,16 @@ public class MaarsMainDialog implements ActionListener {
 	 * @param parameters
 	 *            :MaarsParameters
 	 */
-	public MaarsMainDialog(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
+	public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
 
 		// ------------initialization of parameters---------------//
 		Color labelColor = Color.ORANGE;
 		Color bgColor = Color.WHITE;
 
 		this.mm = mm;
-		this.mmc = mmc;
+		this.mmc = mm.core();
 		this.parameters = parameters;
-
+		
 		// initialize mainFrame
 
 		ReportingUtils.logMessage("create main dialog ...");
