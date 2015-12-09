@@ -59,7 +59,7 @@ public class FluoAnalyzer implements Runnable {
 		this.factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
 
 		int nThread = Runtime.getRuntime().availableProcessors();
-		ExecutorService es = Executors.newFixedThreadPool(nThread);
+		ExecutorService es = Executors.newCachedThreadPool();
 		int nbCell = soc.size();
 		final int[] nbOfCellEachThread = new int[2];
 		nbOfCellEachThread[0] = (int) nbCell / nThread;
@@ -126,7 +126,6 @@ public class FluoAnalyzer implements Runnable {
 				int setSize = Iterables.size(spotSet);
 				ComputeFeatures cptgeometry = null;
 				if (setSize == 1) {
-					// interphase
 					cptgeometry = new ComputeFeatures();
 				} else {
 					cptgeometry = new ComputeFeatures(spotSet, cell.getMeasures());

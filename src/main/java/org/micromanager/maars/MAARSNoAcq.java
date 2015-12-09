@@ -1,11 +1,12 @@
 package org.micromanager.maars;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
@@ -25,7 +26,7 @@ public class MAARSNoAcq {
 	private PrintStream curr_out;
 
 	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
-		ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		ExecutorService es = null;
 		// Start time
 		long start = System.currentTimeMillis();
 
@@ -66,9 +67,20 @@ public class MAARSNoAcq {
 					e.printStackTrace();
 				}
 				int frame = 0;
-				while (frame < 6) {
-					String channels = parameters.getUsingChannels();
-					String[] arrayChannels = channels.split(",", -1);
+				String pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
+				String[] listAcqNames = new File(pathToFluoDir).list();
+				String pattern = "(\\d+)(_)(\\w+)";
+				int frameCounter = 0;
+				for (String acqName : listAcqNames) {
+					if (Pattern.matches(pattern, acqName)) {
+						frameCounter++;
+					}
+				}
+				String channels = parameters.getUsingChannels();
+				String[] arrayChannels = channels.split(",", -1);
+				frameCounter = frameCounter / arrayChannels.length;
+				es = Executors.newCachedThreadPool();
+				while (frame < frameCounter) {
 					for (String channel : arrayChannels) {
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqIDs(id);
