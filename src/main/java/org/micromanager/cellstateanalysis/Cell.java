@@ -15,6 +15,7 @@ public class Cell {
 
 	private int cellNumber;
 	private Roi cellShapeRoi;
+	private String[] measures;
 
 	/**
 	 * @param roiCellShape
@@ -41,5 +42,13 @@ public class Cell {
 
 	public int getCellNumber() {
 		return cellNumber;
+	}
+
+	public void addMeasures(String measures) {
+		this.measures = measures.split(",", -1);
+	}
+	
+	public String[] getMeasures(){
+		return measures;
 	}
 }

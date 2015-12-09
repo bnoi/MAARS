@@ -37,7 +37,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private ArrayList<Cell> cellArray;
 	private String rootSavingPath;
 	private HashMap<String, HashMap<Integer, SpotCollection>> spotsInCells;
-	private HashMap<String, HashMap<Integer, GeometryCollection>> geometriesOfCells;
+	private HashMap<String, HashMap<Integer, FeatureCollection>> featuresOfCells;
 	private ArrayList<String[]> acqIDs;
 	private Model trackmateModel;
 	private HashMap<Integer, ImageStack> croppedStacks;
@@ -147,17 +147,31 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return lowestQualitySpot;
 	}
 
-	public void addGeometryContainer(String channel) {
-		if (this.geometriesOfCells == null) {
-			this.geometriesOfCells = new HashMap<String, HashMap<Integer, GeometryCollection>>();
+	public void addFeaturesContainer(String channel) {
+		if (this.featuresOfCells == null) {
+			this.featuresOfCells = new HashMap<String, HashMap<Integer, FeatureCollection>>();
 		}
-		if (!geometriesOfCells.containsKey(channel)) {
-			geometriesOfCells.put(channel, new HashMap<Integer, GeometryCollection>());
+		if (!featuresOfCells.containsKey(channel)) {
+			featuresOfCells.put(channel, new HashMap<Integer, FeatureCollection>());
 		}
+	}
+
+	public void putFeature(String channel, int cellNb, int frame, HashMap<String, Object> features) {
+		if (!featuresOfCells.get(channel).containsKey(cellNb)) {
+			featuresOfCells.get(channel).put(cellNb, new FeatureCollection());
+		}
+		featuresOfCells.get(channel).get(cellNb).putFeatures(frame, features);
 	}
 
 	public void setRoiMeasurement(ResultsTable rt) {
 		this.rt = rt;
+	}
+
+	public void addMeasurementForeachCell() {
+		for (int i = 0; i < roiArray.length; i++) {
+			cellArray.get(i).addMeasures(rt.getRowAsString(i));
+		}
+
 	}
 
 	public ResultsTable getRoiMeasurement() {

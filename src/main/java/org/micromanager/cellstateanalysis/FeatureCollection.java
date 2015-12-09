@@ -1,5 +1,7 @@
 package org.micromanager.cellstateanalysis;
 
+import java.util.HashMap;
+
 import com.google.common.collect.Iterables;
 
 import fiji.plugin.trackmate.Spot;
@@ -10,38 +12,16 @@ import ij.measure.ResultsTable;
  * @version Nov 19, 2015
  */
 
-public class SpotsAnalyzer {
+public class FeatureCollection {
 
-	private Iterable<Spot> spotSet;
-	private int size;
-	private ResultsTable roiMeasurements;
-	private int frame;
+	private HashMap<Integer, HashMap<String, Object>> collection;
 
-	public SpotsAnalyzer(int frame, Iterable<Spot> set, ResultsTable roiMeasurements) {
-		this.spotSet = set;
-		this.size = Iterables.size(spotSet);
-		this.roiMeasurements = roiMeasurements;
-		this.frame = frame;
+	public FeatureCollection() {
+		this.collection = new HashMap<Integer, HashMap<String, Object>>();
 	}
 
-	public GeometryCollection analyse(){
-		if (this.size == 1) {
-			// interphase
-			for (Spot s: spotSet){
-				return new GeometryCollection(frame,s);
-			}
-		} else if (this.size == 2) {
-			// SPBs or cen2
-		} else if (this.size > 2 && this.size <= 4) {
-			// SPBs + Cen2 or SPBs + telomeres
-		} else if (this.size > 4 && this.size <= 6) {
-			// SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
-		} else if (this.size > 6 && this.size <= 8) {
-			// SPBs + NDC80 incomplete
-		} else {
-			// not manageable
-		}
-		return 
+	public void putFeatures(int frame, HashMap<String, Object> features) {
+		this.collection.put(frame, features);
 	}
 }
 //

@@ -84,6 +84,7 @@ public class MAARS {
 			ms.segmentation(segImg);
 			soc.setRoiMeasurement(ms.getRoiMeasurements());
 			if (ms.roiDetected()) {
+				soc.addMeasurementForeachCell();
 				// from Roi initialize a set of cell
 				soc.loadCells(xPos, yPos);
 				// Get the focus slice of BF image

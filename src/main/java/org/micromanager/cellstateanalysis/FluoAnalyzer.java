@@ -1,11 +1,9 @@
 package org.micromanager.cellstateanalysis;
 
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.ImgUtils;
 
 import com.google.common.collect.Iterables;
@@ -46,48 +44,9 @@ public class FluoAnalyzer implements Runnable {
 		this.frame = frame;
 	}
 
-	// /**
-	// * if number of spot still higher than expected number of spot in the
-	// * channel get the n highest quality spot(s)
-	// *
-	// * @param visibleOnly
-	// */
-	// public void findBestNSpotInCell(Boolean visibleOnly) {
-	// Spot tmpSpot = null;
-	// ArrayList<Integer> idToSkip = new ArrayList<Integer>();
-	// SpotCollection newCollection = new SpotCollection();
-	// int maxNbSpot = (int)
-	// acquisitionMeta.get(MaarsParameters.CUR_MAX_NB_SPOT);
-	// if (tmpCollection.getNSpots(visibleOnly) > maxNbSpot) {
-	// ReportingUtils.logMessage("Found more than " + maxNbSpot + " spots in
-	// cell " + "");
-	// for (int i = 0; i < maxNbSpot; i++) {
-	// for (Spot s : tmpCollection.iterable(visibleOnly)) {
-	// if (tmpSpot == null) {
-	// tmpSpot = s;
-	// } else {
-	// if (Spot.featureComparator("QUALITY").compare(s, tmpSpot) == 1 &&
-	// !idToSkip.contains(s.ID())) {
-	// tmpSpot = s;
-	// }
-	// }
-	// }
-	// newCollection.add(tmpSpot, 0);
-	// if (tmpSpot != null) {
-	// idToSkip.add(tmpSpot.ID());
-	// }
-	// tmpSpot = null;
-	// }
-	// tmpCollection = newCollection;
-	// idToSkip = null;
-	// newCollection = null;
-	// } else {
-	// // do nothing
-	// }
-	// }
-
 	public void run() {
 		soc.addChSpotContainer(channel);
+		soc.addFeaturesContainer(channel);
 		roiMeasurements = soc.getRoiMeasurement();
 		// TODO project or not
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
@@ -146,7 +105,6 @@ public class FluoAnalyzer implements Runnable {
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
 				int cellNb = cell.getCellNumber();
-
 				Roi tmpRoi = null;
 				if (factors[0] != factors[1]) {
 					tmpRoi = cell.rescaleCellShapeRoi(factors);
@@ -164,7 +122,16 @@ public class FluoAnalyzer implements Runnable {
 						}
 					}
 				}
-				new SpotsAnalyzer(frame, soc.getSpotsInFrame(channel, cellNb, frame), roiMeasurements);
+				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
+				int setSize = Iterables.size(spotSet);
+				ComputeFeatures cptgeometry = null;
+				if (setSize == 1) {
+					// interphase
+					cptgeometry = new ComputeFeatures();
+				} else {
+					cptgeometry = new ComputeFeatures(spotSet, cell.getMeasures());
+				}
+				soc.putFeature(channel, cellNb, frame, cptgeometry.getFeatures());
 			}
 		}
 	}
