@@ -98,7 +98,7 @@ public class MAARSNoAcq {
 		}
 		es.shutdown();
 		try {
-			es.awaitTermination(1, TimeUnit.MINUTES);
+			es.awaitTermination(90, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

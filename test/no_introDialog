@@ -2,8 +2,8 @@
     "PropVal": false,
     "PropType": "Boolean"
   },
-  "org.micromanager.internal.dialogs.IntroDlg:whether or not the intro dialog should include a prompt for the config file": {
-    "PropVal": false,
+  "org.micromanager.internal.utils.DefaultUserProfile:always use the default user profile": {
+    "PropVal": true,
     "PropType": "Boolean"
   },
 

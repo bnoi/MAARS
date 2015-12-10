@@ -31,7 +31,6 @@ public class FluoAnalyzer implements Runnable {
 	private int maxNbSpot;
 	private double radius;
 	private int frame;
-	private ResultsTable roiMeasurements;
 
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
 			double radius, int frame) {
@@ -47,7 +46,6 @@ public class FluoAnalyzer implements Runnable {
 	public void run() {
 		soc.addChSpotContainer(channel);
 		soc.addFeaturesContainer(channel);
-		roiMeasurements = soc.getRoiMeasurement();
 		// TODO project or not
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
@@ -59,7 +57,7 @@ public class FluoAnalyzer implements Runnable {
 		this.factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
 
 		int nThread = Runtime.getRuntime().availableProcessors();
-		ExecutorService es = Executors.newCachedThreadPool();
+		ExecutorService es = Executors.newFixedThreadPool(nThread);
 		int nbCell = soc.size();
 		final int[] nbOfCellEachThread = new int[2];
 		nbOfCellEachThread[0] = (int) nbCell / nThread;
@@ -73,7 +71,7 @@ public class FluoAnalyzer implements Runnable {
 		}
 		es.shutdown();
 		try {
-			es.awaitTermination(1, TimeUnit.MINUTES);
+			es.awaitTermination(90, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -123,13 +121,7 @@ public class FluoAnalyzer implements Runnable {
 					}
 				}
 				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
-				int setSize = Iterables.size(spotSet);
-				ComputeFeatures cptgeometry = null;
-				if (setSize == 1) {
-					cptgeometry = new ComputeFeatures();
-				} else {
-					cptgeometry = new ComputeFeatures(spotSet, cell.getMeasures());
-				}
+				ComputeFeatures cptgeometry = new ComputeFeatures(spotSet, soc.getRoiMeasurement(), cellNb);
 				soc.putFeature(channel, cellNb, frame, cptgeometry.getFeatures());
 			}
 		}
