@@ -124,7 +124,6 @@ public class MaarsMainDialog implements ActionListener {
 		widthTf.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
@@ -134,7 +133,6 @@ public class MaarsMainDialog implements ActionListener {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
 			}
 		});
 		widthPanel.add(widthLabel);
@@ -150,7 +148,6 @@ public class MaarsMainDialog implements ActionListener {
 		heightTf.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
@@ -160,7 +157,6 @@ public class MaarsMainDialog implements ActionListener {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
 			}
 		});
 		heightPanel.add(heightLabel);
@@ -374,8 +370,8 @@ public class MaarsMainDialog implements ActionListener {
 			if ((Double) widthTf.getValue() * (Double) heightTf.getValue() == 0) {
 				IJ.error("Session aborted, 0 field to analyse");
 			} else {
-				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
 				saveParameters();
+				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
 				try {
 					if (withOutAcqChk.isSelected()) {
 						hide();
@@ -387,8 +383,17 @@ public class MaarsMainDialog implements ActionListener {
 						}
 					}
 				} catch (Exception e1) {
-
+					if (soc.size() != 0) {
+						soc.writeResults();
+					}
 				}
+				if (soc.size() != 0) {
+					long start = System.currentTimeMillis();
+					soc.writeResults();
+					System.out.println(
+							"it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for writing results");
+				}
+				System.out.println("MAARS Done its job!!");
 			}
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);

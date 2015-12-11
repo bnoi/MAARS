@@ -1,12 +1,13 @@
 package org.micromanager.cellstateanalysis;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.micromanager.maars.MaarsParameters;
-import org.micromanager.segmentPombe.SegPombeParameters;
-import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 
@@ -14,37 +15,25 @@ import ij.measure.Calibration;
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
  * @version Nov 19, 2015
  */
-public class FluoAnalyzer extends Thread {
+public class FluoAnalyzer implements Runnable {
 
-	private MaarsParameters parameters;
-	private String pathToFluoDir;
-	private int frame;
-	private CellChannelFactory currentFactory;
 	private ImagePlus zProjectedFluoImg;
 	private SetOfCells soc;
 	private double[] factors;
-	private Thread thread;
+	private ConcurrentHashMap<String, Object> acquisitionMeta;
 
 	public FluoAnalyzer(MaarsParameters parameters, ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc,
-			String channel, int frame, double positionX, double positionY) {
-		zProjectedFluoImg = ImgUtils.zProject(fluoImage);
-		this.parameters = parameters;
+			ConcurrentHashMap<String, Object> acquisitionMeta) {
+		this.acquisitionMeta = acquisitionMeta;
+		this.zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		this.soc = soc;
-		createCellChannelFactory(channel);
-		this.frame = frame;
-		this.pathToFluoDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + Math.round(positionX)
-				+ "_Y" + Math.round(positionY) + "_FLUO");
-		factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
-	}
-
-	public void createCellChannelFactory(String currentChannel) {
-		currentFactory = new CellChannelFactory(currentChannel,
-				Integer.parseInt(parameters.getChMaxNbSpot(currentChannel)),
-				Double.parseDouble(parameters.getChSpotRaius(currentChannel)));
+		this.factors = ImgUtils.getRescaleFactor(bfImgCal, zProjectedFluoImg.getCalibration());
+		soc.setAcquisitionMeta(acquisitionMeta);
 	}
 
 	public void run() {
 		int nThread = Runtime.getRuntime().availableProcessors();
+		ExecutorService es = Executors.newFixedThreadPool(nThread);
 		int nbCell = soc.size();
 		final int[] nbOfCellEachThread = new int[2];
 		nbOfCellEachThread[0] = (int) nbCell / nThread;
@@ -55,55 +44,50 @@ public class FluoAnalyzer extends Thread {
 			if (i == 0) {
 				final int begin = cursor;
 				final int end = cursor + nbOfCellEachThread[1];
-				class Analyzer implements Runnable {
+				es.execute(new Runnable() {
 					@Override
 					public void run() {
 						for (int j = begin; j < end; j++) {
 							final Cell cell = soc.getCell(j);
+							cell.setCurrentMetadata(acquisitionMeta);
+							cell.createContainers();
 							Roi rescaledRoi = cell.rescaleCellShapeRoi(factors);
 							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
 							cell.addCroppedFluoSlice();
-							// save cropped cells
-							cell.saveCroppedImage(pathToFluoDir);
 							// fluoanalysis
-							cell.setChannelRelated(currentFactory);
-							cell.setCurrentFrame(frame);
-							cell.findFluoSpotTempFunction();
-							// can be optional
-							FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(),
-									currentFactory.getChannel(), cell.getModelOf(currentFactory.getChannel()));
+							cell.detectSpots();
 						}
 					}
-				}
-				thread = new Thread(new Analyzer(), "SubSet_" + i);
-				thread.start();
+				});
 				cursor += nbOfCellEachThread[1];
 			} else {
 				final int begin = cursor;
 				final int end = cursor + nbOfCellEachThread[0];
-				class Analyzer implements Runnable {
+				es.execute(new Runnable() {
 					@Override
 					public void run() {
-						for (int x = begin; x < end; x++) {
-							final Cell cell = soc.getCell(x);
+						for (int j = begin; j < end; j++) {
+							final Cell cell = soc.getCell(j);
+							cell.setCurrentMetadata(acquisitionMeta);
+							cell.createContainers();
 							Roi rescaledRoi = cell.rescaleCellShapeRoi(factors);
 							cell.setFluoImage(ImgUtils.cropImgWithRoi(zProjectedFluoImg, rescaledRoi));
 							cell.addCroppedFluoSlice();
-							// can be optional
-							cell.saveCroppedImage(pathToFluoDir);
 							// fluoanalysis
-							cell.setChannelRelated(currentFactory);
-							cell.setCurrentFrame(frame);
-							cell.findFluoSpotTempFunction();
-							// can be optional
-							FileUtils.writeSpotFeatures(parameters.getSavingPath(), cell.getCellNumber(),
-									currentFactory.getChannel(), cell.getModelOf(currentFactory.getChannel()));
+							cell.detectSpots();
 						}
 					}
-				}
-				thread = new Thread(new Analyzer(), "SubSet_" + i);
-				thread.start();
+				});
 				cursor += nbOfCellEachThread[0];
+			}
+		}
+		es.shutdown();
+		while (!es.isTerminated()){
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

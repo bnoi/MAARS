@@ -1,6 +1,11 @@
 package org.micromanager.cellstateanalysis;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.ImgUtils;
@@ -9,12 +14,12 @@ import ij.process.ImageProcessor;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.io.TmXmlWriter;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.measure.ResultsTable;
 
 /**
  * Cell is a class containing information about cell image, including its
@@ -27,6 +32,7 @@ public class Cell {
 
 	private int cellNumber;
 	private int currentFrame;
+	private Boolean visibleOnly;
 
 	// image related
 	private ImagePlus fluoImage;
@@ -40,7 +46,8 @@ public class Cell {
 	private Measures measures;
 
 	// Data containers
-	private CellChannelFactory factory;
+	private ArrayList<String> channelUsed;
+	private Map<String, Object> acquisitionMeta;
 	private SpotCollection gfpSpotCollection;
 	private SpotCollection cfpSpotCollection;
 	private SpotCollection dapiSpotCollection;
@@ -54,50 +61,41 @@ public class Cell {
 	 */
 	public Cell(Roi roiCellShape, int cellNb) {
 		this.cellShapeRoi = roiCellShape;
-
 		this.cellNumber = cellNb;
+		this.channelUsed = new ArrayList<String>();
+		visibleOnly = true;
 	}
 
 	/**
-	 * Method to find fluorescent spots on cell image and create a Spindle
-	 * object
-	 * 
+	 * Find fluorescent spots on cell images
 	 */
-	public synchronized void findFluoSpotTempFunction() {
-		// Roi related computation
-		// measures;
-		// Spot related computation
-		Boolean visibleOnly = true;
-		this.fluoAnalysis = new CellFluoAnalysis(this, factory);
+	public synchronized void detectSpots() {
+		this.fluoAnalysis = new CellFluoAnalysis(this, acquisitionMeta);
 		fluoAnalysis.doDetection();
 		fluoAnalysis.filterOnlyInCell(visibleOnly);
 		fluoAnalysis.findBestNSpotInCell(visibleOnly);
-		SpotCollection currentCollection = getCollectionOf(factory.getChannel());
 		for (Spot s : fluoAnalysis.getModel().getSpots().iterable(visibleOnly)) {
-			currentCollection.add(s, currentFrame);
+			getCollectionOf((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL)).add(s, currentFrame);
 		}
-		// int nSpotDetected = currentCollection.getNSpots(currentFrame,
-		// visibleOnly);
-		// if (nSpotDetected == 1) {
-		// // interphase
-		// } else if (nSpotDetected == 2) {
-		// // SPBs
-		// } else if (nSpotDetected > 2 && nSpotDetected <= 4) {
-		// // SPBs + Cen2 or SPBs + telomeres
-		// } else if (nSpotDetected > 4 && nSpotDetected <= 6) {
-		// // SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
-		// } else if (nSpotDetected > 6 && nSpotDetected <= 8) {
-		// // SPBs + NDC80 incomplete
-		// } else {
-		// // not manageable
-		// }
-		// ReportingUtils.logMessage("Create spindle using spots found");
-		// Spindle spindle = new Spindle(spotCollection, measures, croppedRoi,
-		// fluoImage.getCalibration(), cellShapeRoi);
 	}
 
-	public void setCurrentFrame(int frame) {
-		this.currentFrame = frame;
+	//TODO
+	public void analyzeSpots() {
+		int nSpotDetected = getCollectionOf((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL))
+				.getNSpots(currentFrame, visibleOnly);
+		if (nSpotDetected == 1) {
+			// interphase
+		} else if (nSpotDetected == 2) {
+			// SPBs or cen2
+		} else if (nSpotDetected > 2 && nSpotDetected <= 4) {
+			// SPBs + Cen2 or SPBs + telomeres
+		} else if (nSpotDetected > 4 && nSpotDetected <= 6) {
+			// SPBs + Cen2 + telomeres or SPBs + NDC80 incomplete
+		} else if (nSpotDetected > 6 && nSpotDetected <= 8) {
+			// SPBs + NDC80 incomplete
+		} else {
+			// not manageable
+		}
 	}
 
 	public void setFocusImage(ImagePlus focusImg) {
@@ -143,10 +141,29 @@ public class Cell {
 	}
 
 	public void saveCroppedImage(String croppedImgDir) {
-		String pathToCroppedImg = croppedImgDir + "/" + String.valueOf(this.getCellNumber());
+		String pathToCroppedImg = croppedImgDir + String.valueOf(this.getCellNumber());
 		ImagePlus imp = new ImagePlus("cell_" + getCellNumber(), croppedFluoStack);
 		imp.setCalibration(getFluoImage().getCalibration());
 		IJ.saveAsTiff(imp, pathToCroppedImg);
+	}
+
+	public void writeSpotFeatures(String path) {
+		Model model = fluoAnalysis.getModel();
+		for (String channel : channelUsed) {
+			File newFile = new File(path + String.valueOf(this.getCellNumber()) + "_" + channel + ".xml");
+			TmXmlWriter writer = new TmXmlWriter(newFile);
+			model.setSpots(getCollectionOf(channel), true);
+			writer.appendModel(model);
+			try {
+				writer.writeToFile();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void addCroppedFluoSlice() {
@@ -157,25 +174,29 @@ public class Cell {
 		croppedFluoStack.addSlice(ip);
 	}
 
-	public void setChannelRelated(CellChannelFactory factory) {
-		this.factory = factory;
-		if (factory.getChannel().equals(MaarsParameters.GFP)) {
+	public void createContainers() {
+		String currentChannel = getCurrentChannel();
+		if (currentChannel.equals(MaarsParameters.GFP)) {
 			if (gfpSpotCollection == null) {
 				gfpSpotCollection = new SpotCollection();
 			}
-		} else if (factory.getChannel().equals(MaarsParameters.CFP)) {
+		} else if (currentChannel.equals(MaarsParameters.CFP)) {
 			if (cfpSpotCollection == null) {
 				cfpSpotCollection = new SpotCollection();
 			}
-		} else if (factory.getChannel().equals(MaarsParameters.DAPI)) {
+		} else if (currentChannel.equals(MaarsParameters.DAPI)) {
 			if (dapiSpotCollection == null) {
 				dapiSpotCollection = new SpotCollection();
 			}
-		} else if (factory.getChannel().equals(MaarsParameters.TXRED)) {
+		} else if (currentChannel.equals(MaarsParameters.TXRED)) {
 			if (txredSpotCollection == null) {
 				txredSpotCollection = new SpotCollection();
 			}
 		}
+	}
+
+	public String getCurrentChannel() {
+		return (String) acquisitionMeta.get(MaarsParameters.CHANNEL);
 	}
 
 	public SpotCollection getCollectionOf(String channel) {
@@ -210,16 +231,8 @@ public class Cell {
 				(int) Math.round(s.getFeature("POSITION_Y") / cal.pixelHeight));
 	}
 
-	/**
-	 * XML write of Trackmate need model instead of SpotCollection
-	 * 
-	 * @param :
-	 *            channel name
-	 * @return model of Trackmate (see @Model in @Trakmate)
-	 */
-	public Model getModelOf(String channel) {
-		Model model = fluoAnalysis.getModel();
-		model.setSpots(getCollectionOf(channel), true);
-		return model;
+	public void setCurrentMetadata(ConcurrentMap<String, Object> acquisitionMeta) {
+		this.acquisitionMeta = acquisitionMeta;
+		channelUsed.add((String) acquisitionMeta.get(MaarsParameters.CUR_CHANNEL));
 	}
 }

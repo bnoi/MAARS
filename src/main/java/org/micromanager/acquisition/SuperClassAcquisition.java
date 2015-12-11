@@ -35,8 +35,8 @@ public class SuperClassAcquisition {
 	private MaarsParameters parameters;
 	private String channelGroup;
 	private String rootDirName;
-	private double positionX;
-	private double positionY;
+	private String positionX;
+	private String positionY;
 
 	/**
 	 * Constructor :
@@ -52,8 +52,8 @@ public class SuperClassAcquisition {
 	 * @param positionY
 	 *            : y field position (can be defined by ExplorationXYPositions)
 	 */
-	public SuperClassAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, double positionX,
-			double positionY) {
+	public SuperClassAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, String positionX,
+			String positionY) {
 		this.mm = mm;
 		this.mmc = mmc;
 		this.parameters = parameters;
@@ -190,15 +190,14 @@ public class SuperClassAcquisition {
 		double range = 0;
 		double step = 0;
 		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
-			//initialize parameters for FLUO Acquisitions
-			acqName = "movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY) + "_FLUO/" + frame + "_"
-					+ channelName;
+			// initialize parameters for FLUO Acquisitions
+			acqName = "movie_X" + positionX + "_Y" + positionY + "_FLUO/" + frame + "_" + channelName;
 			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
 			step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
 			imgName = channelName;
 		} else {
-			//initialize parameters for Bright-Field Acquisitions
-			acqName = "movie_X" + Math.round(positionX) + "_Y" + Math.round(positionY);
+			// initialize parameters for Bright-Field Acquisitions
+			acqName = "movie_X" + positionX + "_Y" + positionY;
 			range = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
 			step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 			imgName = parameters.getSegmentationParameter(MaarsParameters.CHANNEL);

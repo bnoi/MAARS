@@ -7,6 +7,7 @@ import java.util.Map;
 import net.imglib2.type.numeric.real.FloatType;
 
 import org.micromanager.internal.utils.ReportingUtils;
+import org.micromanager.maars.MaarsParameters;
 
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.Model;
@@ -38,8 +39,8 @@ public class CellFluoAnalysis {
 	private Cell cell;
 	private Model model;
 	private Settings settings;
-	private CellChannelFactory factory;
 	private SpotCollection tmpCollection;
+	private Map<String, Object> acquisitionMeta;
 
 	/**
 	 * Constructor : prepare parameters for trackmate : model and setting
@@ -48,10 +49,9 @@ public class CellFluoAnalysis {
 	 * @param factory
 	 */
 
-	public CellFluoAnalysis(Cell cell, CellChannelFactory factory) {
-
+	public CellFluoAnalysis(Cell cell, Map<String, Object> acquisitionMeta) {
+		this.acquisitionMeta = acquisitionMeta;
 		this.cell = cell;
-		this.factory = factory;
 		ImagePlus fluoImg = cell.getFluoImage();
 		fluoImg.deleteRoi();
 		model = new Model();
@@ -72,7 +72,7 @@ public class CellFluoAnalysis {
 		settings.detectorFactory = new LogDetectorFactory<FloatType>();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
 		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
-		detectorSettings.put(KEY_RADIUS, factory.getSpotRadius());
+		detectorSettings.put(KEY_RADIUS, (double) acquisitionMeta.get(MaarsParameters.CUR_SPOT_RADIUS));
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
 		// TODO to figure out what value to use, 15 seems ok for now.
 		detectorSettings.put(KEY_THRESHOLD, (double) 15);
@@ -126,16 +126,15 @@ public class CellFluoAnalysis {
 		Spot tmpSpot = null;
 		ArrayList<Integer> idToSkip = new ArrayList<Integer>();
 		SpotCollection newCollection = new SpotCollection();
-		if (tmpCollection.getNSpots(visibleOnly) > factory.getMaxNbSpot()) {
+		int maxNbSpot = (int) acquisitionMeta.get(MaarsParameters.CUR_MAX_NB_SPOT);
+		if (tmpCollection.getNSpots(visibleOnly) > maxNbSpot) {
 			ReportingUtils.logMessage("Found more spot than waiting number");
-			for (int i = 0; i < factory.getMaxNbSpot(); i++) {
+			for (int i = 0; i < maxNbSpot; i++) {
 				for (Spot s : tmpCollection.iterable(visibleOnly)) {
 					if (tmpSpot == null) {
 						tmpSpot = s;
 					} else {
-						if (Spot.featureComparator("QUALITY").compare(s,
-								tmpSpot) == 1
-								&& !idToSkip.contains(s.ID())) {
+						if (Spot.featureComparator("QUALITY").compare(s, tmpSpot) == 1 && !idToSkip.contains(s.ID())) {
 							tmpSpot = s;
 						}
 					}

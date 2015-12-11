@@ -1,6 +1,4 @@
-package org.micromanager.maarslib;
-
-import org.micromanager.maars.MaarsParameters;
+package org.micromanager.maars;
 
 import mmcorej.CMMCore;
 
