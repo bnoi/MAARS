@@ -32,7 +32,7 @@ GIT_HASH=$(git rev-parse --short HEAD)
 
 # Build MM
 ./autogen.sh
-./configure --enable-imagej-plugin=$CURR_DIR/ImageJ JAVA_HOME=/usr/lib/jvm/default-java/
+CC=gcc CXX=g++ ./configure --enable-imagej-plugin=$CURR_DIR/ImageJ JAVA_HOME=/usr/lib/jvm/default-java/
 make fetchdeps
 make
 
