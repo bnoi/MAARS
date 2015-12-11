@@ -96,9 +96,9 @@ public class MaarsSegmentation {
 		segPombe.createCorrelationImage();
 		segPombe.convertCorrelationToBinaryImage();
 		segPombe.analyseAndFilterParticles();
-		this.rt = segPombe.getRoiMeasurements();
 		segPombe.showAndSaveResultsAndCleanUp();
 		System.out.println("Segmentation done");
+		this.rt = segPombe.getRoiMeasurements();
 		if (segPombe.roiDetected()) {
 			this.roiDetected = true;
 		} else {

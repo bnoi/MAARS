@@ -392,10 +392,11 @@ public class SegPombe {
 			System.out.println("display data frame");
 			resultTable.show("Result");
 			System.out.println("done.");
-		} else {
-			System.out.println("reset data frame");
-			resultTable.reset();
 		}
+//		else {
+//			System.out.println("reset data frame");
+//			resultTable.reset();
+//		}
 
 		if (saveRoi && roiDetected) {
 			System.out.println("saving roi...");

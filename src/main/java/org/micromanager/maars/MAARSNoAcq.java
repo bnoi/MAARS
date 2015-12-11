@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
+import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.FileUtils;
 
 import ij.IJ;
@@ -50,10 +51,10 @@ public class MAARSNoAcq {
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
-			soc.setRoiMeasurement(ms.getRoiMeasurements());
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
 				soc.loadCells(xPos, yPos);
+				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				// Get the focus slice of BF image
 				Calibration bfImgCal = segImg.getCalibration();
 				// ----------------start acquisition and analysis --------//
@@ -82,6 +83,7 @@ public class MAARSNoAcq {
 				es = Executors.newCachedThreadPool();
 				while (frame < frameCounter) {
 					for (String channel : arrayChannels) {
+						ReportingUtils.logMessage("Analysing channel " + channel);
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqIDs(id);
 						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"

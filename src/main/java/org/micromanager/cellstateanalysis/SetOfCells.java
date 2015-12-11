@@ -39,7 +39,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private RoiManager roiManager;
 	private Roi[] roiArray;
 	private int count = 0;
-	private ResultsTable rt;
 	private ArrayList<Cell> cellArray;
 	private String rootSavingPath;
 	private HashMap<String, HashMap<Integer, SpotCollection>> spotsInCells;
@@ -136,6 +135,9 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	public Iterable<Spot> getSpotsInFrame(String channel, int cellNb, int frame) {
+		if (!getSpots(channel).containsKey(cellNb)) {
+			return null;
+		}
 		return getSpotsOfCell(channel, cellNb).iterable(frame, false);
 	}
 
@@ -175,12 +177,10 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		featuresOfCells.get(channel).get(cellNb).put(frame, features);
 	}
 
-	public void setRoiMeasurement(ResultsTable rt) {
-		this.rt = rt;
-	}
-
-	public ResultsTable getRoiMeasurement() {
-		return this.rt;
+	public void setRoiMeasurementIntoCells(ResultsTable rt) {
+		for (Cell c : cellArray) {
+			c.setRoiMeasurement(rt.getRowAsString(c.getCellNumber()));
+		}
 	}
 
 	public void setTrackmateModel(Model model) {
@@ -258,17 +258,17 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				// save features
 				newFile = new File(featuresXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
 				XStream xStream = new XStream();
-				xStream.alias("MAARS", java.util.HashMap.class);
-				String xml = xStream.toXML(featuresOfCells);
-				FileWriter featureWriter = null;
+				xStream.alias("cell", java.util.HashMap.class);
+				String xml = xStream.toXML(featuresOfCells.get(channel).get(cellNb));
+				FileOutputStream fos = null;
 				try {
-					featureWriter = new FileWriter(newFile);
+					fos = new FileOutputStream(newFile);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				try {
-					featureWriter.write(xml);
+					fos.write(xml.getBytes());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

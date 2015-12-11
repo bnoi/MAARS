@@ -3,6 +3,7 @@ package org.micromanager.cellstateanalysis;
 import org.micromanager.utils.ImgUtils;
 
 import ij.gui.Roi;
+import ij.measure.ResultsTable;
 
 /**
  * Cell is a class containing information about cell image, including its
@@ -15,6 +16,10 @@ public class Cell {
 
 	private int cellNumber;
 	private Roi cellShapeRoi;
+	public static final int AREA = 1, MEAN = 2, STD_DEV = 3, MIN = 4, MAX = 5, X_CENTROID = 6, Y_CENTROID = 7,
+			PERIMETER = 8, MAJOR = 9, MINOR = 10, ANGLE = 11, CIRCULARITY = 12, ASPECT_RATIO = 13, ROUNDNESS = 14,
+			SOLIDITY = 15;
+	private String[] measurements;
 
 	/**
 	 * @param roiCellShape
@@ -41,5 +46,13 @@ public class Cell {
 
 	public int getCellNumber() {
 		return cellNumber;
+	}
+
+	public void setRoiMeasurement(String measurements) {
+		this.measurements = measurements.split("\t", -1);
+	}
+
+	public double get(int headerIndex) {
+		return Double.parseDouble(measurements[headerIndex]);
 	}
 }

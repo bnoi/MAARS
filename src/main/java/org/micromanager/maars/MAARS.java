@@ -82,7 +82,7 @@ public class MAARS {
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
-			soc.setRoiMeasurement(ms.getRoiMeasurements());
+			soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
 				soc.loadCells(xPos, yPos);

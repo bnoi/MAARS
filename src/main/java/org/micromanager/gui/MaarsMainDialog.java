@@ -83,7 +83,7 @@ public class MaarsMainDialog implements ActionListener {
 		this.mm = mm;
 		this.mmc = mm.core();
 		this.parameters = parameters;
-		
+
 		// initialize mainFrame
 
 		ReportingUtils.logMessage("create main dialog ...");
@@ -383,6 +383,8 @@ public class MaarsMainDialog implements ActionListener {
 						}
 					}
 				} catch (Exception e1) {
+					e1.printStackTrace();
+					IJ.error("Error occurs");
 					if (soc.size() != 0) {
 						e1.printStackTrace();
 						soc.writeResults();
