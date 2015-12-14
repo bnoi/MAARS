@@ -49,7 +49,7 @@ public class SpotsDetector {
 		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
 		detectorSettings.put(KEY_RADIUS, radius);
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
-		// TODO to figure out what value to use, 2 seems ok for now.
+		// TODO to figure out what value to use, 10 seems ok for now.
 		detectorSettings.put(KEY_THRESHOLD, (double) 10);
 		detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
 		settings.detectorSettings = detectorSettings;

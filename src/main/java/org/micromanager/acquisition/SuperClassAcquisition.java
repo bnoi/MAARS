@@ -70,7 +70,7 @@ public class SuperClassAcquisition {
 		try {
 			mmc.clearROI();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println("Can not clear ROI for MM acquisition");
 			e.printStackTrace();
 		}
 		mm.getDisplayManager().closeAllDisplayWindows(false);
@@ -101,7 +101,7 @@ public class SuperClassAcquisition {
 		try {
 			mmc.setExposure(exposure);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println("Can not set exposure");
 			e.printStackTrace();
 		}
 	}
@@ -220,7 +220,7 @@ public class SuperClassAcquisition {
 			mmc.setConfig(channelGroup, channelName);
 			mmc.waitForConfig(channelGroup, channelName);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
+			System.out.println("Can not set config");
 			e1.printStackTrace();
 		}
 		try {
@@ -279,10 +279,8 @@ public class SuperClassAcquisition {
 				// Datastore (for save)
 				ds.putImage(img);
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (DatastoreFrozenException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

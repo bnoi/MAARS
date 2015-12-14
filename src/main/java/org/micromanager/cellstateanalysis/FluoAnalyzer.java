@@ -55,6 +55,7 @@ public class FluoAnalyzer implements Runnable {
 			double radius, int frame) {
 		this.fluoImage = fluoImage;
 		this.fluoImgCal = fluoImage.getCalibration();
+		soc.setFluoImgCalib(fluoImgCal);
 		this.soc = soc;
 		this.bfImgCal = bfImgCal;
 		this.channel = channel;

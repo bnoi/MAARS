@@ -16,6 +16,7 @@ import org.micromanager.utils.FileUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 
 /**
@@ -97,12 +98,23 @@ public class MAARSNoAcq {
 					frame++;
 				}
 			}
+			RoiManager.getInstance().reset();
+			RoiManager.getInstance().close();
+			if (soc.size() != 0) {
+				IJ.showMessage("Analysis done, writing results");
+				long startWriting = System.currentTimeMillis();
+				soc.saveCroppedImgs();
+				soc.saveSpots();
+				soc.saveFeatures();
+//				soc.writeResults();
+				System.out.println("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+						+ " sec for writing results");
+			}
 		}
 		es.shutdown();
 		try {
-			es.awaitTermination(90, TimeUnit.SECONDS);
+			es.awaitTermination(30, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.setErr(curr_err);

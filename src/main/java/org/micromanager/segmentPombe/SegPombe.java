@@ -90,7 +90,6 @@ public class SegPombe {
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -192,10 +191,8 @@ public class SegPombe {
 				}
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		executor.shutdown();

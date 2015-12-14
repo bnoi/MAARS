@@ -55,7 +55,6 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private JComboBox<String> channel2Combo;
 	private JComboBox<String> channel3Combo;
 	private static String NONE = "None";
-	// TODO
 	String channelListWithNone[] = { NONE, "GFP", "CFP", "TxRed", "DAPI" };
 	String channelList[] = { "GFP", "CFP", "TxRed", "DAPI" };
 
@@ -281,7 +280,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 			try {
 				parameters.save();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
+				System.out.println("Can not save MAARS parameters");
 				e1.printStackTrace();
 			}
 			this.dispose();

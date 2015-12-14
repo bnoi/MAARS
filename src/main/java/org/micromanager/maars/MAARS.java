@@ -16,6 +16,7 @@ import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
@@ -50,7 +51,6 @@ public class MAARS {
 		try {
 			mmc.setOriginXY(mmc.getXYStageDevice());
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
@@ -74,7 +74,7 @@ public class MAARS {
 					mmc.setShutterDevice(
 							parameters.getChShutter(parameters.getSegmentationParameter(MaarsParameters.CHANNEL)));
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					System.out.println("Can't set BF channel for autofocusing");
 					e.printStackTrace();
 				}
 				autofocus.fullFocus();
@@ -109,9 +109,9 @@ public class MAARS {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
+				int frame = 0;
 				if (parameters.useDynamic()) {
 					double startTime = System.currentTimeMillis();
-					int frame = 0;
 					double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
 							* 1000;
 					while (System.currentTimeMillis() - startTime <= timeLimit) {
@@ -128,7 +128,6 @@ public class MAARS {
 						frame++;
 					}
 				} else {
-					int frame = 0;
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
@@ -142,12 +141,22 @@ public class MAARS {
 				}
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
+				if (soc.size() != 0) {
+					IJ.showMessage("Analysis done, writing results");
+					long startWriting = System.currentTimeMillis();
+					soc.saveCroppedImgs();
+					soc.saveSpots();
+					soc.saveFeatures();
+//					soc.writeResults();
+					System.out.println("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+							+ " sec for writing results");
+				}
 			}
 		}
 		mmc.setAutoShutter(true);
 		es.shutdown();
 		try {
-			es.awaitTermination(60, TimeUnit.MINUTES);
+			es.awaitTermination(300, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
