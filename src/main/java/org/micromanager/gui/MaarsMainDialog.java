@@ -380,14 +380,6 @@ public class MaarsMainDialog implements ActionListener {
 						if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
 							hide();
 							new MAARS(mm, mmc, parameters, soc);
-							if (soc.size() != 0) {
-								long start = System.currentTimeMillis();
-								IJ.showMessage("Analysis done, writing results");
-								soc.writeResults();
-								System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000
-										+ " sec for writing results");
-							}
-							System.out.println("MAARS Done its job!!");
 						}
 					}
 				} catch (Exception e1) {
@@ -398,6 +390,14 @@ public class MaarsMainDialog implements ActionListener {
 						soc.writeResults();
 					}
 				}
+				if (soc.size() != 0) {
+					long start = System.currentTimeMillis();
+					IJ.showMessage("Analysis done, writing results");
+					soc.writeResults();
+					System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000
+							+ " sec for writing results");
+				}
+				System.out.println("MAARS Done its job!!");
 			}
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);

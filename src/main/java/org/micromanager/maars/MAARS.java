@@ -18,6 +18,7 @@ import org.micromanager.internal.utils.MMException;
 
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.plugin.frame.RoiManager;
 
 /**
  * 
@@ -69,6 +70,13 @@ public class MAARS {
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			System.out.println("x : " + xPos + " y : " + yPos);
 			try {
+				try {
+					mmc.setShutterDevice(
+							parameters.getChShutter(parameters.getSegmentationParameter(MaarsParameters.CHANNEL)));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				autofocus.fullFocus();
 			} catch (MMException e1) {
 				System.out.println("Can't do autofocus");
@@ -132,6 +140,8 @@ public class MAARS {
 								Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
 					}
 				}
+				RoiManager.getInstance().reset();
+				RoiManager.getInstance().close();
 			}
 		}
 		mmc.setAutoShutter(true);

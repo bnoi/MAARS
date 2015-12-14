@@ -18,7 +18,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 /*
- * MaarsParameters reads a configuration file written as a JsonObject,
+ * MaarsParameters reads a configuration file written as a XML,
  * then allows to access values thanks to all constants defined.
  * 
  * SEGMENTATION_PARAMETERS
