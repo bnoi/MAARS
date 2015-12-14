@@ -107,7 +107,7 @@ public class MAARSNoAcq {
 				soc.saveSpots();
 				soc.saveFeatures();
 //				soc.writeResults();
-				System.out.println("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+				ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 						+ " sec for writing results");
 			}
 		}

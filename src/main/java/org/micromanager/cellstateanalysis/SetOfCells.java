@@ -263,6 +263,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 					if (!new File(croppedImgDir).exists()) {
 						new File(croppedImgDir).mkdirs();
 					}
+					ReportingUtils.logMessage("Saving cropped images of channel " + channel);
 					ImagePlus fluoImg = IJ.openImage(fluoDir + frame + "_" + channel + "/MMStack.ome.tif");
 					ImagePlus zprojectImg = ImgUtils.zProject(fluoImg);
 					// save cropped cells
@@ -305,7 +306,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 					if (!new File(spotsXmlDir).exists()) {
 						new File(spotsXmlDir).mkdirs();
 					}
-					System.out.println(
+					ReportingUtils.logMessage(
 							"Find " + spotsInCells.get(channel).size() + " cells with spots in channel " + channel);
 					// for each cell
 					File newFile = null;
@@ -355,6 +356,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 					if (!new File(featuresXmlDir).exists()) {
 						new File(featuresXmlDir).mkdirs();
 					}
+					ReportingUtils.logMessage("Saving features of channel " + channel);
 					File newFile = null;
 					for (int cellNb : spotsInCells.get(channel).keySet()) {
 						// save features
