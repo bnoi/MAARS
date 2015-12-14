@@ -3,7 +3,7 @@ package org.micromanager.cellstateanalysis;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.commons.math.util.FastMath;
+import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import com.google.common.collect.Iterables;

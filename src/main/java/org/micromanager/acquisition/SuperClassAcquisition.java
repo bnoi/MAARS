@@ -82,7 +82,7 @@ public class SuperClassAcquisition {
 	 * @param shutterLable
 	 */
 	public void setShutter(String shutterLable) {
-		ReportingUtils.logMessage("... Set shutter");
+		ReportingUtils.logMessage("... Set shutter " + shutterLable);
 		try {
 			mmc.setShutterDevice(shutterLable);
 		} catch (Exception e) {
@@ -225,6 +225,7 @@ public class SuperClassAcquisition {
 		double zFocus = 0;
 		try {
 			zFocus = mmc.getPosition(mmc.getFocusDevice());
+			mmc.waitForSystem();
 		} catch (Exception e) {
 			ReportingUtils.logMessage("could not get z current position");
 			e.printStackTrace();
@@ -243,6 +244,7 @@ public class SuperClassAcquisition {
 			ReportingUtils.logMessage("- set focus device at position " + z);
 			try {
 				mmc.setPosition(mmc.getFocusDevice(), z);
+				mmc.waitForSystem();
 			} catch (Exception e) {
 				ReportingUtils.logMessage("could not set focus device at position");
 			}
@@ -253,6 +255,7 @@ public class SuperClassAcquisition {
 		try {
 			mmc.setShutterOpen(false);
 			mmc.setPosition(mmc.getFocusDevice(), zFocus);
+			mmc.waitForSystem();
 		} catch (Exception e) {
 			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();

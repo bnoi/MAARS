@@ -39,10 +39,9 @@ public class MAARS {
 	 * @param parameters
 	 */
 	public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
-		ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		// Start time
 		long start = System.currentTimeMillis();
-
+		mmc.setAutoShutter(false);
 		// Get autofocus manager
 		System.out.println("Autofocusing...");
 		AutofocusPlugin autofocus = mm.getAutofocus();
@@ -57,7 +56,8 @@ public class MAARS {
 
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
-
+		
+		ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		for (int i = 0; i < explo.length(); i++) {
 			try {
 				mm.core().setXYPosition(explo.getX(i), explo.getY(i));
@@ -82,10 +82,10 @@ public class MAARS {
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
-			soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
 				soc.loadCells(xPos, yPos);
+				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				// Get the focus slice of BF image
 				Calibration bfImgCal = segImg.getCalibration();
 				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
