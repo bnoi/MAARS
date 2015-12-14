@@ -207,7 +207,7 @@ public class SuperClassAcquisition {
 		int sliceNumber = (int) Math.round(range / step);
 		int exposure = Integer.parseInt(parameters.getChExposure(channelName));
 		String pathToMovie = rootDirName + "/" + acqName;
-		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
+//		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
 
 		cleanUp();
 		mmc.setAutoShutter(false);
@@ -217,7 +217,15 @@ public class SuperClassAcquisition {
 		setDatastoreMetadata(ds, channelName, acqName, step);
 		// setDisplay(chColor);
 		try {
+			mmc.setConfig(channelGroup, channelName);
+			mmc.waitForConfig(channelGroup, channelName);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
 			mmc.setShutterOpen(true);
+			mmc.waitForSystem();
 		} catch (Exception e) {
 			ReportingUtils.logMessage("Can not open shutter");
 			e.printStackTrace();

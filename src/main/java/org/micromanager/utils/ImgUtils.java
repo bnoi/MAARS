@@ -30,6 +30,12 @@ public class ImgUtils {
 		return imgProject;
 	}
 
+	/**
+	 * change unit of "cm" to "micron"
+	 * 
+	 * @param img
+	 * @return
+	 */
 	public static ImagePlus unitCmToMicron(ImagePlus img) {
 		if (img.getCalibration().getUnit().equals("cm")) {
 			img.getCalibration().setUnit("micron");
@@ -39,6 +45,13 @@ public class ImgUtils {
 		return img;
 	}
 
+	/**
+	 * Crop the ROI on the given image
+	 * 
+	 * @param img
+	 * @param roi
+	 * @return
+	 */
 	public static ImagePlus cropImgWithRoi(ImagePlus img, Roi roi) {
 		ImageStack stack = img.getStack().crop((int) roi.getXBase(), (int) roi.getYBase(), 0,
 				(int) roi.getBounds().width, (int) roi.getBounds().height, img.getStack().getSize());
@@ -49,6 +62,12 @@ public class ImgUtils {
 		return croppedImg;
 	}
 
+	/**
+	 * re-calculate the position of ROI. make it adapt to the cropped image
+	 * 
+	 * @param roi
+	 * @return
+	 */
 	public static Roi centerCroppedRoi(Roi roi) {
 		int[] newXs = roi.getPolygon().xpoints;
 		int[] newYs = roi.getPolygon().ypoints;
@@ -67,6 +86,13 @@ public class ImgUtils {
 		return croppedRoi;
 	}
 
+	/**
+	 * Calculate rescale factor.
+	 * 
+	 * @param cal1
+	 * @param cal2
+	 * @return
+	 */
 	public static double[] getRescaleFactor(Calibration cal1, Calibration cal2) {
 		double[] factors = new double[2];
 		if (cal1.equals(cal2)) {

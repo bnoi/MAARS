@@ -4,7 +4,6 @@ import mmcorej.CMMCore;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +21,7 @@ import ij.measure.Calibration;
 
 /**
  * 
- * Main MAARS process
+ * Main MAARS program
  * 
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 21, 2015
@@ -56,7 +55,7 @@ public class MAARS {
 
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
-		
+
 		ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		for (int i = 0; i < explo.length(); i++) {
 			try {
@@ -138,7 +137,7 @@ public class MAARS {
 		mmc.setAutoShutter(true);
 		es.shutdown();
 		try {
-			es.awaitTermination(1, TimeUnit.MINUTES);
+			es.awaitTermination(60, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

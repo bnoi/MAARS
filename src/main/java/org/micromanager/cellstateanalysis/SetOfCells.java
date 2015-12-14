@@ -3,15 +3,11 @@ package org.micromanager.cellstateanalysis;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.ImgUtils;
 
@@ -29,7 +25,8 @@ import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
 
 /**
- * Class to manipulate a set of cells which corresponds to cells of one field
+ * Main object of MAARS, you got information about each cell (ROI measurement,
+ * analysis related result)
  * 
  * @author Tong LI
  *
@@ -110,7 +107,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return cellArray.size();
 	}
 
-	public void addChSpotContainer(String channel) {
+	public void addSpotContainerOf(String channel) {
 		if (spotsInCells == null) {
 			spotsInCells = new HashMap<String, HashMap<Integer, SpotCollection>>();
 		}
@@ -126,28 +123,65 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		spotsInCells.get(channel).get(cellNb).add(spot, frame);
 	}
 
-	public HashMap<Integer, SpotCollection> getSpots(String channel) {
+	/**
+	 * Get all cells in the channel
+	 * 
+	 * @param channel
+	 * @return
+	 */
+	public HashMap<Integer, SpotCollection> getCells(String channel) {
 		return spotsInCells.get(channel);
 	}
 
-	public SpotCollection getSpotsOfCell(String channel, int cellNb) {
-		return getSpots(channel).get(cellNb);
+	/**
+	 * Get the spot collection of cell
+	 * 
+	 * @param channel
+	 * @param cellNb
+	 * @return
+	 */
+	public SpotCollection getSpots(String channel, int cellNb) {
+		return getCells(channel).get(cellNb);
 	}
 
+	/**
+	 * Get the set of cell in spot collection of frame...
+	 * 
+	 * @param channel
+	 * @param cellNb
+	 * @param frame
+	 * @return
+	 */
 	public Iterable<Spot> getSpotsInFrame(String channel, int cellNb, int frame) {
-		if (!getSpots(channel).containsKey(cellNb)) {
+		if (!getCells(channel).containsKey(cellNb)) {
 			return null;
 		}
-		return getSpotsOfCell(channel, cellNb).iterable(frame, false);
+		return getSpots(channel, cellNb).iterable(frame, false);
 	}
 
+	/**
+	 * Get the number of spot in spotCollection of frame ...
+	 * 
+	 * @param channel
+	 * @param cellNb
+	 * @param frame
+	 * @return
+	 */
 	public int getNbOfSpot(String channel, int cellNb, int frame) {
-		return getSpotsOfCell(channel, cellNb).getNSpots(frame, false);
+		return getSpots(channel, cellNb).getNSpots(frame, false);
 	}
 
+	/**
+	 * Get the lowest qualit spot in the frame
+	 * 
+	 * @param channel
+	 * @param cellNb
+	 * @param frame
+	 * @return
+	 */
 	public Spot findLowestQualitySpot(String channel, int cellNb, int frame) {
 		Iterable<Spot> spotsInFrame = getSpotsInFrame(channel, cellNb, frame);
-		double min = 1000;
+		double min = Double.POSITIVE_INFINITY;
 		Spot lowestQualitySpot = null;
 		for (Spot s : spotsInFrame) {
 			if (s.getFeature(Spot.QUALITY) < min) {
@@ -158,7 +192,11 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		return lowestQualitySpot;
 	}
 
-	public void addFeaturesContainer(String channel) {
+	/**
+	 * 
+	 * @param channel
+	 */
+	public void addFeatureContainerOf(String channel) {
 		if (this.featuresOfCells == null) {
 			this.featuresOfCells = new HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>>();
 		}
@@ -167,6 +205,13 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		}
 	}
 
+	/**
+	 * 
+	 * @param channel
+	 * @param cellNb
+	 * @param frame
+	 * @param features
+	 */
 	public void putFeature(String channel, int cellNb, int frame, HashMap<String, Object> features) {
 		if (!featuresOfCells.get(channel).containsKey(cellNb)) {
 			featuresOfCells.get(channel).put(cellNb, new HashMap<Integer, HashMap<String, Object>>());
@@ -177,17 +222,28 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		featuresOfCells.get(channel).get(cellNb).put(frame, features);
 	}
 
+	/**
+	 * 
+	 * @param rt
+	 */
 	public void setRoiMeasurementIntoCells(ResultsTable rt) {
 		for (Cell c : cellArray) {
 			c.setRoiMeasurement(rt.getRowAsString(c.getCellNumber()));
 		}
 	}
 
+	/**
+	 * 
+	 * @param model
+	 */
 	public void setTrackmateModel(Model model) {
 		if (this.trackmateModel == null)
 			this.trackmateModel = model;
 	}
 
+	/**
+	 * 
+	 */
 	public void writeResults() {
 		croppedStacks = new HashMap<Integer, ImageStack>();
 		for (String[] id : acqIDs) {

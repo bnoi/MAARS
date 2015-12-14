@@ -42,7 +42,7 @@ public class SpotsDetector {
 		settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
 		settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
 
-		// Set up detectino parameters.
+		// Set up detection parameters.
 
 		settings.detectorFactory = new LogDetectorFactory<FloatType>();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();

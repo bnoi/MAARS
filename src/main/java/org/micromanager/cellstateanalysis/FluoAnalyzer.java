@@ -4,12 +4,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.micromanager.utils.ImgUtils;
-
-import com.google.common.collect.Iterables;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -17,7 +14,6 @@ import fiji.plugin.trackmate.SpotCollection;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.measure.ResultsTable;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -36,6 +32,25 @@ public class FluoAnalyzer implements Runnable {
 	private double radius;
 	private int frame;
 
+	/**
+	 * Analyze the set of cell in given the fluo image
+	 * 
+	 * @param fluoImage
+	 *            image to analyze
+	 * @param bfImgCal
+	 *            bright field image calibration, need it to decide whether or
+	 *            not rescale ROI
+	 * @param soc
+	 *            the set of cell to analyze
+	 * @param channel
+	 *            fluo image channel
+	 * @param maxNbSpot
+	 *            max number of spot in corresponding channel
+	 * @param radius
+	 *            radius of spot in corresponding channel
+	 * @param frame
+	 *            time point
+	 */
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
 			double radius, int frame) {
 		this.fluoImage = fluoImage;
@@ -48,12 +63,18 @@ public class FluoAnalyzer implements Runnable {
 		this.frame = frame;
 	}
 
+	/**
+	 * the main, use one new thread just in order to free acquisition thread to
+	 * acquire images as soon as possible
+	 */
 	public void run() {
-		soc.addChSpotContainer(channel);
-		soc.addFeaturesContainer(channel);
-		// TODO project or not
+		soc.addSpotContainerOf(channel);
+		soc.addFeatureContainerOf(channel);
+		// TODO project or not. Do not project if do 3D detection
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
+
+		// Call trackmate to detect spots
 		SpotsDetector detector = new SpotsDetector(zProjectedFluoImg, radius);
 		Model model = detector.doDetection();
 		soc.setTrackmateModel(model);
@@ -69,6 +90,7 @@ public class FluoAnalyzer implements Runnable {
 		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
 		Future<?> future = null;
 		for (int i = 0; i < nThread; i++) {
+			// analyze every subset of cell
 			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread));
 		}
 		es.shutdown();
@@ -86,6 +108,9 @@ public class FluoAnalyzer implements Runnable {
 		}
 	}
 
+	/**
+	 * analyzer of subset
+	 */
 	private class AnalyseBlockCells implements Runnable {
 		final int index;
 		final int[] deltas;
@@ -124,7 +149,7 @@ public class FluoAnalyzer implements Runnable {
 						soc.putSpot(channel, cellNb, frame, s);
 						if (soc.getNbOfSpot(channel, cellNb, frame) > maxNbSpot) {
 							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, cellNb, frame);
-							soc.getSpotsOfCell(channel, cellNb).remove(lowesetQulitySpot, frame);
+							soc.getSpots(channel, cellNb).remove(lowesetQulitySpot, frame);
 						}
 					}
 				}

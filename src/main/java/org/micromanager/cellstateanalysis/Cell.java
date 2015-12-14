@@ -3,11 +3,10 @@ package org.micromanager.cellstateanalysis;
 import org.micromanager.utils.ImgUtils;
 
 import ij.gui.Roi;
-import ij.measure.ResultsTable;
 
 /**
- * Cell is a class containing information about cell image, including its
- * mitotic state, its shape, ... TODO
+ * Cell is a class containing information about cell ROI, including its index in
+ * cell array, and its its corresponding measurements from Analyzer of ImageJ
  * 
  * @author Tong LI
  *

@@ -357,7 +357,7 @@ public class MaarsMainDialog implements ActionListener {
 	public int overWriteOrNot(String path) {
 		int decision = 0;
 		if (FileUtils.exists(path + "/movie_X0_Y0/MMStack.ome.tif")) {
-			decision = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing files?");
+			decision = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
 		}
 		return decision;
 	}
@@ -380,6 +380,14 @@ public class MaarsMainDialog implements ActionListener {
 						if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
 							hide();
 							new MAARS(mm, mmc, parameters, soc);
+							if (soc.size() != 0) {
+								long start = System.currentTimeMillis();
+								IJ.showMessage("Analysis done, writing results");
+								soc.writeResults();
+								System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000
+										+ " sec for writing results");
+							}
+							System.out.println("MAARS Done its job!!");
 						}
 					}
 				} catch (Exception e1) {
@@ -390,14 +398,6 @@ public class MaarsMainDialog implements ActionListener {
 						soc.writeResults();
 					}
 				}
-				if (soc.size() != 0) {
-					long start = System.currentTimeMillis();
-					IJ.showMessage("Analysis done, writing results");
-					soc.writeResults();
-					System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000
-							+ " sec for writing results");
-				}
-				System.out.println("MAARS Done its job!!");
 			}
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);
