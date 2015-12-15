@@ -142,7 +142,6 @@ public class MAARS {
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
 				if (soc.size() != 0) {
-					IJ.showMessage("Analysis done, writing results");
 					long startWriting = System.currentTimeMillis();
 					soc.saveCroppedImgs();
 					soc.saveSpots();
