@@ -110,7 +110,7 @@ public class MAARS {
 				// ----------------start acquisition and analysis --------//
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
 				try {
-					PrintStream ps = new PrintStream(parameters.getSavingPath() + "CellStateAnalysis.LOG");
+					PrintStream ps = new PrintStream(ms.getPathToSegDir() + "CellStateAnalysis.LOG");
 					curr_err = System.err;
 					curr_out = System.err;
 					System.setOut(ps);
@@ -128,7 +128,7 @@ public class MAARS {
 						String[] arrayChannels = channels.split(",", -1);
 						for (String channel : arrayChannels) {
 							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-							soc.setAcqID(id);
+							soc.addAcqID(id);
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
 							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -141,7 +141,7 @@ public class MAARS {
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-						soc.setAcqID(id);
+						soc.addAcqID(id);
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
 						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),

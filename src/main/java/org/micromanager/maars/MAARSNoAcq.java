@@ -86,7 +86,7 @@ public class MAARSNoAcq {
 					for (String channel : arrayChannels) {
 						ReportingUtils.logMessage("Analysing channel " + channel);
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-						soc.setAcqID(id);
+						soc.addAcqID(id);
 						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
 								+ frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
@@ -105,7 +105,7 @@ public class MAARSNoAcq {
 				soc.saveCroppedImgs();
 				soc.saveSpots();
 				soc.saveFeatures();
-//				soc.writeResults();
+				// soc.writeResults();
 				ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 						+ " sec for writing results");
 			}

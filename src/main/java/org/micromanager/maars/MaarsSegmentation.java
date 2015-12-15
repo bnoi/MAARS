@@ -113,6 +113,10 @@ public class MaarsSegmentation {
 	public boolean roiDetected() {
 		return this.roiDetected;
 	}
+	
+	public String getPathToSegDir() {
+		return pathToSegDir;
+	}
 
 	public SegPombeParameters getSegPombeParam() {
 		return this.segPombeParam;
