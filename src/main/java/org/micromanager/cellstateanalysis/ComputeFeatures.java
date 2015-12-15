@@ -85,8 +85,8 @@ public class ComputeFeatures {
 			feature.put(SpAngToMaj, getSpAngToMajAxis(polesVec));
 			Spot cellCenter = new Spot(x - xbase, y - ybase, fakeSpotZ, fakeSpotRadius, fakeSpotQuality);
 			feature.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
-			feature.put(CellCenterToSpCenterAng,
-					Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I));
+			feature.put(CellCenterToSpCenterAng, getAngLessThan90(
+					Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I)));
 		}
 		return feature;
 	}
@@ -194,13 +194,8 @@ public class ComputeFeatures {
 	 */
 	public double getSpAngToMajAxis(Vector3D polesVec) {
 		double halfMajAxis = major / 2;
-		double cellAngle = angle;
-		if (cellAngle > 90) {
-			cellAngle -= 90;
-		}
-		Vector3D cellMajAxisVec = new Vector3D(halfMajAxis * FastMath.cos(cellAngle),
-				halfMajAxis * FastMath.sin(cellAngle), 0);
-		return Vector3D.angle(polesVec, cellMajAxisVec);
+		Vector3D cellMajAxisVec = new Vector3D(halfMajAxis * FastMath.cos(angle), halfMajAxis * FastMath.sin(angle), 0);
+		return getAngLessThan90(Vector3D.angle(polesVec, cellMajAxisVec));
 	}
 
 	/**
@@ -212,5 +207,12 @@ public class ComputeFeatures {
 	public Vector3D spot2Vector3D(Spot s) {
 		return new Vector3D(s.getFeature(Spot.POSITION_X), s.getFeature(Spot.POSITION_Y),
 				s.getFeature(Spot.POSITION_Z));
+	}
+
+	public double getAngLessThan90(double radiant) {
+		if (radiant > FastMath.PI / 2) {
+			radiant -= FastMath.PI;
+		}
+		return FastMath.toDegrees(FastMath.abs(radiant));
 	}
 }
