@@ -1,21 +1,24 @@
-package org.micromanager.cellstateanalysis;
-
-import fiji.plugin.trackmate.SpotCollection;
-
-/**
- * @author Tong LI, mail:tongli.bioinfo@gmail.com
- * @version Nov 19, 2015
- */
-
-public class SpotCollectionAnalysis {
-
-	private SpotCollection collection;
-
-	public SpotCollectionAnalysis(SpotCollection collection) {
-		this.collection = collection;
-	}
-
-}
+//package org.micromanager.cellstateanalysis;
+//
+//import java.util.HashMap;
+//
+///**
+// * @author Tong LI, mail:tongli.bioinfo@gmail.com
+// * @version Nov 19, 2015
+// */
+//
+//public class FeatureCollection {
+//
+//	private HashMap<Integer, HashMap<String, Object>> collection;
+//
+//	public FeatureCollection() {
+//		this.collection = new HashMap<Integer, HashMap<String, Object>>();
+//	}
+//
+//	public void putFeatures(int frame, HashMap<String, Object> features) {
+//		this.collection.put(frame, features);
+//	}
+//}
 //
 // // feature related to spindle
 // private double angleSpCellCenter;

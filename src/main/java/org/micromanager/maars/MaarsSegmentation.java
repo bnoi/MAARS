@@ -6,6 +6,7 @@ import org.micromanager.segmentPombe.SegPombeParameters;
 import org.micromanager.utils.FileUtils;
 
 import ij.ImagePlus;
+import ij.measure.ResultsTable;
 
 /**
  * Class to segment a multiple z-stack bright field image then find and record
@@ -19,6 +20,7 @@ public class MaarsSegmentation {
 	private String pathToSegDir;
 	private SegPombeParameters segPombeParam;
 	private boolean roiDetected = false;
+	private ResultsTable rt;
 
 	/**
 	 * Constructor :
@@ -96,6 +98,7 @@ public class MaarsSegmentation {
 		segPombe.analyseAndFilterParticles();
 		segPombe.showAndSaveResultsAndCleanUp();
 		System.out.println("Segmentation done");
+		this.rt = segPombe.getRoiMeasurements();
 		if (segPombe.roiDetected()) {
 			this.roiDetected = true;
 		} else {
@@ -110,8 +113,16 @@ public class MaarsSegmentation {
 	public boolean roiDetected() {
 		return this.roiDetected;
 	}
+	
+	public String getPathToSegDir() {
+		return pathToSegDir;
+	}
 
 	public SegPombeParameters getSegPombeParam() {
 		return this.segPombeParam;
+	}
+	
+	public ResultsTable getRoiMeasurements(){
+		return this.rt;
 	}
 }

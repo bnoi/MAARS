@@ -74,14 +74,14 @@ public class MaarsMainDialog implements ActionListener {
 	 * @param parameters
 	 *            :MaarsParameters
 	 */
-	public MaarsMainDialog(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
+	public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
 
 		// ------------initialization of parameters---------------//
 		Color labelColor = Color.ORANGE;
 		Color bgColor = Color.WHITE;
 
 		this.mm = mm;
-		this.mmc = mmc;
+		this.mmc = mm.core();
 		this.parameters = parameters;
 
 		// initialize mainFrame
@@ -357,7 +357,7 @@ public class MaarsMainDialog implements ActionListener {
 	public int overWriteOrNot(String path) {
 		int decision = 0;
 		if (FileUtils.exists(path + "/movie_X0_Y0/MMStack.ome.tif")) {
-			decision = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing files?");
+			decision = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
 		}
 		return decision;
 	}
@@ -383,17 +383,16 @@ public class MaarsMainDialog implements ActionListener {
 						}
 					}
 				} catch (Exception e1) {
+					e1.printStackTrace();
+					IJ.showMessage("Error occurs with exception");
 					if (soc.size() != 0) {
-						soc.writeResults();
+						e1.printStackTrace();
+						soc.saveCroppedImgs();
+						soc.saveSpots();
+						soc.saveFeatures();
+						// soc.writeResults();
 					}
 				}
-				if (soc.size() != 0) {
-					long start = System.currentTimeMillis();
-					soc.writeResults();
-					System.out.println(
-							"it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for writing results");
-				}
-				System.out.println("MAARS Done its job!!");
 			}
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);

@@ -18,7 +18,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 /*
- * MaarsParameters reads a configuration file written as a JsonObject,
+ * MaarsParameters reads a configuration file written as a XML,
  * then allows to access values thanks to all constants defined.
  * 
  * SEGMENTATION_PARAMETERS
@@ -72,7 +72,7 @@ import org.jdom2.output.XMLOutputter;
  * 								+-----> COLOR
  * 								+-----> EXPOSURE
  * 								+-----> SHUTTER
- * @author Tong LI
+ * @author Tong LI && Marie
  *
  */
 public class MaarsParameters {
@@ -124,13 +124,14 @@ public class MaarsParameters {
 	public static final String DEFAULT_CHANNEL_PARAMATERS = "DEFAULT_CHANNEL_PARAMATERS";
 
 	public static final String CHANNEL_GROUP = "CHANNEL_GROUP";
-	
+
 	public static final String X_POS = "X_POS";
 	public static final String Y_POS = "Y_POS";
 	public static final String FRAME = "FRAME";
 	public static final String CUR_CHANNEL = "CHANNEL";
 	public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
 	public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
+
 	/**
 	 * Constructor of Element need path to configuration file
 	 * 
@@ -143,10 +144,8 @@ public class MaarsParameters {
 		try {
 			doc = sb.build(defaultParametersStream);
 		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		root = (Element) doc.getContent(0);
@@ -212,133 +211,122 @@ public class MaarsParameters {
 	 * @return : the value of X or Y field
 	 */
 	public int getFieldNb(final String xOrY) {
-		return Integer.parseInt(root.getChild(EXPLORATION_PARAMETERS)
-				.getChildText(xOrY));
+		return Integer.parseInt(root.getChild(EXPLORATION_PARAMETERS).getChildText(xOrY));
 	}
-	
+
 	/**
 	 * 
 	 * @return analysis with dynamic or not
 	 */
-	public boolean useDynamic(){
-		return Boolean.parseBoolean(root
-				.getChild(FLUO_ANALYSIS_PARAMETERS)
-				.getChildText(DYNAMIC));
+	public boolean useDynamic() {
+		return Boolean.parseBoolean(root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(DYNAMIC));
 	}
 
 	/**
 	 * 
 	 * @return saving folder of MAARS output
 	 */
-	public String getSavingPath(){
-		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
-				.getChildText(SAVING_PATH);
+	public String getSavingPath() {
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(SAVING_PATH);
 	}
-	
+
 	/**
 	 * 
 	 * @return time limit of fluorescence acquisition for one acquisition
 	 */
-	public String getFluoParameter(final String parameter){
-		return root
-				.getChild(FLUO_ANALYSIS_PARAMETERS)
-				.getChildText(parameter);
+	public String getFluoParameter(final String parameter) {
+		return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(parameter);
 	}
-	
+
 	/**
 	 * 
 	 * @return time limit of fluorescence acquisition for one acquisition
 	 */
-	public String getSegmentationParameter(final String parameter){
-		return root
-				.getChild(SEGMENTATION_PARAMETERS)
-				.getChildText(parameter);
+	public String getSegmentationParameter(final String parameter) {
+		return root.getChild(SEGMENTATION_PARAMETERS).getChildText(parameter);
 	}
-	
+
 	/**
 	 * 
 	 * @return the name of channel group set in micromanager
 	 */
-	public String getChannelGroup(){
-		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
-				.getChildText(CHANNEL_GROUP);
+	public String getChannelGroup() {
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(CHANNEL_GROUP);
 	}
-	
+
 	/**
 	 * 
-	 * @param ch : GFP, CFP, DAPI, TXRED
+	 * @param ch
+	 *            : GFP, CFP, DAPI, TXRED
 	 * @return corresponding channel shutter
 	 */
-	public String getChShutter(String ch){
-		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
-		.getChild(DEFAULT_CHANNEL_PARAMATERS)
-		.getChild(ch).getChildText(SHUTTER);
+	public String getChShutter(String ch) {
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+				.getChildText(SHUTTER);
 	}
-	
+
 	/**
 	 * 
-	 * @param ch : GFP, CFP, DAPI, TXRED
+	 * @param ch
+	 *            : GFP, CFP, DAPI, TXRED
 	 * @return corresponding channel color
 	 */
-	public String getChColor(String ch){
-		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
-		.getChild(DEFAULT_CHANNEL_PARAMATERS)
-		.getChild(ch).getChildText(COLOR);
+	public String getChColor(String ch) {
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+				.getChildText(COLOR);
 	}
-	
+
 	/**
 	 * 
-	 * @param ch : GFP, CFP, DAPI, TXRED
+	 * @param ch
+	 *            : GFP, CFP, DAPI, TXRED
 	 * @return corresponding channel color
 	 */
-	public String getChExposure(String ch){
-		return root.getChild(GENERAL_ACQUISITION_PARAMETERS)
-		.getChild(DEFAULT_CHANNEL_PARAMATERS)
-		.getChild(ch).getChildText(EXPOSURE);
+	public String getChExposure(String ch) {
+		return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+				.getChildText(EXPOSURE);
 	}
-	
+
 	/**
 	 * 
-	 * @param ch: GFP, CFP, DAPI, TXRED
-	 * @return 	MAXIMUM_NUMBER_OF_SPOT of corresponding channel
+	 * @param ch:
+	 *            GFP, CFP, DAPI, TXRED
+	 * @return MAXIMUM_NUMBER_OF_SPOT of corresponding channel
 	 */
-	public String getChMaxNbSpot(String ch){
-		return root
-				.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch)
+	public String getChMaxNbSpot(String ch) {
+		return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch)
 				.getChildText(MAXIMUM_NUMBER_OF_SPOT);
 	}
-	
+
 	/**
 	 * 
-	 * @param ch: GFP, CFP, DAPI, TXRED
-	 * @return 	SPOT_RADIUS of corresponding channel
+	 * @param ch:
+	 *            GFP, CFP, DAPI, TXRED
+	 * @return SPOT_RADIUS of corresponding channel
 	 */
-	public String getChSpotRaius(String ch){
-		return root
-				.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch)
-				.getChildText(SPOT_RADIUS);
+	public String getChSpotRaius(String ch) {
+		return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChildText(SPOT_RADIUS);
 	}
-	
+
 	/**
 	 * 
 	 * @return get channels used for fluo analysis
 	 */
-	public String getUsingChannels(){
-		return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
-				.getChildText(USING);
+	public String getUsingChannels() {
+		return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChildText(USING);
 	}
-	
-	////////////Setters
+
+	//////////// Setters
 	/**
 	 * update value of x or y field number of exloration
+	 * 
 	 * @param xOrY
 	 * @param value
 	 */
-	public void setFieldNb(final String xOrY, String value){
-		root.getChild(EXPLORATION_PARAMETERS)
-			.getChild(xOrY).setText(value);
+	public void setFieldNb(final String xOrY, String value) {
+		root.getChild(EXPLORATION_PARAMETERS).getChild(xOrY).setText(value);
 	}
-	
+
 	/**
 	 * set segmentation parameter
 	 * 
@@ -348,8 +336,7 @@ public class MaarsParameters {
 	 *            : corresponding value of parameter
 	 */
 	public void setSegmentationParameter(String parameter, String value) {
-		root.getChild(SEGMENTATION_PARAMETERS).getChild(parameter)
-				.setText(value);
+		root.getChild(SEGMENTATION_PARAMETERS).getChild(parameter).setText(value);
 	}
 
 	/**
@@ -361,8 +348,7 @@ public class MaarsParameters {
 	 *            : corresponding value of parameter
 	 */
 	public void setFluoParameter(String parameter, String value) {
-		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(parameter)
-				.setText(value);
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(parameter).setText(value);
 	}
 
 	/**
@@ -372,41 +358,38 @@ public class MaarsParameters {
 	 *            : corresponding value of parameter
 	 */
 	public void setSavingPath(String path) {
-		root.getChild(GENERAL_ACQUISITION_PARAMETERS)
-			.getChild(SAVING_PATH)
-			.setText(path);
+		root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(SAVING_PATH).setText(path);
 	}
 
 	/**
 	 * 
-	 * @param ch: GFP, CFP, DAPI, TXRED
-	 * @return 	MAXIMUM_NUMBER_OF_SPOT of corresponding channel
+	 * @param ch:
+	 *            GFP, CFP, DAPI, TXRED
+	 * @return MAXIMUM_NUMBER_OF_SPOT of corresponding channel
 	 */
-	public void setChMaxNbSpot(String ch, String maxNbSpot){
-		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
-		.getChild(ch)
-		.getChild(MAXIMUM_NUMBER_OF_SPOT).setText(maxNbSpot);
+	public void setChMaxNbSpot(String ch, String maxNbSpot) {
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(MAXIMUM_NUMBER_OF_SPOT)
+				.setText(maxNbSpot);
 	}
-	
+
 	/**
 	 * 
-	 * @param ch: GFP, CFP, DAPI, TXRED
-	 * @return 	SPOT_RADIUS of corresponding channel
+	 * @param ch:
+	 *            GFP, CFP, DAPI, TXRED
+	 * @return SPOT_RADIUS of corresponding channel
 	 */
-	public void setChSpotRaius(String ch, String spotRaidus){
-		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
-		.getChild(ch).getChild(SPOT_RADIUS)
-		.setText(spotRaidus);
+	public void setChSpotRaius(String ch, String spotRaidus) {
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(SPOT_RADIUS)
+				.setText(spotRaidus);
 	}
-	
+
 	/**
 	 * set channels to USING channel
-	 * @param channels 
+	 * 
+	 * @param channels
 	 */
-	public void setUsingChannels(String channels){
-		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS)
-				.getChild(USING).setText(channels);
+	public void setUsingChannels(String channels) {
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(USING).setText(channels);
 	}
 
-	
 }

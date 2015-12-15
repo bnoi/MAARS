@@ -70,7 +70,7 @@ public class SuperClassAcquisition {
 		try {
 			mmc.clearROI();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println("Can not clear ROI for MM acquisition");
 			e.printStackTrace();
 		}
 		mm.getDisplayManager().closeAllDisplayWindows(false);
@@ -82,7 +82,7 @@ public class SuperClassAcquisition {
 	 * @param shutterLable
 	 */
 	public void setShutter(String shutterLable) {
-		ReportingUtils.logMessage("... Set shutter");
+		ReportingUtils.logMessage("... Set shutter " + shutterLable);
 		try {
 			mmc.setShutterDevice(shutterLable);
 		} catch (Exception e) {
@@ -101,7 +101,7 @@ public class SuperClassAcquisition {
 		try {
 			mmc.setExposure(exposure);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			System.out.println("Can not set exposure");
 			e.printStackTrace();
 		}
 	}
@@ -207,7 +207,8 @@ public class SuperClassAcquisition {
 		int sliceNumber = (int) Math.round(range / step);
 		int exposure = Integer.parseInt(parameters.getChExposure(channelName));
 		String pathToMovie = rootDirName + "/" + acqName;
-		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
+		// Color chColor =
+		// MaarsParameters.getColor(parameters.getChColor(channelName));
 
 		cleanUp();
 		mmc.setAutoShutter(false);
@@ -217,14 +218,24 @@ public class SuperClassAcquisition {
 		setDatastoreMetadata(ds, channelName, acqName, step);
 		// setDisplay(chColor);
 		try {
+			mmc.setConfig(channelGroup, channelName);
+			mmc.waitForConfig(channelGroup, channelName);
+		} catch (Exception e1) {
+			System.out.println("Can not set config");
+			e1.printStackTrace();
+		}
+		try {
 			mmc.setShutterOpen(true);
+			mmc.waitForDevice(shutterLable);
 		} catch (Exception e) {
 			ReportingUtils.logMessage("Can not open shutter");
 			e.printStackTrace();
 		}
 		double zFocus = 0;
+		String focusDevice = mmc.getFocusDevice();
 		try {
-			zFocus = mmc.getPosition(mmc.getFocusDevice());
+			zFocus = mmc.getPosition(focusDevice);
+			mmc.waitForDevice(focusDevice);
 		} catch (Exception e) {
 			ReportingUtils.logMessage("could not get z current position");
 			e.printStackTrace();
@@ -242,7 +253,8 @@ public class SuperClassAcquisition {
 		for (int k = 0; k <= sliceNumber; k++) {
 			ReportingUtils.logMessage("- set focus device at position " + z);
 			try {
-				mmc.setPosition(mmc.getFocusDevice(), z);
+				mmc.setPosition(focusDevice, z);
+				mmc.waitForDevice(focusDevice);
 			} catch (Exception e) {
 				ReportingUtils.logMessage("could not set focus device at position");
 			}
@@ -252,7 +264,8 @@ public class SuperClassAcquisition {
 		ReportingUtils.logMessage("--- Acquisition done.");
 		try {
 			mmc.setShutterOpen(false);
-			mmc.setPosition(mmc.getFocusDevice(), zFocus);
+			mmc.setPosition(focusDevice, zFocus);
+			mmc.waitForSystem();
 		} catch (Exception e) {
 			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
@@ -268,10 +281,8 @@ public class SuperClassAcquisition {
 				// Datastore (for save)
 				ds.putImage(img);
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (DatastoreFrozenException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

@@ -637,7 +637,6 @@ public class SegPombeMainDialog implements PlugIn{
 	
 	@Override
 	public void run(String arg0) {
-		// TODO Auto-generated method stub
 		setMainWindow();
 		mainWindow.showDialog();
 		

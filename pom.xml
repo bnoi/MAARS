@@ -78,10 +78,6 @@
             <version>2.0.0.1</version>
         </dependency>
         
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom2</artifactId>
-        </dependency>
         
         <!--Needed to run MM inside IDE-->
         
@@ -120,7 +116,16 @@
             <artifactId>miglayout-swing</artifactId>
             <version>4.2</version>
         </dependency>
-        
+
+        <dependency>
+        	<groupId>xstream</groupId>
+        	<artifactId>xstream</artifactId>
+        	<version>1.2.2</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.commons</groupId>
+        	<artifactId>commons-math3</artifactId>
+        </dependency>
     </dependencies>
     
    <repositories>

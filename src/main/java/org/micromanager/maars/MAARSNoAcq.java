@@ -1,20 +1,22 @@
 package org.micromanager.maars;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
-import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
+import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.FileUtils;
-import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 
 /**
@@ -26,7 +28,7 @@ public class MAARSNoAcq {
 	private PrintStream curr_out;
 
 	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
-		ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		ExecutorService es = null;
 		// Start time
 		long start = System.currentTimeMillis();
 
@@ -37,11 +39,6 @@ public class MAARSNoAcq {
 			System.out.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
-
-			ConcurrentHashMap<String, Object> acquisitionMeta = new ConcurrentHashMap<String, Object>();
-			acquisitionMeta.put(MaarsParameters.X_POS, xPos);
-			acquisitionMeta.put(MaarsParameters.Y_POS, yPos);
-
 			String pathToSegDir = FileUtils
 					.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "/");
 			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
@@ -57,21 +54,13 @@ public class MAARSNoAcq {
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
-				soc.setAcquisitionMeta(acquisitionMeta);
-				soc.loadCells(ms.getSegPombeParam());
+				soc.loadCells(xPos, yPos);
+				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				// Get the focus slice of BF image
 				Calibration bfImgCal = segImg.getCalibration();
-				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
-						segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
-				focusImage.setCalibration(bfImgCal);
-				// measure parameters of ROI
-				for (Cell cell : soc) {
-					cell.setFocusImage(ImgUtils.cropImgWithRoi(focusImage, cell.getCellShapeRoi()));
-					cell.measureBfRoi();
-				}
 				// ----------------start acquisition and analysis --------//
 				try {
-					PrintStream ps = new PrintStream(parameters.getSavingPath() + "CellStateAnalysis.LOG");
+					PrintStream ps = new PrintStream(pathToSegDir + "CellStateAnalysis.LOG");
 					curr_err = System.err;
 					curr_out = System.err;
 					System.setOut(ps);
@@ -80,42 +69,54 @@ public class MAARSNoAcq {
 					e.printStackTrace();
 				}
 				int frame = 0;
-				while (frame < 1) {
-					acquisitionMeta.put(MaarsParameters.FRAME, frame);
-					String channels = parameters.getUsingChannels();
-					String[] arrayChannels = channels.split(",", -1);
+				String pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
+				String[] listAcqNames = new File(pathToFluoDir).list();
+				String pattern = "(\\d+)(_)(\\w+)";
+				int frameCounter = 0;
+				for (String acqName : listAcqNames) {
+					if (Pattern.matches(pattern, acqName)) {
+						frameCounter++;
+					}
+				}
+				String channels = parameters.getUsingChannels();
+				String[] arrayChannels = channels.split(",", -1);
+				frameCounter = frameCounter / arrayChannels.length;
+				es = Executors.newCachedThreadPool();
+				while (frame < frameCounter) {
 					for (String channel : arrayChannels) {
-						acquisitionMeta.put(MaarsParameters.CUR_CHANNEL, channel);
-						acquisitionMeta.put(MaarsParameters.CUR_MAX_NB_SPOT,
-								Integer.parseInt(parameters.getChMaxNbSpot(channel)));
-						acquisitionMeta.put(MaarsParameters.CUR_SPOT_RADIUS,
-								Double.parseDouble(parameters.getChSpotRaius(channel)));
-						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X"
-								+ acquisitionMeta.get(MaarsParameters.X_POS) + "_Y"
-								+ acquisitionMeta.get(MaarsParameters.Y_POS) + "_FLUO/"
-								+ acquisitionMeta.get(MaarsParameters.FRAME) + "_"
-								+ acquisitionMeta.get(MaarsParameters.CUR_CHANNEL) + "/MMStack.ome.tif";
+						ReportingUtils.logMessage("Analysing channel " + channel);
+						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
+						soc.addAcqID(id);
+						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
+								+ frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						System.out.println(pathToFluoMovie);
-						es.execute(new FluoAnalyzer(parameters, fluoImage, bfImgCal, soc, acquisitionMeta));
+						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+								Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
 					}
 					frame++;
 				}
 			}
+			RoiManager.getInstance().reset();
+			RoiManager.getInstance().close();
+			if (soc.size() != 0) {
+				long startWriting = System.currentTimeMillis();
+				soc.saveCroppedImgs();
+				soc.saveSpots();
+				soc.saveFeatures();
+				ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+						+ " sec for writing results");
+			}
 		}
 		es.shutdown();
-		while (!es.isTerminated()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			es.awaitTermination(30, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
-		System.out.println("it took " + (System.currentTimeMillis() - start) + " sec for analysing");
-		System.out.println("DONE.");
-
+		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
 	}
 }

@@ -13,74 +13,73 @@ import ij.measure.Calibration;
  */
 public class MyCoordinatesGeometry {
 
-	/**
-	 * Method to create an ROI corresponding to major axis of the object
-	 * 
-	 * @param bfImage
-	 *            : image need to measure ROI length
-	 * @param measures
-	 *            : measures (containing major axis length and angle and
-	 *            centroid coordinates)
-	 * @param setWidth
-	 *            : true if Line is as wide as minor axis length
-	 * @return Line object (linear ROI)
-	 */
-	public static Line computeCellLinearRoi(ImagePlus bfImage,
-			Measures measures, boolean setWidth) {
-
-		double[] coordinates = computeCellLinearRoiCoordinates(bfImage,
-				measures);
-
-		Line cellLineSelection;
-		// TODO WTF??
-		if (setWidth) {
-			Line.setWidth((int) convertMinorAxisLengthToPixel(
-					measures.getMinor(), measures.getAngle(),
-					bfImage.getCalibration()));
-		} else {
-			Line.setWidth(1);
-		}
-		System.out.println("minor " + Math.round(measures.getMinor()));
-		cellLineSelection = new Line(coordinates[0], coordinates[1],
-				coordinates[2], coordinates[3]);
-
-		return cellLineSelection;
-	}
-
-	/**
-	 * Method to compute Linear ROI coordinates on an image
-	 * 
-	 * @param bfImage
-	 *            : image on which coordinates are computed
-	 * @param measures
-	 *            : Measure object containing informations on major axis
-	 *            (length, angle, centroid coordinates)
-	 * @return double[] where 0 and 2 are x coordinates and 1 and 3 are y
-	 */
-	public static double[] computeCellLinearRoiCoordinates(ImagePlus bfImage,
-			Measures measures) {
-
-		double[] coordinates = computeCoordinatesOfMajorAxis(
-				measures.getXCentroid(), measures.getYCentroid(),
-				measures.getMajor(), measures.getAngle());
-
-		if (bfImage.getCalibration().scaled()) {
-
-			Line.setWidth((int) Math.round(convertMinorAxisLengthToPixel(
-					measures.getMinor(), measures.getAngle(),
-					bfImage.getCalibration())));
-			coordinates[0] = coordinates[0]
-					/ bfImage.getCalibration().pixelWidth;
-			coordinates[1] = coordinates[1]
-					/ bfImage.getCalibration().pixelHeight;
-			coordinates[2] = coordinates[2]
-					/ bfImage.getCalibration().pixelWidth;
-			coordinates[3] = coordinates[3]
-					/ bfImage.getCalibration().pixelHeight;
-		}
-
-		return coordinates;
-	}
+//	/**
+//	 * Method to create an ROI corresponding to major axis of the object
+//	 * 
+//	 * @param bfImage
+//	 *            : image need to measure ROI length
+//	 * @param measures
+//	 *            : measures (containing major axis length and angle and
+//	 *            centroid coordinates)
+//	 * @param setWidth
+//	 *            : true if Line is as wide as minor axis length
+//	 * @return Line object (linear ROI)
+//	 */
+//	public static Line computeCellLinearRoi(ImagePlus bfImage,
+//			Measures measures, boolean setWidth) {
+//
+//		double[] coordinates = computeCellLinearRoiCoordinates(bfImage,
+//				measures);
+//
+//		Line cellLineSelection;
+//		if (setWidth) {
+//			Line.setWidth((int) convertMinorAxisLengthToPixel(
+//					measures.getMinor(), measures.getAngle(),
+//					bfImage.getCalibration()));
+//		} else {
+//			Line.setWidth(1);
+//		}
+//		System.out.println("minor " + Math.round(measures.getMinor()));
+//		cellLineSelection = new Line(coordinates[0], coordinates[1],
+//				coordinates[2], coordinates[3]);
+//
+//		return cellLineSelection;
+//	}
+//
+//	/**
+//	 * Method to compute Linear ROI coordinates on an image
+//	 * 
+//	 * @param bfImage
+//	 *            : image on which coordinates are computed
+//	 * @param measures
+//	 *            : Measure object containing informations on major axis
+//	 *            (length, angle, centroid coordinates)
+//	 * @return double[] where 0 and 2 are x coordinates and 1 and 3 are y
+//	 */
+//	public static double[] computeCellLinearRoiCoordinates(ImagePlus bfImage,
+//			Measures measures) {
+//
+//		double[] coordinates = computeCoordinatesOfMajorAxis(
+//				measures.getXCentroid(), measures.getYCentroid(),
+//				measures.getMajor(), measures.getAngle());
+//
+//		if (bfImage.getCalibration().scaled()) {
+//
+//			Line.setWidth((int) Math.round(convertMinorAxisLengthToPixel(
+//					measures.getMinor(), measures.getAngle(),
+//					bfImage.getCalibration())));
+//			coordinates[0] = coordinates[0]
+//					/ bfImage.getCalibration().pixelWidth;
+//			coordinates[1] = coordinates[1]
+//					/ bfImage.getCalibration().pixelHeight;
+//			coordinates[2] = coordinates[2]
+//					/ bfImage.getCalibration().pixelWidth;
+//			coordinates[3] = coordinates[3]
+//					/ bfImage.getCalibration().pixelHeight;
+//		}
+//
+//		return coordinates;
+//	}
 
 	/**
 	 * Method to convert a length in micron to a length in pixel after

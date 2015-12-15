@@ -90,7 +90,6 @@ public class SegPombe {
 			System.setOut(ps);
 			System.setErr(ps);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -192,10 +191,8 @@ public class SegPombe {
 				}
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		executor.shutdown();
@@ -364,6 +361,10 @@ public class SegPombe {
 	public RoiManager getRoiManager() {
 		return roiManager;
 	}
+	
+	public ResultsTable getRoiMeasurements(){
+		return this.resultTable;
+	}
 
 	/**
 	 * Method to show and saved specified results and flush unwanted results
@@ -388,21 +389,20 @@ public class SegPombe {
 			System.out.println("display data frame");
 			resultTable.show("Result");
 			System.out.println("done.");
-		} else {
-			System.out.println("reset data frame");
-			resultTable.reset();
 		}
+//		else {
+//			System.out.println("reset data frame");
+//			resultTable.reset();
+//		}
 
 		if (saveRoi && roiDetected) {
 			System.out.println("saving roi...");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Save",
-					savingPath + imageToAnalyze.getShortTitle() + "_ROI.zip");
+					savingPath + "ROI.zip");
 			System.out.println("Done");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Delete");
-//			System.out.println("Close roi manager");
-//			roiManager.close();
 		}
 
 		if (showFocusImage) {

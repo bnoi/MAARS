@@ -6,8 +6,6 @@ import org.micromanager.maars.MaarsParameters;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
-import mmcorej.CMMCore;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -22,7 +20,6 @@ import org.micromanager.utils.FileUtils;
 public class MAARSPlugin implements MenuPlugin, SciJavaPlugin {
 
 	private MMStudio mmStudio;
-	private CMMCore mmc;
 	private MaarsParameters parameters;
 
 	static public final String VERSION_INFO = "1.0.0";
@@ -33,7 +30,6 @@ public class MAARSPlugin implements MenuPlugin, SciJavaPlugin {
 	@Override
 	public void setContext(Studio mmStudio) {
 		this.mmStudio = (MMStudio) mmStudio;
-		this.mmc = mmStudio.core();
 	}
 
 	@Override
@@ -76,6 +72,6 @@ public class MAARSPlugin implements MenuPlugin, SciJavaPlugin {
 			inStream = getClass().getResourceAsStream("/maars_default_config.xml");
 		}
 		parameters = new MaarsParameters(inStream);
-		new MaarsMainDialog(mmStudio, mmc, parameters).show();
+		new MaarsMainDialog(mmStudio, parameters).show();
 	}
 }

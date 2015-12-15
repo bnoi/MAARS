@@ -1,7 +1,6 @@
 package org.micromanager.utils;
 
 import java.io.File;
-import java.util.ArrayList;
 import ij.IJ;
 
 /**
