@@ -105,7 +105,6 @@ public class MAARSNoAcq {
 				soc.saveCroppedImgs();
 				soc.saveSpots();
 				soc.saveFeatures();
-				// soc.writeResults();
 				ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 						+ " sec for writing results");
 			}
