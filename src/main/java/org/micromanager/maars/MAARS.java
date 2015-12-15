@@ -15,8 +15,6 @@ import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
-
-import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
@@ -90,7 +88,18 @@ public class MAARS {
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
+				Thread t1 = new Thread(new ImgWriter(soc));
+				Thread t2 = new Thread(new spotsWriter(soc));
+				Thread t3 = new Thread(new featuresWriter(soc));
 				// from Roi initialize a set of cell
+				try {
+					t1.join();
+					t2.join();
+					t3.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				soc.reset();
 				soc.loadCells(xPos, yPos);
 				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				// Get the focus slice of BF image
@@ -119,7 +128,7 @@ public class MAARS {
 						String[] arrayChannels = channels.split(",", -1);
 						for (String channel : arrayChannels) {
 							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-							soc.addAcqIDs(id);
+							soc.setAcqID(id);
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
 							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -132,7 +141,7 @@ public class MAARS {
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-						soc.addAcqIDs(id);
+						soc.setAcqID(id);
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
 						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -142,13 +151,10 @@ public class MAARS {
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
 				if (soc.size() != 0) {
-					long startWriting = System.currentTimeMillis();
-					soc.saveCroppedImgs();
-					soc.saveSpots();
-					soc.saveFeatures();
-//					soc.writeResults();
-					System.out.println("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-							+ " sec for writing results");
+					t1.start();
+					t2.start();
+					t3.start();
+					// soc.writeResults();
 				}
 			}
 		}
@@ -163,5 +169,51 @@ public class MAARS {
 		System.setOut(curr_out);
 		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
 		System.out.println("DONE.");
+	}
+
+	// IN-class classes for result writing
+	class ImgWriter implements Runnable {
+
+		private SetOfCells soc;
+
+		public ImgWriter(SetOfCells soc) {
+			this.soc = soc;
+		}
+
+		@Override
+		public void run() {
+			soc.saveCroppedImgs();
+		}
+
+	}
+
+	class spotsWriter implements Runnable {
+
+		private SetOfCells soc;
+
+		public spotsWriter(SetOfCells soc) {
+			this.soc = soc;
+		}
+
+		@Override
+		public void run() {
+			soc.saveSpots();
+		}
+
+	}
+
+	class featuresWriter implements Runnable {
+
+		private SetOfCells soc;
+
+		public featuresWriter(SetOfCells soc) {
+			this.soc = soc;
+		}
+
+		@Override
+		public void run() {
+			soc.saveFeatures();
+		}
+
 	}
 }
