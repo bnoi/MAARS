@@ -120,10 +120,13 @@ public class MAARS {
 				}
 				int frame = 0;
 				if (parameters.useDynamic()) {
+					double timeInterval = Double
+							.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 					double startTime = System.currentTimeMillis();
 					double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
 							* 1000;
 					while (System.currentTimeMillis() - startTime <= timeLimit) {
+						double beginAcq = System.currentTimeMillis();
 						String channels = parameters.getUsingChannels();
 						String[] arrayChannels = channels.split(",", -1);
 						for (String channel : arrayChannels) {
@@ -135,6 +138,15 @@ public class MAARS {
 									Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
 						}
 						frame++;
+						double acqTook = System.currentTimeMillis() - beginAcq;
+						if (timeInterval > acqTook) {
+							try {
+								Thread.sleep((long) (timeInterval - acqTook));
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
 					}
 				} else {
 					String channels = parameters.getUsingChannels();
