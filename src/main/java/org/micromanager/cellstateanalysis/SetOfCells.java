@@ -259,7 +259,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			if (!new File(croppedImgDir).exists()) {
 				new File(croppedImgDir).mkdirs();
 			}
-			ReportingUtils.logMessage("Saving cropped images of channel " + channel);
 			croppedStacks = new HashMap<Integer, ImageStack>();
 			for (int f = 0; f < Integer.parseInt(frame); f++) {
 				fluoImg = IJ.openImage(fluoDir + f + "_" + channel + "/MMStack.ome.tif");
@@ -283,20 +282,21 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				IJ.saveAsTiff(imp, pathToCroppedImg);
 			}
 		}
+		ReportingUtils.logMessage("Cropped images saved");
 	}
 
 	public void saveSpots() {
-		for (String[] id : acqIDs) {
-			String xPos = id[0];
-			String yPos = id[1];
-			String channel = id[3];
-			String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
-			String spotsXmlDir = fluoDir + "spots/";
-			if (!new File(spotsXmlDir).exists()) {
-				new File(spotsXmlDir).mkdirs();
-			}
-			ReportingUtils
-					.logMessage("Find " + spotsInCells.get(channel).size() + " cells with spots in channel " + channel);
+		String[] id = acqIDs.get(0);
+		String xPos = id[0];
+		String yPos = id[1];
+		String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
+		String spotsXmlDir = fluoDir + "spots/";
+		if (!new File(spotsXmlDir).exists()) {
+			new File(spotsXmlDir).mkdirs();
+		}
+		for (String channel : spotsInCells.keySet()) {
+			ReportingUtils.logMessage(
+					"Find " + spotsInCells.get(channel).size() + " cell(s) with spots in channel " + channel);
 			// for each cell
 			File newFile = null;
 			for (int cellNb : spotsInCells.get(channel).keySet()) {
@@ -327,15 +327,15 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	public void saveFeatures() {
-		for (String[] id : acqIDs) {
-			String xPos = id[0];
-			String yPos = id[1];
-			String channel = id[3];
-			String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
-			String featuresXmlDir = fluoDir + "features/";
-			if (!new File(featuresXmlDir).exists()) {
-				new File(featuresXmlDir).mkdirs();
-			}
+		String[] id = acqIDs.get(0);
+		String xPos = id[0];
+		String yPos = id[1];
+		String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
+		String featuresXmlDir = fluoDir + "features/";
+		if (!new File(featuresXmlDir).exists()) {
+			new File(featuresXmlDir).mkdirs();
+		}
+		for (String channel : spotsInCells.keySet()) {
 			ReportingUtils.logMessage("Saving features of channel " + channel);
 			File newFile = null;
 			for (int cellNb : spotsInCells.get(channel).keySet()) {
