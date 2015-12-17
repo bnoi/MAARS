@@ -52,7 +52,7 @@ public class MAARS {
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
 
-		ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		ExecutorService es = Executors.newCachedThreadPool();
 		for (int i = 0; i < explo.length(); i++) {
 			try {
 				mm.core().setXYPosition(explo.getX(i), explo.getY(i));
@@ -199,6 +199,7 @@ public class MAARS {
 		}
 		double firstPosition = 0;
 		try {
+			mmc.waitForDevice(focusDevice);
 			firstPosition = mmc.getPosition(mmc.getFocusDevice());
 		} catch (Exception e) {
 			System.out.println("Can't get current z level");
@@ -206,6 +207,7 @@ public class MAARS {
 		}
 
 		try {
+			mmc.waitForDevice(focusDevice);
 			mmc.setPosition(focusDevice, 2 * initialPosition - firstPosition);
 		} catch (Exception e) {
 			System.out.println("Can't set z position");
@@ -220,6 +222,7 @@ public class MAARS {
 
 		double secondPosition = 0;
 		try {
+			mmc.waitForDevice(focusDevice);
 			secondPosition = mmc.getPosition(mmc.getFocusDevice());
 		} catch (Exception e) {
 			System.out.println("Can't get current z level");
@@ -227,6 +230,7 @@ public class MAARS {
 		}
 
 		try {
+			mmc.waitForDevice(focusDevice);
 			mmc.setPosition(focusDevice, (secondPosition + firstPosition) / 2);
 		} catch (Exception e) {
 			System.out.println("Can't set z position");
