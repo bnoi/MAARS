@@ -41,9 +41,6 @@ public class MAARS {
 		// Start time
 		long start = System.currentTimeMillis();
 		mmc.setAutoShutter(false);
-		// Get autofocus manager
-		System.out.println("Autofocusing...");
-		AutofocusPlugin autofocus = mm.getAutofocus();
 
 		// Set XY stage device
 		try {
@@ -68,19 +65,13 @@ public class MAARS {
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			System.out.println("x : " + xPos + " y : " + yPos);
 			try {
-				try {
-					mmc.setShutterDevice(
-							parameters.getChShutter(parameters.getSegmentationParameter(MaarsParameters.CHANNEL)));
-				} catch (Exception e) {
-					System.out.println("Can't set BF channel for autofocusing");
-					e.printStackTrace();
-				}
-				autofocus.fullFocus();
-			} catch (MMException e1) {
-				System.out.println("Can't do autofocus");
-				e1.printStackTrace();
+				mmc.setShutterDevice(
+						parameters.getChShutter(parameters.getSegmentationParameter(MaarsParameters.CHANNEL)));
+			} catch (Exception e2) {
+				System.out.println("Can't set BF channel for autofocusing");
+				e2.printStackTrace();
 			}
-
+			autofocus(mm, mmc);
 			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
 			System.out.println("Acquire bright field image...");
 			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL));
@@ -143,7 +134,6 @@ public class MAARS {
 							try {
 								Thread.sleep((long) (timeInterval - acqTook));
 							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
@@ -180,6 +170,68 @@ public class MAARS {
 		System.setOut(curr_out);
 		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
 		System.out.println("DONE.");
+	}
+
+	/**
+	 * A MAARS need specific autofocus process based on JAF(H&P) sharpness
+	 * autofocus
+	 * 
+	 * @param mm
+	 * @param mmc
+	 */
+	public void autofocus(MMStudio mm, CMMCore mmc) {
+		double initialPosition = 0;
+		String focusDevice = mmc.getFocusDevice();
+		try {
+			initialPosition = mmc.getPosition();
+		} catch (Exception e) {
+			System.out.println("Can't get current z level");
+			e.printStackTrace();
+		}
+
+		// Get autofocus manager
+		System.out.println("First autofocus");
+		AutofocusPlugin autofocus = mm.getAutofocus();
+		try {
+			autofocus.fullFocus();
+		} catch (MMException e1) {
+			e1.printStackTrace();
+		}
+		double firstPosition = 0;
+		try {
+			firstPosition = mmc.getPosition(mmc.getFocusDevice());
+		} catch (Exception e) {
+			System.out.println("Can't get current z level");
+			e.printStackTrace();
+		}
+
+		try {
+			mmc.setPosition(focusDevice, 2 * initialPosition - firstPosition);
+		} catch (Exception e) {
+			System.out.println("Can't set z position");
+			e.printStackTrace();
+		}
+
+		try {
+			autofocus.fullFocus();
+		} catch (MMException e1) {
+			e1.printStackTrace();
+		}
+
+		double secondPosition = 0;
+		try {
+			secondPosition = mmc.getPosition(mmc.getFocusDevice());
+		} catch (Exception e) {
+			System.out.println("Can't get current z level");
+			e.printStackTrace();
+		}
+
+		try {
+			mmc.setPosition(focusDevice, (secondPosition + firstPosition) / 2);
+		} catch (Exception e) {
+			System.out.println("Can't set z position");
+			e.printStackTrace();
+		}
 	}
 
 	// IN-class classes for result writing
