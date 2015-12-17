@@ -242,13 +242,18 @@ public class SuperClassAcquisition {
 		}
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 		ReportingUtils.logMessage("... start acquisition");
-		/*
-		 * important to add 2 µm. Depends on different microscopes. in our case,
-		 * the z-focus position is not in the middle of z range. It is often
-		 * lower than the real medium plan. So we add 2. This parameter needs to
-		 * be defined by testing on your own microscope.
-		 */
-		double z = zFocus - (range / 2) + 2;
+		double z = 0;
+		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
+			z = zFocus - (range / 2) + 0.75;
+		} else {
+			/*
+			 * important to add 2 µm. Depends on different microscopes. in our
+			 * case, the z-focus position is not in the middle of z range. It is
+			 * often lower than the real medium plan. So we add 2. This
+			 * parameter needs to be defined by testing on your own microscope.
+			 */
+			z = zFocus - (range / 2) + 2;
+		}
 		List<Image> listImg = new ArrayList<Image>();
 		for (int k = 0; k <= sliceNumber; k++) {
 			ReportingUtils.logMessage("- set focus device at position " + z);
@@ -258,7 +263,7 @@ public class SuperClassAcquisition {
 			} catch (Exception e) {
 				ReportingUtils.logMessage("could not set focus device at position");
 			}
-			listImg.add(mm.live().snap(false).get(0));
+			listImg.add(mm.live().snap(true).get(0));
 			z = z + step;
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
