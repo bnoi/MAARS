@@ -249,7 +249,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	public void saveCroppedImgs() {
 		ImagePlus fluoImg;
 		ImagePlus zprojectImg;
-		String[] id = acqIDs.get(0);
+		String[] id = acqIDs.get(acqIDs.size()-1);
 		String xPos = id[0];
 		String yPos = id[1];
 		String frame = id[2];
@@ -259,16 +259,19 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			new File(croppedImgDir).mkdirs();
 		}
 		for (String channel : spotsInCells.keySet()) {
-			ImageStack fieldStack = new ImageStack();
+			ImageStack fieldStack = null;
 			croppedStacks = new HashMap<Integer, ImageStack>();
-			for (int f = 0; f < Integer.parseInt(frame); f++) {
+			for (int f = 0; f <= Integer.parseInt(frame); f++) {
 				fluoImg = IJ.openImage(fluoDir + f + "_" + channel + "/MMStack.ome.tif");
 				zprojectImg = ImgUtils.zProject(fluoImg);
-				fieldStack.addSlice(zprojectImg.getStack().getProcessor(1));
+				if (fieldStack == null) {
+					fieldStack = zprojectImg.getStack();
+				} else {
+					fieldStack.addSlice(zprojectImg.getStack().getProcessor(1));
+				}
 			}
 			ImagePlus fieldImg = new ImagePlus(channel, fieldStack);
-			//TODO
-			IJ.saveAsTiff(fieldImg, fluoDir);
+			fieldImg.setCalibration(fluoImgCalib);
 			// save cropped cells
 			for (int i = 0; i < roiArray.length; i++) {
 				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(fieldImg, roiArray[i]);
@@ -280,6 +283,8 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				imp.setCalibration(fluoImgCalib);
 				IJ.saveAsTiff(imp, pathToCroppedImg);
 			}
+			fieldStack = null;
+			IJ.saveAsTiff(fieldImg, fluoDir + channel);
 			ReportingUtils.logMessage(channel + " channel cropped images saved");
 		}
 	}
