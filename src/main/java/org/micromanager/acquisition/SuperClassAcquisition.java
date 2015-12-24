@@ -170,7 +170,6 @@ public class SuperClassAcquisition {
 		Color[] chColors = new Color[1];
 		chColors[0] = chColor;
 		DisplaySettingsBuilder displayBuilder = mm.getDisplayManager().getStandardDisplaySettings().copy();
-		displayBuilder.shouldAutostretch(true);
 		displayBuilder.channelColors(chColors);
 		DisplayWindow liveWindow = mm.live().getDisplay();
 		liveWindow.setDisplaySettings(displayBuilder.build());
