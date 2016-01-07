@@ -39,8 +39,8 @@ public class MAARSNoAcq {
 			System.out.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
-//			String xPos = "165";
-//			String yPos ="139";
+			// String xPos = "165";
+			// String yPos ="139";
 			String pathToSegDir = FileUtils
 					.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "/");
 			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
@@ -93,15 +93,18 @@ public class MAARSNoAcq {
 								+ frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						System.out.println(pathToFluoMovie);
-						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
-								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-								Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
+						es.execute(
+								new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+										Integer.parseInt(parameters.getChMaxNbSpot(channel)), Double
+												.parseDouble(parameters.getChSpotRaius(channel)),
+										frame, Double.parseDouble(
+												parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL))));
 					}
 					frame++;
 				}
 			}
-//			RoiManager.getInstance().reset();
-//			RoiManager.getInstance().close();
+			// RoiManager.getInstance().reset();
+			// RoiManager.getInstance().close();
 			if (soc.size() != 0) {
 				long startWriting = System.currentTimeMillis();
 				soc.saveCroppedImgs();

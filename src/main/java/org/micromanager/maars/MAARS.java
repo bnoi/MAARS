@@ -126,7 +126,7 @@ public class MAARS {
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
 							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-									Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
+									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, timeInterval));
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
@@ -147,7 +147,7 @@ public class MAARS {
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
 						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-								Double.parseDouble(parameters.getChSpotRaius(channel)), frame));
+								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, 0));
 					}
 				}
 				RoiManager.getInstance().reset();
