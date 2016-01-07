@@ -1,5 +1,6 @@
 package org.micromanager.cellstateanalysis;
 
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,6 +32,7 @@ public class FluoAnalyzer implements Runnable {
 	private int maxNbSpot;
 	private double radius;
 	private int frame;
+	private double timeInterval;
 
 	/**
 	 * Analyze the set of cell in given the fluo image
@@ -50,9 +52,11 @@ public class FluoAnalyzer implements Runnable {
 	 *            radius of spot in corresponding channel
 	 * @param frame
 	 *            time point
+	 * @param timeInterval
+	 *            interval between time points
 	 */
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-			double radius, int frame) {
+			double radius, int frame, double timeInterval) {
 		this.fluoImage = fluoImage;
 		this.fluoImgCal = fluoImage.getCalibration();
 		soc.setFluoImgCalib(fluoImgCal);
@@ -62,6 +66,7 @@ public class FluoAnalyzer implements Runnable {
 		this.maxNbSpot = maxNbSpot;
 		this.radius = radius;
 		this.frame = frame;
+		this.timeInterval = timeInterval;
 	}
 
 	/**
@@ -155,11 +160,14 @@ public class FluoAnalyzer implements Runnable {
 					}
 				}
 				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
-				ComputeFeatures cptgeometry = new ComputeFeatures(spotSet,
-						cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
+				ComputeGeometry cptgeometry = new ComputeGeometry(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
 						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight, cell.get(Cell.MAJOR), cell.get(Cell.ANGLE),
 						tmpRoi.getXBase() * fluoImgCal.pixelWidth, tmpRoi.getYBase() * fluoImgCal.pixelHeight);
-				soc.putFeature(channel, cellNb, frame, cptgeometry.getFeatures());
+				HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
+				if (frame != 0 && soc.frameExists(channel, cellNb, frame - 1)) {
+					geometry = cptgeometry.addVariations(geometry, soc.getGeometry(channel, cellNb, frame - 1), timeInterval);
+				}
+				soc.putGeometry(channel, cellNb, frame, geometry);
 			}
 		}
 	}

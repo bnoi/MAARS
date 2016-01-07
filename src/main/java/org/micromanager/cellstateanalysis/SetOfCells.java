@@ -43,7 +43,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	// structure for features is really complex...because i need write hashmap
 	// to xml, I will rewrite an xmlwrite for feature collection object for
 	// exemple
-	private HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>> featuresOfCells;
+	private HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>> geosOfCells;
 	private ArrayList<String[]> acqIDs;
 	private Model trackmateModel;
 	private HashMap<Integer, ImageStack> croppedStacks;
@@ -199,11 +199,11 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * @param channel
 	 */
 	public void addFeatureContainerOf(String channel) {
-		if (this.featuresOfCells == null) {
-			this.featuresOfCells = new HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>>();
+		if (this.geosOfCells == null) {
+			this.geosOfCells = new HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>>();
 		}
-		if (!featuresOfCells.containsKey(channel)) {
-			featuresOfCells.put(channel, new HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>());
+		if (!geosOfCells.containsKey(channel)) {
+			geosOfCells.put(channel, new HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>());
 		}
 	}
 
@@ -214,14 +214,34 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * @param frame
 	 * @param features
 	 */
-	public void putFeature(String channel, int cellNb, int frame, HashMap<String, Object> features) {
-		if (!featuresOfCells.get(channel).containsKey(cellNb)) {
-			featuresOfCells.get(channel).put(cellNb, new HashMap<Integer, HashMap<String, Object>>());
+	public void putGeometry(String channel, int cellNb, int frame, HashMap<String, Object> features) {
+		if (!geosOfCells.get(channel).containsKey(cellNb)) {
+			geosOfCells.get(channel).put(cellNb, new HashMap<Integer, HashMap<String, Object>>());
 		}
-		if (!featuresOfCells.get(channel).get(cellNb).containsKey(frame)) {
-			featuresOfCells.get(channel).get(cellNb).put(frame, new HashMap<String, Object>());
+		if (!frameExists(channel, cellNb, frame)) {
+			geosOfCells.get(channel).get(cellNb).put(frame, new HashMap<String, Object>());
 		}
-		featuresOfCells.get(channel).get(cellNb).put(frame, features);
+		geosOfCells.get(channel).get(cellNb).put(frame, features);
+	}
+
+	/**
+	 * 
+	 * @param channel
+	 * @param cellNb
+	 * @param frame
+	 */
+	public HashMap<String, Object> getGeometry(String channel, int cellNb, int frame) {
+		return geosOfCells.get(channel).get(cellNb).get(frame);
+	}
+
+	/**
+	 * 
+	 * @param channel
+	 * @param cellNb
+	 * @param frame
+	 */
+	public boolean frameExists(String channel, int cellNb, int frame) {
+		return geosOfCells.get(channel).get(cellNb).containsKey(frame);
 	}
 
 	/**
@@ -249,7 +269,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	public void saveCroppedImgs() {
 		ImagePlus fluoImg;
 		ImagePlus zprojectImg;
-		String[] id = acqIDs.get(acqIDs.size()-1);
+		String[] id = acqIDs.get(acqIDs.size() - 1);
 		String xPos = id[0];
 		String yPos = id[1];
 		String frame = id[2];
@@ -347,7 +367,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				newFile = new File(featuresXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
 				XStream xStream = new XStream();
 				xStream.alias("cell", java.util.HashMap.class);
-				String xml = xStream.toXML(featuresOfCells.get(channel).get(cellNb));
+				String xml = xStream.toXML(geosOfCells.get(channel).get(cellNb));
 				FileOutputStream fos = null;
 				try {
 					fos = new FileOutputStream(newFile);
@@ -379,7 +399,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		this.count = 0;
 		this.cellArray = null;
 		this.spotsInCells = null;
-		this.featuresOfCells = null;
+		this.geosOfCells = null;
 		this.acqIDs = null;
 		this.trackmateModel = null;
 		this.croppedStacks = null;

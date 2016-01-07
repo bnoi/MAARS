@@ -10,7 +10,7 @@ import com.google.common.collect.Iterables;
 
 import fiji.plugin.trackmate.Spot;
 
-public class ComputeFeatures {
+public class ComputeGeometry {
 	// Names of parameters
 	public final static String PHASE = "phase";
 	public final static String NbOfSpotDetected = "NbOfSpotDetected";
@@ -21,11 +21,12 @@ public class ComputeFeatures {
 	public final static String SpCenterZ = "SpCenterZ";
 	public final static String CellCenterToSpCenterLen = "CellCenterToSpCenterLen";
 	public final static String CellCenterToSpCenterAng = "CellCenterToSpCenterAng";
+	// Velocities
+	public final static String SpElongRate = "spElongRate";
 	// values
 	public final static String INTERPHASE = "interphase";
 	public final static String MITOSIS = "mitosis";
 
-	private Iterable<Spot> spotSet;
 	private double fakeSpotQuality = 0;
 	// z equals to 0 because fitting ellipse in Analyzer do not give z
 	// position.
@@ -35,8 +36,6 @@ public class ComputeFeatures {
 
 	/**
 	 * 
-	 * @param spotSet
-	 *            set of spots to analyze
 	 * @param x
 	 *            x_centroid of cell in origin fluo image
 	 * @param y
@@ -50,9 +49,7 @@ public class ComputeFeatures {
 	 * @param ybase
 	 *            ybase of current cell Roi
 	 */
-	public ComputeFeatures(Iterable<Spot> spotSet, double x, double y, double major, double angle, double xbase,
-			double ybase) {
-		this.spotSet = spotSet;
+	public ComputeGeometry(double x, double y, double major, double angle, double xbase, double ybase) {
 		this.x = x;
 		this.y = y;
 		this.major = major;
@@ -64,31 +61,42 @@ public class ComputeFeatures {
 	/**
 	 * Analyse spotset and return a hashmap of features
 	 * 
+	 * @param spotSet
+	 *            set of spots to analyze
 	 * @return
 	 */
-	public HashMap<String, Object> getFeatures() {
-		HashMap<String, Object> feature = new HashMap<String, Object>();
+	public HashMap<String, Object> compute(Iterable<Spot> spotSet) {
+		HashMap<String, Object> geo = new HashMap<String, Object>();
 		if (spotSet == null || Iterables.size(spotSet) == 1) {
-			feature.put(PHASE, INTERPHASE);
-			feature.put(NbOfSpotDetected, 1);
+			geo.put(PHASE, INTERPHASE);
+			geo.put(NbOfSpotDetected, 1);
 		} else {
-			feature.put(PHASE, MITOSIS);
-			feature.put(NbOfSpotDetected, Iterables.size(spotSet));
+			geo.put(PHASE, MITOSIS);
+			geo.put(NbOfSpotDetected, Iterables.size(spotSet));
 			ArrayList<Spot> poles = findSpindle(spotSet);
 			poles = centerPoles(poles);
 			Vector3D polesVec = getSpAsVector(poles);
-			feature.put(SpLength, polesVec.getNorm());
+			geo.put(SpLength, polesVec.getNorm());
 			Spot spCenter = getCenter(poles);
-			feature.put(SpCenterX, spCenter.getFeature(Spot.POSITION_X));
-			feature.put(SpCenterY, spCenter.getFeature(Spot.POSITION_Y));
-			feature.put(SpCenterZ, spCenter.getFeature(Spot.POSITION_Z));
-			feature.put(SpAngToMaj, getSpAngToMajAxis(polesVec));
+			geo.put(SpCenterX, spCenter.getFeature(Spot.POSITION_X));
+			geo.put(SpCenterY, spCenter.getFeature(Spot.POSITION_Y));
+			geo.put(SpCenterZ, spCenter.getFeature(Spot.POSITION_Z));
+			geo.put(SpAngToMaj, getSpAngToMajAxis(polesVec));
 			Spot cellCenter = new Spot(x - xbase, y - ybase, fakeSpotZ, fakeSpotRadius, fakeSpotQuality);
-			feature.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
-			feature.put(CellCenterToSpCenterAng, getAngLessThan90(
+			geo.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
+			geo.put(CellCenterToSpCenterAng, getAngLessThan90(
 					Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I)));
 		}
-		return feature;
+		return geo;
+	}
+
+	public HashMap<String, Object> addVariations(HashMap<String, Object> currentGeo, HashMap<String, Object> lastGeo,
+			double timeInterval) {
+		if (lastGeo.get(PHASE) == MITOSIS) {
+			currentGeo.put(SpElongRate, String.format("%.12f",
+					((double) currentGeo.get(SpLength) - (double) lastGeo.get(SpLength)) / (timeInterval / 1000)));
+		}
+		return currentGeo;
 	}
 
 	/**
