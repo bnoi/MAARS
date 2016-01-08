@@ -23,6 +23,7 @@ public class ComputeGeometry {
 	public final static String CellCenterToSpCenterAng = "CellCenterToSpCenterAng";
 	// Velocities
 	public final static String SpElongRate = "spElongRate";
+	public final static String SpOrientationRate = "SpOrientationRate";
 	// values
 	public final static String INTERPHASE = "interphase";
 	public final static String MITOSIS = "mitosis";
@@ -95,6 +96,8 @@ public class ComputeGeometry {
 		if (lastGeo.get(PHASE) == MITOSIS) {
 			currentGeo.put(SpElongRate, String.format("%.12f",
 					((double) currentGeo.get(SpLength) - (double) lastGeo.get(SpLength)) / (timeInterval / 1000)));
+			currentGeo.put(SpOrientationRate, String.format("%.12f",
+					((double) currentGeo.get(SpAngToMaj) - (double) lastGeo.get(SpAngToMaj)) / (timeInterval / 1000)));
 		}
 		return currentGeo;
 	}
