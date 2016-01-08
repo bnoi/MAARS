@@ -374,11 +374,11 @@ public class MaarsMainDialog implements ActionListener {
 				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
 				try {
 					if (withOutAcqChk.isSelected()) {
-						hide();
+//						hide();
 						new MAARSNoAcq(mmc, parameters, soc);
 					} else {
 						if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-							hide();
+//							hide();
 							new MAARS(mm, mmc, parameters, soc);
 						}
 					}
