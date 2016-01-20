@@ -17,7 +17,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.SpotCollection;
 import com.google.common.collect.Iterables;
 
-IJ.open("/Volumes/Macintosh/curioData/rad21-k1/3/croppedImgs/0_CFP.tif");
+IJ.open("/home/tong/Documents/movies/102-s2/movie_X0_Y0_FLUO/croppedImgs/1_CFP.tif");
 //ImagePlus imp = IJ.openImage("D:/Data/Tong/Movies/0_FLUO/MMStack_Pos0.ome.tif");
 //IJ.openImage("/Users/theoli89/Desktop/curioData/single_field/102_4/movie_X0_Y0_FLUO/15/MMStack_Pos0.ome.tif");
 
@@ -63,15 +63,17 @@ print("computeSpotFeatures done");
 trackmate.execSpotFiltering(true);
 print("execSpotFiltering done");
 
-print("Found " + trackmate.getModel().getSpots().getNSpots(false) + " spots");
+print("Found " + trackmate.getModel().getSpots().getNSpots(true) + " spots");
 SpotCollection spots = trackmate.getModel().getSpots();
-print(Iterables.size(spots.iterable(false)));
+//print(Iterables.size(spots.iterable(true)));
 for(Spot spot : spots.iterator(true)) {
-	spots.remove(spot, 1);
+	print(spot.getFeature(Spot.FRAME));
+	print(Iterables.size(spots.iterable(0, true)));
+	print(spots.remove(spot, 0));
 }
-print(Iterables.size(spots.iterable(false)));
-model.clearSpots(false);
-print(Iterables.size(trackmate.getModel().getSpots().iterable(false)));
+//print(Iterables.size(spots.iterable(false)));
+//spots.clear();
+//print(Iterables.size(spots.iterable(false)));
 
 //model.setSpots(spots, false);
 // Show
