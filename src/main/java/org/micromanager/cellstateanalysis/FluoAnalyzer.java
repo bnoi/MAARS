@@ -7,7 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.ImgUtils;
+
+import com.google.common.collect.Iterables;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -149,23 +152,25 @@ public class FluoAnalyzer implements Runnable {
 				} else {
 					tmpRoi = cell.getCellShapeRoi();
 				}
-				for (Spot s : spots.iterable(false)) {
+				for (Spot s : spots.iterable(true)) {
 					if (tmpRoi.contains((int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
 							(int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
 						soc.putSpot(channel, cellNb, frame, s);
 						if (soc.getNbOfSpot(channel, cellNb, frame) > maxNbSpot) {
 							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, cellNb, frame);
-							soc.getSpots(channel, cellNb).remove(lowesetQulitySpot, frame);
+							soc.removeSpot(channel, cellNb, frame, lowesetQulitySpot);
 						}
 					}
 				}
 				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
+				ReportingUtils.logMessage(String.valueOf(Iterables.size(spotSet)));
 				ComputeGeometry cptgeometry = new ComputeGeometry(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
 						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight, cell.get(Cell.MAJOR), cell.get(Cell.ANGLE),
 						tmpRoi.getXBase() * fluoImgCal.pixelWidth, tmpRoi.getYBase() * fluoImgCal.pixelHeight);
 				HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
-				if (frame != 0 && soc.frameExists(channel, cellNb, frame - 1)) {
-					geometry = cptgeometry.addVariations(geometry, soc.getGeometry(channel, cellNb, frame - 1), timeInterval);
+				if (frame != 0 && soc.frameExists(channel, cellNb, frame - 1 )) {
+					geometry = cptgeometry.addVariations(geometry, soc.getGeometry(channel, cellNb, frame - 1),
+							timeInterval);
 				}
 				soc.putGeometry(channel, cellNb, frame, geometry);
 			}

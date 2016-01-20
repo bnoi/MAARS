@@ -158,7 +158,11 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		if (!getCells(channel).containsKey(cellNb)) {
 			return null;
 		}
-		return getSpots(channel, cellNb).iterable(frame, false);
+		return getSpots(channel, cellNb).iterable(frame, true);
+	}
+	
+	public void removeSpot(String channel, int cellNb, int frame, Spot spToRemove){
+		spotsInCells.get(channel).get(cellNb).remove(spToRemove, frame);
 	}
 
 	/**
@@ -328,11 +332,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
 				TmXmlWriter spotsWriter = new TmXmlWriter(newFile);
 				SpotCollection centeredSpots = new SpotCollection();
-				for (Spot s : spotsInCells.get(channel).get(cellNb).iterable(false)) {
+				for (Spot s : spotsInCells.get(channel).get(cellNb).iterable(true)) {
 					double xPosBeforeCrop = s.getFeature(Spot.POSITION_X);
 					double yPosBeforeCrop = s.getFeature(Spot.POSITION_Y);
 					s.putFeature(Spot.POSITION_X,
 							xPosBeforeCrop - (roiArray[cellNb].getXBase() * fluoImgCalib.pixelWidth));
+					ReportingUtils.logMessage("before " + cellNb  + " "+ xPosBeforeCrop);
+					ReportingUtils.logMessage("xbase " + cellNb  + " "+ roiArray[cellNb].getXBase() * fluoImgCalib.pixelWidth);
+					ReportingUtils.logMessage("frame " + cellNb  + " "+ (int) Math.round(s.getFeature(Spot.FRAME)));
 					s.putFeature(Spot.POSITION_Y,
 							yPosBeforeCrop - (roiArray[cellNb].getYBase() * fluoImgCalib.pixelHeight));
 					centeredSpots.add(s, (int) Math.round(s.getFeature(Spot.FRAME)));
@@ -404,6 +411,10 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		this.trackmateModel = null;
 		this.croppedStacks = null;
 		this.fluoImgCalib = null;
+	}
+	
+	public String getRootSavingPath(){
+		return this.rootSavingPath;
 	}
 
 	// iterator related

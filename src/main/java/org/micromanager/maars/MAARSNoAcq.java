@@ -86,7 +86,7 @@ public class MAARSNoAcq {
 				es = Executors.newCachedThreadPool();
 				while (frame < frameCounter) {
 					for (String channel : arrayChannels) {
-						ReportingUtils.logMessage("Analysing channel " + channel);
+						ReportingUtils.logMessage("Analysing channel " + channel + "_" + frame);
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqID(id);
 						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
