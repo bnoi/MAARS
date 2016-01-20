@@ -90,90 +90,35 @@ public class FluoAnalyzer implements Runnable {
 		spots = model.getSpots();
 
 		this.factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
-
-		int nThread = Runtime.getRuntime().availableProcessors();
-		ExecutorService es = Executors.newFixedThreadPool(nThread);
-		int nbCell = soc.size();
-		final int[] nbOfCellEachThread = new int[2];
-		nbOfCellEachThread[0] = (int) nbCell / nThread;
-		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
-		Future<?> future = null;
-		for (int i = 0; i < nThread; i++) {
-			// analyze every subset of cell
-			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread));
-		}
-		es.shutdown();
-		try {
-			future.get();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		} catch (ExecutionException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			es.awaitTermination(90, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * analyzer of subset
-	 */
-	private class AnalyseBlockCells implements Runnable {
-		final int index;
-		final int[] deltas;
-
-		public AnalyseBlockCells(int index, final int[] deltas) {
-			this.index = index;
-			this.deltas = deltas;
-		}
-
-		@Override
-		public void run() {
-			int begin = 0;
-			int end = 0;
-			if (index == 0) {
-				if (deltas[0] != deltas[1]) {
-					end = deltas[1];
-				} else {
-					end = deltas[0];
-				}
+		for (int j = 0; j < soc.size(); j++) {
+			Cell cell = soc.getCell(j);
+			int cellNb = j;
+			Roi tmpRoi = null;
+			if (factors[0] != 1 || factors[1] != 1) {
+				tmpRoi = cell.rescaleCellShapeRoi(factors);
 			} else {
-				begin = index * deltas[0] + (deltas[1] - deltas[0]);
-				end = begin + deltas[0];
+				tmpRoi = cell.getCellShapeRoi();
 			}
-			for (int j = begin; j < end; j++) {
-				Cell cell = soc.getCell(j);
-				int cellNb = cell.getCellNumber();
-				Roi tmpRoi = null;
-				if (factors[0] != 1 || factors[1] != 1) {
-					tmpRoi = cell.rescaleCellShapeRoi(factors);
-				} else {
-					tmpRoi = cell.getCellShapeRoi();
-				}
-				for (Spot s : spots.iterable(true)) {
-					if (tmpRoi.contains((int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-							(int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
-						soc.putSpot(channel, cellNb, frame, s);
-						if (soc.getNbOfSpot(channel, cellNb, frame) > maxNbSpot) {
-							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, cellNb, frame);
-							soc.removeSpot(channel, cellNb, frame, lowesetQulitySpot);
-						}
+			for (Spot s : spots.iterable(false)) {
+				if (tmpRoi.contains((int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+						(int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
+					soc.putSpot(channel, cellNb, frame, s);
+					if (soc.getNbOfSpot(channel, cellNb, frame) > maxNbSpot) {
+						Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, cellNb, frame);
+						soc.removeSpot(channel, cellNb, frame, lowesetQulitySpot);
 					}
 				}
-				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
-				ReportingUtils.logMessage(String.valueOf(Iterables.size(spotSet)));
-				ComputeGeometry cptgeometry = new ComputeGeometry(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
-						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight, cell.get(Cell.MAJOR), cell.get(Cell.ANGLE),
-						tmpRoi.getXBase() * fluoImgCal.pixelWidth, tmpRoi.getYBase() * fluoImgCal.pixelHeight);
-				HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
-				if (frame != 0 && soc.frameExists(channel, cellNb, frame - 1 )) {
-					geometry = cptgeometry.addVariations(geometry, soc.getGeometry(channel, cellNb, frame - 1),
-							timeInterval);
-				}
-				soc.putGeometry(channel, cellNb, frame, geometry);
 			}
+			Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
+			ComputeGeometry cptgeometry = new ComputeGeometry(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
+					cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight, cell.get(Cell.MAJOR), cell.get(Cell.ANGLE),
+					tmpRoi.getXBase() * fluoImgCal.pixelWidth, tmpRoi.getYBase() * fluoImgCal.pixelHeight);
+			HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
+			if (frame != 0 && soc.frameExists(channel, cellNb, frame - 1 )) {
+				geometry = cptgeometry.addVariations(geometry, soc.getGeometry(channel, cellNb, frame - 1),
+						timeInterval);
+			}
+			soc.putGeometry(channel, cellNb, frame, geometry);
 		}
 	}
 }

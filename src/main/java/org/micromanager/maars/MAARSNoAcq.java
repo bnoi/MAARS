@@ -16,7 +16,6 @@ import org.micromanager.utils.FileUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
-import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 
 /**
@@ -83,7 +82,8 @@ public class MAARSNoAcq {
 				String channels = parameters.getUsingChannels();
 				String[] arrayChannels = channels.split(",", -1);
 				frameCounter = frameCounter / arrayChannels.length;
-				es = Executors.newCachedThreadPool();
+				int nThread = Runtime.getRuntime().availableProcessors();
+				es = Executors.newFixedThreadPool(nThread);
 				while (frame < frameCounter) {
 					for (String channel : arrayChannels) {
 						ReportingUtils.logMessage("Analysing channel " + channel + "_" + frame);
@@ -105,16 +105,7 @@ public class MAARSNoAcq {
 			}
 			// RoiManager.getInstance().reset();
 			// RoiManager.getInstance().close();
-			if (soc.size() != 0) {
-				long startWriting = System.currentTimeMillis();
-				soc.saveCroppedImgs();
-				soc.saveSpots();
-				soc.saveFeatures();
-				ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-						+ " sec for writing results");
-			}
 		}
-		es.shutdown();
 		try {
 			es.awaitTermination(120, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
