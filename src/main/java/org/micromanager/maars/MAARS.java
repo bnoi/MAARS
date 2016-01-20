@@ -214,6 +214,7 @@ public class MAARS {
 			e.printStackTrace();
 		}
 
+		System.out.println("Seconde autofocus");
 		try {
 			autofocus.fullFocus();
 		} catch (MMException e1) {

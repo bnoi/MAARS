@@ -3,8 +3,10 @@ package org.micromanager.maars;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -16,6 +18,7 @@ import org.micromanager.utils.FileUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 
 /**
@@ -84,6 +87,7 @@ public class MAARSNoAcq {
 				frameCounter = frameCounter / arrayChannels.length;
 				int nThread = Runtime.getRuntime().availableProcessors();
 				es = Executors.newFixedThreadPool(nThread);
+				Future<?> future = null;
 				while (frame < frameCounter) {
 					for (String channel : arrayChannels) {
 						ReportingUtils.logMessage("Analysing channel " + channel + "_" + frame);
@@ -92,8 +96,7 @@ public class MAARSNoAcq {
 						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
 								+ frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
-						System.out.println(pathToFluoMovie);
-						es.execute(
+						future = es.submit(
 								new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 										Integer.parseInt(parameters.getChMaxNbSpot(channel)), Double
 												.parseDouble(parameters.getChSpotRaius(channel)),
@@ -102,10 +105,18 @@ public class MAARSNoAcq {
 					}
 					frame++;
 				}
+				try {
+					future.get();
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				} catch (ExecutionException e1) {
+					e1.printStackTrace();
+				}
 			}
 			// RoiManager.getInstance().reset();
 			// RoiManager.getInstance().close();
 		}
+		es.shutdown();
 		try {
 			es.awaitTermination(120, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
@@ -113,6 +124,14 @@ public class MAARSNoAcq {
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
+		if (soc.size() != 0) {
+			long startWriting = System.currentTimeMillis();
+			soc.saveCroppedImgs();
+			soc.saveSpots();
+			soc.saveFeatures();
+			ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+					+ " sec for writing results");
+		}
 		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
 	}
 }

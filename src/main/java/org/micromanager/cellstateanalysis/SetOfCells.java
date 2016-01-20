@@ -158,11 +158,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		if (!getCells(channel).containsKey(cellNb)) {
 			return null;
 		}
-		return getSpots(channel, cellNb).iterable(frame, true);
-	}
-	
-	public void removeSpot(String channel, int cellNb, int frame, Spot spToRemove){
-		spotsInCells.get(channel).get(cellNb).remove(spToRemove, frame);
+		return getSpots(channel, cellNb).iterable(frame, false);
 	}
 
 	/**
@@ -332,16 +328,19 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
 				TmXmlWriter spotsWriter = new TmXmlWriter(newFile);
 				SpotCollection centeredSpots = new SpotCollection();
-				for (Spot s : spotsInCells.get(channel).get(cellNb).iterable(true)) {
+				for (Spot s : spotsInCells.get(channel).get(cellNb - 1).iterable(false)) {
+					//TODO postions find in cellNB+1 cell
 					double xPosBeforeCrop = s.getFeature(Spot.POSITION_X);
 					double yPosBeforeCrop = s.getFeature(Spot.POSITION_Y);
+					ReportingUtils.logMessage(cellNb + " x before " + String.valueOf(xPosBeforeCrop));
+					ReportingUtils.logMessage(cellNb + " y before " + String.valueOf(yPosBeforeCrop));
+					ReportingUtils.logMessage(cellNb + " xbase " + cellArray.get(cellNb).getCellShapeRoi().getXBase() * fluoImgCalib.pixelWidth);
+					ReportingUtils.logMessage(cellNb + " ybase " + cellArray.get(cellNb).getCellShapeRoi().getYBase()* fluoImgCalib.pixelHeight);
+					ReportingUtils.logMessage(cellNb + " frame " + (int) Math.round(s.getFeature(Spot.FRAME)));
 					s.putFeature(Spot.POSITION_X,
-							xPosBeforeCrop - (roiArray[cellNb].getXBase() * fluoImgCalib.pixelWidth));
-					ReportingUtils.logMessage("before " + cellNb  + " "+ xPosBeforeCrop);
-					ReportingUtils.logMessage("xbase " + cellNb  + " "+ roiArray[cellNb].getXBase() * fluoImgCalib.pixelWidth);
-					ReportingUtils.logMessage("frame " + cellNb  + " "+ (int) Math.round(s.getFeature(Spot.FRAME)));
+							xPosBeforeCrop - (cellArray.get(cellNb - 1).getCellShapeRoi().getXBase() * fluoImgCalib.pixelWidth));
 					s.putFeature(Spot.POSITION_Y,
-							yPosBeforeCrop - (roiArray[cellNb].getYBase() * fluoImgCalib.pixelHeight));
+							yPosBeforeCrop - (cellArray.get(cellNb - 1).getCellShapeRoi().getYBase()* fluoImgCalib.pixelHeight));
 					centeredSpots.add(s, (int) Math.round(s.getFeature(Spot.FRAME)));
 				}
 				trackmateModel.setSpots(centeredSpots, false);
@@ -411,10 +410,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		this.trackmateModel = null;
 		this.croppedStacks = null;
 		this.fluoImgCalib = null;
-	}
-	
-	public String getRootSavingPath(){
-		return this.rootSavingPath;
 	}
 
 	// iterator related
