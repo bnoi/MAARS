@@ -115,6 +115,7 @@ public class MAARSNoAcq {
 			// RoiManager.getInstance().reset();
 			// RoiManager.getInstance().close();
 		}
+		es.shutdown();
 		try {
 			es.awaitTermination(120, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {

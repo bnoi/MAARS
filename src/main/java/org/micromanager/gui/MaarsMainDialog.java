@@ -382,14 +382,6 @@ public class MaarsMainDialog implements ActionListener {
 							new MAARS(mm, mmc, parameters, soc);
 						}
 					}
-					if (soc.size() != 0) {
-						long startWriting = System.currentTimeMillis();
-						soc.saveCroppedImgs();
-						soc.saveSpots();
-						soc.saveFeatures();
-						ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-								+ " sec for writing results");
-					}
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					IJ.showMessage("Error occurs with exception");
