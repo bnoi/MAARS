@@ -115,7 +115,7 @@ public class ImgUtils {
 	 * @return
 	 */
 	public static Roi rescaleRoi(Roi oldRoi, double[] factors) {
-		Roi roi = RoiScaler.scale(oldRoi, factors[0], factors[1], false);
+		Roi roi = RoiScaler.scale(oldRoi, factors[0], factors[1], true);
 		roi.setName("rescaledRoi");
 		return roi;
 	}
