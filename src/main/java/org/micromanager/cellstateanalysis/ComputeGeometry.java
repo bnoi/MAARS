@@ -9,6 +9,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import com.google.common.collect.Iterables;
 
 import fiji.plugin.trackmate.Spot;
+import weka.core.DenseInstance;
 
 public class ComputeGeometry {
 	// Names of parameters
@@ -67,6 +68,7 @@ public class ComputeGeometry {
 	 * @return
 	 */
 	public HashMap<String, Object> compute(Iterable<Spot> spotSet) {
+		DenseInstance intstance = new DenseInstance(5);
 		HashMap<String, Object> geo = new HashMap<String, Object>();
 		if (spotSet == null || Iterables.size(spotSet) == 1) {
 			geo.put(PHASE, INTERPHASE);

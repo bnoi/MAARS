@@ -14,8 +14,10 @@ import ij.measure.Calibration;
 import ij.plugin.ZProjector;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.SpotCollection;
+import com.google.common.collect.Iterables;
 
-IJ.open("/media/tong/74CDBC0B2251059E/test/movie_X0_Y0/MMStack.ome.tif");
+IJ.open("/home/tong/Documents/movies/102-s2/movie_X0_Y0_FLUO/croppedImgs/1_CFP.tif");
 //ImagePlus imp = IJ.openImage("D:/Data/Tong/Movies/0_FLUO/MMStack_Pos0.ome.tif");
 //IJ.openImage("/Users/theoli89/Desktop/curioData/single_field/102_4/movie_X0_Y0_FLUO/15/MMStack_Pos0.ome.tif");
 
@@ -28,7 +30,6 @@ projector.doProjection();
 ImagePlus zprojection = projector.getProjection();
 zprojection.show();
 Calibration cal = imp.getCalibration();
-print(cal.pixelWidth + "");
 Model model = new Model();
 
 Settings settings = new Settings();
@@ -62,12 +63,19 @@ print("computeSpotFeatures done");
 trackmate.execSpotFiltering(true);
 print("execSpotFiltering done");
 
-print("Found " + trackmate.getModel().getSpots().getNSpots(false) + " spots");
+print("Found " + trackmate.getModel().getSpots().getNSpots(true) + " spots");
+SpotCollection spots = trackmate.getModel().getSpots();
+//print(Iterables.size(spots.iterable(true)));
+for(Spot spot : spots.iterator(true)) {
+	print(spot.getFeature(Spot.FRAME));
+	print(Iterables.size(spots.iterable(0, true)));
+	print(spots.remove(spot, 0));
+}
+//print(Iterables.size(spots.iterable(false)));
+//spots.clear();
+//print(Iterables.size(spots.iterable(false)));
 
-//for(Spot spot : trackmate.getModel().getSpots().iterable(true)) {
- //  print(spot.getFeature(Spot.RADIUS));
-//}
-
+//model.setSpots(spots, false);
 // Show
 SelectionModel selectionModel = new SelectionModel(model);
 HyperStackDisplayer displayer= new HyperStackDisplayer(model, selectionModel, zprojection);
