@@ -95,8 +95,8 @@ public class MAARSNoAcq {
 						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
 								+ frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
-						future = es.submit(
-								new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+						future = es
+								.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 										Integer.parseInt(parameters.getChMaxNbSpot(channel)), Double
 												.parseDouble(parameters.getChSpotRaius(channel)),
 										frame, Double.parseDouble(
