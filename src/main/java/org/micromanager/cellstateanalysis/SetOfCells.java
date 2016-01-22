@@ -141,7 +141,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * @param cellNb
 	 * @return
 	 */
-	public SpotCollection getSpots(String channel, int cellNb) {
+	public SpotCollection getCollections(String channel, int cellNb) {
 		return getCells(channel).get(cellNb);
 	}
 
@@ -157,7 +157,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		if (!getCells(channel).containsKey(cellNb)) {
 			return null;
 		}
-		return getSpots(channel, cellNb).iterable(frame, true);
+		return getCollections(channel, cellNb).iterable(frame, false);
 	}
 
 	public void removeSpot(String channel, int cellNb, int frame, Spot spToRemove) {
@@ -173,7 +173,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * @return
 	 */
 	public int getNbOfSpot(String channel, int cellNb, int frame) {
-		return getSpots(channel, cellNb).getNSpots(frame, false);
+		return getCollections(channel, cellNb).getNSpots(frame, false);
 	}
 
 	/**
@@ -221,7 +221,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		if (!geosOfCells.get(channel).containsKey(cellNb)) {
 			geosOfCells.get(channel).put(cellNb, new HashMap<Integer, HashMap<String, Object>>());
 		}
-		if (!frameExists(channel, cellNb, frame)) {
+		if (!geoFrameExists(channel, cellNb, frame)) {
 			geosOfCells.get(channel).get(cellNb).put(frame, new HashMap<String, Object>());
 		}
 		geosOfCells.get(channel).get(cellNb).put(frame, features);
@@ -243,7 +243,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * @param cellNb
 	 * @param frame
 	 */
-	public boolean frameExists(String channel, int cellNb, int frame) {
+	public boolean geoFrameExists(String channel, int cellNb, int frame) {
 		return geosOfCells.get(channel).get(cellNb).containsKey(frame);
 	}
 
@@ -322,15 +322,15 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			new File(spotsXmlDir).mkdirs();
 		}
 		for (String channel : spotsInCells.keySet()) {
-			ReportingUtils.logMessage(
-					"Find " + spotsInCells.get(channel).size() + " cell(s) with spots in channel " + channel);
+			HashMap<Integer, SpotCollection> currentChannel = spotsInCells.get(channel);
+			ReportingUtils.logMessage("Find " + currentChannel.size() + " cell(s) with spots in channel " + channel);
 			// for each cell
 			File newFile = null;
-			for (int cellNb : spotsInCells.get(channel).keySet()) {
+			for (int cellNb : currentChannel.keySet()) {
 				// save spots detected
 				newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
 				TmXmlWriter spotsWriter = new TmXmlWriter(newFile);
-				trackmateModel.setSpots(spotsInCells.get(channel).get(cellNb), false);
+				trackmateModel.setSpots(currentChannel.get(cellNb), false);
 				spotsWriter.appendModel(trackmateModel);
 				try {
 					spotsWriter.writeToFile();

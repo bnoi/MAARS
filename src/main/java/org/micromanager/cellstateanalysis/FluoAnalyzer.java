@@ -1,5 +1,6 @@
 package org.micromanager.cellstateanalysis;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -7,11 +8,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.math3.util.FastMath;
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.ImgUtils;
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -144,6 +143,8 @@ public class FluoAnalyzer implements Runnable {
 				begin = index * deltas[0] + (deltas[1] - deltas[0]);
 				end = begin + deltas[0];
 			}
+			// need to be false because all spots are not visible
+			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(spots.iterable(false));
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
 				int cellNb = cell.getCellNumber();
@@ -153,34 +154,38 @@ public class FluoAnalyzer implements Runnable {
 				} else {
 					tmpRoi = cell.getCellShapeRoi();
 				}
-				// need to be false because all spots are not visible
-				for (Spot s : spots.iterable(false)) {
-					ReportingUtils.logMessage(String.valueOf(tmpRoi.getXBase()));
-					ReportingUtils.logMessage(String.valueOf(tmpRoi.getXBase()));
-					ReportingUtils.logMessage(String.valueOf(tmpRoi.getFloatWidth()));
-					ReportingUtils.logMessage(String.valueOf(tmpRoi.getFloatHeight()));
-					ReportingUtils.logMessage(String.valueOf(s.getFeature(Spot.POSITION_X)));
-					ReportingUtils.logMessage(String.valueOf(s.getFeature(Spot.POSITION_Y)));
+				double calibratedXBase = tmpRoi.getXBase() * fluoImgCal.pixelWidth;
+				double calibratedYBase = tmpRoi.getYBase() * fluoImgCal.pixelHeight;
+				ArrayList<Spot> spotsToDel = new ArrayList<Spot>();
+				for (Spot s : currentThreadSpots) {
 					if (tmpRoi.contains((int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
 							(int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
 						soc.putSpot(channel, cellNb, frame, s);
-						spots.remove(s, (int) FastMath.round(s.getFeature(Spot.FRAME)));
+						spotsToDel.add(s);
 						if (soc.getNbOfSpot(channel, cellNb, frame) > maxNbSpot) {
 							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, cellNb, frame);
 							soc.removeSpot(channel, cellNb, frame, lowesetQulitySpot);
 						}
 					}
 				}
+				for (Spot s2del : spotsToDel) {
+					currentThreadSpots.remove(s2del);
+				}
 				ComputeGeometry cptgeometry = new ComputeGeometry(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
 						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight, cell.get(Cell.MAJOR), cell.get(Cell.ANGLE),
-						tmpRoi.getXBase() * fluoImgCal.pixelWidth, tmpRoi.getYBase() * fluoImgCal.pixelHeight);
+						calibratedXBase, calibratedYBase);
 				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
-				HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
-				if (frame != 0 && soc.frameExists(channel, cellNb, frame - 1)) {
-					geometry = cptgeometry.addVariations(geometry, soc.getGeometry(channel, cellNb, frame - 1),
-							timeInterval);
+				if (spotSet != null) {
+					HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
+					soc.putGeometry(channel, cellNb, frame, geometry);
+					HashMap<String, Object> newGeometry = new HashMap<String, Object>();
+					int lastGeoIndex = frame - 1;
+					if (frame != 0 && soc.geoFrameExists(channel, cellNb, lastGeoIndex)) {
+						newGeometry = cptgeometry.addVariations(geometry,
+								soc.getGeometry(channel, cellNb, lastGeoIndex), timeInterval);
+						soc.putGeometry(channel, cellNb, frame, newGeometry);
+					}
 				}
-				soc.putGeometry(channel, cellNb, frame, geometry);
 			}
 		}
 	}
