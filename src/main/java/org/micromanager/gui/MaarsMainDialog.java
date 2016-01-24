@@ -354,7 +354,7 @@ public class MaarsMainDialog implements ActionListener {
 		}
 	}
 
-	public int overWriteOrNot(String path) {
+	public int overwriteOrNot(String path) {
 		int decision = 0;
 		if (FileUtils.exists(path + "/movie_X0_Y0/MMStack.ome.tif")) {
 			decision = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
@@ -377,7 +377,7 @@ public class MaarsMainDialog implements ActionListener {
 //						hide();
 						new MAARSNoAcq(mmc, parameters, soc);
 					} else {
-						if (overWriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
+						if (overwriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
 //							hide();
 							new MAARS(mm, mmc, parameters, soc);
 						}
@@ -390,7 +390,6 @@ public class MaarsMainDialog implements ActionListener {
 						soc.saveCroppedImgs();
 						soc.saveSpots();
 						soc.saveFeatures();
-						// soc.writeResults();
 					}
 				}
 			}
