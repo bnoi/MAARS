@@ -41,8 +41,6 @@ public class MAARSNoAcq {
 			System.out.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
-			// String xPos = "165";
-			// String yPos ="139";
 			String pathToSegDir = FileUtils
 					.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "/");
 			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
@@ -126,9 +124,9 @@ public class MAARSNoAcq {
 		System.setOut(curr_out);
 		if (soc.size() != 0) {
 			long startWriting = System.currentTimeMillis();
-			soc.saveCroppedImgs();
 			soc.saveSpots();
 			soc.saveFeatures();
+			soc.saveCroppedImgs();
 			ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
 		}
