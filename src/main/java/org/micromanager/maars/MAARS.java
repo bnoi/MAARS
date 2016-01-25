@@ -53,8 +53,8 @@ public class MAARS {
 
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
-
-		ExecutorService es = Executors.newCachedThreadPool();
+		int nThread = Runtime.getRuntime().availableProcessors();
+		ExecutorService es = Executors.newFixedThreadPool(nThread);
 		for (int i = 0; i < explo.length(); i++) {
 			try {
 				mm.core().setXYPosition(explo.getX(i), explo.getY(i));
@@ -126,11 +126,9 @@ public class MAARS {
 							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 							soc.addAcqID(id);
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-							// es.execute(new FluoAnalyzer(fluoImage, bfImgCal,
-							// soc, channel,
-							// Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-							// Double.parseDouble(parameters.getChSpotRaius(channel)),
-							// frame, timeInterval));
+							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, timeInterval));
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;

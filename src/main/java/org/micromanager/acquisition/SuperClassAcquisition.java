@@ -244,7 +244,7 @@ public class SuperClassAcquisition {
 		double z = zFocus - (range / 2);
 		List<Image> listImg = new ArrayList<Image>();
 		for (int k = 0; k <= sliceNumber; k++) {
-			ReportingUtils.logMessage("- set focus device at position " + z);
+			System.out.println("- set focus device at position " + z);
 			try {
 				mmc.setPosition(focusDevice, z);
 				mmc.waitForDevice(focusDevice);
@@ -264,7 +264,7 @@ public class SuperClassAcquisition {
 			e.printStackTrace();
 		}
 		// add images into Datastore and imageplus
-		System.out.println("add images into Datastore and imageplus");
+		ReportingUtils.logMessage("add images into Datastore and imageplus");
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
 		for (Image img : listImg) {
 			// Prepare a imagePlus (for analysis)
@@ -280,7 +280,7 @@ public class SuperClassAcquisition {
 			}
 		}
 		ds.freeze();
-		// ImagePlus for analysis
+		// ImagePlus for further analysis
 		ImagePlus imagePlus = new ImagePlus(imgName, imageStack);
 		Calibration cal = new Calibration();
 		cal.setUnit("micron");
