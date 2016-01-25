@@ -15,6 +15,8 @@ import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
+import org.micromanager.internal.utils.ReportingUtils;
+
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
@@ -124,12 +126,15 @@ public class MAARS {
 							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 							soc.addAcqID(id);
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
-							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
-									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, timeInterval));
+							// es.execute(new FluoAnalyzer(fluoImage, bfImgCal,
+							// soc, channel,
+							// Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+							// Double.parseDouble(parameters.getChSpotRaius(channel)),
+							// frame, timeInterval));
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
+						ReportingUtils.logMessage(String.valueOf(acqTook));
 						if (timeInterval > acqTook) {
 							try {
 								Thread.sleep((long) (timeInterval - acqTook));
@@ -193,6 +198,11 @@ public class MAARS {
 		System.out.println("First autofocus");
 		AutofocusPlugin autofocus = mm.getAutofocus();
 		try {
+			mmc.setShutterOpen(true);
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+		try {
 			autofocus.fullFocus();
 		} catch (MMException e1) {
 			e1.printStackTrace();
@@ -235,6 +245,11 @@ public class MAARS {
 			mmc.setPosition(focusDevice, (secondPosition + firstPosition) / 2);
 		} catch (Exception e) {
 			System.out.println("Can't set z position");
+			e.printStackTrace();
+		}
+		try {
+			mmc.setShutterOpen(false);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
