@@ -131,6 +131,7 @@ public class FluoAnalyzer implements Runnable {
 
 		@Override
 		public void run() {
+			// distribute number of cells for each thread
 			int begin = 0;
 			int end = 0;
 			if (index == 0) {
@@ -168,6 +169,8 @@ public class FluoAnalyzer implements Runnable {
 						}
 					}
 				}
+				// remove spots found in current cell in order to accelerate
+				// iteration
 				for (Spot s2del : spotsToDel) {
 					currentThreadSpots.remove(s2del);
 				}
