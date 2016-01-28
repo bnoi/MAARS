@@ -1,180 +1,198 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0   http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <groupId>sc.fiji</groupId>
-        <artifactId>pom-fiji</artifactId>
-        <version>17.0.0</version>
-    </parent>
-    
-    <artifactId>MAARS_</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <name>MAARS</name>
-    
-    <description>A Micro-Manager plugin for cell biology analysis</description>
-    
-    <properties>
-        <scijava.jvm.version>1.7</scijava.jvm.version>
-    </properties>
-    
-    <developers>
-        
-        <developer>
-            <id>BioinfoTongLI</id>
-            <name>Tong Li</name>
-            <email>tongli.bioinfo@gmail.com</email>
-        </developer>
-        
-        <developer>
-            <id>hadim</id>
-            <name>Hadrien Mary</name>
-            <email>hadrien.mary@gmail.com</email>
-        </developer>
-        
-    </developers>
-    
-    <scm>
-        <connection>scm:git:git://github.com/bnoi/MAARS</connection>
-        <developerConnection>scm:git:git@github.com:bnoi/MAARS</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/bnoi/MAARS</url>
-    </scm>
-    
-    <dependencies>
-        
-        <dependency>
-            <groupId>net.imagej</groupId>
-            <artifactId>ij</artifactId>
-            <version>1.49v</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>sc.fiji</groupId>
-            <artifactId>TrackMate_</artifactId>
-            <version>2.8.1</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>net.imagej</groupId>
-            <artifactId>imagej-common</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.micromanager</groupId>
-            <artifactId>MMJ_</artifactId>
-            <version>2.0.0.1</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.micromanager</groupId>
-            <artifactId>MMCoreJ</artifactId>
-            <version>2.0.0.1</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.micromanager</groupId>
-            <artifactId>MMAcqEngine</artifactId>
-            <version>2.0.0.1</version>
-        </dependency>
-        
-        
-        <!--Needed to run MM inside IDE-->
-        
-        <dependency>
-            <groupId>org.beanshell</groupId>                        
-            <artifactId>bsh</artifactId>
-            <version>2.0b4</version>
-        </dependency>
-      
-        <dependency>
-           <groupId>com.google.guava</groupId>                        
-           <artifactId>guava</artifactId>
-           <version>17.0</version>
-        </dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0   http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-        <dependency>
-           <groupId>com.fifesoft</groupId>                        
-           <artifactId>rsyntaxtextarea</artifactId>
-           <version>2.5.2</version>
-        </dependency>
+	<parent>
+		<groupId>sc.fiji</groupId>
+		<artifactId>pom-fiji</artifactId>
+		<version>17.0.0</version>
+	</parent>
 
-        <dependency>
-           <groupId>com.bulenkov</groupId>                        
-           <artifactId>iconloader</artifactId>
-           <version>1.0.0</version>
-        </dependency>
-      
-        <dependency>
-           <groupId>org.clojure</groupId>
-           <artifactId>clojure</artifactId>
-           <version>1.3.0</version>
-        </dependency>
-      
-        <dependency>
-            <groupId>com.miglayout</groupId>
-            <artifactId>miglayout-swing</artifactId>
-            <version>4.2</version>
-        </dependency>
+	<artifactId>MAARS_</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>MAARS</name>
 
-        <dependency>
-        	<groupId>xstream</groupId>
-        	<artifactId>xstream</artifactId>
-        	<version>1.2.2</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.commons</groupId>
-        	<artifactId>commons-math3</artifactId>
-        </dependency>
-    </dependencies>
-    
-   <repositories>
-        <repository>
-            <id>imagej.public</id>
-            <url>http://maven.imagej.net/content/groups/public</url>
-        </repository>
+	<description>A Micro-Manager plugin for cell biology analysis</description>
 
-        <repository>
-            <id>project.local</id>
-            <name>project</name>
-            <url>file:${project.basedir}/repo</url>
-        </repository>
-   </repositories>
-            
-    <build>
-        <plugins>
-        <plugin>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <configuration>
-                <rules>
-                    <banClasses implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
-                        <dependencies>
-                            <!-- org.json clashes -->
-                            <dependency>
-                                <artifactId>MMJ_</artifactId>
-                                <ignoreClasses>
-                                    <ignoreClass>org/json/*</ignoreClass>
-                                </ignoreClasses>
-                            </dependency>
-                            <dependency>
-                                <artifactId>MMCoreJ</artifactId>
-                                <ignoreClasses>
-                                    <ignoreClass>org/json/*</ignoreClass>
-                                </ignoreClasses>
-                            </dependency>
-                            <dependency>
-                                <artifactId>mines-jtk</artifactId>
-                                <ignoreClasses>
-                                    <ignoreClass>edu/mines/jtk/*</ignoreClass>
-                                </ignoreClasses>
-                            </dependency>
-                        </dependencies>
-                        <findAllDuplicates>true</findAllDuplicates>
-                    </banClasses>
-                </rules>
-            </configuration>
-        </plugin>
-        </plugins>
-    </build>
-    
+	<properties>
+		<scijava.jvm.version>1.7</scijava.jvm.version>
+	</properties>
+
+	<developers>
+
+		<developer>
+			<id>BioinfoTongLI</id>
+			<name>Tong Li</name>
+			<email>tongli.bioinfo@gmail.com</email>
+		</developer>
+
+		<developer>
+			<id>hadim</id>
+			<name>Hadrien Mary</name>
+			<email>hadrien.mary@gmail.com</email>
+		</developer>
+
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/bnoi/MAARS</connection>
+		<developerConnection>scm:git:git@github.com:bnoi/MAARS</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/bnoi/MAARS</url>
+	</scm>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+			<version>1.49v</version>
+		</dependency>
+
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>TrackMate_</artifactId>
+			<version>2.8.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.micromanager</groupId>
+			<artifactId>MMJ_</artifactId>
+			<version>2.0.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.micromanager</groupId>
+			<artifactId>MMCoreJ</artifactId>
+			<version>2.0.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.micromanager</groupId>
+			<artifactId>MMAcqEngine</artifactId>
+			<version>2.0.0.1</version>
+		</dependency>
+
+		<!--Needed to run MM inside IDE -->
+
+		<dependency>
+			<groupId>org.beanshell</groupId>
+			<artifactId>bsh</artifactId>
+			<version>2.0b4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>17.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fifesoft</groupId>
+			<artifactId>rsyntaxtextarea</artifactId>
+			<version>2.5.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.bulenkov</groupId>
+			<artifactId>iconloader</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.clojure</groupId>
+			<artifactId>clojure</artifactId>
+			<version>1.3.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-swing</artifactId>
+			<version>4.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+		</dependency>
+
+		<!-- Need for write Big Tiff -->
+		<dependency>
+			<groupId>ome</groupId>
+			<artifactId>bio-formats_plugins</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>imagej.public</id>
+			<url>http://maven.imagej.net/content/groups/public</url>
+		</repository>
+
+		<repository>
+			<id>project.local</id>
+			<name>project</name>
+			<url>file:${project.basedir}/repo</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<configuration>
+					<rules>
+						<banClasses
+							implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
+							<dependencies>
+								<!-- org.json clashes -->
+								<dependency>
+									<artifactId>MMJ_</artifactId>
+									<ignoreClasses>
+										<ignoreClass>org/json/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>mines-jtk</artifactId>
+									<ignoreClasses>
+										<ignoreClass>edu/mines/jtk/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>batik</artifactId>
+									<ignoreClasses>
+										<ignoreClass>org/apache/commons/io/*</ignoreClass>
+										<ignoreClass>org/apache/xerces/*</ignoreClass>
+										<ignoreClass>org/apache/html/*</ignoreClass>
+										<ignoreClass>org/apache/wml/*</ignoreClass>
+										<ignoreClass>org/w3c/dom/*</ignoreClass>
+										<ignoreClass>javax/xml/*</ignoreClass>
+										<ignoreClass>org/xml/sax/helpers/*</ignoreClass>
+										<ignoreClass>org/apache/commons/logging/*</ignoreClass>
+										<ignoreClass>org/xml/sax/*</ignoreClass>
+										<ignoreClass>org/apache/xmlcommons/*</ignoreClass>
+										<ignoreClass>org/apache/xml/serialize/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+							</dependencies>
+							<findAllDuplicates>true</findAllDuplicates>
+						</banClasses>
+					</rules>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

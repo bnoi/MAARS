@@ -65,7 +65,7 @@ public class ComputeGeometry {
 	 * @return
 	 */
 	public HashMap<String, Object> compute(Iterable<Spot> spotSet) {
-//		DenseInstance intstance = new DenseInstance(5);
+		// DenseInstance intstance = new DenseInstance(5);
 		HashMap<String, Object> geo = new HashMap<String, Object>();
 		// this functions modify directly coordinates of spot in
 		// soc, because it's back-up
@@ -96,10 +96,10 @@ public class ComputeGeometry {
 	public HashMap<String, Object> addVariations(HashMap<String, Object> currentGeo, HashMap<String, Object> lastGeo,
 			double timeInterval) {
 		if (lastGeo.get(PHASE) == MITOSIS && currentGeo.get(PHASE) == MITOSIS) {
-			currentGeo.put(SpElongRate, String.format("%.12f",
-					((double) currentGeo.get(SpLength) - (double) lastGeo.get(SpLength)) / (timeInterval / 1000)));
-			currentGeo.put(SpOrientationRate, String.format("%.12f",
-					((double) currentGeo.get(SpAngToMaj) - (double) lastGeo.get(SpAngToMaj)) / (timeInterval / 1000)));
+			currentGeo.put(SpElongRate, String.format("%.12f", (new Double(currentGeo.get(SpLength).toString())
+					- new Double(lastGeo.get(SpLength).toString()) / (timeInterval / 1000))));
+			currentGeo.put(SpOrientationRate, String.format("%.12f", (new Double(currentGeo.get(SpAngToMaj).toString())
+					- new Double(lastGeo.get(SpAngToMaj).toString()) / (timeInterval / 1000))));
 		}
 		return currentGeo;
 	}

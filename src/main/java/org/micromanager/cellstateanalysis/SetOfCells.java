@@ -24,6 +24,7 @@ import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
+import loci.plugins.LociExporter;
 
 /**
  * Main object of MAARS, you got information about each cell (ROI measurement,
@@ -307,7 +308,11 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				IJ.saveAsTiff(imp, pathToCroppedImg);
 			}
 			fieldStack = null;
-			IJ.saveAsTiff(fieldImg, fluoDir + channel);
+			final String file = fluoDir + channel + ".tif";
+			final String macroOpts = "outfile=[" + file + "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
+			LociExporter lociExporter = new LociExporter();
+			lociExporter.setup(macroOpts, fieldImg);
+			lociExporter.run(null);
 			ReportingUtils.logMessage(channel + " channel cropped images saved");
 		}
 	}

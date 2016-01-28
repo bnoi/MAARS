@@ -226,6 +226,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	}
 
 	public void setChPanelValue(JPanel jp, String ch) {
+		@SuppressWarnings("unchecked")
 		JComboBox<String> tmpCombo = (JComboBox<String>) jp.getComponent(0);
 		tmpCombo.setSelectedItem(ch);
 
