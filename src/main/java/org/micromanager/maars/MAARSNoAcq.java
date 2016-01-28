@@ -125,7 +125,7 @@ public class MAARSNoAcq {
 		if (soc.size() != 0) {
 			long startWriting = System.currentTimeMillis();
 			soc.saveSpots();
-			soc.saveFeatures();
+			soc.saveGeometries();
 			soc.saveCroppedImgs();
 			ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");

@@ -374,11 +374,9 @@ public class MaarsMainDialog implements ActionListener {
 				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
 				try {
 					if (withOutAcqChk.isSelected()) {
-//						hide();
 						new MAARSNoAcq(mmc, parameters, soc);
 					} else {
 						if (overwriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-//							hide();
 							new MAARS(mm, mmc, parameters, soc);
 						}
 					}
@@ -389,7 +387,7 @@ public class MaarsMainDialog implements ActionListener {
 						e1.printStackTrace();
 						soc.saveCroppedImgs();
 						soc.saveSpots();
-						soc.saveFeatures();
+						soc.saveGeometries();
 					}
 				}
 			}

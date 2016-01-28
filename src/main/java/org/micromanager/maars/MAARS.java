@@ -293,7 +293,7 @@ public class MAARS {
 
 		@Override
 		public void run() {
-			soc.saveFeatures();
+			soc.saveGeometries();
 		}
 
 	}
