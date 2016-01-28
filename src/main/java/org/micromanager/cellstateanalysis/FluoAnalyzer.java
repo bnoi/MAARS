@@ -84,7 +84,7 @@ public class FluoAnalyzer implements Runnable {
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
 
 		// Call trackmate to detect spots
-		SpotsDetector detector = new SpotsDetector(zProjectedFluoImg, radius);
+		MaarsTrackmate detector = new MaarsTrackmate(zProjectedFluoImg, radius);
 		Model model = detector.doDetection();
 		soc.setTrackmateModel(model);
 		spots = model.getSpots();

@@ -25,6 +25,7 @@ import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
 import loci.plugins.LociExporter;
+import util.opencsv.CSVWriter;
 
 /**
  * Main object of MAARS, you got information about each cell (ROI measurement,
@@ -308,7 +309,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				IJ.saveAsTiff(imp, pathToCroppedImg);
 			}
 			fieldStack = null;
-			final String file = fluoDir + channel + ".tif";
+			final String file = fluoDir + channel + ".ome.btf";
 			final String macroOpts = "outfile=[" + file + "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
 			LociExporter lociExporter = new LociExporter();
 			lociExporter.setup(macroOpts, fieldImg);
@@ -348,7 +349,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		}
 	}
 
-	public void saveFeatures() {
+	public void saveGeometries() {
 		String[] id = acqIDs.get(0);
 		String xPos = id[0];
 		String yPos = id[1];
