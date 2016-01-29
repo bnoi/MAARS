@@ -13,7 +13,7 @@ import fiji.plugin.trackmate.Spot;
 
 public class ComputeGeometry {
 	// Names of parameters
-	public final static String PHASE = "phase";
+	public final static String PHASE = "Phase";
 	public final static String NbOfSpotDetected = "NbOfSpotDetected";
 	public final static String SpAngToMaj = "SpAngToMaj";
 	public final static String SpLength = "SpLength";
@@ -23,11 +23,11 @@ public class ComputeGeometry {
 	public final static String CellCenterToSpCenterLen = "CellCenterToSpCenterLen";
 	public final static String CellCenterToSpCenterAng = "CellCenterToSpCenterAng";
 	// Velocities
-	public final static String SpElongRate = "spElongRate";
+	public final static String SpElongRate = "SpElongRate";
 	public final static String SpOrientationRate = "SpOrientationRate";
 	// values
-	public final static String INTERPHASE = "interphase";
-	public final static String MITOSIS = "mitosis";
+	public final static String INTERPHASE = "Interphase";
+	public final static String MITOSIS = "Mitosis";
 
 	private double fakeSpotQuality = 0;
 	// z equals to 0 because fitting ellipse in Analyzer do not give z

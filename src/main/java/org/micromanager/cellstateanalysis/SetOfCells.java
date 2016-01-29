@@ -2,16 +2,16 @@ package org.micromanager.cellstateanalysis;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
+
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.ImgUtils;
-
-import com.thoughtworks.xstream.XStream;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -37,7 +37,8 @@ import util.opencsv.CSVWriter;
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 
 	private RoiManager roiManager;
-	private int count = 0;
+	private int iteratorCount = 0;
+	private int geoHeaderLen = 0;
 	private ArrayList<Cell> cellArray;
 	private String rootSavingPath;
 	private HashMap<String, HashMap<Integer, SpotCollection>> spotsInCells;
@@ -49,6 +50,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private Model trackmateModel;
 	private HashMap<Integer, ImageStack> croppedStacks;
 	private Calibration fluoImgCalib;
+	private Set<String> headerSet;
 
 	/**
 	 * Constructor
@@ -226,6 +228,10 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		if (!geoFrameExists(channel, cellNb, frame)) {
 			geosOfCells.get(channel).get(cellNb).put(frame, new HashMap<String, Object>());
 		}
+		if (features.size() > geoHeaderLen) {
+			geoHeaderLen = features.size();
+			headerSet = features.keySet();
+		}
 		geosOfCells.get(channel).get(cellNb).put(frame, features);
 	}
 
@@ -310,7 +316,8 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			}
 			fieldStack = null;
 			final String file = fluoDir + channel + ".ome.btf";
-			final String macroOpts = "outfile=[" + file + "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
+			final String macroOpts = "outfile=[" + file
+					+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
 			LociExporter lociExporter = new LociExporter();
 			lociExporter.setup(macroOpts, fieldImg);
 			lociExporter.run(null);
@@ -360,21 +367,50 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		}
 		for (String channel : spotsInCells.keySet()) {
 			ReportingUtils.logMessage("Saving features of channel " + channel);
-			File newFile = null;
-			for (int cellNb : spotsInCells.get(channel).keySet()) {
-				// save features
-				newFile = new File(featuresXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
-				XStream xStream = new XStream();
-				xStream.alias("cell", java.util.HashMap.class);
-				String xml = xStream.toXML(geosOfCells.get(channel).get(cellNb));
-				FileOutputStream fos = null;
-				try {
-					fos = new FileOutputStream(newFile);
-				} catch (IOException e1) {
-					e1.printStackTrace();
+			ArrayList<String[]> outLines = null;
+			HashMap<String, Integer> headerIndex = new HashMap<String, Integer>();
+			String[] headerList = new String[headerSet.size() + 1];
+			headerList[0] = "Frame";
+			headerList[1] = ComputeGeometry.PHASE;
+			headerList[2] = ComputeGeometry.NbOfSpotDetected;
+			int index = 3;
+			for (String att : headerSet) {
+				if (!att.equals(ComputeGeometry.PHASE) && !att.equals(ComputeGeometry.NbOfSpotDetected)) {
+					headerIndex.put(att, index);
+					headerList[index] = att;
+					index++;
 				}
+			}
+			FileWriter cellGeoWriter = null;
+			for (int cellNb : geosOfCells.get(channel).keySet()) {
+				outLines = new ArrayList<String[]>();
+				outLines.add(headerList);
+				String[] geoOfFrame = null;
 				try {
-					fos.write(xml.getBytes());
+					cellGeoWriter = new FileWriter(featuresXmlDir + String.valueOf(cellNb) + "_" + channel + ".csv");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				HashMap<Integer, HashMap<String, Object>> geosInCell = geosOfCells.get(channel).get(cellNb);
+				for (int frame = 0; frame < geosInCell.size(); frame++) {
+					if (geosInCell.containsKey(frame)) {
+						geoOfFrame = new String[headerList.length];
+						geoOfFrame[0] = String.valueOf(frame);
+						geoOfFrame[1] = String.valueOf(geosInCell.get(frame).get(ComputeGeometry.PHASE));
+						geoOfFrame[2] = String.valueOf(geosInCell.get(frame).get(ComputeGeometry.NbOfSpotDetected));
+						for (String att : geosInCell.get(frame).keySet()) {
+							if (!att.equals(ComputeGeometry.PHASE) && !att.equals(ComputeGeometry.NbOfSpotDetected)) {
+								geoOfFrame[headerIndex.get(att)] = new String(
+										geosInCell.get(frame).get(att).toString());
+							}
+						}
+						outLines.add(geoOfFrame);
+					}
+				}
+				CSVWriter writer = new CSVWriter(cellGeoWriter);
+				writer.writeAll(outLines);
+				try {
+					writer.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -394,7 +430,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	public void reset() {
-		this.count = 0;
+		this.iteratorCount = 0;
 		this.cellArray = null;
 		this.spotsInCells = null;
 		this.geosOfCells = null;
@@ -417,15 +453,15 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 
 	@Override
 	public boolean hasNext() {
-		return count < cellArray.size();
+		return iteratorCount < cellArray.size();
 	}
 
 	@Override
 	public Cell next() {
-		if (count >= cellArray.size())
+		if (iteratorCount >= cellArray.size())
 			throw new NoSuchElementException();
-		count++;
-		return cellArray.get(count - 1);
+		iteratorCount++;
+		return cellArray.get(iteratorCount - 1);
 	}
 
 	@Override
@@ -434,6 +470,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	public void resetCount() {
-		this.count = 0;
+		this.iteratorCount = 0;
 	}
 }
