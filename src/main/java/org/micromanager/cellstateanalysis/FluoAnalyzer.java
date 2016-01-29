@@ -181,13 +181,13 @@ public class FluoAnalyzer implements Runnable {
 				if (spotSet != null) {
 					HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
 					soc.putGeometry(channel, cellNb, frame, geometry);
-					HashMap<String, Object> newGeometry = new HashMap<String, Object>();
-					int lastGeoIndex = frame - 1;
-					if (frame != 0 && soc.geoFrameExists(channel, cellNb, lastGeoIndex)) {
-						newGeometry = cptgeometry.addVariations(geometry,
-								soc.getGeometry(channel, cellNb, lastGeoIndex), timeInterval);
-						soc.putGeometry(channel, cellNb, frame, newGeometry);
-					}
+//					HashMap<String, Object> newGeometry = new HashMap<String, Object>();
+//					int lastGeoIndex = frame - 1;
+//					if (frame != 0 && soc.geoFrameExists(channel, cellNb, lastGeoIndex)) {
+//						newGeometry = cptgeometry.addVariations(geometry,
+//								soc.getGeometry(channel, cellNb, lastGeoIndex), timeInterval);
+//						soc.putGeometry(channel, cellNb, frame, newGeometry);
+//					}
 				}
 			}
 		}
