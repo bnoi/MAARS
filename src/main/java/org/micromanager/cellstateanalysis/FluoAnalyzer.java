@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.util.FastMath;
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.ImgUtils;
 
 import com.google.common.collect.Lists;

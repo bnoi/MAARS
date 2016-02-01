@@ -411,7 +411,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				}
 				HashMap<Integer, HashMap<String, Object>> geosInCell = geosOfCells.get(channel).get(cellNb);
 				ReportingUtils.logMessage("cell " + cellNb +"_" + geosInCell.size());
-				for (int frame = 0; frame < geosInCell.size(); frame++) {
+				for (int frame : geosInCell.keySet()) {
 					if (geosInCell.containsKey(frame)) {
 						geoOfFrame = new String[headerList.length];
 						geoOfFrame[0] = String.valueOf(frame);
