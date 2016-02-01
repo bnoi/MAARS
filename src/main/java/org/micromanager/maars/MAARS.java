@@ -28,18 +28,29 @@ import ij.plugin.frame.RoiManager;
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 21, 2015
  */
-public class MAARS {
+public class MAARS implements Runnable {
 	private PrintStream curr_err;
 	private PrintStream curr_out;
+	private MMStudio mm;
+	private CMMCore mmc;
+	private MaarsParameters parameters;
+	private SetOfCells soc;
 
 	/**
-	 * Constructor and run the program
+	 * Constructor
 	 * 
 	 * @param mm
 	 * @param mmc
 	 * @param parameters
 	 */
 	public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
+		this.mmc = mmc;
+		this.parameters = parameters;
+		this.soc = soc;
+		this.mm = mm;
+	}
+
+	public void runAnalysis() {
 		// Start time
 		long start = System.currentTimeMillis();
 		mmc.setAutoShutter(false);
@@ -296,5 +307,10 @@ public class MAARS {
 			soc.saveGeometries();
 		}
 
+	}
+
+	@Override
+	public void run() {
+		this.runAnalysis();
 	}
 }

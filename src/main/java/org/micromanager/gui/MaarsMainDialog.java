@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -354,12 +356,12 @@ public class MaarsMainDialog implements ActionListener {
 		}
 	}
 
-	public int overwriteOrNot(String path) {
-		int decision = 0;
+	public int overWrite(String path) {
+		int overWrite = 0;
 		if (FileUtils.exists(path + "/movie_X0_Y0/MMStack.ome.tif")) {
-			decision = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
+			overWrite = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
 		}
-		return decision;
+		return overWrite;
 	}
 
 	@Override
@@ -372,12 +374,13 @@ public class MaarsMainDialog implements ActionListener {
 			} else {
 				saveParameters();
 				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
+				ExecutorService es = Executors.newFixedThreadPool(1);
 				try {
 					if (withOutAcqChk.isSelected()) {
-						new MAARSNoAcq(mmc, parameters, soc);
+						es.execute(new MAARSNoAcq(mmc, parameters, soc));
 					} else {
-						if (overwriteOrNot(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-							new MAARS(mm, mmc, parameters, soc);
+						if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
+							es.execute(new MAARS(mm, mmc, parameters, soc));
 						}
 					}
 				} catch (Exception e1) {
@@ -390,6 +393,7 @@ public class MaarsMainDialog implements ActionListener {
 						soc.saveGeometries();
 					}
 				}
+				es.shutdown();
 			}
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);
@@ -403,5 +407,4 @@ public class MaarsMainDialog implements ActionListener {
 			fluoAcqDurationTf.setEditable(false);
 		}
 	}
-
 }

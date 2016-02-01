@@ -266,12 +266,29 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	/**
-	 * 
+	 * Save header of Trackmate output and spot collection
 	 * @param model
 	 */
 	public void setTrackmateModel(Model model) {
 		if (this.trackmateModel == null)
 			this.trackmateModel = model;
+	}
+	
+	/**
+	 * update spot collection
+	 * @param newCollection
+	 */
+	public void refreshSpots(SpotCollection newCollection){
+		this.trackmateModel.clearSpots(true);
+		this.trackmateModel.setSpots(newCollection, true);
+	}
+	
+	/**
+	 * Spot collection getter
+	 * @return SpotCollection
+	 */
+	public SpotCollection getSpotsInModel(){
+		return this.trackmateModel.getSpots();
 	}
 
 	/**
@@ -311,6 +328,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			for (int j = 0; j < croppedStacks.size(); j++) {
 				String pathToCroppedImg = croppedImgDir + String.valueOf(j) + "_" + channel;
 				ImagePlus imp = new ImagePlus("cell_" + j, croppedStacks.get(j));
+				IJ.run(imp, "Enhance Contrast", "saturated=0.35");
 				imp.setCalibration(fluoImgCalib);
 				IJ.saveAsTiff(imp, pathToCroppedImg);
 			}
@@ -365,7 +383,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		if (!new File(featuresXmlDir).exists()) {
 			new File(featuresXmlDir).mkdirs();
 		}
-		for (String channel : spotsInCells.keySet()) {
+		for (String channel : geosOfCells.keySet()) {
 			ReportingUtils.logMessage("Saving features of channel " + channel);
 			ArrayList<String[]> outLines = null;
 			HashMap<String, Integer> headerIndex = new HashMap<String, Integer>();
@@ -392,6 +410,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 					e.printStackTrace();
 				}
 				HashMap<Integer, HashMap<String, Object>> geosInCell = geosOfCells.get(channel).get(cellNb);
+				ReportingUtils.logMessage("cell " + cellNb +"_" + geosInCell.size());
 				for (int frame = 0; frame < geosInCell.size(); frame++) {
 					if (geosInCell.containsKey(frame)) {
 						geoOfFrame = new String[headerList.length];
