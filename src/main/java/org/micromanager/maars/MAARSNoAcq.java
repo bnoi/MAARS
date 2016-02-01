@@ -25,11 +25,20 @@ import mmcorej.CMMCore;
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 22, 2015
  */
-public class MAARSNoAcq {
+public class MAARSNoAcq implements Runnable {
 	private PrintStream curr_err;
 	private PrintStream curr_out;
+	private CMMCore mmc;
+	private MaarsParameters parameters;
+	private SetOfCells soc;
 
 	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
+		this.mmc = mmc;
+		this.parameters = parameters;
+		this.soc = soc;
+	}
+
+	public void runAnalysis() {
 		ExecutorService es = null;
 		// Start time
 		long start = System.currentTimeMillis();
@@ -131,5 +140,10 @@ public class MAARSNoAcq {
 					+ " sec for writing results");
 		}
 		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
+	}
+
+	@Override
+	public void run() {
+		this.runAnalysis();
 	}
 }

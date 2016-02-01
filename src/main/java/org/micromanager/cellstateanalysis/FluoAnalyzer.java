@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.math3.util.FastMath;
+import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.ImgUtils;
 
 import com.google.common.collect.Lists;
@@ -30,7 +32,6 @@ public class FluoAnalyzer implements Runnable {
 	private double[] factors;
 	private Calibration bfImgCal;
 	private Calibration fluoImgCal;
-	private SpotCollection spots;
 	private String channel;
 	private int maxNbSpot;
 	private double radius;
@@ -87,7 +88,7 @@ public class FluoAnalyzer implements Runnable {
 		MaarsTrackmate detector = new MaarsTrackmate(zProjectedFluoImg, radius);
 		Model model = detector.doDetection();
 		soc.setTrackmateModel(model);
-		spots = model.getSpots();
+		soc.refreshSpots(getNBestqualitySpots(model.getSpots()));
 
 		this.factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
 
@@ -115,6 +116,38 @@ public class FluoAnalyzer implements Runnable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private SpotCollection getNBestqualitySpots(SpotCollection spots) {
+		SpotCollection newSet = new SpotCollection();
+		for (Spot s : spots.iterable(false)) {
+			int currentFrame = (int) FastMath.round(s.getFeature(Spot.FRAME));
+			newSet.add(s, currentFrame);
+			if (newSet.getNSpots(currentFrame, false) > soc.size() * maxNbSpot) {
+				newSet.remove(findLowestQualitySpot(newSet.iterable(currentFrame, false)), currentFrame);
+			}
+		}
+		return newSet;
+	}
+
+	/**
+	 * Get the lowest qualit spot in the frame
+	 * 
+	 * @param channel
+	 * @param cellNb
+	 * @param frame
+	 * @return
+	 */
+	private Spot findLowestQualitySpot(Iterable<Spot> spotsInFrame) {
+		double min = Double.POSITIVE_INFINITY;
+		Spot lowestQualitySpot = null;
+		for (Spot s : spotsInFrame) {
+			if (s.getFeature(Spot.QUALITY) < min) {
+				min = s.getFeature(Spot.QUALITY);
+				lowestQualitySpot = s;
+			}
+		}
+		return lowestQualitySpot;
 	}
 
 	/**
@@ -145,7 +178,7 @@ public class FluoAnalyzer implements Runnable {
 				end = begin + deltas[0];
 			}
 			// need to be false because all spots are not visible
-			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(spots.iterable(false));
+			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(soc.getSpotsInModel().iterable(false));
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
 				int cellNb = cell.getCellNumber();
@@ -181,13 +214,16 @@ public class FluoAnalyzer implements Runnable {
 				if (spotSet != null) {
 					HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
 					soc.putGeometry(channel, cellNb, frame, geometry);
-//					HashMap<String, Object> newGeometry = new HashMap<String, Object>();
-//					int lastGeoIndex = frame - 1;
-//					if (frame != 0 && soc.geoFrameExists(channel, cellNb, lastGeoIndex)) {
-//						newGeometry = cptgeometry.addVariations(geometry,
-//								soc.getGeometry(channel, cellNb, lastGeoIndex), timeInterval);
-//						soc.putGeometry(channel, cellNb, frame, newGeometry);
-//					}
+					// HashMap<String, Object> newGeometry = new HashMap<String,
+					// Object>();
+					// int lastGeoIndex = frame - 1;
+					// if (frame != 0 && soc.geoFrameExists(channel, cellNb,
+					// lastGeoIndex)) {
+					// newGeometry = cptgeometry.addVariations(geometry,
+					// soc.getGeometry(channel, cellNb, lastGeoIndex),
+					// timeInterval);
+					// soc.putGeometry(channel, cellNb, frame, newGeometry);
+					// }
 				}
 			}
 		}

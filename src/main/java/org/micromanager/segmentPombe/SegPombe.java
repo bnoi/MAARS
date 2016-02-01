@@ -133,6 +133,7 @@ public class SegPombe {
 		}
 
 		if (saveFocusImage) {
+			IJ.run(focusImg, "Enhance Contrast", "saturated=0.35");
 			FileSaver fileSaver = new FileSaver(focusImg);
 			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
 					+ "_FocusImage.tif");
@@ -433,6 +434,7 @@ public class SegPombe {
 			System.out.println("save correlation image");
 			imgCorrTemp.setTitle(imageToAnalyze.getShortTitle()
 					+ "_CorrelationImage");
+			IJ.run(imgCorrTemp, "Enhance Contrast", "saturated=0.35");
 			FileSaver fileSaver = new FileSaver(imgCorrTemp);
 			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
 					+ "_CorrelationImage.tif");
