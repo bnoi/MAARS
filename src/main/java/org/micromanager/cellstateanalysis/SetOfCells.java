@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -267,27 +269,30 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 
 	/**
 	 * Save header of Trackmate output and spot collection
+	 * 
 	 * @param model
 	 */
 	public void setTrackmateModel(Model model) {
 		if (this.trackmateModel == null)
 			this.trackmateModel = model;
 	}
-	
+
 	/**
 	 * update spot collection
+	 * 
 	 * @param newCollection
 	 */
-	public void refreshSpots(SpotCollection newCollection){
+	public void refreshSpots(SpotCollection newCollection) {
 		this.trackmateModel.clearSpots(true);
 		this.trackmateModel.setSpots(newCollection, true);
 	}
-	
+
 	/**
 	 * Spot collection getter
+	 * 
 	 * @return SpotCollection
 	 */
-	public SpotCollection getSpotsInModel(){
+	public SpotCollection getSpotsInModel() {
 		return this.trackmateModel.getSpots();
 	}
 
@@ -300,7 +305,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		String[] id = acqIDs.get(acqIDs.size() - 1);
 		String xPos = id[0];
 		String yPos = id[1];
-		String frame = id[2];
+		String totalNbFrame = id[2];
 		String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
 		String croppedImgDir = fluoDir + "croppedImgs/";
 		if (!new File(croppedImgDir).exists()) {
@@ -309,14 +314,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		for (String channel : spotsInCells.keySet()) {
 			ImageStack fieldStack = null;
 			croppedStacks = new HashMap<Integer, ImageStack>();
-			for (int f = 0; f <= Integer.parseInt(frame); f++) {
+			for (int f = 0; f <= Integer.parseInt(totalNbFrame); f++) {
 				fluoImg = IJ.openImage(fluoDir + f + "_" + channel + "/MMStack.ome.tif");
 				zprojectImg = ImgUtils.zProject(fluoImg);
 				if (fieldStack == null) {
-					fieldStack = zprojectImg.getStack();
-				} else {
-					fieldStack.addSlice(zprojectImg.getStack().getProcessor(1));
+					fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight(),
+							Integer.parseInt(totalNbFrame) + 1);	
 				}
+				fieldStack.setProcessor(zprojectImg.getStack().getProcessor(1), f + 1);
 			}
 			ImagePlus fieldImg = new ImagePlus(channel, fieldStack);
 			fieldImg.setCalibration(fluoImgCalib);
@@ -402,7 +407,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			FileWriter cellGeoWriter = null;
 			for (int cellNb : geosOfCells.get(channel).keySet()) {
 				outLines = new ArrayList<String[]>();
-				outLines.add(headerList);
 				String[] geoOfFrame = null;
 				try {
 					cellGeoWriter = new FileWriter(featuresXmlDir + String.valueOf(cellNb) + "_" + channel + ".csv");
@@ -410,7 +414,8 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 					e.printStackTrace();
 				}
 				HashMap<Integer, HashMap<String, Object>> geosInCell = geosOfCells.get(channel).get(cellNb);
-				ReportingUtils.logMessage("cell " + cellNb +"_" + geosInCell.size());
+				// ReportingUtils.logMessage("cell " + cellNb + "_" +
+				// geosInCell.size());
 				for (int frame : geosInCell.keySet()) {
 					if (geosInCell.containsKey(frame)) {
 						geoOfFrame = new String[headerList.length];
@@ -426,7 +431,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 						outLines.add(geoOfFrame);
 					}
 				}
-				CSVWriter writer = new CSVWriter(cellGeoWriter);
+				Collections.sort(outLines, new Comparator<String[]>() {
+					@Override
+					public int compare(String[] o1, String[] o2) {
+						return Integer.valueOf(o1[0]).compareTo(Integer.valueOf(o2[0]));
+					}
+				});
+				outLines.add(0, headerList);
+				CSVWriter writer = new CSVWriter(cellGeoWriter, ',', CSVWriter.NO_QUOTE_CHARACTER);
 				writer.writeAll(outLines);
 				try {
 					writer.close();

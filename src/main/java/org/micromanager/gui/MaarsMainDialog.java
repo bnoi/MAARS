@@ -9,8 +9,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -372,28 +374,23 @@ public class MaarsMainDialog implements ActionListener {
 			if ((Double) widthTf.getValue() * (Double) heightTf.getValue() == 0) {
 				IJ.error("Session aborted, 0 field to analyse");
 			} else {
+				Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
+				    public void uncaughtException(Thread th, Throwable ex) {
+				        System.out.println("Uncaught exception: " + ex);
+				    }
+				};
 				saveParameters();
 				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
-				ExecutorService es = Executors.newFixedThreadPool(1);
-				try {
-					if (withOutAcqChk.isSelected()) {
-						es.execute(new MAARSNoAcq(mmc, parameters, soc));
-					} else {
-						if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-							es.execute(new MAARS(mm, mmc, parameters, soc));
-						}
-					}
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					IJ.showMessage("Error occurs with exception");
-					if (soc.size() != 0) {
-						e1.printStackTrace();
-						soc.saveCroppedImgs();
-						soc.saveSpots();
-						soc.saveGeometries();
+				Thread th = null;
+				if (withOutAcqChk.isSelected()) {
+					th = new Thread(new MAARSNoAcq(mmc, parameters, soc));
+				} else {
+					if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
+						th = new Thread(new MAARS(mm, mmc, parameters, soc));
 					}
 				}
-				es.shutdown();
+				th.setUncaughtExceptionHandler(h);
+				th.start();
 			}
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);
