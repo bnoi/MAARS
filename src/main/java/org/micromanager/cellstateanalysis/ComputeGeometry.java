@@ -6,8 +6,6 @@ import java.util.HashMap;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
-import com.google.common.collect.Iterables;
-
 import fiji.plugin.trackmate.Spot;
 //import weka.core.DenseInstance;
 
@@ -64,33 +62,21 @@ public class ComputeGeometry {
 	 *            set of spots to analyze
 	 * @return
 	 */
-	public HashMap<String, Object> compute(Iterable<Spot> spotSet) {
+	public HashMap<String, Object> compute(HashMap<String, Object> geometry, ArrayList<Spot> poles) {
 		// DenseInstance intstance = new DenseInstance(5);
-		HashMap<String, Object> geo = new HashMap<String, Object>();
-		// this functions modify directly coordinates of spot in
-		// soc, because it's back-up
-		centerSpots(spotSet, calibratedXBase, calibratedYBase);
-		if (spotSet == null || Iterables.size(spotSet) == 1) {
-			geo.put(PHASE, INTERPHASE);
-			geo.put(NbOfSpotDetected, Iterables.size(spotSet));
-		} else {
-			geo.put(PHASE, MITOSIS);
-			geo.put(NbOfSpotDetected, Iterables.size(spotSet));
-			ArrayList<Spot> poles = findSpindle(spotSet);
-			Vector3D polesVec = getSpAsVector(poles);
-			geo.put(SpLength, polesVec.getNorm());
-			Spot spCenter = getCenter(poles);
-			geo.put(SpCenterX, spCenter.getFeature(Spot.POSITION_X));
-			geo.put(SpCenterY, spCenter.getFeature(Spot.POSITION_Y));
-			geo.put(SpCenterZ, spCenter.getFeature(Spot.POSITION_Z));
-			geo.put(SpAngToMaj, getSpAngToMajAxis(polesVec));
-			Spot cellCenter = new Spot(x - calibratedXBase, y - calibratedYBase, fakeSpotZ, fakeSpotRadius,
-					fakeSpotQuality);
-			geo.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
-			geo.put(CellCenterToSpCenterAng, getAngLessThan90(
-					Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I)));
-		}
-		return geo;
+		Vector3D polesVec = getSpAsVector(poles);
+		geometry.put(SpLength, polesVec.getNorm());
+		Spot spCenter = getCenter(poles);
+		geometry.put(SpCenterX, spCenter.getFeature(Spot.POSITION_X));
+		geometry.put(SpCenterY, spCenter.getFeature(Spot.POSITION_Y));
+		geometry.put(SpCenterZ, spCenter.getFeature(Spot.POSITION_Z));
+		geometry.put(SpAngToMaj, getSpAngToMajAxis(polesVec));
+		Spot cellCenter = new Spot(x - calibratedXBase, y - calibratedYBase, fakeSpotZ, fakeSpotRadius,
+				fakeSpotQuality);
+		geometry.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
+		geometry.put(CellCenterToSpCenterAng, getAngLessThan90(
+				Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I)));
+		return geometry; 
 	}
 
 	public HashMap<String, Object> addVariations(HashMap<String, Object> currentGeo, HashMap<String, Object> lastGeo,
@@ -122,10 +108,10 @@ public class ComputeGeometry {
 	 * re-calculate the position of poles. Newly returned coordinates
 	 * corresponding the one in cropped image
 	 */
-	public Iterable<Spot> centerSpots(Iterable<Spot> spotSet, double calibratedXBase, double calibratedYBase) {
+	public Iterable<Spot> centerSpots(Iterable<Spot> spotSet) {
 		for (Spot s : spotSet) {
-			s.putFeature(Spot.POSITION_X, s.getFeature(Spot.POSITION_X) - calibratedXBase);
-			s.putFeature(Spot.POSITION_Y, s.getFeature(Spot.POSITION_Y) - calibratedYBase);
+			s.putFeature(Spot.POSITION_X, s.getFeature(Spot.POSITION_X) - this.calibratedXBase);
+			s.putFeature(Spot.POSITION_Y, s.getFeature(Spot.POSITION_Y) - this.calibratedYBase);
 		}
 		return spotSet;
 	}
@@ -136,7 +122,7 @@ public class ComputeGeometry {
 	 * @param spotSet
 	 * @return
 	 */
-	public ArrayList<Spot> findSpindle(Iterable<Spot> spotSet) {
+	public ArrayList<Spot> findMostDistant2Spots(Iterable<Spot> spotSet) {
 		ArrayList<Spot> poles = new ArrayList<Spot>();
 		for (Spot s0 : spotSet) {
 			if (poles.size() < 2) {

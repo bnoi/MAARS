@@ -337,7 +337,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				imp.setCalibration(fluoImgCalib);
 				IJ.saveAsTiff(imp, pathToCroppedImg);
 			}
-			fieldStack = null;
 			final String file = fluoDir + channel + ".ome.btf";
 			final String macroOpts = "outfile=[" + file
 					+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
@@ -414,8 +413,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 					e.printStackTrace();
 				}
 				HashMap<Integer, HashMap<String, Object>> geosInCell = geosOfCells.get(channel).get(cellNb);
-				// ReportingUtils.logMessage("cell " + cellNb + "_" +
-				// geosInCell.size());
 				for (int frame : geosInCell.keySet()) {
 					if (geosInCell.containsKey(frame)) {
 						geoOfFrame = new String[headerList.length];

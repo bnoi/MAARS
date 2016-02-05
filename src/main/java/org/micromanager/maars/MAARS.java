@@ -150,8 +150,15 @@ public class MAARS implements Runnable {
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
+						} else {
+							ReportingUtils.logMessage(
+									"Attention : acquisition before took longer than " + timeInterval + " ms.");
 						}
 					}
+					// main acquisition finished, find whether there is merotely
+					// cells.
+					
+					
 				} else {
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);

@@ -1,2 +1,0 @@
-//print(mm.core().getVersionInfo());
-mm.displays();
