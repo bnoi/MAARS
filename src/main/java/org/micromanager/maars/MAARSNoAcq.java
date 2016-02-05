@@ -63,10 +63,10 @@ public class MAARSNoAcq implements Runnable {
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
-				// from Roi initialize a set of cell
+				// from Roi.zip initialize a set of cell
 				soc.loadCells(xPos, yPos);
-				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				// Get the focus slice of BF image
+				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				Calibration bfImgCal = segImg.getCalibration();
 				// ----------------start acquisition and analysis --------//
 				try {
@@ -119,8 +119,6 @@ public class MAARSNoAcq implements Runnable {
 					e1.printStackTrace();
 				}
 			}
-			// RoiManager.getInstance().reset();
-			// RoiManager.getInstance().close();
 		}
 		es.shutdown();
 		try {

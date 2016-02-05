@@ -2,6 +2,7 @@ package org.micromanager.cellstateanalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,12 +12,15 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.math3.util.FastMath;
 import org.micromanager.utils.ImgUtils;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Line;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 
@@ -36,6 +40,7 @@ public class FluoAnalyzer implements Runnable {
 	private double radius;
 	private int frame;
 	private double timeInterval;
+	private HashSet<Integer> mitoCells;
 
 	/**
 	 * Analyze the set of cell in given the fluo image
@@ -70,6 +75,7 @@ public class FluoAnalyzer implements Runnable {
 		this.radius = radius;
 		this.frame = frame;
 		this.timeInterval = timeInterval;
+		this.mitoCells = new HashSet<Integer>();
 	}
 
 	/**
@@ -100,7 +106,7 @@ public class FluoAnalyzer implements Runnable {
 		Future<?> future = null;
 		for (int i = 0; i < nThread; i++) {
 			// analyze every subset of cell
-			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread));
+			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, mitoCells));
 		}
 		es.shutdown();
 		try {
@@ -114,6 +120,9 @@ public class FluoAnalyzer implements Runnable {
 			es.awaitTermination(90, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+		for (int i : mitoCells) {
+			IJ.log("" + i);
 		}
 	}
 
@@ -155,10 +164,12 @@ public class FluoAnalyzer implements Runnable {
 	private class AnalyseBlockCells implements Runnable {
 		final int index;
 		final int[] deltas;
+		HashSet<Integer> mitoCells;
 
-		public AnalyseBlockCells(int index, final int[] deltas) {
+		public AnalyseBlockCells(int index, final int[] deltas, HashSet<Integer> mitoCells) {
 			this.index = index;
 			this.deltas = deltas;
+			this.mitoCells = mitoCells;
 		}
 
 		@Override
@@ -211,7 +222,51 @@ public class FluoAnalyzer implements Runnable {
 						calibratedXBase, calibratedYBase);
 				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
 				if (spotSet != null) {
-					HashMap<String, Object> geometry = cptgeometry.compute(spotSet);
+					// this functions modify directly coordinates of spot in
+					// soc, because it's back-up
+					cptgeometry.centerSpots(spotSet);
+					int setSize = Iterables.size(spotSet);
+					HashMap<String, Object> geometry = new HashMap<String, Object>();
+					geometry.put(ComputeGeometry.NbOfSpotDetected, setSize);
+					if (setSize == 1) {
+						geometry.put(ComputeGeometry.PHASE, ComputeGeometry.INTERPHASE);
+					} else {
+						ArrayList<Spot> poles = cptgeometry.findMostDistant2Spots(spotSet);
+						geometry.put(ComputeGeometry.PHASE, ComputeGeometry.MITOSIS);
+						geometry = cptgeometry.compute(geometry, poles);
+						if (setSize > 2) {
+							Line spLine = new Line(
+									(int) FastMath
+											.round(poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+									(int) FastMath
+											.round(poles.get(0).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight),
+									(int) FastMath
+											.round(poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+									(int) FastMath
+											.round(poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
+							Line.setWidth((int) FastMath.round(1 / fluoImgCal.pixelWidth));
+							for (Spot s : spotSet) {
+								if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
+									// ReportingUtils.logMessage(" " + (int)
+									// FastMath
+									// .round(s.getFeature(Spot.POSITION_X) /
+									// fluoImgCal.pixelWidth));
+									// ReportingUtils.logMessage(" " + (int)
+									// FastMath
+									// .round(s.getFeature(Spot.POSITION_Y) /
+									// fluoImgCal.pixelHeight));
+									if (spLine.contains(
+											(int) FastMath.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+											(int) FastMath
+													.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
+										if (!mitoCells.contains(cellNb)) {
+											this.mitoCells.add(cellNb);
+										}
+									}
+								}
+							}
+						}
+					}
 					soc.putGeometry(channel, cellNb, frame, geometry);
 					// HashMap<String, Object> newGeometry = new HashMap<String,
 					// Object>();
