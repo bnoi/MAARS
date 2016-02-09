@@ -4,6 +4,9 @@ import mmcorej.CMMCore;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +20,7 @@ import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
@@ -35,6 +39,7 @@ public class MAARS implements Runnable {
 	private CMMCore mmc;
 	private MaarsParameters parameters;
 	private SetOfCells soc;
+	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
 
 	/**
 	 * Constructor
@@ -48,6 +53,7 @@ public class MAARS implements Runnable {
 		this.parameters = parameters;
 		this.soc = soc;
 		this.mm = mm;
+		this.merotelyCandidates = new ConcurrentHashMap<Integer, Integer>();
 	}
 
 	public void runAnalysis() {
@@ -76,14 +82,7 @@ public class MAARS implements Runnable {
 			}
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
-			System.out.println("x : " + xPos + " y : " + yPos);
-			try {
-				mmc.setShutterDevice(
-						parameters.getChShutter(parameters.getSegmentationParameter(MaarsParameters.CHANNEL)));
-			} catch (Exception e2) {
-				System.out.println("Can't set BF channel for autofocusing");
-				e2.printStackTrace();
-			}
+			System.out.println("Current position : x_" + xPos + " y_" + yPos);
 			autofocus(mm, mmc);
 			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
 			System.out.println("Acquire bright field image...");
@@ -139,7 +138,8 @@ public class MAARS implements Runnable {
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
 							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, timeInterval));
+									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, timeInterval,
+									merotelyCandidates));
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
@@ -157,8 +157,7 @@ public class MAARS implements Runnable {
 					}
 					// main acquisition finished, find whether there is merotely
 					// cells.
-					
-					
+
 				} else {
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
@@ -168,7 +167,7 @@ public class MAARS implements Runnable {
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
 						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, 0));
+								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, 0, merotelyCandidates));
 					}
 				}
 				RoiManager.getInstance().reset();
@@ -178,7 +177,15 @@ public class MAARS implements Runnable {
 					t2.start();
 					t3.start();
 				}
+				for (int nb : merotelyCandidates.keySet()) {
+					if (this.merotelyCandidates.get(nb) > 5) {
+						String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
+								.format(Calendar.getInstance().getTime());
+						IJ.log(timeStamp + " : " + nb);
+					}
+				}
 			}
+			this.merotelyCandidates.clear();
 		}
 		mmc.setAutoShutter(true);
 		es.shutdown();
@@ -201,6 +208,12 @@ public class MAARS implements Runnable {
 	 * @param mmc
 	 */
 	public void autofocus(MMStudio mm, CMMCore mmc) {
+		try {
+			mmc.setShutterDevice(parameters.getChShutter(parameters.getSegmentationParameter(MaarsParameters.CHANNEL)));
+		} catch (Exception e2) {
+			System.out.println("Can't set BF channel for autofocusing");
+			e2.printStackTrace();
+		}
 		double initialPosition = 0;
 		String focusDevice = mmc.getFocusDevice();
 		try {

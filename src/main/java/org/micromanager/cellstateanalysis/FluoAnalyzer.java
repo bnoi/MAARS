@@ -2,7 +2,7 @@ package org.micromanager.cellstateanalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
@@ -40,13 +39,12 @@ public class FluoAnalyzer implements Runnable {
 	private double radius;
 	private int frame;
 	private double timeInterval;
-	private HashSet<Integer> mitoCells;
+	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
 
 	/**
-	 * Analyze the set of cell in given the fluo image
-	 * 
 	 * @param fluoImage
 	 *            image to analyze
+	 * 
 	 * @param bfImgCal
 	 *            bright field image calibration, need it to decide whether or
 	 *            not rescale ROI
@@ -62,9 +60,13 @@ public class FluoAnalyzer implements Runnable {
 	 *            time point
 	 * @param timeInterval
 	 *            interval between time points
+	 * @param merotelyCandidates
+	 *            hashmap<cell number, times that this cell has been found one point on
+	 *            the "spindle line"
 	 */
+
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-			double radius, int frame, double timeInterval) {
+			double radius, int frame, double timeInterval, ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
 		this.fluoImage = fluoImage;
 		this.fluoImgCal = fluoImage.getCalibration();
 		soc.setFluoImgCalib(fluoImgCal);
@@ -75,7 +77,7 @@ public class FluoAnalyzer implements Runnable {
 		this.radius = radius;
 		this.frame = frame;
 		this.timeInterval = timeInterval;
-		this.mitoCells = new HashSet<Integer>();
+		this.merotelyCandidates = merotelyCandidates;
 	}
 
 	/**
@@ -106,7 +108,7 @@ public class FluoAnalyzer implements Runnable {
 		Future<?> future = null;
 		for (int i = 0; i < nThread; i++) {
 			// analyze every subset of cell
-			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, mitoCells));
+			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, merotelyCandidates));
 		}
 		es.shutdown();
 		try {
@@ -120,9 +122,6 @@ public class FluoAnalyzer implements Runnable {
 			es.awaitTermination(90, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
-		for (int i : mitoCells) {
-			IJ.log("" + i);
 		}
 	}
 
@@ -164,12 +163,13 @@ public class FluoAnalyzer implements Runnable {
 	private class AnalyseBlockCells implements Runnable {
 		final int index;
 		final int[] deltas;
-		HashSet<Integer> mitoCells;
+		private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
 
-		public AnalyseBlockCells(int index, final int[] deltas, HashSet<Integer> mitoCells) {
+		public AnalyseBlockCells(int index, final int[] deltas,
+				ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
 			this.index = index;
 			this.deltas = deltas;
-			this.mitoCells = mitoCells;
+			this.merotelyCandidates = merotelyCandidates;
 		}
 
 		@Override
@@ -221,6 +221,8 @@ public class FluoAnalyzer implements Runnable {
 						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight, cell.get(Cell.MAJOR), cell.get(Cell.ANGLE),
 						calibratedXBase, calibratedYBase);
 				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
+				// testing whether using GFP, because ussually we mark Kt with
+				// GFP
 				if (spotSet != null) {
 					// this functions modify directly coordinates of spot in
 					// soc, because it's back-up
@@ -244,23 +246,20 @@ public class FluoAnalyzer implements Runnable {
 											.round(poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
 									(int) FastMath
 											.round(poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
-							Line.setWidth((int) FastMath.round(1 / fluoImgCal.pixelWidth));
+							Line.setWidth((int) FastMath.round(0.5 / fluoImgCal.pixelWidth));
 							for (Spot s : spotSet) {
 								if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
-									// ReportingUtils.logMessage(" " + (int)
-									// FastMath
-									// .round(s.getFeature(Spot.POSITION_X) /
-									// fluoImgCal.pixelWidth));
-									// ReportingUtils.logMessage(" " + (int)
-									// FastMath
-									// .round(s.getFeature(Spot.POSITION_Y) /
-									// fluoImgCal.pixelHeight));
+									// detect metaphase Kt oscillation or
+									// merotely
 									if (spLine.contains(
 											(int) FastMath.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
 											(int) FastMath
 													.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
-										if (!mitoCells.contains(cellNb)) {
-											this.mitoCells.add(cellNb);
+										if (merotelyCandidates.containsKey(cellNb)) {
+											this.merotelyCandidates.replace(cellNb,
+													this.merotelyCandidates.get(cellNb) + 1);
+										} else {
+											this.merotelyCandidates.put(cellNb, 1);
 										}
 									}
 								}

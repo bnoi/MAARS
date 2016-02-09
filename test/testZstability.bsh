@@ -1,0 +1,32 @@
+import java.util.ArrayList;
+String focusDevice = mmc.getFocusDevice();
+print(focusDevice);
+double range = 1.2;
+Map listPositions = new HashMap();
+for (int speed = 0; speed < 10; speed++){
+	for (int tolerance = 0; tolerance < 10; tolerance++){
+		//mmc.setProperty(label, propName, speed);
+		//mmc.setProperty(label, propName, tolerance);
+		String label = String.valueOf(speed) + "_" + String.valueOf(tolerance);
+		zFocus = mmc.getPosition(focusDevice);
+		double z = zFocus - (range / 2);
+		ArrayList onePosition = new ArrayList();
+		for (int repete = 0; repete < 100; repete++){
+			for (int k = 0; k < 3; k++) {
+				//print("- set focus device at position " + z);
+				try {
+					mmc.setPosition(focusDevice, z);
+					mmc.waitForDevice(focusDevice);
+				} catch (Exception e) {
+					print("could not set focus device at position");
+				}
+				z = z + 0.4;
+			}
+			onePosition.add(repete, mmc.getPosition(focusDevice));
+		}
+		mmc.setPosition(zFocus);
+		listPositions.put(label, onePosition);
+		print(label);
+		print(onePosition);
+	}	
+}
