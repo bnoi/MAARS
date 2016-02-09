@@ -3,6 +3,9 @@ package org.micromanager.maars;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,11 +34,13 @@ public class MAARSNoAcq implements Runnable {
 	private CMMCore mmc;
 	private MaarsParameters parameters;
 	private SetOfCells soc;
+	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
 
 	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
 		this.mmc = mmc;
 		this.parameters = parameters;
 		this.soc = soc;
+		this.merotelyCandidates = new ConcurrentHashMap<Integer, Integer>();
 	}
 
 	public void runAnalysis() {
@@ -103,12 +108,11 @@ public class MAARSNoAcq implements Runnable {
 						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
 								+ frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
-						future = es
-								.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
-										Integer.parseInt(parameters.getChMaxNbSpot(channel)), Double
-												.parseDouble(parameters.getChSpotRaius(channel)),
-										frame, Double.parseDouble(
-												parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL))));
+						future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+								Double.parseDouble(parameters.getChSpotRaius(channel)), frame,
+								Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)),
+								merotelyCandidates));
 					}
 					frame++;
 				}
@@ -134,6 +138,14 @@ public class MAARSNoAcq implements Runnable {
 			soc.saveSpots();
 			soc.saveGeometries();
 			soc.saveCroppedImgs();
+			// cells to be printed
+			for (int i : merotelyCandidates.keySet()) {
+				if (this.merotelyCandidates.get(i) > 5) {
+					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
+							.format(Calendar.getInstance().getTime());
+					IJ.log(timeStamp + " : " + i);
+				}
+			}
 			ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
 		}

@@ -243,7 +243,7 @@ public class SuperClassAcquisition {
 		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
 		List<Image> listImg = new ArrayList<Image>();
-		for (int k = 0; k <= sliceNumber; k++) {
+		for (int k = 0; k < sliceNumber; k++) {
 			System.out.println("- set focus device at position " + z);
 			try {
 				mmc.setPosition(focusDevice, z);
@@ -251,8 +251,8 @@ public class SuperClassAcquisition {
 			} catch (Exception e) {
 				ReportingUtils.logMessage("could not set focus device at position");
 			}
-			listImg.add(mm.live().snap(true).get(0));
 			z = z + step;
+			listImg.add(mm.live().snap(true).get(0));
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
 		try {

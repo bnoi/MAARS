@@ -44,9 +44,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private ArrayList<Cell> cellArray;
 	private String rootSavingPath;
 	private HashMap<String, HashMap<Integer, SpotCollection>> spotsInCells;
-	// structure for features is really complex...because i need write hashmap
-	// to xml, I will rewrite an xmlwrite for feature collection object for
-	// exemple
 	private HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>> geosOfCells;
 	private ArrayList<String[]> acqIDs;
 	private Model trackmateModel;
