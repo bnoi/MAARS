@@ -137,13 +137,14 @@ public class MAARSNoAcq implements Runnable {
 			long startWriting = System.currentTimeMillis();
 			soc.saveSpots();
 			soc.saveGeometries();
-			soc.saveCroppedImgs();
+			String croppedImgDir = soc.saveCroppedImgs();
 			// cells to be printed
 			for (int i : merotelyCandidates.keySet()) {
 				if (this.merotelyCandidates.get(i) > 5) {
 					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 							.format(Calendar.getInstance().getTime());
 					IJ.log(timeStamp + " : " + i);
+					IJ.openImage(croppedImgDir + i + "_GFP.tif").show();
 				}
 			}
 			ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
