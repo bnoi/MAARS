@@ -2,14 +2,23 @@ package org.micromanager.maars;
 
 import mmcorej.CMMCore;
 
+import java.awt.Toolkit;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
@@ -77,31 +86,21 @@ public class MAARS implements Runnable {
 				mm.core().setXYPosition(explo.getX(i), explo.getY(i));
 				mmc.waitForDevice(mmc.getXYStageDevice());
 			} catch (Exception e) {
-				System.out.println("Can't set XY stage devie");
+				IJ.error("Can't set XY stage devie");
 				e.printStackTrace();
 			}
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
-			System.out.println("Current position : x_" + xPos + " y_" + yPos);
+			IJ.log("Current position : x_" + xPos + " y_" + yPos);
 			autofocus(mm, mmc);
 			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
-			System.out.println("Acquire bright field image...");
+			IJ.log("Acquire bright field image...");
 			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL));
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
-				Thread t1 = new Thread(new ImgWriter(soc));
-				Thread t2 = new Thread(new spotsWriter(soc));
-				Thread t3 = new Thread(new featuresWriter(soc));
 				// from Roi initialize a set of cell
-				try {
-					t1.join();
-					t2.join();
-					t3.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 				soc.reset();
 				soc.loadCells(xPos, yPos);
 				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
@@ -173,17 +172,24 @@ public class MAARS implements Runnable {
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
 				if (soc.size() != 0) {
-					t1.start();
-					t2.start();
-					t3.start();
-				}
-				for (int nb : merotelyCandidates.keySet()) {
-					if (this.merotelyCandidates.get(nb) > 5) {
-						String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
-								.format(Calendar.getInstance().getTime());
-						IJ.log(timeStamp + " : " + nb);
+					long startWriting = System.currentTimeMillis();
+					soc.saveSpots();
+					soc.saveGeometries();
+					String croppedImgDir = soc.saveCroppedImgs();
+					for (int nb : merotelyCandidates.keySet()) {
+						if (this.merotelyCandidates.get(nb) > 5) {
+							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
+									.format(Calendar.getInstance().getTime());
+							IJ.log(timeStamp + " : " + nb);
+							IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
+							Toolkit.getDefaultToolkit().beep();
+						}
 					}
+					mailNotify();
+					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+							+ " sec for writing results");
 				}
+
 			}
 			this.merotelyCandidates.clear();
 		}
@@ -196,8 +202,8 @@ public class MAARS implements Runnable {
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
-		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
-		System.out.println("DONE.");
+		IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
+		IJ.log("DONE.");
 	}
 
 	/**
@@ -211,7 +217,7 @@ public class MAARS implements Runnable {
 		try {
 			mmc.setShutterDevice(parameters.getChShutter(parameters.getSegmentationParameter(MaarsParameters.CHANNEL)));
 		} catch (Exception e2) {
-			System.out.println("Can't set BF channel for autofocusing");
+			IJ.error("Can't set BF channel for autofocusing");
 			e2.printStackTrace();
 		}
 		double initialPosition = 0;
@@ -219,53 +225,40 @@ public class MAARS implements Runnable {
 		try {
 			initialPosition = mmc.getPosition();
 		} catch (Exception e) {
-			System.out.println("Can't get current z level");
+			IJ.error("Can't get current z level");
 			e.printStackTrace();
 		}
 
 		// Get autofocus manager
-		System.out.println("First autofocus");
+		IJ.log("First autofocus");
 		AutofocusPlugin autofocus = mm.getAutofocus();
-		try {
-			mmc.setShutterOpen(true);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-		try {
-			autofocus.fullFocus();
-		} catch (MMException e1) {
-			e1.printStackTrace();
-		}
 		double firstPosition = 0;
 		try {
+			mmc.setShutterOpen(true);
+			autofocus.fullFocus();
 			mmc.waitForDevice(focusDevice);
 			firstPosition = mmc.getPosition(mmc.getFocusDevice());
-		} catch (Exception e) {
-			System.out.println("Can't get current z level");
-			e.printStackTrace();
+		} catch (Exception e2) {
+			e2.printStackTrace();
 		}
 
 		try {
 			mmc.waitForDevice(focusDevice);
 			mmc.setPosition(focusDevice, 2 * initialPosition - firstPosition);
 		} catch (Exception e) {
-			System.out.println("Can't set z position");
+			IJ.error("Can't set z position");
 			e.printStackTrace();
 		}
 
-		System.out.println("Seconde autofocus");
-		try {
-			autofocus.fullFocus();
-		} catch (MMException e1) {
-			e1.printStackTrace();
-		}
-
+		IJ.log("Seconde autofocus");
 		double secondPosition = 0;
 		try {
+			autofocus.fullFocus();
 			mmc.waitForDevice(focusDevice);
 			secondPosition = mmc.getPosition(mmc.getFocusDevice());
+		} catch (MMException e1) {
+			e1.printStackTrace();
 		} catch (Exception e) {
-			System.out.println("Can't get current z level");
 			e.printStackTrace();
 		}
 
@@ -273,7 +266,7 @@ public class MAARS implements Runnable {
 			mmc.waitForDevice(focusDevice);
 			mmc.setPosition(focusDevice, (secondPosition + firstPosition) / 2);
 		} catch (Exception e) {
-			System.out.println("Can't set z position");
+			IJ.error("Can't set z position");
 			e.printStackTrace();
 		}
 		try {
@@ -283,50 +276,43 @@ public class MAARS implements Runnable {
 		}
 	}
 
-	// IN-class classes for result writing
-	class ImgWriter implements Runnable {
+	public static void mailNotify() {
+		String to = "tongli.bioinfo@gmail.com";
 
-		private SetOfCells soc;
+		// Sender's email ID needs to be mentioned
+		String from = "MAARS@univ-tlse3.fr";
 
-		public ImgWriter(SetOfCells soc) {
-			this.soc = soc;
+		// Get system properties
+		Properties properties = System.getProperties();
+
+		// Setup mail server
+		properties.setProperty("mail.smtp.host", "smtps.univ-tlse3.fr");
+
+		// Get the default Session object.
+		Session session = Session.getDefaultInstance(properties);
+
+		try {
+			// Create a default MimeMessage object.
+			MimeMessage message = new MimeMessage(session);
+
+			// Set From: header field of the header.
+			message.setFrom(new InternetAddress(from));
+
+			// Set To: header field of the header.
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
+
+			// Set Subject: header field
+			message.setSubject("Analysis done!");
+
+			// Now set the actual message
+			message.setText("");
+
+			// Send message
+			Transport.send(message);
+			System.out.println("Sent message successfully....");
+		} catch (MessagingException mex) {
+			mex.printStackTrace();
 		}
-
-		@Override
-		public void run() {
-			soc.saveCroppedImgs();
-		}
-
-	}
-
-	class spotsWriter implements Runnable {
-
-		private SetOfCells soc;
-
-		public spotsWriter(SetOfCells soc) {
-			this.soc = soc;
-		}
-
-		@Override
-		public void run() {
-			soc.saveSpots();
-		}
-
-	}
-
-	class featuresWriter implements Runnable {
-
-		private SetOfCells soc;
-
-		public featuresWriter(SetOfCells soc) {
-			this.soc = soc;
-		}
-
-		@Override
-		public void run() {
-			soc.saveGeometries();
-		}
-
 	}
 
 	@Override

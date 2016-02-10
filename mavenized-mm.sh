@@ -42,7 +42,7 @@ fi
 MM_FOLDER=$1
 
 # Need to be manually updated
-BASE_MM_VERSION="2.0.0.0"
+BASE_MM_VERSION="2.0.0.1"
 
 # Specify which file you want to mavenized (only MM jars)
 declare -a mm_jars=("MMJ_" "MMCoreJ" "MMAcqEngine")

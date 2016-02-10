@@ -1,10 +1,12 @@
 package org.micromanager.maars;
 
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -12,6 +14,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
@@ -51,7 +60,7 @@ public class MAARSNoAcq implements Runnable {
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
 
 		for (int i = 0; i < explo.length(); i++) {
-			System.out.println("x : " + explo.getX(i) + " y : " + explo.getY(i));
+			IJ.log("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			String pathToSegDir = FileUtils
@@ -62,7 +71,7 @@ public class MAARSNoAcq implements Runnable {
 				segImg = IJ.openImage(pathToSegMovie);
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("Invalid path");
+				IJ.error("Invalid path");
 			}
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
@@ -144,12 +153,14 @@ public class MAARSNoAcq implements Runnable {
 							.format(Calendar.getInstance().getTime());
 					IJ.log(timeStamp + " : " + i);
 					IJ.openImage(croppedImgDir + i + "_GFP.tif").show();
+					Toolkit.getDefaultToolkit().beep();
 				}
 			}
+			MAARS.mailNotify();
 			ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
 		}
-		System.out.println("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
+		IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
 	}
 
 	@Override
