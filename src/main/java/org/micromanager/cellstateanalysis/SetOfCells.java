@@ -296,7 +296,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	/**
 	 * crop and save images
 	 */
-	public void saveCroppedImgs() {
+	public String saveCroppedImgs() {
 		ImagePlus fluoImg;
 		ImagePlus zprojectImg;
 		String[] id = acqIDs.get(acqIDs.size() - 1);
@@ -342,6 +342,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			lociExporter.run(null);
 			ReportingUtils.logMessage(channel + " channel cropped images saved");
 		}
+		return croppedImgDir;
 	}
 
 	public void saveSpots() {

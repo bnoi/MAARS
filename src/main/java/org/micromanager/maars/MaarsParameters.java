@@ -143,9 +143,7 @@ public class MaarsParameters {
 		final SAXBuilder sb = new SAXBuilder();
 		try {
 			doc = sb.build(defaultParametersStream);
-		} catch (JDOMException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		}  catch (IOException | JDOMException e) {
 			e.printStackTrace();
 		}
 		root = (Element) doc.getContent(0);
