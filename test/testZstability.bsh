@@ -5,20 +5,19 @@ import util.opencsv.CSVWriter.NO_QUOTE_CHARACTER;
 
 String focusDevice = mmc.getFocusDevice();
 print(focusDevice);
-double range = 1.2;
+double range = 1.6;
 ArrayList outLines = new ArrayList();;
 for (int speed = 1; speed < 10; speed++){
 	for (int tolerance = 1; tolerance < 10; tolerance++){
-		mmc.setProperty("TIZDrive", "Speed", speed);
-		mmc.setProperty("TIZDrive", "Tolerance", tolerance);
+		//mmc.setProperty("TIZDrive", "Speed", speed);
+		//mmc.setProperty("TIZDrive", "Tolerance", tolerance);
 		String label = String.valueOf(speed) + "_" + String.valueOf(tolerance);
 		print(label);
-		mmc.setPosition(focusDevice, 0);
-		zFocus = mmc.getPosition(focusDevice);
-		double z = zFocus - (range / 2);
 		String[] onePosition = new String[101];
-		onePosition[0] = label;
 		for (int repete = 1; repete <= 100; repete++){
+			zFocus = mmc.getPosition(focusDevice);
+			double z = zFocus - (range / 2);
+			onePosition[0] = label;
 			for (int k = 0; k < 3; k++) {
 				//print("- set focus device at position " + z);
 				try {
@@ -36,7 +35,7 @@ for (int speed = 1; speed < 10; speed++){
 	}	
 }
 
-FileWriter writer = new FileWriter("D:\\Data\\Tong\\test.csv");
+FileWriter writer = new FileWriter("/home/tong/Documents/code/test.csv");
 CSVWriter csvwriter = new CSVWriter(writer, ',', CSVWriter.NO_QUOTE_CHARACTER);
 csvwriter.writeAll(outLines);
 csvwriter.close();
