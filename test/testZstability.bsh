@@ -7,11 +7,13 @@ String focusDevice = mmc.getFocusDevice();
 print(focusDevice);
 double range = 1.2;
 ArrayList outLines = new ArrayList();;
-for (int speed = 0; speed < 10; speed++){
-	for (int tolerance = 0; tolerance < 10; tolerance++){
-		//mmc.setProperty(label, propName, speed);
-		//mmc.setProperty(label, propName, tolerance);
+for (int speed = 1; speed < 10; speed++){
+	for (int tolerance = 1; tolerance < 10; tolerance++){
+		mmc.setProperty("TIZDrive", "Speed", speed);
+		mmc.setProperty("TIZDrive", "Tolerance", tolerance);
 		String label = String.valueOf(speed) + "_" + String.valueOf(tolerance);
+		print(label);
+		mmc.setPosition(focusDevice, 0);
 		zFocus = mmc.getPosition(focusDevice);
 		double z = zFocus - (range / 2);
 		String[] onePosition = new String[101];
@@ -34,7 +36,7 @@ for (int speed = 0; speed < 10; speed++){
 	}	
 }
 
-FileWriter writer = new FileWriter("/home/tong/Documents/code/test.csv");
+FileWriter writer = new FileWriter("D:\\Data\\Tong\\test.csv");
 CSVWriter csvwriter = new CSVWriter(writer, ',', CSVWriter.NO_QUOTE_CHARACTER);
 csvwriter.writeAll(outLines);
 csvwriter.close();
