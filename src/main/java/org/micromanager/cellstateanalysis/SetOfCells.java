@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.ImgUtils;
 
 import fiji.plugin.trackmate.Model;
@@ -66,13 +65,13 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 *            : parameters that used in
 	 */
 	public void loadCells(String xPos, String yPos) {
-		ReportingUtils.logMessage("Loading Cells");
+		IJ.log("Loading Cells");
 		Roi[] roiArray = getRoisAsArray(rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "/" + "ROI.zip");
 		cellArray = new ArrayList<Cell>();
 		for (int i = 0; i < roiArray.length; i++) {
 			cellArray.add(i, new Cell(roiArray[i], i));
 		}
-		ReportingUtils.logMessage("Done.");
+		IJ.log("Done.");
 	}
 
 	/**
@@ -340,7 +339,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			LociExporter lociExporter = new LociExporter();
 			lociExporter.setup(macroOpts, fieldImg);
 			lociExporter.run(null);
-			ReportingUtils.logMessage(channel + " channel cropped images saved");
+			IJ.log(channel + " channel cropped images saved");
 		}
 		return croppedImgDir;
 	}
@@ -356,7 +355,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		}
 		for (String channel : spotsInCells.keySet()) {
 			HashMap<Integer, SpotCollection> currentChannel = spotsInCells.get(channel);
-			ReportingUtils.logMessage("Find " + currentChannel.size() + " cell(s) with spots in channel " + channel);
+			IJ.log("Find " + currentChannel.size() + " cell(s) with spots in channel " + channel);
 			// for each cell
 			File newFile = null;
 			for (int cellNb : currentChannel.keySet()) {
@@ -386,7 +385,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			new File(featuresXmlDir).mkdirs();
 		}
 		for (String channel : geosOfCells.keySet()) {
-			ReportingUtils.logMessage("Saving features of channel " + channel);
+			IJ.log("Saving features of channel " + channel);
 			ArrayList<String[]> outLines = null;
 			HashMap<String, Integer> headerIndex = new HashMap<String, Integer>();
 			String[] headerList = new String[headerSet.size() + 1];

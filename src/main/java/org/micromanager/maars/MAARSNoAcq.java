@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -15,16 +14,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.utils.FileUtils;
 
 import ij.IJ;
@@ -110,7 +101,7 @@ public class MAARSNoAcq implements Runnable {
 				Future<?> future = null;
 				while (frame < frameCounter) {
 					for (String channel : arrayChannels) {
-						ReportingUtils.logMessage("Analysing channel " + channel + "_" + frame);
+						IJ.log("Analysing channel " + channel + "_" + frame);
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqID(id);
 						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
@@ -146,7 +137,6 @@ public class MAARSNoAcq implements Runnable {
 			soc.saveSpots();
 			soc.saveGeometries();
 			String croppedImgDir = soc.saveCroppedImgs();
-			// cells to be printed
 			for (int i : merotelyCandidates.keySet()) {
 				if (this.merotelyCandidates.get(i) > 5) {
 					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
@@ -156,8 +146,8 @@ public class MAARSNoAcq implements Runnable {
 					Toolkit.getDefaultToolkit().beep();
 				}
 			}
-			MAARS.mailNotify();
-			ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+//			MAARS.mailNotify();
+			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
 		}
 		IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
