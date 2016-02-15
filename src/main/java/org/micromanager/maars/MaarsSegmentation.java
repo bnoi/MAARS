@@ -5,6 +5,7 @@ import org.micromanager.segmentPombe.SegPombe;
 import org.micromanager.segmentPombe.SegPombeParameters;
 import org.micromanager.utils.FileUtils;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
 
@@ -47,7 +48,7 @@ public class MaarsSegmentation {
 	 */
 	public void segmentation(ImagePlus img) {
 
-		System.out.println("Prepare parameters for segmentation...");
+		IJ.log("Prepare parameters for segmentation...");
 		segPombeParam = new SegPombeParameters();
 
 		segPombeParam.setImageToAnalyze(img);
@@ -89,20 +90,20 @@ public class MaarsSegmentation {
 
 		segPombeParam.setMeanGreyValueThreshold(
 				Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.MEAN_GREY_VALUE)));
-		System.out.println("Done.");
+		IJ.log("Done.");
 		// Main segmentation process
-		System.out.println("Begin segmentation...");
+		IJ.log("Begin segmentation...");
 		SegPombe segPombe = new SegPombe(segPombeParam);
 		segPombe.createCorrelationImage();
 		segPombe.convertCorrelationToBinaryImage();
 		segPombe.analyseAndFilterParticles();
 		segPombe.showAndSaveResultsAndCleanUp();
-		System.out.println("Segmentation done");
+		IJ.log("Segmentation done");
 		this.rt = segPombe.getRoiMeasurements();
 		if (segPombe.roiDetected()) {
 			this.roiDetected = true;
 		} else {
-			System.out.println("No ROI detected!! Stop here!");
+			IJ.log("No ROI detected!! Stop here!");
 		}
 	}
 

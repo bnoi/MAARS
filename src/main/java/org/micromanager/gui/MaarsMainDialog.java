@@ -30,7 +30,6 @@ import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
 
-import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MAARS;
 import org.micromanager.maars.MAARSNoAcq;
 import org.micromanager.maars.MaarsParameters;
@@ -86,7 +85,7 @@ public class MaarsMainDialog implements ActionListener {
 
 		// initialize mainFrame
 
-		ReportingUtils.logMessage("create main dialog ...");
+		IJ.log("create main dialog ...");
 		mainDialog = new JFrame("Mitosis Analysing And Recording System - MAARS");
 		JFrame.setDefaultLookAndFeelDecorated(true);
 		mainDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -266,7 +265,7 @@ public class MaarsMainDialog implements ActionListener {
 		mainPanel.add(savePathTfPanel);
 		mainPanel.add(okPanel);
 		mainDialog.add(mainPanel);
-		ReportingUtils.logMessage("Done.");
+		IJ.log("Done.");
 		mainDialog.pack();
 	}
 
