@@ -12,10 +12,14 @@ for (int speed = 1; speed < 10; speed++){
 		mmc.setProperty("TIZDrive", "Speed", speed);
 		mmc.setProperty("TIZDrive", "Tolerance", tolerance);
 		String label = String.valueOf(speed) + "_" + String.valueOf(tolerance);
-		print(label);
 		String[] onePosition = new String[101];
-		for (int repete = 1; repete <= 100; repete++){
+		zFocus = mmc.getPosition(focusDevice);
+		while (zFocus > 1000.05 || zFocus < 999.95){
+			mmc.setPosition(1000);
 			zFocus = mmc.getPosition(focusDevice);
+		}
+		print(label);
+		for (int repete = 1; repete <= 100; repete++){
 			mmc.waitForDevice(focusDevice);
 			double z = zFocus - (range / 2);
 			onePosition[0] = label;
@@ -37,7 +41,7 @@ for (int speed = 1; speed < 10; speed++){
 	}	
 }
 
-FileWriter writer = new FileWriter("D:\\Data\\Tong\\test1.csv");
+FileWriter writer = new FileWriter("D:\\Data\\Tong\\test_60_0.csv");
 CSVWriter csvwriter = new CSVWriter(writer, ',', CSVWriter.NO_QUOTE_CHARACTER);
 csvwriter.writeAll(outLines);
 csvwriter.close();
