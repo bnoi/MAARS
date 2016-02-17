@@ -258,6 +258,10 @@ public class SuperClassAcquisition {
 		try {
 			mmc.setShutterOpen(false);
 			mmc.setPosition(focusDevice, zFocus);
+			while (zFocus > zFocus + 0.03 || zFocus < zFocus - 0.03){
+				mmc.setPosition(focusDevice, zFocus);
+				zFocus = mmc.getPosition(focusDevice);
+			}
 			mmc.waitForSystem();
 		} catch (Exception e) {
 			ReportingUtils.logMessage("could not set focus device back to position and close shutter");

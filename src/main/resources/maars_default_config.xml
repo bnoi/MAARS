@@ -39,18 +39,18 @@
         <SHUTTER>TIDiaLamp</SHUTTER>
       </BF>
       <CFP>
-        <COLOR>CYAN</COLOR>
+        <COLOR>BLUE</COLOR>
         <EXPOSURE>220</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </CFP>
       <DAPI>
-        <COLOR>BLUE</COLOR>
+        <COLOR></COLOR>
         <EXPOSURE>100</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </DAPI>
       <GFP>
-        <COLOR>GREEN</COLOR>
-        <EXPOSURE>150</EXPOSURE>
+        <COLOR>CYAN</COLOR>
+        <EXPOSURE>80</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </GFP>
       <TxRed>
