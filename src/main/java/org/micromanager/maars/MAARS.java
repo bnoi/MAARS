@@ -93,9 +93,18 @@ public class MAARS implements Runnable {
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			IJ.log("Current position : x_" + xPos + " y_" + yPos);
 			autofocus(mm, mmc);
+			double zFocus = 0;
+			String focusDevice = mmc.getFocusDevice();
+			try {
+				zFocus = mmc.getPosition(focusDevice);
+				mmc.waitForDevice(focusDevice);
+			} catch (Exception e) {
+				ReportingUtils.logMessage("could not get z current position");
+				e.printStackTrace();
+			}
 			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
 			IJ.log("Acquire bright field image...");
-			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL));
+			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus);
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
@@ -134,7 +143,7 @@ public class MAARS implements Runnable {
 						for (String channel : arrayChannels) {
 							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 							soc.addAcqID(id);
-							ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
+							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
 							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, timeInterval,
@@ -163,7 +172,7 @@ public class MAARS implements Runnable {
 					for (String channel : arrayChannels) {
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqID(id);
-						ImagePlus fluoImage = fluoAcq.acquire(frame, channel);
+						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
 						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, 0, merotelyCandidates));

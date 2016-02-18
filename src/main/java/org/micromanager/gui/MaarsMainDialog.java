@@ -227,7 +227,7 @@ public class MaarsMainDialog implements ActionListener {
 
 		JPanel savePathLabelPanel = new JPanel(new GridLayout(1, 0));
 		savePathLabelPanel.setBackground(bgColor);
-		JLabel savePathLabel = new JLabel("Save Path :");
+		JLabel savePathLabel = new JLabel("Saving Path :");
 		savePathLabelPanel.add(savePathLabel);
 
 		// Saving Path textfield

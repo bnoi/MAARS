@@ -183,7 +183,7 @@ public class SuperClassAcquisition {
 	 *            name of the current channel (ex. BF, CFP, GFP, TXRED)
 	 * @return a duplicate of acquired images.
 	 */
-	public ImagePlus acquire(int frame, String channelName) {
+	public ImagePlus acquire(int frame, String channelName, double zFocus) {
 		String acqName = null;
 		String imgName = null;
 		double range = 0;
@@ -230,15 +230,7 @@ public class SuperClassAcquisition {
 			ReportingUtils.logMessage("Can not open shutter");
 			e.printStackTrace();
 		}
-		double zFocus = 0;
 		String focusDevice = mmc.getFocusDevice();
-		try {
-			zFocus = mmc.getPosition(focusDevice);
-			mmc.waitForDevice(focusDevice);
-		} catch (Exception e) {
-			ReportingUtils.logMessage("could not get z current position");
-			e.printStackTrace();
-		}
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
