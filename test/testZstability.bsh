@@ -5,7 +5,7 @@ import util.opencsv.CSVWriter.NO_QUOTE_CHARACTER;
 
 String focusDevice = mmc.getFocusDevice();
 print(focusDevice);
-double range = 1.6;
+double range = 1.2;
 ArrayList outLines = new ArrayList();;
 for (int speed = 1; speed < 10; speed++){
 	for (int tolerance = 1; tolerance < 10; tolerance++){
@@ -16,14 +16,14 @@ for (int speed = 1; speed < 10; speed++){
 		zFocus = mmc.getPosition(focusDevice);
 		while (zFocus > 1000.05 || zFocus < 999.95){
 			mmc.setPosition(1000);
+			mmc.waitForDevice(focusDevice);
 			zFocus = mmc.getPosition(focusDevice);
 		}
 		print(label);
 		for (int repete = 1; repete <= 100; repete++){
-			mmc.waitForDevice(focusDevice);
 			double z = zFocus - (range / 2);
 			onePosition[0] = label;
-			for (int k = 0; k < 3; k++) {
+			for (int k = 0; k < 4; k++) {
 				//print("- set focus device at position " + z);
 				try {
 					mmc.setPosition(focusDevice, z);
@@ -33,10 +33,10 @@ for (int speed = 1; speed < 10; speed++){
 				}
 				z = z + 0.4;
 			}
+			mmc.setPosition(1000);
+			mmc.waitForDevice(focusDevice);
 			onePosition[repete] = String.valueOf(mmc.getPosition(focusDevice));
 		}
-		mmc.setPosition(1000);
-		mmc.waitForDevice(focusDevice);
 		outLines.add(onePosition);
 	}	
 }

@@ -92,7 +92,7 @@ public class MAARS implements Runnable {
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			IJ.log("Current position : x_" + xPos + " y_" + yPos);
-			autofocus(mm, mmc);
+//			autofocus(mm, mmc);
 			double zFocus = 0;
 			String focusDevice = mmc.getFocusDevice();
 			try {
