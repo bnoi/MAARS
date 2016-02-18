@@ -17,7 +17,7 @@ public class SegAcquisition extends SuperClassAcquisition {
 		super(mm, mmc, parameters, positionX, positionY);
 	}
 
-	public ImagePlus acquire(String channelName) {
-		return super.acquire(0, channelName);
+	public ImagePlus acquire(String channelName, double zFocus) {
+		return super.acquire(0, channelName, zFocus);
 	}
 }

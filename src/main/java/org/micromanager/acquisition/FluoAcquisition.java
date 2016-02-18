@@ -17,7 +17,7 @@ public class FluoAcquisition extends SuperClassAcquisition {
 		super(mm, mmc, parameters, positionX, positionY);
 	}
 
-	public ImagePlus acquire(int frame, String channelName) {
-		return super.acquire(frame, channelName);
+	public ImagePlus acquire(int frame, String channelName, double zFocus) {
+		return super.acquire(frame, channelName, zFocus);
 	}
 }
