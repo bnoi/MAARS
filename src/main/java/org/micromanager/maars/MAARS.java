@@ -191,7 +191,6 @@ public class MAARS implements Runnable {
 									.format(Calendar.getInstance().getTime());
 							IJ.log(timeStamp + " : " + nb);
 							IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
-							Toolkit.getDefaultToolkit().beep();
 						}
 					}
 					mailNotify();
