@@ -315,7 +315,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				zprojectImg = ImgUtils.zProject(fluoImg);
 				if (fieldStack == null) {
 					fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight(),
-							Integer.parseInt(totalNbFrame) + 1);	
+							Integer.parseInt(totalNbFrame) + 1);
 				}
 				fieldStack.setProcessor(zprojectImg.getStack().getProcessor(1), f + 1);
 			}

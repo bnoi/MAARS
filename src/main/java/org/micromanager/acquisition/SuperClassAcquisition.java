@@ -181,6 +181,8 @@ public class SuperClassAcquisition {
 	 *            current frame (time point)
 	 * @param channelName
 	 *            name of the current channel (ex. BF, CFP, GFP, TXRED)
+	 * @param zFocus
+	 *            zFocus where maximum # of spot can be seen
 	 * @return a duplicate of acquired images.
 	 */
 	public ImagePlus acquire(int frame, String channelName, double zFocus) {
@@ -206,8 +208,7 @@ public class SuperClassAcquisition {
 		int sliceNumber = (int) Math.round(range / step);
 		int exposure = Integer.parseInt(parameters.getChExposure(channelName));
 		String pathToMovie = rootDirName + "/" + acqName;
-		// Color chColor =
-		// MaarsParameters.getColor(parameters.getChColor(channelName));
+		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
 
 		cleanUp();
 		mmc.setAutoShutter(false);
@@ -215,7 +216,6 @@ public class SuperClassAcquisition {
 		setChExposure(exposure);
 		Datastore ds = createDataStore(pathToMovie);
 		setDatastoreMetadata(ds, channelName, acqName, step);
-		// setDisplay(chColor);
 		try {
 			mmc.setConfig(channelGroup, channelName);
 			mmc.waitForConfig(channelGroup, channelName);
@@ -245,14 +245,20 @@ public class SuperClassAcquisition {
 			}
 			z = z + step;
 			listImg.add(mm.live().snap(true).get(0));
+			if (k == 0) {
+				setDisplay(chColor);
+			}
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
 		try {
 			mmc.setShutterOpen(false);
 			mmc.setPosition(focusDevice, zFocus);
-			while (zFocus > zFocus + 0.03 || zFocus < zFocus - 0.03){
+			mmc.waitForDevice(focusDevice);
+			double currentZ = mmc.getPosition(focusDevice);
+			while (currentZ > zFocus + 0.03 || currentZ < zFocus - 0.03) {
 				mmc.setPosition(focusDevice, zFocus);
-				zFocus = mmc.getPosition(focusDevice);
+				mmc.waitForDevice(focusDevice);
+				currentZ = mmc.getPosition(focusDevice);
 			}
 			mmc.waitForSystem();
 		} catch (Exception e) {

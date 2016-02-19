@@ -139,12 +139,12 @@ public class MAARSNoAcq implements Runnable {
 			soc.saveGeometries();
 			String croppedImgDir = soc.saveCroppedImgs();
 			for (int i : merotelyCandidates.keySet()) {
-				if (this.merotelyCandidates.get(i) > 5) {
+				//TODO
+				if (this.merotelyCandidates.get(i) > 10) {
 					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 							.format(Calendar.getInstance().getTime());
 					IJ.log(timeStamp + " : " + i);
 					IJ.openImage(croppedImgDir + i + "_GFP.tif").show();
-					Toolkit.getDefaultToolkit().beep();
 				}
 			}
 //			MAARS.mailNotify();
