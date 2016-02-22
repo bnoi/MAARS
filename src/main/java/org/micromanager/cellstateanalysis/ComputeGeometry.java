@@ -74,9 +74,9 @@ public class ComputeGeometry {
 		Spot cellCenter = new Spot(x - calibratedXBase, y - calibratedYBase, fakeSpotZ, fakeSpotRadius,
 				fakeSpotQuality);
 		geometry.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
-		geometry.put(CellCenterToSpCenterAng, getAngLessThan90(
+		geometry.put(CellCenterToSpCenterAng, rad2AngLessThan90(
 				Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I)));
-		return geometry; 
+		return geometry;
 	}
 
 	public HashMap<String, Object> addVariations(HashMap<String, Object> currentGeo, HashMap<String, Object> lastGeo,
@@ -189,26 +189,26 @@ public class ComputeGeometry {
 	 * @return
 	 */
 	public double getSpAngToMajAxis(Vector3D polesVec) {
-		double halfMajAxis = major / 2;
-		Vector3D cellMajAxisVec = new Vector3D(halfMajAxis * FastMath.cos(angle), halfMajAxis * FastMath.sin(angle), 0);
-		return getAngLessThan90(Vector3D.angle(polesVec, cellMajAxisVec));
+		Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(angle), major * FastMath.sin(angle), 0);
+		return rad2AngLessThan90(Vector3D.angle(cellMajAxisVec, polesVec));
 	}
 
 	/**
-	 * Create a vector from a spot (so [0,0,0] to [x,y,z])
+	 * Create a vector from a spot (so [0,0,0] to [x,-y,z])
 	 * 
 	 * @param s
 	 * @return
 	 */
 	public Vector3D spot2Vector3D(Spot s) {
-		return new Vector3D(s.getFeature(Spot.POSITION_X), s.getFeature(Spot.POSITION_Y),
+		return new Vector3D(s.getFeature(Spot.POSITION_X), -s.getFeature(Spot.POSITION_Y),
 				s.getFeature(Spot.POSITION_Z));
 	}
 
-	public double getAngLessThan90(double radiant) {
-		if (radiant > FastMath.PI / 2) {
-			radiant -= FastMath.PI;
+	public double rad2AngLessThan90(double radiant) {
+		double ang = FastMath.toDegrees(radiant);
+		while (ang >= 90){
+			ang -= 180;
 		}
-		return FastMath.toDegrees(FastMath.abs(radiant));
+		return FastMath.abs(ang);
 	}
 }
