@@ -2,7 +2,6 @@ package org.micromanager.maars;
 
 import mmcorej.CMMCore;
 
-import java.awt.Toolkit;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
@@ -63,155 +62,6 @@ public class MAARS implements Runnable {
 		this.soc = soc;
 		this.mm = mm;
 		this.merotelyCandidates = new ConcurrentHashMap<Integer, Integer>();
-	}
-
-	public void runAnalysis() {
-		// Start time
-		long start = System.currentTimeMillis();
-		mmc.setAutoShutter(false);
-
-		// Set XY stage device
-		try {
-			mmc.setOriginXY(mmc.getXYStageDevice());
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-
-		// Acquisition path arrangement
-		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
-		int nThread = Runtime.getRuntime().availableProcessors();
-		ExecutorService es = Executors.newFixedThreadPool(nThread);
-		for (int i = 0; i < explo.length(); i++) {
-			try {
-				mm.core().setXYPosition(explo.getX(i), explo.getY(i));
-				mmc.waitForDevice(mmc.getXYStageDevice());
-			} catch (Exception e) {
-				IJ.error("Can't set XY stage devie");
-				e.printStackTrace();
-			}
-			String xPos = String.valueOf(Math.round(explo.getX(i)));
-			String yPos = String.valueOf(Math.round(explo.getY(i)));
-			IJ.log("Current position : x_" + xPos + " y_" + yPos);
-//			autofocus(mm, mmc);
-			double zFocus = 0;
-			String focusDevice = mmc.getFocusDevice();
-			try {
-				zFocus = mmc.getPosition(focusDevice);
-				mmc.waitForDevice(focusDevice);
-			} catch (Exception e) {
-				ReportingUtils.logMessage("could not get z current position");
-				e.printStackTrace();
-			}
-			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
-			IJ.log("Acquire bright field image...");
-			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus);
-			// --------------------------segmentation-----------------------------//
-			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
-			ms.segmentation(segImg);
-			if (ms.roiDetected()) {
-				// from Roi initialize a set of cell
-				soc.reset();
-				soc.loadCells(xPos, yPos);
-				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
-				// Get the focus slice of BF image
-				Calibration bfImgCal = segImg.getCalibration();
-				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
-						segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
-				focusImage.setCalibration(bfImgCal);
-				// ----------------start acquisition and analysis --------//
-				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
-				try {
-					PrintStream ps = new PrintStream(ms.getPathToSegDir() + "CellStateAnalysis.LOG");
-					curr_err = System.err;
-					curr_out = System.err;
-					System.setOut(ps);
-					System.setErr(ps);
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-				int frame = 0;
-				if (parameters.useDynamic()) {
-					double timeInterval = Double
-							.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-					double startTime = System.currentTimeMillis();
-					double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
-							* 1000;
-					while (System.currentTimeMillis() - startTime <= timeLimit) {
-						double beginAcq = System.currentTimeMillis();
-						String channels = parameters.getUsingChannels();
-						String[] arrayChannels = channels.split(",", -1);
-						for (String channel : arrayChannels) {
-							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-							soc.addAcqID(id);
-							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
-							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
-									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, timeInterval,
-									merotelyCandidates));
-						}
-						frame++;
-						double acqTook = System.currentTimeMillis() - beginAcq;
-						ReportingUtils.logMessage(String.valueOf(acqTook));
-						if (timeInterval > acqTook) {
-							try {
-								Thread.sleep((long) (timeInterval - acqTook));
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						} else {
-							ReportingUtils.logMessage(
-									"Attention : acquisition before took longer than " + timeInterval + " ms.");
-						}
-					}
-					// main acquisition finished, find whether there is merotely
-					// cells.
-
-				} else {
-					String channels = parameters.getUsingChannels();
-					String[] arrayChannels = channels.split(",", -1);
-					for (String channel : arrayChannels) {
-						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-						soc.addAcqID(id);
-						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
-						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
-								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, 0, merotelyCandidates));
-					}
-				}
-				RoiManager.getInstance().reset();
-				RoiManager.getInstance().close();
-				if (soc.size() != 0) {
-					long startWriting = System.currentTimeMillis();
-					soc.saveSpots();
-					soc.saveGeometries();
-					String croppedImgDir = soc.saveCroppedImgs();
-					for (int nb : merotelyCandidates.keySet()) {
-						if (this.merotelyCandidates.get(nb) > 5) {
-							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
-									.format(Calendar.getInstance().getTime());
-							IJ.log(timeStamp + " : " + nb);
-							IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
-						}
-					}
-					mailNotify();
-					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-							+ " sec for writing results");
-				}
-
-			}
-			this.merotelyCandidates.clear();
-		}
-		mmc.setAutoShutter(true);
-		es.shutdown();
-		try {
-			es.awaitTermination(300, TimeUnit.MINUTES);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		System.setErr(curr_err);
-		System.setOut(curr_out);
-		IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
-		IJ.log("DONE.");
 	}
 
 	/**
@@ -325,6 +175,150 @@ public class MAARS implements Runnable {
 
 	@Override
 	public void run() {
-		this.runAnalysis();
+		// Start time
+		long start = System.currentTimeMillis();
+		mmc.setAutoShutter(false);
+
+		// Set XY stage device
+		try {
+			mmc.setOriginXY(mmc.getXYStageDevice());
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+
+		// Acquisition path arrangement
+		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
+		int nThread = Runtime.getRuntime().availableProcessors();
+		ExecutorService es = Executors.newFixedThreadPool(nThread);
+		for (int i = 0; i < explo.length(); i++) {
+			try {
+				mm.core().setXYPosition(explo.getX(i), explo.getY(i));
+				mmc.waitForDevice(mmc.getXYStageDevice());
+			} catch (Exception e) {
+				IJ.error("Can't set XY stage devie");
+				e.printStackTrace();
+			}
+			String xPos = String.valueOf(Math.round(explo.getX(i)));
+			String yPos = String.valueOf(Math.round(explo.getY(i)));
+			IJ.log("Current position : x_" + xPos + " y_" + yPos);
+			// autofocus(mm, mmc);
+			double zFocus = 0;
+			String focusDevice = mmc.getFocusDevice();
+			try {
+				zFocus = mmc.getPosition(focusDevice);
+				mmc.waitForDevice(focusDevice);
+			} catch (Exception e) {
+				ReportingUtils.logMessage("could not get z current position");
+				e.printStackTrace();
+			}
+			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
+			IJ.log("Acquire bright field image...");
+			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus);
+			// --------------------------segmentation-----------------------------//
+			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
+			ms.segmentation(segImg);
+			if (ms.roiDetected()) {
+				// from Roi initialize a set of cell
+				soc.reset();
+				soc.loadCells(xPos, yPos);
+				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
+				// Get the focus slice of BF image
+				Calibration bfImgCal = segImg.getCalibration();
+				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
+						segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
+				focusImage.setCalibration(bfImgCal);
+				// ----------------start acquisition and analysis --------//
+				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
+				try {
+					PrintStream ps = new PrintStream(ms.getPathToSegDir() + "CellStateAnalysis.LOG");
+					curr_err = System.err;
+					curr_out = System.err;
+					System.setOut(ps);
+					System.setErr(ps);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+				int frame = 0;
+				if (parameters.useDynamic()) {
+					double timeInterval = Double
+							.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+					double startTime = System.currentTimeMillis();
+					double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
+							* 1000;
+					while (System.currentTimeMillis() - startTime <= timeLimit) {
+						double beginAcq = System.currentTimeMillis();
+						String channels = parameters.getUsingChannels();
+						String[] arrayChannels = channels.split(",", -1);
+						for (String channel : arrayChannels) {
+							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
+							soc.addAcqID(id);
+							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
+							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, merotelyCandidates));
+						}
+						frame++;
+						double acqTook = System.currentTimeMillis() - beginAcq;
+						ReportingUtils.logMessage(String.valueOf(acqTook));
+						if (timeInterval > acqTook) {
+							try {
+								Thread.sleep((long) (timeInterval - acqTook));
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						} else {
+							ReportingUtils.logMessage(
+									"Attention : acquisition before took longer than " + timeInterval + " ms.");
+						}
+					}
+					// main acquisition finished, find whether there is merotely
+					// cells.
+
+				} else {
+					String channels = parameters.getUsingChannels();
+					String[] arrayChannels = channels.split(",", -1);
+					for (String channel : arrayChannels) {
+						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
+						soc.addAcqID(id);
+						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
+						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, merotelyCandidates));
+					}
+				}
+				RoiManager.getInstance().reset();
+				RoiManager.getInstance().close();
+				if (soc.size() != 0) {
+					long startWriting = System.currentTimeMillis();
+					soc.saveSpots();
+					soc.saveGeometries();
+					String croppedImgDir = soc.saveCroppedImgs();
+					for (int nb : merotelyCandidates.keySet()) {
+						if (this.merotelyCandidates.get(nb) > frame * 0.02) {
+							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
+									.format(Calendar.getInstance().getTime());
+							IJ.log(timeStamp + " : " + nb);
+							IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
+						}
+					}
+					mailNotify();
+					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+							+ " sec for writing results");
+				}
+
+			}
+			this.merotelyCandidates.clear();
+		}
+		mmc.setAutoShutter(true);
+		es.shutdown();
+		try {
+			es.awaitTermination(300, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.setErr(curr_err);
+		System.setOut(curr_out);
+		IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
+		IJ.log("DONE.");
 	}
 }

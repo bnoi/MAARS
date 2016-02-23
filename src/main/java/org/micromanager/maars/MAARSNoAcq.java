@@ -1,6 +1,5 @@
 package org.micromanager.maars;
 
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -21,6 +20,7 @@ import org.micromanager.utils.FileUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
+import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 
 /**
@@ -40,15 +40,23 @@ public class MAARSNoAcq implements Runnable {
 		this.parameters = parameters;
 		this.soc = soc;
 		this.merotelyCandidates = new ConcurrentHashMap<Integer, Integer>();
+		RoiManager manager = RoiManager.getInstance();
+		if (manager != null) {
+			manager.removeAll();
+			manager.reset();
+		}
 	}
 
-	public void runAnalysis() {
+	@Override
+	public void run() {
 		ExecutorService es = null;
 		// Start time
 		long start = System.currentTimeMillis();
 
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
+
+		int frameCounter = 0;
 
 		for (int i = 0; i < explo.length(); i++) {
 			IJ.log("x : " + explo.getX(i) + " y : " + explo.getY(i));
@@ -87,7 +95,7 @@ public class MAARSNoAcq implements Runnable {
 				String pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
 				String[] listAcqNames = new File(pathToFluoDir).list();
 				String pattern = "(\\d+)(_)(\\w+)";
-				int frameCounter = 0;
+				frameCounter = 0;
 				for (String acqName : listAcqNames) {
 					if (Pattern.matches(pattern, acqName)) {
 						frameCounter++;
@@ -109,9 +117,7 @@ public class MAARSNoAcq implements Runnable {
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-								Double.parseDouble(parameters.getChSpotRaius(channel)), frame,
-								Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)),
-								merotelyCandidates));
+								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, merotelyCandidates));
 					}
 					frame++;
 				}
@@ -137,24 +143,18 @@ public class MAARSNoAcq implements Runnable {
 			soc.saveSpots();
 			soc.saveGeometries();
 			String croppedImgDir = soc.saveCroppedImgs();
-			for (int i : merotelyCandidates.keySet()) {
-				//TODO
-				if (this.merotelyCandidates.get(i) > 10) {
+			for (int nb : merotelyCandidates.keySet()) {
+				if (this.merotelyCandidates.get(nb) > frameCounter * 0.1) {
 					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 							.format(Calendar.getInstance().getTime());
-					IJ.log(timeStamp + " : " + i);
-					IJ.openImage(croppedImgDir + i + "_GFP.tif").show();
+					IJ.log(timeStamp + " : " + nb);
+					IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
 				}
 			}
-//			MAARS.mailNotify();
+			// MAARS.mailNotify();
 			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
 		}
 		IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
-	}
-
-	@Override
-	public void run() {
-		this.runAnalysis();
 	}
 }
