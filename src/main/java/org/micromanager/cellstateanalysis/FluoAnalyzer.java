@@ -1,5 +1,7 @@
 package org.micromanager.cellstateanalysis;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +20,8 @@ import com.google.common.collect.Lists;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.io.TmXmlWriter;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
@@ -31,7 +35,6 @@ public class FluoAnalyzer implements Runnable {
 
 	private ImagePlus fluoImage;
 	private SetOfCells soc;
-	private double[] factors;
 	private Calibration bfImgCal;
 	private Calibration fluoImgCal;
 	private String channel;
@@ -39,6 +42,7 @@ public class FluoAnalyzer implements Runnable {
 	private double radius;
 	private int frame;
 	private double timeInterval;
+	private SpotCollection collection;
 	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
 
 	/**
@@ -94,10 +98,11 @@ public class FluoAnalyzer implements Runnable {
 		// Call trackmate to detect spots
 		MaarsTrackmate detector = new MaarsTrackmate(zProjectedFluoImg, radius);
 		Model model = detector.doDetection();
-		soc.setTrackmateModel(model);
-		soc.refreshSpots(getNBestqualitySpots(model.getSpots()));
-
-		this.factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
+		if (frame == 0) {
+			soc.setTrackmateModel(model);
+		}
+		collection = getNBestqualitySpots(model.getSpots());
+		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
 
 		int nThread = Runtime.getRuntime().availableProcessors();
 		ExecutorService es = Executors.newFixedThreadPool(nThread);
@@ -108,7 +113,7 @@ public class FluoAnalyzer implements Runnable {
 		Future<?> future = null;
 		for (int i = 0; i < nThread; i++) {
 			// analyze every subset of cell
-			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, merotelyCandidates));
+			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, factors, merotelyCandidates));
 		}
 		es.shutdown();
 		try {
@@ -119,7 +124,7 @@ public class FluoAnalyzer implements Runnable {
 			e1.printStackTrace();
 		}
 		try {
-			es.awaitTermination(90, TimeUnit.SECONDS);
+			es.awaitTermination(3, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -128,10 +133,9 @@ public class FluoAnalyzer implements Runnable {
 	private SpotCollection getNBestqualitySpots(SpotCollection spots) {
 		SpotCollection newSet = new SpotCollection();
 		for (Spot s : spots.iterable(false)) {
-			int currentFrame = (int) FastMath.round(s.getFeature(Spot.FRAME));
-			newSet.add(s, currentFrame);
-			if (newSet.getNSpots(currentFrame, false) > soc.size() * maxNbSpot) {
-				newSet.remove(findLowestQualitySpot(newSet.iterable(currentFrame, false)), currentFrame);
+			newSet.add(s, 0);
+			if (newSet.getNSpots(0, false) > soc.size() * maxNbSpot) {
+				newSet.remove(findLowestQualitySpot(newSet.iterable(0, false)), 0);
 			}
 		}
 		return newSet;
@@ -145,10 +149,10 @@ public class FluoAnalyzer implements Runnable {
 	 * @param frame
 	 * @return
 	 */
-	private Spot findLowestQualitySpot(Iterable<Spot> spotsInFrame) {
+	public static Spot findLowestQualitySpot(Iterable<Spot> spots) {
 		double min = Double.POSITIVE_INFINITY;
 		Spot lowestQualitySpot = null;
-		for (Spot s : spotsInFrame) {
+		for (Spot s : spots) {
 			if (s.getFeature(Spot.QUALITY) < min) {
 				min = s.getFeature(Spot.QUALITY);
 				lowestQualitySpot = s;
@@ -161,15 +165,17 @@ public class FluoAnalyzer implements Runnable {
 	 * analyzer of subset
 	 */
 	private class AnalyseBlockCells implements Runnable {
-		final int index;
-		final int[] deltas;
+		private final int index;
+		private final int[] deltas;
+		private double[] factors;
 		private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
 
-		public AnalyseBlockCells(int index, final int[] deltas,
+		public AnalyseBlockCells(int index, final int[] deltas, double[] factors,
 				ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
 			this.index = index;
 			this.deltas = deltas;
 			this.merotelyCandidates = merotelyCandidates;
+			this.factors = factors;
 		}
 
 		@Override
@@ -188,7 +194,7 @@ public class FluoAnalyzer implements Runnable {
 				end = begin + deltas[0];
 			}
 			// need to be false because all spots are not visible
-			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(soc.getSpotsInModel().iterable(false));
+			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(collection.iterable(false));
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
 				int cellNb = cell.getCellNumber();
@@ -207,7 +213,8 @@ public class FluoAnalyzer implements Runnable {
 						soc.putSpot(channel, cellNb, frame, s);
 						spotsToDel.add(s);
 						if (soc.getNbOfSpot(channel, cellNb, frame) > maxNbSpot) {
-							Spot lowesetQulitySpot = soc.findLowestQualitySpot(channel, cellNb, frame);
+							Spot lowesetQulitySpot = FluoAnalyzer
+									.findLowestQualitySpot(soc.getSpotsInFrame(channel, cellNb, frame));
 							soc.removeSpot(channel, cellNb, frame, lowesetQulitySpot);
 						}
 					}
@@ -218,10 +225,11 @@ public class FluoAnalyzer implements Runnable {
 					currentThreadSpots.remove(s2del);
 				}
 				ComputeGeometry cptgeometry = new ComputeGeometry(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
-						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight, cell.get(Cell.MAJOR), cell.get(Cell.ANGLE),
-						calibratedXBase, calibratedYBase);
+						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight,
+						cell.get(Cell.MAJOR) * fluoImgCal.pixelWidth, cell.get(Cell.ANGLE), calibratedXBase,
+						calibratedYBase);
 				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
-				// testing whether using GFP, because ussually we mark Kt with
+				// testing whether using GFP, because usually we mark Kt with
 				// GFP
 				if (spotSet != null) {
 					// this functions modify directly coordinates of spot in
@@ -237,7 +245,7 @@ public class FluoAnalyzer implements Runnable {
 						geometry.put(ComputeGeometry.PHASE, ComputeGeometry.MITOSIS);
 						geometry = cptgeometry.compute(geometry, poles);
 						if (setSize > 2) {
-							if ((double) geometry.get(ComputeGeometry.SpLength) > 3) {
+							if ((double) geometry.get(ComputeGeometry.SpLength) > 4) {
 								Line spLine = new Line(
 										(int) FastMath.round(
 												poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),

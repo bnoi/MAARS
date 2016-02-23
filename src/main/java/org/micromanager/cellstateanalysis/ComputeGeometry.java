@@ -189,7 +189,8 @@ public class ComputeGeometry {
 	 * @return
 	 */
 	public double getSpAngToMajAxis(Vector3D polesVec) {
-		Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(angle), major * FastMath.sin(angle), 0);
+		Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(angle)),
+				major * FastMath.sin(FastMath.toRadians(angle)), 0);
 		return rad2AngLessThan90(Vector3D.angle(cellMajAxisVec, polesVec));
 	}
 
@@ -206,7 +207,7 @@ public class ComputeGeometry {
 
 	public double rad2AngLessThan90(double radiant) {
 		double ang = FastMath.toDegrees(radiant);
-		while (ang >= 90){
+		while (ang >= 90) {
 			ang -= 180;
 		}
 		return FastMath.abs(ang);
