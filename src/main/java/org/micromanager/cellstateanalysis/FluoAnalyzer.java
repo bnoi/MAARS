@@ -1,7 +1,5 @@
 package org.micromanager.cellstateanalysis;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,8 +18,6 @@ import com.google.common.collect.Lists;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.io.TmXmlWriter;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
@@ -41,7 +37,6 @@ public class FluoAnalyzer implements Runnable {
 	private int maxNbSpot;
 	private double radius;
 	private int frame;
-	private double timeInterval;
 	private SpotCollection collection;
 	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
 
@@ -70,7 +65,7 @@ public class FluoAnalyzer implements Runnable {
 	 */
 
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-			double radius, int frame, double timeInterval, ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
+			double radius, int frame, ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
 		this.fluoImage = fluoImage;
 		this.fluoImgCal = fluoImage.getCalibration();
 		soc.setFluoImgCalib(fluoImgCal);
@@ -80,7 +75,6 @@ public class FluoAnalyzer implements Runnable {
 		this.maxNbSpot = maxNbSpot;
 		this.radius = radius;
 		this.frame = frame;
-		this.timeInterval = timeInterval;
 		this.merotelyCandidates = merotelyCandidates;
 	}
 
@@ -255,7 +249,7 @@ public class FluoAnalyzer implements Runnable {
 												poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
 										(int) FastMath.round(
 												poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
-								Line.setWidth((int) FastMath.round(0.5 / fluoImgCal.pixelWidth));
+								Line.setWidth((int) FastMath.round(0.25 / fluoImgCal.pixelWidth));
 								for (Spot s : spotSet) {
 									if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
 										// detect metaphase Kt oscillation or
@@ -278,16 +272,6 @@ public class FluoAnalyzer implements Runnable {
 						}
 					}
 					soc.putGeometry(channel, cellNb, frame, geometry);
-					// HashMap<String, Object> newGeometry = new HashMap<String,
-					// Object>();
-					// int lastGeoIndex = frame - 1;
-					// if (frame != 0 && soc.geoFrameExists(channel, cellNb,
-					// lastGeoIndex)) {
-					// newGeometry = cptgeometry.addVariations(geometry,
-					// soc.getGeometry(channel, cellNb, lastGeoIndex),
-					// timeInterval);
-					// soc.putGeometry(channel, cellNb, frame, newGeometry);
-					// }
 				}
 			}
 		}

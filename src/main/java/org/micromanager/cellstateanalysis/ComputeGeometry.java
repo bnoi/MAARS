@@ -79,17 +79,6 @@ public class ComputeGeometry {
 		return geometry;
 	}
 
-	public HashMap<String, Object> addVariations(HashMap<String, Object> currentGeo, HashMap<String, Object> lastGeo,
-			double timeInterval) {
-		if (lastGeo.get(PHASE) == MITOSIS && currentGeo.get(PHASE) == MITOSIS) {
-			currentGeo.put(SpElongRate, String.format("%.12f", (new Double(currentGeo.get(SpLength).toString())
-					- new Double(lastGeo.get(SpLength).toString()) / (timeInterval / 1000))));
-			currentGeo.put(SpOrientationRate, String.format("%.12f", (new Double(currentGeo.get(SpAngToMaj).toString())
-					- new Double(lastGeo.get(SpAngToMaj).toString()) / (timeInterval / 1000))));
-		}
-		return currentGeo;
-	}
-
 	/**
 	 * return a vector from two given spots
 	 * 
