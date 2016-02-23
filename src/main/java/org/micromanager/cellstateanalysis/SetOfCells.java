@@ -179,27 +179,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	/**
-	 * Get the lowest qualit spot in the frame
-	 * 
-	 * @param channel
-	 * @param cellNb
-	 * @param frame
-	 * @return
-	 */
-	public Spot findLowestQualitySpot(String channel, int cellNb, int frame) {
-		Iterable<Spot> spotsInFrame = getSpotsInFrame(channel, cellNb, frame);
-		double min = Double.POSITIVE_INFINITY;
-		Spot lowestQualitySpot = null;
-		for (Spot s : spotsInFrame) {
-			if (s.getFeature(Spot.QUALITY) < min) {
-				min = s.getFeature(Spot.QUALITY);
-				lowestQualitySpot = s;
-			}
-		}
-		return lowestQualitySpot;
-	}
-
-	/**
 	 * 
 	 * @param channel
 	 */
@@ -271,25 +250,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	public void setTrackmateModel(Model model) {
 		if (this.trackmateModel == null)
 			this.trackmateModel = model;
-	}
-
-	/**
-	 * update spot collection
-	 * 
-	 * @param newCollection
-	 */
-	public void refreshSpots(SpotCollection newCollection) {
-		this.trackmateModel.clearSpots(true);
-		this.trackmateModel.setSpots(newCollection, true);
-	}
-
-	/**
-	 * Spot collection getter
-	 * 
-	 * @return SpotCollection
-	 */
-	public SpotCollection getSpotsInModel() {
-		return this.trackmateModel.getSpots();
 	}
 
 	/**
