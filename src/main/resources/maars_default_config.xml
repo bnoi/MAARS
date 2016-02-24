@@ -17,7 +17,7 @@
       </DAPI>
       <GFP>
         <MAXIMUM_NUMBER_OF_SPOT>6</MAXIMUM_NUMBER_OF_SPOT>
-        <SPOT_RADIUS>0.25</SPOT_RADIUS>
+        <SPOT_RADIUS>0.35</SPOT_RADIUS>
       </GFP>
       <TxRed>
         <MAXIMUM_NUMBER_OF_SPOT>2</MAXIMUM_NUMBER_OF_SPOT>
@@ -40,7 +40,7 @@
       </BF>
       <CFP>
         <COLOR>BLUE</COLOR>
-        <EXPOSURE>220</EXPOSURE>
+        <EXPOSURE>200</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </CFP>
       <DAPI>
@@ -50,7 +50,7 @@
       </DAPI>
       <GFP>
         <COLOR>CYAN</COLOR>
-        <EXPOSURE>80</EXPOSURE>
+        <EXPOSURE>100</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </GFP>
       <TxRed>

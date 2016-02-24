@@ -24,33 +24,28 @@ import net.imglib2.type.numeric.real.FloatType;
 
 public class MaarsTrackmate {
 
-	private Model model;
 	private Settings settings;
 
-	public MaarsTrackmate(ImagePlus img, double radius) {
-		img.deleteRoi();
-		model = new Model();
-
+	public MaarsTrackmate(ImagePlus img, double radPixel, double quality) {
 		settings = new Settings();
 		settings.setFrom(img);
 
 		// Computer different features (in order)
 
+		settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<FloatType>());
+		settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
+		settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
 		settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory<FloatType>());
 		settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory<FloatType>());
-		settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<FloatType>());
-		settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
-		settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
 
 		// Set up detection parameters.
 
 		settings.detectorFactory = new LogDetectorFactory<FloatType>();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
 		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
-		detectorSettings.put(KEY_RADIUS, radius);
+		detectorSettings.put(KEY_RADIUS, radPixel);
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
-		// TODO to figure out what value to use
-		detectorSettings.put(KEY_THRESHOLD, (double) 2);
+		detectorSettings.put(KEY_THRESHOLD, (double) quality);
 		detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
 		settings.detectorSettings = detectorSettings;
 	}
@@ -60,7 +55,7 @@ public class MaarsTrackmate {
 	 * unfiltered spots.
 	 */
 	public Model doDetection() {
-		TrackMate trackmate = new TrackMate(model, settings);
+		TrackMate trackmate = new TrackMate(settings);
 
 		trackmate.execDetection();
 

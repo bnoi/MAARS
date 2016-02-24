@@ -24,10 +24,9 @@ public class ImgUtils {
 		projector.setMethod(ZProjector.MAX_METHOD);
 		projector.setImage(img);
 		projector.doProjection();
-		ImagePlus imgProject = projector.getProjection();
-		imgProject.setCalibration(img.getCalibration());
-		imgProject.setTitle(img.getTitle());
-		return imgProject;
+		ImagePlus imgProjected = projector.getProjection();
+		imgProjected.setTitle(img.getTitle() + "_projected");
+		return imgProjected;
 	}
 
 	/**
