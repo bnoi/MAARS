@@ -31,11 +31,11 @@ base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
-String imgFloder = "/home/tong/Documents/movies/624-60x/264-s1/movie_X0_Y0_FLUO/croppedImgs";
+String imgFloder = "/home/tong/Documents/movies/289/60x/3/movie_X0_Y0_FLUO/0_CFP";
 File folder = new File(imgFloder);
 //for ( File fileEntry : listFile) {
 //print(fileEntry);
-ImagePlus imp =IJ.openImage(imgFloder + "/41_GFP.tif");
+ImagePlus imp =IJ.openImage(imgFloder + "/MMStack.ome.tif");
 ZProjector projector = new ZProjector();
 projector.setMethod(ZProjector.MAX_METHOD);
 projector.setImage(imp);
@@ -45,7 +45,6 @@ ImagePlus zprojection = projector.getProjection();
 zprojection.show();
 Calibration cal = imp.getCalibration();
 print(cal.pixelWidth + "");
-Model model = new Model();
 
 Settings settings = new Settings();
 
@@ -59,16 +58,16 @@ settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory());
 settings.detectorFactory = new LogDetectorFactory();
 Map detectorSettings = new HashMap();
 detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-detectorSettings.put("RADIUS", (double) 5);
-detectorSettings.put("TARGET_CHANNEL", 1);
-detectorSettings.put("THRESHOLD", (double) 0);
-detectorSettings.put("DO_MEDIAN_FILTERING", false);
+detectorSettings.put("RADIUS", (double) 3.2);
+detectorSettings.put("TARGET_CHANNEL", fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL);
+detectorSettings.put("THRESHOLD", (double) 20);
+detectorSettings.put("DO_MEDIAN_FILTERING", true);
 settings.detectorSettings = detectorSettings;
 
-FeatureFilter filter1 = new FeatureFilter("QUALITY", 1, true);
+FeatureFilter filter1 = new FeatureFilter("QUALITY", 5, true);
 settings.addSpotFilter(filter1);
 
-TrackMate trackmate = new TrackMate(model, settings);
+TrackMate trackmate = new TrackMate(settings);
 print("Trackmate created");
 
 trackmate.execDetection();
@@ -83,15 +82,12 @@ print("computeSpotFeatures done");
 trackmate.execSpotFiltering(true);
 print("execSpotFiltering done");
 
-print("Found " + trackmate.getModel().getSpots().getNSpots(false) + " spots");
-TmXmlWriter spotsWriter = new TmXmlWriter(new File(imgFloder + "/41_GFP1"));
+Model model = trackmate.getModel();
+print("Found " + model.getSpots().getNSpots(false) + " spots");
+TmXmlWriter spotsWriter = new TmXmlWriter(new File(imgFloder + "/GFP"));
 spotsWriter.appendModel(model);
 spotsWriter.writeToFile();
 
-
-//for(Spot spot : trackmate.getModel().getSpots().iterable(true)) {
- //  print(spot.getFeature(Spot.RADIUS));
-//}
 
 // Show
 SelectionModel selectionModel = new SelectionModel(model);

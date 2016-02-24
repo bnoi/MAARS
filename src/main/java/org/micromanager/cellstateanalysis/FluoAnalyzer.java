@@ -2,6 +2,7 @@ package org.micromanager.cellstateanalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -16,8 +17,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
@@ -87,14 +90,26 @@ public class FluoAnalyzer implements Runnable {
 		soc.addFeatureContainerOf(channel);
 		// TODO project or not. Do not project if do 3D detection
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
+		zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
 		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
-
 		// Call trackmate to detect spots
-		MaarsTrackmate detector = new MaarsTrackmate(zProjectedFluoImg, radius);
-		Model model = detector.doDetection();
+		MaarsTrackmate trackmate = null;
+		if (channel.equals("CFP")){
+			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 10);
+		}else if (channel.equals("GFP")){
+			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 2);
+		}
+		Model model = trackmate.doDetection();
+
 		if (frame == 0) {
 			soc.setTrackmateModel(model);
+			zProjectedFluoImg.show();
+			SelectionModel selectionModel = new SelectionModel(model);
+			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
+			displayer.render();
+			displayer.refresh();
 		}
+
 		collection = getNBestqualitySpots(model.getSpots());
 		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
 
@@ -126,7 +141,9 @@ public class FluoAnalyzer implements Runnable {
 
 	private SpotCollection getNBestqualitySpots(SpotCollection spots) {
 		SpotCollection newSet = new SpotCollection();
-		for (Spot s : spots.iterable(false)) {
+		Iterator<Spot> it = spots.iterator(false);
+		while (it.hasNext()) {
+			Spot s = it.next();
 			newSet.add(s, 0);
 			if (newSet.getNSpots(0, false) > soc.size() * maxNbSpot) {
 				newSet.remove(findLowestQualitySpot(newSet.iterable(0, false)), 0);
@@ -228,7 +245,7 @@ public class FluoAnalyzer implements Runnable {
 				if (spotSet != null) {
 					// this functions modify directly coordinates of spot in
 					// soc, because it's back-up
-					cptgeometry.centerSpots(spotSet);
+//					cptgeometry.centerSpots(spotSet);
 					int setSize = Iterables.size(spotSet);
 					HashMap<String, Object> geometry = new HashMap<String, Object>();
 					geometry.put(ComputeGeometry.NbOfSpotDetected, setSize);
