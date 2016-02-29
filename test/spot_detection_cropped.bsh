@@ -58,7 +58,7 @@ settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory());
 settings.detectorFactory = new LogDetectorFactory();
 Map detectorSettings = new HashMap();
 detectorSettings.put("DO_SUBPIXEL_LOCALIZATION", true);
-detectorSettings.put("RADIUS", (double) 3.2);
+detectorSettings.put("RADIUS", (double) 3.75);
 detectorSettings.put("TARGET_CHANNEL", fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL);
 detectorSettings.put("THRESHOLD", (double) 20);
 detectorSettings.put("DO_MEDIAN_FILTERING", true);

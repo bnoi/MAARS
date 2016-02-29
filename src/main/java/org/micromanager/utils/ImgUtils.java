@@ -25,7 +25,6 @@ public class ImgUtils {
 		projector.setImage(img);
 		projector.doProjection();
 		ImagePlus imgProjected = projector.getProjection();
-		imgProjected.setTitle(img.getTitle() + "_projected");
 		return imgProjected;
 	}
 
@@ -36,11 +35,9 @@ public class ImgUtils {
 	 * @return
 	 */
 	public static ImagePlus unitCmToMicron(ImagePlus img) {
-		if (img.getCalibration().getUnit().equals("cm")) {
-			img.getCalibration().setUnit("micron");
-			img.getCalibration().pixelWidth = img.getCalibration().pixelWidth * 10000;
-			img.getCalibration().pixelHeight = img.getCalibration().pixelHeight * 10000;
-		}
+		img.getCalibration().setUnit("micron");
+		img.getCalibration().pixelWidth = img.getCalibration().pixelWidth * 10000;
+		img.getCalibration().pixelHeight = img.getCalibration().pixelHeight * 10000;
 		return img;
 	}
 

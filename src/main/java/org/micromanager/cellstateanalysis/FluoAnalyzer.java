@@ -25,6 +25,10 @@ import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
 import ij.measure.Calibration;
+import ij.measure.Measurements;
+import ij.measure.ResultsTable;
+import ij.plugin.filter.Analyzer;
+import ij.plugin.frame.RoiManager;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -89,14 +93,28 @@ public class FluoAnalyzer implements Runnable {
 		soc.addSpotContainerOf(channel);
 		soc.addFeatureContainerOf(channel);
 		// TODO project or not. Do not project if do 3D detection
+		if (fluoImage.getCalibration().getUnit().equals("cm")) {
+			fluoImage = ImgUtils.unitCmToMicron(fluoImage);
+		}
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
+		zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
 		zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
-		zProjectedFluoImg = ImgUtils.unitCmToMicron(zProjectedFluoImg);
+		if (frame == 0) {
+			ResultsTable resultTable = new ResultsTable();
+			Analyzer analyzer = new Analyzer(zProjectedFluoImg,
+					Measurements.MEAN + Measurements.STD_DEV + Measurements.MIN_MAX, resultTable);
+			Iterator<Cell> it = soc.iterator();
+			while (it.hasNext()) {
+				zProjectedFluoImg.setRoi(it.next().getCellShapeRoi());
+				analyzer.measure();
+			}
+			resultTable.show("0 frame fluo measure");
+		}
 		// Call trackmate to detect spots
 		MaarsTrackmate trackmate = null;
-		if (channel.equals("CFP")){
-			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 10);
-		}else if (channel.equals("GFP")){
+		if (channel.equals("CFP")) {
+			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 5);
+		} else if (channel.equals("GFP")) {
 			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 2);
 		}
 		Model model = trackmate.doDetection();
@@ -245,7 +263,7 @@ public class FluoAnalyzer implements Runnable {
 				if (spotSet != null) {
 					// this functions modify directly coordinates of spot in
 					// soc, because it's back-up
-//					cptgeometry.centerSpots(spotSet);
+					// cptgeometry.centerSpots(spotSet);
 					int setSize = Iterables.size(spotSet);
 					HashMap<String, Object> geometry = new HashMap<String, Object>();
 					geometry.put(ComputeGeometry.NbOfSpotDetected, setSize);
