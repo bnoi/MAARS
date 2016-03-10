@@ -28,7 +28,6 @@ import ij.measure.Calibration;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
-import ij.plugin.frame.RoiManager;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -107,13 +106,14 @@ public class FluoAnalyzer implements Runnable {
 			while (it.hasNext()) {
 				zProjectedFluoImg.setRoi(it.next().getCellShapeRoi());
 				analyzer.measure();
+				zProjectedFluoImg.deleteRoi();
 			}
-			resultTable.show("0 frame fluo measure");
+			resultTable.show(channel + " 0 frame fluo measure");
 		}
 		// Call trackmate to detect spots
 		MaarsTrackmate trackmate = null;
 		if (channel.equals("CFP")) {
-			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 5);
+			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 8);
 		} else if (channel.equals("GFP")) {
 			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 2);
 		}
@@ -274,7 +274,7 @@ public class FluoAnalyzer implements Runnable {
 						geometry.put(ComputeGeometry.PHASE, ComputeGeometry.MITOSIS);
 						geometry = cptgeometry.compute(geometry, poles);
 						if (setSize > 2) {
-							if ((double) geometry.get(ComputeGeometry.SpLength) > 4) {
+							if ((double) geometry.get(ComputeGeometry.SpLength) > 5) {
 								Line spLine = new Line(
 										(int) FastMath.round(
 												poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
