@@ -255,7 +255,8 @@ public class MAARS implements Runnable {
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
 							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-									Double.parseDouble(parameters.getChSpotRaius(channel)), frame, merotelyCandidates));
+									Double.parseDouble(parameters.getChSpotRaius(channel)),
+									Double.parseDouble(parameters.getChQuality(channel)), frame, merotelyCandidates));
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
@@ -283,7 +284,8 @@ public class MAARS implements Runnable {
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
 						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, merotelyCandidates));
+								Double.parseDouble(parameters.getChSpotRaius(channel)),
+								Double.parseDouble(parameters.getChQuality(channel)), frame, merotelyCandidates));
 					}
 				}
 				RoiManager.getInstance().reset();

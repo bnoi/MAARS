@@ -117,7 +117,8 @@ public class MAARSNoAcq implements Runnable {
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-								Double.parseDouble(parameters.getChSpotRaius(channel)), frame, merotelyCandidates));
+								Double.parseDouble(parameters.getChSpotRaius(channel)),
+								Double.parseDouble(parameters.getChQuality(channel)),frame, merotelyCandidates));
 					}
 					frame++;
 				}

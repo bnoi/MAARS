@@ -57,6 +57,7 @@ import org.jdom2.output.XMLOutputter;
  *    				|
  *    				+-----> SPOT_RADIUS
  *    				+-----> MAXIMUM_NUMBER_OF_SPOT
+ *    				+-----> QUALITY
  *    +-----> DYNAMIC
  *    +-----> TIME_LIMIT
  *    +-----> TIME_INTERVAL
@@ -89,6 +90,7 @@ public class MaarsParameters {
 	public static final String SPOT_RADIUS = "SPOT_RADIUS";
 	public static final String SAVE_FLUORESCENT_MOVIES = "SAVE_FLUORESCENT_MOVIES";
 	public static final String MAXIMUM_NUMBER_OF_SPOT = "MAXIMUM_NUMBER_OF_SPOT";
+	public static final String QUALITY = "QUALITY";
 	public static final String DYNAMIC = "DYNAMIC";
 
 	public static final String X_FIELD_NUMBER = "X_FIELD_NUMBER";
@@ -308,6 +310,16 @@ public class MaarsParameters {
 
 	/**
 	 * 
+	 * @param ch:
+	 *            GFP, CFP, DAPI, TXRED
+	 * @return SPOT_RADIUS of corresponding channel
+	 */
+	public String getChQuality(String ch) {
+		return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChildText(QUALITY);
+	}
+	
+	/**
+	 * 
 	 * @return get channels used for fluo analysis
 	 */
 	public String getUsingChannels() {
@@ -381,6 +393,17 @@ public class MaarsParameters {
 				.setText(spotRaidus);
 	}
 
+	/**
+	 * 
+	 * @param ch:
+	 *            GFP, CFP, DAPI, TXRED
+	 * @return SPOT_RADIUS of corresponding channel
+	 */
+	public void setChQuality(String ch, String quality) {
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(QUALITY)
+				.setText(quality);
+	}
+	
 	/**
 	 * set channels to USING channel
 	 * 

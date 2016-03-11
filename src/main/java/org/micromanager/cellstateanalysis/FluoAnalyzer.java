@@ -42,6 +42,7 @@ public class FluoAnalyzer implements Runnable {
 	private String channel;
 	private int maxNbSpot;
 	private double radius;
+	private double quality;
 	private int frame;
 	private SpotCollection collection;
 	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
@@ -71,7 +72,7 @@ public class FluoAnalyzer implements Runnable {
 	 */
 
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-			double radius, int frame, ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
+			double radius, double quality, int frame, ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
 		this.fluoImage = fluoImage;
 		this.fluoImgCal = fluoImage.getCalibration();
 		soc.setFluoImgCalib(fluoImgCal);
@@ -80,6 +81,7 @@ public class FluoAnalyzer implements Runnable {
 		this.channel = channel;
 		this.maxNbSpot = maxNbSpot;
 		this.radius = radius;
+		this.quality = quality;
 		this.frame = frame;
 		this.merotelyCandidates = merotelyCandidates;
 	}
@@ -111,17 +113,12 @@ public class FluoAnalyzer implements Runnable {
 			resultTable.show(channel + " 0 frame fluo measure");
 		}
 		// Call trackmate to detect spots
-		MaarsTrackmate trackmate = null;
-		if (channel.equals("CFP")) {
-			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 8);
-		} else if (channel.equals("GFP")) {
-			trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, 2);
-		}
+		MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
+
 		Model model = trackmate.doDetection();
 
 		if (frame == 0) {
 			soc.setTrackmateModel(model);
-			zProjectedFluoImg.show();
 			SelectionModel selectionModel = new SelectionModel(model);
 			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
 			displayer.render();

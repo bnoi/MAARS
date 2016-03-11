@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
@@ -19,6 +20,7 @@ import fiji.plugin.trackmate.features.spot.SpotContrastAndSNRAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotIntensityAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotMorphologyAnalyzerFactory;
 import fiji.plugin.trackmate.features.spot.SpotRadiusEstimatorFactory;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.ImagePlus;
 import net.imglib2.type.numeric.real.FloatType;
 
@@ -26,7 +28,7 @@ public class MaarsTrackmate {
 
 	private Settings settings;
 
-	public MaarsTrackmate(ImagePlus img, double radPixel, double quality) {
+	public MaarsTrackmate(ImagePlus img, double radius, double quality) {
 		settings = new Settings();
 		settings.setFrom(img);
 
@@ -43,9 +45,9 @@ public class MaarsTrackmate {
 		settings.detectorFactory = new LogDetectorFactory<FloatType>();
 		Map<String, Object> detectorSettings = new HashMap<String, Object>();
 		detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
-		detectorSettings.put(KEY_RADIUS, (double) radPixel);
+		detectorSettings.put(KEY_RADIUS, radius);
 		detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
-		detectorSettings.put(KEY_THRESHOLD, (double) quality);
+		detectorSettings.put(KEY_THRESHOLD, quality);
 		detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
 		settings.detectorSettings = detectorSettings;
 	}

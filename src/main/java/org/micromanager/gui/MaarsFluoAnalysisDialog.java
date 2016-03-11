@@ -1,6 +1,5 @@
 package org.micromanager.gui;
 
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -10,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -18,7 +18,15 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.micromanager.cellstateanalysis.MaarsTrackmate;
 import org.micromanager.maars.MaarsParameters;
+import org.micromanager.utils.ImgUtils;
+
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.SelectionModel;
+import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import ij.IJ;
+import ij.ImagePlus;
 
 import javax.swing.JLabel;
 
@@ -45,16 +53,25 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private JPanel channel3Panel;
 	private JFormattedTextField maxNumberSpotCh1Tf;
 	private JFormattedTextField spotRadiusCh1Tf;
+	private JFormattedTextField qualityCh1Tf;
 	private JFormattedTextField maxNumberSpotCh2Tf;
 	private JFormattedTextField spotRadiusCh2Tf;
+	private JFormattedTextField qualityCh2Tf;
 	private JFormattedTextField maxNumberSpotCh3Tf;
 	private JFormattedTextField spotRadiusCh3Tf;
+	private JFormattedTextField qualityCh3Tf;
 	private JCheckBox saveFlims;
-	private Button okFluoAnaParamButton;
+	private JButton acquire1;
+	private JButton acquire2;
+	private JButton acquire3;
+	private JButton test1;
+	private JButton test2;
+	private JButton test3;
+	private JButton okFluoAnaParamButton;
 	private JComboBox<String> channel1Combo;
 	private JComboBox<String> channel2Combo;
 	private JComboBox<String> channel3Combo;
-	private static String NONE = "None";
+	public static String NONE = "None";
 	String channelListWithNone[] = { NONE, "GFP", "CFP", "TxRed", "DAPI" };
 	String channelList[] = { "GFP", "CFP", "TxRed", "DAPI" };
 
@@ -70,7 +87,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		this.parameters = parameters;
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+		// this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 		this.setTitle("MAARS - Fluorescent Analysis parameters");
 		this.setBackground(Color.WHITE);
 		this.setLayout(new GridLayout(0, 1));
@@ -124,9 +141,12 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		JLabel fluoChannelsTitle = new JLabel("Fluo Channel", SwingConstants.CENTER);
 		JLabel maxNbSpotTitle = new JLabel("Max # of spot", SwingConstants.CENTER);
 		JLabel spotRaiusTitle = new JLabel("Spot Radius", SwingConstants.CENTER);
+		JLabel qualityTitle = new JLabel("Quality", SwingConstants.CENTER);
 		channelTitlePanel.add(fluoChannelsTitle);
 		channelTitlePanel.add(maxNbSpotTitle);
 		channelTitlePanel.add(spotRaiusTitle);
+		channelTitlePanel.add(qualityTitle);
+		channelTitlePanel.add(new JLabel());
 
 		//
 
@@ -134,10 +154,19 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		channel1Combo = new JComboBox<String>(channelList);
 		maxNumberSpotCh1Tf = new JFormattedTextField(Integer.class);
 		spotRadiusCh1Tf = new JFormattedTextField(Double.class);
+		qualityCh1Tf = new JFormattedTextField(Double.class);
+		JPanel buttonPanel1 = new JPanel(new GridLayout(1, 0));
+		acquire1 = new JButton("acquire");
+		acquire1.addActionListener(this);
+		test1 = new JButton("test");
+		test1.addActionListener(this);
+		buttonPanel1.add(acquire1);
+		buttonPanel1.add(test1);
 		channel1Panel.add(channel1Combo);
 		channel1Panel.add(maxNumberSpotCh1Tf);
 		channel1Panel.add(spotRadiusCh1Tf);
-
+		channel1Panel.add(qualityCh1Tf);
+		channel1Panel.add(buttonPanel1);
 		//
 
 		channel2Panel = new JPanel(new GridLayout(1, 0));
@@ -145,11 +174,21 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		channel2Combo.addActionListener(this);
 		maxNumberSpotCh2Tf = new JFormattedTextField(Integer.class);
 		spotRadiusCh2Tf = new JFormattedTextField(Double.class);
+		qualityCh2Tf = new JFormattedTextField(Double.class);
+		JPanel buttonPanel2 = new JPanel(new GridLayout(1, 0));
+		acquire2 = new JButton("acquire");
+		acquire2.addActionListener(this);
+		test2 = new JButton("test");
+		test2.addActionListener(this);
+		buttonPanel2.add(acquire2);
+		buttonPanel2.add(test2);
 		maxNumberSpotCh2Tf.setText("");
 		spotRadiusCh2Tf.setText("");
 		channel2Panel.add(channel2Combo);
 		channel2Panel.add(maxNumberSpotCh2Tf);
 		channel2Panel.add(spotRadiusCh2Tf);
+		channel2Panel.add(qualityCh2Tf);
+		channel2Panel.add(buttonPanel2);
 
 		//
 
@@ -158,11 +197,22 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		channel3Combo.addActionListener(this);
 		maxNumberSpotCh3Tf = new JFormattedTextField(Integer.class);
 		spotRadiusCh3Tf = new JFormattedTextField(Double.class);
+		qualityCh3Tf = new JFormattedTextField(Double.class);
+		JPanel buttonPanel3 = new JPanel(new GridLayout(1, 0));
+		acquire3 = new JButton("acquire");
+		acquire3.addActionListener(this);
+		test3 = new JButton("test");
+		test3.addActionListener(this);
+		buttonPanel3.add(acquire3);
+		buttonPanel3.add(test3);
 		maxNumberSpotCh3Tf.setText("");
 		spotRadiusCh3Tf.setText("");
+		qualityCh3Tf.setText("");
 		channel3Panel.add(channel3Combo);
 		channel3Panel.add(maxNumberSpotCh3Tf);
 		channel3Panel.add(spotRadiusCh3Tf);
+		channel3Panel.add(qualityCh3Tf);
+		channel3Panel.add(buttonPanel3);
 
 		//
 
@@ -181,7 +231,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		//
 
-		okFluoAnaParamButton = new Button("OK");
+		okFluoAnaParamButton = new JButton("OK");
 		okFluoAnaParamButton.addActionListener(this);
 
 		//
@@ -234,6 +284,8 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		tmpTf.setValue(parameters.getChMaxNbSpot(ch));
 		tmpTf = (JFormattedTextField) jp.getComponent(2);
 		tmpTf.setValue(parameters.getChSpotRaius(ch));
+		tmpTf = (JFormattedTextField) jp.getComponent(3);
+		tmpTf.setValue(parameters.getChQuality(ch));
 
 	}
 
@@ -248,14 +300,17 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		String channel1 = channel1Combo.getSelectedItem().toString();
 		parameters.setChMaxNbSpot(channel1, maxNumberSpotCh1Tf.getText());
 		parameters.setChSpotRaius(channel1, spotRadiusCh1Tf.getText());
+		parameters.setChQuality(channel1, qualityCh1Tf.getText());
 		if (!channel2Combo.getSelectedItem().equals(NONE)) {
 			String channel2 = channel2Combo.getSelectedItem().toString();
 			parameters.setChMaxNbSpot(channel2, maxNumberSpotCh2Tf.getText());
 			parameters.setChSpotRaius(channel2, spotRadiusCh2Tf.getText());
+			parameters.setChQuality(channel2, qualityCh2Tf.getText());
 			if (!channel3Combo.getSelectedItem().equals(NONE)) {
 				String channel3 = channel3Combo.getSelectedItem().toString();
 				parameters.setChMaxNbSpot(channel3, maxNumberSpotCh3Tf.getText());
 				parameters.setChSpotRaius(channel3, spotRadiusCh3Tf.getText());
+				parameters.setChQuality(channel3, qualityCh3Tf.getText());
 				channels = channel1 + "," + channel2 + "," + channel3;
 			} else {
 				channels = channel1 + "," + channel2;
@@ -265,6 +320,24 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		}
 		return channels;
 
+	}
+
+	public void testTrackmate(JPanel jp) {
+		JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(2);
+		double spotRadius = Double.parseDouble((String) tmpTf.getValue());
+		tmpTf = (JFormattedTextField) jp.getComponent(3);
+		double quality = Double.parseDouble((String) tmpTf.getValue());
+		System.out.println(spotRadius + " _ " + quality);
+		ImagePlus img = IJ.openImage("/home/tong/Documents/movies/289/60x/3/movie_X0_Y0_FLUO/0_CFP/MMStack.ome.tif");
+		ImagePlus zProjectedFluoImg = ImgUtils.zProject(img);
+		zProjectedFluoImg.setCalibration(img.getCalibration());
+		MaarsTrackmate tmTest = new MaarsTrackmate(zProjectedFluoImg, spotRadius, quality);
+		Model model = tmTest.doDetection();
+		SelectionModel selectionModel = new SelectionModel(model);
+		HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
+		IJ.run(zProjectedFluoImg, "Enhance Contrast", "saturated=0.35");
+		displayer.refresh();
+		displayer.render();
 	}
 
 	@Override
@@ -291,29 +364,59 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 				channel3Combo.setEnabled(true);
 				maxNumberSpotCh2Tf.setEditable(true);
 				spotRadiusCh2Tf.setEditable(true);
+				qualityCh2Tf.setEditable(true);
+				test2.setEnabled(true);
+				acquire2.setEnabled(true);
 			} else {
 				maxNumberSpotCh2Tf.setText("");
 				spotRadiusCh2Tf.setText("");
+				qualityCh2Tf.setText("");
 				maxNumberSpotCh2Tf.setEditable(false);
 				spotRadiusCh2Tf.setEditable(false);
+				qualityCh2Tf.setEditable(false);
+				test2.setEnabled(false);
+				acquire2.setEnabled(false);
 				channel3Combo.setSelectedItem(NONE);
 				maxNumberSpotCh3Tf.setText("");
 				spotRadiusCh3Tf.setText("");
+				qualityCh3Tf.setText("");
 				channel3Combo.setEnabled(false);
 				maxNumberSpotCh3Tf.setEditable(false);
 				spotRadiusCh3Tf.setEditable(false);
+				qualityCh3Tf.setEditable(false);
+				test3.setEnabled(false);
+				acquire3.setEnabled(false);
 			}
 		} else if (src == channel3Combo) {
 			if (channel3Combo.getSelectedItem() != NONE) {
 				setChPanelValue(channel3Panel, channel3Combo.getSelectedItem().toString());
 				maxNumberSpotCh3Tf.setEditable(true);
 				spotRadiusCh3Tf.setEditable(true);
+				qualityCh3Tf.setEditable(true);
+				test3.setEnabled(true);
+				acquire3.setEnabled(true);
 			} else {
 				maxNumberSpotCh3Tf.setText("");
 				spotRadiusCh3Tf.setText("");
+				qualityCh3Tf.setText("");
 				maxNumberSpotCh3Tf.setEditable(false);
 				spotRadiusCh3Tf.setEditable(false);
+				qualityCh3Tf.setEditable(false);
+				test3.setEnabled(false);
+				acquire3.setEnabled(false);
 			}
+		} else if (src == acquire1) {
+
+		} else if (src == acquire2) {
+
+		} else if (src == acquire3) {
+
+		} else if (src == test1) {
+			testTrackmate(channel1Panel);
+		} else if (src == test2) {
+			testTrackmate(channel2Panel);
+		} else if (src == test3) {
+			testTrackmate(channel3Panel);
 		}
 	}
 }
