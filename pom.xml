@@ -126,6 +126,12 @@
 			<version>1.4</version>
 		</dependency>
 
+		<dependency>
+			<groupId>weka</groupId>
+			<artifactId>weka</artifactId>
+			<version>3.7.6</version>
+		</dependency>
+
 		<!-- Need for write Big Tiff -->
 		<dependency>
 			<groupId>ome</groupId>
