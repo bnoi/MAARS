@@ -21,6 +21,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;

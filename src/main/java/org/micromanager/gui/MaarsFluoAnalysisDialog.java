@@ -3,7 +3,6 @@ package org.micromanager.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Dialog;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -328,16 +327,17 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		tmpTf = (JFormattedTextField) jp.getComponent(3);
 		double quality = Double.parseDouble((String) tmpTf.getValue());
 		System.out.println(spotRadius + " _ " + quality);
-		ImagePlus img = IJ.openImage("/home/tong/Documents/movies/289/60x/3/movie_X0_Y0_FLUO/0_CFP/MMStack.ome.tif");
+		ImagePlus img = IJ.openImage("/Volumes/Macintosh/curioData/624-60x/264-s1/movie_X0_Y0_FLUO/0_GFP/MMStack.ome.tif");
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(img);
 		zProjectedFluoImg.setCalibration(img.getCalibration());
 		MaarsTrackmate tmTest = new MaarsTrackmate(zProjectedFluoImg, spotRadius, quality);
 		Model model = tmTest.doDetection();
+		model.getSpots().setVisible(true);
 		SelectionModel selectionModel = new SelectionModel(model);
 		HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
 		IJ.run(zProjectedFluoImg, "Enhance Contrast", "saturated=0.35");
-		displayer.refresh();
 		displayer.render();
+		displayer.refresh();
 	}
 
 	@Override
