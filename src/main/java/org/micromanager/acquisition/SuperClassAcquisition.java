@@ -143,13 +143,11 @@ public class SuperClassAcquisition {
 	 *            real distance between two slices (in micron)
 	 * @return
 	 */
-	public Datastore setDatastoreMetadata(Datastore ds, String channelName, String acqName, double step) {
+	public void setDatastoreMetadata(Datastore ds, String channelName, String acqName, double step) {
 		ReportingUtils.logMessage("... Update summaryMetadata");
 		SummaryMetadataBuilder summaryMD = ds.getSummaryMetadata().copy();
 		summaryMD = summaryMD.channelGroup(channelGroup);
-		String[] channels = new String[1];
-		channels[0] = channelName;
-		summaryMD = summaryMD.channelNames(channels);
+		summaryMD = summaryMD.channelNames(new String[] { channelName });
 		summaryMD = summaryMD.name(acqName);
 		summaryMD = summaryMD.zStepUm(step);
 		try {
@@ -158,7 +156,6 @@ public class SuperClassAcquisition {
 			System.out.println("Can not update datastore metadata");
 			e2.printStackTrace();
 		}
-		return ds;
 	}
 
 	/**
@@ -175,6 +172,31 @@ public class SuperClassAcquisition {
 		liveWindow.setDisplaySettings(displayBuilder.build());
 	};
 
+	public void save(List<Image> listImg, int frame, String channelName, double step) {
+		String acqName = null;
+		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
+			// initialize parameters for FLUO Acquisitions
+			acqName = "movie_X" + positionX + "_Y" + positionY + "_FLUO/" + frame + "_" + channelName;
+		} else {
+			// initialize parameters for Bright-Field Acquisitions
+			acqName = "movie_X" + positionX + "_Y" + positionY;
+		}
+		String pathToMovie = rootDirName + "/" + acqName;
+		Datastore ds = createDataStore(pathToMovie);
+		setDatastoreMetadata(ds, channelName, acqName, step);
+		for (Image img : listImg) {
+			try {
+				ds.putImage(img);
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (DatastoreFrozenException e) {
+				e.printStackTrace();
+			}
+		}
+		ds.freeze();
+		ds.close();
+	}
+
 	/**
 	 * 
 	 * @param frame
@@ -185,37 +207,28 @@ public class SuperClassAcquisition {
 	 *            zFocus where maximum # of spot can be seen
 	 * @return a duplicate of acquired images.
 	 */
-	public ImagePlus acquire(int frame, String channelName, double zFocus) {
-		String acqName = null;
-		String imgName = null;
+	public ImagePlus acquire(int frame, String channelName, double zFocus, boolean save) {
 		double range = 0;
 		double step = 0;
 		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
 			// initialize parameters for FLUO Acquisitions
-			acqName = "movie_X" + positionX + "_Y" + positionY + "_FLUO/" + frame + "_" + channelName;
 			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
 			step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
-			imgName = channelName;
 		} else {
 			// initialize parameters for Bright-Field Acquisitions
-			acqName = "movie_X" + positionX + "_Y" + positionY;
 			range = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
 			step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
-			imgName = parameters.getSegmentationParameter(MaarsParameters.CHANNEL);
 		}
 
 		String shutterLable = parameters.getChShutter(channelName);
 		int sliceNumber = (int) Math.round(range / step);
 		int exposure = Integer.parseInt(parameters.getChExposure(channelName));
-		String pathToMovie = rootDirName + "/" + acqName;
 		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
 
 		cleanUp();
 		mmc.setAutoShutter(false);
 		setShutter(shutterLable);
 		setChExposure(exposure);
-		Datastore ds = createDataStore(pathToMovie);
-		setDatastoreMetadata(ds, channelName, acqName, step);
 		try {
 			mmc.setConfig(channelGroup, channelName);
 			mmc.waitForConfig(channelGroup, channelName);
@@ -235,7 +248,7 @@ public class SuperClassAcquisition {
 		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
 		List<Image> listImg = new ArrayList<Image>();
-		for (int k = 0; k < sliceNumber; k++) {
+		for (int k = 0; k <= sliceNumber; k++) {
 			System.out.println("- set focus device at position " + z);
 			try {
 				mmc.setPosition(focusDevice, z);
@@ -265,32 +278,23 @@ public class SuperClassAcquisition {
 			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
-		// add images into Datastore and imageplus
-		ReportingUtils.logMessage("add images into Datastore and imageplus");
+		if (save) {
+			save(listImg, frame, channelName, step);
+		}
 		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
 		for (Image img : listImg) {
 			// Prepare a imagePlus (for analysis)
 			ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
 			imageStack.addSlice(imgProcessor.convertToShortProcessor());
-			try {
-				// Datastore (for save)
-				ds.putImage(img);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (DatastoreFrozenException e) {
-				e.printStackTrace();
-			}
 		}
-		ds.freeze();
 		// ImagePlus for further analysis
-		ImagePlus imagePlus = new ImagePlus(imgName, imageStack);
+		ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
 		Calibration cal = new Calibration();
 		cal.setUnit("micron");
 		cal.pixelWidth = mmc.getPixelSizeUm();
 		cal.pixelHeight = mmc.getPixelSizeUm();
-		cal.pixelDepth = ds.getSummaryMetadata().getZStepUm();
+		cal.pixelDepth = step;
 		imagePlus.setCalibration(cal);
-		ds.close();
 		return imagePlus;
 	}
 }

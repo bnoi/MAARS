@@ -17,7 +17,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.micromanager.acquisition.SuperClassAcquisition;
 import org.micromanager.cellstateanalysis.MaarsTrackmate;
+import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 import org.micromanager.utils.ImgUtils;
 
@@ -26,6 +29,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
+import mmcorej.CMMCore;
 
 import javax.swing.JLabel;
 
@@ -42,6 +46,8 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private MMStudio mm;
+	private CMMCore mmc;
 	private MaarsParameters parameters;
 	private int fieldLength = 8;
 	private JTextField range;
@@ -80,10 +86,11 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	 * @param parameters
 	 *            : parameters displayed in dialog
 	 */
-	public MaarsFluoAnalysisDialog(MaarsParameters parameters) {
+	public MaarsFluoAnalysisDialog(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 
 		// set up this dialog
-
+		this.mm = mm;
+		this.mmc = mmc;
 		this.parameters = parameters;
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		// this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
@@ -199,8 +206,10 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		qualityCh3Tf = new JFormattedTextField(Double.class);
 		JPanel buttonPanel3 = new JPanel(new GridLayout(1, 0));
 		acquire3 = new JButton("acquire");
+		acquire3.setEnabled(false);
 		acquire3.addActionListener(this);
 		test3 = new JButton("test");
+		test3.setEnabled(false);
 		test3.addActionListener(this);
 		buttonPanel3.add(acquire3);
 		buttonPanel3.add(test3);
@@ -321,23 +330,39 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 	}
 
-	public void testTrackmate(JPanel jp) {
+	public void testTrackmate(JPanel jp, ImagePlus img) {
 		JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(2);
 		double spotRadius = Double.parseDouble((String) tmpTf.getValue());
 		tmpTf = (JFormattedTextField) jp.getComponent(3);
 		double quality = Double.parseDouble((String) tmpTf.getValue());
-		System.out.println(spotRadius + " _ " + quality);
-		ImagePlus img = IJ.openImage("/Volumes/Macintosh/curioData/624-60x/264-s1/movie_X0_Y0_FLUO/0_GFP/MMStack.ome.tif");
+		// ImagePlus img = IJ.getImage().duplicate();
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(img);
 		zProjectedFluoImg.setCalibration(img.getCalibration());
 		MaarsTrackmate tmTest = new MaarsTrackmate(zProjectedFluoImg, spotRadius, quality);
-		Model model = tmTest.doDetection();
+		Model model = tmTest.doDetection(false);
 		model.getSpots().setVisible(true);
 		SelectionModel selectionModel = new SelectionModel(model);
 		HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
 		IJ.run(zProjectedFluoImg, "Enhance Contrast", "saturated=0.35");
 		displayer.render();
 		displayer.refresh();
+	}
+
+	public ImagePlus acquireTestImg(JPanel jp) {
+		@SuppressWarnings("unchecked")
+		JComboBox<String> tmpCombo = (JComboBox<String>) jp.getComponent(0);
+		double zFocus = 0;
+		String focusDevice = mmc.getFocusDevice();
+		try {
+			zFocus = mmc.getPosition(focusDevice);
+			mmc.waitForDevice(focusDevice);
+		} catch (Exception e) {
+			ReportingUtils.logMessage("could not get z current position");
+			e.printStackTrace();
+		}
+		SuperClassAcquisition acq = new SuperClassAcquisition(mm, mmc, parameters, "0", "0");
+		String channelName = (String) tmpCombo.getSelectedItem();
+		return acq.acquire(0, channelName, zFocus, false);
 	}
 
 	@Override
@@ -406,17 +431,17 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 				acquire3.setEnabled(false);
 			}
 		} else if (src == acquire1) {
-
+			acquireTestImg(channel1Panel);
 		} else if (src == acquire2) {
-
+			acquireTestImg(channel2Panel);
 		} else if (src == acquire3) {
-
+			acquireTestImg(channel3Panel);
 		} else if (src == test1) {
-			testTrackmate(channel1Panel);
+			testTrackmate(channel1Panel, acquireTestImg(channel1Panel));
 		} else if (src == test2) {
-			testTrackmate(channel2Panel);
+			testTrackmate(channel2Panel, acquireTestImg(channel2Panel));
 		} else if (src == test3) {
-			testTrackmate(channel3Panel);
+			testTrackmate(channel3Panel, acquireTestImg(channel3Panel));
 		}
 	}
 }
