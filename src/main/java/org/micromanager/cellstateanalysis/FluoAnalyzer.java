@@ -21,7 +21,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
@@ -116,7 +115,7 @@ public class FluoAnalyzer implements Runnable {
 		// Call trackmate to detect spots
 		MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
 
-		Model model = trackmate.doDetection();
+		Model model = trackmate.doDetection(true);
 
 		if (frame == 0) {
 			soc.setTrackmateModel(model);

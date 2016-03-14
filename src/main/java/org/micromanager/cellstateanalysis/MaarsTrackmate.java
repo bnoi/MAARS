@@ -54,14 +54,16 @@ public class MaarsTrackmate {
 	 * Take parameters in the constructor then initalize trakemate object to get
 	 * unfiltered spots.
 	 */
-	public Model doDetection() {
+	public Model doDetection(boolean computeFeatures) {
 		TrackMate trackmate = new TrackMate(settings);
 
 		trackmate.execDetection();
 
 		trackmate.execInitialSpotFiltering();
 
-		trackmate.computeSpotFeatures(false);
+		if (computeFeatures) {
+			trackmate.computeSpotFeatures(false);
+		}
 
 		return trackmate.getModel();
 	}

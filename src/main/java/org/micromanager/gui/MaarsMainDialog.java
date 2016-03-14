@@ -370,9 +370,9 @@ public class MaarsMainDialog implements ActionListener {
 				IJ.error("Session aborted, 0 field to analyse");
 			} else {
 				Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
-				    public void uncaughtException(Thread th, Throwable ex) {
-				        System.out.println("Uncaught exception: " + ex);
-				    }
+					public void uncaughtException(Thread th, Throwable ex) {
+						System.out.println("Uncaught exception: " + ex);
+					}
 				};
 				saveParameters();
 				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
@@ -390,7 +390,7 @@ public class MaarsMainDialog implements ActionListener {
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);
 		} else if (e.getSource() == fluoAnalysisButton) {
-			new MaarsFluoAnalysisDialog(parameters);
+			new MaarsFluoAnalysisDialog(mm, mmc, parameters);
 		} else if (e.getSource() == dynamicOpt) {
 			setAnalysisStrategy();
 			fluoAcqDurationTf.setEditable(true);
