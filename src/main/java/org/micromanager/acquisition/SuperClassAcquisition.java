@@ -278,6 +278,7 @@ public class SuperClassAcquisition {
 			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}
+		mmc.setAutoShutter(true);
 		if (save) {
 			save(listImg, frame, channelName, step);
 		}
