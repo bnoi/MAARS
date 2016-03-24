@@ -281,7 +281,7 @@ public class FluoAnalyzer implements Runnable {
 												poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
 										(int) FastMath.round(
 												poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
-								Line.setWidth((int) FastMath.round(0.25 / fluoImgCal.pixelWidth));
+								Line.setWidth(2 * (int) FastMath.round(radius / fluoImgCal.pixelWidth));
 								for (Spot s : spotSet) {
 									if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
 										// detect metaphase Kt oscillation or
