@@ -66,6 +66,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private JFormattedTextField spotRadiusCh3Tf;
 	private JFormattedTextField qualityCh3Tf;
 	private JCheckBox saveFlims;
+	private JCheckBox doAnalysis;
 	private JButton test1;
 	private JButton test2;
 	private JButton test3;
@@ -128,10 +129,12 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		//
 
-		JPanel saveMoviesChkPanel = new JPanel(new GridLayout(1, 0));
+		JPanel checkBoxPanel = new JPanel(new GridLayout(1, 0));
 		saveFlims = new JCheckBox("Save Movies",
 				Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
-		saveMoviesChkPanel.add(saveFlims);
+		doAnalysis = new JCheckBox("Do Analysis", false);
+		checkBoxPanel.add(saveFlims);
+		checkBoxPanel.add(doAnalysis);
 
 		//
 
@@ -239,7 +242,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		mainPanel.add(fluoRangePanel);
 		mainPanel.add(fluoStepPanel);
 		mainPanel.add(timeIntervalPanel);
-		mainPanel.add(saveMoviesChkPanel);
+		mainPanel.add(checkBoxPanel);
 		mainPanel.add(fluoAnaParamLabel);
 		mainPanel.add(channelTitlePanel);
 		mainPanel.add(channel1Panel);
