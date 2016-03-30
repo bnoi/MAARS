@@ -61,6 +61,7 @@ import org.jdom2.output.XMLOutputter;
  *    +-----> DYNAMIC
  *    +-----> TIME_LIMIT
  *    +-----> TIME_INTERVAL
+ *    +-----> DO_ANALYSIS
  *    
  * GENERAL_ACQUISITION_PARAMETERS
  *    |
@@ -109,6 +110,7 @@ public class MaarsParameters {
 	public static final String TIME_INTERVAL = "TIME_INTERVAL";
 	public static final String TIME_LIMIT = "TIME_LIMIT";
 	public static final String SAVING_PATH = "SAVING_PATH";
+	public static final String DO_ANALYSIS = "DO_ANALYSIS";
 
 	public static final String SHUTTER = "SHUTTER";
 	public static final String COLOR = "COLOR";

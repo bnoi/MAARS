@@ -175,6 +175,7 @@ public class MAARS implements Runnable {
 
 	@Override
 	public void run() {
+		Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
 		// Start time
 		long start = System.currentTimeMillis();
 		mmc.setAutoShutter(false);
@@ -253,10 +254,13 @@ public class MAARS implements Runnable {
 							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 							soc.addAcqID(id);
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
-							es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
-									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-									Double.parseDouble(parameters.getChSpotRaius(channel)),
-									Double.parseDouble(parameters.getChQuality(channel)), frame, merotelyCandidates));
+							if (do_analysis) {
+								es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+										Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+										Double.parseDouble(parameters.getChSpotRaius(channel)),
+										Double.parseDouble(parameters.getChQuality(channel)), frame,
+										merotelyCandidates));
+							}
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
