@@ -6,6 +6,8 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -126,13 +128,33 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		timeInterval = new JTextField(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL), fieldLength);
 		timeIntervalPanel.add(timeIntervalTitle);
 		timeIntervalPanel.add(timeInterval);
+		timeInterval.addKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (Double.parseDouble(timeInterval.getText()) <= 15000) {
+					doAnalysis.setSelected(false);
+					doAnalysis.setEnabled(false);
+				}else{
+					doAnalysis.setSelected(true);
+					doAnalysis.setEnabled(true);
+				}
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+		});
 
 		//
 
 		JPanel checkBoxPanel = new JPanel(new GridLayout(1, 0));
 		saveFlims = new JCheckBox("Save Movies",
 				Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
-		doAnalysis = new JCheckBox("Do Analysis", false);
+		doAnalysis = new JCheckBox("Do Analysis", true);
 		checkBoxPanel.add(saveFlims);
 		checkBoxPanel.add(doAnalysis);
 
@@ -361,6 +383,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		if (src == okFluoAnaParamButton) {
 			parameters.setFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
 			parameters.setFluoParameter(MaarsParameters.STEP, step.getText());
+			parameters.setFluoParameter(MaarsParameters.DO_ANALYSIS, String.valueOf(doAnalysis.isSelected()));
 			parameters.setFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES,
 					String.valueOf(saveFlims.isSelected()));
 			parameters.setFluoParameter(MaarsParameters.TIME_INTERVAL, timeInterval.getText());
