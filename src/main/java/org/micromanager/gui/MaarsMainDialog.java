@@ -219,7 +219,7 @@ public class MaarsMainDialog implements ActionListener {
 		JPanel chkPanel = new JPanel(new GridLayout(1, 0));
 		chkPanel.setBackground(bgColor);
 		saveParametersChk = new JCheckBox("Save parameters", true);
-		withOutAcqChk = new JCheckBox("Don't do acquisition", true);
+		withOutAcqChk = new JCheckBox("Don't do acquisition", false);
 		chkPanel.add(withOutAcqChk);
 		chkPanel.add(saveParametersChk);
 

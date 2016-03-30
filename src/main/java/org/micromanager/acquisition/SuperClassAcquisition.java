@@ -257,10 +257,10 @@ public class SuperClassAcquisition {
 				ReportingUtils.logMessage("could not set focus device at position");
 			}
 			z = z + step;
-			listImg.add(mm.live().snap(true).get(0));
-			if (k == 0) {
-				setDisplay(chColor);
-			}
+			listImg.add(mm.live().snap(false).get(0));
+//			if (k == 0) {
+//				setDisplay(chColor);
+//			}
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
 		try {
