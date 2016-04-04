@@ -46,7 +46,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>> geosOfCells;
 	private ArrayList<String[]> acqIDs;
 	private Model trackmateModel;
-	private HashMap<Integer, ImageStack> croppedStacks;
+	private HashMap<Integer, ImagePlus> croppedImps;
 	private Calibration fluoImgCalib;
 	private Set<String> headerSet;
 
@@ -253,6 +253,20 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	/**
+	 *  crop ROIs from merged field-wide image
+	 * @param mergedImg
+	 * @return HashMap<cell NB, corresponding cropped img>
+	 */
+	public HashMap<Integer, ImagePlus> cropRois(ImagePlus mergedImg) {
+		HashMap<Integer, ImagePlus> croppedImgs = new HashMap<Integer, ImagePlus>();
+		for (int i = 0; i < cellArray.size(); i++) {
+			ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cellArray.get(i).getCellShapeRoi());
+			croppedImgs.put(i, croppedImg);
+		}
+		return croppedImgs;
+	}
+
+	/**
 	 * crop and save images
 	 */
 	public String saveCroppedImgs() {
@@ -269,7 +283,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		}
 		for (String channel : spotsInCells.keySet()) {
 			ImageStack fieldStack = null;
-			croppedStacks = new HashMap<Integer, ImageStack>();
 			for (int f = 0; f <= Integer.parseInt(totalNbFrame); f++) {
 				fluoImg = IJ.openImage(fluoDir + f + "_" + channel + "/MMStack.ome.tif");
 				zprojectImg = ImgUtils.zProject(fluoImg);
@@ -282,13 +295,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			ImagePlus fieldImg = new ImagePlus(channel, fieldStack);
 			fieldImg.setCalibration(fluoImgCalib);
 			// save cropped cells
-			for (int i = 0; i < cellArray.size(); i++) {
-				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(fieldImg, cellArray.get(i).getCellShapeRoi());
-				croppedStacks.put(i, croppedImg.getStack());
-			}
-			for (int j = 0; j < croppedStacks.size(); j++) {
+			croppedImps = cropRois(fieldImg);
+//			for (int i = 0; i < cellArray.size(); i++) {
+//				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(fieldImg, cellArray.get(i).getCellShapeRoi());
+//				croppedStacks.put(i, croppedImg.getStack());
+//			}
+			for (int j = 0; j < croppedImps.size(); j++) {
 				String pathToCroppedImg = croppedImgDir + String.valueOf(j) + "_" + channel;
-				ImagePlus imp = new ImagePlus("cell_" + j, croppedStacks.get(j));
+				ImagePlus imp = croppedImps.get(j);
 				IJ.run(imp, "Enhance Contrast", "saturated=0.35");
 				imp.setCalibration(fluoImgCalib);
 				IJ.saveAsTiff(imp, pathToCroppedImg);
@@ -421,7 +435,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		this.geosOfCells = null;
 		this.acqIDs = null;
 		this.trackmateModel = null;
-		this.croppedStacks = null;
+		this.croppedImps = null;
 		this.fluoImgCalib = null;
 	}
 

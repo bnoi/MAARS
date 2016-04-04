@@ -64,6 +64,7 @@ public class MAARSNoAcq implements Runnable {
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
 
+		ImagePlus mergedImg = new ImagePlus();
 		int frameCounter = 0;
 
 		for (int i = 0; i < explo.length(); i++) {
@@ -102,7 +103,6 @@ public class MAARSNoAcq implements Runnable {
 				String pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
 				String[] listAcqNames = new File(pathToFluoDir).list();
 				String pattern = "(\\d+)(_)(\\w+)";
-				frameCounter = 0;
 				ArrayList<String> arrayChannels = new ArrayList<String>();
 				ArrayList<Integer> arrayImgFrames = new ArrayList<Integer>();
 				for (String acqName : listAcqNames) {
@@ -115,11 +115,10 @@ public class MAARSNoAcq implements Runnable {
 						if (!arrayImgFrames.contains(Integer.parseInt(current_frame))) {
 							arrayImgFrames.add(Integer.parseInt(current_frame));
 						}
-						frameCounter++;
 					}
 				}
+				frameCounter = arrayChannels.size();
 				Collections.sort(arrayImgFrames);
-				frameCounter = frameCounter / arrayChannels.size();
 				int nThread = Runtime.getRuntime().availableProcessors();
 				es = Executors.newFixedThreadPool(nThread);
 				Future<FloatProcessor> future = null;
@@ -145,12 +144,10 @@ public class MAARSNoAcq implements Runnable {
 				}
 				ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
 				try {
-					int f = 1;
 					for (int frameInd : map.keySet()) {
 						for (String channel : map.get(frameInd).keySet()) {
 							FloatProcessor zprojectedImgProcessor = map.get(frameInd).get(channel).get();
 							fluoStack.addSlice(zprojectedImgProcessor);
-							f++;
 						}
 					}
 				} catch (InterruptedException e1) {
@@ -158,7 +155,8 @@ public class MAARSNoAcq implements Runnable {
 				} catch (ExecutionException e1) {
 					e1.printStackTrace();
 				}
-				new ImagePlus("all_channels", fluoStack).show();
+				 new ImagePlus("merged_channels", fluoStack);
+				mergedImg.setCalibration(segImg.getCalibration());
 			}
 		}
 		es.shutdown();
@@ -173,6 +171,7 @@ public class MAARSNoAcq implements Runnable {
 			long startWriting = System.currentTimeMillis();
 			soc.saveSpots();
 			soc.saveGeometries();
+			soc.cropRois(mergedImg);
 			String croppedImgDir = soc.saveCroppedImgs();
 			for (int nb : merotelyCandidates.keySet()) {
 				if (this.merotelyCandidates.get(nb) > frameCounter * 0.1) {
