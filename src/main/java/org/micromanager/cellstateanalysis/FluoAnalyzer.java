@@ -3,6 +3,7 @@ package org.micromanager.cellstateanalysis;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -28,12 +29,13 @@ import ij.measure.Calibration;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
+import ij.process.FloatProcessor;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
  * @version Nov 19, 2015
  */
-public class FluoAnalyzer implements Runnable {
+public class FluoAnalyzer implements Callable<FloatProcessor> {
 
 	private ImagePlus fluoImage;
 	private SetOfCells soc;
@@ -50,7 +52,7 @@ public class FluoAnalyzer implements Runnable {
 	/**
 	 * @param fluoImage
 	 *            image to analyze
-	 * 
+	 * zProjectedFluoImg
 	 * @param bfImgCal
 	 *            bright field image calibration, need it to decide whether or
 	 *            not rescale ROI
@@ -84,74 +86,6 @@ public class FluoAnalyzer implements Runnable {
 		this.quality = quality;
 		this.frame = frame;
 		this.merotelyCandidates = merotelyCandidates;
-	}
-
-	/**
-	 * the main, use one new thread just in order to free acquisition thread to
-	 * acquire images as soon as possible
-	 */
-	public void run() {
-		soc.addSpotContainerOf(channel);
-		soc.addFeatureContainerOf(channel);
-		// TODO project or not. Do not project if do 3D detection
-		if (fluoImage.getCalibration().getUnit().equals("cm")) {
-			fluoImage = ImgUtils.unitCmToMicron(fluoImage);
-		}
-		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
-		zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
-		zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
-		if (frame == 0) {
-			ResultsTable resultTable = new ResultsTable();
-			Analyzer analyzer = new Analyzer(zProjectedFluoImg,
-					Measurements.MEAN + Measurements.STD_DEV + Measurements.MIN_MAX, resultTable);
-			Iterator<Cell> it = soc.iterator();
-			while (it.hasNext()) {
-				zProjectedFluoImg.setRoi(it.next().getCellShapeRoi());
-				analyzer.measure();
-				zProjectedFluoImg.deleteRoi();
-			}
-			resultTable.show(channel + " 0 frame fluo measure");
-		}
-		// Call trackmate to detect spots
-		MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
-
-		Model model = trackmate.doDetection(true);
-
-		if (frame == 0) {
-			soc.setTrackmateModel(model);
-			SelectionModel selectionModel = new SelectionModel(model);
-			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
-			displayer.render();
-			displayer.refresh();
-		}
-
-		collection = getNBestqualitySpots(model.getSpots());
-		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
-
-		int nThread = Runtime.getRuntime().availableProcessors();
-		ExecutorService es = Executors.newFixedThreadPool(nThread);
-		int nbCell = soc.size();
-		final int[] nbOfCellEachThread = new int[2];
-		nbOfCellEachThread[0] = (int) nbCell / nThread;
-		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
-		Future<?> future = null;
-		for (int i = 0; i < nThread; i++) {
-			// analyze every subset of cell
-			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, factors, merotelyCandidates));
-		}
-		es.shutdown();
-		try {
-			future.get();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		} catch (ExecutionException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			es.awaitTermination(3, TimeUnit.MINUTES);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private SpotCollection getNBestqualitySpots(SpotCollection spots) {
@@ -307,5 +241,75 @@ public class FluoAnalyzer implements Runnable {
 				}
 			}
 		}
+	}
+
+	/**
+	 * the main, use one new thread just in order to free acquisition thread to
+	 * acquire images as soon as possible
+	 */
+	@Override
+	public FloatProcessor call() throws Exception {
+		soc.addSpotContainerOf(channel);
+		soc.addFeatureContainerOf(channel);
+		// TODO project or not. Do not project if do 3D detection
+		if (fluoImage.getCalibration().getUnit().equals("cm")) {
+			fluoImage = ImgUtils.unitCmToMicron(fluoImage);
+		}
+		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
+		zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
+		zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
+		if (frame == 0) {
+			ResultsTable resultTable = new ResultsTable();
+			Analyzer analyzer = new Analyzer(zProjectedFluoImg,
+					Measurements.MEAN + Measurements.STD_DEV + Measurements.MIN_MAX, resultTable);
+			Iterator<Cell> it = soc.iterator();
+			while (it.hasNext()) {
+				zProjectedFluoImg.setRoi(it.next().getCellShapeRoi());
+				analyzer.measure();
+				zProjectedFluoImg.deleteRoi();
+			}
+			resultTable.show(channel + " 0 frame fluo measure");
+		}
+		// Call trackmate to detect spots
+		MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
+
+		Model model = trackmate.doDetection(true);
+
+		if (frame == 0) {
+			soc.setTrackmateModel(model);
+			SelectionModel selectionModel = new SelectionModel(model);
+			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
+			displayer.render();
+			displayer.refresh();
+		}
+
+		collection = getNBestqualitySpots(model.getSpots());
+		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
+
+		int nThread = Runtime.getRuntime().availableProcessors();
+		ExecutorService es = Executors.newFixedThreadPool(nThread);
+		int nbCell = soc.size();
+		final int[] nbOfCellEachThread = new int[2];
+		nbOfCellEachThread[0] = (int) nbCell / nThread;
+		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
+		Future<?> future = null;
+		for (int i = 0; i < nThread; i++) {
+			// analyze every subset of cell
+			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, factors, merotelyCandidates));
+		}
+		es.shutdown();
+		try {
+			future.get();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		} catch (ExecutionException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			es.awaitTermination(3, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return zProjectedFluoImg.getProcessor().convertToFloatProcessor();
 	}
 }

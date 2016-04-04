@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -19,8 +24,11 @@ import org.micromanager.utils.FileUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.measure.Calibration;
+import ij.plugin.ZProjector;
 import ij.plugin.frame.RoiManager;
+import ij.process.FloatProcessor;
 import mmcorej.CMMCore;
 
 /**
@@ -91,44 +99,66 @@ public class MAARSNoAcq implements Runnable {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-				int frame = 0;
 				String pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
 				String[] listAcqNames = new File(pathToFluoDir).list();
 				String pattern = "(\\d+)(_)(\\w+)";
 				frameCounter = 0;
+				ArrayList<String> arrayChannels = new ArrayList<String>();
+				ArrayList<Integer> arrayImgFrames = new ArrayList<Integer>();
 				for (String acqName : listAcqNames) {
 					if (Pattern.matches(pattern, acqName)) {
+						String current_channel = acqName.split("_", -1)[1];
+						String current_frame = acqName.split("_", -1)[0];
+						if (!arrayChannels.contains(current_channel)) {
+							arrayChannels.add(current_channel);
+						}
+						if (!arrayImgFrames.contains(Integer.parseInt(current_frame))) {
+							arrayImgFrames.add(Integer.parseInt(current_frame));
+						}
 						frameCounter++;
 					}
 				}
-				String channels = parameters.getUsingChannels();
-				String[] arrayChannels = channels.split(",", -1);
-				frameCounter = frameCounter / arrayChannels.length;
+				Collections.sort(arrayImgFrames);
+				frameCounter = frameCounter / arrayChannels.size();
 				int nThread = Runtime.getRuntime().availableProcessors();
 				es = Executors.newFixedThreadPool(nThread);
-				Future<?> future = null;
-				while (frame < frameCounter) {
+				Future<FloatProcessor> future = null;
+				Map<Integer, Map<String, Future<FloatProcessor>>> map = new HashMap<Integer, Map<String, Future<FloatProcessor>>>();
+				for (int frameInd = 0; frameInd < arrayImgFrames.size(); frameInd++) {
+					Map<String, Future<FloatProcessor>> channelsInFrame = new HashMap<String, Future<FloatProcessor>>();
 					for (String channel : arrayChannels) {
-						IJ.log("Analysing channel " + channel + "_" + frame);
-						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
+						int current_frame = arrayImgFrames.get(frameInd);
+						IJ.log("Analysing channel " + channel + "_" + current_frame);
+						String[] id = new String[] { xPos, yPos, String.valueOf(current_frame), channel };
 						soc.addAcqID(id);
 						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
-								+ frame + "_" + channel + "/MMStack.ome.tif";
+								+ current_frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 								Double.parseDouble(parameters.getChSpotRaius(channel)),
-								Double.parseDouble(parameters.getChQuality(channel)),frame, merotelyCandidates));
+								Double.parseDouble(parameters.getChQuality(channel)), Integer.valueOf(current_frame),
+								merotelyCandidates));
+						channelsInFrame.put(channel, future);
 					}
-					frame++;
+					map.put(frameInd, channelsInFrame);
 				}
+				ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
 				try {
-					future.get();
+					int f = 1;
+					for (int frameInd : map.keySet()) {
+						for (String channel : map.get(frameInd).keySet()) {
+							FloatProcessor zprojectedImgProcessor = map.get(frameInd).get(channel).get();
+							fluoStack.addSlice(zprojectedImgProcessor);
+							f++;
+						}
+					}
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				} catch (ExecutionException e1) {
 					e1.printStackTrace();
 				}
+				new ImagePlus("all_channels", fluoStack).show();
 			}
 		}
 		es.shutdown();

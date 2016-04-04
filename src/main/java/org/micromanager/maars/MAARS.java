@@ -255,7 +255,7 @@ public class MAARS implements Runnable {
 							soc.addAcqID(id);
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
 							if (do_analysis) {
-								es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+								es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 										Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 										Double.parseDouble(parameters.getChSpotRaius(channel)),
 										Double.parseDouble(parameters.getChQuality(channel)), frame,
@@ -286,7 +286,7 @@ public class MAARS implements Runnable {
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqID(id);
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
-						es.execute(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+						es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 								Double.parseDouble(parameters.getChSpotRaius(channel)),
 								Double.parseDouble(parameters.getChQuality(channel)), frame, merotelyCandidates));
