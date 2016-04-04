@@ -184,7 +184,7 @@ public class SegPombe {
 			for (int xPos : map.keySet()) {
 				FloatProcessor processor = map.get(xPos).get();
 				for (int x = 0; x < processor.getWidth(); x++) {
-					IJ.showStatus("Computing correlation image");
+					IJ.showStatus("Rendering correlation image");
 					for (int y = 0; y < processor.getHeight(); y++) {
 						imgCorrTempProcessor.putPixel(x + xPos, y,
 								processor.get(x, y));
