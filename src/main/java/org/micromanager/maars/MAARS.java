@@ -298,13 +298,18 @@ public class MAARS implements Runnable {
 					long startWriting = System.currentTimeMillis();
 					soc.saveSpots();
 					soc.saveGeometries();
-					String croppedImgDir = soc.saveCroppedImgs();
+					Boolean splitChannel = true;
+					String croppedImgDir = soc.saveCroppedImgs(splitChannel);
 					for (int nb : merotelyCandidates.keySet()) {
 						if (this.merotelyCandidates.get(nb) > frame * 0.02) {
 							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 									.format(Calendar.getInstance().getTime());
 							IJ.log(timeStamp + " : " + nb);
-							IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
+							if (splitChannel){
+								IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
+							}else{
+								IJ.openImage(croppedImgDir + nb + "_merged.tif").show();
+							}
 						}
 					}
 					mailNotify();
