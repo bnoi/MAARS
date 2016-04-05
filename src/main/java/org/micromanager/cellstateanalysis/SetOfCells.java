@@ -46,7 +46,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>> geosOfCells;
 	private ArrayList<String[]> acqIDs;
 	private Model trackmateModel;
-	private HashMap<Integer, ImagePlus> croppedImps;
+	private HashMap<Integer, HashMap<String, ImagePlus>> croppedImps;
 	private Calibration fluoImgCalib;
 	private Set<String> headerSet;
 
@@ -252,61 +252,97 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			this.trackmateModel = model;
 	}
 
+	public ImagePlus stackFluoImgs(String totalNbFrame, String fluoDir, String channel) {
+		ImagePlus fluoImg;
+		ImagePlus zprojectImg;
+		ImageStack fieldStack = null;
+		for (int f = 0; f <= Integer.parseInt(totalNbFrame); f++) {
+			fluoImg = IJ.openImage(fluoDir + f + "_" + channel + "/MMStack.ome.tif");
+			zprojectImg = ImgUtils.zProject(fluoImg);
+			if (fieldStack == null) {
+				fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight(),
+						Integer.parseInt(totalNbFrame) + 1);
+			}
+			fieldStack.setProcessor(zprojectImg.getStack().getProcessor(1), f + 1);
+		}
+		ImagePlus fieldImg = new ImagePlus(channel, fieldStack);
+		fieldImg.setCalibration(fluoImgCalib);
+		return fieldImg;
+	}
+
 	/**
-	 *  crop ROIs from merged field-wide image
+	 * crop ROIs from merged field-wide image
+	 * 
 	 * @param mergedImg
 	 * @return HashMap<cell NB, corresponding cropped img>
 	 */
-	public HashMap<Integer, ImagePlus> cropRois(ImagePlus mergedImg) {
-		HashMap<Integer, ImagePlus> croppedImgs = new HashMap<Integer, ImagePlus>();
-		for (int i = 0; i < cellArray.size(); i++) {
-			ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cellArray.get(i).getCellShapeRoi());
-			croppedImgs.put(i, croppedImg);
+	public HashMap<Integer, HashMap<String, ImagePlus>> cropRois(ImagePlus mergedImg, Boolean splitChannel) {
+		HashMap<Integer, HashMap<String, ImagePlus>> croppedImgs = new HashMap<Integer, HashMap<String, ImagePlus>>();
+		if (splitChannel) {
+			for (int i = 0; i < cellArray.size(); i++) {
+				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cellArray.get(i).getCellShapeRoi());
+				HashMap<String, ImageStack> channelStacks = new HashMap<String, ImageStack>();
+				for (int j = 1; j <= croppedImg.getImageStack().size(); j++) {
+					String currentLabel = croppedImg.getImageStack().getSliceLabel(j);
+					if (!channelStacks.containsKey(currentLabel)){
+						channelStacks.put(currentLabel, new ImageStack(croppedImg.getWidth(), croppedImg.getHeight()));
+					}
+					channelStacks.get(currentLabel).addSlice(croppedImg.getStack().getProcessor(j).convertToFloatProcessor());
+				}
+				HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
+				for (String channel : channelStacks.keySet()){
+					croppedImgInChannel.put(channel, new ImagePlus(channel, channelStacks.get(channel)));
+				}
+				croppedImgs.put(i, croppedImgInChannel);
+			}
+		} else {
+			for (int i = 0; i < cellArray.size(); i++) {
+				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cellArray.get(i).getCellShapeRoi());
+				HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
+				croppedImgInChannel.put("merged", croppedImg);
+				croppedImgs.put(i, croppedImgInChannel);
+			}
 		}
 		return croppedImgs;
 	}
 
 	/**
-	 * crop and save images
+	 * 
+	 * @param croppedImgSet
+	 * @return cropped images base directory
 	 */
-	public String saveCroppedImgs() {
-		ImagePlus fluoImg;
-		ImagePlus zprojectImg;
-		String[] id = acqIDs.get(acqIDs.size() - 1);
-		String xPos = id[0];
-		String yPos = id[1];
-		String totalNbFrame = id[2];
-		String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
-		String croppedImgDir = fluoDir + "croppedImgs/";
-		if (!new File(croppedImgDir).exists()) {
-			new File(croppedImgDir).mkdirs();
+	public String saveCroppedImgs(HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet, String dir2save) {
+		if (!new File(dir2save).exists()) {
+			new File(dir2save).mkdirs();
 		}
-		for (String channel : spotsInCells.keySet()) {
-			ImageStack fieldStack = null;
-			for (int f = 0; f <= Integer.parseInt(totalNbFrame); f++) {
-				fluoImg = IJ.openImage(fluoDir + f + "_" + channel + "/MMStack.ome.tif");
-				zprojectImg = ImgUtils.zProject(fluoImg);
-				if (fieldStack == null) {
-					fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight(),
-							Integer.parseInt(totalNbFrame) + 1);
-				}
-				fieldStack.setProcessor(zprojectImg.getStack().getProcessor(1), f + 1);
-			}
-			ImagePlus fieldImg = new ImagePlus(channel, fieldStack);
-			fieldImg.setCalibration(fluoImgCalib);
-			// save cropped cells
-			croppedImps = cropRois(fieldImg);
-//			for (int i = 0; i < cellArray.size(); i++) {
-//				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(fieldImg, cellArray.get(i).getCellShapeRoi());
-//				croppedStacks.put(i, croppedImg.getStack());
-//			}
-			for (int j = 0; j < croppedImps.size(); j++) {
-				String pathToCroppedImg = croppedImgDir + String.valueOf(j) + "_" + channel;
-				ImagePlus imp = croppedImps.get(j);
+		for (int cellNb : croppedImgSet.keySet()) {
+			for (String s : croppedImgSet.get(cellNb).keySet()) {
+				String pathToCroppedImg = dir2save + String.valueOf(cellNb) + "_" + s;
+				ImagePlus imp = croppedImgSet.get(cellNb).get(s);
 				IJ.run(imp, "Enhance Contrast", "saturated=0.35");
 				imp.setCalibration(fluoImgCalib);
 				IJ.saveAsTiff(imp, pathToCroppedImg);
 			}
+		}
+		return dir2save;
+	}
+
+	/**
+	 * crop and save images
+	 */
+	public String saveCroppedImgs(Boolean splitChannel) {
+		String[] id = acqIDs.get(acqIDs.size() - 1);
+		String xPos = id[0];
+		String yPos = id[1];
+		String totalFrameNb = id[2];
+		String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
+		String croppedImgDir = fluoDir + "croppedImgs/";
+
+		for (String channel : spotsInCells.keySet()) {
+			ImagePlus fieldImg = stackFluoImgs(totalFrameNb, fluoDir, channel);
+			// save cropped cells
+			croppedImps = cropRois(fieldImg, splitChannel);
+			saveCroppedImgs(croppedImps, croppedImgDir);
 			final String file = fluoDir + channel + ".ome.btf";
 			final String macroOpts = "outfile=[" + file
 					+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";

@@ -66,6 +66,7 @@ public class MAARSNoAcq implements Runnable {
 
 		ImagePlus mergedImg = new ImagePlus();
 		int frameCounter = 0;
+		String pathToFluoDir = null;
 
 		for (int i = 0; i < explo.length(); i++) {
 			IJ.log("x : " + explo.getX(i) + " y : " + explo.getY(i));
@@ -100,7 +101,7 @@ public class MAARSNoAcq implements Runnable {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-				String pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
+				pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
 				String[] listAcqNames = new File(pathToFluoDir).list();
 				String pattern = "(\\d+)(_)(\\w+)";
 				ArrayList<String> arrayChannels = new ArrayList<String>();
@@ -130,8 +131,7 @@ public class MAARSNoAcq implements Runnable {
 						IJ.log("Analysing channel " + channel + "_" + current_frame);
 						String[] id = new String[] { xPos, yPos, String.valueOf(current_frame), channel };
 						soc.addAcqID(id);
-						String pathToFluoMovie = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/"
-								+ current_frame + "_" + channel + "/MMStack.ome.tif";
+						String pathToFluoMovie = pathToFluoDir + current_frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -146,8 +146,7 @@ public class MAARSNoAcq implements Runnable {
 				try {
 					for (int frameInd : map.keySet()) {
 						for (String channel : map.get(frameInd).keySet()) {
-							FloatProcessor zprojectedImgProcessor = map.get(frameInd).get(channel).get();
-							fluoStack.addSlice(zprojectedImgProcessor);
+							fluoStack.addSlice(channel, map.get(frameInd).get(channel).get());
 						}
 					}
 				} catch (InterruptedException e1) {
@@ -155,8 +154,9 @@ public class MAARSNoAcq implements Runnable {
 				} catch (ExecutionException e1) {
 					e1.printStackTrace();
 				}
-				 new ImagePlus("merged_channels", fluoStack);
+				mergedImg = new ImagePlus("merged_channels", fluoStack);
 				mergedImg.setCalibration(segImg.getCalibration());
+				mergedImg.setZ(fluoStack.getSize());
 			}
 		}
 		es.shutdown();
@@ -171,14 +171,19 @@ public class MAARSNoAcq implements Runnable {
 			long startWriting = System.currentTimeMillis();
 			soc.saveSpots();
 			soc.saveGeometries();
-			soc.cropRois(mergedImg);
-			String croppedImgDir = soc.saveCroppedImgs();
+			Boolean splitChannel = true;
+			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
+			String croppedImgDir = soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
 			for (int nb : merotelyCandidates.keySet()) {
 				if (this.merotelyCandidates.get(nb) > frameCounter * 0.1) {
 					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 							.format(Calendar.getInstance().getTime());
 					IJ.log(timeStamp + " : " + nb);
-					IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
+					if (splitChannel){
+						IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
+					}else{
+						IJ.openImage(croppedImgDir + nb + "_merged.tif").show();
+					}
 				}
 			}
 			// MAARS.mailNotify();
