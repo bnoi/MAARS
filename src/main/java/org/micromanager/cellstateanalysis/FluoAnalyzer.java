@@ -51,8 +51,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 
 	/**
 	 * @param fluoImage
-	 *            image to analyze
-	 * zProjectedFluoImg
+	 *            image to analyze zProjectedFluoImg
 	 * @param bfImgCal
 	 *            bright field image calibration, need it to decide whether or
 	 *            not rescale ROI
@@ -204,35 +203,42 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 						ArrayList<Spot> poles = cptgeometry.findMostDistant2Spots(spotSet);
 						geometry.put(ComputeGeometry.PHASE, ComputeGeometry.MITOSIS);
 						geometry = cptgeometry.compute(geometry, poles);
-						if (setSize > 2) {
-							if ((double) geometry.get(ComputeGeometry.SpLength) > 5) {
-								Line spLine = new Line(
-										(int) FastMath.round(
-												poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-										(int) FastMath.round(
-												poles.get(0).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight),
-										(int) FastMath.round(
-												poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-										(int) FastMath.round(
-												poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
-								Line.setWidth(2 * (int) FastMath.round(radius / fluoImgCal.pixelWidth));
-								for (Spot s : spotSet) {
-									if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
-										// detect metaphase Kt oscillation or
-										// merotely
-										if (spLine.contains(
-												(int) FastMath
-														.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-												(int) FastMath.round(
-														s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
-											if (merotelyCandidates.containsKey(cellNb)) {
-												this.merotelyCandidates.replace(cellNb,
-														this.merotelyCandidates.get(cellNb) + 1);
-											} else {
-												this.merotelyCandidates.put(cellNb, 1);
+						//TODO
+						if (channel.equals("GFP")) {
+							if (setSize > 2) {
+								double spindleLength = (double) geometry.get(ComputeGeometry.SpLength);
+								if (spindleLength > 5) {
+									Line spLine = new Line(
+											(int) FastMath.round(
+													poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+											(int) FastMath.round(
+													poles.get(0).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight),
+											(int) FastMath.round(
+													poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+											(int) FastMath.round(
+													poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
+									Line.setWidth(2 * (int) FastMath.round(radius / fluoImgCal.pixelWidth));
+									for (Spot s : spotSet) {
+										if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
+											// detect metaphase Kt oscillation
+											// or
+											// merotely
+											if (spLine.contains(
+													(int) FastMath.round(
+															s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+													(int) FastMath.round(
+															s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
+												if (merotelyCandidates.containsKey(cellNb)) {
+													this.merotelyCandidates.replace(cellNb,
+															this.merotelyCandidates.get(cellNb) + 1);
+												} else {
+													this.merotelyCandidates.put(cellNb, 1);
+												}
 											}
 										}
 									}
+								}else if(spindleLength>2){
+									//TODO
 								}
 							}
 						}

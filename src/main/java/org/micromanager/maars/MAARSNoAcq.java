@@ -118,12 +118,12 @@ public class MAARSNoAcq implements Runnable {
 						}
 					}
 				}
-				frameCounter = arrayChannels.size();
+				frameCounter = arrayImgFrames.size();
 				Collections.sort(arrayImgFrames);
 				int nThread = Runtime.getRuntime().availableProcessors();
 				es = Executors.newFixedThreadPool(nThread);
 				Future<FloatProcessor> future = null;
-				Map<Integer, Map<String, Future<FloatProcessor>>> map = new HashMap<Integer, Map<String, Future<FloatProcessor>>>();
+				ArrayList<Map<String, Future<FloatProcessor>>> futureSet = new ArrayList<Map<String, Future<FloatProcessor>>>();
 				for (int frameInd = 0; frameInd < arrayImgFrames.size(); frameInd++) {
 					Map<String, Future<FloatProcessor>> channelsInFrame = new HashMap<String, Future<FloatProcessor>>();
 					for (String channel : arrayChannels) {
@@ -140,13 +140,13 @@ public class MAARSNoAcq implements Runnable {
 								merotelyCandidates));
 						channelsInFrame.put(channel, future);
 					}
-					map.put(frameInd, channelsInFrame);
+					futureSet.add(channelsInFrame);
 				}
 				ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
 				try {
-					for (int frameInd : map.keySet()) {
-						for (String channel : map.get(frameInd).keySet()) {
-							fluoStack.addSlice(channel, map.get(frameInd).get(channel).get());
+					for (int frameInd = 0; frameInd < futureSet.size(); frameInd++) {
+						for (String channel : futureSet.get(frameInd).keySet()) {
+							fluoStack.addSlice(channel, futureSet.get(frameInd).get(channel).get());
 						}
 					}
 				} catch (InterruptedException e1) {
@@ -173,12 +173,13 @@ public class MAARSNoAcq implements Runnable {
 			soc.saveGeometries();
 			Boolean splitChannel = true;
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
-			String croppedImgDir = soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
+			String croppedImgDir = pathToFluoDir + "croppedImgs/";
+//			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
 			for (int nb : merotelyCandidates.keySet()) {
 				if (this.merotelyCandidates.get(nb) > frameCounter * 0.1) {
 					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 							.format(Calendar.getInstance().getTime());
-					IJ.log(timeStamp + " : " + nb);
+					IJ.log(timeStamp + " : " + nb + "_" + frameCounter + "_" + this.merotelyCandidates.get(nb));
 					if (splitChannel){
 						IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
 					}else{
