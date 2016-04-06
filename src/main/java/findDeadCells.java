@@ -11,9 +11,9 @@ import weka.core.converters.CSVLoader;
 public class findDeadCells {
 	public findDeadCells(){
 		CSVLoader loader = new CSVLoader();
-		File trainingFile = new File("/home/tong/Documents/movies/normAll.csv");
+		File trainingFile = new File("/home/tong/Documents/movies/noted_normAll.csv");
 //		File testFile = new File("/home/tong/Documents/movies/testSet1_normAll.csv");
-		File testFile = new File("/home/tong/Documents/movies/102/60x/102/5/normAll.csv");		
+		File testFile = new File("/home/tong/Documents/movies/102/60x/25-03-2/CFP 0 frame fluo measure.xlscsv");		
 		try {
 			loader.setFile(trainingFile);
 		} catch (IOException e1) {

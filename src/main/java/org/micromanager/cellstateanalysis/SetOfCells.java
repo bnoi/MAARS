@@ -311,7 +311,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * @param croppedImgSet
 	 * @return cropped images base directory
 	 */
-	public String saveCroppedImgs(HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet, String dir2save) {
+	public void saveCroppedImgs(HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet, String dir2save) {
 		if (!new File(dir2save).exists()) {
 			new File(dir2save).mkdirs();
 		}
@@ -324,7 +324,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 				IJ.saveAsTiff(imp, pathToCroppedImg);
 			}
 		}
-		return dir2save;
 	}
 
 	/**

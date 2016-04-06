@@ -286,10 +286,12 @@ public class MAARS implements Runnable {
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqID(id);
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
-						es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
-								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-								Double.parseDouble(parameters.getChSpotRaius(channel)),
-								Double.parseDouble(parameters.getChQuality(channel)), frame, merotelyCandidates));
+						if (do_analysis) {
+							es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+									Double.parseDouble(parameters.getChSpotRaius(channel)),
+									Double.parseDouble(parameters.getChQuality(channel)), frame, merotelyCandidates));
+						}
 					}
 				}
 				RoiManager.getInstance().reset();
@@ -305,9 +307,9 @@ public class MAARS implements Runnable {
 							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 									.format(Calendar.getInstance().getTime());
 							IJ.log(timeStamp + " : " + nb);
-							if (splitChannel){
+							if (splitChannel) {
 								IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
-							}else{
+							} else {
 								IJ.openImage(croppedImgDir + nb + "_merged.tif").show();
 							}
 						}
