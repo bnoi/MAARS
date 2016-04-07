@@ -74,6 +74,7 @@ public class SegPombe {
 	private PrintStream ps;
 	private PrintStream curr_err;
 	private PrintStream curr_out;
+	private static String bf = "BF";
 
 	/**
 	 * Constructor
@@ -83,7 +84,7 @@ public class SegPombe {
 		this.savingPath = parameters.getSavingPath();
 
 		try {
-			ps = new PrintStream(savingPath + imageToAnalyze.getShortTitle()
+			ps = new PrintStream(savingPath + bf
 					+ "_Segmentation.LOG");
 			curr_err = System.err;
 			curr_out = System.out;
@@ -125,7 +126,7 @@ public class SegPombe {
 
 		imageToAnalyze.setZ((int) Math.round(zFocus));
 
-		focusImg = new ImagePlus(imageToAnalyze.getShortTitle() + "FocusImage",
+		focusImg = new ImagePlus(bf + "_FocusImage",
 				imageToAnalyze.getProcessor().duplicate());
 
 		if (imageToAnalyze.getCalibration().scaled()) {
@@ -135,7 +136,7 @@ public class SegPombe {
 		if (saveFocusImage) {
 			IJ.run(focusImg, "Enhance Contrast", "saturated=0.35");
 			FileSaver fileSaver = new FileSaver(focusImg);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
+			fileSaver.saveAsTiff(savingPath + bf
 					+ "_FocusImage.tif");
 		}
 		imageToAnalyze.flatten();
@@ -158,6 +159,7 @@ public class SegPombe {
 		ImageSplitter splitter = new ImageSplitter(imageToAnalyze, nbProcessor);
 		int xPosition = 0;
 		ImagePlus subImg;
+		long start = System.currentTimeMillis();
 		ExecutorService executor = Executors.newFixedThreadPool(nbProcessor);
 		Map<Integer, Future<FloatProcessor>> map = new HashMap<Integer, Future<FloatProcessor>>();
 		Future<FloatProcessor> task = null;
@@ -197,6 +199,7 @@ public class SegPombe {
 			e.printStackTrace();
 		}
 		executor.shutdown();
+		IJ.log("Segmentation took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec");
 	}
 
 	/**
@@ -243,7 +246,7 @@ public class SegPombe {
 		roiManager = new RoiManager();
 
 		imgCorrTemp = new ImagePlus("Correlation Image of "
-				+ imageToAnalyze.getShortTitle(), imgCorrTempProcessor);
+				+ bf, imgCorrTempProcessor);
 
 		particleAnalyzer = new ParticleAnalyzer(
 				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
@@ -379,7 +382,7 @@ public class SegPombe {
 		if (saveDataFrame && roiDetected) {
 			System.out.println("saving data frame...");
 			try {
-				resultTable.saveAs(savingPath + imageToAnalyze.getShortTitle()
+				resultTable.saveAs(savingPath + bf
 						+ "_Results.csv");
 			} catch (IOException io) {
 				IJ.error("Error", "Could not save DataFrame");
@@ -416,10 +419,10 @@ public class SegPombe {
 
 		if (saveBinaryImg) {
 			System.out.println("save binary image");
-			binCorrelationImage.setTitle(imageToAnalyze.getShortTitle()
+			binCorrelationImage.setTitle(bf
 					+ "_BinaryImage");
 			FileSaver fileSaver = new FileSaver(binCorrelationImage);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
+			fileSaver.saveAsTiff(savingPath + bf
 					+ "_BinaryImage.tif");
 		}
 		if (showBinaryImg) {
@@ -432,11 +435,11 @@ public class SegPombe {
 
 		if (saveCorrelationImg) {
 			System.out.println("save correlation image");
-			imgCorrTemp.setTitle(imageToAnalyze.getShortTitle()
+			imgCorrTemp.setTitle(bf
 					+ "_CorrelationImage");
 			IJ.run(imgCorrTemp, "Enhance Contrast", "saturated=0.35");
 			FileSaver fileSaver = new FileSaver(imgCorrTemp);
-			fileSaver.saveAsTiff(savingPath + imageToAnalyze.getShortTitle()
+			fileSaver.saveAsTiff(savingPath + bf
 					+ "_CorrelationImage.tif");
 		}
 		if (showCorrelationImg) {

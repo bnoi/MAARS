@@ -174,7 +174,8 @@ public class MAARSNoAcq implements Runnable {
 			Boolean splitChannel = true;
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
 			String croppedImgDir = pathToFluoDir + "croppedImgs/";
-//			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
+			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
+			//TODO
 			for (int nb : merotelyCandidates.keySet()) {
 				if (this.merotelyCandidates.get(nb) > frameCounter * 0.1) {
 					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
