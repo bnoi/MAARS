@@ -302,6 +302,8 @@ public class MAARS implements Runnable {
 					soc.saveGeometries();
 					Boolean splitChannel = true;
 					String croppedImgDir = soc.saveCroppedImgs(splitChannel);
+					//TODO
+					
 					for (int nb : merotelyCandidates.keySet()) {
 						if (this.merotelyCandidates.get(nb) > frame * 0.02) {
 							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
