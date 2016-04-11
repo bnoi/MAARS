@@ -207,7 +207,8 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 						if (channel.equals("GFP")) {
 							if (setSize > 2) {
 								double spindleLength = (double) geometry.get(ComputeGeometry.SpLength);
-								if (spindleLength > 5) {
+								//TODO
+								if (spindleLength > 4) {
 									Line spLine = new Line(
 											(int) FastMath.round(
 													poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
@@ -238,7 +239,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 										}
 									}
 								}else if(spindleLength>2){
-									//TODO
+									//TODO list for metaphase and normal anaphase
 								}
 							}
 						}

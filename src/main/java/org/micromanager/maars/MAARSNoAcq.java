@@ -167,6 +167,9 @@ public class MAARSNoAcq implements Runnable {
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
+		// TODO
+		double laggingThreshold = 150;
+		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 		if (soc.size() != 0) {
 			long startWriting = System.currentTimeMillis();
 			soc.saveSpots();
@@ -175,15 +178,18 @@ public class MAARSNoAcq implements Runnable {
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
 			String croppedImgDir = pathToFluoDir + "croppedImgs/";
 			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
-			//TODO
+			// TODO
+
 			for (int nb : merotelyCandidates.keySet()) {
-				if (this.merotelyCandidates.get(nb) > frameCounter * 0.1) {
+				int abnormalStateTimes = this.merotelyCandidates.get(nb);
+				if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
 					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 							.format(Calendar.getInstance().getTime());
-					IJ.log(timeStamp + " : " + nb + "_" + frameCounter + "_" + this.merotelyCandidates.get(nb));
-					if (splitChannel){
+					IJ.log(timeStamp + " : " + nb + "_" + frameCounter + "_"
+							+ abnormalStateTimes * timeInterval / 1000);
+					if (splitChannel) {
 						IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
-					}else{
+					} else {
 						IJ.openImage(croppedImgDir + nb + "_merged.tif").show();
 					}
 				}
