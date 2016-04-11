@@ -45,12 +45,12 @@ class getMitosisFiles(object):
         # if not file_utils.FileUtils.is_ressource_exists(self._in_file_name):
         #     raise Exception("%s do not exists !\n" % (self._in_file_name))
 
-    def distance(x1,y1,x2,y2):
+    def distance(self, x1,y1,x2,y2):
         xd = x2-x1
         yd = y2-y1
         return  math.sqrt(xd*xd + yd*yd)
 
-    def analyzeSPBTrack(baseDir, cellNb, channel):
+    def analyzeSPBTrack(self, baseDir, cellNb, channel):
         geoPath = baseDir + '/movie_X0_Y0_FLUO/features/'+str(cellNb)+'_' + channel +'.csv'
         spotsPath = baseDir+ '/movie_X0_Y0_FLUO/spots/'+str(cellNb)+'_' + channel +'.xml'
         concat_data = list()
@@ -103,8 +103,8 @@ class getMitosisFiles(object):
                                                              np.nan, 1]))
                                 last_spot_0_x_y = [current_spot_0_x, current_spot_0_y]  
                             else:
-                                dis00 = distance(last_spot_0_x_y[0], last_spot_0_x_y[1], current_spot_0_x, current_spot_0_y)
-                                dis10 = distance(last_spot_1_x_y[0], last_spot_1_x_y[1], current_spot_0_x, current_spot_0_y)
+                                dis00 = self.distance(last_spot_0_x_y[0], last_spot_0_x_y[1], current_spot_0_x, current_spot_0_y)
+                                dis10 = self.distance(last_spot_1_x_y[0], last_spot_1_x_y[1], current_spot_0_x, current_spot_0_y)
                                 if dis00 < dis10:
                                     concat_data.append(np.array([i,
                                                                  current_cell_major,
@@ -146,8 +146,8 @@ class getMitosisFiles(object):
                             last_spot_0_x_y = [current_spot_0_x, current_spot_0_y]
                             last_spot_1_x_y = [current_spot_1_x, current_spot_1_y]
                         else:
-                            dis00 = distance(last_spot_0_x_y[0], last_spot_0_x_y[1], current_spot_0_x, current_spot_0_y)
-                            dis01 = distance(last_spot_0_x_y[0], last_spot_0_x_y[1], current_spot_1_x, current_spot_1_y)
+                            dis00 = self.distance(last_spot_0_x_y[0], last_spot_0_x_y[1], current_spot_0_x, current_spot_0_y)
+                            dis01 = self.distance(last_spot_0_x_y[0], last_spot_0_x_y[1], current_spot_1_x, current_spot_1_y)
                             if dis00 < dis01:
                                 concat_data.append(np.array([i,
                                                              current_cell_major,
@@ -245,7 +245,7 @@ class getMitosisFiles(object):
                             plt.xlim(0, 200)
                             plt.ylim(-5, 30)
                             plt.show()
-                            d = analyzeSPBTrack(acqDir, x, channels[0])
+                            d = self.analyzeSPBTrack(acqDir, x, channels[0])
                             print("shrink % : " + str(len(diffSeg[diffSeg<0])/len(diffSeg)*100))
                             print("mean speed : %s µm/min " % ((list(segment.values())[-1] - list(segment.values())[0])/len(segment.keys())*15))
                             croppedImgsDir = acqDir + "/cropImgs/"
