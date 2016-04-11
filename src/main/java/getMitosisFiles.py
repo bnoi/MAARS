@@ -39,9 +39,9 @@ class getMitosisFiles(object):
                             help="channel used",
                             type=str)
         args = parser.parse_args()
-        self._cellNb = cellNb
-        self._baseDir = baseDir
-        self._channel = channel
+        self._cellNb = args.cellNb
+        self._baseDir = args.baseDir
+        self._channel = args.channel
         # if not file_utils.FileUtils.is_ressource_exists(self._in_file_name):
         #     raise Exception("%s do not exists !\n" % (self._in_file_name))
 
