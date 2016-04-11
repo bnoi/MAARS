@@ -15,16 +15,21 @@ idx = pd.IndexSlice
 class getMitosisFiles(object):
     """
     @summary: collect files related to mitotic cell to root dir of acquisition 
-        usage:  python getMitosisFiles.py baseDir cellNb channel
+        usage:  python getMitosisFiles.py baseDir channel
                 --help
-    @param contig: path to the contig file
-    @param output: path to the output file
-    @return: [STDOUT] print global statistic.
+    @param baseDir
+    @param channel
     """
-    def __init__(self, baseDir = "", cellNb = 0,  channel = ""):
-        self._cellNb = cellNb
+    def __init__(self, baseDir = "",  channel = "", totalNbOfCell = int, calibration = float, gap_tolerance = float
+        ,elongating_trend = float, minimumPeriod = int, acq_interval = int):
         self._baseDir = baseDir
         self._channel = channel
+        self._calibration = calibration
+        self._totalNbOfCell = totalNbOfCell
+        self._gap_tolerance = gap_tolerance
+        self._elongating_trend = elongating_trend
+        self._minimumPeriod = minimumPeriod
+        self._acq_interval = acq_interval
 
     def set_attributes_from_cmd_line(self):
         parser = argparse.ArgumentParser(description="collect files \
@@ -32,18 +37,36 @@ class getMitosisFiles(object):
         parser.add_argument("baseDir",
                             help="path to acquisition folder",
                             type=str)
-        parser.add_argument("cellNb",
-                            help="cell to look for",
-                            type=int)
         parser.add_argument("channel",
-                            help="channel used",
+                            help="channel used to detect SPBs",
                             type=str)
+        parser.add_argument("-calibration",
+                            help="calibration of image",
+                            type=float, default=0.1075)
+        parser.add_argument("-totalNbOfCell",
+                            help="totalNbOfCell",
+                            type=int, default=1200)
+        parser.add_argument("-gap_tolerance",
+                            help="maximum percent of gap that can be accepted",
+                            type=float, default=0.23)
+        parser.add_argument("-elongating_trend",
+                            help="percentage of elongating timepoint",
+                            type=float, default=0.6)
+        parser.add_argument("-minimumPeriod",
+                            help="minimum time segment to be analyzed",
+                            type=int, default=200)
+        parser.add_argument("-acq_interval",
+                            help="interval of fluo acquisition",
+                            type=int, default=20)
         args = parser.parse_args()
-        self._cellNb = args.cellNb
         self._baseDir = args.baseDir
         self._channel = args.channel
-        # if not file_utils.FileUtils.is_ressource_exists(self._in_file_name):
-        #     raise Exception("%s do not exists !\n" % (self._in_file_name))
+        self._totalNbOfCell = args.totalNbOfCell
+        self._calibration = args.calibration
+        self._gap_tolerance = args.gap_tolerance
+        self._elongating_trend = args.elongating_trend
+        self._minimumPeriod = args.minimumPeriod
+        self._acq_interval = args.acq_interval
 
     def distance(self, x1,y1,x2,y2):
         xd = x2-x1
@@ -59,19 +82,17 @@ class getMitosisFiles(object):
         frameLabel = 'Frame'
         xPos='x'
         yPos = 'y'
-        calibration = 0.1075
         spAng2MajVal = 0
         csvPath = baseDir + '/movie_X0_Y0/BF_Results.csv'
         if os.path.lexists(csvPath) : 
             cellRois = pd.DataFrame.from_csv(csvPath)
-        current_cell_major = 0
-        current_cell_major = cellRois.loc[cellNb + 1][major] * calibration
+        current_cell_major = cellRois.loc[cellNb + 1][major] * self._calibration
         last_spot_0_x_y = None
         last_spot_1_x_y = None
         if os.path.lexists(geoPath) and os.path.lexists(spotsPath):
             oneCellGeo = pd.DataFrame.from_csv(geoPath)
             oneCellSpots = trackmate.trackmate_peak_import(spotsPath, False)
-            for i in range(0, oneCellGeo.index[-1]):
+            for i in range(0, oneCellGeo.index[-1] + 1):
                 if i in oneCellGeo.index:
                     spAng2MajVal = oneCellGeo[spAngToMajLabel].loc[i]
                     current_spot_0_x = oneCellSpots.loc[idx[i,:],idx[xPos,yPos]].iloc[0][xPos]
@@ -196,14 +217,14 @@ class getMitosisFiles(object):
         return concat_data
 
     def analyze(self):
-        iteration_nb = 1100
-        gap_tolerance = 0.23
-        upward_trend = 0.6
-        minimumPeriod = 200
-        acq_interval = 20
+        iteration_nb = self._totalNbOfCell
+        gap_tolerance = self._gap_tolerance
+        elongating_trend = self._elongating_trend
+        minimumPeriod = self._minimumPeriod
+        acq_interval = self._acq_interval
         minimumSegLength = minimumPeriod/acq_interval
         acqDir = self._baseDir
-        channels = ['CFP','GFP']
+        channels = [self._channel,'GFP', 'TxRed', 'DAPI']
         for x in range(0, iteration_nb):
             csvPath = acqDir + '/movie_X0_Y0_FLUO/features/'+str(x)+'_' +channels[0]+'.csv'
             if os.path.lexists(csvPath) : 
@@ -232,22 +253,22 @@ class getMitosisFiles(object):
                         segmentList.append(segment)
                     for segment in segmentList:
                         diffSeg = diff(list(segment.values()))
-                        if len(diffSeg[diffSeg>0]) > len(diffSeg) * upward_trend:
-                            fig, ax = plt.subplots(figsize=(15, 10))
-                            diffedLength = diff(spLen)
-                            ax.plot(frames[0:-1], diffedLength , '-x')
-                            ax.plot(frames, spLen, '-o')
-                            #ax.plot(list(segment.keys()), list(segment.values()), lw = 5)
-                            ax.plot(list(segment.keys())[0:-1], diffSeg, lw = 5)
-                            ax.axhline(0)
-                            plt.ylabel("Spindle Length ($μm$)", fontsize=20)
-                            plt.xlabel("frame // cell " + str(x), fontsize=20)
-                            plt.xlim(0, 200)
-                            plt.ylim(-5, 30)
-                            plt.show()
+                        if len(diffSeg[diffSeg>0]) > len(diffSeg) * elongating_trend:
+                            # fig, ax = plt.subplots(figsize=(15, 10))
+                            # diffedLength = diff(spLen)
+                            # ax.plot(frames[0:-1], diffedLength , '-x')
+                            # ax.plot(frames, spLen, '-o')
+                            # ax.plot(list(segment.keys()), list(segment.values()), lw = 5)
+                            # ax.plot(list(segment.keys())[0:-1], diffSeg, lw = 5)
+                            # ax.axhline(0)
+                            # plt.ylabel("Spindle Length ($μm$)", fontsize=20)
+                            # plt.xlabel("frame // cell " + str(x), fontsize=20)
+                            # plt.xlim(0, 200)
+                            # plt.ylim(-5, 30)
+                            # plt.show()
                             d = self.analyzeSPBTrack(acqDir, x, channels[0])
-                            print("shrink % : " + str(len(diffSeg[diffSeg<0])/len(diffSeg)*100))
-                            print("mean speed : %s µm/min " % ((list(segment.values())[-1] - list(segment.values())[0])/len(segment.keys())*15))
+                            # print("shrink % : " + str(len(diffSeg[diffSeg<0])/len(diffSeg)*100))
+                            # print("mean speed : %s µm/min " % ((list(segment.values())[-1] - list(segment.values())[0])/len(segment.keys())*15))
                             croppedImgsDir = acqDir + "/cropImgs/"
                             spotsDir = acqDir + "/spots/"
                             csvDir = acqDir + "/csv/"
