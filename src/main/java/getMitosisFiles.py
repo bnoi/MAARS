@@ -50,10 +50,7 @@ class getMitosisFiles(object):
         yd = y2-y1
         return  math.sqrt(xd*xd + yd*yd)
 
-    def analyzeSPBTrack():
-        baseDir = self._cellNb
-        cellNb = self._baseDir
-        channel = self._channel
+    def analyzeSPBTrack(baseDir, cellNb, channel):
         geoPath = baseDir + '/movie_X0_Y0_FLUO/features/'+str(cellNb)+'_' + channel +'.csv'
         spotsPath = baseDir+ '/movie_X0_Y0_FLUO/spots/'+str(cellNb)+'_' + channel +'.xml'
         concat_data = list()
@@ -198,77 +195,77 @@ class getMitosisFiles(object):
         ax.plot(concat_data[concat_data['Track'] ==1]['x'], -concat_data[concat_data['Track'] ==1]['y'],color = 'red')
         return concat_data
 
-    iteration_nb = 1100
-    gap_tolerance = 0.23
-    upward_trend = 0.6
-    minimumPeriod = 200
-    acq_interval = 20
-    minimumSegLength = minimumPeriod/acq_interval
-    acqDir = '/home/tong/Documents/movies/289/60x/11'
-    channels = ['CFP','GFP']
-    for x in range(0, iteration_nb):
-    #for x in range(247, 248):
-        csvPath = acqDir + '/movie_X0_Y0_FLUO/features/'+str(x)+'_' +channels[0]+'.csv'
-        if os.path.lexists(csvPath) : 
-            oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= [('Frame', 'i'), ('Phase', np.str, 10), ('NbOfSpotDetected', '<i8'), ('SpLength', 'f'), ('SpCenterX', 'f'), ('SpCenterY', 'f'), ('CellCenterToSpCenterAng', 'f'), ('SpAngToMaj', 'f'), ('SpCenterZ', 'f'), ('CellCenterToSpCenterLen', 'f')])
-            spLen = oneCell['SpLength']
-            frames = oneCell['Frame']
-            if len(spLen[spLen>0]) > minimumSegLength:
-                segmentList = list()
-                segment = dict()
-                nanInSegmentCount = 0
-                for i in range(0,len(spLen)):
-                    val = spLen[i]
-                    if not math.isnan(val):
-                        segment[frames[i]] = val
-                    elif nanInSegmentCount < len(segment)*gap_tolerance:
-                        segment[frames[i]] = val
-                        nanInSegmentCount +=1
-                    else:
-                        if len(segment) > minimumSegLength:
-                            segment = {k: segment[k] for k in segment if not math.isnan(k)}
-                            segmentList.append(segment)
-                        segment = dict()
-                        nanInSegmentCount = 0
-                if not segmentList and len(segment) >minimumSegLength:
-                    segment = {k: segment[k] for k in segment if not math.isnan(k)}
-                    segmentList.append(segment)
-                for segment in segmentList:
-                    diffSeg = diff(list(segment.values()))
-                    if len(diffSeg[diffSeg>0]) > len(diffSeg) * upward_trend:
-                        fig, ax = plt.subplots(figsize=(15, 10))
-                        diffedLength = diff(spLen)
-                        ax.plot(frames[0:-1], diffedLength , '-x')
-                        ax.plot(frames, spLen, '-o')
-                        #ax.plot(list(segment.keys()), list(segment.values()), lw = 5)
-                        ax.plot(list(segment.keys())[0:-1], diffSeg, lw = 5)
-                        ax.axhline(0)
-                        plt.ylabel("Spindle Length ($μm$)", fontsize=20)
-                        plt.xlabel("frame // cell " + str(x), fontsize=20)
-                        plt.xlim(0, 200)
-                        plt.ylim(-5, 30)
-                        plt.show()
-                        d = analyzeSPBTrack(acqDir, x, channels[0])
-                        print("shrink % : " + str(len(diffSeg[diffSeg<0])/len(diffSeg)*100))
-                        print("mean speed : %s µm/min " % ((list(segment.values())[-1] - list(segment.values())[0])/len(segment.keys())*15))
-                        croppedImgsDir = acqDir + "/cropImgs/"
-                        spotsDir = acqDir + "/spots/"
-                        csvDir = acqDir + "/csv/"
-                        if not os.path.isdir(croppedImgsDir):
-                            os.mkdir(croppedImgsDir)
-                        if not os.path.isdir(spotsDir):
-                            os.mkdir(spotsDir)
-                        if not os.path.isdir(csvDir):
-                            os.mkdir(csvDir)
-                        d.to_csv(csvDir + "/d_" + str(x) + ".csv", sep='\t')
-                        for ch in channels:
-                            if os.path.lexists(acqDir + "/movie_X0_Y0_FLUO/croppedImgs/" + str(x) + "_" + ch + ".tif"):
-                                shutil.copyfile(acqDir + "/movie_X0_Y0_FLUO/croppedImgs/" + str(x) + "_" + ch + ".tif",  croppedImgsDir + str(x) + "_" + ch +".tif");
-                                shutil.copyfile(acqDir + "/movie_X0_Y0_FLUO/spots/" + str(x) + "_" + ch + ".xml", spotsDir + str(x) + "_" + ch + ".xml");
+    def analyze(self):
+        iteration_nb = 1100
+        gap_tolerance = 0.23
+        upward_trend = 0.6
+        minimumPeriod = 200
+        acq_interval = 20
+        minimumSegLength = minimumPeriod/acq_interval
+        acqDir = self._baseDir
+        channels = ['CFP','GFP']
+        for x in range(0, iteration_nb):
+            csvPath = acqDir + '/movie_X0_Y0_FLUO/features/'+str(x)+'_' +channels[0]+'.csv'
+            if os.path.lexists(csvPath) : 
+                oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= [('Frame', 'i'), ('Phase', np.str, 10), ('NbOfSpotDetected', '<i8'), ('SpLength', 'f'), ('SpCenterX', 'f'), ('SpCenterY', 'f'), ('CellCenterToSpCenterAng', 'f'), ('SpAngToMaj', 'f'), ('SpCenterZ', 'f'), ('CellCenterToSpCenterLen', 'f')])
+                spLen = oneCell['SpLength']
+                frames = oneCell['Frame']
+                if len(spLen[spLen>0]) > minimumSegLength:
+                    segmentList = list()
+                    segment = dict()
+                    nanInSegmentCount = 0
+                    for i in range(0,len(spLen)):
+                        val = spLen[i]
+                        if not math.isnan(val):
+                            segment[frames[i]] = val
+                        elif nanInSegmentCount < len(segment)*gap_tolerance:
+                            segment[frames[i]] = val
+                            nanInSegmentCount +=1
+                        else:
+                            if len(segment) > minimumSegLength:
+                                segment = {k: segment[k] for k in segment if not math.isnan(k)}
+                                segmentList.append(segment)
+                            segment = dict()
+                            nanInSegmentCount = 0
+                    if not segmentList and len(segment) >minimumSegLength:
+                        segment = {k: segment[k] for k in segment if not math.isnan(k)}
+                        segmentList.append(segment)
+                    for segment in segmentList:
+                        diffSeg = diff(list(segment.values()))
+                        if len(diffSeg[diffSeg>0]) > len(diffSeg) * upward_trend:
+                            fig, ax = plt.subplots(figsize=(15, 10))
+                            diffedLength = diff(spLen)
+                            ax.plot(frames[0:-1], diffedLength , '-x')
+                            ax.plot(frames, spLen, '-o')
+                            #ax.plot(list(segment.keys()), list(segment.values()), lw = 5)
+                            ax.plot(list(segment.keys())[0:-1], diffSeg, lw = 5)
+                            ax.axhline(0)
+                            plt.ylabel("Spindle Length ($μm$)", fontsize=20)
+                            plt.xlabel("frame // cell " + str(x), fontsize=20)
+                            plt.xlim(0, 200)
+                            plt.ylim(-5, 30)
+                            plt.show()
+                            d = analyzeSPBTrack(acqDir, x, channels[0])
+                            print("shrink % : " + str(len(diffSeg[diffSeg<0])/len(diffSeg)*100))
+                            print("mean speed : %s µm/min " % ((list(segment.values())[-1] - list(segment.values())[0])/len(segment.keys())*15))
+                            croppedImgsDir = acqDir + "/cropImgs/"
+                            spotsDir = acqDir + "/spots/"
+                            csvDir = acqDir + "/csv/"
+                            if not os.path.isdir(croppedImgsDir):
+                                os.mkdir(croppedImgsDir)
+                            if not os.path.isdir(spotsDir):
+                                os.mkdir(spotsDir)
+                            if not os.path.isdir(csvDir):
+                                os.mkdir(csvDir)
+                            d.to_csv(csvDir + "/d_" + str(x) + ".csv", sep='\t')
+                            for ch in channels:
+                                if os.path.lexists(acqDir + "/movie_X0_Y0_FLUO/croppedImgs/" + str(x) + "_" + ch + ".tif"):
+                                    shutil.copyfile(acqDir + "/movie_X0_Y0_FLUO/croppedImgs/" + str(x) + "_" + ch + ".tif",  croppedImgsDir + str(x) + "_" + ch +".tif");
+                                    shutil.copyfile(acqDir + "/movie_X0_Y0_FLUO/spots/" + str(x) + "_" + ch + ".xml", spotsDir + str(x) + "_" + ch + ".xml");
 
 if __name__ == '__main__':
     launcher = getMitosisFiles()
     launcher.set_attributes_from_cmd_line()
-    launcher.analyzeSPBTrack()
+    launcher.analyze()
     print("Collection done")
 
