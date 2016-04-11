@@ -30,3 +30,6 @@ nb-configuration.xml
 
 #runtime dep jars#
 nbactions.xml
+
+#python compile
+*.pyc

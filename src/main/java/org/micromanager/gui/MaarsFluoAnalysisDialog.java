@@ -24,6 +24,7 @@ import org.micromanager.cellstateanalysis.MaarsTrackmate;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
+import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
 import fiji.plugin.trackmate.Model;
@@ -138,7 +139,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 				if (Double.parseDouble(timeInterval.getText()) <= 15000) {
 					doAnalysis.setSelected(false);
 					doAnalysis.setEnabled(false);
-				}else{
+				} else {
 					doAnalysis.setSelected(true);
 					doAnalysis.setEnabled(true);
 				}
@@ -360,9 +361,18 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		displayer.refresh();
 	}
 
+	public void testTrackmate(JPanel jp) {
+		String channelName = getSelectedChannel(jp);
+		String imgPath = parameters.getSavingPath() + "/movie_X0_Y0_FLUO/0_" + channelName + "/MMStack.ome.tif";
+		if (FileUtils.exists(imgPath)) {
+			testTrackmate(jp, IJ.openImage(imgPath));
+		} else {
+			testTrackmate(jp, acquireTestImg(jp));
+		}
+	}
+
 	public ImagePlus acquireTestImg(JPanel jp) {
-		@SuppressWarnings("unchecked")
-		JComboBox<String> tmpCombo = (JComboBox<String>) jp.getComponent(0);
+
 		double zFocus = 0;
 		String focusDevice = mmc.getFocusDevice();
 		try {
@@ -373,8 +383,14 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 			e.printStackTrace();
 		}
 		SuperClassAcquisition acq = new SuperClassAcquisition(mm, mmc, parameters, "0", "0");
-		String channelName = (String) tmpCombo.getSelectedItem();
+		String channelName = getSelectedChannel(jp);
 		return acq.acquire(0, channelName, zFocus, false);
+	}
+
+	public String getSelectedChannel(JPanel jp) {
+		@SuppressWarnings("unchecked")
+		JComboBox<String> tmpCombo = (JComboBox<String>) jp.getComponent(0);
+		return (String) tmpCombo.getSelectedItem();
 	}
 
 	@Override
@@ -439,11 +455,11 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 				test3.setEnabled(false);
 			}
 		} else if (src == test1) {
-			testTrackmate(channel1Panel, acquireTestImg(channel1Panel));
+			testTrackmate(channel1Panel);
 		} else if (src == test2) {
-			testTrackmate(channel2Panel, acquireTestImg(channel2Panel));
+			testTrackmate(channel2Panel);
 		} else if (src == test3) {
-			testTrackmate(channel3Panel, acquireTestImg(channel3Panel));
+			testTrackmate(channel3Panel);
 		}
 	}
 }

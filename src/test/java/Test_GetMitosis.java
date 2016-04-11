@@ -4,10 +4,12 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Test;
 import org.micromanager.cellstateanalysis.GetMitosis;
 
+import util.opencsv.CSVReader;
+
 public class Test_GetMitosis {
 
 	GetMitosis getMitosis = new GetMitosis();
-	String cwd = System.getProperty("user.dir") + "resources";
+	String cwd = System.getProperty("user.dir") + "/resources";
 
 	@Test
 	public void testDistance() {
@@ -38,4 +40,12 @@ public class Test_GetMitosis {
 		Boolean answer = getMitosis.filesExist(cwd, 0, "CFP");
 		assertEquals(true, answer);
 	}
+	
+	@Test
+	public void testLoadROIsAnalaysis() {
+		getMitosis.loadROIsAnalaysis(cwd + "/movie_X0_Y0/BF_Results.csv");
+//		assertEquals(true, answer);
+	}
+	
 }
+

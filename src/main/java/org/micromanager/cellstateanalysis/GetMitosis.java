@@ -1,10 +1,16 @@
 package org.micromanager.cellstateanalysis;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 import org.apache.commons.math3.util.FastMath;
 import org.micromanager.utils.FileUtils;
 
-public class GetMitosis {
+import util.opencsv.CSVReader;
 
+public class GetMitosis {
+	//TODO finish this version in JAVA
 	public GetMitosis() {
 	}
 
@@ -21,6 +27,29 @@ public class GetMitosis {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	public void loadROIsAnalaysis(String pathToBFResult){
+		CSVReader reader = null;
+		try {
+			reader = new CSVReader(new FileReader(pathToBFResult));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String [] nextLine;
+	     try {
+			while ((nextLine = reader.readNext()) != null) {
+			    // nextLine[] is an array of values from the line
+				for (String att : nextLine){
+					System.out.print(att + "\t");
+				}
+				System.out.println();
+			 }
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }
