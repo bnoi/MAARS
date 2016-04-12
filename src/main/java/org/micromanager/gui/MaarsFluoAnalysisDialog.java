@@ -384,7 +384,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		}
 		SuperClassAcquisition acq = new SuperClassAcquisition(mm, mmc, parameters, "0", "0");
 		String channelName = getSelectedChannel(jp);
-		return acq.acquire(0, channelName, zFocus, false);
+		return acq.convert2Imp(acq.acquire(0, channelName, zFocus), channelName, Double.parseDouble(step.getText()));
 	}
 
 	public String getSelectedChannel(JPanel jp) {

@@ -196,6 +196,24 @@ public class SuperClassAcquisition {
 		ds.freeze();
 		ds.close();
 	}
+	
+	public ImagePlus convert2Imp(List<Image> listImg, String channelName, Double step){
+		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+		for (Image img : listImg) {
+			// Prepare a imagePlus (for analysis)
+			ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
+			imageStack.addSlice(imgProcessor.convertToShortProcessor());
+		}
+		// ImagePlus for further analysis
+		ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
+		Calibration cal = new Calibration();
+		cal.setUnit("micron");
+		cal.pixelWidth = mmc.getPixelSizeUm();
+		cal.pixelHeight = mmc.getPixelSizeUm();
+		cal.pixelDepth = step;
+		imagePlus.setCalibration(cal);
+		return imagePlus;
+	}
 
 	/**
 	 * 
@@ -207,7 +225,7 @@ public class SuperClassAcquisition {
 	 *            zFocus where maximum # of spot can be seen
 	 * @return a duplicate of acquired images.
 	 */
-	public ImagePlus acquire(int frame, String channelName, double zFocus, boolean save) {
+	public List<Image> acquire(int frame, String channelName, double zFocus) {
 		double range = 0;
 		double step = 0;
 		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
@@ -258,6 +276,7 @@ public class SuperClassAcquisition {
 			}
 			z = z + step;
 			listImg.add(mm.live().snap(false).get(0));
+			//TODO sometime this display make the program crash
 //			if (k == 0) {
 //				setDisplay(chColor);
 //			}
@@ -279,23 +298,6 @@ public class SuperClassAcquisition {
 			e.printStackTrace();
 		}
 		mmc.setAutoShutter(true);
-		if (save) {
-			save(listImg, frame, channelName, step);
-		}
-		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-		for (Image img : listImg) {
-			// Prepare a imagePlus (for analysis)
-			ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
-			imageStack.addSlice(imgProcessor.convertToShortProcessor());
-		}
-		// ImagePlus for further analysis
-		ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
-		Calibration cal = new Calibration();
-		cal.setUnit("micron");
-		cal.pixelWidth = mmc.getPixelSizeUm();
-		cal.pixelHeight = mmc.getPixelSizeUm();
-		cal.pixelDepth = step;
-		imagePlus.setCalibration(cal);
-		return imagePlus;
+		return listImg;
 	}
 }
