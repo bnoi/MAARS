@@ -188,8 +188,6 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 						cell.get(Cell.MAJOR) * fluoImgCal.pixelWidth, cell.get(Cell.ANGLE), calibratedXBase,
 						calibratedYBase);
 				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
-				// testing whether using GFP, because usually we mark Kt with
-				// GFP
 				if (spotSet != null) {
 					// this functions modify directly coordinates of spot in
 					// soc, because it's back-up
@@ -203,11 +201,12 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 						ArrayList<Spot> poles = cptgeometry.findMostDistant2Spots(spotSet);
 						geometry.put(ComputeGeometry.PHASE, ComputeGeometry.MITOSIS);
 						geometry = cptgeometry.compute(geometry, poles);
-						//TODO
+						// TODO to specify in gui that GFP for Kt and cfp for
+						// spbs for exemple
 						if (channel.equals("GFP")) {
 							if (setSize > 2) {
 								double spindleLength = (double) geometry.get(ComputeGeometry.SpLength);
-								//TODO
+								// TODO anaphase onset length
 								if (spindleLength > 4) {
 									Line spLine = new Line(
 											(int) FastMath.round(
@@ -238,8 +237,9 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 											}
 										}
 									}
-								}else if(spindleLength>2){
-									//TODO list for metaphase and normal anaphase
+								} else if (spindleLength > 2) {
+									// TODO list for metaphase and normal
+									// anaphase
 								}
 							}
 						}
@@ -258,10 +258,10 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 	public FloatProcessor call() throws Exception {
 		soc.addSpotContainerOf(channel);
 		soc.addFeatureContainerOf(channel);
-		// TODO project or not. Do not project if do 3D detection
 		if (fluoImage.getCalibration().getUnit().equals("cm")) {
 			fluoImage = ImgUtils.unitCmToMicron(fluoImage);
 		}
+		// TODO project or not. Do not project if do 3D detection
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
 		zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
 		zProjectedFluoImg.setCalibration(fluoImage.getCalibration());

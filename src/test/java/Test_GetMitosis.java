@@ -4,8 +4,6 @@ import org.apache.commons.math3.util.FastMath;
 import org.junit.Test;
 import org.micromanager.cellstateanalysis.GetMitosis;
 
-import util.opencsv.CSVReader;
-
 public class Test_GetMitosis {
 
 	GetMitosis getMitosis = new GetMitosis();

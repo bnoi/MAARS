@@ -30,7 +30,6 @@ import org.micromanager.internal.utils.ReportingUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
 
 /**
@@ -175,7 +174,6 @@ public class MAARS implements Runnable {
 
 	@Override
 	public void run() {
-		Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
 		// Start time
 		long start = System.currentTimeMillis();
 		mmc.setAutoShutter(false);
@@ -214,7 +212,7 @@ public class MAARS implements Runnable {
 			}
 			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
 			IJ.log("Acquire bright field image...");
-			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus);
+			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus, true);
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
@@ -224,10 +222,9 @@ public class MAARS implements Runnable {
 				soc.loadCells(xPos, yPos);
 				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				// Get the focus slice of BF image
-				Calibration bfImgCal = segImg.getCalibration();
-				ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
-						segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
-				focusImage.setCalibration(bfImgCal);
+				// ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
+				// segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
+				// focusImage.setCalibration(bfImgCal);
 				// ----------------start acquisition and analysis --------//
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
 				try {
@@ -240,9 +237,11 @@ public class MAARS implements Runnable {
 					e.printStackTrace();
 				}
 				int frame = 0;
+				Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
+				double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+				Boolean saveFilm = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
 				if (parameters.useDynamic()) {
-					double timeInterval = Double
-							.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+					// being dynamic acquisition
 					double startTime = System.currentTimeMillis();
 					double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
 							* 1000;
@@ -253,9 +252,9 @@ public class MAARS implements Runnable {
 						for (String channel : arrayChannels) {
 							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 							soc.addAcqID(id);
-							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
+							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, saveFilm);
 							if (do_analysis) {
-								es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+								es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
 										Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 										Double.parseDouble(parameters.getChSpotRaius(channel)),
 										Double.parseDouble(parameters.getChQuality(channel)), frame,
@@ -264,7 +263,7 @@ public class MAARS implements Runnable {
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
-						ReportingUtils.logMessage(String.valueOf(acqTook));
+						IJ.log(String.valueOf(acqTook));
 						if (timeInterval > acqTook) {
 							try {
 								Thread.sleep((long) (timeInterval - acqTook));
@@ -272,22 +271,21 @@ public class MAARS implements Runnable {
 								e.printStackTrace();
 							}
 						} else {
-							ReportingUtils.logMessage(
-									"Attention : acquisition before took longer than " + timeInterval + " ms.");
+							IJ.log("Attention : acquisition before took longer than " + timeInterval / 1000 + " s.");
 						}
 					}
-					// main acquisition finished, find whether there is merotely
-					// cells.
-
+					// dynamic acquisition finished, find whether there is
+					// merotely cells.
 				} else {
+					// being static acquisition
 					String channels = parameters.getUsingChannels();
 					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqID(id);
-						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus);
+						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, saveFilm);
 						if (do_analysis) {
-							es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+							es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 									Double.parseDouble(parameters.getChSpotRaius(channel)),
 									Double.parseDouble(parameters.getChQuality(channel)), frame, merotelyCandidates));
@@ -296,19 +294,24 @@ public class MAARS implements Runnable {
 				}
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
-				if (soc.size() != 0) {
+				// TODO add a textfield in gui to specify this parameter
+				double laggingThreshold = 120;
+				if (soc.size() != 0 && do_analysis) {
 					long startWriting = System.currentTimeMillis();
 					soc.saveSpots();
 					soc.saveGeometries();
+					// TODO add a textfield in gui to specify this parameter
 					Boolean splitChannel = true;
 					String croppedImgDir = soc.saveCroppedImgs(splitChannel);
-					//TODO
-					
+					// TODO a new static class to find lagging chromosomes
+
 					for (int nb : merotelyCandidates.keySet()) {
-						if (this.merotelyCandidates.get(nb) > frame * 0.02) {
+						int abnormalStateTimes = this.merotelyCandidates.get(nb);
+						if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
 							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 									.format(Calendar.getInstance().getTime());
-							IJ.log(timeStamp + " : " + nb);
+							IJ.log(timeStamp + " : " + nb + "_" + frame + "_"
+									+ abnormalStateTimes * timeInterval / 1000);
 							if (splitChannel) {
 								IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
 							} else {
@@ -316,24 +319,23 @@ public class MAARS implements Runnable {
 							}
 						}
 					}
-					mailNotify();
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}
-
+				mailNotify();
 			}
 			this.merotelyCandidates.clear();
 		}
 		mmc.setAutoShutter(true);
 		es.shutdown();
 		try {
-			es.awaitTermination(300, TimeUnit.MINUTES);
+			//TODO no acq should be more than one hour
+			es.awaitTermination(60, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
 		IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
-		IJ.log("DONE.");
 	}
 }

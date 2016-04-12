@@ -167,8 +167,8 @@ public class MAARSNoAcq implements Runnable {
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
-		// TODO
-		double laggingThreshold = 150;
+		// TODO add a textfield in gui to specify this parameter
+		double laggingThreshold = 120;
 		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 		if (soc.size() != 0) {
 			long startWriting = System.currentTimeMillis();
@@ -178,7 +178,7 @@ public class MAARSNoAcq implements Runnable {
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
 			String croppedImgDir = pathToFluoDir + "croppedImgs/";
 			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
-			// TODO
+			// TODO a new static class to find lagging chromosomes 
 
 			for (int nb : merotelyCandidates.keySet()) {
 				int abnormalStateTimes = this.merotelyCandidates.get(nb);
