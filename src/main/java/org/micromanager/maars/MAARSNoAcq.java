@@ -178,7 +178,7 @@ public class MAARSNoAcq implements Runnable {
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
 			String croppedImgDir = pathToFluoDir + "croppedImgs/";
 			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
-			// TODO a new static class to find lagging chromosomes 
+			// TODO a new static class to find lagging chromosomes
 
 			for (int nb : merotelyCandidates.keySet()) {
 				int abnormalStateTimes = this.merotelyCandidates.get(nb);
