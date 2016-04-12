@@ -290,6 +290,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 					channelStacks.get(currentLabel).addSlice(croppedImg.getStack().getProcessor(j).convertToFloatProcessor());
 				}
 				HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
+				//TODO problem here
 				for (String channel : channelStacks.keySet()){
 					croppedImgInChannel.put(channel, new ImagePlus(channel, channelStacks.get(channel)));
 				}
