@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
+import org.micromanager.cellstateanalysis.GetMitosis;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.utils.FileUtils;
 
@@ -178,8 +179,9 @@ public class MAARSNoAcq implements Runnable {
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
 			String croppedImgDir = pathToFluoDir + "croppedImgs/";
 			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
+			soc.exportChannelBtf(pathToFluoDir, mergedImg, splitChannel);
+			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// TODO a new static class to find lagging chromosomes
-
 			for (int nb : merotelyCandidates.keySet()) {
 				int abnormalStateTimes = this.merotelyCandidates.get(nb);
 				if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
