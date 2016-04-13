@@ -29,4 +29,8 @@ public class SegAcquisition extends SuperClassAcquisition {
 		}
 		return super.convert2Imp(listImg, channelName, step); 
 	}
+	
+	public String getSaveDir(){
+		return super.getSaveDir();
+	}
 }

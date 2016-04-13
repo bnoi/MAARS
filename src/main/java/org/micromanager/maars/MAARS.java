@@ -5,7 +5,9 @@ import mmcorej.CMMCore;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +30,8 @@ import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
+import org.micromanager.resultSaver.CroppedImgSaver;
+import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -186,6 +190,13 @@ public class MAARS implements Runnable {
 			e1.printStackTrace();
 		}
 
+		String channels = parameters.getUsingChannels();
+		String[] arrayCh = channels.split(",", -1);
+		ArrayList<String> arrayChannels = new ArrayList<String>();
+		for (String channel : arrayCh) {
+			arrayChannels.add(channel);
+		}
+
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
 		int nThread = Runtime.getRuntime().availableProcessors();
@@ -213,7 +224,8 @@ public class MAARS implements Runnable {
 			}
 			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
 			IJ.log("Acquire bright field image...");
-			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus, true);
+			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus,
+					true);
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
@@ -240,7 +252,8 @@ public class MAARS implements Runnable {
 				int frame = 0;
 				Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
 				double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-				Boolean saveFilm = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
+				Boolean saveFilm = Boolean
+						.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
 				if (parameters.useDynamic()) {
 					// being dynamic acquisition
 					double startTime = System.currentTimeMillis();
@@ -248,8 +261,6 @@ public class MAARS implements Runnable {
 							* 1000;
 					while (System.currentTimeMillis() - startTime <= timeLimit) {
 						double beginAcq = System.currentTimeMillis();
-						String channels = parameters.getUsingChannels();
-						String[] arrayChannels = channels.split(",", -1);
 						for (String channel : arrayChannels) {
 							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 							soc.addAcqID(id);
@@ -279,8 +290,6 @@ public class MAARS implements Runnable {
 					// merotely cells.
 				} else {
 					// being static acquisition
-					String channels = parameters.getUsingChannels();
-					String[] arrayChannels = channels.split(",", -1);
 					for (String channel : arrayChannels) {
 						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
 						soc.addAcqID(id);
@@ -303,7 +312,15 @@ public class MAARS implements Runnable {
 					soc.saveGeometries();
 					// TODO add a textfield in gui to specify this parameter
 					Boolean splitChannel = true;
-					String croppedImgDir = soc.saveImgs(splitChannel);
+					String fluoDir = segAcq.getSaveDir() + "_FLUO";
+					ImagePlus fieldImg = ImgUtils.loadFullFluoImgs(fluoDir);
+					// save cropped cells
+					HashMap<Integer, HashMap<String, ImagePlus>> croppedImps = ImgUtils
+							.cropMergedImpWithRois(soc.getCellArray(), fieldImg, splitChannel);
+					CroppedImgSaver saver = new CroppedImgSaver(fluoDir, fieldImg);
+					saver.saveCroppedImgs(croppedImps);
+					saver.exportChannelBtf(splitChannel, arrayChannels);
+					String croppedImgDir = saver.getCroppedImgDir();
 					// TODO a new static class to find lagging chromosomes
 
 					for (int nb : merotelyCandidates.keySet()) {
@@ -331,7 +348,7 @@ public class MAARS implements Runnable {
 		mmc.setAutoShutter(true);
 		es.shutdown();
 		try {
-			//TODO no acq should be more than one hour
+			// TODO no acq should be more than one hour
 			es.awaitTermination(60, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();

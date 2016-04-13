@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.micromanager.resultSaver.CroppedImgSaver;
 import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
@@ -253,133 +254,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 			this.trackmateModel = model;
 	}
 
-	public ImagePlus stackFluoImgs(String totalNbFrame, String fluoDir) {
-		ImagePlus fluoImg;
-		ImagePlus zprojectImg;
-		ImageStack fieldStack = null;
-		for (int f = 0; f <= Integer.parseInt(totalNbFrame); f++) {
-			for (String channel : spotsInCells.keySet()) {
-				fluoImg = IJ.openImage(fluoDir + f + "_" + channel + "/MMStack.ome.tif");
-				zprojectImg = ImgUtils.zProject(fluoImg);
-				if (fieldStack == null) {
-					fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight(),
-							Integer.parseInt(totalNbFrame) + 1);
-				}
-				fieldStack.setProcessor(zprojectImg.getStack().getProcessor(1), f + 1);
-			}
-		}
-		ImagePlus fieldImg = new ImagePlus("merged", fieldStack);
-		fieldImg.setCalibration(fluoImgCalib);
-		return fieldImg;
-	}
-
-	/**
-	 * crop ROIs from merged field-wide image
-	 * 
-	 * @param mergedImg
-	 * @return HashMap<cell NB, corresponding cropped img>
-	 */
-	public HashMap<Integer, HashMap<String, ImagePlus>> cropRois(ImagePlus mergedImg, Boolean splitChannel) {
-		HashMap<Integer, HashMap<String, ImagePlus>> croppedImgs = new HashMap<Integer, HashMap<String, ImagePlus>>();
-		if (splitChannel) {
-			for (int i = 0; i < cellArray.size(); i++) {
-				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cellArray.get(i).getCellShapeRoi());
-				HashMap<String, ImageStack> channelStacks = new HashMap<String, ImageStack>();
-				for (int j = 1; j <= croppedImg.getImageStack().size(); j++) {
-					String currentLabel = croppedImg.getImageStack().getSliceLabel(j);
-					if (!channelStacks.containsKey(currentLabel)) {
-						channelStacks.put(currentLabel, new ImageStack(croppedImg.getWidth(), croppedImg.getHeight()));
-					}
-					channelStacks.get(currentLabel)
-							.addSlice(croppedImg.getStack().getProcessor(j).convertToFloatProcessor());
-				}
-				HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
-				// TODO problem here
-				for (String channel : channelStacks.keySet()) {
-					croppedImgInChannel.put(channel, new ImagePlus(channel, channelStacks.get(channel)));
-				}
-				croppedImgs.put(i, croppedImgInChannel);
-			}
-		} else {
-			for (int i = 0; i < cellArray.size(); i++) {
-				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cellArray.get(i).getCellShapeRoi());
-				HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
-				croppedImgInChannel.put("merged", croppedImg);
-				croppedImgs.put(i, croppedImgInChannel);
-			}
-		}
-		return croppedImgs;
-	}
-
-	/**
-	 * 
-	 * @param croppedImgSet
-	 * @return cropped images base directory
-	 */
-	public void saveCroppedImgs(HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet, String dir2save) {
-		if (!new File(dir2save).exists()) {
-			new File(dir2save).mkdirs();
-		}
-		for (int cellNb : croppedImgSet.keySet()) {
-			for (String s : croppedImgSet.get(cellNb).keySet()) {
-				String pathToCroppedImg = dir2save + String.valueOf(cellNb) + "_" + s;
-				ImagePlus imp = croppedImgSet.get(cellNb).get(s);
-				IJ.run(imp, "Enhance Contrast", "saturated=0.35");
-				imp.setCalibration(fluoImgCalib);
-				IJ.saveAsTiff(imp, pathToCroppedImg);
-			}
-		}
-	}
-
-	/**
-	 * crop and save images
-	 */
-	public String saveImgs(Boolean splitChannel) {
-		String[] id = acqIDs.get(acqIDs.size() - 1);
-		String xPos = id[0];
-		String yPos = id[1];
-		String totalFrameNb = id[2];
-		String fluoDir = rootSavingPath + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
-		String croppedImgDir = fluoDir + "croppedImgs/";
-
-		ImagePlus fieldImg = stackFluoImgs(totalFrameNb, fluoDir);
-		// save cropped cells
-		croppedImps = cropRois(fieldImg, splitChannel);
-		saveCroppedImgs(croppedImps, croppedImgDir);
-		exportChannelBtf(fluoDir, fieldImg, splitChannel);
-		return croppedImgDir;
-	}
-
-	public void exportChannelBtf(String fluoDir, ImagePlus mergedImg, Boolean splitChannel) {
-		if (splitChannel) {
-			for (String channel : spotsInCells.keySet()) {
-				final String btfPath = fluoDir + channel + ".ome.btf";
-				if (!FileUtils.exists(btfPath)) {
-					ImageStack currentStack = new ImageStack(mergedImg.getWidth(), mergedImg.getHeight());
-					for (int j = 1; j <= mergedImg.getImageStack().size(); j++) {
-						if (mergedImg.getStack().getSliceLabel(j) == channel) {
-							currentStack.addSlice(mergedImg.getStack().getProcessor(j).convertToFloatProcessor());
-						}
-					}
-					final String macroOpts = "outfile=[" + btfPath
-							+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
-					LociExporter lociExporter = new LociExporter();
-					lociExporter.setup(macroOpts, new ImagePlus(channel, currentStack));
-					lociExporter.run(null);
-				}
-			}
-		} else {
-			String btfPath = fluoDir + "merged.ome.btf";
-			if (!FileUtils.exists(btfPath)) {
-				final String macroOpts = "outfile=[" + btfPath
-						+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
-				LociExporter lociExporter = new LociExporter();
-				lociExporter.setup(macroOpts, mergedImg);
-				lociExporter.run(null);
-			}
-		}
-	}
-
 	public void saveSpots() {
 		String[] id = acqIDs.get(0);
 		String xPos = id[0];
@@ -503,6 +377,10 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 
 	public String getRootSavingPath() {
 		return this.rootSavingPath;
+	}
+	
+	public ArrayList<Cell> getCellArray(){
+		return this.cellArray;
 	}
 
 	// iterator related

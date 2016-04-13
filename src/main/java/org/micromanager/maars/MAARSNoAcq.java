@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,13 +20,14 @@ import java.util.regex.Pattern;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.GetMitosis;
 import org.micromanager.cellstateanalysis.SetOfCells;
+import org.micromanager.resultSaver.CroppedImgSaver;
 import org.micromanager.utils.FileUtils;
+import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
-import ij.plugin.ZProjector;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatProcessor;
 import mmcorej.CMMCore;
@@ -68,7 +68,8 @@ public class MAARSNoAcq implements Runnable {
 		ImagePlus mergedImg = new ImagePlus();
 		int frameCounter = 0;
 		String pathToFluoDir = null;
-
+		ArrayList<String> arrayChannels = new ArrayList<String>();
+		
 		for (int i = 0; i < explo.length(); i++) {
 			IJ.log("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
@@ -105,7 +106,6 @@ public class MAARSNoAcq implements Runnable {
 				pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
 				String[] listAcqNames = new File(pathToFluoDir).list();
 				String pattern = "(\\d+)(_)(\\w+)";
-				ArrayList<String> arrayChannels = new ArrayList<String>();
 				ArrayList<Integer> arrayImgFrames = new ArrayList<Integer>();
 				for (String acqName : listAcqNames) {
 					if (Pattern.matches(pattern, acqName)) {
@@ -175,10 +175,15 @@ public class MAARSNoAcq implements Runnable {
 			long startWriting = System.currentTimeMillis();
 			soc.saveSpots();
 			soc.saveGeometries();
+			//TODO maybe to shorten?
 			Boolean splitChannel = true;
-			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
-			String croppedImgDir = pathToFluoDir + "croppedImgs/";
-			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
+			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = ImgUtils
+					.cropMergedImpWithRois(soc.getCellArray(), mergedImg, splitChannel);
+			CroppedImgSaver saver = new CroppedImgSaver(pathToFluoDir, mergedImg);
+			saver.saveCroppedImgs(croppedImgSet);
+			saver.exportChannelBtf(splitChannel, arrayChannels);
+			String croppedImgDir = saver.getCroppedImgDir();
+			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// TODO a new static class to find lagging chromosomes
 			for (int nb : merotelyCandidates.keySet()) {
 				int abnormalStateTimes = this.merotelyCandidates.get(nb);
@@ -194,8 +199,6 @@ public class MAARSNoAcq implements Runnable {
 					}
 				}
 			}
-			soc.exportChannelBtf(pathToFluoDir, mergedImg, splitChannel);
-			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// MAARS.mailNotify();
 			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
