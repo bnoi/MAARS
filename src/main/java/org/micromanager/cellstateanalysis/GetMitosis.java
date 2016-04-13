@@ -67,7 +67,7 @@ public class GetMitosis {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IJ.log(new Scanner(pr.getErrorStream(), "UTF-8").useDelimiter("\\A").next());
+//		IJ.log(new Scanner(pr.getErrorStream(), "UTF-8").useDelimiter("\\A").next());
 	}
 
 //	public static void main(String[] args) {

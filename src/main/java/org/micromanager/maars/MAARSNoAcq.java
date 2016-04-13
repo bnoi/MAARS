@@ -199,6 +199,8 @@ public class MAARSNoAcq implements Runnable {
 					}
 				}
 			}
+			soc.exportChannelBtf(pathToFluoDir, mergedImg, splitChannel);
+			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// MAARS.mailNotify();
 			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
