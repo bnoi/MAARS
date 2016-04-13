@@ -302,7 +302,7 @@ public class MAARS implements Runnable {
 					soc.saveGeometries();
 					// TODO add a textfield in gui to specify this parameter
 					Boolean splitChannel = true;
-					String croppedImgDir = soc.saveCroppedImgs(splitChannel);
+					String croppedImgDir = soc.saveImgs(splitChannel);
 					// TODO a new static class to find lagging chromosomes
 
 					for (int nb : merotelyCandidates.keySet()) {

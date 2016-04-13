@@ -154,7 +154,7 @@ public class MAARSNoAcq implements Runnable {
 				} catch (ExecutionException e1) {
 					e1.printStackTrace();
 				}
-				mergedImg = new ImagePlus("merged_channels", fluoStack);
+				mergedImg = new ImagePlus("merged", fluoStack);
 				mergedImg.setCalibration(segImg.getCalibration());
 				mergedImg.setZ(fluoStack.getSize());
 			}
