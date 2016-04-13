@@ -23,6 +23,7 @@ import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
 import org.micromanager.acquisition.SegAcquisition;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
+import org.micromanager.cellstateanalysis.GetMitosis;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
@@ -319,6 +320,7 @@ public class MAARS implements Runnable {
 							}
 						}
 					}
+					GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}

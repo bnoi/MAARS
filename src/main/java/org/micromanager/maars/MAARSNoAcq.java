@@ -179,8 +179,6 @@ public class MAARSNoAcq implements Runnable {
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = soc.cropRois(mergedImg, splitChannel);
 			String croppedImgDir = pathToFluoDir + "croppedImgs/";
 			soc.saveCroppedImgs(croppedImgSet, pathToFluoDir + "croppedImgs/");
-			soc.exportChannelBtf(pathToFluoDir, mergedImg, splitChannel);
-			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// TODO a new static class to find lagging chromosomes
 			for (int nb : merotelyCandidates.keySet()) {
 				int abnormalStateTimes = this.merotelyCandidates.get(nb);
@@ -196,6 +194,8 @@ public class MAARSNoAcq implements Runnable {
 					}
 				}
 			}
+			soc.exportChannelBtf(pathToFluoDir, mergedImg, splitChannel);
+			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// MAARS.mailNotify();
 			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
