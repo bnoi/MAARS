@@ -121,7 +121,3 @@ ENV/
 .ropeproject
 
 .pydevproject
-
-src/main/java/__init__.py
-
-src/main/java/__pycache__/trackmate.cpython-35.pyc
