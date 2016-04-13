@@ -181,7 +181,6 @@ public class MAARSNoAcq implements Runnable {
 					.cropMergedImpWithRois(soc.getCellArray(), mergedImg, splitChannel);
 			CroppedImgSaver saver = new CroppedImgSaver(pathToFluoDir, mergedImg);
 			saver.saveCroppedImgs(croppedImgSet);
-			saver.exportChannelBtf(splitChannel, arrayChannels);
 			String croppedImgDir = saver.getCroppedImgDir();
 			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// TODO a new static class to find lagging chromosomes
@@ -199,6 +198,8 @@ public class MAARSNoAcq implements Runnable {
 					}
 				}
 			}
+			saver.exportChannelBtf(splitChannel, arrayChannels);
+			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// MAARS.mailNotify();
 			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
