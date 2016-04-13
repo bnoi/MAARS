@@ -261,14 +261,14 @@ class getMitosisFiles(object):
                             # ax.plot(list(segment.keys()), list(segment.values()), lw = 5)
                             # ax.plot(list(segment.keys())[0:-1], diffSeg, lw = 5)
                             # ax.axhline(0)
-                            # plt.ylabel("Spindle Length ($μm$)", fontsize=20)
+                            # plt.ylabel("Spindle Length ($um$)", fontsize=20)
                             # plt.xlabel("frame // cell " + str(x), fontsize=20)
                             # plt.xlim(0, 200)
                             # plt.ylim(-5, 30)
                             # plt.show()
                             d = self.analyzeSPBTrack(acqDir, x, channels[0])
                             # print("shrink % : " + str(len(diffSeg[diffSeg<0])/len(diffSeg)*100))
-                            # print("mean speed : %s µm/min " % ((list(segment.values())[-1] - list(segment.values())[0])/len(segment.keys())*15))
+                            # print("mean speed : %s um/min " % ((list(segment.values())[-1] - list(segment.values())[0])/len(segment.keys())*15))
                             croppedImgsDir = acqDir + "/cropImgs/"
                             spotsDir = acqDir + "/spots/"
                             csvDir = acqDir + "/csv/"

@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
 import fiji.plugin.trackmate.Model;
@@ -352,24 +353,30 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	public void exportChannelBtf(String fluoDir, ImagePlus mergedImg, Boolean splitChannel) {
 		if (splitChannel) {
 			for (String channel : spotsInCells.keySet()) {
-				ImageStack currentStack = new ImageStack(mergedImg.getWidth(), mergedImg.getHeight());
-				for (int j = 1; j <= mergedImg.getImageStack().size(); j++) {
-					currentStack.addSlice(mergedImg.getStack().getProcessor(j).convertToFloatProcessor());
+				final String btfPath = fluoDir + channel + ".ome.btf";
+				if (!FileUtils.exists(btfPath)) {
+					ImageStack currentStack = new ImageStack(mergedImg.getWidth(), mergedImg.getHeight());
+					for (int j = 1; j <= mergedImg.getImageStack().size(); j++) {
+						if (mergedImg.getStack().getSliceLabel(j) == channel) {
+							currentStack.addSlice(mergedImg.getStack().getProcessor(j).convertToFloatProcessor());
+						}
+					}
+					final String macroOpts = "outfile=[" + btfPath
+							+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
+					LociExporter lociExporter = new LociExporter();
+					lociExporter.setup(macroOpts, new ImagePlus(channel, currentStack));
+					lociExporter.run(null);
 				}
-				final String file = fluoDir + channel + ".ome.btf";
-				final String macroOpts = "outfile=[" + file
-						+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
-				LociExporter lociExporter = new LociExporter();
-				lociExporter.setup(macroOpts, new ImagePlus(channel, currentStack));
-				lociExporter.run(null);
 			}
 		} else {
-			final String file = fluoDir + "merged.ome.btf";
-			final String macroOpts = "outfile=[" + file
-					+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
-			LociExporter lociExporter = new LociExporter();
-			lociExporter.setup(macroOpts, mergedImg);
-			lociExporter.run(null);
+			String btfPath = fluoDir + "merged.ome.btf";
+			if (!FileUtils.exists(btfPath)) {
+				final String macroOpts = "outfile=[" + btfPath
+						+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
+				LociExporter lociExporter = new LociExporter();
+				lociExporter.setup(macroOpts, mergedImg);
+				lociExporter.run(null);
+			}
 		}
 	}
 
