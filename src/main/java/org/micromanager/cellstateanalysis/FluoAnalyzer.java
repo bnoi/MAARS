@@ -76,7 +76,6 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 			double radius, double quality, int frame, ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
 		this.fluoImage = fluoImage;
 		this.fluoImgCal = fluoImage.getCalibration();
-		soc.setFluoImgCalib(fluoImgCal);
 		this.soc = soc;
 		this.bfImgCal = bfImgCal;
 		this.channel = channel;

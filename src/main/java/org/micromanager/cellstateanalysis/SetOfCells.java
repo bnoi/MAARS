@@ -12,22 +12,14 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.micromanager.resultSaver.CroppedImgSaver;
-import org.micromanager.utils.FileUtils;
-import org.micromanager.utils.ImgUtils;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlWriter;
 import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Roi;
-import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
-import loci.plugins.LociExporter;
 import util.opencsv.CSVWriter;
 
 /**
@@ -48,8 +40,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private HashMap<String, HashMap<Integer, HashMap<Integer, HashMap<String, Object>>>> geosOfCells;
 	private ArrayList<String[]> acqIDs;
 	private Model trackmateModel;
-	private HashMap<Integer, HashMap<String, ImagePlus>> croppedImps;
-	private Calibration fluoImgCalib;
 	private Set<String> headerSet;
 
 	/**
@@ -360,10 +350,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		this.acqIDs.add(id);
 	}
 
-	public void setFluoImgCalib(Calibration fluoImgCalib) {
-		this.fluoImgCalib = fluoImgCalib;
-	}
-
 	public void reset() {
 		this.iteratorCount = 0;
 		this.cellArray = null;
@@ -371,8 +357,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		this.geosOfCells = null;
 		this.acqIDs = null;
 		this.trackmateModel = null;
-		this.croppedImps = null;
-		this.fluoImgCalib = null;
 	}
 
 	public String getRootSavingPath() {
