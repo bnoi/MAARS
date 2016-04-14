@@ -4,9 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.utils.FileUtils;
-import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -17,13 +15,14 @@ public class CroppedImgSaver {
 	String pathToFluoDir;
 	String croppedImgDir;
 	ImagePlus mergedFullFieldImg;
+
 	public CroppedImgSaver(String pathToFluoDir, ImagePlus mergedFullFieldImg) {
 		this.pathToFluoDir = pathToFluoDir;
 		this.croppedImgDir = pathToFluoDir + "croppedImgs/";
-		this.mergedFullFieldImg = mergedFullFieldImg; 
+		this.mergedFullFieldImg = mergedFullFieldImg;
 	}
-	
-	public String getCroppedImgDir(){
+
+	public String getCroppedImgDir() {
 		return this.croppedImgDir;
 	}
 
@@ -45,17 +44,19 @@ public class CroppedImgSaver {
 			}
 		}
 	}
-	
+
 	public void exportChannelBtf(Boolean splitChannel, ArrayList<String> arrayChannels) {
 		LociExporter lociExporter = new LociExporter();
 		if (splitChannel) {
 			for (String channel : arrayChannels) {
 				final String btfPath = pathToFluoDir + channel + ".ome.btf";
 				if (!FileUtils.exists(btfPath)) {
-					ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(), mergedFullFieldImg.getHeight());
+					ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(),
+							mergedFullFieldImg.getHeight());
 					for (int j = 1; j <= mergedFullFieldImg.getImageStack().size(); j++) {
 						if (mergedFullFieldImg.getStack().getSliceLabel(j) == channel) {
-							currentStack.addSlice(mergedFullFieldImg.getStack().getProcessor(j).convertToFloatProcessor());
+							currentStack
+									.addSlice(mergedFullFieldImg.getStack().getProcessor(j).convertToFloatProcessor());
 						}
 					}
 					final String macroOpts = "outfile=[" + btfPath

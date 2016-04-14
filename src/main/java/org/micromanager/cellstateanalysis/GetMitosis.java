@@ -57,20 +57,21 @@ public class GetMitosis {
 
 	public static void getMitosisWithPython(String acqDir, String channel) {
 		String[] cmd = new String[] { "/home/tong/miniconda3/bin/python",
-				GetMitosis.class.getProtectionDomain().getCodeSource().getLocation().getPath()
-						+ "getMitosisFiles.py",
+				GetMitosis.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "getMitosisFiles.py",
 				acqDir, channel };
-		Process pr = null;
+		ProcessBuilder probuilder = new ProcessBuilder(cmd);
+//		probuilder.redirectErrorStream(true);
 		try {
-			pr = Runtime.getRuntime().exec(cmd);
+			Process process = probuilder.start();
+			IJ.log(new Scanner(process.getInputStream(), "UTF-8").useDelimiter("\\A").next());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		IJ.log(new Scanner(pr.getErrorStream(), "UTF-8").useDelimiter("\\A").next());
+
 	}
 
-//	public static void main(String[] args) {
-//		GetMitosis.getMitosis("/home/tong/Documents/movies/102/60x/12-04-2", "CFP");
-//	}
+	public static void main(String[] args) {
+		GetMitosis.getMitosisWithPython("/home/tong/Documents/movies/102/60x/13-04-1", "CFP");
+	}
 }

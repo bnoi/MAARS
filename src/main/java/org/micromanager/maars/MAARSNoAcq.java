@@ -69,7 +69,7 @@ public class MAARSNoAcq implements Runnable {
 		int frameCounter = 0;
 		String pathToFluoDir = null;
 		ArrayList<String> arrayChannels = new ArrayList<String>();
-		
+
 		for (int i = 0; i < explo.length(); i++) {
 			IJ.log("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
@@ -175,14 +175,13 @@ public class MAARSNoAcq implements Runnable {
 			long startWriting = System.currentTimeMillis();
 			soc.saveSpots();
 			soc.saveGeometries();
-			//TODO maybe to shorten?
+			// TODO maybe to shorten?
 			Boolean splitChannel = true;
+			CroppedImgSaver saver = new CroppedImgSaver(pathToFluoDir, mergedImg);
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = ImgUtils
 					.cropMergedImpWithRois(soc.getCellArray(), mergedImg, splitChannel);
-			CroppedImgSaver saver = new CroppedImgSaver(pathToFluoDir, mergedImg);
 			saver.saveCroppedImgs(croppedImgSet);
 			String croppedImgDir = saver.getCroppedImgDir();
-			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
 			// TODO a new static class to find lagging chromosomes
 			for (int nb : merotelyCandidates.keySet()) {
 				int abnormalStateTimes = this.merotelyCandidates.get(nb);
@@ -198,8 +197,8 @@ public class MAARSNoAcq implements Runnable {
 					}
 				}
 			}
-			saver.exportChannelBtf(splitChannel, arrayChannels);
 			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
+			saver.exportChannelBtf(splitChannel, arrayChannels);
 			// MAARS.mailNotify();
 			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
