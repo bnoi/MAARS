@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.GetMitosis;
 import org.micromanager.cellstateanalysis.SetOfCells;
-import org.micromanager.resultSaver.CroppedImgSaver;
+import org.micromanager.resultSaver.MAARSImgSaver;
 import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
@@ -175,9 +175,10 @@ public class MAARSNoAcq implements Runnable {
 			long startWriting = System.currentTimeMillis();
 			soc.saveSpots();
 			soc.saveGeometries();
-			// TODO maybe to shorten?
+			// TODO maybe to be shorten?
 			Boolean splitChannel = true;
-			CroppedImgSaver saver = new CroppedImgSaver(pathToFluoDir, mergedImg);
+			mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
+			MAARSImgSaver saver = new MAARSImgSaver(pathToFluoDir, mergedImg);
 			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = ImgUtils
 					.cropMergedImpWithRois(soc.getCellArray(), mergedImg, splitChannel);
 			saver.saveCroppedImgs(croppedImgSet);
