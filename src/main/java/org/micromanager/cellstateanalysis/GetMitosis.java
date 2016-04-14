@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import org.apache.commons.math3.util.FastMath;
 import org.micromanager.utils.FileUtils;
+import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
 import util.opencsv.CSVReader;
@@ -73,5 +74,6 @@ public class GetMitosis {
 
 	public static void main(String[] args) {
 		GetMitosis.getMitosisWithPython("/home/tong/Documents/movies/102/60x/13-04-1", "CFP");
+		//ImgUtils.loadFullFluoImgs("/home/tong/Documents/movies/624-60x/14-04-1/movie_X0_Y0_FLUO");
 	}
 }

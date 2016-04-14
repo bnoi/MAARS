@@ -2,6 +2,9 @@ package org.micromanager.utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
@@ -135,9 +138,21 @@ public class ImgUtils {
 		ImagePlus zprojectImg = null;
 		ImageStack fieldStack = null;
 		Calibration fluoImgCalib = null;
-		String[] listAcqNames = new File(fluoDir).list();
+		ArrayList<String> listAcqNames = new ArrayList<String>();
 		String pattern = "(\\d+)(_)(\\w+)";
+		for (String acqName : new File(fluoDir).list()) {
+			if (Pattern.matches(pattern, acqName)) {
+				listAcqNames.add(acqName);
+			}
+		}
+		Collections.sort(listAcqNames, new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				return Integer.valueOf(o1.split("_", -1)[0]).compareTo(Integer.valueOf(o2.split("_", -1)[0]));
+			}
+		});
 		for (String acqName : listAcqNames) {
+			System.out.println(acqName);
 			if (Pattern.matches(pattern, acqName)) {
 				fluoImg = IJ.openImage(fluoDir + "/" + acqName + "/MMStack.ome.tif");
 				zprojectImg = ImgUtils.zProject(fluoImg);
@@ -147,22 +162,23 @@ public class ImgUtils {
 				if (fieldStack == null) {
 					fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight());
 				}
-				fieldStack.addSlice(acqName.split("_", -1)[1] , zprojectImg.getStack().getProcessor(1).convertToFloatProcessor());
+				fieldStack.addSlice(acqName.split("_", -1)[1],
+						zprojectImg.getStack().getProcessor(1).convertToFloatProcessor());
 			}
 		}
 		ImagePlus fieldImg = new ImagePlus("merged", fieldStack);
 		fieldImg.setCalibration(fluoImgCalib);
 		return fieldImg;
 	}
-	
+
 	/**
 	 * crop ROIs from merged field-wide image
 	 * 
 	 * @param mergedImg
 	 * @return HashMap<cell NB, HashMap<channel, corresponding cropped img>>
 	 */
-	public static HashMap<Integer, HashMap<String, ImagePlus>> cropMergedImpWithRois(ArrayList<Cell> cellArray, ImagePlus mergedImg,
-			Boolean splitChannel) {
+	public static HashMap<Integer, HashMap<String, ImagePlus>> cropMergedImpWithRois(ArrayList<Cell> cellArray,
+			ImagePlus mergedImg, Boolean splitChannel) {
 		HashMap<Integer, HashMap<String, ImagePlus>> croppedImgs = new HashMap<Integer, HashMap<String, ImagePlus>>();
 		if (splitChannel) {
 			for (int i = 0; i < cellArray.size(); i++) {
