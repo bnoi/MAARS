@@ -136,7 +136,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				if (Double.parseDouble(timeInterval.getText()) <= 15000) {
+				if (Double.parseDouble(timeInterval.getText()) < 10000) {
 					doAnalysis.setSelected(false);
 					doAnalysis.setEnabled(false);
 				} else {
