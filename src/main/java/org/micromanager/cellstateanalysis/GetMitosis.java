@@ -57,6 +57,7 @@ public class GetMitosis {
 	}
 
 	public static void getMitosisWithPython(String acqDir, String channel) {
+		//TODO find a way to call python with packages
 		String[] cmd = new String[] { "/home/tong/miniconda3/bin/python",
 				GetMitosis.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "getMitosisFiles.py",
 				acqDir, channel };

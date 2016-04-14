@@ -2,7 +2,6 @@ package org.micromanager.utils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -152,7 +151,6 @@ public class ImgUtils {
 			}
 		});
 		for (String acqName : listAcqNames) {
-			System.out.println(acqName);
 			if (Pattern.matches(pattern, acqName)) {
 				fluoImg = IJ.openImage(fluoDir + "/" + acqName + "/MMStack.ome.tif");
 				zprojectImg = ImgUtils.zProject(fluoImg);
@@ -162,8 +160,7 @@ public class ImgUtils {
 				if (fieldStack == null) {
 					fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight());
 				}
-				fieldStack.addSlice(acqName.split("_", -1)[1],
-						zprojectImg.getStack().getProcessor(1).convertToFloatProcessor());
+				fieldStack.addSlice(acqName.split("_", -1)[1], zprojectImg.getStack().getProcessor(1));
 			}
 		}
 		ImagePlus fieldImg = new ImagePlus("merged", fieldStack);

@@ -30,7 +30,7 @@ import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
-import org.micromanager.resultSaver.CroppedImgSaver;
+import org.micromanager.resultSaver.MAARSImgSaver;
 import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
@@ -317,7 +317,7 @@ public class MAARS implements Runnable {
 					// save cropped cells
 					HashMap<Integer, HashMap<String, ImagePlus>> croppedImps = ImgUtils
 							.cropMergedImpWithRois(soc.getCellArray(), fieldImg, splitChannel);
-					CroppedImgSaver saver = new CroppedImgSaver(fluoDir, fieldImg);
+					MAARSImgSaver saver = new MAARSImgSaver(fluoDir, fieldImg);
 					saver.saveCroppedImgs(croppedImps);
 					String croppedImgDir = saver.getCroppedImgDir();
 					// TODO a new static class to find lagging chromosomes
@@ -337,7 +337,7 @@ public class MAARS implements Runnable {
 						}
 					}
 					//GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
-					//saver.exportChannelBtf(splitChannel, arrayChannels);
+					saver.exportChannelBtf(splitChannel, arrayChannels);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}

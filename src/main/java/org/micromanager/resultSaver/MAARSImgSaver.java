@@ -11,12 +11,12 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import loci.plugins.LociExporter;
 
-public class CroppedImgSaver {
+public class MAARSImgSaver {
 	String pathToFluoDir;
 	String croppedImgDir;
 	ImagePlus mergedFullFieldImg;
 
-	public CroppedImgSaver(String pathToFluoDir, ImagePlus mergedFullFieldImg) {
+	public MAARSImgSaver(String pathToFluoDir, ImagePlus mergedFullFieldImg) {
 		this.pathToFluoDir = pathToFluoDir;
 		this.croppedImgDir = pathToFluoDir + "/croppedImgs/";
 		this.mergedFullFieldImg = mergedFullFieldImg;
@@ -54,7 +54,7 @@ public class CroppedImgSaver {
 					ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(),
 							mergedFullFieldImg.getHeight());
 					for (int j = 1; j <= mergedFullFieldImg.getImageStack().size(); j++) {
-						if (mergedFullFieldImg.getStack().getSliceLabel(j) == channel) {
+						if (mergedFullFieldImg.getStack().getSliceLabel(j).equals(channel)) {
 							currentStack
 									.addSlice(mergedFullFieldImg.getStack().getProcessor(j));
 						}
