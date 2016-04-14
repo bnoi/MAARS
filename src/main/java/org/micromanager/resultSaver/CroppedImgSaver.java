@@ -64,6 +64,7 @@ public class CroppedImgSaver {
 					ImagePlus currentChImp = new ImagePlus(channel, currentStack);
 					currentChImp.setCalibration(mergedFullFieldImg.getCalibration());
 					lociExporter.setup(macroOpts, currentChImp);
+					lociExporter.run(null);
 				}
 			}
 		} else {
@@ -72,8 +73,9 @@ public class CroppedImgSaver {
 				final String macroOpts = "outfile=[" + btfPath
 						+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
 				lociExporter.setup(macroOpts, mergedFullFieldImg);
+				lociExporter.run(null);
 			}
 		}
-		lociExporter.run(null);
+		
 	}
 }
