@@ -56,7 +56,7 @@ public class SuperClassAcquisition {
 		this.mmc = mmc;
 		this.parameters = parameters;
 		this.channelGroup = parameters.getChannelGroup();
-		this.saveDir = parameters.getSavingPath() + "movie_X" + positionX + "_Y" + positionY;
+		this.saveDir = parameters.getSavingPath() + "/movie_X" + positionX + "_Y" + positionY;
 	}
 	
 	public String getSaveDir(){

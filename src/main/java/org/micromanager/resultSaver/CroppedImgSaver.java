@@ -18,7 +18,7 @@ public class CroppedImgSaver {
 
 	public CroppedImgSaver(String pathToFluoDir, ImagePlus mergedFullFieldImg) {
 		this.pathToFluoDir = pathToFluoDir;
-		this.croppedImgDir = pathToFluoDir + "croppedImgs/";
+		this.croppedImgDir = pathToFluoDir + "/croppedImgs/";
 		this.mergedFullFieldImg = mergedFullFieldImg;
 	}
 
@@ -49,14 +49,14 @@ public class CroppedImgSaver {
 		LociExporter lociExporter = new LociExporter();
 		if (splitChannel) {
 			for (String channel : arrayChannels) {
-				final String btfPath = pathToFluoDir + channel + ".ome.btf";
+				final String btfPath = pathToFluoDir + "/" + channel + ".ome.btf";
 				if (!FileUtils.exists(btfPath)) {
 					ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(),
 							mergedFullFieldImg.getHeight());
 					for (int j = 1; j <= mergedFullFieldImg.getImageStack().size(); j++) {
 						if (mergedFullFieldImg.getStack().getSliceLabel(j) == channel) {
 							currentStack
-									.addSlice(mergedFullFieldImg.getStack().getProcessor(j).convertToFloatProcessor());
+									.addSlice(mergedFullFieldImg.getStack().getProcessor(j));
 						}
 					}
 					final String macroOpts = "outfile=[" + btfPath

@@ -139,7 +139,7 @@ public class ImgUtils {
 		String pattern = "(\\d+)(_)(\\w+)";
 		for (String acqName : listAcqNames) {
 			if (Pattern.matches(pattern, acqName)) {
-				fluoImg = IJ.openImage(acqName + "/MMStack.ome.tif");
+				fluoImg = IJ.openImage(fluoDir + "/" + acqName + "/MMStack.ome.tif");
 				zprojectImg = ImgUtils.zProject(fluoImg);
 				if (fluoImgCalib == null) {
 					fluoImgCalib = fluoImg.getCalibration();

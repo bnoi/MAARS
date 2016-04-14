@@ -275,7 +275,7 @@ public class MAARS implements Runnable {
 						}
 						frame++;
 						double acqTook = System.currentTimeMillis() - beginAcq;
-						IJ.log(String.valueOf(acqTook));
+						System.out.println(String.valueOf(acqTook));
 						if (timeInterval > acqTook) {
 							try {
 								Thread.sleep((long) (timeInterval - acqTook));
@@ -337,7 +337,7 @@ public class MAARS implements Runnable {
 						}
 					}
 					//GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
-					saver.exportChannelBtf(splitChannel, arrayChannels);
+					//saver.exportChannelBtf(splitChannel, arrayChannels);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}
