@@ -2,9 +2,7 @@ package org.micromanager.cellstateanalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,6 +10,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.util.FastMath;
+import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.AnalysisFactory;
 import org.micromanager.utils.ImgUtils;
 
 import com.google.common.collect.Iterables;
@@ -26,9 +25,6 @@ import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.measure.Measurements;
-import ij.measure.ResultsTable;
-import ij.plugin.filter.Analyzer;
 import ij.process.FloatProcessor;
 
 /**
@@ -47,9 +43,11 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 	private double quality;
 	private int frame;
 	private SpotCollection collection;
-	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
+	private AnalysisFactory factory;
+	private Model model;
 
 	/**
+	 * 
 	 * @param fluoImage
 	 *            image to analyze zProjectedFluoImg
 	 * @param bfImgCal
@@ -70,10 +68,12 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 	 * @param merotelyCandidates
 	 *            hashmap<cell number, times that this cell has been found one
 	 *            point on the "spindle line"
+	 * @param spotCotainer
+	 * @param geoContainer
 	 */
 
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-			double radius, double quality, int frame, ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
+			double radius, double quality, int frame, AnalysisFactory factory) {
 		this.fluoImage = fluoImage;
 		this.fluoImgCal = fluoImage.getCalibration();
 		this.soc = soc;
@@ -83,40 +83,74 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 		this.radius = radius;
 		this.quality = quality;
 		this.frame = frame;
-		this.merotelyCandidates = merotelyCandidates;
-	}
-
-	private SpotCollection getNBestqualitySpots(SpotCollection spots) {
-		SpotCollection newSet = new SpotCollection();
-		Iterator<Spot> it = spots.iterator(false);
-		while (it.hasNext()) {
-			Spot s = it.next();
-			newSet.add(s, 0);
-			if (newSet.getNSpots(0, false) > soc.size() * maxNbSpot) {
-				newSet.remove(findLowestQualitySpot(newSet.iterable(0, false)), 0);
-			}
-		}
-		return newSet;
+		this.factory = factory;
 	}
 
 	/**
-	 * Get the lowest qualit spot in the frame
-	 * 
-	 * @param channel
-	 * @param cellNb
-	 * @param frame
-	 * @return
+	 * the main, use one new thread just in order to free acquisition thread to
+	 * acquire images as soon as possible
 	 */
-	public static Spot findLowestQualitySpot(Iterable<Spot> spots) {
-		double min = Double.POSITIVE_INFINITY;
-		Spot lowestQualitySpot = null;
-		for (Spot s : spots) {
-			if (s.getFeature(Spot.QUALITY) < min) {
-				min = s.getFeature(Spot.QUALITY);
-				lowestQualitySpot = s;
-			}
+	@Override
+	public FloatProcessor call() throws Exception {
+		if (fluoImage.getCalibration().getUnit().equals("cm")) {
+			fluoImage = ImgUtils.unitCmToMicron(fluoImage);
 		}
-		return lowestQualitySpot;
+		// TODO project or not. Do not project if do 3D detection
+		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
+		zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
+		zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
+		// if (frame == 0) {
+		// ResultsTable resultTable = new ResultsTable();
+		// Analyzer analyzer = new Analyzer(zProjectedFluoImg,
+		// Measurements.MEAN + Measurements.STD_DEV + Measurements.MIN_MAX,
+		// resultTable);
+		// Iterator<Cell> it = soc.iterator();
+		// while (it.hasNext()) {
+		// zProjectedFluoImg.setRoi(it.next().getCellShapeRoi());
+		// analyzer.measure();
+		// zProjectedFluoImg.deleteRoi();
+		// }
+		// resultTable.show(channel + " 0 frame fluo measure");
+		// }
+		// Call trackmate to detect spots
+		MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
+
+		model = trackmate.doDetection(true);
+
+		if (frame == 0) {
+			SelectionModel selectionModel = new SelectionModel(model);
+			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
+			displayer.render();
+			displayer.refresh();
+		}
+		int nbCell = soc.size();
+		collection = SpotsContainer.getNBestqualitySpots(model.getSpots(), nbCell, maxNbSpot);
+		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
+
+		int nThread = Runtime.getRuntime().availableProcessors();
+		ExecutorService es = Executors.newFixedThreadPool(nThread);
+		final int[] nbOfCellEachThread = new int[2];
+		nbOfCellEachThread[0] = (int) nbCell / nThread;
+		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
+		Future<?> future = null;
+		for (int i = 0; i < nThread; i++) {
+			// analyze every subset of cell
+			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, factors));
+		}
+		es.shutdown();
+		try {
+			future.get();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		} catch (ExecutionException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			es.awaitTermination(3, TimeUnit.MINUTES);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return zProjectedFluoImg.getProcessor().convertToFloatProcessor();
 	}
 
 	/**
@@ -126,13 +160,10 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 		private final int index;
 		private final int[] deltas;
 		private double[] factors;
-		private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
 
-		public AnalyseBlockCells(int index, final int[] deltas, double[] factors,
-				ConcurrentHashMap<Integer, Integer> merotelyCandidates) {
+		public AnalyseBlockCells(int index, final int[] deltas, double[] factors) {
 			this.index = index;
 			this.deltas = deltas;
-			this.merotelyCandidates = merotelyCandidates;
 			this.factors = factors;
 		}
 
@@ -155,7 +186,8 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(collection.iterable(false));
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
-				int cellNb = cell.getCellNumber();
+				cell.setTrackmateModel(model);
+				cell.addChannel(channel);
 				Roi tmpRoi = null;
 				if (factors[0] != 1 || factors[1] != 1) {
 					tmpRoi = cell.rescaleCellShapeRoi(factors);
@@ -168,12 +200,12 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 				for (Spot s : currentThreadSpots) {
 					if (tmpRoi.contains((int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
 							(int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
-						soc.putSpot(channel, cellNb, frame, s);
+						cell.putSpot(channel, frame, s);
 						spotsToDel.add(s);
-						if (soc.getNbOfSpot(channel, cellNb, frame) > maxNbSpot) {
-							Spot lowesetQulitySpot = FluoAnalyzer
-									.findLowestQualitySpot(soc.getSpotsInFrame(channel, cellNb, frame));
-							soc.removeSpot(channel, cellNb, frame, lowesetQulitySpot);
+						if (cell.getNbOfSpots(channel, frame) > maxNbSpot) {
+							Spot lowesetQulitySpot = SpotsContainer
+									.findLowestQualitySpot(cell.getSpotsInFrame(channel, frame));
+							cell.removeSpot(channel, frame, lowesetQulitySpot);
 						}
 					}
 				}
@@ -186,7 +218,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight,
 						cell.get(Cell.MAJOR) * fluoImgCal.pixelWidth, cell.get(Cell.ANGLE), calibratedXBase,
 						calibratedYBase);
-				Iterable<Spot> spotSet = soc.getSpotsInFrame(channel, cellNb, frame);
+				Iterable<Spot> spotSet = cell.getSpotsInFrame(channel, frame);
 				if (spotSet != null) {
 					// this functions modify directly coordinates of spot in
 					// soc, because it's back-up
@@ -195,10 +227,8 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 					HashMap<String, Object> geometry = new HashMap<String, Object>();
 					geometry.put(ComputeGeometry.NbOfSpotDetected, setSize);
 					if (setSize == 1) {
-						geometry.put(ComputeGeometry.PHASE, ComputeGeometry.INTERPHASE);
 					} else {
 						ArrayList<Spot> poles = cptgeometry.findMostDistant2Spots(spotSet);
-						geometry.put(ComputeGeometry.PHASE, ComputeGeometry.MITOSIS);
 						geometry = cptgeometry.compute(geometry, poles);
 						// TODO to specify in gui that GFP for Kt and cfp for
 						// spbs for exemple
@@ -227,12 +257,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 															s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
 													(int) FastMath.round(
 															s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
-												if (merotelyCandidates.containsKey(cellNb)) {
-													this.merotelyCandidates.replace(cellNb,
-															this.merotelyCandidates.get(cellNb) + 1);
-												} else {
-													this.merotelyCandidates.put(cellNb, 1);
-												}
+												cell.incrementMerotelyCount();
 											}
 										}
 									}
@@ -243,79 +268,9 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 							}
 						}
 					}
-					soc.putGeometry(channel, cellNb, frame, geometry);
+					cell.putGeometry(channel, frame, geometry);
 				}
 			}
 		}
-	}
-
-	/**
-	 * the main, use one new thread just in order to free acquisition thread to
-	 * acquire images as soon as possible
-	 */
-	@Override
-	public FloatProcessor call() throws Exception {
-		soc.addSpotContainerOf(channel);
-		soc.addFeatureContainerOf(channel);
-		if (fluoImage.getCalibration().getUnit().equals("cm")) {
-			fluoImage = ImgUtils.unitCmToMicron(fluoImage);
-		}
-		// TODO project or not. Do not project if do 3D detection
-		ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
-		zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
-		zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
-		if (frame == 0) {
-			ResultsTable resultTable = new ResultsTable();
-			Analyzer analyzer = new Analyzer(zProjectedFluoImg,
-					Measurements.MEAN + Measurements.STD_DEV + Measurements.MIN_MAX, resultTable);
-			Iterator<Cell> it = soc.iterator();
-			while (it.hasNext()) {
-				zProjectedFluoImg.setRoi(it.next().getCellShapeRoi());
-				analyzer.measure();
-				zProjectedFluoImg.deleteRoi();
-			}
-			resultTable.show(channel + " 0 frame fluo measure");
-		}
-		// Call trackmate to detect spots
-		MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
-
-		Model model = trackmate.doDetection(true);
-
-		if (frame == 0) {
-			soc.setTrackmateModel(model);
-			SelectionModel selectionModel = new SelectionModel(model);
-			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
-			displayer.render();
-			displayer.refresh();
-		}
-
-		collection = getNBestqualitySpots(model.getSpots());
-		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
-
-		int nThread = Runtime.getRuntime().availableProcessors();
-		ExecutorService es = Executors.newFixedThreadPool(nThread);
-		int nbCell = soc.size();
-		final int[] nbOfCellEachThread = new int[2];
-		nbOfCellEachThread[0] = (int) nbCell / nThread;
-		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
-		Future<?> future = null;
-		for (int i = 0; i < nThread; i++) {
-			// analyze every subset of cell
-			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, factors, merotelyCandidates));
-		}
-		es.shutdown();
-		try {
-			future.get();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		} catch (ExecutionException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			es.awaitTermination(3, TimeUnit.MINUTES);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return zProjectedFluoImg.getProcessor().convertToFloatProcessor();
 	}
 }

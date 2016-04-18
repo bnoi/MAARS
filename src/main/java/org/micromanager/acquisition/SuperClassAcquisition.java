@@ -34,7 +34,7 @@ public class SuperClassAcquisition {
 	private CMMCore mmc;
 	private MaarsParameters parameters;
 	private String channelGroup;
-	private String saveDir;
+	private String baseSaveDir;
 
 	/**
 	 * Constructor :
@@ -56,11 +56,11 @@ public class SuperClassAcquisition {
 		this.mmc = mmc;
 		this.parameters = parameters;
 		this.channelGroup = parameters.getChannelGroup();
-		this.saveDir = parameters.getSavingPath() + "/movie_X" + positionX + "_Y" + positionY;
+		
 	}
 	
-	public String getSaveDir(){
-		return this.saveDir;
+	public void setBaseSaveDir(String baseSaveDir){
+		this.baseSaveDir = baseSaveDir;
 	}
 
 	/**
@@ -172,14 +172,13 @@ public class SuperClassAcquisition {
 		liveWindow.setDisplaySettings(displayBuilder.build());
 	};
 
-	public void save(List<Image> listImg, int frame, String channelName, double step) {
-		String pathToMovie = null;
+	public void save(List<Image> listImg, int frame, String channelName, double step, String pathToMovie) {
 		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
 			// initialize parameters for FLUO Acquisitions
-			pathToMovie = saveDir + "_FLUO/" + frame + "_" + channelName;
+			pathToMovie = baseSaveDir + "_FLUO/" + frame + "_" + channelName;
 		} else {
 			// initialize parameters for Bright-Field Acquisitions
-			pathToMovie = saveDir;
+			pathToMovie = baseSaveDir;
 		}
 		Datastore ds = createDataStore(pathToMovie);
 		setDatastoreMetadata(ds, channelName, String.valueOf(frame), step);

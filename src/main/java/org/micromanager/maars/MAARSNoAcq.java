@@ -3,13 +3,10 @@ package org.micromanager.maars;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,17 +15,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
-import org.micromanager.cellstateanalysis.GetMitosis;
 import org.micromanager.cellstateanalysis.SetOfCells;
-import org.micromanager.resultSaver.MAARSImgSaver;
+import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.AnalysisFactory;
 import org.micromanager.utils.FileUtils;
-import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
-import ij.plugin.frame.RoiManager;
 import ij.process.FloatProcessor;
 import mmcorej.CMMCore;
 
@@ -42,18 +36,16 @@ public class MAARSNoAcq implements Runnable {
 	private CMMCore mmc;
 	private MaarsParameters parameters;
 	private SetOfCells soc;
-	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
+	private String pathToSegDir;
+	private String pathToFluoDir;
+	private ArrayList<String> arrayChannels = new ArrayList<String>();
+	private AnalysisFactory factory;
 
-	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
+	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters) {
 		this.mmc = mmc;
 		this.parameters = parameters;
-		this.soc = soc;
-		this.merotelyCandidates = new ConcurrentHashMap<Integer, Integer>();
-		RoiManager manager = RoiManager.getInstance();
-		if (manager != null) {
-			manager.removeAll();
-			manager.reset();
-		}
+		this.soc = new SetOfCells();
+		factory = new AnalysisFactory(parameters.getAnalaysisOptions());
 	}
 
 	@Override
@@ -66,16 +58,13 @@ public class MAARSNoAcq implements Runnable {
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
 
 		ImagePlus mergedImg = new ImagePlus();
-		int frameCounter = 0;
-		String pathToFluoDir = null;
-		ArrayList<String> arrayChannels = new ArrayList<String>();
 		for (int i = 0; i < explo.length(); i++) {
 			IJ.log("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
-			String pathToSegDir = FileUtils
-					.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "/");
-			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "MMStack.ome.tif");
+			this.pathToSegDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos);
+			pathToFluoDir = pathToSegDir + "_FLUO/";
+			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "/MMStack.ome.tif");
 			ImagePlus segImg = null;
 			try {
 				segImg = IJ.openImage(pathToSegMovie);
@@ -89,13 +78,13 @@ public class MAARSNoAcq implements Runnable {
 			if (ms.roiDetected()) {
 				soc.reset();
 				// from Roi.zip initialize a set of cell
-				soc.loadCells(xPos, yPos);
+				soc.loadCells(pathToSegDir);
 				// Get the focus slice of BF image
 				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				Calibration bfImgCal = segImg.getCalibration();
 				// ----------------start acquisition and analysis --------//
 				try {
-					PrintStream ps = new PrintStream(pathToSegDir + "CellStateAnalysis.LOG");
+					PrintStream ps = new PrintStream(pathToSegDir + "/CellStateAnalysis.LOG");
 					curr_err = System.err;
 					curr_out = System.err;
 					System.setOut(ps);
@@ -103,7 +92,6 @@ public class MAARSNoAcq implements Runnable {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-				pathToFluoDir = parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos + "_FLUO/";
 				String[] listAcqNames = new File(pathToFluoDir).list();
 				String pattern = "(\\d+)(_)(\\w+)";
 				ArrayList<Integer> arrayImgFrames = new ArrayList<Integer>();
@@ -119,7 +107,6 @@ public class MAARSNoAcq implements Runnable {
 						}
 					}
 				}
-				frameCounter = arrayImgFrames.size();
 				Collections.sort(arrayImgFrames);
 				int nThread = Runtime.getRuntime().availableProcessors();
 				es = Executors.newFixedThreadPool(nThread);
@@ -128,17 +115,16 @@ public class MAARSNoAcq implements Runnable {
 				for (int frameInd = 0; frameInd < arrayImgFrames.size(); frameInd++) {
 					Map<String, Future<FloatProcessor>> channelsInFrame = new HashMap<String, Future<FloatProcessor>>();
 					for (String channel : arrayChannels) {
+						factory.addChannel(channel);
 						int current_frame = arrayImgFrames.get(frameInd);
 						IJ.log("Analysing channel " + channel + "_" + current_frame);
-						String[] id = new String[] { xPos, yPos, String.valueOf(current_frame), channel };
-						soc.addAcqID(id);
 						String pathToFluoMovie = pathToFluoDir + current_frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 								Double.parseDouble(parameters.getChSpotRaius(channel)),
 								Double.parseDouble(parameters.getChQuality(channel)), Integer.valueOf(current_frame),
-								merotelyCandidates));
+								factory));
 						channelsInFrame.put(channel, future);
 					}
 					futureSet.add(channelsInFrame);
@@ -168,38 +154,10 @@ public class MAARSNoAcq implements Runnable {
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
-		// TODO add a textfield in gui to specify this parameter
-		double laggingThreshold = 120;
-		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+
 		if (soc.size() != 0) {
 			long startWriting = System.currentTimeMillis();
-			soc.saveSpots();
-			soc.saveGeometries();
-			// TODO maybe to be shorten?
-			Boolean splitChannel = true;
-			mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-			MAARSImgSaver saver = new MAARSImgSaver(pathToFluoDir, mergedImg);
-			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = ImgUtils
-					.cropMergedImpWithRois(soc.getCellArray(), mergedImg, splitChannel);
-			saver.saveCroppedImgs(croppedImgSet);
-			String croppedImgDir = saver.getCroppedImgDir();
-			// TODO a new static class to find lagging chromosomes
-			for (int nb : merotelyCandidates.keySet()) {
-				int abnormalStateTimes = this.merotelyCandidates.get(nb);
-				if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
-					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
-							.format(Calendar.getInstance().getTime());
-					IJ.log(timeStamp + " : " + nb + "_" + frameCounter + "_"
-							+ abnormalStateTimes * timeInterval / 1000);
-					if (splitChannel) {
-						IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
-					} else {
-						IJ.openImage(croppedImgDir + nb + "_merged.tif").show();
-					}
-				}
-			}
-			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
-			saver.exportChannelBtf(splitChannel, arrayChannels);
+			MAARS.saveAll(soc.getCellArray(), parameters, mergedImg, pathToFluoDir, arrayChannels);
 			// MAARS.mailNotify();
 			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");
