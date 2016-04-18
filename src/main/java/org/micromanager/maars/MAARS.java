@@ -234,10 +234,6 @@ public class MAARS implements Runnable {
 				soc.reset();
 				soc.loadCells(xPos, yPos);
 				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
-				// Get the focus slice of BF image
-				// ImagePlus focusImage = new ImagePlus(segImg.getShortTitle(),
-				// segImg.getStack().getProcessor(ms.getSegPombeParam().getFocusSlide()));
-				// focusImage.setCalibration(bfImgCal);
 				// ----------------start acquisition and analysis --------//
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
 				try {

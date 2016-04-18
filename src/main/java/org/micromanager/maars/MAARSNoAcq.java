@@ -69,7 +69,6 @@ public class MAARSNoAcq implements Runnable {
 		int frameCounter = 0;
 		String pathToFluoDir = null;
 		ArrayList<String> arrayChannels = new ArrayList<String>();
-
 		for (int i = 0; i < explo.length(); i++) {
 			IJ.log("x : " + explo.getX(i) + " y : " + explo.getY(i));
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
@@ -88,6 +87,7 @@ public class MAARSNoAcq implements Runnable {
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
+				soc.reset();
 				// from Roi.zip initialize a set of cell
 				soc.loadCells(xPos, yPos);
 				// Get the focus slice of BF image
