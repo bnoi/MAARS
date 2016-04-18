@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -186,38 +187,41 @@ public class MAARS implements Runnable {
 		}
 	}
 
-	public static void saveAll(ArrayList<Cell> cellArray, MaarsParameters parameters, ImagePlus mergedImg,
+	public static void saveAll(SetOfCells soc, MaarsParameters parameters, ImagePlus mergedImg,
 			String pathToFluoDir, ArrayList<String> arrayChannels) {
 		// TODO add a textfield in gui to specify this parameter
 		double laggingThreshold = 120;
+		Boolean splitChannel = true;
 		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-		for (Cell cell : cellArray) {
+		Iterator<Cell> cellItr = soc.iterator();
+		while (cellItr.hasNext()) {
+			Cell cell = cellItr.next();
 			int cellNb = cell.getCellNumber();
-			MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir, cell);
-			spotSaver.save();
-			MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir, cell);
-			geoSaver.save();
-			// TODO maybe to be shorten?
-			Boolean splitChannel = true;
-			MAARSImgSaver saver = new MAARSImgSaver(pathToFluoDir, mergedImg);
-			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = ImgUtils.cropMergedImpWithRois(cellArray,
-					mergedImg, splitChannel);
-			saver.saveCroppedImgs(croppedImgSet);
-			String croppedImgDir = saver.getCroppedImgDir();
-			// TODO a new static class to find lagging chromosomes
-
-			int abnormalStateTimes = cell.getMerotelyCount();
-			if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
-				String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
-				IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
-				if (splitChannel) {
-					IJ.openImage(croppedImgDir + cellNb + "_GFP.tif").show();
-				} else {
-					IJ.openImage(croppedImgDir + cellNb + "_merged.tif").show();
-				}
-			}
-			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
-			saver.exportChannelBtf(splitChannel, arrayChannels);
+			IJ.log(""+ cellNb);
+			IJ.log(cell.getNbOfSpots("CFP", 0) + "");
+//			MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir, cell);
+//			spotSaver.save();
+//			MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir, cell);
+//			geoSaver.save();
+//			MAARSImgSaver saver = new MAARSImgSaver(pathToFluoDir, mergedImg);
+//			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = ImgUtils.cropMergedImpWithRois(cellArray,
+//					mergedImg, splitChannel);
+//			saver.saveCroppedImgs(croppedImgSet);
+//			String croppedImgDir = saver.getCroppedImgDir();
+//			// TODO a new static class to find lagging chromosomes
+//			int abnormalStateTimes = cell.getMerotelyCount();
+//			// TODO maybe to be shorten?
+//			if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
+//				String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
+//				IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
+//				if (splitChannel) {
+//					IJ.openImage(croppedImgDir + cellNb + "_GFP.tif").show();
+//				} else {
+//					IJ.openImage(croppedImgDir + cellNb + "_merged.tif").show();
+//				}
+//			}
+//			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
+//			saver.exportChannelBtf(splitChannel, arrayChannels);
 		}
 	}
 
@@ -274,7 +278,7 @@ public class MAARS implements Runnable {
 					pathToSegDir, true);
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
-			ms.segmentation(segImg);
+			ms.segmentation(segImg, this.pathToSegDir);
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
 				soc.reset();
@@ -283,7 +287,7 @@ public class MAARS implements Runnable {
 				// ----------------start acquisition and analysis --------//
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
 				try {
-					PrintStream ps = new PrintStream(ms.getPathToSegDir() + "CellStateAnalysis.LOG");
+					PrintStream ps = new PrintStream(this.pathToSegDir + "/CellStateAnalysis.LOG");
 					curr_err = System.err;
 					curr_out = System.err;
 					System.setOut(ps);
@@ -346,7 +350,7 @@ public class MAARS implements Runnable {
 				if (soc.size() != 0 && do_analysis) {
 					long startWriting = System.currentTimeMillis();
 					ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-					MAARS.saveAll(soc.getCellArray(), parameters, mergedImg, pathToFluoDir, arrayChannels);
+					MAARS.saveAll(soc, parameters, mergedImg, pathToFluoDir, arrayChannels);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}

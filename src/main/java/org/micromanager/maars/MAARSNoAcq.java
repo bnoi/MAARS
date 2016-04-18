@@ -74,7 +74,7 @@ public class MAARSNoAcq implements Runnable {
 			}
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
-			ms.segmentation(segImg);
+			ms.segmentation(segImg, this.pathToSegDir);
 			if (ms.roiDetected()) {
 				soc.reset();
 				// from Roi.zip initialize a set of cell
@@ -157,7 +157,7 @@ public class MAARSNoAcq implements Runnable {
 
 		if (soc.size() != 0) {
 			long startWriting = System.currentTimeMillis();
-			MAARS.saveAll(soc.getCellArray(), parameters, mergedImg, pathToFluoDir, arrayChannels);
+			MAARS.saveAll(soc, parameters, mergedImg, pathToFluoDir, arrayChannels);
 			// MAARS.mailNotify();
 			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 					+ " sec for writing results");

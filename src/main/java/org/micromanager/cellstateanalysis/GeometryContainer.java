@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class GeometryContainer {
-	private HashMap<String, HashMap<Integer, HashMap<String, Object>>> geosOfCells;
+	private HashMap<String, HashMap<Integer, HashMap<String, Object>>> geosOfCells = null;
 	private Set<String> headerSet;
 	private int geoHeaderLen = 0;
 

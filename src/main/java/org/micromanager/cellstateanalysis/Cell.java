@@ -8,6 +8,7 @@ import org.micromanager.utils.ImgUtils;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
+import ij.IJ;
 import ij.gui.Roi;
 
 /**
@@ -27,7 +28,7 @@ public class Cell {
 	private String[] measurements;
 	private SpotsContainer spotContainer;
 	private GeometryContainer geoContainer;
-	public static AtomicInteger merotelyCounter = new AtomicInteger(-1);
+	public static AtomicInteger merotelyCounter = new AtomicInteger(0);
 
 	/**
 	 * @param roiCellShape
