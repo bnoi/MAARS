@@ -25,7 +25,6 @@ import javax.swing.SwingConstants;
 
 import mmcorej.CMMCore;
 
-import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 
 import ij.IJ;
@@ -375,13 +374,12 @@ public class MaarsMainDialog implements ActionListener {
 					}
 				};
 				saveParameters();
-				SetOfCells soc = new SetOfCells(parameters.getSavingPath());
 				Thread th = null;
 				if (withOutAcqChk.isSelected()) {
-					th = new Thread(new MAARSNoAcq(mmc, parameters, soc));
+					th = new Thread(new MAARSNoAcq(mmc, parameters));
 				} else {
 					if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-						th = new Thread(new MAARS(mm, mmc, parameters, soc));
+						th = new Thread(new MAARS(mm, mmc, parameters));
 					}
 				}
 				th.setUncaughtExceptionHandler(h);

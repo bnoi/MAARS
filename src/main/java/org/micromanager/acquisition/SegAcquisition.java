@@ -21,16 +21,16 @@ public class SegAcquisition extends SuperClassAcquisition {
 		this.step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 	}
 
-	public ImagePlus acquire(String channelName, double zFocus, Boolean save) {
+	public ImagePlus acquire(String channelName, double zFocus, String pathToSegMovie, Boolean save) {
 		int frame = 0;
 		List<Image> listImg = super.acquire(frame, channelName, zFocus);
 		if (save){
-			super.save(listImg, frame, channelName, step);
+			super.save(listImg, frame, channelName, step, pathToSegMovie);
 		}
 		return super.convert2Imp(listImg, channelName, step); 
 	}
 	
-	public String getSaveDir(){
-		return super.getSaveDir();
+	public void setBaseSaveDir(String baseSaveDir){
+		super.setBaseSaveDir(baseSaveDir);
 	}
 }

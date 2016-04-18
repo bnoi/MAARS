@@ -1,7 +1,13 @@
 package org.micromanager.cellstateanalysis;
 
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.micromanager.utils.ImgUtils;
 
+import fiji.plugin.trackmate.Model;
+import fiji.plugin.trackmate.Spot;
 import ij.gui.Roi;
 
 /**
@@ -19,6 +25,9 @@ public class Cell {
 			PERIMETER = 8, MAJOR = 9, MINOR = 10, ANGLE = 11, CIRCULARITY = 12, ASPECT_RATIO = 13, ROUNDNESS = 14,
 			SOLIDITY = 15;
 	private String[] measurements;
+	private SpotsContainer spotContainer;
+	private GeometryContainer geoContainer;
+	public static AtomicInteger merotelyCounter = new AtomicInteger(-1);
 
 	/**
 	 * @param roiCellShape
@@ -53,5 +62,50 @@ public class Cell {
 
 	public double get(int headerIndex) {
 		return Double.parseDouble(measurements[headerIndex]);
+	}
+
+	public void addChannel(String channel) {
+		spotContainer.addChannel(channel);
+		geoContainer.addChannel(channel);
+	}
+
+	public void putSpot(String channel, int frame, Spot s) {
+		spotContainer.putSpot(channel, frame, s);
+	}
+
+	public int getNbOfSpots(String channel, int frame) {
+		return spotContainer.getNbOfSpot(channel, frame);
+	}
+
+	public Iterable<Spot> getSpotsInFrame(String channel, int frame) {
+		return spotContainer.getSpotsInFrame(channel, frame);
+	}
+
+	public void removeSpot(String channel, int frame, Spot s) {
+		spotContainer.removeSpot(channel, frame, s);
+	}
+	
+	public void setTrackmateModel(Model model){
+		spotContainer.setTrackmateModel(model);
+	}
+	
+	public SpotsContainer getSpotContainer(){
+		return this.spotContainer;
+	}
+	
+	public void putGeometry(String channel, int frame, HashMap<String, Object> geometries){
+		geoContainer.putGeometry(channel, frame, geometries);
+	}
+	
+	public GeometryContainer getGeometryContainer(){
+		return this.geoContainer;
+	}
+
+	public void incrementMerotelyCount(){
+		merotelyCounter.incrementAndGet();
+	}
+	
+	public int getMerotelyCount(){
+		return merotelyCounter.get();
 	}
 }

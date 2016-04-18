@@ -11,7 +11,6 @@ import fiji.plugin.trackmate.Spot;
 
 public class ComputeGeometry {
 	// Names of parameters
-	public final static String PHASE = "Phase";
 	public final static String NbOfSpotDetected = "NbOfSpotDetected";
 	public final static String SpAngToMaj = "SpAngToMaj";
 	public final static String SpLength = "SpLength";

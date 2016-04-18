@@ -24,13 +24,20 @@ import javax.mail.internet.MimeMessage;
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
 import org.micromanager.acquisition.SegAcquisition;
+import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
+import org.micromanager.cellstateanalysis.GeometryContainer;
 import org.micromanager.cellstateanalysis.GetMitosis;
 import org.micromanager.cellstateanalysis.SetOfCells;
+import org.micromanager.cellstateanalysis.SpotsContainer;
+import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.AnalysisFactory;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
+import org.micromanager.resultSaver.MAARSGeometrySaver;
 import org.micromanager.resultSaver.MAARSImgSaver;
+import org.micromanager.resultSaver.MAARSSpotsSaver;
+import org.micromanager.utils.FileUtils;
 import org.micromanager.utils.ImgUtils;
 
 import ij.IJ;
@@ -50,8 +57,10 @@ public class MAARS implements Runnable {
 	private MMStudio mm;
 	private CMMCore mmc;
 	private MaarsParameters parameters;
+	private String pathToSegDir;
+	private String pathToFluoDir;
 	private SetOfCells soc;
-	private ConcurrentHashMap<Integer, Integer> merotelyCandidates;
+	private AnalysisFactory factory;
 
 	/**
 	 * Constructor
@@ -60,12 +69,12 @@ public class MAARS implements Runnable {
 	 * @param mmc
 	 * @param parameters
 	 */
-	public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SetOfCells soc) {
+	public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 		this.mmc = mmc;
 		this.parameters = parameters;
-		this.soc = soc;
+		this.soc = new SetOfCells();
 		this.mm = mm;
-		this.merotelyCandidates = new ConcurrentHashMap<Integer, Integer>();
+		factory = new AnalysisFactory(parameters.getAnalaysisOptions());
 	}
 
 	/**
@@ -177,6 +186,41 @@ public class MAARS implements Runnable {
 		}
 	}
 
+	public static void saveAll(ArrayList<Cell> cellArray, MaarsParameters parameters, ImagePlus mergedImg,
+			String pathToFluoDir, ArrayList<String> arrayChannels) {
+		// TODO add a textfield in gui to specify this parameter
+		double laggingThreshold = 120;
+		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+		for (Cell cell : cellArray) {
+			int cellNb = cell.getCellNumber();
+			MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir, cell);
+			spotSaver.save();
+			MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir, cell);
+			geoSaver.save();
+			// TODO maybe to be shorten?
+			Boolean splitChannel = true;
+			MAARSImgSaver saver = new MAARSImgSaver(pathToFluoDir, mergedImg);
+			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = ImgUtils.cropMergedImpWithRois(cellArray,
+					mergedImg, splitChannel);
+			saver.saveCroppedImgs(croppedImgSet);
+			String croppedImgDir = saver.getCroppedImgDir();
+			// TODO a new static class to find lagging chromosomes
+
+			int abnormalStateTimes = cell.getMerotelyCount();
+			if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
+				String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
+				IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
+				if (splitChannel) {
+					IJ.openImage(croppedImgDir + cellNb + "_GFP.tif").show();
+				} else {
+					IJ.openImage(croppedImgDir + cellNb + "_merged.tif").show();
+				}
+			}
+			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
+			saver.exportChannelBtf(splitChannel, arrayChannels);
+		}
+	}
+
 	@Override
 	public void run() {
 		// Start time
@@ -212,6 +256,8 @@ public class MAARS implements Runnable {
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			IJ.log("Current position : x_" + xPos + " y_" + yPos);
+			this.pathToSegDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos);
+			this.pathToFluoDir = pathToSegDir + "_FLUO/";
 			// autofocus(mm, mmc);
 			double zFocus = 0;
 			String focusDevice = mmc.getFocusDevice();
@@ -225,14 +271,14 @@ public class MAARS implements Runnable {
 			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
 			IJ.log("Acquire bright field image...");
 			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus,
-					true);
+					pathToSegDir, true);
 			// --------------------------segmentation-----------------------------//
 			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
 			ms.segmentation(segImg);
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
 				soc.reset();
-				soc.loadCells(xPos, yPos);
+				soc.loadCells(pathToSegDir);
 				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				// ----------------start acquisition and analysis --------//
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
@@ -258,15 +304,13 @@ public class MAARS implements Runnable {
 					while (System.currentTimeMillis() - startTime <= timeLimit) {
 						double beginAcq = System.currentTimeMillis();
 						for (String channel : arrayChannels) {
-							String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-							soc.addAcqID(id);
-							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, saveFilm);
+							factory.addChannel(channel);
+							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, pathToFluoDir, saveFilm);
 							if (do_analysis) {
 								es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
 										Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 										Double.parseDouble(parameters.getChSpotRaius(channel)),
-										Double.parseDouble(parameters.getChQuality(channel)), frame,
-										merotelyCandidates));
+										Double.parseDouble(parameters.getChQuality(channel)), frame, factory));
 							}
 						}
 						frame++;
@@ -287,58 +331,26 @@ public class MAARS implements Runnable {
 				} else {
 					// being static acquisition
 					for (String channel : arrayChannels) {
-						String[] id = new String[] { xPos, yPos, String.valueOf(frame), channel };
-						soc.addAcqID(id);
-						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, saveFilm);
+						factory.addChannel(channel);
+						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, pathToFluoDir, saveFilm);
 						if (do_analysis) {
 							es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 									Double.parseDouble(parameters.getChSpotRaius(channel)),
-									Double.parseDouble(parameters.getChQuality(channel)), frame, merotelyCandidates));
+									Double.parseDouble(parameters.getChQuality(channel)), frame, factory));
 						}
 					}
 				}
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
-				// TODO add a textfield in gui to specify this parameter
-				double laggingThreshold = 120;
 				if (soc.size() != 0 && do_analysis) {
 					long startWriting = System.currentTimeMillis();
-					soc.saveSpots();
-					soc.saveGeometries();
-					// TODO add a textfield in gui to specify this parameter
-					Boolean splitChannel = true;
-					String fluoDir = segAcq.getSaveDir() + "_FLUO";
-					ImagePlus fieldImg = ImgUtils.loadFullFluoImgs(fluoDir);
-					// save cropped cells
-					HashMap<Integer, HashMap<String, ImagePlus>> croppedImps = ImgUtils
-							.cropMergedImpWithRois(soc.getCellArray(), fieldImg, splitChannel);
-					MAARSImgSaver saver = new MAARSImgSaver(fluoDir, fieldImg);
-					saver.saveCroppedImgs(croppedImps);
-					String croppedImgDir = saver.getCroppedImgDir();
-					// TODO a new static class to find lagging chromosomes
-
-					for (int nb : merotelyCandidates.keySet()) {
-						int abnormalStateTimes = this.merotelyCandidates.get(nb);
-						if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
-							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
-									.format(Calendar.getInstance().getTime());
-							IJ.log(timeStamp + " : " + nb + "_" + frame + "_"
-									+ abnormalStateTimes * timeInterval / 1000);
-							if (splitChannel) {
-								IJ.openImage(croppedImgDir + nb + "_GFP.tif").show();
-							} else {
-								IJ.openImage(croppedImgDir + nb + "_merged.tif").show();
-							}
-						}
-					}
-					//GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
-					saver.exportChannelBtf(splitChannel, arrayChannels);
+					ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
+					MAARS.saveAll(soc.getCellArray(), parameters, mergedImg, pathToFluoDir, arrayChannels);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}
 				mailNotify();
-				this.merotelyCandidates.clear();
 			}
 		}
 		mmc.setAutoShutter(true);

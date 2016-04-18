@@ -9,6 +9,8 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -62,6 +64,10 @@ import org.jdom2.output.XMLOutputter;
  *    +-----> TIME_LIMIT
  *    +-----> TIME_INTERVAL
  *    +-----> DO_ANALYSIS
+ *    +-----> ANALYSIS_OPTIONS
+ *    		|
+ *    		+-----> DO_MITOSIS_RATIO
+ *    		+----->
  *    
  * GENERAL_ACQUISITION_PARAMETERS
  *    |
@@ -111,6 +117,12 @@ public class MaarsParameters {
 	public static final String TIME_LIMIT = "TIME_LIMIT";
 	public static final String SAVING_PATH = "SAVING_PATH";
 	public static final String DO_ANALYSIS = "DO_ANALYSIS";
+	public static final String ANALYSIS_OPTIONS = "ANALYSIS_OPTIONS";
+	public static final String DO_MITOSIS_RATIO = "DO_MITOSIS_RATIO";
+	public static final String DO_INTERPHASE_RATIO = "DO_INTERPHASE_RATIO";
+	public static final String DO_METAPHASE_RATIO = "DO_METAPHASE_RATIO";
+	public static final String DO_FIND_MEROTELY = "DO_FIND_MEROTELY";
+	
 
 	public static final String SHUTTER = "SHUTTER";
 	public static final String COLOR = "COLOR";
@@ -147,7 +159,7 @@ public class MaarsParameters {
 		final SAXBuilder sb = new SAXBuilder();
 		try {
 			doc = sb.build(defaultParametersStream);
-		}  catch (IOException | JDOMException e) {
+		} catch (IOException | JDOMException e) {
 			e.printStackTrace();
 		}
 		root = (Element) doc.getContent(0);
@@ -319,7 +331,7 @@ public class MaarsParameters {
 	public String getChQuality(String ch) {
 		return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChildText(QUALITY);
 	}
-	
+
 	/**
 	 * 
 	 * @return get channels used for fluo analysis
@@ -402,10 +414,9 @@ public class MaarsParameters {
 	 * @return SPOT_RADIUS of corresponding channel
 	 */
 	public void setChQuality(String ch, String quality) {
-		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(QUALITY)
-				.setText(quality);
+		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(QUALITY).setText(quality);
 	}
-	
+
 	/**
 	 * set channels to USING channel
 	 * 
@@ -413,6 +424,18 @@ public class MaarsParameters {
 	 */
 	public void setUsingChannels(String channels) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(USING).setText(channels);
+	}
+
+	public ArrayList<String> getAnalaysisOptions() {
+		ArrayList<String> toDoOptions = new ArrayList<String>();
+		List<Element> allOptions = root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(MaarsParameters.ANALYSIS_OPTIONS)
+				.getChildren();
+		for (Element att : allOptions) {
+			if (Boolean.parseBoolean(att.getText())) {
+				toDoOptions.add(att.getName());
+			}
+		}
+		return toDoOptions;
 	}
 
 }
