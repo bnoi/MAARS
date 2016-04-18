@@ -20,12 +20,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	private int iteratorCount = 0;
 	private ArrayList<Cell> cellArray;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param savingPath
-	 *            :root directory of acquisitions
-	 */
 	public SetOfCells() {
 	}
 
@@ -37,8 +31,8 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		IJ.log("Loading Cells");
 		Roi[] roiArray = getRoisAsArray(pathToSegDir + "/ROI.zip");
 		cellArray = new ArrayList<Cell>();
-		for (int i = 0; i < roiArray.length; i++) {
-			cellArray.add(i, new Cell(roiArray[i], i));
+		for (int i = 1; i <= roiArray.length; i++) {
+			cellArray.add(i-1, new Cell(roiArray[i-1], i));
 		}
 		IJ.log("Done.");
 	}
@@ -66,7 +60,17 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * @return Cell corresponding to index
 	 */
 	public Cell getCell(int index) {
-		return cellArray.get(index);
+		return this.cellArray.get(index);
+	}
+	
+	/**
+	 * 
+	 * @param index
+	 * @param cell
+	 */
+	public void updateCell(int index, Cell cell){
+		IJ.log("Reseted");
+		this.cellArray.set(index, cell);
 	}
 
 	/**
@@ -84,17 +88,13 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 */
 	public void setRoiMeasurementIntoCells(ResultsTable rt) {
 		for (Cell c : cellArray) {
-			c.setRoiMeasurement(rt.getRowAsString(c.getCellNumber()));
+			c.setRoiMeasurement(rt.getRowAsString(c.getCellNumber()-1));
 		}
 	}
 
 	public void reset() {
 		this.iteratorCount = 0;
 		this.cellArray = null;
-	}
-
-	public ArrayList<Cell> getCellArray() {
-		return this.cellArray;
 	}
 
 	// iterator related

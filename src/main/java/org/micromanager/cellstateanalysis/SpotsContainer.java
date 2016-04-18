@@ -7,9 +7,10 @@ import java.util.Set;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import ij.IJ;
 
 public class SpotsContainer {
-	private HashMap<String, SpotCollection> spotsInCell;
+	private HashMap<String, SpotCollection> spotsInCell = null;
 	private Model trackmateModel;
 
 	public SpotsContainer() {
@@ -37,6 +38,7 @@ public class SpotsContainer {
 	 * @param spot
 	 */
 	public void putSpot(String channel, int frame, Spot spot) {
+		IJ.log("added spot");
 		spotsInCell.get(channel).add(spot, frame);
 	}
 

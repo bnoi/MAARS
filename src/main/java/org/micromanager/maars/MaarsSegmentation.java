@@ -18,7 +18,6 @@ import ij.measure.ResultsTable;
  */
 public class MaarsSegmentation {
 	private MaarsParameters parameters;
-	private String pathToSegDir;
 	private SegPombeParameters segPombeParam;
 	private boolean roiDetected = false;
 	private ResultsTable rt;
@@ -36,8 +35,6 @@ public class MaarsSegmentation {
 	public MaarsSegmentation(MaarsParameters parameters, String positionX, String positionY) {
 
 		this.parameters = parameters;
-		this.pathToSegDir = FileUtils
-				.convertPath(parameters.getSavingPath() + "/movie_X" + positionX + "_Y" + positionY + "/");
 	}
 
 	/**
@@ -46,7 +43,7 @@ public class MaarsSegmentation {
 	 * @param img
 	 *            : image to segmente
 	 */
-	public void segmentation(ImagePlus img) {
+	public void segmentation(ImagePlus img, String pathToSegDir) {
 
 		IJ.log("Prepare parameters for segmentation...");
 		segPombeParam = new SegPombeParameters();
@@ -113,10 +110,6 @@ public class MaarsSegmentation {
 	 */
 	public boolean roiDetected() {
 		return this.roiDetected;
-	}
-	
-	public String getPathToSegDir() {
-		return pathToSegDir;
 	}
 
 	public SegPombeParameters getSegPombeParam() {

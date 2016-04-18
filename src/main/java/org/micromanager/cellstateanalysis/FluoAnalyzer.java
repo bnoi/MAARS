@@ -21,6 +21,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
@@ -146,7 +147,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 			e1.printStackTrace();
 		}
 		try {
-			es.awaitTermination(3, TimeUnit.MINUTES);
+			es.awaitTermination(10, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -186,6 +187,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(collection.iterable(false));
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
+				IJ.log(j + "_" + cell.getCellNumber() + "_" + begin + "_" + end );
 				cell.setTrackmateModel(model);
 				cell.addChannel(channel);
 				Roi tmpRoi = null;
@@ -269,6 +271,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 						}
 					}
 					cell.putGeometry(channel, frame, geometry);
+//					soc.updateCell(j, cell);
 				}
 			}
 		}
