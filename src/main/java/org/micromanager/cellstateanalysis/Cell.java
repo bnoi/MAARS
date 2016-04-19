@@ -1,7 +1,6 @@
 package org.micromanager.cellstateanalysis;
 
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.micromanager.utils.ImgUtils;
@@ -9,6 +8,7 @@ import org.micromanager.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import ij.IJ;
+import ij.gui.Line;
 import ij.gui.Roi;
 
 /**
@@ -28,6 +28,7 @@ public class Cell {
 	private String[] measurements;
 	private SpotsContainer spotContainer;
 	private GeometryContainer geoContainer;
+	private SpindleContainer spContainer;
 	public static AtomicInteger merotelyCounter = new AtomicInteger(0);
 
 	/**
@@ -39,6 +40,9 @@ public class Cell {
 	public Cell(Roi roiCellShape, int cellNb) {
 		this.cellShapeRoi = roiCellShape;
 		this.cellNumber = cellNb;
+		this.spotContainer = new SpotsContainer();
+		this.geoContainer = new GeometryContainer();
+		this.spContainer = new SpindleContainer();
 	}
 
 	/**
@@ -103,10 +107,15 @@ public class Cell {
 	}
 
 	public void incrementMerotelyCount(){
+		IJ.log("increased");
 		merotelyCounter.incrementAndGet();
 	}
 	
 	public int getMerotelyCount(){
 		return merotelyCounter.get();
+	}
+	
+	public void addSpLine(int frame, Line spLine){
+		this.spContainer.addSpLine(frame, spLine);
 	}
 }

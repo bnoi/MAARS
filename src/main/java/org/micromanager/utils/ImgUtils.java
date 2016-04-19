@@ -174,39 +174,32 @@ public class ImgUtils {
 	 * @param mergedImg
 	 * @return HashMap<cell NB, HashMap<channel, corresponding cropped img>>
 	 */
-	public static HashMap<Integer, HashMap<String, ImagePlus>> cropMergedImpWithRois(ArrayList<Cell> cellArray,
-			ImagePlus mergedImg, Boolean splitChannel) {
-		HashMap<Integer, HashMap<String, ImagePlus>> croppedImgs = new HashMap<Integer, HashMap<String, ImagePlus>>();
+	public static HashMap<String, ImagePlus> cropMergedImpWithRois(Cell cell, ImagePlus mergedImg,
+			Boolean splitChannel) {
+		HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
 		if (splitChannel) {
-			for (int i = 0; i < cellArray.size(); i++) {
-				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cellArray.get(i).getCellShapeRoi());
-				HashMap<String, ImageStack> channelStacks = new HashMap<String, ImageStack>();
-				for (int j = 1; j <= croppedImg.getImageStack().size(); j++) {
-					// TODO problem here
-					String currentLabel = croppedImg.getImageStack().getSliceLabel(j);
-					if (!channelStacks.containsKey(currentLabel)) {
-						channelStacks.put(currentLabel, new ImageStack(croppedImg.getWidth(), croppedImg.getHeight()));
-					}
-					channelStacks.get(currentLabel)
-							.addSlice(croppedImg.getStack().getProcessor(j).convertToFloatProcessor());
+			ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
+			HashMap<String, ImageStack> channelStacks = new HashMap<String, ImageStack>();
+			for (int j = 1; j <= croppedImg.getImageStack().size(); j++) {
+				// TODO problem here
+				String currentLabel = croppedImg.getImageStack().getSliceLabel(j);
+				if (!channelStacks.containsKey(currentLabel)) {
+					channelStacks.put(currentLabel, new ImageStack(croppedImg.getWidth(), croppedImg.getHeight()));
 				}
-				HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
-				for (String channel : channelStacks.keySet()) {
-					ImagePlus croppedSingleChImg = new ImagePlus(channel, channelStacks.get(channel));
-					croppedSingleChImg.setCalibration(mergedImg.getCalibration());
-					croppedSingleChImg.setRoi(croppedImg.getRoi());
-					croppedImgInChannel.put(channel, croppedSingleChImg);
-				}
-				croppedImgs.put(i, croppedImgInChannel);
+				channelStacks.get(currentLabel)
+						.addSlice(croppedImg.getStack().getProcessor(j).convertToFloatProcessor());
+			}
+
+			for (String channel : channelStacks.keySet()) {
+				ImagePlus croppedSingleChImg = new ImagePlus(channel, channelStacks.get(channel));
+				croppedSingleChImg.setCalibration(mergedImg.getCalibration());
+				croppedSingleChImg.setRoi(croppedImg.getRoi());
+				croppedImgInChannel.put(channel, croppedSingleChImg);
 			}
 		} else {
-			for (int i = 0; i < cellArray.size(); i++) {
-				ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cellArray.get(i).getCellShapeRoi());
-				HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
-				croppedImgInChannel.put("merged", croppedImg);
-				croppedImgs.put(i, croppedImgInChannel);
-			}
+			ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
+			croppedImgInChannel.put("merged", croppedImg);
 		}
-		return croppedImgs;
+		return croppedImgInChannel;
 	}
 }

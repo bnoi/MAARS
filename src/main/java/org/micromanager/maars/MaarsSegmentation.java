@@ -3,7 +3,6 @@ package org.micromanager.maars;
 import org.micromanager.segmentPombe.ParametersProcessor;
 import org.micromanager.segmentPombe.SegPombe;
 import org.micromanager.segmentPombe.SegPombeParameters;
-import org.micromanager.utils.FileUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -115,8 +114,8 @@ public class MaarsSegmentation {
 	public SegPombeParameters getSegPombeParam() {
 		return this.segPombeParam;
 	}
-	
-	public ResultsTable getRoiMeasurements(){
+
+	public ResultsTable getRoiMeasurements() {
 		return this.rt;
 	}
 }

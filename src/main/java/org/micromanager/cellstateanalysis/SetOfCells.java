@@ -64,16 +64,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 	
 	/**
-	 * 
-	 * @param index
-	 * @param cell
-	 */
-	public void updateCell(int index, Cell cell){
-		IJ.log("Reseted");
-		this.cellArray.set(index, cell);
-	}
-
-	/**
 	 * total number of cell
 	 * 
 	 * @return
