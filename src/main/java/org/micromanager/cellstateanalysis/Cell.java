@@ -26,7 +26,7 @@ public class Cell {
 	private String[] measurements;
 	private SpotsContainer spotContainer;
 	private GeometryContainer geoContainer;
-	public static AtomicInteger merotelyCounter;
+	private AtomicInteger merotelyCounter = new AtomicInteger(0);;
 
 	/**
 	 * @param roiCellShape
@@ -103,9 +103,6 @@ public class Cell {
 	}
 
 	public void incrementMerotelyCount() {
-		if (merotelyCounter == null) {
-			merotelyCounter = new AtomicInteger(0);
-		}
 		IJ.log("cell " + this.cellNumber + " merotely counter increased to " + merotelyCounter.incrementAndGet());
 	}
 
