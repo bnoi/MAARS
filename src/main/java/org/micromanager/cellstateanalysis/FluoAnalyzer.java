@@ -9,11 +9,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.math3.util.FastMath;
 import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.AnalysisFactory;
+import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.FindMerotely;
 import org.micromanager.utils.ImgUtils;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import fiji.plugin.trackmate.Model;
@@ -21,9 +20,9 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-import ij.IJ;
+
 import ij.ImagePlus;
-import ij.gui.Line;
+
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.process.FloatProcessor;
@@ -116,13 +115,11 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 		// Call trackmate to detect spots
 		MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
 
-		model = trackmate.doDetection(true);
-
+		this.model = trackmate.doDetection(true);
 		if (frame == 0) {
 			SelectionModel selectionModel = new SelectionModel(model);
 			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
 			displayer.render();
-			displayer.refresh();
 		}
 		int nbCell = soc.size();
 		collection = SpotsContainer.getNBestqualitySpots(model.getSpots(), nbCell, maxNbSpot);
@@ -187,9 +184,8 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(collection.iterable(false));
 			for (int j = begin; j < end; j++) {
 				Cell cell = soc.getCell(j);
-				IJ.log(j + "_" + cell.getCellNumber() + "_" + begin + "_" + end );
-				cell.setTrackmateModel(model);
 				cell.addChannel(channel);
+				cell.setTrackmateModel(model);
 				Roi tmpRoi = null;
 				if (factors[0] != 1 || factors[1] != 1) {
 					tmpRoi = cell.rescaleCellShapeRoi(factors);
@@ -222,56 +218,11 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 						calibratedYBase);
 				Iterable<Spot> spotSet = cell.getSpotsInFrame(channel, frame);
 				if (spotSet != null) {
-					// this functions modify directly coordinates of spot in
-					// soc, because it's back-up
-					// cptgeometry.centerSpots(spotSet);
-					int setSize = Iterables.size(spotSet);
 					HashMap<String, Object> geometry = new HashMap<String, Object>();
-					geometry.put(ComputeGeometry.NbOfSpotDetected, setSize);
-					if (setSize == 1) {
-					} else {
-						ArrayList<Spot> poles = cptgeometry.findMostDistant2Spots(spotSet);
-						geometry = cptgeometry.compute(geometry, poles);
-						// TODO to specify in gui that GFP for Kt and cfp for
-						// spbs for exemple
-						if (channel.equals("GFP")) {
-							if (setSize > 2) {
-								double spindleLength = (double) geometry.get(ComputeGeometry.SpLength);
-								// TODO anaphase onset length
-								if (spindleLength > 4) {
-									Line spLine = new Line(
-											(int) FastMath.round(
-													poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-											(int) FastMath.round(
-													poles.get(0).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight),
-											(int) FastMath.round(
-													poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-											(int) FastMath.round(
-													poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
-									Line.setWidth(2 * (int) FastMath.round(radius / fluoImgCal.pixelWidth));
-									for (Spot s : spotSet) {
-										if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
-											// detect metaphase Kt oscillation
-											// or
-											// merotely
-											if (spLine.contains(
-													(int) FastMath.round(
-															s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-													(int) FastMath.round(
-															s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
-												cell.incrementMerotelyCount();
-											}
-										}
-									}
-								} else if (spindleLength > 2) {
-									// TODO list for metaphase and normal
-									// anaphase
-								}
-							}
-						}
-					}
+					cptgeometry.compute(geometry, spotSet);
+					ArrayList<Spot> poles = cptgeometry.getPoles();
+					new FindMerotely(cell, spotSet, geometry, fluoImgCal, poles, radius, frame);
 					cell.putGeometry(channel, frame, geometry);
-//					soc.updateCell(j, cell);
 				}
 			}
 		}

@@ -31,17 +31,15 @@ public class MAARSImgSaver {
 	 * @param croppedImgSet
 	 * @return cropped images base directory
 	 */
-	public void saveCroppedImgs(HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet) {
+	public void saveCroppedImgs(HashMap<String, ImagePlus> croppedImgSet, int cellNb) {
 		if (!new File(croppedImgDir).exists()) {
 			new File(croppedImgDir).mkdirs();
 		}
-		for (int cellNb : croppedImgSet.keySet()) {
-			for (String s : croppedImgSet.get(cellNb).keySet()) {
-				String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + s;
-				ImagePlus imp = croppedImgSet.get(cellNb).get(s);
-				IJ.run(imp, "Enhance Contrast", "saturated=0.35");
-				IJ.saveAsTiff(imp, pathToCroppedImg);
-			}
+		for (String s : croppedImgSet.keySet()) {
+			String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + s;
+			ImagePlus imp = croppedImgSet.get(s);
+			IJ.run(imp, "Enhance Contrast", "saturated=0.35");
+			IJ.saveAsTiff(imp, pathToCroppedImg);
 		}
 	}
 
@@ -55,8 +53,7 @@ public class MAARSImgSaver {
 							mergedFullFieldImg.getHeight());
 					for (int j = 1; j <= mergedFullFieldImg.getImageStack().size(); j++) {
 						if (mergedFullFieldImg.getStack().getSliceLabel(j).equals(channel)) {
-							currentStack
-									.addSlice(mergedFullFieldImg.getStack().getProcessor(j));
+							currentStack.addSlice(mergedFullFieldImg.getStack().getProcessor(j));
 						}
 					}
 					final String macroOpts = "outfile=[" + btfPath
@@ -76,6 +73,6 @@ public class MAARSImgSaver {
 				lociExporter.run(null);
 			}
 		}
-		
+
 	}
 }

@@ -8,9 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -27,10 +25,8 @@ import org.micromanager.acquisition.FluoAcquisition;
 import org.micromanager.acquisition.SegAcquisition;
 import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
-import org.micromanager.cellstateanalysis.GeometryContainer;
 import org.micromanager.cellstateanalysis.GetMitosis;
 import org.micromanager.cellstateanalysis.SetOfCells;
-import org.micromanager.cellstateanalysis.SpotsContainer;
 import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.AnalysisFactory;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
@@ -187,41 +183,41 @@ public class MAARS implements Runnable {
 		}
 	}
 
-	public static void saveAll(SetOfCells soc, MaarsParameters parameters, ImagePlus mergedImg,
-			String pathToFluoDir, ArrayList<String> arrayChannels) {
+	public static void saveAll(SetOfCells soc, MaarsParameters parameters, ImagePlus mergedImg, String pathToFluoDir,
+			ArrayList<String> arrayChannels) {
 		// TODO add a textfield in gui to specify this parameter
 		double laggingThreshold = 120;
 		Boolean splitChannel = true;
 		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-		Iterator<Cell> cellItr = soc.iterator();
-		while (cellItr.hasNext()) {
-			Cell cell = cellItr.next();
+		MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
+		MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
+		MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
+		for (Cell cell : soc) {
+			spotSaver.save(cell);
+			geoSaver.save(cell);
+			HashMap<String, ImagePlus> croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
+			imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
+		}
+		GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
+		imgSaver.exportChannelBtf(splitChannel, arrayChannels);
+		ImagePlus merotelyImp = null;
+		for (Cell cell : soc) {
 			int cellNb = cell.getCellNumber();
-			IJ.log(""+ cellNb);
-			IJ.log(cell.getNbOfSpots("CFP", 0) + "");
-//			MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir, cell);
-//			spotSaver.save();
-//			MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir, cell);
-//			geoSaver.save();
-//			MAARSImgSaver saver = new MAARSImgSaver(pathToFluoDir, mergedImg);
-//			HashMap<Integer, HashMap<String, ImagePlus>> croppedImgSet = ImgUtils.cropMergedImpWithRois(cellArray,
-//					mergedImg, splitChannel);
-//			saver.saveCroppedImgs(croppedImgSet);
-//			String croppedImgDir = saver.getCroppedImgDir();
-//			// TODO a new static class to find lagging chromosomes
-//			int abnormalStateTimes = cell.getMerotelyCount();
-//			// TODO maybe to be shorten?
-//			if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
-//				String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
-//				IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
-//				if (splitChannel) {
-//					IJ.openImage(croppedImgDir + cellNb + "_GFP.tif").show();
-//				} else {
-//					IJ.openImage(croppedImgDir + cellNb + "_merged.tif").show();
-//				}
-//			}
-//			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
-//			saver.exportChannelBtf(splitChannel, arrayChannels);
+			// TODO a new static class to find lagging chromosomes
+			int abnormalStateTimes = cell.getMerotelyCount();
+			// TODO maybe to be shorten?
+			if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
+				String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
+				IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
+				String croppedImgDir = imgSaver.getCroppedImgDir();
+				if (splitChannel) {
+					merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_GFP.tif");
+					merotelyImp.show();
+				} else {
+					merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_merged.tif");
+					merotelyImp.show();
+				}
+			}
 		}
 	}
 

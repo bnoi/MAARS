@@ -3,13 +3,10 @@ package org.micromanager.cellstateanalysis;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Scanner;
 
 import org.apache.commons.math3.util.FastMath;
 import org.micromanager.utils.FileUtils;
-import org.micromanager.utils.ImgUtils;
 
-import ij.IJ;
 import util.opencsv.CSVReader;
 
 public class GetMitosis {
@@ -57,15 +54,17 @@ public class GetMitosis {
 	}
 
 	public static void getMitosisWithPython(String acqDir, String channel) {
-		//TODO find a way to call python with packages
+		// TODO find a way to call python with packages
 		String[] cmd = new String[] { "/home/tong/miniconda3/bin/python",
 				GetMitosis.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "getMitosisFiles.py",
 				acqDir, channel };
 		ProcessBuilder probuilder = new ProcessBuilder(cmd);
-//		probuilder.redirectErrorStream(true);
+		probuilder.redirectErrorStream(true);
 		try {
-			Process process = probuilder.start();
-			IJ.log(new Scanner(process.getInputStream(), "UTF-8").useDelimiter("\\A").next());
+			probuilder.start();
+			// Process process = probuilder.start();
+			// IJ.log(new Scanner(process.getErrorStream(),
+			// "UTF-8").useDelimiter("\\A").next());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -73,8 +72,10 @@ public class GetMitosis {
 
 	}
 
-	public static void main(String[] args) {
-		GetMitosis.getMitosisWithPython("/home/tong/Documents/movies/102/60x/13-04-1", "CFP");
-		//ImgUtils.loadFullFluoImgs("/home/tong/Documents/movies/624-60x/14-04-1/movie_X0_Y0_FLUO");
-	}
+	// public static void main(String[] args) {
+	// GetMitosis.getMitosisWithPython("/home/tong/Documents/movies/102/60x/12-04-2",
+	// "CFP");
+	// //
+	// ImgUtils.loadFullFluoImgs("/home/tong/Documents/movies/624-60x/14-04-1/movie_X0_Y0_FLUO");
+	// }
 }

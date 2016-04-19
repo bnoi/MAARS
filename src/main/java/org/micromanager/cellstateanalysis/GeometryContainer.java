@@ -5,14 +5,8 @@ import java.util.Set;
 
 public class GeometryContainer {
 	private HashMap<String, HashMap<Integer, HashMap<String, Object>>> geosOfCells = null;
-	private Set<String> headerSet;
-	private int geoHeaderLen = 0;
 
 	public GeometryContainer() {
-	}
-
-	public Set<String> getHeader() {
-		return this.headerSet;
 	}
 
 	/**
@@ -48,10 +42,6 @@ public class GeometryContainer {
 	public void putGeometry(String channel, int frame, HashMap<String, Object> geometries) {
 		if (!geoFrameExists(channel, frame)) {
 			getGeosInChannel(channel).put(frame, new HashMap<String, Object>());
-		}
-		if (geometries.size() > geoHeaderLen) {
-			geoHeaderLen = geometries.size();
-			headerSet = geometries.keySet();
 		}
 		getGeosInChannel(channel).put(frame, geometries);
 	}

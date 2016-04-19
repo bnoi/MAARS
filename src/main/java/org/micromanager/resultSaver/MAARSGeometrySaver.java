@@ -7,65 +7,49 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 
 import org.micromanager.cellstateanalysis.Cell;
-import org.micromanager.cellstateanalysis.ComputeGeometry;
-import org.micromanager.cellstateanalysis.GeometryContainer;
 
-import ij.IJ;
 import util.opencsv.CSVWriter;
 
 public class MAARSGeometrySaver {
-	private GeometryContainer container;
 	private String geometryCSVDir;
 
-	public MAARSGeometrySaver(String pathToFluoDir, Cell cell) {
-		this.container = cell.getGeometryContainer();
+	public MAARSGeometrySaver(String pathToFluoDir) {
 		this.geometryCSVDir = pathToFluoDir + "/features/";
 		if (!new File(geometryCSVDir).exists()) {
 			new File(geometryCSVDir).mkdirs();
 		}
 	}
 
-	public void saveGeometries(String channel, HashMap<Integer, HashMap<String, Object>> geosInChannel) {
-		Set<String> headerSet = container.getHeader();
-		IJ.log("Saving features of channel " + channel);
-		ArrayList<String[]> outLines = null;
-		HashMap<String, Integer> headerIndex = new HashMap<String, Integer>();
-		String[] headerList = new String[headerSet.size() + 1];
-		headerList[0] = "Frame";
-		headerList[1] = ComputeGeometry.NbOfSpotDetected;
-		int index = 2;
-		for (String att : headerSet) {
-			if (!att.equals(ComputeGeometry.NbOfSpotDetected)) {
-				headerIndex.put(att, index);
-				headerList[index] = att;
-				index++;
+	public void saveGeometries(String channel, Cell cell) {
+		HashMap<Integer, HashMap<String, Object>> geosInFrams = cell.getGeometryContainer().getGeosInChannel(channel);
+		int cellNb = cell.getCellNumber();
+		ArrayList<String[]> outLines = new ArrayList<String[]>();
+		if (geosInFrams.keySet().size() > 0) {
+			int firstFrame = (int) geosInFrams.keySet().toArray()[0];
+			List<String> headerList = new ArrayList<>(geosInFrams.get(firstFrame).keySet());
+			Collections.sort(headerList);
+			String[] header = new String[headerList.size() + 1];
+			header[0] = "Frame";
+			for (int i = 1; i <= headerList.size(); i++) {
+				header[i] = headerList.get(i - 1);
 			}
-		}
-		FileWriter cellGeoWriter = null;
-		for (int cellNb : geosInChannel.keySet()) {
-			outLines = new ArrayList<String[]>();
+			FileWriter cellGeoWriter = null;
 			String[] geoOfFrame = null;
 			try {
 				cellGeoWriter = new FileWriter(geometryCSVDir + String.valueOf(cellNb) + "_" + channel + ".csv");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			HashMap<Integer, HashMap<String, Object>> geosInCell = geosInChannel;
-			for (int frame : geosInCell.keySet()) {
-				if (geosInCell.containsKey(frame)) {
-					geoOfFrame = new String[headerList.length];
-					geoOfFrame[0] = String.valueOf(frame);
-					geoOfFrame[1] = String.valueOf(geosInCell.get(frame).get(ComputeGeometry.NbOfSpotDetected));
-					for (String att : geosInCell.get(frame).keySet()) {
-						if (!att.equals(ComputeGeometry.NbOfSpotDetected)) {
-							geoOfFrame[headerIndex.get(att)] = new String(geosInCell.get(frame).get(att).toString());
-						}
-					}
-					outLines.add(geoOfFrame);
+			for (int frame : geosInFrams.keySet()) {
+				geoOfFrame = new String[headerList.size() + 1];
+				geoOfFrame[0] = String.valueOf(frame);
+				for (int i = 1; i <= headerList.size(); i++) {
+					geoOfFrame[i] = String.valueOf(geosInFrams.get(frame).get(headerList.get(i - 1)));
 				}
+				outLines.add(geoOfFrame);
 			}
 			Collections.sort(outLines, new Comparator<String[]>() {
 				@Override
@@ -73,7 +57,7 @@ public class MAARSGeometrySaver {
 					return Integer.valueOf(o1[0]).compareTo(Integer.valueOf(o2[0]));
 				}
 			});
-			outLines.add(0, headerList);
+			outLines.add(0, header);
 			CSVWriter writer = new CSVWriter(cellGeoWriter, ',', CSVWriter.NO_QUOTE_CHARACTER);
 			writer.writeAll(outLines);
 			try {
@@ -85,9 +69,9 @@ public class MAARSGeometrySaver {
 
 	}
 
-	public void save() {
-		for (String channel : container.getUsingChannels()) {
-			saveGeometries(channel, container.getGeosInChannel(channel));
+	public void save(Cell cell) {
+		for (String channel : cell.getGeometryContainer().getUsingChannels()) {
+			saveGeometries(channel, cell);
 		}
 	}
 }
