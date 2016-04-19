@@ -27,7 +27,6 @@ import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.GetMitosis;
 import org.micromanager.cellstateanalysis.SetOfCells;
-import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.AnalysisFactory;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
@@ -57,7 +56,6 @@ public class MAARS implements Runnable {
 	private String pathToSegDir;
 	private String pathToFluoDir;
 	private SetOfCells soc;
-	private AnalysisFactory factory;
 
 	/**
 	 * Constructor
@@ -71,7 +69,6 @@ public class MAARS implements Runnable {
 		this.parameters = parameters;
 		this.soc = new SetOfCells();
 		this.mm = mm;
-		factory = new AnalysisFactory(parameters.getAnalaysisOptions());
 	}
 
 	/**
@@ -304,13 +301,12 @@ public class MAARS implements Runnable {
 					while (System.currentTimeMillis() - startTime <= timeLimit) {
 						double beginAcq = System.currentTimeMillis();
 						for (String channel : arrayChannels) {
-							factory.addChannel(channel);
 							ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, pathToFluoDir, saveFilm);
 							if (do_analysis) {
 								es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
 										Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 										Double.parseDouble(parameters.getChSpotRaius(channel)),
-										Double.parseDouble(parameters.getChQuality(channel)), frame, factory));
+										Double.parseDouble(parameters.getChQuality(channel)), frame));
 							}
 						}
 						frame++;
@@ -331,13 +327,12 @@ public class MAARS implements Runnable {
 				} else {
 					// being static acquisition
 					for (String channel : arrayChannels) {
-						factory.addChannel(channel);
 						ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, pathToFluoDir, saveFilm);
 						if (do_analysis) {
 							es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
 									Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 									Double.parseDouble(parameters.getChSpotRaius(channel)),
-									Double.parseDouble(parameters.getChQuality(channel)), frame, factory));
+									Double.parseDouble(parameters.getChQuality(channel)), frame));
 						}
 					}
 				}

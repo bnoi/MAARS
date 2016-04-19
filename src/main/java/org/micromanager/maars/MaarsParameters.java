@@ -9,8 +9,6 @@ import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -122,7 +120,6 @@ public class MaarsParameters {
 	public static final String DO_INTERPHASE_RATIO = "DO_INTERPHASE_RATIO";
 	public static final String DO_METAPHASE_RATIO = "DO_METAPHASE_RATIO";
 	public static final String DO_FIND_MEROTELY = "DO_FIND_MEROTELY";
-	
 
 	public static final String SHUTTER = "SHUTTER";
 	public static final String COLOR = "COLOR";
@@ -425,17 +422,4 @@ public class MaarsParameters {
 	public void setUsingChannels(String channels) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(USING).setText(channels);
 	}
-
-	public ArrayList<String> getAnalaysisOptions() {
-		ArrayList<String> toDoOptions = new ArrayList<String>();
-		List<Element> allOptions = root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(MaarsParameters.ANALYSIS_OPTIONS)
-				.getChildren();
-		for (Element att : allOptions) {
-			if (Boolean.parseBoolean(att.getText())) {
-				toDoOptions.add(att.getName());
-			}
-		}
-		return toDoOptions;
-	}
-
 }

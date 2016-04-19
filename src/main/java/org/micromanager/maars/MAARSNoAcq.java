@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
 import org.micromanager.cellstateanalysis.SetOfCells;
-import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.AnalysisFactory;
 import org.micromanager.utils.FileUtils;
 
 import ij.IJ;
@@ -39,13 +38,11 @@ public class MAARSNoAcq implements Runnable {
 	private String pathToSegDir;
 	private String pathToFluoDir;
 	private ArrayList<String> arrayChannels = new ArrayList<String>();
-	private AnalysisFactory factory;
 
 	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters) {
 		this.mmc = mmc;
 		this.parameters = parameters;
 		this.soc = new SetOfCells();
-		factory = new AnalysisFactory(parameters.getAnalaysisOptions());
 	}
 
 	@Override
@@ -115,7 +112,6 @@ public class MAARSNoAcq implements Runnable {
 				for (int frameInd = 0; frameInd < arrayImgFrames.size(); frameInd++) {
 					Map<String, Future<FloatProcessor>> channelsInFrame = new HashMap<String, Future<FloatProcessor>>();
 					for (String channel : arrayChannels) {
-						factory.addChannel(channel);
 						int current_frame = arrayImgFrames.get(frameInd);
 						IJ.log("Analysing channel " + channel + "_" + current_frame);
 						String pathToFluoMovie = pathToFluoDir + current_frame + "_" + channel + "/MMStack.ome.tif";
@@ -123,8 +119,7 @@ public class MAARSNoAcq implements Runnable {
 						future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 								Double.parseDouble(parameters.getChSpotRaius(channel)),
-								Double.parseDouble(parameters.getChQuality(channel)), Integer.valueOf(current_frame),
-								factory));
+								Double.parseDouble(parameters.getChQuality(channel)), Integer.valueOf(current_frame)));
 						channelsInFrame.put(channel, future);
 					}
 					futureSet.add(channelsInFrame);

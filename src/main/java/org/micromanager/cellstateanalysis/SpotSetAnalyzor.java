@@ -10,9 +10,8 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import fiji.plugin.trackmate.Spot;
-//import weka.core.DenseInstance;
 
-public class ComputeGeometry {
+public class SpotSetAnalyzor {
 	// Names of parameters
 	public final static String NbOfSpotDetected = "NbOfSpotDetected";
 	public final static String SpAngToMaj = "SpAngToMaj";
@@ -22,15 +21,11 @@ public class ComputeGeometry {
 	public final static String SpCenterZ = "SpCenterZ";
 	public final static String CellCenterToSpCenterLen = "CellCenterToSpCenterLen";
 	public final static String CellCenterToSpCenterAng = "CellCenterToSpCenterAng";
-	// Velocities
-	public final static String SpElongRate = "SpElongRate";
-	public final static String SpOrientationRate = "SpOrientationRate";
-
 	private double fakeSpotQuality = 0;
 	// z equals to 0 because fitting ellipse in Analyzer do not give z
 	// position.
 	private double fakeSpotZ = 0;
-	private double fakeSpotRadius = 0.2;
+	private double fakeSpotRadius = 0.25;
 	private double x, y, major, angle, calibratedXBase, calibratedYBase;
 	private ArrayList<Spot> poles;
 
@@ -38,14 +33,19 @@ public class ComputeGeometry {
 	 * 
 	 * @param x
 	 *            x_centroid of cell in origin fluo image
+	 * 
 	 * @param y
 	 *            y_centroid of cell in origin fluo image
 	 * @param major
 	 *            cell major axis length
 	 * @param angle
 	 *            cell major axis absolut angle
+	 * @param calibratedXBase
+	 *            x base in micron
+	 * @param calibratedYBase
+	 *            y base in micron
 	 */
-	public ComputeGeometry(double x, double y, double major, double angle, double calibratedXBase,
+	public SpotSetAnalyzor(double x, double y, double major, double angle, double calibratedXBase,
 			double calibratedYBase) {
 		this.x = x;
 		this.y = y;
@@ -67,10 +67,9 @@ public class ComputeGeometry {
 		// soc, because it's back-up
 		// cptgeometry.centerSpots(spotSet);
 		int setSize = Iterables.size(spotSet);
-		geometry.put(ComputeGeometry.NbOfSpotDetected, setSize);
+		geometry.put(SpotSetAnalyzor.NbOfSpotDetected, setSize);
 		if (setSize > 1) {
 			poles = findMostDistant2Spots(spotSet);
-			// DenseInstance intstance = new DenseInstance(5);
 			Vector3D polesVec = getSpAsVector(poles);
 			geometry.put(SpLength, polesVec.getNorm());
 			Spot spCenter = getCenter(poles);
@@ -83,7 +82,7 @@ public class ComputeGeometry {
 			geometry.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
 			geometry.put(CellCenterToSpCenterAng, rad2AngLessThan90(
 					Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I)));
-		}else{
+		} else {
 			geometry.put(SpLength, "");
 			geometry.put(SpCenterX, "");
 			geometry.put(SpCenterY, "");
@@ -93,8 +92,8 @@ public class ComputeGeometry {
 			geometry.put(CellCenterToSpCenterAng, "");
 		}
 	}
-	
-	public ArrayList<Spot> getPoles(){
+
+	public ArrayList<Spot> getPoles() {
 		return this.poles;
 	}
 
@@ -198,7 +197,7 @@ public class ComputeGeometry {
 	 */
 	public double getSpAngToMajAxis(Vector3D polesVec) {
 		Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(angle)),
-				major * FastMath.sin(FastMath.toRadians(angle)), 0);
+				major * FastMath.sin(FastMath.toRadians(angle)), fakeSpotZ);
 		return rad2AngLessThan90(Vector3D.angle(cellMajAxisVec, polesVec));
 	}
 

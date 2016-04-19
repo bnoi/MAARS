@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.AnalysisFactory;
 import org.micromanager.cellstateanalysis.singleCellAnalysisFactory.FindMerotely;
 import org.micromanager.utils.ImgUtils;
 
@@ -43,7 +42,6 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 	private double quality;
 	private int frame;
 	private SpotCollection collection;
-	private AnalysisFactory factory;
 	private Model model;
 
 	/**
@@ -73,7 +71,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 	 */
 
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-			double radius, double quality, int frame, AnalysisFactory factory) {
+			double radius, double quality, int frame) {
 		this.fluoImage = fluoImage;
 		this.fluoImgCal = fluoImage.getCalibration();
 		this.soc = soc;
@@ -83,7 +81,6 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 		this.radius = radius;
 		this.quality = quality;
 		this.frame = frame;
-		this.factory = factory;
 	}
 
 	/**
@@ -120,6 +117,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 			SelectionModel selectionModel = new SelectionModel(model);
 			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
 			displayer.render();
+			displayer.refresh();
 		}
 		int nbCell = soc.size();
 		collection = SpotsContainer.getNBestqualitySpots(model.getSpots(), nbCell, maxNbSpot);
@@ -212,15 +210,17 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 				for (Spot s2del : spotsToDel) {
 					currentThreadSpots.remove(s2del);
 				}
-				ComputeGeometry cptgeometry = new ComputeGeometry(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
+
+				SpotSetAnalyzor spotSetAnalyzor = new SpotSetAnalyzor(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
 						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight,
 						cell.get(Cell.MAJOR) * fluoImgCal.pixelWidth, cell.get(Cell.ANGLE), calibratedXBase,
 						calibratedYBase);
+
 				Iterable<Spot> spotSet = cell.getSpotsInFrame(channel, frame);
 				if (spotSet != null) {
 					HashMap<String, Object> geometry = new HashMap<String, Object>();
-					cptgeometry.compute(geometry, spotSet);
-					ArrayList<Spot> poles = cptgeometry.getPoles();
+					spotSetAnalyzor.compute(geometry, spotSet);
+					ArrayList<Spot> poles = spotSetAnalyzor.getPoles();
 					new FindMerotely(cell, spotSet, geometry, fluoImgCal, poles, radius, frame);
 					cell.putGeometry(channel, frame, geometry);
 				}
