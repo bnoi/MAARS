@@ -8,12 +8,10 @@ import org.micromanager.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import ij.IJ;
-import ij.gui.Line;
 import ij.gui.Roi;
 
 /**
- * Cell is a class containing information about cell ROI, including its index in
- * cell array, and its its corresponding measurements from Analyzer of ImageJ
+ *
  * 
  * @author Tong LI
  *
@@ -28,8 +26,7 @@ public class Cell {
 	private String[] measurements;
 	private SpotsContainer spotContainer;
 	private GeometryContainer geoContainer;
-	private SpindleContainer spContainer;
-	public static AtomicInteger merotelyCounter = new AtomicInteger(0);
+	public static AtomicInteger merotelyCounter;
 
 	/**
 	 * @param roiCellShape
@@ -42,7 +39,6 @@ public class Cell {
 		this.cellNumber = cellNb;
 		this.spotContainer = new SpotsContainer();
 		this.geoContainer = new GeometryContainer();
-		this.spContainer = new SpindleContainer();
 	}
 
 	/**
@@ -89,33 +85,31 @@ public class Cell {
 	public void removeSpot(String channel, int frame, Spot s) {
 		spotContainer.removeSpot(channel, frame, s);
 	}
-	
-	public void setTrackmateModel(Model model){
+
+	public void setTrackmateModel(Model model) {
 		spotContainer.setTrackmateModel(model);
 	}
-	
-	public SpotsContainer getSpotContainer(){
+
+	public SpotsContainer getSpotContainer() {
 		return this.spotContainer;
 	}
-	
-	public void putGeometry(String channel, int frame, HashMap<String, Object> geometries){
+
+	public void putGeometry(String channel, int frame, HashMap<String, Object> geometries) {
 		geoContainer.putGeometry(channel, frame, geometries);
 	}
-	
-	public GeometryContainer getGeometryContainer(){
+
+	public GeometryContainer getGeometryContainer() {
 		return this.geoContainer;
 	}
 
-	public void incrementMerotelyCount(){
-		IJ.log("increased");
-		merotelyCounter.incrementAndGet();
+	public void incrementMerotelyCount() {
+		if (merotelyCounter == null) {
+			merotelyCounter = new AtomicInteger(0);
+		}
+		IJ.log("cell " + this.cellNumber + " merotely counter increased to " + merotelyCounter.incrementAndGet());
 	}
-	
-	public int getMerotelyCount(){
+
+	public int getMerotelyCount() {
 		return merotelyCounter.get();
-	}
-	
-	public void addSpLine(int frame, Line spLine){
-		this.spContainer.addSpLine(frame, spLine);
 	}
 }
