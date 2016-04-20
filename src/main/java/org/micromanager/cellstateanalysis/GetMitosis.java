@@ -1,8 +1,10 @@
 package org.micromanager.cellstateanalysis;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.apache.commons.math3.util.FastMath;
 import org.micromanager.utils.FileUtils;
@@ -55,25 +57,27 @@ public class GetMitosis {
 
 	public static void getMitosisWithPython(String acqDir, String channel) {
 		// TODO find a way to call python with packages
-		String[] cmd = new String[] { "/home/tong/miniconda3/bin/python",
+		String[] cmd = new String[] { "/Users/tongli/miniconda3/bin/python",
 				GetMitosis.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "getMitosisFiles.py",
 				acqDir, channel };
 		ProcessBuilder probuilder = new ProcessBuilder(cmd);
-		probuilder.redirectErrorStream(true);
 		try {
-			probuilder.start();
-			// Process process = probuilder.start();
-			// IJ.log(new Scanner(process.getErrorStream(),
-			// "UTF-8").useDelimiter("\\A").next());
+			Process process = probuilder.start();
+			BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+			String s = null;
+			while ((s = in.readLine()) != null) {
+                System.out.println(s);
+            }
+			while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+            }
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	public static void main(String[] args) {
-		GetMitosis.getMitosisWithPython("/home/tong/Documents/movies/102/60x/12-04-1", "CFP");
-		//ImgUtils.loadFullFluoImgs("/home/tong/Documents/movies/624-60x/14-04-1/movie_X0_Y0_FLUO");
+		GetMitosis.getMitosisWithPython("/Volumes/Macintosh/curioData/102/25-03-1/", "CFP");
 	}
 }
