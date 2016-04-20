@@ -215,6 +215,28 @@ class getMitosisFiles(object):
         # ax.scatter(concat_data[concat_data['Track'] ==1]['x'], -concat_data[concat_data['Track'] ==1]['y'],color = 'red')
         # ax.plot(concat_data[concat_data['Track'] ==1]['x'], -concat_data[concat_data['Track'] ==1]['y'],color = 'red')
         return concat_data
+        
+    def getSegList(self):
+		segmentList = list()
+		segment = dict()
+		nanInSegmentCount = 0
+		for i in range(0,len(spLen)):
+			val = spLen[i]
+			if not math.isnan(val):
+				segment[frames[i]] = val
+			elif nanInSegmentCount < len(segment)*gap_tolerance:
+				segment[frames[i]] = val
+				nanInSegmentCount +=1
+			else:
+				if len(segment) > minimumSegLength:
+					segment = {k: segment[k] for k in segment if not math.isnan(segment[k])}
+					segmentList.append(segment)
+				segment = dict()
+				nanInSegmentCount = 0
+		if not segmentList and len(segment) >minimumSegLength:
+			segment = {k: segment[k] for k in segment if not math.isnan(segment[k])}
+			segmentList.append(segment)
+		return segmentList
 
     def analyze(self):
         iteration_nb = self._totalNbOfCell
@@ -228,29 +250,11 @@ class getMitosisFiles(object):
         for x in range(0, iteration_nb):
             csvPath = acqDir + '/movie_X0_Y0_FLUO/features/'+str(x)+'_' +channels[0]+'.csv'
             if os.path.lexists(csvPath) : 
-                oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= [('Frame', 'i'), ('Phase', np.str, 10), ('NbOfSpotDetected', '<i8'), ('SpLength', 'f'), ('SpCenterX', 'f'), ('SpCenterY', 'f'), ('CellCenterToSpCenterAng', 'f'), ('SpAngToMaj', 'f'), ('SpCenterZ', 'f'), ('CellCenterToSpCenterLen', 'f')])
+                oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= float)
                 spLen = oneCell['SpLength']
                 frames = oneCell['Frame']
                 if len(spLen[spLen>0]) > minimumSegLength:
-                    segmentList = list()
-                    segment = dict()
-                    nanInSegmentCount = 0
-                    for i in range(0,len(spLen)):
-                        val = spLen[i]
-                        if not math.isnan(val):
-                            segment[frames[i]] = val
-                        elif nanInSegmentCount < len(segment)*gap_tolerance:
-                            segment[frames[i]] = val
-                            nanInSegmentCount +=1
-                        else:
-                            if len(segment) > minimumSegLength:
-                                segment = {k: segment[k] for k in segment if not math.isnan(k)}
-                                segmentList.append(segment)
-                            segment = dict()
-                            nanInSegmentCount = 0
-                    if not segmentList and len(segment) >minimumSegLength:
-                        segment = {k: segment[k] for k in segment if not math.isnan(k)}
-                        segmentList.append(segment)
+					segmentList = getSegList()
                     for segment in segmentList:
                         diffSeg = diff(list(segment.values()))
                         if len(diffSeg[diffSeg>0]) > len(diffSeg) * elongating_trend:
