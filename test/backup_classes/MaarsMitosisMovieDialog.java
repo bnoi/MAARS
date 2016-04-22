@@ -60,9 +60,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addCheckbox(
 				"Minimum absolute spindle size",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.START_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MINIMUM_SPINDLE_SIZE)
@@ -74,9 +74,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"value",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.START_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MINIMUM_SPINDLE_SIZE)
@@ -89,9 +89,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addCheckbox(
 				"Maximum absolute spindle size",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.START_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
@@ -104,9 +104,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"value",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.START_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
@@ -118,9 +118,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addCheckbox(
 				"Relative spindle angle to major axis",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.START_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE)
@@ -132,9 +132,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"value",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.START_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.START_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE)
@@ -154,9 +154,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addCheckbox(
 				"Maximum absolute spindle size",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
@@ -167,9 +167,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"value",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
@@ -182,9 +182,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addCheckbox(
 				"Maximum relative spindle size",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_MAXIMUM_SPINDLE_SIZE)
@@ -196,9 +196,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"value",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_MAXIMUM_SPINDLE_SIZE)
@@ -210,9 +210,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addCheckbox(
 				"Relative spindle maximum angle to major axis",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE)
@@ -224,9 +224,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"value",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE)
@@ -238,9 +238,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addCheckbox(
 				"Time limit",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
 						.getAsBoolean());
@@ -251,9 +251,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"value",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
 						.getAsDouble(), 3, 10, "min");
@@ -266,9 +266,9 @@ public class MaarsMitosisMovieDialog {
 						"Minimum growing of spindle required during time interval",
 						parameters
 								.getParametersAsJsonObject()
-								.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+								.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 								.getAsJsonObject()
-								.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+								.get(AllMaarsParameters.END_CONDITIONS)
 								.getAsJsonObject()
 								.get(AllMaarsParameters.CONDITIONS)
 								.getAsJsonObject()
@@ -281,9 +281,9 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"value",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
-						.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+						.get(AllMaarsParameters.END_CONDITIONS)
 						.getAsJsonObject().get(AllMaarsParameters.VALUES)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.GROWING_SPINDLE).getAsDouble(),
@@ -311,7 +311,7 @@ public class MaarsMitosisMovieDialog {
 
 		java.util.Iterator<JsonElement> fluoArray = parameters
 				.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.CHANNEL)
 				.getAsJsonArray().iterator();
 		String fluo = fluoArray.next().getAsString();
@@ -326,7 +326,7 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"Time interval",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.TIME_INTERVAL).getAsInt(), 3,
 				10, "ms");
@@ -336,7 +336,7 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"Range",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
 						.getAsInt(), 3, 10, "micron");
@@ -345,7 +345,7 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"Step",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.STEP)
 						.getAsDouble(), 3, 10, "micron");
 
@@ -354,7 +354,7 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addNumericField(
 				"Margin around cell",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject()
 						.get(AllMaarsParameters.MARGIN_AROUD_CELL)
 						.getAsDouble(), 3, 10, "pixel");
@@ -363,7 +363,7 @@ public class MaarsMitosisMovieDialog {
 		mitosisMovieDialog.addStringField(
 				"Saving path for all movies \n(linux style path)",
 				parameters.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 						.getAsString(), 5);
 

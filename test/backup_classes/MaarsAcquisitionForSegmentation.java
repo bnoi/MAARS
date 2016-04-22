@@ -90,7 +90,7 @@ public class MaarsAcquisitionForSegmentation {
 		ReportingUtils.logMessage("- step : " + step);
 		int sliceNumber = (int) Math.round(range / step);
 		ReportingUtils.logMessage("- slice number : " + sliceNumber);
-		String acqName = "movie_X" + Math.round(positionX) + "_Y"
+		String acqName = "X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY);
 		ReportingUtils.logMessage("- acquisition name : " + acqName);
 		pathToMovie = rootDirName + acqName;

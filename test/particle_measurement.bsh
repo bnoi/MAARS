@@ -5,7 +5,7 @@ import ij.gui.Roi;
 import ij.plugin.filter.Analyzer;
 import ij.measure.ResultsTable;
 import ij.measure.Measurements;
-savingPath = "/home/tong/Documents/movie_X0_Y0/MITOSIS/movie_X0_Y0_199_BF/0/";
+savingPath = "/home/tong/Documents/X0_Y0/MITOSIS/X0_Y0_199_BF/0/";
 ImagePlus bfimg = IJ.openImage(savingPath + "Maars_BinaryImage.tif");
 
 RoiManager roiManager = new RoiManager();

@@ -19,11 +19,11 @@ import ij.measure.Calibration;
 import ij.plugin.ZProjector;
 
 //ImagePlus imp = IJ.open("MAX_MMStack_Pos0.ome.tif");
-//ImagePlus imp = IJ.openImage("/Users/theoli89/Desktop/curioData/Virtual/movie_X0_Y0_FLUO/0/1.tif");
+//ImagePlus imp = IJ.openImage("/Users/theoli89/Desktop/curioData/Virtual/X0_Y0_FLUO/0/1.tif");
 //ImagePlus imp = IJ.getImage();
 
 for (int i = 1;i<60;i++){
-	ImagePlus imp = IJ.openImage("/home/tong/Documents/movies/102-s4/movie_X0_Y0_FLUO/croppedImgs/"+i+".tif");
+	ImagePlus imp = IJ.openImage("/home/tong/Documents/movies/102-s4/X0_Y0_FLUO/croppedImgs/"+i+".tif");
 	ZProjector projector = new ZProjector();
 	projector.setMethod(ZProjector.MAX_METHOD);
 	projector.setImage(imp);

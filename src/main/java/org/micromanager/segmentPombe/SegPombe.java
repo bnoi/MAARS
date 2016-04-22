@@ -233,17 +233,22 @@ public class SegPombe {
 
 		resultTable = new ResultsTable();
 
-		roiManager = new RoiManager();
+		if (RoiManager.getInstance() != null) {
+			roiManager = RoiManager.getInstance();
+
+		} else {
+			roiManager = new RoiManager();
+		}
 
 		imgCorrTemp = new ImagePlus("Correlation Image of " + bf, imgCorrTempProcessor);
 
+		ParticleAnalyzer.setRoiManager(roiManager);
 		particleAnalyzer = new ParticleAnalyzer(
 				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.SHOW_PROGRESS
 						+ ParticleAnalyzer.ADD_TO_MANAGER,
 				Measurements.AREA + Measurements.CENTROID + Measurements.PERIMETER + Measurements.SHAPE_DESCRIPTORS
 						+ Measurements.ELLIPSE,
 				resultTable, minParticleInMicron, maxParticleInMicron);
-
 		System.out.println("minParticleSize " + minParticleInMicron + " maxParticleSize " + maxParticleInMicron);
 		System.out.println("Analyse particles on " + binCorrelationImage.getTitle() + " ...");
 
@@ -370,10 +375,6 @@ public class SegPombe {
 			resultTable.show("Result");
 			System.out.println("done.");
 		}
-		// else {
-		// System.out.println("reset data frame");
-		// resultTable.reset();
-		// }
 
 		if (saveRoi && roiDetected) {
 			System.out.println("saving roi...");

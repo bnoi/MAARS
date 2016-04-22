@@ -19,10 +19,10 @@ public class CellStateAnalysis implements PlugIn {
 	public void run(String arg) {
 		// ImagePlus image = IJ.getImage().duplicate();
 		// ImagePlus image =
-		// IJ.openImage("/run/media/marie/data_marie_1/data/bf_gfp/filmtest/movie_X-0.0_Y-0.0/rescaled_DUP_MMStack.omeFocusImage.tif");
+		// IJ.openImage("/run/media/marie/data_marie_1/data/bf_gfp/filmtest/X-0.0_Y-0.0/rescaled_DUP_MMStack.omeFocusImage.tif");
 		// String path = IJ.getImage().getOriginalFileInfo().directory;
 		// String path =
-		// "/run/media/marie/data_marie_1/data/bf_gfp/filmtest/movie_X-0.0_Y-0.0/";
+		// "/run/media/marie/data_marie_1/data/bf_gfp/filmtest/X-0.0_Y-0.0/";
 		// ImagePlus correlationImagePlus =
 		// IJ.openImage(path+IJ.getImage().getShortTitle()+"CorrelationImage.tif");
 		// ImagePlus correlationImagePlus =
@@ -52,7 +52,7 @@ public class CellStateAnalysis implements PlugIn {
 		 * 
 		 * 
 		 * ImagePlus fluoImg1 = IJ.openImage(
-		 * "/run/media/marie/data_marie_1/data/bf_gfp/filmtest/movie_X-0.0_Y-0.0GFP13/MMStack.ome.tif"
+		 * "/run/media/marie/data_marie_1/data/bf_gfp/filmtest/X-0.0_Y-0.0GFP13/MMStack.ome.tif"
 		 * );
 		 * 
 		 * soc.getCell(12).addFluoImage(fluoImg1); Spindle sp1 =
@@ -63,7 +63,7 @@ public class CellStateAnalysis implements PlugIn {
 		 * 
 		 * 
 		 * ImagePlus fluoImg2 = IJ.openImage(
-		 * "/run/media/marie/data_marie_1/data/bf_gfp/filmtest/movie_X-0.0_Y-0.0GFP13GFP20/MMStack.ome.tif"
+		 * "/run/media/marie/data_marie_1/data/bf_gfp/filmtest/X-0.0_Y-0.0GFP13GFP20/MMStack.ome.tif"
 		 * ); soc.getCell(19).addFluoImage(fluoImg2); Spindle sp2 =
 		 * soc.getCell(19).findFluoSpotTempFunction(false);
 		 * System.out.println(sp2.getFeature());

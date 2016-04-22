@@ -23,9 +23,9 @@ public class GetMitosis {
 	}
 
 	public Boolean filesExist(String baseDir, int cellNb, String channel) {
-		if (FileUtils.exists(baseDir + "/movie_X0_Y0_FLUO/features/" + cellNb + "_" + channel + ".csv")
-				& FileUtils.exists(baseDir + "/movie_X0_Y0_FLUO/spots/" + cellNb + "_" + channel + ".xml")
-				& FileUtils.exists(baseDir + "/movie_X0_Y0/BF_Results.csv")) {
+		if (FileUtils.exists(baseDir + "/X0_Y0_FLUO/features/" + cellNb + "_" + channel + ".csv")
+				& FileUtils.exists(baseDir + "/X0_Y0_FLUO/spots/" + cellNb + "_" + channel + ".xml")
+				& FileUtils.exists(baseDir + "/X0_Y0/BF_Results.csv")) {
 			return true;
 		} else {
 			return false;
@@ -77,7 +77,7 @@ public class GetMitosis {
 		}
 	}
 
-	public static void main(String[] args) {
-		GetMitosis.getMitosisWithPython("/Volumes/Macintosh/curioData/102/25-03-1/", "CFP");
-	}
+//	public static void main(String[] args) {
+//		GetMitosis.getMitosisWithPython("/Volumes/Macintosh/curioData/102/25-03-1/", "CFP");
+//	}
 }

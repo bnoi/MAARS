@@ -41,7 +41,7 @@ public class Test_GetMitosis {
 	
 	@Test
 	public void testLoadROIsAnalaysis() {
-		getMitosis.loadROIsAnalaysis(cwd + "/movie_X0_Y0/BF_Results.csv");
+		getMitosis.loadROIsAnalaysis(cwd + "/X0_Y0/BF_Results.csv");
 //		assertEquals(true, answer);
 	}
 	

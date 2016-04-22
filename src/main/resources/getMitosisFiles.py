@@ -74,8 +74,8 @@ class getMitosisFiles(object):
         return  math.sqrt(xd*xd + yd*yd)
 
     def analyzeSPBTrack(self, baseDir, cellNb, channel):
-        geoPath = baseDir + '/movie_X0_Y0_FLUO/features/'+str(cellNb)+'_' + channel +'.csv'
-        spotsPath = baseDir+ '/movie_X0_Y0_FLUO/spots/'+str(cellNb)+'_' + channel +'.xml'
+        geoPath = baseDir + '/X0_Y0_FLUO/features/'+str(cellNb)+'_' + channel +'.csv'
+        spotsPath = baseDir+ '/X0_Y0_FLUO/spots/'+str(cellNb)+'_' + channel +'.xml'
         concat_data = list()
         major = 'Major'
         spAngToMajLabel = 'SpAngToMaj'
@@ -83,7 +83,7 @@ class getMitosisFiles(object):
         xPos='x'
         yPos = 'y'
         spAng2MajVal = 0
-        csvPath = baseDir + '/movie_X0_Y0/BF_Results.csv'
+        csvPath = baseDir + '/X0_Y0/BF_Results.csv'
         if os.path.lexists(csvPath) : 
             cellRois = pd.DataFrame.from_csv(csvPath)
         current_cell_major = cellRois.loc[cellNb + 1][major] * self._calibration
@@ -248,7 +248,7 @@ class getMitosisFiles(object):
         acqDir = self._baseDir
         channels = [self._channel,'GFP', 'TxRed', 'DAPI']
         for x in range(0, iteration_nb):
-            csvPath = acqDir + '/movie_X0_Y0_FLUO/features/'+str(x)+'_' +channels[0]+'.csv'
+            csvPath = acqDir + '/X0_Y0_FLUO/features/'+str(x)+'_' +channels[0]+'.csv'
             if os.path.lexists(csvPath) : 
                 oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= float)
                 spLen = oneCell['SpLength']
@@ -270,9 +270,9 @@ class getMitosisFiles(object):
                 			    os.mkdir(csvDir)
                 			d.to_csv(csvDir + "/d_" + str(x) + ".csv", sep='\t')
                 			for ch in channels:
-                				if os.path.lexists(acqDir + "/movie_X0_Y0_FLUO/croppedImgs/" + str(x) + "_" + ch + ".tif"):
-                					shutil.copyfile(acqDir + "/movie_X0_Y0_FLUO/croppedImgs/" + str(x) + "_" + ch + ".tif",  croppedImgsDir + str(x) + "_" + ch +".tif");
-                					shutil.copyfile(acqDir + "/movie_X0_Y0_FLUO/spots/" + str(x) + "_" + ch + ".xml", spotsDir + str(x) + "_" + ch + ".xml");
+                				if os.path.lexists(acqDir + "/X0_Y0_FLUO/croppedImgs/" + str(x) + "_" + ch + ".tif"):
+                					shutil.copyfile(acqDir + "/X0_Y0_FLUO/croppedImgs/" + str(x) + "_" + ch + ".tif",  croppedImgsDir + str(x) + "_" + ch +".tif");
+                					shutil.copyfile(acqDir + "/X0_Y0_FLUO/spots/" + str(x) + "_" + ch + ".xml", spotsDir + str(x) + "_" + ch + ".xml");
 
 if __name__ == '__main__':
     launcher = getMitosisFiles()

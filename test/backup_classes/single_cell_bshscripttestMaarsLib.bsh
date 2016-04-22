@@ -114,14 +114,14 @@ if(md.isOkClicked()) {
 					.get(AllMaarsParameters.FIND_BEST_MITOSIS_IN_FIELD)
 					.getAsBoolean()) {
 						
-				String acqNameFluo = "/movie_X"
+				String acqNameFluo = "/X"
 					+Math.round(xPos)
 					+"_Y"+Math.round(yPos)
 					+"_FLUO";
 				
 				ImagePlus fluoImage = mafa.acquire(false, acqNameFluo);
 				fiji.plugin.maars.cellstateanalysis.Cell tragetCell = mfa.analyzeEntireField(fluoImage, mas.getPathToMovie()
-							+"/movie_X"+Math.round(xPos)
+							+"/X"+Math.round(xPos)
 							+"_Y"+Math.round(yPos));
 				mfa.getSetOfCells().closeRoiManager();
 				if(tragetCell != null){	
@@ -130,7 +130,7 @@ if(md.isOkClicked()) {
 			}
 			else {
 				int timeInterval = param.getParametersAsJsonObject()
-						.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+						.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 						.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
 						.getAsInt();
 				double startTime = System.currentTimeMillis();
@@ -139,7 +139,7 @@ if(md.isOkClicked()) {
 	//			while (frame < 1)
 	//			{
 	//				double beginAcq = System.currentTimeMillis();
-					String acqNameFluo = "/movie_X"
+					String acqNameFluo = "/X"
 													+Math.round(xPos)
 													+"_Y"+Math.round(yPos)+
 													"_FLUO/" + frame;

@@ -8,7 +8,7 @@ import ij.IJ;
 
 public class Overlay_rect {
 	public Overlay_rect() {
-		ImagePlus img = IJ.openImage("/home/tong/Documents/movies/289/5/movie_X0_Y0_FLUO/croppedImgs/49_GFP.tif");
+		ImagePlus img = IJ.openImage("/home/tong/Documents/movies/289/5/X0_Y0_FLUO/croppedImgs/49_GFP.tif");
 		Line line = new Line(30, 30, 40, 50);
 		Line.setWidth(5);
 		img.setRoi(line);

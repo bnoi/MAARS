@@ -207,6 +207,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		buttonPanel2.add(test2);
 		maxNumberSpotCh2Tf.setText("");
 		spotRadiusCh2Tf.setText("");
+		qualityCh2Tf.setText("");
 		channel2Panel.add(channel2Combo);
 		channel2Panel.add(maxNumberSpotCh2Tf);
 		channel2Panel.add(spotRadiusCh2Tf);
@@ -363,7 +364,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 	public void testTrackmate(JPanel jp) {
 		String channelName = getSelectedChannel(jp);
-		String imgPath = parameters.getSavingPath() + "/movie_X0_Y0_FLUO/0_" + channelName + "/MMStack.ome.tif";
+		String imgPath = parameters.getSavingPath() + "/X0_Y0_FLUO/0_" + channelName + "/MMStack.ome.tif";
 		if (FileUtils.exists(imgPath)) {
 			testTrackmate(jp, IJ.openImage(imgPath));
 		} else {

@@ -121,7 +121,7 @@ public class MaarsAcquisitionForFluoAnalysis {
 		int sliceNumber = (int) Math.round(range / step);
 		ReportingUtils.logMessage("- slice number : " + sliceNumber);
 
-		String acqName = "movie_X" + Math.round(positionX) + "_Y"
+		String acqName = "X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_FLUO/" + frame + "_" + channel;
 
 		String pathToMovie = rootDirName + "/" + acqName;
