@@ -113,12 +113,12 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 		MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
 
 		this.model = trackmate.doDetection(true);
-		if (frame == 0) {
-			SelectionModel selectionModel = new SelectionModel(model);
-			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
-			displayer.render();
-			displayer.refresh();
-		}
+//		if (frame == 0) {
+//			SelectionModel selectionModel = new SelectionModel(model);
+//			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
+//			displayer.render();
+//			displayer.refresh();
+//		}
 		int nbCell = soc.size();
 		collection = SpotsContainer.getNBestqualitySpots(model.getSpots(), nbCell, maxNbSpot);
 		double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);

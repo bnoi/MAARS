@@ -181,7 +181,7 @@ public class MAARS implements Runnable {
 	}
 
 	public static void saveAll(SetOfCells soc, MaarsParameters parameters, ImagePlus mergedImg, String pathToFluoDir,
-			ArrayList<String> arrayChannels) {
+			ArrayList<String> arrayChannels, Boolean posAnalysis) {
 		// TODO add a textfield in gui to specify this parameter
 		double laggingThreshold = 120;
 		Boolean splitChannel = true;
@@ -195,24 +195,27 @@ public class MAARS implements Runnable {
 			HashMap<String, ImagePlus> croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
 			imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
 		}
-		GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
-		imgSaver.exportChannelBtf(splitChannel, arrayChannels);
-		ImagePlus merotelyImp = null;
-		for (Cell cell : soc) {
-			int cellNb = cell.getCellNumber();
-			// TODO a new static class to find lagging chromosomes
-			int abnormalStateTimes = cell.getMerotelyCount();
-			// TODO maybe to be shorten?
-			if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
-				String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
-				IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
-				String croppedImgDir = imgSaver.getCroppedImgDir();
-				if (splitChannel) {
-					merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_GFP.tif");
-					merotelyImp.show();
-				} else {
-					merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_merged.tif");
-					merotelyImp.show();
+		if (posAnalysis) {
+			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
+			imgSaver.exportChannelBtf(splitChannel, arrayChannels);
+			ImagePlus merotelyImp = null;
+			for (Cell cell : soc) {
+				int cellNb = cell.getCellNumber();
+				// TODO a new static class to find lagging chromosomes
+				int abnormalStateTimes = cell.getMerotelyCount();
+				// TODO maybe to be shorten?
+				if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
+					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
+							.format(Calendar.getInstance().getTime());
+					IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
+					String croppedImgDir = imgSaver.getCroppedImgDir();
+					if (splitChannel) {
+						merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_GFP.tif");
+						merotelyImp.show();
+					} else {
+						merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_merged.tif");
+						merotelyImp.show();
+					}
 				}
 			}
 		}
@@ -253,7 +256,7 @@ public class MAARS implements Runnable {
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			IJ.log("Current position : x_" + xPos + " y_" + yPos);
-			this.pathToSegDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos);
+			this.pathToSegDir = FileUtils.convertPath(parameters.getSavingPath() + "/X" + xPos + "_Y" + yPos);
 			this.pathToFluoDir = pathToSegDir + "_FLUO/";
 			// autofocus(mm, mmc);
 			double zFocus = 0;
@@ -341,7 +344,7 @@ public class MAARS implements Runnable {
 				if (soc.size() != 0 && do_analysis) {
 					long startWriting = System.currentTimeMillis();
 					ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-					MAARS.saveAll(soc, parameters, mergedImg, pathToFluoDir, arrayChannels);
+					MAARS.saveAll(soc, parameters, mergedImg, pathToFluoDir, arrayChannels, true);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}

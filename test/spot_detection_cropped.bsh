@@ -31,7 +31,7 @@ base_dir = "/home/tong/Documents/code/MAARS/";
 //base_dir = "/Volumes/Macintosh/Documents/MAARS/";
 
 addClassPath(base_dir + "target/MAARS_-1.0.jar");
-String imgFloder = "/home/tong/Documents/movies/289/60x/3/movie_X0_Y0_FLUO/0_CFP";
+String imgFloder = "/home/tong/Documents/movies/289/60x/3/X0_Y0_FLUO/0_CFP";
 File folder = new File(imgFloder);
 //for ( File fileEntry : listFile) {
 //print(fileEntry);

@@ -4,8 +4,8 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.RoiScaler;
 
-String pathToRois = "/Volumes/Macintosh/curioData/test/movie_X0_Y0/rescaled_MMStack_Pos0.ome_ROI.zip";
-//ImagePlus img = IJ.openImage("/Volumes/Macintosh/curioData/test/movie_X0_Y0/rescaled_MMStack_Pos0.ome_BinaryImage.tif");
+String pathToRois = "/Volumes/Macintosh/curioData/test/X0_Y0/rescaled_MMStack_Pos0.ome_ROI.zip";
+//ImagePlus img = IJ.openImage("/Volumes/Macintosh/curioData/test/X0_Y0/rescaled_MMStack_Pos0.ome_BinaryImage.tif");
 ImagePlus img = IJ.getImage();
 roiManager = new RoiManager();
 roiManager.runCommand("Open", pathToRois);

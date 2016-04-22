@@ -119,7 +119,7 @@ public class MaarsAcquisitionMitosis {
 		double wtest = mmc.getImageWidth();
 		double htest = mmc.getImageHeight();
 		int margin = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.MARGIN_AROUD_CELL)
 				.getAsInt();
 
@@ -161,10 +161,10 @@ public class MaarsAcquisitionMitosis {
 
 		ReportingUtils.logMessage("Acquire Mitosis Movie :");
 		ReportingUtils.logMessage("_______________________");
-		String fluoAcqName = "movie_X" + Math.round(positionX) + "_Y"
+		String fluoAcqName = "X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
 				+ cell.getCellShapeRoi().getName() + "_Fluo";
-		String bfAcqName = "movie_X" + Math.round(positionX) + "_Y"
+		String bfAcqName = "X" + Math.round(positionX) + "_Y"
 				+ Math.round(positionY) + "_"
 				+ cell.getCellShapeRoi().getName() + "_BF";
 		ReportingUtils.logMessage("Close all previous acquisitions");
@@ -186,17 +186,17 @@ public class MaarsAcquisitionMitosis {
 		ReportingUtils.logMessage("- channel group : " + channelGroup);
 
 		String rootDirName = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.SAVING_PATH)
 				.getAsString()
-				+ "movie_X"
+				+ "X"
 				+ Math.round(positionX)
 				+ "_Y"
 				+ Math.round(positionY) + "/MITOSIS/";
 		ReportingUtils.logMessage("- saving path : " + rootDirName);
 
 		JsonArray channelArray = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.CHANNEL)
 				.getAsJsonArray();
 
@@ -247,25 +247,25 @@ public class MaarsAcquisitionMitosis {
 		}
 
 		int frameNumber = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.FRAME_NUMBER)
 				.getAsInt();
 		ReportingUtils.logMessage("- frame number : " + frameNumber);
 
 		int timeInterval = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_INTERVAL)
 				.getAsInt();
 		ReportingUtils.logMessage("- time interval " + timeInterval);
 
 		double fluoRange = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.RANGE_SIZE_FOR_MOVIE)
 				.getAsDouble();
 		ReportingUtils.logMessage("- range size : " + fluoRange);
 
 		double fluoStep = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 				.getAsJsonObject().get(AllMaarsParameters.STEP).getAsDouble();
 		ReportingUtils.logMessage("- step : " + fluoStep);
 
@@ -799,38 +799,38 @@ public class MaarsAcquisitionMitosis {
 		boolean ok = true;
 
 		boolean checkTimeLimit = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.END_CONDITIONS)
 				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 				.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
 				.getAsBoolean();
 
 		boolean checkAbsMaxSpSize = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.END_CONDITIONS)
 				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.ABSOLUTE_MAXIMUM_SPINDLE_SIZE)
 				.getAsBoolean();
 
 		boolean checkRelativeMaxSpSize = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.END_CONDITIONS)
 				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.RELATIVE_MAXIMUM_SPINDLE_SIZE)
 				.getAsBoolean();
 
 		boolean checkRelativeSpAngle = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.END_CONDITIONS)
 				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 				.getAsJsonObject()
 				.get(AllMaarsParameters.RELATIVE_SPINDLE_ANGLE).getAsBoolean();
 
 		boolean checkGrowing = parameters.getParametersAsJsonObject()
-				.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
-				.getAsJsonObject().get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+				.get(AllMaarsParameters.MITOSIS_PARAMETERS)
+				.getAsJsonObject().get(AllMaarsParameters.END_CONDITIONS)
 				.getAsJsonObject().get(AllMaarsParameters.CONDITIONS)
 				.getAsJsonObject().get(AllMaarsParameters.GROWING_SPINDLE)
 				.getAsBoolean();
@@ -844,9 +844,9 @@ public class MaarsAcquisitionMitosis {
 
 			ReportingUtils.logMessage("check time limit");
 			double timeLimit = parameters.getParametersAsJsonObject()
-					.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+					.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 					.getAsJsonObject()
-					.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+					.get(AllMaarsParameters.END_CONDITIONS)
 					.getAsJsonObject().get(AllMaarsParameters.VALUES)
 					.getAsJsonObject().get(AllMaarsParameters.TIME_LIMIT)
 					.getAsDouble() * 60 * 1000;
@@ -870,9 +870,9 @@ public class MaarsAcquisitionMitosis {
 					ok = ok
 							&& newSp.getLength() <= parameters
 									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+									.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 									.getAsJsonObject()
-									.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+									.get(AllMaarsParameters.END_CONDITIONS)
 									.getAsJsonObject()
 									.get(AllMaarsParameters.VALUES)
 									.getAsJsonObject()
@@ -886,9 +886,9 @@ public class MaarsAcquisitionMitosis {
 					ok = ok
 							&& newSp.getLengthRatioToMajorAxis() >= parameters
 									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+									.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 									.getAsJsonObject()
-									.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+									.get(AllMaarsParameters.END_CONDITIONS)
 									.getAsJsonObject()
 									.get(AllMaarsParameters.VALUES)
 									.getAsJsonObject()
@@ -902,9 +902,9 @@ public class MaarsAcquisitionMitosis {
 					ok = ok
 							&& newSp.getAngleToMajorAxis() >= parameters
 									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+									.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 									.getAsJsonObject()
-									.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+									.get(AllMaarsParameters.END_CONDITIONS)
 									.getAsJsonObject()
 									.get(AllMaarsParameters.VALUES)
 									.getAsJsonObject()
@@ -919,9 +919,9 @@ public class MaarsAcquisitionMitosis {
 					ok = ok
 							&& growing >= parameters
 									.getParametersAsJsonObject()
-									.get(AllMaarsParameters.MITOSIS_MOVIE_PARAMETERS)
+									.get(AllMaarsParameters.MITOSIS_PARAMETERS)
 									.getAsJsonObject()
-									.get(AllMaarsParameters.END_MOVIE_CONDITIONS)
+									.get(AllMaarsParameters.END_CONDITIONS)
 									.getAsJsonObject()
 									.get(AllMaarsParameters.VALUES)
 									.getAsJsonObject()

@@ -17,9 +17,9 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.SpotCollection;
 import com.google.common.collect.Iterables;
 
-IJ.open("/home/tong/Documents/movies/102-s2/movie_X0_Y0_FLUO/croppedImgs/1_CFP.tif");
+IJ.open("/home/tong/Documents/movies/102-s2/X0_Y0_FLUO/croppedImgs/1_CFP.tif");
 //ImagePlus imp = IJ.openImage("D:/Data/Tong/Movies/0_FLUO/MMStack_Pos0.ome.tif");
-//IJ.openImage("/Users/theoli89/Desktop/curioData/single_field/102_4/movie_X0_Y0_FLUO/15/MMStack_Pos0.ome.tif");
+//IJ.openImage("/Users/theoli89/Desktop/curioData/single_field/102_4/X0_Y0_FLUO/15/MMStack_Pos0.ome.tif");
 
 ImagePlus imp =IJ.getImage();
 ZProjector projector = new ZProjector();

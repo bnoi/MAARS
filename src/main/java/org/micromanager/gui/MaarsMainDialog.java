@@ -219,6 +219,7 @@ public class MaarsMainDialog implements ActionListener {
 		chkPanel.setBackground(bgColor);
 		saveParametersChk = new JCheckBox("Save parameters", true);
 		withOutAcqChk = new JCheckBox("Don't do acquisition", false);
+		withOutAcqChk.addActionListener(this);
 		chkPanel.add(withOutAcqChk);
 		chkPanel.add(saveParametersChk);
 
@@ -354,7 +355,7 @@ public class MaarsMainDialog implements ActionListener {
 
 	public int overWrite(String path) {
 		int overWrite = 0;
-		if (FileUtils.exists(path + "/movie_X0_Y0/MMStack.ome.tif")) {
+		if (FileUtils.exists(path + "/X0_Y0/MMStack.ome.tif")) {
 			overWrite = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
 		}
 		return overWrite;
@@ -376,7 +377,7 @@ public class MaarsMainDialog implements ActionListener {
 				saveParameters();
 				Thread th = null;
 				if (withOutAcqChk.isSelected()) {
-					th = new Thread(new MAARSNoAcq(mmc, parameters));
+					th = new Thread(new MAARSNoAcq(parameters));
 				} else {
 					if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
 						th = new Thread(new MAARS(mm, mmc, parameters));
@@ -396,6 +397,22 @@ public class MaarsMainDialog implements ActionListener {
 		} else if (e.getSource() == staticOpt) {
 			setAnalysisStrategy();
 			fluoAcqDurationTf.setEditable(false);
+		} else if (e.getSource() == withOutAcqChk) {
+			if (withOutAcqChk.isSelected()) {
+				widthTf.setText("MAARS do it for you");
+				widthTf.setEditable(false);
+				heightTf.setText("MAARS do it for you");
+				heightTf.setEditable(false);
+				numFieldLabel.setText("Don't worry about this");
+			} else {
+				widthTf.setText(String.valueOf(mmc.getImageWidth() * calibration));
+				widthTf.setEditable(true);
+				heightTf.setText(String.valueOf(mmc.getImageHeight() * calibration));
+				heightTf.setEditable(true);
+				refreshNumField();
+			}
+		} else {
+			IJ.log("MAARS don't understand what you want, sorry");
 		}
 	}
 }

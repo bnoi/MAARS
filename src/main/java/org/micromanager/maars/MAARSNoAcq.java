@@ -22,8 +22,8 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
+import ij.plugin.frame.RoiManager;
 import ij.process.FloatProcessor;
-import mmcorej.CMMCore;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
@@ -32,17 +32,30 @@ import mmcorej.CMMCore;
 public class MAARSNoAcq implements Runnable {
 	private PrintStream curr_err;
 	private PrintStream curr_out;
-	private CMMCore mmc;
 	private MaarsParameters parameters;
 	private SetOfCells soc;
+	private String rootDir;
 	private String pathToSegDir;
 	private String pathToFluoDir;
 	private ArrayList<String> arrayChannels = new ArrayList<String>();
 
-	public MAARSNoAcq(CMMCore mmc, MaarsParameters parameters) {
-		this.mmc = mmc;
+	public MAARSNoAcq(MaarsParameters parameters) {
 		this.parameters = parameters;
+		rootDir = parameters.getSavingPath();
 		this.soc = new SetOfCells();
+	}
+
+	private ArrayList<String[]> getAcqPositions() {
+		ArrayList<String[]> acqPos = new ArrayList<String[]>();
+		String[] listAcqNames = new File(rootDir).list();
+		String pattern = "(X)(\\d+)(_)(Y)(\\d+)(_FLUO)";
+		for (String acqName : listAcqNames) {
+			if (Pattern.matches(pattern, acqName)) {
+				acqPos.add(new String[] { acqName.split("_", -1)[0].substring(1),
+						acqName.split("_", -1)[1].substring(1) });
+			}
+		}
+		return acqPos;
 	}
 
 	@Override
@@ -50,16 +63,12 @@ public class MAARSNoAcq implements Runnable {
 		ExecutorService es = null;
 		// Start time
 		long start = System.currentTimeMillis();
-
-		// Acquisition path arrangement
-		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
-
 		ImagePlus mergedImg = new ImagePlus();
-		for (int i = 0; i < explo.length(); i++) {
-			IJ.log("x : " + explo.getX(i) + " y : " + explo.getY(i));
-			String xPos = String.valueOf(Math.round(explo.getX(i)));
-			String yPos = String.valueOf(Math.round(explo.getY(i)));
-			this.pathToSegDir = FileUtils.convertPath(parameters.getSavingPath() + "/movie_X" + xPos + "_Y" + yPos);
+		for (String[] pos : getAcqPositions()) {
+			String xPos = pos[0];
+			String yPos = pos[1];
+			IJ.log("x : " + xPos + " y : " + yPos);
+			this.pathToSegDir = FileUtils.convertPath(rootDir + "/X" + xPos + "_Y" + yPos);
 			pathToFluoDir = pathToSegDir + "_FLUO/";
 			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "/MMStack.ome.tif");
 			ImagePlus segImg = null;
@@ -139,6 +148,15 @@ public class MAARSNoAcq implements Runnable {
 				mergedImg = new ImagePlus("merged", fluoStack);
 				mergedImg.setCalibration(segImg.getCalibration());
 				mergedImg.setZ(fluoStack.getSize());
+				RoiManager.getInstance().reset();
+				RoiManager.getInstance().close();
+				if (soc.size() != 0) {
+					long startWriting = System.currentTimeMillis();
+					MAARS.saveAll(soc, parameters, mergedImg, pathToFluoDir, arrayChannels, false);
+					// MAARS.mailNotify();
+					IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+							+ " sec for writing results");
+				}
 			}
 		}
 		es.shutdown();
@@ -149,14 +167,6 @@ public class MAARSNoAcq implements Runnable {
 		}
 		System.setErr(curr_err);
 		System.setOut(curr_out);
-
-		if (soc.size() != 0) {
-			long startWriting = System.currentTimeMillis();
-			MAARS.saveAll(soc, parameters, mergedImg, pathToFluoDir, arrayChannels);
-			// MAARS.mailNotify();
-			IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-					+ " sec for writing results");
-		}
 		IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
 	}
 }
