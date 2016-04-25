@@ -32,7 +32,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		Roi[] roiArray = getRoisAsArray(pathToSegDir + "/ROI.zip");
 		cellArray = new ArrayList<Cell>();
 		for (int i = 1; i <= roiArray.length; i++) {
-			cellArray.add(i-1, new Cell(roiArray[i-1], i));
+			cellArray.add(i - 1, new Cell(roiArray[i - 1], i));
 		}
 		IJ.log("Done.");
 	}
@@ -60,9 +60,9 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * @return Cell corresponding to index
 	 */
 	public Cell getCell(int index) {
-		return this.cellArray.get(index);
+		return this.cellArray.get(index - 1);
 	}
-	
+
 	/**
 	 * total number of cell
 	 * 
@@ -78,7 +78,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 */
 	public void setRoiMeasurementIntoCells(ResultsTable rt) {
 		for (Cell c : cellArray) {
-			c.setRoiMeasurement(rt.getRowAsString(c.getCellNumber()-1));
+			c.setRoiMeasurement(rt.getRowAsString(c.getCellNumber() - 1));
 		}
 	}
 

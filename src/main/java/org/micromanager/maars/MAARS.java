@@ -2,6 +2,7 @@ package org.micromanager.maars;
 
 import mmcorej.CMMCore;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
@@ -12,6 +13,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -180,7 +182,7 @@ public class MAARS implements Runnable {
 		}
 	}
 
-	public static String saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
+	public static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
 			ArrayList<String> arrayChannels, Boolean splitChannel) {
 		MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
 		MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
@@ -192,33 +194,38 @@ public class MAARS implements Runnable {
 			imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
 		}
 		imgSaver.exportChannelBtf(splitChannel, arrayChannels);
-		return  imgSaver.getCroppedImgDir();
 	}
 
 	public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
-			String croppedImgDir, String pathToSegDir) {
+			String pathToSegDir) {
 		// TODO add a textfield in gui to specify this parameter
 		double laggingThreshold = 120;
 		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP");
-		ImagePlus merotelyImp = null;
-		for (Cell cell : soc) {
-			int cellNb = cell.getCellNumber();
-			// TODO a new static class to find lagging chromosomes
-			int abnormalStateTimes = cell.getMerotelyCount();
-			// TODO maybe to be shorten?
-			if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
-				String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
-				IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
-				if (splitChannel) {
-					merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_GFP.tif");
-					merotelyImp.show();
-				} else {
-					merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_merged.tif");
-					merotelyImp.show();
+		if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
+			String[] listAcqNames = new File(pathToSegDir + "_MITOSIS/csv/").list();
+			String pattern = "(d_)(\\d+)(.csv)";
+			ImagePlus merotelyImp = null;
+			for (String acqName : listAcqNames) {
+				if (Pattern.matches(pattern, acqName)) {
+					//TODO
+					int cellNb = Integer.parseInt(acqName.split("_", -1)[0].substring(0, -4));
+					Cell cell = soc.getCell(cellNb);
+					int abnormalStateTimes = cell.getMerotelyCount();
+					// TODO maybe to be shorten?
+					if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
+						String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
+						IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
+						if (splitChannel) {
+							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS/cropImgs/" + cellNb + "_GFP.tif");
+							merotelyImp.show();
+						} else {
+							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS/cropImgs/" + cellNb + "_merged.tif");
+							merotelyImp.show();
+						}
+					}
 				}
 			}
-
 		}
 	}
 
@@ -346,8 +353,8 @@ public class MAARS implements Runnable {
 					long startWriting = System.currentTimeMillis();
 					Boolean splitChannel = true;
 					ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-					String croppedImgDir = MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
-					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, croppedImgDir, pathToSegDir);
+					MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
+					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}
