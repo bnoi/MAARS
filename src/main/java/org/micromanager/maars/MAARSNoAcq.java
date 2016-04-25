@@ -152,8 +152,9 @@ public class MAARSNoAcq implements Runnable {
 				RoiManager.getInstance().close();
 				if (soc.size() != 0) {
 					long startWriting = System.currentTimeMillis();
-					MAARS.saveAll(soc, parameters, mergedImg, pathToFluoDir, arrayChannels, false);
-					// MAARS.mailNotify();
+					Boolean splitChannel = true;
+					String croppedImgDir = MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
+					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, croppedImgDir, pathToSegDir);
 					IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}
