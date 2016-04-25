@@ -25,7 +25,7 @@ import org.micromanager.acquisition.FluoAcquisition;
 import org.micromanager.acquisition.SegAcquisition;
 import org.micromanager.cellstateanalysis.Cell;
 import org.micromanager.cellstateanalysis.FluoAnalyzer;
-import org.micromanager.cellstateanalysis.GetMitosis;
+import org.micromanager.cellstateanalysis.PythonPipeline;
 import org.micromanager.cellstateanalysis.SetOfCells;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
@@ -180,12 +180,8 @@ public class MAARS implements Runnable {
 		}
 	}
 
-	public static void saveAll(SetOfCells soc, MaarsParameters parameters, ImagePlus mergedImg, String pathToFluoDir,
-			ArrayList<String> arrayChannels, Boolean posAnalysis) {
-		// TODO add a textfield in gui to specify this parameter
-		double laggingThreshold = 120;
-		Boolean splitChannel = true;
-		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+	public static String saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
+			ArrayList<String> arrayChannels, Boolean splitChannel) {
 		MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
 		MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
 		MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
@@ -195,29 +191,34 @@ public class MAARS implements Runnable {
 			HashMap<String, ImagePlus> croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
 			imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
 		}
-		if (posAnalysis) {
-			GetMitosis.getMitosisWithPython(parameters.getSavingPath(), "CFP");
-			imgSaver.exportChannelBtf(splitChannel, arrayChannels);
-			ImagePlus merotelyImp = null;
-			for (Cell cell : soc) {
-				int cellNb = cell.getCellNumber();
-				// TODO a new static class to find lagging chromosomes
-				int abnormalStateTimes = cell.getMerotelyCount();
-				// TODO maybe to be shorten?
-				if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
-					String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
-							.format(Calendar.getInstance().getTime());
-					IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
-					String croppedImgDir = imgSaver.getCroppedImgDir();
-					if (splitChannel) {
-						merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_GFP.tif");
-						merotelyImp.show();
-					} else {
-						merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_merged.tif");
-						merotelyImp.show();
-					}
+		imgSaver.exportChannelBtf(splitChannel, arrayChannels);
+		return  imgSaver.getCroppedImgDir();
+	}
+
+	public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
+			String croppedImgDir, String pathToSegDir) {
+		// TODO add a textfield in gui to specify this parameter
+		double laggingThreshold = 120;
+		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP");
+		ImagePlus merotelyImp = null;
+		for (Cell cell : soc) {
+			int cellNb = cell.getCellNumber();
+			// TODO a new static class to find lagging chromosomes
+			int abnormalStateTimes = cell.getMerotelyCount();
+			// TODO maybe to be shorten?
+			if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
+				String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
+				IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
+				if (splitChannel) {
+					merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_GFP.tif");
+					merotelyImp.show();
+				} else {
+					merotelyImp = IJ.openImage(croppedImgDir + cellNb + "_merged.tif");
+					merotelyImp.show();
 				}
 			}
+
 		}
 	}
 
@@ -343,8 +344,10 @@ public class MAARS implements Runnable {
 				RoiManager.getInstance().close();
 				if (soc.size() != 0 && do_analysis) {
 					long startWriting = System.currentTimeMillis();
+					Boolean splitChannel = true;
 					ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-					MAARS.saveAll(soc, parameters, mergedImg, pathToFluoDir, arrayChannels, true);
+					String croppedImgDir = MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
+					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, croppedImgDir, pathToSegDir);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}
