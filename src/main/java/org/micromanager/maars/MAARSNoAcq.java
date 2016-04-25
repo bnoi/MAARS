@@ -159,8 +159,8 @@ public class MAARSNoAcq implements Runnable {
 				}
 			}
 		}
-		es.shutdown();
 		try {
+			es.shutdown();
 			es.awaitTermination(120, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
