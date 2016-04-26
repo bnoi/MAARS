@@ -20,6 +20,9 @@ public class MAARSImgSaver {
 		this.pathToFluoDir = pathToFluoDir;
 		this.croppedImgDir = pathToFluoDir + "/croppedImgs/";
 		this.mergedFullFieldImg = mergedFullFieldImg;
+		if (!new File(croppedImgDir).exists()) {
+			new File(croppedImgDir).mkdirs();
+		}
 	}
 
 	public String getCroppedImgDir() {
@@ -32,9 +35,6 @@ public class MAARSImgSaver {
 	 * @return cropped images base directory
 	 */
 	public void saveCroppedImgs(HashMap<String, ImagePlus> croppedImgSet, int cellNb) {
-		if (!new File(croppedImgDir).exists()) {
-			new File(croppedImgDir).mkdirs();
-		}
 		for (String s : croppedImgSet.keySet()) {
 			String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + s;
 			ImagePlus imp = croppedImgSet.get(s);

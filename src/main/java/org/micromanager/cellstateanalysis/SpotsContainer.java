@@ -9,7 +9,7 @@ import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 
 public class SpotsContainer {
-	private HashMap<String, SpotCollection> spotsInCell = null;
+	private HashMap<String, SpotCollection> spotsInCell;
 	private Model trackmateModel;
 
 	public SpotsContainer() {
@@ -21,11 +21,11 @@ public class SpotsContainer {
 	 * @param channel
 	 */
 	public void addChannel(String channel) {
-		if (spotsInCell == null) {
-			spotsInCell = new HashMap<String, SpotCollection>();
+		if (this.spotsInCell == null) {
+			this.spotsInCell = new HashMap<String, SpotCollection>();
 		}
-		if (!spotsInCell.containsKey(channel)) {
-			spotsInCell.put(channel, new SpotCollection());
+		if (!this.spotsInCell.containsKey(channel)) {
+			this.spotsInCell.put(channel, new SpotCollection());
 		}
 	}
 
@@ -37,7 +37,7 @@ public class SpotsContainer {
 	 * @param spot
 	 */
 	public void putSpot(String channel, int frame, Spot spot) {
-		spotsInCell.get(channel).add(spot, frame);
+		this.spotsInCell.get(channel).add(spot, frame);
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class SpotsContainer {
 	 * @return
 	 */
 	public SpotCollection getSpots(String channel) {
-		return spotsInCell.get(channel);
+		return this.spotsInCell.get(channel);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class SpotsContainer {
 	 * @param spToRemove
 	 */
 	public void removeSpot(String channel, int frame, Spot spToRemove) {
-		spotsInCell.get(channel).remove(spToRemove, frame);
+		this.spotsInCell.get(channel).remove(spToRemove, frame);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class SpotsContainer {
 	}
 
 	public Set<String> getUsingChannels() {
-		return spotsInCell.keySet();
+		return this.spotsInCell.keySet();
 	}
 
 	/**

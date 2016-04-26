@@ -46,15 +46,15 @@ public class Cell {
 	 * @return ROI corresponding to segmented cell
 	 */
 	public Roi getCellShapeRoi() {
-		return cellShapeRoi;
+		return this.cellShapeRoi;
 	}
 
 	public Roi rescaleCellShapeRoi(double[] factors) {
-		return ImgUtils.rescaleRoi(cellShapeRoi, factors);
+		return ImgUtils.rescaleRoi(this.cellShapeRoi, factors);
 	}
 
 	public int getCellNumber() {
-		return cellNumber;
+		return this.cellNumber;
 	}
 
 	public void setRoiMeasurement(String measurements) {
@@ -66,28 +66,28 @@ public class Cell {
 	}
 
 	public void addChannel(String channel) {
-		spotContainer.addChannel(channel);
-		geoContainer.addChannel(channel);
+		this.spotContainer.addChannel(channel);
+		this.geoContainer.addChannel(channel);
 	}
 
 	public void putSpot(String channel, int frame, Spot s) {
-		spotContainer.putSpot(channel, frame, s);
+		this.spotContainer.putSpot(channel, frame, s);
 	}
 
 	public int getNbOfSpots(String channel, int frame) {
-		return spotContainer.getNbOfSpot(channel, frame);
+		return this.spotContainer.getNbOfSpot(channel, frame);
 	}
 
 	public Iterable<Spot> getSpotsInFrame(String channel, int frame) {
-		return spotContainer.getSpotsInFrame(channel, frame);
+		return this.spotContainer.getSpotsInFrame(channel, frame);
 	}
 
 	public void removeSpot(String channel, int frame, Spot s) {
-		spotContainer.removeSpot(channel, frame, s);
+		this.spotContainer.removeSpot(channel, frame, s);
 	}
 
 	public void setTrackmateModel(Model model) {
-		spotContainer.setTrackmateModel(model);
+		this.spotContainer.setTrackmateModel(model);
 	}
 
 	public SpotsContainer getSpotContainer() {
@@ -95,7 +95,7 @@ public class Cell {
 	}
 
 	public void putGeometry(String channel, int frame, HashMap<String, Object> geometries) {
-		geoContainer.putGeometry(channel, frame, geometries);
+		this.geoContainer.putGeometry(channel, frame, geometries);
 	}
 
 	public GeometryContainer getGeometryContainer() {
@@ -103,10 +103,10 @@ public class Cell {
 	}
 
 	public void incrementMerotelyCount() {
-		IJ.log("cell " + this.cellNumber + " merotely counter increased to " + merotelyCounter.incrementAndGet());
+		IJ.log("cell " + this.cellNumber + " merotely counter increased to " + this.merotelyCounter.incrementAndGet());
 	}
 
 	public int getMerotelyCount() {
-		return merotelyCounter.get();
+		return this.merotelyCounter.get();
 	}
 }
