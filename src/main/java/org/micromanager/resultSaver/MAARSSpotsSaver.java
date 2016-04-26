@@ -23,7 +23,7 @@ public class MAARSSpotsSaver {
 	}
 
 	public void saveSpots(String channel, SpotCollection spotsInChannel, String cellNb) {
-		Model trackmateModel = container.getTrackmateModel();
+		Model trackmateModel = this.container.getTrackmateModel();
 		// for each cell
 		File newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");
 		TmXmlWriter spotsWriter = new TmXmlWriter(newFile);
@@ -41,8 +41,8 @@ public class MAARSSpotsSaver {
 
 	public void save(Cell cell) {
 		this.container = cell.getSpotContainer();
-		for (String channel : container.getUsingChannels()) {
-			saveSpots(channel, container.getSpots(channel), String.valueOf(cell.getCellNumber()));
+		for (String channel : this.container.getUsingChannels()) {
+			saveSpots(channel, this.container.getSpots(channel), String.valueOf(cell.getCellNumber()));
 		}
 	}
 }

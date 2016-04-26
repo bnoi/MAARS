@@ -19,7 +19,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
-
+import ij.IJ;
 import ij.ImagePlus;
 
 import ij.gui.Roi;
@@ -180,7 +180,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 			}
 			// need to be false because all spots are not visible
 			ArrayList<Spot> currentThreadSpots = Lists.newArrayList(collection.iterable(false));
-			for (int j = begin; j < end; j++) {
+			for (int j = begin +1 ; j <= end; j++) {
 				Cell cell = soc.getCell(j);
 				cell.addChannel(channel);
 				cell.setTrackmateModel(model);
@@ -210,7 +210,6 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 				for (Spot s2del : spotsToDel) {
 					currentThreadSpots.remove(s2del);
 				}
-
 				SpotSetAnalyzor spotSetAnalyzor = new SpotSetAnalyzor(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
 						cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight,
 						cell.get(Cell.MAJOR) * fluoImgCal.pixelWidth, cell.get(Cell.ANGLE), calibratedXBase,

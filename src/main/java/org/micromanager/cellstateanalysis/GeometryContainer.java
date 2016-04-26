@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class GeometryContainer {
-	private HashMap<String, HashMap<Integer, HashMap<String, Object>>> geosOfCells = null;
+	private HashMap<String, HashMap<Integer, HashMap<String, Object>>> geosOfCells;
 
 	public GeometryContainer() {
 	}
@@ -17,8 +17,8 @@ public class GeometryContainer {
 		if (this.geosOfCells == null) {
 			this.geosOfCells = new HashMap<String, HashMap<Integer, HashMap<String, Object>>>();
 		}
-		if (!geosOfCells.containsKey(channel)) {
-			geosOfCells.put(channel, new HashMap<Integer, HashMap<String, Object>>());
+		if (!this.geosOfCells.containsKey(channel)) {
+			this.geosOfCells.put(channel, new HashMap<Integer, HashMap<String, Object>>());
 		}
 	}
 
@@ -45,13 +45,17 @@ public class GeometryContainer {
 		}
 		getGeosInChannel(channel).put(frame, geometries);
 	}
+	
+	public boolean isEmpty(){
+		return this.geosOfCells.isEmpty();
+	}
 
 	public Set<String> getUsingChannels() {
-		return geosOfCells.keySet();
+		return this.geosOfCells.keySet();
 	}
 
 	public HashMap<Integer, HashMap<String, Object>> getGeosInChannel(String channel) {
-		return geosOfCells.get(channel);
+		return this.geosOfCells.get(channel);
 	}
 
 }

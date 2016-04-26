@@ -188,8 +188,8 @@ public class MAARS implements Runnable {
 		MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
 		MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
 		for (Cell cell : soc) {
-			spotSaver.save(cell);
 			geoSaver.save(cell);
+			spotSaver.save(cell);
 			HashMap<String, ImagePlus> croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
 			imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
 		}
@@ -198,8 +198,6 @@ public class MAARS implements Runnable {
 
 	public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
 			String pathToSegDir) {
-		// TODO add a textfield in gui to specify this parameter
-		double laggingThreshold = 120;
 		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP");
 		if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
@@ -208,14 +206,16 @@ public class MAARS implements Runnable {
 			ImagePlus merotelyImp = null;
 			for (String acqName : listAcqNames) {
 				if (Pattern.matches(pattern, acqName)) {
-					//TODO
-					int cellNb = Integer.parseInt(acqName.split("_", -1)[0].substring(0, -4));
+					int cellNb = Integer
+							.parseInt(acqName.split("_", -1)[1].substring(0, acqName.split("_", -1)[1].length() - 4));
 					Cell cell = soc.getCell(cellNb);
 					int abnormalStateTimes = cell.getMerotelyCount();
 					// TODO maybe to be shorten?
-					if (abnormalStateTimes > (laggingThreshold / (timeInterval / 1000))) {
-						String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Calendar.getInstance().getTime());
-						IJ.log(timeStamp + " : " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000);
+					if (abnormalStateTimes > 0) {
+						String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
+								.format(Calendar.getInstance().getTime());
+						IJ.log(timeStamp + " : cell " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000
+								+ " s.");
 						if (splitChannel) {
 							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS/cropImgs/" + cellNb + "_GFP.tif");
 							merotelyImp.show();
