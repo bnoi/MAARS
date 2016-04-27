@@ -196,10 +196,8 @@ public class MAARS implements Runnable {
 		imgSaver.exportChannelBtf(splitChannel, arrayChannels);
 	}
 
-	public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
-			String pathToSegDir) {
-		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP");
+	public static void showMerotelyCells(String pathToSegDir, double timeInterval, SetOfCells soc,
+			Boolean splitChannel) {
 		if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
 			String[] listAcqNames = new File(pathToSegDir + "_MITOSIS/csv/").list();
 			String pattern = "(d_)(\\d+)(.csv)";
@@ -210,7 +208,6 @@ public class MAARS implements Runnable {
 							.parseInt(acqName.split("_", -1)[1].substring(0, acqName.split("_", -1)[1].length() - 4));
 					Cell cell = soc.getCell(cellNb);
 					int abnormalStateTimes = cell.getMerotelyCount();
-					// TODO maybe to be shorten?
 					if (abnormalStateTimes > 0) {
 						String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 								.format(Calendar.getInstance().getTime());
@@ -226,6 +223,17 @@ public class MAARS implements Runnable {
 					}
 				}
 			}
+		}
+	}
+
+	public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
+			String pathToSegDir, Boolean showMerotely) {
+		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+		//TODO 
+		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP", "0.1075", String.valueOf(soc.size()), "0.3", "0.6", "200",
+				String.valueOf(timeInterval));
+		if (showMerotely) {
+			MAARS.showMerotelyCells(pathToSegDir, timeInterval, soc, splitChannel);
 		}
 	}
 
@@ -354,7 +362,7 @@ public class MAARS implements Runnable {
 					Boolean splitChannel = true;
 					ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
 					MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
-					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir);
+					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir, true);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}
@@ -364,8 +372,8 @@ public class MAARS implements Runnable {
 		mmc.setAutoShutter(true);
 		es.shutdown();
 		try {
-			// TODO no acq should be more than one hour
-			es.awaitTermination(60, TimeUnit.MINUTES);
+			// TODO no acq should be more than 3 hours
+			es.awaitTermination(180, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

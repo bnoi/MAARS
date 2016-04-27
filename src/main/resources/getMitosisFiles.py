@@ -81,11 +81,9 @@ class getMitosisFiles(object):
 		frameLabel = 'Frame'
 		xPos='x'
 		yPos = 'y'
-		spAng2MajVal = 0
-		csvPath = baseDir + '/BF_Results.csv'
-		if os.path.lexists(csvPath) : 
-			cellRois = pd.DataFrame.from_csv(csvPath)
-		current_cell_major = cellRois.loc[cellNb + 1][major] * self._calibration
+		csvPath = baseDir + '/BF_Results.csv' 
+		cellRois = pd.DataFrame.from_csv(csvPath)
+		current_cell_major = cellRois.loc[cellNb][major] * self._calibration
 		last_spot_0_x_y = None
 		last_spot_1_x_y = None
 		if os.path.lexists(geoPath) and os.path.lexists(spotsPath):
@@ -197,12 +195,12 @@ class getMitosisFiles(object):
 				else:
 					concat_data.append(np.array([i,
 												 current_cell_major,
-												 spAng2MajVal,
+												 np.nan,
 												 np.nan,
 												 np.nan, np.nan]))
 					concat_data.append(np.array([i,
 												 current_cell_major,
-												 spAng2MajVal,
+												 np.nan,
 												 np.nan,
 												 np.nan, np.nan]))
 			concat_data = pd.DataFrame(concat_data, columns = [frameLabel, major, spAngToMajLabel, xPos, yPos, 'Track'])
@@ -241,7 +239,7 @@ class getMitosisFiles(object):
 		minimumSegLength = minimumPeriod/acq_interval
 		acqDir = self._baseDir
 		channels = [self._channel,'GFP', 'TxRed', 'DAPI']
-		for x in range(0, iteration_nb):
+		for x in range(1, iteration_nb):
 			csvPath = acqDir + '_FLUO/features/'+str(x)+'_' +channels[0]+'.csv'
 			if os.path.lexists(csvPath) : 
 				oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= float)
