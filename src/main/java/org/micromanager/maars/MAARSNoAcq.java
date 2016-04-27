@@ -155,7 +155,7 @@ public class MAARSNoAcq implements Runnable {
 					long startWriting = System.currentTimeMillis();
 					Boolean splitChannel = true;
 					MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
-					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir);
+					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir, true);
 					IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
 							+ " sec for writing results");
 				}
