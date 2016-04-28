@@ -17,7 +17,7 @@ from argparse import ArgumentParser
 from re import match
 from collections import deque
 idx = IndexSlice
-get_ipython().magic('matplotlib inline')
+#get_ipython().magic('matplotlib inline')
 
 class getMitosisFiles(object):
     """
@@ -75,7 +75,7 @@ class getMitosisFiles(object):
 
     def getAllCellNnumbers(self):
         all_cell_nbs=list()
-        features_dir = self._baseDir + '_FLUO/features'
+        features_dir = self._baseDir + '_FLUO' + path.sep + 'features'
         for f in listdir(features_dir):
             current_cell_nb = f.split("_")[0]
             if current_cell_nb not in all_cell_nbs:
@@ -109,7 +109,7 @@ class getMitosisFiles(object):
         minimumSegLength = self._minimumPeriod/self._acq_interval
         cellNbs, features_dir = self.getAllCellNnumbers()
         for cellNb in cellNbs:
-            csvPath = features_dir + "/" + cellNb + '_' + channel+'.csv'
+            csvPath = features_dir + path.sep + cellNb + '_' + channel+'.csv'
             if path.lexists(csvPath) : 
                 oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= float)
                 spLen = oneCell['SpLength']
@@ -150,12 +150,12 @@ class getMitosisFiles(object):
         return smallest_key
     
     def createOutputDirs(self):
-        mitosisDir = self._baseDir + "_MITOSIS/"
-        croppedImgsDir = mitosisDir + "cropImgs/"
-        spotsDir = mitosisDir + "spots/"
-        csvDir = mitosisDir + "csv/"
-        featuresDir = mitosisDir + "features/"
-        figureDir = mitosisDir + "figs/"
+        mitosisDir = self._baseDir + "_MITOSIS" + path.sep 
+        croppedImgsDir = mitosisDir + "cropImgs" + path.sep 
+        spotsDir = mitosisDir + "spots" + path.sep 
+        csvDir = mitosisDir + "csv" + path.sep 
+        featuresDir = mitosisDir + "features" + path.sep 
+        figureDir = mitosisDir + "figs"+ path.sep 
         if not path.isdir(mitosisDir):
             mkdir(mitosisDir)
         if not path.isdir(croppedImgsDir):
@@ -171,8 +171,8 @@ class getMitosisFiles(object):
         return croppedImgsDir, spotsDir, csvDir, featuresDir, figureDir
         
     def analyzeSPBTrack(self, baseDir, cellNb, channel, figureDir, cell_major_length, save):
-        geoPath = baseDir + '_FLUO/features/'+str(cellNb)+'_' + channel +'.csv'
-        spotsPath = baseDir+ '_FLUO/spots/'+str(cellNb)+'_' + channel +'.xml'
+        geoPath = baseDir + '_FLUO'+ path.sep +'features'+ path.sep +str(cellNb)+'_' + channel +'.csv'
+        spotsPath = baseDir+ '_FLUO'+ path.sep +'spots'+ path.sep +str(cellNb)+'_' + channel +'.xml'
         concat_data = list()
         spAngToMajLabel = 'SpAngToMaj'
         frameLabel = 'Frame'
@@ -186,6 +186,7 @@ class getMitosisFiles(object):
             for i in range(0, oneCellGeo.index[-1] + 1):
                 if i in oneCellGeo.index:
                     spAng2MajVal = oneCellGeo[spAngToMajLabel].loc[i]
+                    #to investigate
                     current_spot_0_x = oneCellSpots.loc[idx[i,:],idx[xPos,yPos]].iloc[0][xPos]
                     current_spot_0_y = oneCellSpots.loc[idx[i,:],idx[xPos,yPos]].iloc[0][yPos]
                     if np.isnan(spAng2MajVal):
@@ -395,15 +396,15 @@ class getMitosisFiles(object):
         channels = ['CFP','GFP', 'TxRed', 'DAPI']
         mitosis_cellNbs = self.getMitosisCellNbs(channels[0])
         croppedImgsDir, spotsDir, csvDir, featuresDir, figureDir = self.createOutputDirs()
-        csvPath = self._baseDir + '/BF_Results.csv' 
+        csvPath = self._baseDir + path.sep +'BF_Results.csv' 
         cellRois = DataFrame.from_csv(csvPath)
         for cellNb in mitosis_cellNbs:
             current_major_length = cellRois.loc[int(cellNb)][major] * self._calibration
             for ch in channels:
-                if path.lexists(self._baseDir + "_FLUO/croppedImgs/" + cellNb + "_" + ch + ".tif"):
-                    copyfile(self._baseDir + "_FLUO/croppedImgs/" + cellNb + "_" + ch + ".tif",  croppedImgsDir + cellNb + "_" + ch +".tif")
-                    copyfile(self._baseDir + "_FLUO/spots/" + cellNb + "_" + ch + ".xml", spotsDir + cellNb + "_" + ch + ".xml")
-                    copyfile(self._baseDir + "_FLUO/features/" + cellNb + "_" + ch + ".csv", featuresDir + cellNb + "_" + ch + ".csv");
+                if path.lexists(self._baseDir + "_FLUO"+ path.sep +"croppedImgs"+ path.sep  + cellNb + "_" + ch + ".tif"):
+                    copyfile(self._baseDir + "_FLUO"+ path.sep +"croppedImgs" + path.sep + cellNb + "_" + ch + ".tif",  croppedImgsDir + cellNb + "_" + ch +".tif")
+                    copyfile(self._baseDir + "_FLUO"+ path.sep +"spots" + path.sep + cellNb + "_" + ch + ".xml", spotsDir + cellNb + "_" + ch + ".xml")
+                    copyfile(self._baseDir + "_FLUO"+ path.sep +"features"+ path.sep  + cellNb + "_" + ch + ".csv", featuresDir + cellNb + "_" + ch + ".csv");
             cellFeaturesPath = featuresDir + cellNb + '_' + channels[0]+'.csv'
             oneCellFeatures = genfromtxt(cellFeaturesPath, delimiter=',', names=True, dtype= float)
             spLens = oneCellFeatures['SpLength']
@@ -427,12 +428,12 @@ class getMitosisFiles(object):
             self.find_slope_change_point(spLens, frames, current_major_length, figureDir, cellNb, save)
             #
             d = self.analyzeSPBTrack(self._baseDir, cellNb, channels[0], figureDir, current_major_length, save)
-            d.to_csv(csvDir + "/d_" + cellNb + ".csv", sep='\t')
+            d.to_csv(csvDir + path.sep +"d_" + cellNb + ".csv", sep='\t')
             
 if __name__ == '__main__':
     launcher = getMitosisFiles("/home/tong/Documents/movies/102/60x/dynamic/25-03-1/X0_Y0", "CFP")
     launcher.set_attributes_from_cmd_line()
-    launcher.analyze(False)
+    launcher.analyze(True)
 #     plt.hist(change_point_lengths)
     print("Collection done")
 

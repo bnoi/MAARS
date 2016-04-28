@@ -3,6 +3,7 @@ package org.micromanager.acquisition;
 import mmcorej.CMMCore;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -175,7 +176,7 @@ public class SuperClassAcquisition {
 	public void save(List<Image> listImg, int frame, String channelName, double step, String pathToMovie) {
 		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
 			// initialize parameters for FLUO Acquisitions
-			pathToMovie = baseSaveDir + "_FLUO/" + frame + "_" + channelName;
+			pathToMovie = baseSaveDir + "_FLUO" + File.separator + frame + "_" + channelName;
 		} else {
 			// initialize parameters for Bright-Field Acquisitions
 			pathToMovie = baseSaveDir;

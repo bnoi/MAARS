@@ -17,7 +17,7 @@ public class MAARSGeometrySaver {
 	private String geometryCSVDir;
 
 	public MAARSGeometrySaver(String pathToFluoDir) {
-		this.geometryCSVDir = pathToFluoDir + "/features/";
+		this.geometryCSVDir = pathToFluoDir + File.separator + "features"  + File.separator;
 		if (!new File(geometryCSVDir).exists()) {
 			new File(geometryCSVDir).mkdirs();
 		}

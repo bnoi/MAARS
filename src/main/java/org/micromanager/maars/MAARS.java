@@ -199,7 +199,8 @@ public class MAARS implements Runnable {
 	public static void showMerotelyCells(String pathToSegDir, double timeInterval, SetOfCells soc,
 			Boolean splitChannel) {
 		if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
-			String[] listAcqNames = new File(pathToSegDir + "_MITOSIS/csv/").list();
+			String[] listAcqNames = new File(pathToSegDir + "_MITOSIS" + File.separator + "csv" + File.separator)
+					.list();
 			String pattern = "(d_)(\\d+)(.csv)";
 			ImagePlus merotelyImp = null;
 			for (String acqName : listAcqNames) {
@@ -213,10 +214,12 @@ public class MAARS implements Runnable {
 								.format(Calendar.getInstance().getTime());
 						IJ.log(timeStamp + " : cell " + cellNb + "_" + abnormalStateTimes * timeInterval + " s.");
 						if (splitChannel) {
-							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS/cropImgs/" + cellNb + "_GFP.tif");
+							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "cropImgs"
+									+ File.separator + cellNb + "_GFP.tif");
 							merotelyImp.show();
 						} else {
-							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS/cropImgs/" + cellNb + "_merged.tif");
+							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "cropImgs"
+									+ File.separator + cellNb + "_merged.tif");
 							merotelyImp.show();
 						}
 					}
@@ -271,8 +274,9 @@ public class MAARS implements Runnable {
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			IJ.log("Current position : x_" + xPos + " y_" + yPos);
-			this.pathToSegDir = FileUtils.convertPath(parameters.getSavingPath() + "/X" + xPos + "_Y" + yPos);
-			this.pathToFluoDir = pathToSegDir + "_FLUO/";
+			this.pathToSegDir = FileUtils
+					.convertPath(parameters.getSavingPath() + File.separator + "X" + xPos + "_Y" + yPos);
+			this.pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
 			// autofocus(mm, mmc);
 			double zFocus = 0;
 			String focusDevice = mmc.getFocusDevice();
@@ -298,7 +302,7 @@ public class MAARS implements Runnable {
 				// ----------------start acquisition and analysis --------//
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
 				try {
-					PrintStream ps = new PrintStream(this.pathToSegDir + "/CellStateAnalysis.LOG");
+					PrintStream ps = new PrintStream(this.pathToSegDir + File.separator + "CellStateAnalysis.LOG");
 					curr_err = System.err;
 					curr_out = System.err;
 					System.setOut(ps);

@@ -152,7 +152,7 @@ public class ImgUtils {
 		});
 		for (String acqName : listAcqNames) {
 			if (Pattern.matches(pattern, acqName)) {
-				fluoImg = IJ.openImage(fluoDir + "/" + acqName + "/MMStack.ome.tif");
+				fluoImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + "MMStack.ome.tif");
 				zprojectImg = ImgUtils.zProject(fluoImg);
 				if (fluoImgCalib == null) {
 					fluoImgCalib = fluoImg.getCalibration();

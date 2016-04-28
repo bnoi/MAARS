@@ -16,7 +16,7 @@ public class MAARSSpotsSaver {
 	private SpotsContainer container;
 
 	public MAARSSpotsSaver(String pathToFluoDir) {
-		spotsXmlDir = pathToFluoDir + "/spots/";
+		spotsXmlDir = pathToFluoDir + File.separator + "spots" + File.separator;
 		if (!new File(spotsXmlDir).exists()) {
 			new File(spotsXmlDir).mkdirs();
 		}

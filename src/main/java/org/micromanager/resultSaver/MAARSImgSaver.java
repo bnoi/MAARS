@@ -18,7 +18,7 @@ public class MAARSImgSaver {
 
 	public MAARSImgSaver(String pathToFluoDir, ImagePlus mergedFullFieldImg) {
 		this.pathToFluoDir = pathToFluoDir;
-		this.croppedImgDir = pathToFluoDir + "/croppedImgs/";
+		this.croppedImgDir = pathToFluoDir + File.separator + "croppedImgs" + File.separator;
 		this.mergedFullFieldImg = mergedFullFieldImg;
 		if (!new File(croppedImgDir).exists()) {
 			new File(croppedImgDir).mkdirs();
@@ -47,7 +47,7 @@ public class MAARSImgSaver {
 		LociExporter lociExporter = new LociExporter();
 		if (splitChannel) {
 			for (String channel : arrayChannels) {
-				final String btfPath = pathToFluoDir + "/" + channel + ".ome.btf";
+				final String btfPath = pathToFluoDir + File.separator + channel + ".ome.btf";
 				if (!FileUtils.exists(btfPath)) {
 					ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(),
 							mergedFullFieldImg.getHeight());
