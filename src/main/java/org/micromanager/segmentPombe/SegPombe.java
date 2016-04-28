@@ -1,5 +1,6 @@
 package org.micromanager.segmentPombe;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -84,7 +85,7 @@ public class SegPombe {
 		this.savingPath = parameters.getSavingPath();
 
 		try {
-			ps = new PrintStream(savingPath + "/" + bf + "_Segmentation.LOG");
+			ps = new PrintStream(savingPath + File.separator + bf + "_Segmentation.LOG");
 			curr_err = System.err;
 			curr_out = System.out;
 			System.setOut(ps);
@@ -134,7 +135,7 @@ public class SegPombe {
 		if (saveFocusImage) {
 			IJ.run(focusImg, "Enhance Contrast", "saturated=0.35");
 			FileSaver fileSaver = new FileSaver(focusImg);
-			fileSaver.saveAsTiff(savingPath + "/" + bf + "_FocusImage.tif");
+			fileSaver.saveAsTiff(savingPath + File.separator + bf + "_FocusImage.tif");
 		}
 		imageToAnalyze.flatten();
 		System.out.println("FocusImage saved.");
@@ -364,7 +365,7 @@ public class SegPombe {
 		if (saveDataFrame && roiDetected) {
 			System.out.println("saving data frame...");
 			try {
-				resultTable.saveAs(savingPath + "/" + bf + "_Results.csv");
+				resultTable.saveAs(savingPath + File.separator + bf + "_Results.csv");
 			} catch (IOException io) {
 				IJ.error("Error", "Could not save DataFrame");
 			}
@@ -379,7 +380,7 @@ public class SegPombe {
 		if (saveRoi && roiDetected) {
 			System.out.println("saving roi...");
 			roiManager.runCommand("Select All");
-			roiManager.runCommand("Save", savingPath + "/ROI.zip");
+			roiManager.runCommand("Save", savingPath + File.separator +"ROI.zip");
 			System.out.println("Done");
 			roiManager.runCommand("Select All");
 			roiManager.runCommand("Delete");
@@ -397,7 +398,7 @@ public class SegPombe {
 			System.out.println("save binary image");
 			binCorrelationImage.setTitle(bf + "_BinaryImage");
 			FileSaver fileSaver = new FileSaver(binCorrelationImage);
-			fileSaver.saveAsTiff(savingPath + "/" + bf + "_BinaryImage.tif");
+			fileSaver.saveAsTiff(savingPath + File.separator + bf + "_BinaryImage.tif");
 		}
 		if (showBinaryImg) {
 			System.out.println("show binary image");
@@ -412,7 +413,7 @@ public class SegPombe {
 			imgCorrTemp.setTitle(bf + "_CorrelationImage");
 			IJ.run(imgCorrTemp, "Enhance Contrast", "saturated=0.35");
 			FileSaver fileSaver = new FileSaver(imgCorrTemp);
-			fileSaver.saveAsTiff(savingPath + "/" + bf + "_CorrelationImage.tif");
+			fileSaver.saveAsTiff(savingPath + File.separator + bf + "_CorrelationImage.tif");
 		}
 		if (showCorrelationImg) {
 			System.out.println("show correlation image");

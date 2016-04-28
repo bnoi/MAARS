@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.BoxLayout;
@@ -355,7 +356,7 @@ public class MaarsMainDialog implements ActionListener {
 
 	public int overWrite(String path) {
 		int overWrite = 0;
-		if (FileUtils.exists(path + "/X0_Y0/MMStack.ome.tif")) {
+		if (FileUtils.exists(path + File.separator + "X0_Y0" + File.separator + "MMStack.ome.tif")) {
 			overWrite = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
 		}
 		return overWrite;

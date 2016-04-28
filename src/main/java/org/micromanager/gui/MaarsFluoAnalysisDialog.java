@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -364,7 +365,8 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 	public void testTrackmate(JPanel jp) {
 		String channelName = getSelectedChannel(jp);
-		String imgPath = parameters.getSavingPath() + "/X0_Y0_FLUO/0_" + channelName + "/MMStack.ome.tif";
+		String imgPath = parameters.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator + "0_"
+				+ channelName + File.separator + "MMStack.ome.tif";
 		if (FileUtils.exists(imgPath)) {
 			testTrackmate(jp, IJ.openImage(imgPath));
 		} else {

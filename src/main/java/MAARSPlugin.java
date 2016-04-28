@@ -6,6 +6,7 @@ import org.micromanager.maars.MaarsParameters;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -69,7 +70,7 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 			}
 
 		} else {
-			inStream = getClass().getResourceAsStream("/maars_default_config.xml");
+			inStream = getClass().getResourceAsStream(File.separator + "maars_default_config.xml");
 		}
 		parameters = new MaarsParameters(inStream);
 		new MaarsMainDialog(mmStudio, parameters).show();
