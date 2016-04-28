@@ -211,8 +211,7 @@ public class MAARS implements Runnable {
 					if (abnormalStateTimes > 0) {
 						String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
 								.format(Calendar.getInstance().getTime());
-						IJ.log(timeStamp + " : cell " + cellNb + "_" + abnormalStateTimes * timeInterval / 1000
-								+ " s.");
+						IJ.log(timeStamp + " : cell " + cellNb + "_" + abnormalStateTimes * timeInterval + " s.");
 						if (splitChannel) {
 							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS/cropImgs/" + cellNb + "_GFP.tif");
 							merotelyImp.show();
@@ -228,10 +227,10 @@ public class MAARS implements Runnable {
 
 	public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
 			String pathToSegDir, Boolean showMerotely) {
-		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-		//TODO 
-		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP", "0.1075", String.valueOf(soc.size()), "0.3", "0.6", "200",
-				String.valueOf(timeInterval));
+		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
+		// TODO
+		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP", "0.1075", "0.3", "0.6", "200",
+				String.valueOf(Math.round((timeInterval))));
 		if (showMerotely) {
 			MAARS.showMerotelyCells(pathToSegDir, timeInterval, soc, splitChannel);
 		}
