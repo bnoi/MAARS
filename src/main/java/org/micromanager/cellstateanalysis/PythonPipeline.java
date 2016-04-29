@@ -53,8 +53,13 @@ public class PythonPipeline {
 					pythonPath = condaDir + sep + dir + sep + "bin" + sep + "python";
 				}
 			}
-		} else if (osName.equals("Mac")) {
-
+		} else if (osName.equals("Mac OS X")) {
+			condaDir = new File(sep + "Users" + sep + System.getProperty("user.name"));
+			for (String dir : condaDir.list()) {
+				if (dir.matches(condaDirPattern)) {
+					pythonPath = condaDir + sep + dir + sep + "bin" + sep + "python";
+				}
+			}
 		} else if (osName.equals("windows")) {
 
 		}
@@ -63,7 +68,7 @@ public class PythonPipeline {
 	}
 
 	public static void main(String[] args) {
-		PythonPipeline.getMitosisFiles("/home/tong/Documents/movies/102/60x/dynamic/07-04-1/X0_Y0", "CFP", "0.1075", "0.3", "0.6", "200", "20");
+		PythonPipeline.getMitosisFiles("/Volumes/Macintosh/curioData/102/25-03-1/X0_Y0", "CFP", "0.1075", "0.3", "0.6", "200", "20");
 		// PythonPipeline.getPythonInConda();
 	}
 }
