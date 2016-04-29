@@ -151,9 +151,11 @@ public class MAARSNoAcq implements Runnable {
 				mergedImg.setZ(fluoStack.getSize());
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
+				double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 				if (soc.size() != 0) {
 					long startWriting = System.currentTimeMillis();
 					Boolean splitChannel = true;
+					mergedImg.getCalibration().frameInterval = timeInterval / 1000;
 					MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
 					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir, true);
 					IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000

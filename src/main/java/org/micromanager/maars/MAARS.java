@@ -261,6 +261,7 @@ public class MAARS implements Runnable {
 
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
+		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 		int nThread = Runtime.getRuntime().availableProcessors();
 		ExecutorService es = Executors.newFixedThreadPool(nThread);
 		for (int i = 0; i < explo.length(); i++) {
@@ -312,7 +313,6 @@ public class MAARS implements Runnable {
 				}
 				int frame = 0;
 				Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
-				double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
 				Boolean saveFilm = Boolean
 						.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
 				if (parameters.useDynamic()) {
@@ -364,6 +364,7 @@ public class MAARS implements Runnable {
 					long startWriting = System.currentTimeMillis();
 					Boolean splitChannel = true;
 					ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
+					mergedImg.getCalibration().frameInterval = timeInterval / 1000;
 					MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
 					MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir, true);
 					ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
