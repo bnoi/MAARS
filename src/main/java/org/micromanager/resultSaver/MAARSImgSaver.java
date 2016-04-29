@@ -47,7 +47,7 @@ public class MAARSImgSaver {
 		LociExporter lociExporter = new LociExporter();
 		if (splitChannel) {
 			for (String channel : arrayChannels) {
-				final String btfPath = pathToFluoDir + File.separator + channel + ".ome.btf";
+				final String btfPath = pathToFluoDir + File.separator + channel + ".ome";
 				if (!FileUtils.exists(btfPath)) {
 					ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(),
 							mergedFullFieldImg.getHeight());
@@ -65,7 +65,7 @@ public class MAARSImgSaver {
 				}
 			}
 		} else {
-			String btfPath = pathToFluoDir + "merged.ome.btf";
+			String btfPath = pathToFluoDir + "merged.ome";
 			if (!FileUtils.exists(btfPath)) {
 				final String macroOpts = "outfile=[" + btfPath
 						+ "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
