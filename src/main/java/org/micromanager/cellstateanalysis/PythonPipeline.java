@@ -16,12 +16,21 @@ public class PythonPipeline {
 		Process process = null;
 		BufferedReader in = null;
 		BufferedReader stdError = null;
-		// TODO find a way to call python with packages
-		String[] cmd = new String[] { PythonPipeline.getPythonInConda(),
-				PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath()
-						+ "AnalyzeMAARSOutput.py",
-				acqDir, channel, "-calibration", calibration, "-gap_tolerance", gap_tolerance, "-elongating_trend",
-				elongat_trend, "-minimumPeriod", minimumPeriod, "-acq_interval", interval };
+		String[] cmd = null;
+		if (System.getProperty("os.name").matches("(Windows)(.+)")) {
+			cmd = new String[] { PythonPipeline.getPythonInConda(),
+					PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
+							+ "AnalyzeMAARSOutput.py",
+					acqDir, channel, "-calibration", calibration, "-gap_tolerance", gap_tolerance, "-elongating_trend",
+					elongat_trend, "-minimumPeriod", minimumPeriod, "-acq_interval", interval };
+		} else {
+			cmd = new String[] { PythonPipeline.getPythonInConda(),
+					PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath()
+							+ "AnalyzeMAARSOutput.py",
+					acqDir, channel, "-calibration", calibration, "-gap_tolerance", gap_tolerance, "-elongating_trend",
+					elongat_trend, "-minimumPeriod", minimumPeriod, "-acq_interval", interval };
+		}
+
 		probuilder = new ProcessBuilder(cmd);
 		try {
 			process = probuilder.start();
@@ -60,15 +69,21 @@ public class PythonPipeline {
 					pythonPath = condaDir + sep + dir + sep + "bin" + sep + "python";
 				}
 			}
-		} else if (osName.equals("windows")) {
-
+		} else {
+			condaDir = new File(sep + "C:" + sep + "Users" + sep + System.getProperty("user.name"));
+			for (String dir : condaDir.list()) {
+				if (dir.matches(condaDirPattern)) {
+					pythonPath = condaDir + sep + dir + sep + "python";
+				}
+			}
 		}
 		System.out.println(pythonPath);
 		return pythonPath;
 	}
 
 	public static void main(String[] args) {
-		PythonPipeline.getMitosisFiles("/Volumes/Macintosh/curioData/102/25-03-1/X0_Y0", "CFP", "0.1075", "0.3", "0.6", "200", "20");
+		PythonPipeline.getMitosisFiles("/Volumes/Macintosh/curioData/102/25-03-1/X0_Y0", "CFP", "0.1075", "0.3", "0.6",
+				"200", "20");
 		// PythonPipeline.getPythonInConda();
 	}
 }
