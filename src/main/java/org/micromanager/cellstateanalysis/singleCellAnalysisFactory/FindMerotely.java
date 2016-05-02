@@ -21,22 +21,18 @@ public class FindMerotely {
 		// spbs for exemple
 		int setSize = Iterables.size(spotSet);
 		if (setSize > 2) {
-			double spindleLength = (double) geometry.get(SpotSetAnalyzor.SpLength);
-			// TODO anaphase onset length
-			if (spindleLength > 4) {
-				Line spLine = new Line(
-						(int) FastMath.round(poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-						(int) FastMath.round(poles.get(0).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight),
-						(int) FastMath.round(poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-						(int) FastMath.round(poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
-				Line.setWidth(2 * (int) FastMath.round(radius / fluoImgCal.pixelWidth));
-				for (Spot s : spotSet) {
-					if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
-						if (spLine.contains((int) FastMath.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
-								(int) FastMath.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
-							// merotely
-							cell.incrementMerotelyCount();
-						}
+			Line spLine = new Line(
+					(int) FastMath.round(poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+					(int) FastMath.round(poles.get(0).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight),
+					(int) FastMath.round(poles.get(1).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+					(int) FastMath.round(poles.get(1).getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight));
+			Line.setWidth(2 * (int) FastMath.round(radius / fluoImgCal.pixelWidth));
+			for (Spot s : spotSet) {
+				if (!s.equals(poles.get(0)) && !s.equals(poles.get(1))) {
+					if (spLine.contains((int) FastMath.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
+							(int) FastMath.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
+						// merotely
+						cell.addSpotInBtwnFrame(frame);
 					}
 				}
 			}

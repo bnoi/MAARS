@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -22,6 +23,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.commons.math3.util.FastMath;
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.FluoAcquisition;
 import org.micromanager.acquisition.SegAcquisition;
@@ -196,31 +198,39 @@ public class MAARS implements Runnable {
 		imgSaver.exportChannelBtf(splitChannel, arrayChannels);
 	}
 
-	public static void showMerotelyCells(String pathToSegDir, double timeInterval, SetOfCells soc,
+	public static void showChromLaggingCells(String pathToSegDir, double timeInterval, SetOfCells soc,
 			Boolean splitChannel) {
 		if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
-			String[] listAcqNames = new File(pathToSegDir + "_MITOSIS" + File.separator + "csv" + File.separator)
+			String[] listAcqNames = new File(pathToSegDir + "_MITOSIS" + File.separator + "figs" + File.separator)
 					.list();
-			String pattern = "(d_)(\\d+)(.csv)";
+			String pattern = "(\\d+)(_slopChangePoints_)(\\d+)(.png)";
 			ImagePlus merotelyImp = null;
 			for (String acqName : listAcqNames) {
 				if (Pattern.matches(pattern, acqName)) {
-					int cellNb = Integer
-							.parseInt(acqName.split("_", -1)[1].substring(0, acqName.split("_", -1)[1].length() - 4));
+					String[] splitName = acqName.split("_", -1);
+					int cellNb = Integer.parseInt(splitName[0]);
+					int anaBOnsetFrame = Integer.parseInt(
+							splitName[splitName.length - 1].substring(0, splitName[splitName.length - 1].length() - 4));
 					Cell cell = soc.getCell(cellNb);
-					int abnormalStateTimes = cell.getMerotelyCount();
-					if (abnormalStateTimes > 0) {
-						String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
-								.format(Calendar.getInstance().getTime());
-						IJ.log(timeStamp + " : cell " + cellNb + "_" + abnormalStateTimes * timeInterval + " s.");
-						if (splitChannel) {
-							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "cropImgs"
-									+ File.separator + cellNb + "_GFP.tif");
-							merotelyImp.show();
-						} else {
-							merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "cropImgs"
-									+ File.separator + cellNb + "_merged.tif");
-							merotelyImp.show();
+					ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
+					Collections.sort(spotInBtwnFrames);
+					if (spotInBtwnFrames.size() > 0) {
+						IJ.log(cellNb + "_last_" +spotInBtwnFrames.get(spotInBtwnFrames.size() - 1));
+						IJ.log(cellNb + "_onset_" +anaBOnsetFrame);
+						if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) > anaBOnsetFrame) {
+							String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
+									.format(Calendar.getInstance().getTime());
+							// IJ.log(timeStamp + " : cell " + cellNb + "_" +
+							// abnormalStateTimes * timeInterval + " s.");
+							if (splitChannel) {
+								merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "cropImgs"
+										+ File.separator + cellNb + "_GFP.tif");
+								merotelyImp.show();
+							} else {
+								merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "cropImgs"
+										+ File.separator + cellNb + "_merged.tif");
+								merotelyImp.show();
+							}
 						}
 					}
 				}
@@ -229,13 +239,13 @@ public class MAARS implements Runnable {
 	}
 
 	public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
-			String pathToSegDir, Boolean showMerotely) {
+			String pathToSegDir, Boolean showChromLagging) {
 		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
 		// TODO
 		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP", "0.1075", "0.3", "0.6", "200",
 				String.valueOf(Math.round((timeInterval))));
-		if (showMerotely) {
-			MAARS.showMerotelyCells(pathToSegDir, timeInterval, soc, splitChannel);
+		if (showChromLagging) {
+			MAARS.showChromLaggingCells(pathToSegDir, timeInterval, soc, splitChannel);
 		}
 	}
 
