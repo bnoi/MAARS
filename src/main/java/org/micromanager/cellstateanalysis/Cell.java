@@ -1,13 +1,12 @@
 package org.micromanager.cellstateanalysis;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.micromanager.utils.ImgUtils;
 
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
-import ij.IJ;
 import ij.gui.Roi;
 
 /**
@@ -26,7 +25,7 @@ public class Cell {
 	private String[] measurements;
 	private SpotsContainer spotContainer;
 	private GeometryContainer geoContainer;
-	private AtomicInteger merotelyCounter = new AtomicInteger(0);;
+	private ArrayList<Integer> spotInBetweenFrames = new ArrayList<Integer>();
 
 	/**
 	 * @param roiCellShape
@@ -102,11 +101,11 @@ public class Cell {
 		return this.geoContainer;
 	}
 
-	public void incrementMerotelyCount() {
-		IJ.log("cell " + this.cellNumber + " merotely counter increased to " + this.merotelyCounter.incrementAndGet());
+	public void addSpotInBtwnFrame(Integer frame) {
+		this.spotInBetweenFrames.add(frame);
 	}
 
-	public int getMerotelyCount() {
-		return this.merotelyCounter.get();
+	public ArrayList<Integer> getSpotInBtwnFrames() {
+		return this.spotInBetweenFrames;
 	}
 }

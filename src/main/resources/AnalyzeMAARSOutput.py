@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[3]:
+# In[16]:
 
 #!/usr/bin/env python3
 import numpy as np
@@ -116,7 +116,7 @@ class getMitosisFiles(object):
                 if len(spLens[spLens>0]) > minimumSegLength:
                     end = np.where(spLens == np.nanmax(spLens))[0]
                     spLens = spLens[:end+1]
-                    if len(spLens) > minimumSegLength:
+                    if len(spLens[spLens>0]) > minimumSegLength:
                         frames = oneCell['Frame'][:end+1]
                         segmentList = self.getSegList(minimumSegLength, spLens, frames)
                         for segment in segmentList:
@@ -311,9 +311,10 @@ class getMitosisFiles(object):
         plt.ylabel("Absolute y in original fluo image (pixel)", fontsize=20)
         plt.xlabel("Absolute x in original fluo image (pixel)", fontsize=20)
         if save:
-            plt.savefig(figureDir + cellNb + "_track")
+            plt.savefig(figureDir + cellNb + "_SPBtracks")
         else:
             plt.show()
+        plt.close(fig)
         return concat_data
     
     def find_slope_change_point(self, spLen, frame, majorAxieLen, figureDir, cellNb, save):
@@ -343,7 +344,7 @@ class getMitosisFiles(object):
                     theo_line1_y = []
                     for x in theo_line1_x:
                         theo_line1_y.append(x * slope + intercept)
-                    if (slope>0):
+                    if (slope>=0):
                         ax.plot(theo_line1_x,theo_line1_y, lw = 1 + i*0.1, c='red')
                     else:
                         ax.plot(theo_line1_x,theo_line1_y, lw = 1 + i*0.1, c = 'blue')
@@ -363,7 +364,7 @@ class getMitosisFiles(object):
                     if frame[y] == f:
                         idx = y
                 change_points_values[f] = diffrences[f]
-                if len(change_points_values) == 3:
+                if len(change_points_values) == 4:
                     key_to_pop = self.findKeyWithSmallestVal(change_points_values)
                     change_points_values.pop(key_to_pop, None)
             ax.plot(frame, spLen, '-o')
@@ -384,19 +385,17 @@ class getMitosisFiles(object):
                 if doPlot:
                     ax.axvline(frame[idx])
                     ax.axhline(spLen[idx])
-                plotedPoints.append(idx)
-
+                    plotedPoints.append(int(round(frame[idx])))
+            changePoints = "_".join(str(e) for e in plotedPoints)
             plt.ylabel("Scaled spindle length (to cell major axe)", fontsize=20)
-            plt.xlabel("Frame ", fontsize=20)
+            plt.xlabel("Change_Point(s)_" + changePoints, fontsize=20)
             plt.xlim(0)
             plt.ylim(-0.2, 1)
             if save:
-                plt.savefig(figureDir + cellNb + "_changePoints")
+                plt.savefig(figureDir + cellNb + "_slopChangePoints_" + changePoints)
             else:
                 plt.show()
-        else:
-            idx = 0
-        return spLen[idx]
+            plt.close(fig)
 
     def analyze(self, save):
         major = 'Major'
@@ -417,7 +416,6 @@ class getMitosisFiles(object):
             spLens = oneCellFeatures['SpLength']
             end = np.where(spLens == np.nanmax(spLens))[-1]
             spLens = spLens[:end+1]
-            print(cellNb)
             if len(spLens) > self._minimumPeriod/self._acq_interval:
                 frames = oneCellFeatures['Frame']
                 frames = frames[:end+1]
@@ -436,6 +434,7 @@ class getMitosisFiles(object):
                     plt.savefig(figureDir + cellNb + "_elongation")
                 else:
                     plt.show()
+                plt.close(fig)
                 #
                 self.find_slope_change_point(spLens, frames, current_major_length, figureDir, cellNb, save)
                 #
@@ -443,16 +442,11 @@ class getMitosisFiles(object):
                 d.to_csv(csvDir + "/d_" + cellNb + ".csv", sep='\t')
             
 if __name__ == '__main__':
-    launcher = getMitosisFiles("/Volumes/Macintosh/curioData/102/25-03-1/X0_Y0", "CFP")
+    launcher = getMitosisFiles("/home/tong/Documents/movies/102/60x/dynamic/08-04-1/X0_Y0", "CFP")
     launcher.set_attributes_from_cmd_line()
     launcher.analyze(True)
 #     plt.hist(change_point_lengths)
     print("Collection done")
-
-
-# In[ ]:
-
-
 
 
 # In[ ]:
