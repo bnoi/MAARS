@@ -29,8 +29,4 @@ public class SegAcquisition extends SuperClassAcquisition {
 		}
 		return super.convert2Imp(listImg, channelName, step); 
 	}
-	
-	public void setBaseSaveDir(String baseSaveDir){
-		super.setBaseSaveDir(baseSaveDir);
-	}
 }
