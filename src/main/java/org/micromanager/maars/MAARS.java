@@ -299,6 +299,7 @@ public class MAARS implements Runnable {
 				e.printStackTrace();
 			}
 			SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters, xPos, yPos);
+			segAcq.setBaseSaveDir(pathToSegDir);
 			IJ.log("Acquire bright field image...");
 			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus,
 					pathToSegDir, true);
@@ -312,6 +313,7 @@ public class MAARS implements Runnable {
 				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 				// ----------------start acquisition and analysis --------//
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
+				fluoAcq.setBaseSaveDir(pathToFluoDir);
 				try {
 					PrintStream ps = new PrintStream(this.pathToSegDir + File.separator + "CellStateAnalysis.LOG");
 					curr_err = System.err;

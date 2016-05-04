@@ -176,7 +176,7 @@ public class SuperClassAcquisition {
 	public void save(List<Image> listImg, int frame, String channelName, double step, String pathToMovie) {
 		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
 			// initialize parameters for FLUO Acquisitions
-			pathToMovie = baseSaveDir + "_FLUO" + File.separator + frame + "_" + channelName;
+			pathToMovie = baseSaveDir +  File.separator + frame + "_" + channelName;
 		} else {
 			// initialize parameters for Bright-Field Acquisitions
 			pathToMovie = baseSaveDir;
