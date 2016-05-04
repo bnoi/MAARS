@@ -1,15 +1,14 @@
 
 # coding: utf-8
 
-# In[16]:
+# In[ ]:
 
 #!/usr/bin/env python3
 import numpy as np
 import matplotlib.pyplot as plt
 from os import path, mkdir, listdir
 from pandas import DataFrame, IndexSlice, DataFrame
-from numpy import diff
-from numpy import genfromtxt
+from numpy import diff, genfromtxt, round
 from math import isnan, sqrt
 from shutil import copyfile
 from trackmate import trackmate_peak_import
@@ -17,7 +16,7 @@ from argparse import ArgumentParser
 from re import match
 from collections import deque
 idx = IndexSlice
-#get_ipython().magic('matplotlib inline')
+#%matplotlib inline
 
 class getMitosisFiles(object):
     """
@@ -52,7 +51,7 @@ class getMitosisFiles(object):
                             type=float, default=0.3)
         parser.add_argument("-elongating_trend",
                             help="percentage of elongating timepoint",
-                            type=float, default=0.6)
+                            type=float, default=0.8)
         parser.add_argument("-minimumPeriod",
                             help="minimum time segment to be analyzed",
                             type=int, default=200)
@@ -108,11 +107,16 @@ class getMitosisFiles(object):
         mitosis_cellNbs = list()
         minimumSegLength = self._minimumPeriod/self._acq_interval
         cellNbs, features_dir = self.getAllCellNnumbers()
+        mask_size = 2
+        mean_mask = np.zeros(mask_size)
+        for x in range(0 , mask_size):
+            mean_mask[x] = 1/mask_size
         for cellNb in cellNbs:
             csvPath = features_dir + "/" + cellNb + '_' + channel+'.csv'
             if path.lexists(csvPath) : 
                 oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= float)
                 spLens = oneCell['SpLength']
+                spLens = np.convolve(mean_mask, spLens)
                 if len(spLens[spLens>0]) > minimumSegLength:
                     end = np.where(spLens == np.nanmax(spLens))[0]
                     spLens = spLens[:end+1]
@@ -382,11 +386,11 @@ class getMitosisFiles(object):
                         doPlot = False
                     else:
                         doPlot = True
-                if doPlot:
+                if doPlot and spLen[idx] > 0.15:
                     ax.axvline(frame[idx])
                     ax.axhline(spLen[idx])
                     plotedPoints.append(int(round(frame[idx])))
-            changePoints = "_".join(str(e) for e in plotedPoints)
+            changePoints = "_".join(str(e) for e in sorted(plotedPoints))
             plt.ylabel("Scaled spindle length (to cell major axe)", fontsize=20)
             plt.xlabel("Change_Point(s)_" + changePoints, fontsize=20)
             plt.xlim(0)
@@ -414,7 +418,12 @@ class getMitosisFiles(object):
             cellFeaturesPath = featuresDir + cellNb + '_' + channels[0]+'.csv'
             oneCellFeatures = genfromtxt(cellFeaturesPath, delimiter=',', names=True, dtype= float)
             spLens = oneCellFeatures['SpLength']
+            mask_size = 2
+            mean_mask = np.zeros(mask_size)
+            for x in range(0 , mask_size):
+                mean_mask[x] = 1/mask_size
             end = np.where(spLens == np.nanmax(spLens))[-1]
+            spLens = np.convolve(mean_mask, spLens)
             spLens = spLens[:end+1]
             if len(spLens) > self._minimumPeriod/self._acq_interval:
                 frames = oneCellFeatures['Frame']
@@ -442,7 +451,7 @@ class getMitosisFiles(object):
                 d.to_csv(csvDir + "/d_" + cellNb + ".csv", sep='\t')
             
 if __name__ == '__main__':
-    launcher = getMitosisFiles("/home/tong/Documents/movies/102/60x/dynamic/08-04-1/X0_Y0", "CFP")
+    launcher = getMitosisFiles("/Volumes/Macintosh/curioData/102/25-03-1/X0_Y0", "CFP")
     launcher.set_attributes_from_cmd_line()
     launcher.analyze(True)
 #     plt.hist(change_point_lengths)
