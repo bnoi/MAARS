@@ -28,8 +28,8 @@ public class MAARSGeometrySaver {
 		int cellNb = cell.getCellNumber();
 		ArrayList<String[]> outLines = new ArrayList<String[]>();
 		if (geosInFrams.keySet().size() > 0) {
-			int firstFrame = (int) geosInFrams.keySet().toArray()[0];
-			List<String> headerList = new ArrayList<>(geosInFrams.get(firstFrame).keySet());
+			int firstFrame = (Integer) geosInFrams.keySet().toArray()[0];
+			List<String> headerList = new ArrayList(geosInFrams.get(firstFrame).keySet());
 			Collections.sort(headerList);
 			String[] header = new String[headerList.size() + 1];
 			header[0] = "Frame";
