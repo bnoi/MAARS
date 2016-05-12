@@ -1,8 +1,8 @@
 import org.micromanager.MenuPlugin;
 import org.micromanager.Studio;
-import org.micromanager.gui.MaarsMainDialog;
+import org.univ_tlse3.gui.MaarsMainDialog;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.maars.MaarsParameters;
+import org.univ_tlse3.maars.MaarsParameters;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
@@ -11,7 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import org.micromanager.utils.FileUtils;
+import org.univ_tlse3.utils.FileUtils;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
