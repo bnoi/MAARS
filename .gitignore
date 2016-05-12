@@ -121,3 +121,11 @@ ENV/
 .ropeproject
 
 .pydevproject
+
+#intellij
+*.iml
+
+*.eml
+
+.idea/
+.idea/libraries/

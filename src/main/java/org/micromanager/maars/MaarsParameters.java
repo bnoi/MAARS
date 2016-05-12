@@ -148,15 +148,18 @@ public class MaarsParameters {
 	/**
 	 * Constructor of Element need path to configuration file
 	 * 
-	 * @param defaultParametersFile
-	 * @throws IOException
+	 * @param defaultParametersStream
 	 */
 	public MaarsParameters(InputStream defaultParametersStream) {
 
 		final SAXBuilder sb = new SAXBuilder();
 		try {
-			doc = sb.build(defaultParametersStream);
-		} catch (IOException | JDOMException e) {
+			try {
+				doc = sb.build(defaultParametersStream);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch(JDOMException e){
 			e.printStackTrace();
 		}
 		root = (Element) doc.getContent(0);
@@ -375,7 +378,7 @@ public class MaarsParameters {
 	/**
 	 * set saving path
 	 * 
-	 * @param value
+	 * @param path
 	 *            : corresponding value of parameter
 	 */
 	public void setSavingPath(String path) {
