@@ -21,7 +21,7 @@ import ij.plugin.frame.RoiManager;
  * @author marie
  *
  */
-public class SigmaOptimization implements PlugIn {
+class SigmaOptimization implements PlugIn {
 
 	private GenericDialog dialog;
 	private double lowerSigma = 1;
@@ -35,7 +35,7 @@ public class SigmaOptimization implements PlugIn {
 	/**
 	 * Create Dialog window to set parameters of algorithm
 	 */
-	public void createDialog() {
+	private void createDialog() {
 
 		image = IJ.getImage();
 		pathToSaveResult = image.getOriginalFileInfo().directory;
@@ -60,8 +60,9 @@ public class SigmaOptimization implements PlugIn {
 	 * Set lower value of range to test
 	 * 
 	 * @param value
+	 * value to set
 	 */
-	public void setLowerSigma(double value) {
+	void setLowerSigma(double value) {
 		lowerSigma = value;
 	}
 
@@ -69,8 +70,9 @@ public class SigmaOptimization implements PlugIn {
 	 * Set upper value of range to test
 	 * 
 	 * @param value
+	 * value to set
 	 */
-	public void setUpperSigma(double value) {
+	void setUpperSigma(double value) {
 		upperSigma = value;
 	}
 
@@ -78,6 +80,7 @@ public class SigmaOptimization implements PlugIn {
 	 * Set step of range to test
 	 * 
 	 * @param value
+	 * value to set
 	 */
 	public void setStep(double value) {
 		step = value;
@@ -87,6 +90,7 @@ public class SigmaOptimization implements PlugIn {
 	 * Set path where results will be stored
 	 * 
 	 * @param path
+	 * path to set
 	 */
 	public void setPath(String path) {
 		pathToSaveResult = path;
@@ -96,16 +100,18 @@ public class SigmaOptimization implements PlugIn {
 	 * slice index corresponding to focus plane
 	 * 
 	 * @param zf
+	 * focus to set
 	 */
-	public void setZFocus(int zf) {
+	void setZFocus(int zf) {
 		this.zf = zf;
 	}
 
 	/**
 	 * 
 	 * @param direction
+	 * direction to set
 	 */
-	public void setDirection(int direction) {
+	void setDirection(int direction) {
 		this.direction = direction;
 	}
 
@@ -113,7 +119,7 @@ public class SigmaOptimization implements PlugIn {
 	 * 
 	 * @return dialog
 	 */
-	public GenericDialog getDialog() {
+	GenericDialog getDialog() {
 		return dialog;
 	}
 
@@ -132,6 +138,7 @@ public class SigmaOptimization implements PlugIn {
 			System.out.println("could not create writer");
 			e.printStackTrace();
 		}
+		assert fw != null;
 		BufferedWriter bw = new BufferedWriter(fw);
 
 		try {
@@ -153,9 +160,9 @@ public class SigmaOptimization implements PlugIn {
 			System.out.println("for sigma = " + sigma);
 
 			double mean = 0;
-			for (int roi = 0; roi < rois.length; roi++) {
-				double x = rois[roi].getXBase();
-				double y = rois[roi].getYBase();
+			for (Roi roi1 : rois) {
+				double x = roi1.getXBase();
+				double y = roi1.getYBase();
 				float[] iz = new float[image.getNSlices()];
 
 				System.out.println("for pixel x : " + x + " y : " + y);
@@ -166,11 +173,11 @@ public class SigmaOptimization implements PlugIn {
 				}
 				ComputeCorrelation computeCorrelationImage = new ComputeCorrelation(
 						iz, zf, sigma
-								/ (float) image.getCalibration().pixelDepth,
+						/ (float) image.getCalibration().pixelDepth,
 						direction);
 				mean = mean
 						+ computeCorrelationImage.integrate(0,
-								image.getNSlices() - 1);
+						image.getNSlices() - 1);
 			}
 			mean = mean / rois.length;
 			System.out.println("mean = " + mean);

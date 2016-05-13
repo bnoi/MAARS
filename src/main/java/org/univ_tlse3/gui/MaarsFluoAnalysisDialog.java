@@ -44,7 +44,7 @@ import javax.swing.JLabel;
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  *
  */
-public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
+class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 	/**
 	 * 
@@ -53,7 +53,6 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private MMStudio mm;
 	private CMMCore mmc;
 	private MaarsParameters parameters;
-	private int fieldLength = 8;
 	private JTextField range;
 	private JTextField step;
 	private JTextField timeInterval;
@@ -78,7 +77,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private JComboBox<String> channel1Combo;
 	private JComboBox<String> channel2Combo;
 	private JComboBox<String> channel3Combo;
-	public static String NONE = "None";
+	private static String NONE = "None";
 	String channelListWithNone[] = { NONE, "GFP", "CFP", "TxRed", "DAPI" };
 	String channelList[] = { "GFP", "CFP", "TxRed", "DAPI" };
 
@@ -88,7 +87,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	 * @param parameters
 	 *            : parameters displayed in dialog
 	 */
-	public MaarsFluoAnalysisDialog(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
+	MaarsFluoAnalysisDialog(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 
 		// set up this dialog
 		this.mm = mm;
@@ -111,6 +110,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		JPanel fluoRangePanel = new JPanel(new GridLayout(1, 2));
 		JLabel rangeTitle = new JLabel("Range (micron) : ", SwingConstants.CENTER);
+		int fieldLength = 8;
 		range = new JTextField(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE), fieldLength);
 		fluoRangePanel.add(rangeTitle);
 		fluoRangePanel.add(range);
@@ -284,21 +284,13 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 	/**
 	 * 
-	 * @return dialog
-	 */
-	public JDialog getDialog() {
-		return this;
-	}
-
-	/**
-	 * 
 	 * @return parameters
 	 */
 	public MaarsParameters getParameters() {
 		return parameters;
 	}
 
-	public void setChPanelValue(JPanel jp, String ch) {
+	private void setChPanelValue(JPanel jp, String ch) {
 		@SuppressWarnings("unchecked")
 		JComboBox<String> tmpCombo = (JComboBox<String>) jp.getComponent(0);
 		tmpCombo.setSelectedItem(ch);
@@ -318,7 +310,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	 * 
 	 * @return channels : list of selected object
 	 */
-	public String updateFluoChParameters() {
+	private String updateFluoChParameters() {
 		String channels;
 		String channel1 = channel1Combo.getSelectedItem().toString();
 		parameters.setChMaxNbSpot(channel1, maxNumberSpotCh1Tf.getText());
@@ -345,7 +337,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 	}
 
-	public void testTrackmate(JPanel jp, ImagePlus img) {
+	private void testTrackmate(JPanel jp, ImagePlus img) {
 		JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(2);
 		double spotRadius = Double.parseDouble((String) tmpTf.getValue());
 		tmpTf = (JFormattedTextField) jp.getComponent(3);
@@ -363,7 +355,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		displayer.refresh();
 	}
 
-	public void testTrackmate(JPanel jp) {
+	private void testTrackmate(JPanel jp) {
 		String channelName = getSelectedChannel(jp);
 		String imgPath = parameters.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator + "0_"
 				+ channelName + File.separator + "MMStack.ome.tif";
@@ -374,7 +366,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		}
 	}
 
-	public ImagePlus acquireTestImg(JPanel jp) {
+	private ImagePlus acquireTestImg(JPanel jp) {
 
 		double zFocus = 0;
 		String focusDevice = mmc.getFocusDevice();
@@ -385,12 +377,12 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 			ReportingUtils.logMessage("could not get z current position");
 			e.printStackTrace();
 		}
-		SuperClassAcquisition acq = new SuperClassAcquisition(mm, mmc, parameters, "0", "0");
+		SuperClassAcquisition acq = new SuperClassAcquisition(mm, mmc, parameters);
 		String channelName = getSelectedChannel(jp);
-		return acq.convert2Imp(acq.acquire(0, channelName, zFocus), channelName, Double.parseDouble(step.getText()));
+		return acq.convert2Imp(acq.acquire(channelName, zFocus), channelName, Double.parseDouble(step.getText()));
 	}
 
-	public String getSelectedChannel(JPanel jp) {
+	private String getSelectedChannel(JPanel jp) {
 		@SuppressWarnings("unchecked")
 		JComboBox<String> tmpCombo = (JComboBox<String>) jp.getComponent(0);
 		return (String) tmpCombo.getSelectedItem();

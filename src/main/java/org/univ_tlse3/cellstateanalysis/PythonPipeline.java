@@ -12,11 +12,11 @@ public class PythonPipeline {
 	public static void getMitosisFiles(String acqDir, String channel, String calibration, String gap_tolerance,
 			String elongat_trend, String minimumPeriod, String interval) {
 
-		ProcessBuilder probuilder = null;
-		Process process = null;
-		BufferedReader in = null;
-		BufferedReader stdError = null;
-		String[] cmd = null;
+		ProcessBuilder probuilder;
+		Process process;
+		BufferedReader in;
+		BufferedReader stdError;
+		String[] cmd;
 		if (System.getProperty("os.name").matches("(Windows)(.+)")) {
 			cmd = new String[] { PythonPipeline.getPythonInConda(),
 					PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
@@ -36,7 +36,7 @@ public class PythonPipeline {
 			process = probuilder.start();
 			in = new BufferedReader(new InputStreamReader(process.getInputStream()));
 			stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-			String s = null;
+			String s;
 			while ((s = in.readLine()) != null) {
 				IJ.log(s);
 			}
@@ -49,10 +49,10 @@ public class PythonPipeline {
 		}
 	}
 
-	public static String getPythonInConda() {
+	private static String getPythonInConda() {
 		String osName = System.getProperty("os.name");
 		String pythonPath = "";
-		File condaDir = null;
+		File condaDir;
 		String condaDirPattern = "(\\w+)(conda)(\\w+)";
 		String sep = File.separator;
 		if (osName.equals("Linux")) {

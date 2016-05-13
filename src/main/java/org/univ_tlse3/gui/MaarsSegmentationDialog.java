@@ -25,14 +25,13 @@ import org.univ_tlse3.maars.MaarsParameters;
  * @author Tong LI
  *
  */
-public class MaarsSegmentationDialog extends JDialog implements ActionListener {
+class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	private MaarsParameters parameters;
-	private int filedLength = 8;
 	private JCheckBox shapeFilter;
 	private JTextField solidity;
 	private JCheckBox greyValueFilter;
@@ -49,7 +48,7 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 	 * @param parameters
 	 *            : default parameters (which are going to be displayed)
 	 */
-	public MaarsSegmentationDialog(MaarsParameters parameters) {
+	MaarsSegmentationDialog(MaarsParameters parameters) {
 
 		this.parameters = parameters;
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -71,6 +70,7 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 		JPanel segRangePanel = new JPanel(new GridLayout(1, 2));
 		JLabel rangeTitle = new JLabel("Range (micron) : ",
 				SwingConstants.CENTER);
+		int filedLength = 8;
 		range = new JTextField(
 				parameters
 						.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE),
@@ -184,14 +184,6 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
 	/**
 	 * 
-	 * @return dialog
-	 */
-	public JDialog getDialog() {
-		return this;
-	}
-
-	/**
-	 * 
 	 * @return parameters
 	 */
 	public MaarsParameters getParameters() {
@@ -206,14 +198,12 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 			} else {
 				solidity.setEditable(false);
 			}
-			;
 		} else if (e.getSource() == greyValueFilter) {
 			if (greyValueFilter.isSelected()) {
 				greyValue.setEditable(true);
 			} else {
 				greyValue.setEditable(false);
 			}
-			;
 		} else if (e.getSource() == okBut) {
 			parameters.setSegmentationParameter(
 					MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
@@ -234,8 +224,6 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 			parameters.setSegmentationParameter(MaarsParameters.SOLIDITY,
 					solidity.getText());
 			this.setVisible(false);
-			;
 		}
-
 	}
 }

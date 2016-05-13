@@ -7,7 +7,7 @@ import ij.ImageStack;
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 13, 2015
  */
-public class ImageSplitter {
+class ImageSplitter {
 	private ImagePlus img;
 	private int numberToSplit;
 
@@ -15,10 +15,11 @@ public class ImageSplitter {
 	 * constructor
 	 * 
 	 * @param img
+	 * image to analyse
 	 * @param number
 	 *            : typically is the available processor number
 	 */
-	public ImageSplitter(ImagePlus img, int number) {
+	ImageSplitter(ImagePlus img, int number) {
 		this.img = img;
 		this.numberToSplit = number;
 	}
@@ -28,10 +29,10 @@ public class ImageSplitter {
 	 * @return double[]: if divided evenly, double[0] == double[1] else double[1]
 	 *         take the rest of width
 	 */
-	public int[] getWidths() {
+	int[] getWidths() {
 		int[] coord = new int[2];
-		coord[0] = (int) img.getWidth() / numberToSplit;
-		coord[1] = (int) coord[0] + img.getWidth() % numberToSplit;
+		coord[0] = img.getWidth() / numberToSplit;
+		coord[1] = coord[0] + img.getWidth() % numberToSplit;
 		return coord;
 	}
 
@@ -43,10 +44,10 @@ public class ImageSplitter {
 	 *            : width double[0] or double[1]
 	 * @return cropped imagePlus
 	 */
-	public ImagePlus crop(int xBase, int width) {
+	ImagePlus crop(int xBase, int width) {
 		ImagePlus newImg = new ImagePlus();
 		ImageStack stack = img.getStack();
-		ImageStack newStack = null;
+		ImageStack newStack;
 		newStack = stack.crop(xBase, 0, 0, width, img.getHeight(), img.getNSlices());
 		newImg.setStack(newStack);
 		return newImg;

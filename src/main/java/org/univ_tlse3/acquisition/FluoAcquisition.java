@@ -17,15 +17,15 @@ import ij.ImagePlus;
 public class FluoAcquisition extends SuperClassAcquisition {
 	private double step;
 	public FluoAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, String positionX, String positionY) {
-		super(mm, mmc, parameters, positionX, positionY);
+		super(mm, mmc, parameters);
 		this.step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 	}
 
 	public ImagePlus acquire(int frame, String channelName, double zFocus, String pathToFluoMovie, Boolean save) {
-		List<Image> listImg = super.acquire(frame, channelName, zFocus);
+		List<Image> listImg = super.acquire(channelName, zFocus);
 		if (save){
 			
-			super.save(listImg, frame, channelName, step, pathToFluoMovie);
+			super.save(listImg, frame, channelName, step);
 		}
 		return super.convert2Imp(listImg, channelName, step); 
 	}

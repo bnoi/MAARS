@@ -83,8 +83,8 @@ import org.jdom2.output.XMLOutputter;
  */
 public class MaarsParameters {
 
-	Document doc;
-	Element root;
+	private Document doc;
+	private Element root;
 
 	public static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
 	public static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
@@ -163,15 +163,6 @@ public class MaarsParameters {
 			e.printStackTrace();
 		}
 		root = (Element) doc.getContent(0);
-	}
-
-	/**
-	 * Return Element containing all parameters
-	 * 
-	 * @return Element
-	 */
-	public Element getRootElement() {
-		return root;
 	}
 
 	/**

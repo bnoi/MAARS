@@ -35,8 +35,6 @@ public class MAARSNoAcq implements Runnable {
 	private MaarsParameters parameters;
 	private SetOfCells soc;
 	private String rootDir;
-	private String pathToSegDir;
-	private String pathToFluoDir;
 	private ArrayList<String> arrayChannels = new ArrayList<String>();
 
 	public MAARSNoAcq(MaarsParameters parameters) {
@@ -68,8 +66,8 @@ public class MAARSNoAcq implements Runnable {
 			String xPos = pos[0];
 			String yPos = pos[1];
 			IJ.log("x : " + xPos + " y : " + yPos);
-			this.pathToSegDir = FileUtils.convertPath(rootDir + "/X" + xPos + "_Y" + yPos);
-			pathToFluoDir = pathToSegDir + "_FLUO/";
+			String pathToSegDir = FileUtils.convertPath(rootDir + "/X" + xPos + "_Y" + yPos);
+			String pathToFluoDir = pathToSegDir + "_FLUO/";
 			String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "/MMStack.ome.tif");
 			ImagePlus segImg = null;
 			try {
@@ -79,15 +77,18 @@ public class MAARSNoAcq implements Runnable {
 				IJ.error("Invalid path");
 			}
 			// --------------------------segmentation-----------------------------//
-			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
-			ms.segmentation(segImg, this.pathToSegDir);
+			MaarsSegmentation ms = new MaarsSegmentation(parameters);
+			ms.segmentation(segImg, pathToSegDir);
 			if (ms.roiDetected()) {
 				soc.reset();
 				// from Roi.zip initialize a set of cell
 				soc.loadCells(pathToSegDir);
 				// Get the focus slice of BF image
 				soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
-				Calibration bfImgCal = segImg.getCalibration();
+				Calibration bfImgCal = null;
+				if (segImg != null) {
+					bfImgCal = segImg.getCalibration();
+				}
 				// ----------------start acquisition and analysis --------//
 				try {
 					PrintStream ps = new PrintStream(pathToSegDir + "/CellStateAnalysis.LOG");
@@ -116,28 +117,33 @@ public class MAARSNoAcq implements Runnable {
 				Collections.sort(arrayImgFrames);
 				int nThread = Runtime.getRuntime().availableProcessors();
 				es = Executors.newFixedThreadPool(nThread);
-				Future<FloatProcessor> future = null;
+				Future<FloatProcessor> future;
 				ArrayList<Map<String, Future<FloatProcessor>>> futureSet = new ArrayList<Map<String, Future<FloatProcessor>>>();
-				for (int frameInd = 0; frameInd < arrayImgFrames.size(); frameInd++) {
+				for (Integer arrayImgFrame : arrayImgFrames) {
 					Map<String, Future<FloatProcessor>> channelsInFrame = new HashMap<String, Future<FloatProcessor>>();
 					for (String channel : arrayChannels) {
-						int current_frame = arrayImgFrames.get(frameInd);
+						int current_frame = arrayImgFrame;
 						IJ.log("Analysing channel " + channel + "_" + current_frame);
 						String pathToFluoMovie = pathToFluoDir + current_frame + "_" + channel + "/MMStack.ome.tif";
 						ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
 						future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
 								Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 								Double.parseDouble(parameters.getChSpotRaius(channel)),
-								Double.parseDouble(parameters.getChQuality(channel)), Integer.valueOf(current_frame)));
+								Double.parseDouble(parameters.getChQuality(channel)), current_frame));
 						channelsInFrame.put(channel, future);
 					}
 					futureSet.add(channelsInFrame);
 				}
-				ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
+				ImageStack fluoStack = null;
+				if (segImg != null) {
+					fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
+				}
 				try {
-					for (int frameInd = 0; frameInd < futureSet.size(); frameInd++) {
-						for (String channel : futureSet.get(frameInd).keySet()) {
-							fluoStack.addSlice(channel, futureSet.get(frameInd).get(channel).get());
+					for (Map<String, Future<FloatProcessor>> aFutureSet : futureSet) {
+						for (String channel : aFutureSet.keySet()) {
+							if (fluoStack != null) {
+								fluoStack.addSlice(channel, aFutureSet.get(channel).get());
+							}
 						}
 					}
 				} catch (InterruptedException e1) {
@@ -146,8 +152,12 @@ public class MAARSNoAcq implements Runnable {
 					e1.printStackTrace();
 				}
 				mergedImg = new ImagePlus("merged", fluoStack);
-				mergedImg.setCalibration(segImg.getCalibration());
-				mergedImg.setZ(fluoStack.getSize());
+				if (segImg != null) {
+					mergedImg.setCalibration(segImg.getCalibration());
+				}
+				if (fluoStack != null) {
+					mergedImg.setZ(fluoStack.getSize());
+				}
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
 				double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));

@@ -12,9 +12,9 @@ import ij.ImageStack;
 import loci.plugins.LociExporter;
 
 public class MAARSImgSaver {
-	String pathToFluoDir;
-	String croppedImgDir;
-	ImagePlus mergedFullFieldImg;
+	private String pathToFluoDir;
+	private String croppedImgDir;
+	private ImagePlus mergedFullFieldImg;
 
 	public MAARSImgSaver(String pathToFluoDir, ImagePlus mergedFullFieldImg) {
 		this.pathToFluoDir = pathToFluoDir;
@@ -23,10 +23,6 @@ public class MAARSImgSaver {
 		if (!new File(croppedImgDir).exists()) {
 			new File(croppedImgDir).mkdirs();
 		}
-	}
-
-	public String getCroppedImgDir() {
-		return this.croppedImgDir;
 	}
 
 	/**

@@ -11,16 +11,16 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import fiji.plugin.trackmate.Spot;
 
-public class SpotSetAnalyzor {
+class SpotSetAnalyzor {
 	// Names of parameters
-	public final static String NbOfSpotDetected = "NbOfSpotDetected";
-	public final static String SpAngToMaj = "SpAngToMaj";
-	public final static String SpLength = "SpLength";
-	public final static String SpCenterX = "SpCenterX";
-	public final static String SpCenterY = "SpCenterY";
-	public final static String SpCenterZ = "SpCenterZ";
-	public final static String CellCenterToSpCenterLen = "CellCenterToSpCenterLen";
-	public final static String CellCenterToSpCenterAng = "CellCenterToSpCenterAng";
+	private final static String NbOfSpotDetected = "NbOfSpotDetected";
+	private final static String SpAngToMaj = "SpAngToMaj";
+	private final static String SpLength = "SpLength";
+	private final static String SpCenterX = "SpCenterX";
+	private final static String SpCenterY = "SpCenterY";
+	private final static String SpCenterZ = "SpCenterZ";
+	private final static String CellCenterToSpCenterLen = "CellCenterToSpCenterLen";
+	private final static String CellCenterToSpCenterAng = "CellCenterToSpCenterAng";
 	private double fakeSpotQuality = 0;
 	// z equals to 0 because fitting ellipse in Analyzer do not give z
 	// position.
@@ -45,8 +45,8 @@ public class SpotSetAnalyzor {
 	 * @param calibratedYBase
 	 *            y base in micron
 	 */
-	public SpotSetAnalyzor(double x, double y, double major, double angle, double calibratedXBase,
-			double calibratedYBase) {
+	SpotSetAnalyzor(double x, double y, double major, double angle, double calibratedXBase,
+					double calibratedYBase) {
 		this.x = x;
 		this.y = y;
 		this.major = major;
@@ -60,9 +60,8 @@ public class SpotSetAnalyzor {
 	 * 
 	 * @param spotSet
 	 *            set of spots to analyze
-	 * @return
 	 */
-	public void compute(HashMap<String, Object> geometry, Iterable<Spot> spotSet) {
+	void compute(HashMap<String, Object> geometry, Iterable<Spot> spotSet) {
 		// this functions modify directly coordinates of spot in
 		// soc, because it's back-up
 		// cptgeometry.centerSpots(spotSet);
@@ -93,7 +92,7 @@ public class SpotSetAnalyzor {
 		}
 	}
 
-	public ArrayList<Spot> getPoles() {
+	ArrayList<Spot> getPoles() {
 		return this.poles;
 	}
 
@@ -101,9 +100,10 @@ public class SpotSetAnalyzor {
 	 * return a vector from two given spots
 	 * 
 	 * @param poles
+     *      the 2 spots corresponding to each poles
 	 * @return the vector
 	 */
-	public Vector3D getSpAsVector(ArrayList<Spot> poles) {
+    private Vector3D getSpAsVector(ArrayList<Spot> poles) {
 		Spot sp1 = poles.get(0);
 		Spot sp2 = poles.get(1);
 		Vector3D v1 = spot2Vector3D(sp1);
@@ -127,9 +127,11 @@ public class SpotSetAnalyzor {
 	 * find the poles ( find the two most distant spots)
 	 * 
 	 * @param spotSet
+     * a set of spots
 	 * @return
+     * the SPBs
 	 */
-	public ArrayList<Spot> findMostDistant2Spots(Iterable<Spot> spotSet) {
+    private ArrayList<Spot> findMostDistant2Spots(Iterable<Spot> spotSet) {
 		ArrayList<Spot> poles = new ArrayList<Spot>();
 		for (Spot s0 : spotSet) {
 			if (poles.size() < 2) {
@@ -164,7 +166,9 @@ public class SpotSetAnalyzor {
 	 * Calculate the distance between spots
 	 * 
 	 * @param s1
+     * the first spot
 	 * @param s2
+     * the second spot
 	 * @return distance
 	 */
 	private double distance(Spot s1, Spot s2) {
@@ -178,9 +182,10 @@ public class SpotSetAnalyzor {
 	 * get the center spot of poles
 	 * 
 	 * @param poles
+     * the 2 SPBs
 	 * @return center spot
 	 */
-	public Spot getCenter(ArrayList<Spot> poles) {
+    private Spot getCenter(ArrayList<Spot> poles) {
 		Spot s1 = poles.get(0);
 		Spot s2 = poles.get(1);
 		double centerx = (s1.getFeature(Spot.POSITION_X) + s2.getFeature(Spot.POSITION_X)) / 2;
@@ -193,9 +198,11 @@ public class SpotSetAnalyzor {
 	 * Get the angle between the spindle and the cell major axis
 	 * 
 	 * @param polesVec
+     * the vector of SPBs
 	 * @return
+     * the angle between polesVec and cell major axe
 	 */
-	public double getSpAngToMajAxis(Vector3D polesVec) {
+	private double getSpAngToMajAxis(Vector3D polesVec) {
 		Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(angle)),
 				major * FastMath.sin(FastMath.toRadians(angle)), fakeSpotZ);
 		return rad2AngLessThan90(Vector3D.angle(cellMajAxisVec, polesVec));
@@ -205,14 +212,16 @@ public class SpotSetAnalyzor {
 	 * Create a vector from a spot (so [0,0,0] to [x,-y,z])
 	 * 
 	 * @param s
+     * a spot
 	 * @return
+     * a vector
 	 */
-	public Vector3D spot2Vector3D(Spot s) {
+    private Vector3D spot2Vector3D(Spot s) {
 		return new Vector3D(s.getFeature(Spot.POSITION_X), -s.getFeature(Spot.POSITION_Y),
 				s.getFeature(Spot.POSITION_Z));
 	}
 
-	public double rad2AngLessThan90(double radiant) {
+	private double rad2AngLessThan90(double radiant) {
 		double ang = FastMath.toDegrees(radiant);
 		while (ang >= 90) {
 			ang -= 180;

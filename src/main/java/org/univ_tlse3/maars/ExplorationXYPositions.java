@@ -30,6 +30,7 @@ public class ExplorationXYPositions {
 	 * in microns
 	 * 
 	 * @param parameters
+	 * MAARS Parameters object
 	 */
 	public ExplorationXYPositions(CMMCore mmc, MaarsParameters parameters) {
 		int xNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
@@ -52,14 +53,14 @@ public class ExplorationXYPositions {
 			 */
 			if (x % 2 == 0) {
 				y = 0;
-				limit = (int) yNumber;
+				limit = yNumber;
 				direction = 1;
 			}
 			/*
 			 * if x is an odd number direction is -1 meaning y is decreasing
 			 */
 			else {
-				y = (int) yNumber - 1;
+				y = yNumber - 1;
 				limit = -1;
 				direction = -1;
 			}
@@ -85,6 +86,7 @@ public class ExplorationXYPositions {
 	/**
 	 * 
 	 * @param index
+	 * index of xy positions
 	 * @return double where first one is x coordinates and the second one is y
 	 *         coordinates
 	 */
@@ -95,18 +97,20 @@ public class ExplorationXYPositions {
 	/**
 	 * 
 	 * @param index
+	 * index of xy positions
 	 * @return x coordinates of position corresponding to index
 	 */
-	public double getX(int index) {
+	double getX(int index) {
 		return get(index)[0];
 	}
 
 	/**
 	 * 
 	 * @param index
+	 * index of xy positions
 	 * @return y coordinates of position corresponding to index
 	 */
-	public double getY(int index) {
+	double getY(int index) {
 		return get(index)[1];
 	}
 }

@@ -24,8 +24,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	}
 
 	/**
-	 * @param parameters
-	 *            : parameters that used in
 	 */
 	public void loadCells(String pathToSegDir) {
 		IJ.log("Loading Cells");
@@ -41,8 +39,9 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * Method to open ROI file and get them as ROI array
 	 * 
 	 * @return
+	 * array of ROI
 	 */
-	public Roi[] getRoisAsArray(String pathToRois) {
+	private Roi[] getRoisAsArray(String pathToRois) {
 		RoiManager roiManager = RoiManager.getInstance();
 		if (roiManager == null) {
 			roiManager = new RoiManager();
@@ -57,6 +56,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * Method to get Cell corresponding to index
 	 * 
 	 * @param index
+	 * index of cell in cellArray
 	 * @return Cell corresponding to index
 	 */
 	public Cell getCell(int index) {
@@ -67,6 +67,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	 * total number of cell
 	 * 
 	 * @return
+	 * the size of cell array
 	 */
 	public int size() {
 		return cellArray.size();
@@ -75,6 +76,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 	/**
 	 * 
 	 * @param rt
+	 * rt from particle analyzer
 	 */
 	public void setRoiMeasurementIntoCells(ResultsTable rt) {
 		for (Cell c : cellArray) {
@@ -112,7 +114,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
 		throw new UnsupportedOperationException();
 	}
 
-	public void resetCount() {
+	private void resetCount() {
 		this.iteratorCount = 0;
 	}
 }

@@ -47,14 +47,10 @@ public class SegPombe {
 
 	// Variables to get results
 	private FloatProcessor imgCorrTempProcessor;
-	private ByteProcessor byteImage;
 	private ImagePlus binCorrelationImage;
 	private ImagePlus imgCorrTemp;
 	private ResultsTable resultTable;
-	private ParticleAnalyzer particleAnalyzer;
-	private Analyzer analyzer;
 	private RoiManager roiManager;
-	private Roi[] roiArray;
 
 	// Options related to display and save
 	private boolean showCorrelationImg;
@@ -121,10 +117,10 @@ public class SegPombe {
 
 	}
 
-	public void getFocusImage() {
+	private void getFocusImage() {
 		System.out.println("get Focus Image");
 
-		imageToAnalyze.setZ((int) Math.round(zFocus));
+		imageToAnalyze.setZ(Math.round(zFocus));
 
 		focusImg = new ImagePlus(bf + "_FocusImage", imageToAnalyze.getProcessor().duplicate());
 
@@ -158,7 +154,7 @@ public class SegPombe {
 		long start = System.currentTimeMillis();
 		ExecutorService executor = Executors.newFixedThreadPool(nbProcessor);
 		Map<Integer, Future<FloatProcessor>> map = new HashMap<Integer, Future<FloatProcessor>>();
-		Future<FloatProcessor> task = null;
+		Future<FloatProcessor> task;
 		int[] widths = splitter.getWidths();
 		for (int i = 0; i < nbProcessor; i++) {
 			if (i == 0) {
@@ -202,7 +198,7 @@ public class SegPombe {
 
 		System.out.println("Convert correlation image to binary image");
 
-		byteImage = imgCorrTempProcessor.convertToByteProcessor(true);
+		ByteProcessor byteImage = imgCorrTempProcessor.convertToByteProcessor(true);
 		byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false, BinaryProcessor.BLACK_AND_WHITE_LUT);
 
 		// image pre-processing
@@ -244,7 +240,7 @@ public class SegPombe {
 		imgCorrTemp = new ImagePlus("Correlation Image of " + bf, imgCorrTempProcessor);
 
 		ParticleAnalyzer.setRoiManager(roiManager);
-		particleAnalyzer = new ParticleAnalyzer(
+		ParticleAnalyzer particleAnalyzer = new ParticleAnalyzer(
 				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.SHOW_PROGRESS
 						+ ParticleAnalyzer.ADD_TO_MANAGER,
 				Measurements.AREA + Measurements.CENTROID + Measurements.PERIMETER + Measurements.SHAPE_DESCRIPTORS
@@ -259,6 +255,7 @@ public class SegPombe {
 		if (!nbRoi.equals(0)) {
 			if (filterAbnormalShape || filtrateWithMeanGrayValue) {
 
+				Roi[] roiArray;
 				if (filtrateWithMeanGrayValue) {
 
 					System.out.println("Filtering with mean grey value...");
@@ -277,7 +274,7 @@ public class SegPombe {
 
 					System.out.println("- initialize analyser");
 
-					analyzer = new Analyzer(imgCorrTemp,
+					Analyzer analyzer = new Analyzer(imgCorrTemp,
 							Measurements.AREA + Measurements.STD_DEV + Measurements.MIN_MAX
 									+ Measurements.SHAPE_DESCRIPTORS + Measurements.MEAN + Measurements.CENTROID
 									+ Measurements.PERIMETER + Measurements.ELLIPSE,
@@ -338,15 +335,11 @@ public class SegPombe {
 		}
 	}
 
-	public void deleteRowOfResultTable(ArrayList<Integer> rowToDelete) {
+	private void deleteRowOfResultTable(ArrayList<Integer> rowToDelete) {
 		for (int i = 0; i < rowToDelete.size(); i++) {
 			int row = rowToDelete.get(i) - i;
 			resultTable.deleteRow(row);
 		}
-	}
-
-	public RoiManager getRoiManager() {
-		return roiManager;
 	}
 
 	public ResultsTable getRoiMeasurements() {
@@ -427,14 +420,6 @@ public class SegPombe {
 		System.setErr(curr_err);
 	}
 
-	public int getDirection() {
-		return direction;
-	}
-
-	public void setDirection(int newDirection) {
-		direction = newDirection;
-	}
-
 	/**
 	 * Return if any roi detected
 	 */
@@ -442,7 +427,7 @@ public class SegPombe {
 		return this.roiDetected;
 	}
 
-	public void setRoiDetectedFalse() {
+	private void setRoiDetectedFalse() {
 		this.roiDetected = false;
 	}
 

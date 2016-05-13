@@ -46,13 +46,8 @@ public class SuperClassAcquisition {
 	 *            : Core object of Micro-Manager
 	 * @param parameters
 	 *            : parameters used for algorithm
-	 * @param positionX
-	 *            : x field position (can be defined by ExplorationXYPositions)
-	 * @param positionY
-	 *            : y field position (can be defined by ExplorationXYPositions)
 	 */
-	public SuperClassAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, String positionX,
-			String positionY) {
+	public SuperClassAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 		this.mm = mm;
 		this.mmc = mmc;
 		this.parameters = parameters;
@@ -67,7 +62,7 @@ public class SuperClassAcquisition {
 	/**
 	 * clear ROI selected, close previously opened display windows
 	 */
-	public void cleanUp() {
+	private void cleanUp() {
 		try {
 			mmc.clearROI();
 		} catch (Exception e) {
@@ -81,8 +76,9 @@ public class SuperClassAcquisition {
 	 * Set shutter for current acquisition
 	 * 
 	 * @param shutterLable
+	 * label of shutter
 	 */
-	public void setShutter(String shutterLable) {
+	private void setShutter(String shutterLable) {
 		ReportingUtils.logMessage("... Set shutter " + shutterLable);
 		try {
 			mmc.setShutterDevice(shutterLable);
@@ -96,8 +92,9 @@ public class SuperClassAcquisition {
 	 * set channel exposure of current acquisition
 	 * 
 	 * @param exposure
+	 * exposure of channel
 	 */
-	public void setChExposure(double exposure) {
+	private void setChExposure(double exposure) {
 		ReportingUtils.logMessage("... Set exposure");
 		try {
 			mmc.setExposure(exposure);
@@ -112,9 +109,10 @@ public class SuperClassAcquisition {
 	 * most of the case)
 	 * 
 	 * @param pathToMovieFolder
-	 * @return an initialized datastore with default metadata.
+	 * path to movie folder
+	 * @return an initialized data store with default metadata.
 	 */
-	public Datastore createDataStore(String pathToMovieFolder) {
+	private Datastore createDataStore(String pathToMovieFolder) {
 		ReportingUtils.logMessage("... Initialize a Datastore");
 		Datastore ds = null;
 		if (!FileUtils.exists(pathToMovieFolder)) {
@@ -142,9 +140,8 @@ public class SuperClassAcquisition {
 	 *            name of acquisition
 	 * @param step
 	 *            real distance between two slices (in micron)
-	 * @return
 	 */
-	public void setDatastoreMetadata(Datastore ds, String channelName, String acqName, double step) {
+	private void setDatastoreMetadata(Datastore ds, String channelName, String acqName, double step) {
 		ReportingUtils.logMessage("... Update summaryMetadata");
 		SummaryMetadataBuilder summaryMD = ds.getSummaryMetadata().copy();
 		summaryMD = summaryMD.channelGroup(channelGroup);
@@ -161,8 +158,7 @@ public class SuperClassAcquisition {
 
 	/**
 	 * set visualization color of acquisition
-	 * 
-	 * @param ds
+	 *
 	 */
 	public void setDisplay(Color chColor) {
 		Color[] chColors = new Color[1];
@@ -171,10 +167,11 @@ public class SuperClassAcquisition {
 		displayBuilder.channelColors(chColors);
 		DisplayWindow liveWindow = mm.live().getDisplay();
 		liveWindow.setDisplaySettings(displayBuilder.build());
-	};
+	}
 
-	public void save(List<Image> listImg, int frame, String channelName, double step, String pathToMovie) {
-		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
+	public void save(List<Image> listImg, int frame, String channelName, double step) {
+		String pathToMovie;
+		if (!channelName.equals(parameters.getSegmentationParameter(MaarsParameters.CHANNEL))) {
 			// initialize parameters for FLUO Acquisitions
 			pathToMovie = baseSaveDir +  File.separator + frame + "_" + channelName;
 		} else {
@@ -216,17 +213,15 @@ public class SuperClassAcquisition {
 
 	/**
 	 * 
-	 * @param frame
-	 *            current frame (time point)
 	 * @param channelName
 	 *            name of the current channel (ex. BF, CFP, GFP, TXRED)
 	 * @param zFocus
 	 *            zFocus where maximum # of spot can be seen
 	 * @return a duplicate of acquired images.
 	 */
-	public List<Image> acquire(int frame, String channelName, double zFocus) {
-		double range = 0;
-		double step = 0;
+	public List<Image> acquire(String channelName, double zFocus) {
+		double range;
+		double step;
 		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
 			// initialize parameters for FLUO Acquisitions
 			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));

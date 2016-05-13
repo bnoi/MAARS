@@ -19,7 +19,7 @@ public class Cell {
 
 	private int cellNumber;
 	private Roi cellShapeRoi;
-	public static final int AREA = 1, MEAN = 2, STD_DEV = 3, MIN = 4, MAX = 5, X_CENTROID = 6, Y_CENTROID = 7,
+	static final int AREA = 1, MEAN = 2, STD_DEV = 3, MIN = 4, MAX = 5, X_CENTROID = 6, Y_CENTROID = 7,
 			PERIMETER = 8, MAJOR = 9, MINOR = 10, ANGLE = 11, CIRCULARITY = 12, ASPECT_RATIO = 13, ROUNDNESS = 14,
 			SOLIDITY = 15;
 	private String[] measurements;
@@ -48,7 +48,7 @@ public class Cell {
 		return this.cellShapeRoi;
 	}
 
-	public Roi rescaleCellShapeRoi(double[] factors) {
+	Roi rescaleCellShapeRoi(double[] factors) {
 		return ImgUtils.rescaleRoi(this.cellShapeRoi, factors);
 	}
 
@@ -56,7 +56,7 @@ public class Cell {
 		return this.cellNumber;
 	}
 
-	public void setRoiMeasurement(String measurements) {
+	void setRoiMeasurement(String measurements) {
 		this.measurements = measurements.split("\t", -1);
 	}
 
@@ -64,28 +64,28 @@ public class Cell {
 		return Double.parseDouble(measurements[headerIndex]);
 	}
 
-	public void addChannel(String channel) {
+	void addChannel(String channel) {
 		this.spotContainer.addChannel(channel);
 		this.geoContainer.addChannel(channel);
 	}
 
-	public void putSpot(String channel, int frame, Spot s) {
+	void putSpot(String channel, int frame, Spot s) {
 		this.spotContainer.putSpot(channel, frame, s);
 	}
 
-	public int getNbOfSpots(String channel, int frame) {
+	int getNbOfSpots(String channel, int frame) {
 		return this.spotContainer.getNbOfSpot(channel, frame);
 	}
 
-	public Iterable<Spot> getSpotsInFrame(String channel, int frame) {
+	Iterable<Spot> getSpotsInFrame(String channel, int frame) {
 		return this.spotContainer.getSpotsInFrame(channel, frame);
 	}
 
-	public void removeSpot(String channel, int frame, Spot s) {
+	void removeSpot(String channel, int frame, Spot s) {
 		this.spotContainer.removeSpot(channel, frame, s);
 	}
 
-	public void setTrackmateModel(Model model) {
+	void setTrackmateModel(Model model) {
 		this.spotContainer.setTrackmateModel(model);
 	}
 
@@ -93,7 +93,7 @@ public class Cell {
 		return this.spotContainer;
 	}
 
-	public void putGeometry(String channel, int frame, HashMap<String, Object> geometries) {
+	void putGeometry(String channel, int frame, HashMap<String, Object> geometries) {
 		this.geoContainer.putGeometry(channel, frame, geometries);
 	}
 

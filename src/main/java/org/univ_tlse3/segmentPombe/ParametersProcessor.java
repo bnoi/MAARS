@@ -15,8 +15,8 @@ import ij.measure.Calibration;
  */
 public class ParametersProcessor {
 
-	SegPombeMainDialog mainDialog;
-	SegPombeParameters parameters;
+	private SegPombeMainDialog mainDialog;
+	private SegPombeParameters parameters;
 	private ImagePlus imgToAnalysis;
 
 	private boolean unitsChecked;
@@ -216,7 +216,7 @@ public class ParametersProcessor {
 						"Width value is in micron, convert it in pixel : " + String.valueOf(parameters.getMaxWidth()));
 			} else {
 				if (selectedIndex == SegPombeParameters.PIXELS) {
-					parameters.setMaxWidth((int) tmpInt);
+					parameters.setMaxWidth(tmpInt);
 				}
 			}
 
@@ -229,7 +229,7 @@ public class ParametersProcessor {
 						+ String.valueOf(parameters.getMaxHeight()));
 			} else {
 				if (selectedIndex == SegPombeParameters.PIXELS) {
-					parameters.setMaxHeight((int) tmpInt);
+					parameters.setMaxHeight(tmpInt);
 				}
 			}
 			// Then we can change scale
@@ -272,7 +272,7 @@ public class ParametersProcessor {
 			IJ.log("Image width is greater than maximum width allowed");
 
 			newWidth = maxWidth;
-			newHeight = (int) img.getHeight() * maxWidth / img.getWidth();
+			newHeight = img.getHeight() * maxWidth / img.getWidth();
 
 			newMinParticleSize = (int) parameters.getMinParticleSize() * maxWidth / img.getWidth();
 			newMaxParticleSize = (int) parameters.getMaxParticleSize() * maxWidth / img.getWidth();
@@ -288,7 +288,7 @@ public class ParametersProcessor {
 			if (newHeight > maxHeight) {
 				IJ.log("New height is still greater than maximum height allowed");
 				newHeight = maxHeight;
-				newWidth = (int) img.getWidth() * maxHeight / img.getHeight();
+				newWidth = img.getWidth() * maxHeight / img.getHeight();
 
 				newMinParticleSize = (int) parameters.getMinParticleSize() * maxHeight / img.getHeight();
 				newMaxParticleSize = (int) parameters.getMaxParticleSize() * maxHeight / img.getHeight();
@@ -309,7 +309,7 @@ public class ParametersProcessor {
 				IJ.log("Image height is greater than maximum width allowed");
 
 				newHeight = maxHeight;
-				newWidth = (int) img.getWidth() * maxHeight / img.getHeight();
+				newWidth = img.getWidth() * maxHeight / img.getHeight();
 
 				newMinParticleSize = (int) parameters.getMinParticleSize() * maxHeight / img.getHeight();
 				newMaxParticleSize = (int) parameters.getMaxParticleSize() * maxHeight / img.getHeight();
@@ -326,7 +326,7 @@ public class ParametersProcessor {
 					IJ.log("New Width is still greater than maximum height allowed");
 
 					newWidth = maxWidth;
-					newHeight = (int) img.getHeight() * maxWidth / img.getWidth();
+					newHeight = img.getHeight() * maxWidth / img.getWidth();
 
 					if (img.getCalibration().scaled()) {
 						newCal.pixelWidth = parameters.getScale(SegPombeParameters.WIDTH) * img.getWidth() / maxWidth;
@@ -350,8 +350,8 @@ public class ParametersProcessor {
 	 * Method to change size and scale of the image to analyze : need to compute
 	 * parameters before so it can be coherent
 	 */
-	public void rescale(int newWidth, int newHeight, int newMinParticleSize, int newMaxParticleSize,
-			Calibration newCal) {
+	private void rescale(int newWidth, int newHeight, int newMinParticleSize, int newMaxParticleSize,
+						 Calibration newCal) {
 
 		parameters.setMinParticleSize(newMinParticleSize);
 		parameters.setMaxParticleSize(newMaxParticleSize);
@@ -411,7 +411,7 @@ public class ParametersProcessor {
 	 * Method to get the state of all the result Option checkbox and return
 	 * false if none of them are selected
 	 */
-	public boolean checkResultOptions() {
+	private boolean checkResultOptions() {
 
 		return (mainDialog.getShowCorrelationImgCkb().getState() || mainDialog.getSaveBinaryImgCkb().getState()
 				|| mainDialog.getShowDataFrameCkb().getState() || mainDialog.getSaveCorrelationImgCkb().getState()
@@ -426,9 +426,8 @@ public class ParametersProcessor {
 	 * CellsBoundaries constants : WIDTH and HEIGHT and DEPTH. Return an int
 	 * width or height in pixels.
 	 */
-	public int convertMicronToPixel(double micronSize, int widthOrHeightOrDepth) {
-		int pixelSize = (int) Math.round(micronSize / parameters.getScale(widthOrHeightOrDepth));
-		return pixelSize;
+	private int convertMicronToPixel(double micronSize, int widthOrHeightOrDepth) {
+		return (int) Math.round(micronSize / parameters.getScale(widthOrHeightOrDepth));
 	}
 
 	/**
@@ -438,9 +437,8 @@ public class ParametersProcessor {
 	 * width or height in microns.
 	 */
 	public double convertPixelToMicron(int pixelSize, int widthOrHeightOrDepth) {
-		double micronSize = (double) parameters.getScale(widthOrHeightOrDepth) * pixelSize;
 
-		return micronSize;
+		return parameters.getScale(widthOrHeightOrDepth) * pixelSize;
 	}
 
 	public SegPombeParameters getParameters() {

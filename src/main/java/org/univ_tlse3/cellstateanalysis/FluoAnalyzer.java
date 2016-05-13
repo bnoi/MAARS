@@ -3,7 +3,6 @@ package org.univ_tlse3.cellstateanalysis;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -58,13 +57,6 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 	 *            radius of spot in corresponding channel
 	 * @param frame
 	 *            time point
-	 * @param timeInterval
-	 *            interval between time points
-	 * @param merotelyCandidates
-	 *            hashmap<cell number, times that this cell has been found one
-	 *            point on the "spindle line"
-	 * @param spotCotainer
-	 * @param geoContainer
 	 */
 
 	public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
@@ -123,20 +115,16 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 		int nThread = Runtime.getRuntime().availableProcessors();
 		ExecutorService es = Executors.newFixedThreadPool(nThread);
 		final int[] nbOfCellEachThread = new int[2];
-		nbOfCellEachThread[0] = (int) nbCell / nThread;
-		nbOfCellEachThread[1] = (int) nbOfCellEachThread[0] + nbCell % nThread;
+		nbOfCellEachThread[0] = nbCell / nThread;
+		nbOfCellEachThread[1] = nbOfCellEachThread[0] + nbCell % nThread;
 		Future<?> future = null;
 		for (int i = 0; i < nThread; i++) {
 			// analyze every subset of cell
 			future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, factors));
 		}
 		es.shutdown();
-		try {
+		if (future != null) {
 			future.get();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		} catch (ExecutionException e1) {
-			e1.printStackTrace();
 		}
 		try {
 			es.awaitTermination(10, TimeUnit.MINUTES);
@@ -154,7 +142,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 		private final int[] deltas;
 		private double[] factors;
 
-		public AnalyseBlockCells(int index, final int[] deltas, double[] factors) {
+		AnalyseBlockCells(int index, final int[] deltas, double[] factors) {
 			this.index = index;
 			this.deltas = deltas;
 			this.factors = factors;
@@ -164,7 +152,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 		public void run() {
 			// distribute number of cells for each thread
 			int begin = 0;
-			int end = 0;
+			int end;
 			if (index == 0) {
 				if (deltas[0] != deltas[1]) {
 					end = deltas[1];
@@ -181,7 +169,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 				Cell cell = soc.getCell(j);
 				cell.addChannel(channel);
 				cell.setTrackmateModel(model);
-				Roi tmpRoi = null;
+				Roi tmpRoi;
 				if (factors[0] != 1 || factors[1] != 1) {
 					tmpRoi = cell.rescaleCellShapeRoi(factors);
 				} else {
@@ -217,7 +205,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
 					HashMap<String, Object> geometry = new HashMap<String, Object>();
 					spotSetAnalyzor.compute(geometry, spotSet);
 					ArrayList<Spot> poles = spotSetAnalyzor.getPoles();
-					new FindMerotely(cell, spotSet, geometry, fluoImgCal, poles, radius, frame);
+					new FindMerotely(cell, spotSet, fluoImgCal, poles, radius, frame);
 					cell.putGeometry(channel, frame, geometry);
 				}
 			}

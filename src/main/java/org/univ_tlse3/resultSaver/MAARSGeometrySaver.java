@@ -23,7 +23,7 @@ public class MAARSGeometrySaver {
 		}
 	}
 
-	public void saveGeometries(String channel, Cell cell) {
+	private void saveGeometries(String channel, Cell cell) {
 		HashMap<Integer, HashMap<String, Object>> geosInFrams = cell.getGeometryContainer().getGeosInChannel(channel);
 		int cellNb = cell.getCellNumber();
 		ArrayList<String[]> outLines = new ArrayList<String[]>();
@@ -37,7 +37,7 @@ public class MAARSGeometrySaver {
 				header[i] = headerList.get(i - 1);
 			}
 			FileWriter cellGeoWriter = null;
-			String[] geoOfFrame = null;
+			String[] geoOfFrame;
 			try {
 				cellGeoWriter = new FileWriter(geometryCSVDir + String.valueOf(cellNb) + "_" + channel + ".csv");
 			} catch (IOException e) {
