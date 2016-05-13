@@ -26,7 +26,7 @@ public class ComputeCorrelation {
 	 * Standard normal distribution density function. Replace with any
 	 * sufficiently smooth function.
 	 **********************************************************************/
-	public double f(double z) {
+	private double f(double z) {
 		return iz[(int) z] * direction * (z - zf)
 				* Math.exp(-Math.pow(zf - z, 2) / (2 * Math.pow(sigma, 2)));
 	}

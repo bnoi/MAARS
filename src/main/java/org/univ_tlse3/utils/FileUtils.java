@@ -13,6 +13,7 @@ public class FileUtils {
 	 * test if the path exists
 	 * 
 	 * @param path
+	 * path to test
 	 * @return : true or false
 	 */
 	public static boolean exists(String path) {
@@ -23,6 +24,7 @@ public class FileUtils {
 	 * Convert an unix path in windows path if program is running on windows OS
 	 * 
 	 * @param unixPath
+	 * path to be converted
 	 * @return String path
 	 */
 	public static String convertPath(String unixPath) {
@@ -37,6 +39,7 @@ public class FileUtils {
 	 * if current path do not exists, create a new one
 	 * 
 	 * @param pathToFluoDir
+	 * folder to create
 	 */
 	public static void createFolder(String pathToFluoDir) {
 		File fluoDir = new File(pathToFluoDir);

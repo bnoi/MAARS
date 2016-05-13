@@ -58,7 +58,6 @@ public class MaarsMainDialog implements ActionListener {
 	private JFormattedTextField widthTf;
 	private JFormattedTextField heightTf;
 	private JFormattedTextField fluoAcqDurationTf;
-	private JCheckBox saveParametersChk;
 	private JCheckBox withOutAcqChk;
 	private JRadioButton dynamicOpt;
 	private JRadioButton staticOpt;
@@ -68,8 +67,6 @@ public class MaarsMainDialog implements ActionListener {
 	 * 
 	 * @param mm
 	 *            : graphical user interface of Micro-Manager
-	 * @param mmc
-	 *            : Core object of Micro-Manager
 	 * @param parameters
 	 *            :MaarsParameters
 	 */
@@ -218,7 +215,7 @@ public class MaarsMainDialog implements ActionListener {
 
 		JPanel chkPanel = new JPanel(new GridLayout(1, 0));
 		chkPanel.setBackground(bgColor);
-		saveParametersChk = new JCheckBox("Save parameters", true);
+		JCheckBox saveParametersChk = new JCheckBox("Save parameters", true);
 		withOutAcqChk = new JCheckBox("Don't do acquisition", false);
 		withOutAcqChk.addActionListener(this);
 		chkPanel.add(withOutAcqChk);
@@ -274,16 +271,8 @@ public class MaarsMainDialog implements ActionListener {
 	 * 
 	 * @return graphical user interface of Micro-Manager
 	 */
-	public MMStudio getMM() {
+	private MMStudio getMM() {
 		return mm;
-	}
-
-	/**
-	 * 
-	 * @return Core object of Micro-Manager
-	 */
-	public CMMCore getMMC() {
-		return mmc;
 	}
 
 	/**
@@ -294,18 +283,11 @@ public class MaarsMainDialog implements ActionListener {
 	}
 
 	/**
-	 * Hide dialog
-	 */
-	public void hide() {
-		mainDialog.dispose();
-	}
-
-	/**
 	 * Method to display number of field the program has to scan
 	 */
-	public void refreshNumField() {
-		double newWidth = 0;
-		double newHeigth = 0;
+	private void refreshNumField() {
+		double newWidth;
+		double newHeigth;
 
 		newWidth = (Double) widthTf.getValue();
 		newHeigth = (Double) widthTf.getValue();
@@ -328,7 +310,7 @@ public class MaarsMainDialog implements ActionListener {
 	/**
 	 * method to save the parameters entered
 	 */
-	public void saveParameters() {
+	private void saveParameters() {
 		if (!savePathTf.getText().equals(parameters.getSavingPath())) {
 			parameters.setSavingPath(savePathTf.getText());
 		}
@@ -345,7 +327,7 @@ public class MaarsMainDialog implements ActionListener {
 	/**
 	 * method to set the strategy selected
 	 */
-	public void setAnalysisStrategy() {
+	private void setAnalysisStrategy() {
 
 		if (dynamicOpt.isSelected()) {
 			parameters.setFluoParameter(MaarsParameters.DYNAMIC, "" + true);
@@ -354,7 +336,7 @@ public class MaarsMainDialog implements ActionListener {
 		}
 	}
 
-	public int overWrite(String path) {
+	private int overWrite(String path) {
 		int overWrite = 0;
 		if (FileUtils.exists(path + File.separator + "X0_Y0" + File.separator + "MMStack.ome.tif")) {
 			overWrite = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
@@ -384,8 +366,10 @@ public class MaarsMainDialog implements ActionListener {
 						th = new Thread(new MAARS(mm, mmc, parameters));
 					}
 				}
-				th.setUncaughtExceptionHandler(h);
-				th.start();
+				if (th != null) {
+					th.setUncaughtExceptionHandler(h);
+					th.start();
+				}
 			}
 		} else if (e.getSource() == segmButton) {
 			new MaarsSegmentationDialog(parameters);

@@ -34,7 +34,7 @@ public class SegPombeMainDialog implements PlugIn{
 	private NonBlockingGenericDialog mainWindow;
 
 	// pombeSegmentor parameter object (with predefined values)
-	SegPombeParameters defaultParameters = new SegPombeParameters();
+	private SegPombeParameters defaultParameters = new SegPombeParameters();
 
 	// Component allowing to receive parameters from user
 	// to get sigma : typical cell size
@@ -88,26 +88,14 @@ public class SegPombeMainDialog implements PlugIn{
 	// meaning file currently selected or file found with browser
 	private JTextField imgNameTf;
 
-	// Button of the mainWindow
-	private Button browseButton;
-	private Button currentImageButton;
-	private Button runButton;
-	private Button cancelButton;
-
-	// Action associated with buttons
-	private RunAction runAction;
-	//private BrowseAction browseAction;
-	private CurrentImageAction currentImageAction;
-	private CancelAction cancelAction;
-
 	// Units available from comboBoxes
-	String unitList[] = { "pixels", "microns" };
+	private String unitList[] = { "pixels", "microns" };
 
 	/*
 	 * Create the main window in which there is : - a panel to handle the image
 	 * to Process and run the plugin - a panel to set(???)
 	 */
-	public void setMainWindow() {
+	private void setMainWindow() {
 
 		mainWindow = new NonBlockingGenericDialog("Cells Boundaries");
 
@@ -395,14 +383,14 @@ public class SegPombeMainDialog implements PlugIn{
 		Panel fieldAndBrowsePanel = new Panel();
 		imgNameTf = new JTextField(20);
 		imgNameTf.setEditable(false);
-		
-		browseButton = new Button("Browse");
+
+		Button browseButton = new Button("Browse");
 //		browseAction = new BrowseAction(this, defaultParameters);
 //		browseButton.addActionListener(browseAction);
 		
 		Panel currentImagePanel = new Panel();
-		currentImageButton = new Button("Current Image");
-		currentImageAction = new CurrentImageAction(this);
+		Button currentImageButton = new Button("Current Image");
+		CurrentImageAction currentImageAction = new CurrentImageAction(this);
 		currentImageButton.addActionListener(currentImageAction);
 		currentImagePanel.add(currentImageButton);
 
@@ -413,12 +401,12 @@ public class SegPombeMainDialog implements PlugIn{
 		getPicturePanel.add(currentImagePanel);
 
 		Panel runCancelPanel = new Panel();
-		runButton = new Button("run");
-		runAction = initRunAction();
+		Button runButton = new Button("run");
+		RunAction runAction = initRunAction();
 		runButton.addActionListener(runAction);
 
-		cancelButton = new Button("Cancel");
-		cancelAction = initCancelAction();
+		Button cancelButton = new Button("Cancel");
+		CancelAction cancelAction = initCancelAction();
 		cancelButton.addActionListener(cancelAction);
 
 		runCancelPanel.add(runButton);
@@ -444,14 +432,14 @@ public class SegPombeMainDialog implements PlugIn{
 	/*
 	 * Initialize Run action
 	 */
-	public RunAction initRunAction() {
+	private RunAction initRunAction() {
 		return new RunAction(this);
 	}
 
 	/*
 	 * Initialize Cancel action
 	 */
-	public CancelAction initCancelAction() {
+	private CancelAction initCancelAction() {
 		return new CancelAction(this);
 	}
 
@@ -461,7 +449,7 @@ public class SegPombeMainDialog implements PlugIn{
 		imgNameTf.setText(name);
 	}
 
-	public void setPathDirField(String pathFolder) {
+	private void setPathDirField(String pathFolder) {
 		saveDirTf.setText(pathFolder);
 	}
 
@@ -494,111 +482,111 @@ public class SegPombeMainDialog implements PlugIn{
 		}
 	}
 
-	public JTextField getImgNameTf() {
+	JTextField getImgNameTf() {
 		return imgNameTf;
 	}
 
-	public Checkbox getShowCorrelationImgCkb() {
+	Checkbox getShowCorrelationImgCkb() {
 		return showCorrelationImgCkb;
 	}
 
-	public Checkbox getShowBinaryImgCkb() {
+	Checkbox getShowBinaryImgCkb() {
 		return showBinaryImgCkb;
 	}
 
-	public Checkbox getShowDataFrameCkb() {
+	Checkbox getShowDataFrameCkb() {
 		return showDataFrameCkb;
 	}
 
-	public Checkbox getShowFocusImageCkb() {
+	Checkbox getShowFocusImageCkb() {
 		return showFocusImageCkb;
 	}
 
-	public Checkbox getSaveFocusImageCkb() {
+	Checkbox getSaveFocusImageCkb() {
 		return saveFocusImageCkb;
 	}
 
-	public Checkbox getSaveRoiCkb() {
+	Checkbox getSaveRoiCkb() {
 		return saveRoiCkb;
 	}
 
-	public Checkbox getSaveCorrelationImgCkb() {
+	Checkbox getSaveCorrelationImgCkb() {
 		return saveCorrelationImgCkb;
 	}
 
-	public Checkbox getSaveBinaryImgCkb() {
+	Checkbox getSaveBinaryImgCkb() {
 		return saveBinaryImgCkb;
 	}
 
-	public Checkbox getSaveDataFrameCkb() {
+	Checkbox getSaveDataFrameCkb() {
 		return saveDataFrameCkb;
 	}
 
-	public JFormattedTextField getTypicalSizeTf() {
+	JFormattedTextField getTypicalSizeTf() {
 		return typicalSizeTf;
 	}
 
-	public JComboBox<String> getTypicalSizeUnitCombo() {
+	JComboBox<String> getTypicalSizeUnitCombo() {
 		return typicalSizeUnitCombo;
 	}
 
-	public Checkbox getChangeScaleCkb() {
+	Checkbox getChangeScaleCkb() {
 		return changeScaleCkb;
 	}
 
-	public JFormattedTextField getMaxWidthTf() {
+	JFormattedTextField getMaxWidthTf() {
 		return maxWidthTf;
 	}
 
-	public JFormattedTextField getMaxHeightTf() {
+	JFormattedTextField getMaxHeightTf() {
 		return maxHeightTf;
 	}
 
-	public JComboBox<String> getMaxWidthUnitCombo() {
+	JComboBox<String> getMaxWidthUnitCombo() {
 		return maxWidthUnitCombo;
 	}
 
-	public JComboBox<String> getMaxHeightUnitCombo() {
+	JComboBox<String> getMaxHeightUnitCombo() {
 		return maxHeightUnitCombo;
 	}
 
-	public Checkbox getFilterAbnormalShapeCkb() {
+	Checkbox getFilterAbnormalShapeCkb() {
 		return filterAbnormalShapeCkb;
 	}
 
-	public Checkbox getFilterWithMeanGreyValueCkb() {
+	Checkbox getFilterWithMeanGreyValueCkb() {
 		return filterWithMeanGreyValueCkb;
 	}
 
-	public JTextField getSaveDirTf() {
+	JTextField getSaveDirTf() {
 		return saveDirTf;
 	}
 
-	public JFormattedTextField getMinParticleSizeTf() {
+	JFormattedTextField getMinParticleSizeTf() {
 		return minParticleSizeTf;
 	}
 
-	public JFormattedTextField getMaxParticleSizeTf() {
+	JFormattedTextField getMaxParticleSizeTf() {
 		return maxParticleSizeTf;
 	}
 
-	public JComboBox<String> getMinParticleSizeUnitCombo() {
+	JComboBox<String> getMinParticleSizeUnitCombo() {
 		return minParticleSizeUnitCombo;
 	}
 
-	public JFormattedTextField getManualZFocusTf() {
+	JFormattedTextField getManualZFocusTf() {
 		return manualZFocusTf;
 	}
 
-	public Checkbox getManualZFocusCkb() {
+	Checkbox getManualZFocusCkb() {
 		return manualZFocusCkb;
 	}
 
-	public JComboBox<String> getMaxParticleSizeUnitCombo() {
+	JComboBox<String> getMaxParticleSizeUnitCombo() {
 		return maxParticleSizeUnitCombo;
 	}
 
-	public int getDirection() {
+	int getDirection() {
 
 		if (blackOrWhiteCombo.getSelectedIndex() == 0) {
 			return 1;
@@ -607,11 +595,11 @@ public class SegPombeMainDialog implements PlugIn{
 		}
 	}
 
-	public JFormattedTextField getSolidityTf() {
+	JFormattedTextField getSolidityTf() {
 		return solidityTf;
 	}
 
-	public JFormattedTextField getMeanGreyValueField() {
+	JFormattedTextField getMeanGreyValueField() {
 		return meanGreyValueField;
 	}
 
@@ -621,10 +609,6 @@ public class SegPombeMainDialog implements PlugIn{
 	 */
 	public void getAlreadryOpenedImage() {
 		setPathDirField(IJ.getImage().getOriginalFileInfo().directory);
-	}
-
-	public RunAction getRunAction() {
-		return runAction;
 	}
 
 	public void showMainWindow() {

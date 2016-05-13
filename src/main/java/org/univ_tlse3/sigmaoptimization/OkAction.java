@@ -11,7 +11,7 @@ import java.awt.event.ActionListener;
  * @author marie
  *
  */
-public class OkAction implements ActionListener {
+class OkAction implements ActionListener {
 
 	private SigmaOptimization so;
 
@@ -19,8 +19,9 @@ public class OkAction implements ActionListener {
 	 * Constructor :
 	 * 
 	 * @param so
+	 * object optimization
 	 */
-	public OkAction(SigmaOptimization so) {
+	OkAction(SigmaOptimization so) {
 		this.so = so;
 	}
 

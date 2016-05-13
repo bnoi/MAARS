@@ -22,7 +22,7 @@ public class MAARSSpotsSaver {
 		}
 	}
 
-	public void saveSpots(String channel, SpotCollection spotsInChannel, String cellNb) {
+	private void saveSpots(String channel, SpotCollection spotsInChannel, String cellNb) {
 		Model trackmateModel = this.container.getTrackmateModel();
 		// for each cell
 		File newFile = new File(spotsXmlDir + String.valueOf(cellNb) + "_" + channel + ".xml");

@@ -17,8 +17,7 @@ import ij.measure.ResultsTable;
  */
 public class MaarsSegmentation {
 	private MaarsParameters parameters;
-	private SegPombeParameters segPombeParam;
-	private boolean roiDetected = false;
+    private boolean roiDetected = false;
 	private ResultsTable rt;
 
 	/**
@@ -26,12 +25,8 @@ public class MaarsSegmentation {
 	 * 
 	 * @param parameters
 	 *            : MAARS parameters (see class MaarsParameters)
-	 * @param positionX
-	 *            : current X coordinate of microscope's view.
-	 * @param positionY
-	 *            : current Y coordinate of microscope's view.
-	 */
-	public MaarsSegmentation(MaarsParameters parameters, String positionX, String positionY) {
+     */
+	public MaarsSegmentation(MaarsParameters parameters) {
 
 		this.parameters = parameters;
 	}
@@ -45,7 +40,7 @@ public class MaarsSegmentation {
 	public void segmentation(ImagePlus img, String pathToSegDir) {
 
 		IJ.log("Prepare parameters for segmentation...");
-		segPombeParam = new SegPombeParameters();
+        SegPombeParameters segPombeParam = new SegPombeParameters();
 
 		segPombeParam.setImageToAnalyze(img);
 		segPombeParam.setSavingPath(pathToSegDir);
@@ -107,15 +102,11 @@ public class MaarsSegmentation {
 	 * 
 	 * @return if no Roi detected
 	 */
-	public boolean roiDetected() {
+	boolean roiDetected() {
 		return this.roiDetected;
 	}
 
-	public SegPombeParameters getSegPombeParam() {
-		return this.segPombeParam;
-	}
-
-	public ResultsTable getRoiMeasurements() {
+	ResultsTable getRoiMeasurements() {
 		return this.rt;
 	}
 }

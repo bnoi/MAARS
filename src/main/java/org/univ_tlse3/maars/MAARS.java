@@ -56,7 +56,6 @@ public class MAARS implements Runnable {
 	private MMStudio mm;
 	private CMMCore mmc;
 	private MaarsParameters parameters;
-	private String pathToSegDir;
 	private String pathToFluoDir;
 	private SetOfCells soc;
 
@@ -144,7 +143,7 @@ public class MAARS implements Runnable {
 		}
 	}
 
-	public static void mailNotify() {
+	private static void mailNotify() {
 		String to = "tongli.bioinfo@gmail.com";
 
 		// Sender's email ID needs to be mentioned
@@ -183,8 +182,8 @@ public class MAARS implements Runnable {
 		}
 	}
 
-	public static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
-			ArrayList<String> arrayChannels, Boolean splitChannel) {
+	static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
+						ArrayList<String> arrayChannels, Boolean splitChannel) {
 		MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
 		MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
 		MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
@@ -197,8 +196,8 @@ public class MAARS implements Runnable {
 		imgSaver.exportChannelBtf(splitChannel, arrayChannels);
 	}
 
-	public static void showChromLaggingCells(String pathToSegDir, double timeInterval, SetOfCells soc,
-			Boolean splitChannel) {
+	private static void showChromLaggingCells(String pathToSegDir, double timeInterval, SetOfCells soc,
+											  Boolean splitChannel) {
 		if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
 			String[] listAcqNames = new File(pathToSegDir + "_MITOSIS" + File.separator + "figs" + File.separator)
 					.list();
@@ -237,8 +236,8 @@ public class MAARS implements Runnable {
 		}
 	}
 
-	public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
-			String pathToSegDir, Boolean showChromLagging) {
+	static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, Boolean splitChannel,
+									  String pathToSegDir, Boolean showChromLagging) {
 		double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
 		// TODO
 		PythonPipeline.getMitosisFiles(pathToSegDir, "CFP", "0.1075", "0.3", "0.6", "200",
@@ -264,9 +263,7 @@ public class MAARS implements Runnable {
 		String channels = parameters.getUsingChannels();
 		String[] arrayCh = channels.split(",", -1);
 		ArrayList<String> arrayChannels = new ArrayList<String>();
-		for (String channel : arrayCh) {
-			arrayChannels.add(channel);
-		}
+		Collections.addAll(arrayChannels, arrayCh);
 
 		// Acquisition path arrangement
 		ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
@@ -284,7 +281,7 @@ public class MAARS implements Runnable {
 			String xPos = String.valueOf(Math.round(explo.getX(i)));
 			String yPos = String.valueOf(Math.round(explo.getY(i)));
 			IJ.log("Current position : x_" + xPos + " y_" + yPos);
-			this.pathToSegDir = FileUtils
+			String pathToSegDir = FileUtils
 					.convertPath(parameters.getSavingPath() + File.separator + "X" + xPos + "_Y" + yPos);
 			this.pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
 			// autofocus(mm, mmc);
@@ -303,8 +300,8 @@ public class MAARS implements Runnable {
 			ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus,
 					pathToSegDir, true);
 			// --------------------------segmentation-----------------------------//
-			MaarsSegmentation ms = new MaarsSegmentation(parameters, xPos, yPos);
-			ms.segmentation(segImg, this.pathToSegDir);
+			MaarsSegmentation ms = new MaarsSegmentation(parameters);
+			ms.segmentation(segImg, pathToSegDir);
 			if (ms.roiDetected()) {
 				// from Roi initialize a set of cell
 				soc.reset();
@@ -314,7 +311,7 @@ public class MAARS implements Runnable {
 				FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters, xPos, yPos);
 				fluoAcq.setBaseSaveDir(pathToFluoDir);
 				try {
-					PrintStream ps = new PrintStream(this.pathToSegDir + File.separator + "CellStateAnalysis.LOG");
+					PrintStream ps = new PrintStream(pathToSegDir + File.separator + "CellStateAnalysis.LOG");
 					curr_err = System.err;
 					curr_out = System.err;
 					System.setOut(ps);

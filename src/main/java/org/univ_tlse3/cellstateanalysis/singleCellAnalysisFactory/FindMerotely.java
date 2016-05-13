@@ -1,7 +1,6 @@
 package org.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.apache.commons.math3.util.FastMath;
 import org.univ_tlse3.cellstateanalysis.Cell;
@@ -14,7 +13,7 @@ import ij.measure.Calibration;
 
 public class FindMerotely {
 
-	public FindMerotely(Cell cell, Iterable<Spot> spotSet, HashMap<String, Object> geometry, Calibration fluoImgCal,
+	public FindMerotely(Cell cell, Iterable<Spot> spotSet, Calibration fluoImgCal,
 						ArrayList<Spot> poles, double radius, int frame) {
 		// TODO to specify in gui that GFP for Kt and cfp for
 		// spbs for exemple

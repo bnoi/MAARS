@@ -21,9 +21,8 @@ import org.univ_tlse3.utils.FileUtils;
 public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 
 	private MMStudio mmStudio;
-	private MaarsParameters parameters;
 
-	static public final String VERSION_INFO = "1.0.0";
+	private static final String VERSION_INFO = "1.0.0";
 	static private final String COPYRIGHT_NOTICE = "BSD License, 2016";
 	static private final String DESCRIPTION = "Micro-Manager plugin for Mitotic Analysing And Recording System";
 	static private final String NAME = "MAARS";
@@ -72,7 +71,7 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 		} else {
 			inStream = getClass().getResourceAsStream(File.separator + "maars_default_config.xml");
 		}
-		parameters = new MaarsParameters(inStream);
+		MaarsParameters parameters = new MaarsParameters(inStream);
 		new MaarsMainDialog(mmStudio, parameters).show();
 	}
 }

@@ -12,15 +12,16 @@ public class SpotsContainer {
 	private HashMap<String, SpotCollection> spotsInCell;
 	private Model trackmateModel;
 
-	public SpotsContainer() {
+	SpotsContainer() {
 	}
 
 	/**
 	 * add channel
 	 * 
 	 * @param channel
+	 * channel name
 	 */
-	public void addChannel(String channel) {
+	void addChannel(String channel) {
 		if (this.spotsInCell == null) {
 			this.spotsInCell = new HashMap<String, SpotCollection>();
 		}
@@ -33,10 +34,13 @@ public class SpotsContainer {
 	 * put spot in specified channel / cell / frame
 	 * 
 	 * @param channel
+     * channel name
 	 * @param frame
+     * frame name
 	 * @param spot
+     * spot
 	 */
-	public void putSpot(String channel, int frame, Spot spot) {
+    void putSpot(String channel, int frame, Spot spot) {
 		this.spotsInCell.get(channel).add(spot, frame);
 	}
 
@@ -57,7 +61,7 @@ public class SpotsContainer {
 	 * @param frame
 	 * @return
 	 */
-	public Iterable<Spot> getSpotsInFrame(String channel, int frame) {
+    Iterable<Spot> getSpotsInFrame(String channel, int frame) {
 		return getSpots(channel).iterable(frame, false);
 	}
 
@@ -68,7 +72,7 @@ public class SpotsContainer {
 	 * @param frame
 	 * @param spToRemove
 	 */
-	public void removeSpot(String channel, int frame, Spot spToRemove) {
+    void removeSpot(String channel, int frame, Spot spToRemove) {
 		this.spotsInCell.get(channel).remove(spToRemove, frame);
 	}
 
@@ -79,7 +83,7 @@ public class SpotsContainer {
 	 * @param frame
 	 * @return
 	 */
-	public int getNbOfSpot(String channel, int frame) {
+    int getNbOfSpot(String channel, int frame) {
 		return getSpots(channel).getNSpots(frame, false);
 	}
 
@@ -87,8 +91,9 @@ public class SpotsContainer {
 	 * Save header of Trackmate output and spot collection
 	 * 
 	 * @param model
+     * model from Trackmate
 	 */
-	public void setTrackmateModel(Model model) {
+    void setTrackmateModel(Model model) {
 		if (this.trackmateModel == null)
 			this.trackmateModel = model;
 	}
@@ -104,11 +109,10 @@ public class SpotsContainer {
 	/**
 	 * Get the lowest qualit spot in the frame
 	 * 
-	 * @param channel
-	 * @param frame
 	 * @return
+     * the spot with worst quality
 	 */
-	public static Spot findLowestQualitySpot(Iterable<Spot> spots) {
+	static Spot findLowestQualitySpot(Iterable<Spot> spots) {
 		double min = Double.POSITIVE_INFINITY;
 		Spot lowestQualitySpot = null;
 		for (Spot s : spots) {
@@ -120,7 +124,7 @@ public class SpotsContainer {
 		return lowestQualitySpot;
 	}
 
-	public static SpotCollection getNBestqualitySpots(SpotCollection spots, int setSize, int maxNbSpot) {
+	static SpotCollection getNBestqualitySpots(SpotCollection spots, int setSize, int maxNbSpot) {
 		SpotCollection newSet = new SpotCollection();
 		Iterator<Spot> it = spots.iterator(false);
 		while (it.hasNext()) {

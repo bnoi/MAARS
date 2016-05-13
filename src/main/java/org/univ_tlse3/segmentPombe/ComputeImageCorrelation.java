@@ -9,13 +9,13 @@ import ij.process.FloatProcessor;
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 13, 2015
  */
-public class ComputeImageCorrelation implements Callable<FloatProcessor> {
+class ComputeImageCorrelation implements Callable<FloatProcessor> {
 	private ImagePlus img;
 	private float zFocus;
 	private float sigma;
 	private int direction;
 
-	public ComputeImageCorrelation(ImagePlus img, float zFocus, float sigma, int direction) {
+	ComputeImageCorrelation(ImagePlus img, float zFocus, float sigma, int direction) {
 		this.img = img;
 		this.zFocus = zFocus;
 		this.sigma = sigma;
