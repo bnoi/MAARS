@@ -41,8 +41,8 @@ public class FileUtils {
 	 * @param pathToFluoDir
 	 * folder to create
 	 */
-	public static void createFolder(String pathToFluoDir) {
+	public static Boolean createFolder(String pathToFluoDir) {
 		File fluoDir = new File(pathToFluoDir);
-		fluoDir.mkdirs();
+		return fluoDir.mkdirs();
 	}
 }

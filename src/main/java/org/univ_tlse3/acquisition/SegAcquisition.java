@@ -16,12 +16,12 @@ import ij.ImagePlus;
  */
 public class SegAcquisition extends SuperClassAcquisition {
 	private double step;
-	public SegAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters, String positionX, String positionY) {
+	public SegAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 		super(mm, mmc, parameters);
 		this.step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 	}
 
-	public ImagePlus acquire(String channelName, double zFocus, String pathToSegMovie, Boolean save) {
+	public ImagePlus acquire(String channelName, double zFocus, Boolean save) {
 		int frame = 0;
 		List<Image> listImg = super.acquire(channelName, zFocus);
 		if (save){

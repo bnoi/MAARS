@@ -222,7 +222,7 @@ public class SuperClassAcquisition {
 	public List<Image> acquire(String channelName, double zFocus) {
 		double range;
 		double step;
-		if (channelName != parameters.getSegmentationParameter(MaarsParameters.CHANNEL)) {
+		if (!channelName.equals(parameters.getSegmentationParameter(MaarsParameters.CHANNEL))) {
 			// initialize parameters for FLUO Acquisitions
 			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
 			step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));

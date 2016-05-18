@@ -1,35 +1,35 @@
 package org.univ_tlse3.segmentPombe.mainDialogActions;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import org.univ_tlse3.segmentPombe.ParametersProcessor;
 import org.univ_tlse3.segmentPombe.SegPombe;
 import org.univ_tlse3.segmentPombe.SegPombeMainDialog;
 import org.univ_tlse3.segmentPombe.SegPombeParameters;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 public class RunAction implements ActionListener {
 
-	private SegPombeMainDialog mainDialog;
+    private SegPombeMainDialog mainDialog;
 
-	public RunAction(SegPombeMainDialog mainDialog) {
-		this.mainDialog = mainDialog;
-	}
+    public RunAction(SegPombeMainDialog mainDialog) {
+        this.mainDialog = mainDialog;
+    }
 
-	/**
-	 * Action performed when run Button is triggered. It checks all parameters
-	 * then run Algorithm.
-	 */
-	public void actionPerformed(ActionEvent e) {
-		ParametersProcessor process = new ParametersProcessor(mainDialog);
-		if (process.checkParameters()) {
-			process.updateParameters();
-			SegPombeParameters parameters = process.getParameters();
-			SegPombe segPombe = new SegPombe(parameters);
-			segPombe.createCorrelationImage();
-			segPombe.convertCorrelationToBinaryImage();
-			segPombe.analyseAndFilterParticles();
-			segPombe.showAndSaveResultsAndCleanUp();
-		}
-	}
+    /**
+     * Action performed when run Button is triggered. It checks all parameters
+     * then run Algorithm.
+     */
+    public void actionPerformed(ActionEvent e) {
+        ParametersProcessor process = new ParametersProcessor(mainDialog);
+        if (process.checkParameters()) {
+            process.updateParameters();
+            SegPombeParameters parameters = process.getParameters();
+            SegPombe segPombe = new SegPombe(parameters);
+            segPombe.createCorrelationImage();
+            segPombe.convertCorrelationToBinaryImage();
+            segPombe.analyseAndFilterParticles();
+            segPombe.showAndSaveResultsAndCleanUp();
+        }
+    }
 }

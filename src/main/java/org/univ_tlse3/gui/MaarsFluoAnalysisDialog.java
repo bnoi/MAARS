@@ -78,8 +78,6 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private JComboBox<String> channel2Combo;
 	private JComboBox<String> channel3Combo;
 	private static String NONE = "None";
-	String channelListWithNone[] = { NONE, "GFP", "CFP", "TxRed", "DAPI" };
-	String channelList[] = { "GFP", "CFP", "TxRed", "DAPI" };
 
 	/**
 	 * Constructor :
@@ -181,6 +179,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		//
 
 		channel1Panel = new JPanel(new GridLayout(1, 0));
+		String[] channelList = {"GFP", "CFP", "TxRed", "DAPI"};
 		channel1Combo = new JComboBox<String>(channelList);
 		maxNumberSpotCh1Tf = new JFormattedTextField(Integer.class);
 		spotRadiusCh1Tf = new JFormattedTextField(Double.class);
@@ -197,6 +196,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		//
 
 		channel2Panel = new JPanel(new GridLayout(1, 0));
+		String[] channelListWithNone = {NONE, "GFP", "CFP", "TxRed", "DAPI"};
 		channel2Combo = new JComboBox<String>(channelListWithNone);
 		channel2Combo.addActionListener(this);
 		maxNumberSpotCh2Tf = new JFormattedTextField(Integer.class);

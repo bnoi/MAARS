@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[ ]:
+# In[3]:
 
 #!/usr/bin/env python3
 import numpy as np
@@ -15,8 +15,27 @@ from trackmate import trackmate_peak_import
 from argparse import ArgumentParser
 from re import match
 from collections import deque
+from scipy import stats
 idx = IndexSlice
 #%matplotlib inline
+
+def perf_measure(real, predict, cellNbs):
+    TP = 0
+    FP = 0
+    FN = 0
+    TN = 0
+    for predictVal in predict: 
+        if predictVal in real:
+            TP += 1
+        else:
+            FP += 1
+    for realVal in real:
+        if realVal not in predict:
+            FN += 1
+    for i in cellNbs:
+        if i not in predict and i not in real:
+            TN += 1
+    return(TP, FP, FN, TN)
 
 class getMitosisFiles(object):
     """
@@ -30,9 +49,7 @@ class getMitosisFiles(object):
         self._baseDir = baseDir
         self._channel = channel
         self._calibration = 0.1075
-        self._gap_tolerance = 0.3
-        self._elongating_trend = 0.6
-        self._minimumPeriod = 200
+        self._minimumPeriod = 100
         self._acq_interval = 20
 
     def set_attributes_from_cmd_line(self):
@@ -46,12 +63,6 @@ class getMitosisFiles(object):
         parser.add_argument("-calibration",
                             help="calibration of image",
                             type=float, default=0.1075)
-        parser.add_argument("-gap_tolerance",
-                            help="maximum percent of gap that can be accepted",
-                            type=float, default=0.3)
-        parser.add_argument("-elongating_trend",
-                            help="percentage of elongating timepoint",
-                            type=float, default=0.8)
         parser.add_argument("-minimumPeriod",
                             help="minimum time segment to be analyzed",
                             type=int, default=200)
@@ -62,8 +73,6 @@ class getMitosisFiles(object):
         self._baseDir = args.baseDir
         self._channel = args.channel
         self._calibration = args.calibration
-        self._gap_tolerance = args.gap_tolerance
-        self._elongating_trend = args.elongating_trend
         self._minimumPeriod = args.minimumPeriod
         self._acq_interval = args.acq_interval
 
@@ -72,7 +81,7 @@ class getMitosisFiles(object):
         yd = y2-y1
         return  sqrt(xd*xd + yd*yd)
 
-    def getAllCellNnumbers(self):
+    def getAllCellNumbers(self):
         all_cell_nbs=list()
         features_dir = self._baseDir + '_FLUO/features'
         for f in listdir(features_dir):
@@ -81,55 +90,41 @@ class getMitosisFiles(object):
                 all_cell_nbs.append(current_cell_nb)
         return all_cell_nbs, features_dir
     
-    def getSegList(self,minimumSegLength, spLen, frames):
-        segmentList = list()
-        segment = dict()
-        nanInSegmentCount = 0
-        for i in range(0,len(spLen)):
-            val = spLen[i]
-            if not isnan(val):
-                segment[frames[i]] = val
-            elif nanInSegmentCount < len(segment) * self._gap_tolerance:
-                segment[frames[i]] = val
-                nanInSegmentCount +=1
-            else:
-                if len(segment) > minimumSegLength:
-                    segment = {k: segment[k] for k in segment if not isnan(segment[k])}
-                    segmentList.append(segment)
-                segment = dict()
-                nanInSegmentCount = 0
-        if not segmentList and len(segment) >minimumSegLength:
-            segment = {k: segment[k] for k in segment if not isnan(segment[k])}
-            segmentList.append(segment)
-        return segmentList
-    
-    def getMitosisCellNbs(self, channel):
+    def getMitosisCellNbs(self, channel,features_dir,cellNbs, p):
         mitosis_cellNbs = list()
         minimumSegLength = self._minimumPeriod/self._acq_interval
-        cellNbs, features_dir = self.getAllCellNnumbers()
-        mask_size = 2
-        mean_mask = np.zeros(mask_size)
-        for x in range(0 , mask_size):
-            mean_mask[x] = 1/mask_size
         for cellNb in cellNbs:
-            csvPath = features_dir + "/" + cellNb + '_' + channel+'.csv'
+            csvPath = features_dir + "/" + str(cellNb) + '_' + channel+'.csv'
             if path.lexists(csvPath) : 
                 oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= float)
                 spLens = oneCell['SpLength']
-                spLens = np.convolve(mean_mask, spLens)
+                frames = oneCell['Frame']
                 if len(spLens[spLens>0]) > minimumSegLength:
-                    end = np.where(spLens == np.nanmax(spLens))[0]
-                    spLens = spLens[:end+1]
-                    if len(spLens[spLens>0]) > minimumSegLength:
-                        frames = oneCell['Frame'][:end+1]
-                        segmentList = self.getSegList(minimumSegLength, spLens, frames)
-                        for segment in segmentList:
-                            diffSeg = diff(list(segment.values()))
-                            if len(diffSeg[diffSeg>0]) > len(diffSeg) * self._elongating_trend:
-                                if cellNb not in mitosis_cellNbs:
-                                    mitosis_cellNbs.append(cellNb)
+                    rawSpLens = spLens
+                    nans, x= self.nan_helper(spLens)
+                    spLens[nans]= np.interp(x(nans), x(~nans), spLens[~nans])
+                    maxValue = max(spLens)
+                    firstMax = [i for i, j in enumerate(spLens) if j == maxValue][0]
+                    for i in range(firstMax, len(spLens)):
+                        spLens[i] = max(spLens)
+                    mito_region = list()
+                    f = list()
+                    minValue = min(spLens)
+                    lastMin = [i for i, j in enumerate(spLens) if j == minValue][-1]
+                    for i in range(lastMin,firstMax+1):
+                        mito_region.append(rawSpLens[i])
+                        f.append(i)
+                    if len(f)>0:
+                        slope, intercept, r_value, p_value, std_err = stats.linregress(f, mito_region)
+#                         print(r_value, p_value, std_err)
+                        if p_value < 3*10**(-9):
+                            if cellNb not in mitosis_cellNbs:
+                                mitosis_cellNbs.append(cellNb)
         return mitosis_cellNbs
     
+    def load_rois(self):
+        csvPath = self._baseDir + '/BF_Results.csv' 
+        return DataFrame.from_csv(csvPath)
     def nan_helper(self, y):
         """Helper to handle indices and logical indices of NaNs.
 
@@ -315,7 +310,7 @@ class getMitosisFiles(object):
         plt.ylabel("Absolute y in original fluo image (pixel)", fontsize=20)
         plt.xlabel("Absolute x in original fluo image (pixel)", fontsize=20)
         if save:
-            plt.savefig(figureDir + cellNb + "_SPBtracks")
+            plt.savefig(figureDir + str(cellNb) + "_SPBtracks")
         else:
             plt.show()
         plt.close(fig)
@@ -394,68 +389,86 @@ class getMitosisFiles(object):
             plt.ylabel("Scaled spindle length (to cell major axe)", fontsize=20)
             plt.xlabel("Change_Point(s)_" + changePoints, fontsize=20)
             plt.xlim(0)
-            plt.ylim(-0.2, 1)
+            plt.ylim(-0.05, 1)
             if save:
-                plt.savefig(figureDir + cellNb + "_slopChangePoints_" + changePoints)
+                plt.savefig(figureDir + str(cellNb) + "_slopChangePoints_" + changePoints)
             else:
                 plt.show()
             plt.close(fig)
 
-    def analyze(self, save):
+    def analyze(self, save, mitosis_cellNbs, allCellNbs, channels):
         major = 'Major'
-        channels = ['CFP','GFP', 'TxRed', 'DAPI']
-        mitosis_cellNbs = self.getMitosisCellNbs(channels[0])
         croppedImgsDir, spotsDir, csvDir, featuresDir, figureDir = self.createOutputDirs()
-        csvPath = self._baseDir + '/BF_Results.csv' 
-        cellRois = DataFrame.from_csv(csvPath)
+        cellRois = self.load_rois()
         for cellNb in mitosis_cellNbs:
             current_major_length = cellRois.loc[int(cellNb)][major] * self._calibration
             for ch in channels:
-                if path.lexists(self._baseDir + "_FLUO/croppedImgs/" + cellNb + "_" + ch + ".tif"):
-                    copyfile(self._baseDir + "_FLUO/croppedImgs/" + cellNb + "_" + ch + ".tif",  croppedImgsDir + cellNb + "_" + ch +".tif")
-                    copyfile(self._baseDir + "_FLUO/spots/" + cellNb + "_" + ch + ".xml", spotsDir + cellNb + "_" + ch + ".xml")
-                    copyfile(self._baseDir + "_FLUO/features/" + cellNb + "_" + ch + ".csv", featuresDir + cellNb + "_" + ch + ".csv");
-            cellFeaturesPath = featuresDir + cellNb + '_' + channels[0]+'.csv'
-            oneCellFeatures = genfromtxt(cellFeaturesPath, delimiter=',', names=True, dtype= float)
-            spLens = oneCellFeatures['SpLength']
-            mask_size = 2
-            mean_mask = np.zeros(mask_size)
-            for x in range(0 , mask_size):
-                mean_mask[x] = 1/mask_size
-            end = np.where(spLens == np.nanmax(spLens))[-1]
-            spLens = np.convolve(mean_mask, spLens)
-            spLens = spLens[:end+1]
-            if len(spLens) > self._minimumPeriod/self._acq_interval:
-                frames = oneCellFeatures['Frame']
-                frames = frames[:end+1]
-                diffedLengths = diff(spLens)
-                #
-                fig, ax = plt.subplots(figsize=(15, 10))
-                ax.axhline(current_major_length,  c= 'red', lw = 10)
-                ax.plot(frames[1:], diffedLengths , '-x')
-                ax.plot(frames, spLens, '-o')
-                ax.axhline(0)
-                plt.ylabel("Spindle Length ($μm$)", fontsize=20)
-                plt.xlabel("Frame // cell " + cellNb, fontsize=20)
-                plt.xlim(0)
-                plt.ylim(-2,current_major_length)
-                if save:
-                    plt.savefig(figureDir + cellNb + "_elongation")
-                else:
-                    plt.show()
-                plt.close(fig)
-                #
-                self.find_slope_change_point(spLens, frames, current_major_length, figureDir, cellNb, save)
-                #
-                d = self.analyzeSPBTrack(self._baseDir, cellNb, channels[0], figureDir, current_major_length, save)
-                d.to_csv(csvDir + "/d_" + cellNb + ".csv", sep='\t')
+                if path.lexists(self._baseDir + "_FLUO/croppedImgs/" + str(cellNb) + "_" + ch + ".tif"):
+                    copyfile(self._baseDir + "_FLUO/croppedImgs/" + str(cellNb) + "_" + ch + ".tif",  croppedImgsDir + str(cellNb) + "_" + ch +".tif")
+                    copyfile(self._baseDir + "_FLUO/spots/" + str(cellNb) + "_" + ch + ".xml", spotsDir + str(cellNb) + "_" + ch + ".xml")
+                    copyfile(self._baseDir + "_FLUO/features/" + str(cellNb) + "_" + ch + ".csv", featuresDir + str(cellNb) + "_" + ch + ".csv");
+            cellFeaturesPath = featuresDir + str(cellNb) + '_' + channels[0]+'.csv'
+            currentCellFeatures = genfromtxt(cellFeaturesPath, delimiter=',', names=True, dtype= float)
+            spLens = currentCellFeatures['SpLength']
+            frames = currentCellFeatures['Frame']
+            nans, x= self.nan_helper(spLens)
+            spLens[nans]= np.interp(x(nans), x(~nans), spLens[~nans])
+            #
+            fig, ax = plt.subplots(figsize=(15, 10))
+            ax.plot(frames, spLens, '-o')
+            ax.axhline(current_major_length,  c= 'red', lw = 10)
+            plt.ylabel("Spindle Length ($μm$)", fontsize=20)
+            plt.xlabel("Time (second)", fontsize=20)
+            plt.tick_params(axis='both', which='major', labelsize=20)
+            #ax.axvline(380, c='blue')
+            #ax.axvline(500, c='red')
+            #plt.xlabel("Frame // cell " + str(cellNb), fontsize=20)
+            plt.xlim(0)
+            plt.ylim(0,current_major_length)
+            maxValue = max(spLens)
+            firstMaxIndex = [i for i, j in enumerate(spLens) if j == maxValue][0]
+            for i in range(firstMaxIndex, len(spLens)):
+                spLens[i] = maxValue
+            ax.plot(frames, spLens, '-o')
+            mito_region = list()
+            f = list()
+            minValue = min(spLens)
+            lastMin = [i for i, j in enumerate(spLens) if j == minValue][-1]
+            for i in range(lastMin,firstMaxIndex+1):
+                mito_region.append(spLens[i])
+                f.append(frames[i])
+            ax.plot(f, mito_region, '-o')
+            if save:
+                plt.savefig(figureDir + str(cellNb) + "_elongation", bbox_inches='tight')
+            else:
+                plt.show()
+            plt.close(fig)
+            
+            #
+            self.find_slope_change_point(spLens, frames, current_major_length, figureDir, cellNb, save)
+            
+            #
+            d = self.analyzeSPBTrack(self._baseDir, cellNb, channels[0], figureDir, current_major_length, save)
+            d.to_csv(csvDir + "/d_" + str(cellNb) + ".csv", sep='\t')
             
 if __name__ == '__main__':
-    launcher = getMitosisFiles("/Volumes/Macintosh/curioData/102/25-03-1/X0_Y0", "CFP")
+    baseDir="/home/tong/Documents/movies/102/60x/dynamic/25-03-1/X0_Y0"
+    channels = ['CFP','GFP', 'TxRed', 'DAPI']
+    launcher = getMitosisFiles(baseDir, channels[0])
     launcher.set_attributes_from_cmd_line()
-    launcher.analyze(True)
-#     plt.hist(change_point_lengths)
-    print("Collection done")
+    cellNbs, features_dir = launcher.getAllCellNumbers()
+    cellNbs = [int(n) for n in cellNbs]
+    #file = open(baseDir+"/anot")
+    #data = file.readlines()
+    #realList = [int(n) for n in data[0].split(',')]
+    #tprs = list()
+    #fprs = list()
+    predictedList = launcher.getMitosisCellNbs(channels[0],features_dir,cellNbs,0)
+    predictedList = [int(n) for n in predictedList]
+    #tp, fp, fn, tn = perf_measure(realList,predictedList,cellNbs)
+    #print('TP%s_FP%s_FN%s_TN%s' %(tp,fp,fn,tn))
+    #print(tp+fp+fn+tn)
+    launcher.analyze(True,predictedList,cellNbs, channels)
 
 
 # In[ ]:
