@@ -61,7 +61,6 @@ public class MAARSNoAcq implements Runnable {
 		ExecutorService es = null;
 		// Start time
 		long start = System.currentTimeMillis();
-		ImagePlus mergedImg;
 		for (String[] pos : getAcqPositions()) {
 			String xPos = pos[0];
 			String yPos = pos[1];
@@ -151,12 +150,12 @@ public class MAARSNoAcq implements Runnable {
 				} catch (ExecutionException e1) {
 					e1.printStackTrace();
 				}
-				mergedImg = new ImagePlus("merged", fluoStack);
+				ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
 				if (segImg != null) {
 					mergedImg.setCalibration(segImg.getCalibration());
 				}
 				if (fluoStack != null) {
-					mergedImg.setZ(fluoStack.getSize());
+					mergedImg.setT(fluoStack.getSize());
 				}
 				RoiManager.getInstance().reset();
 				RoiManager.getInstance().close();
