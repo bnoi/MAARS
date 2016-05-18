@@ -61,7 +61,7 @@ public class MAARSNoAcq implements Runnable {
 		ExecutorService es = null;
 		// Start time
 		long start = System.currentTimeMillis();
-		ImagePlus mergedImg = new ImagePlus();
+		ImagePlus mergedImg;
 		for (String[] pos : getAcqPositions()) {
 			String xPos = pos[0];
 			String yPos = pos[1];
@@ -173,6 +173,7 @@ public class MAARSNoAcq implements Runnable {
 			}
 		}
 		try {
+			assert es != null;
 			es.shutdown();
 			es.awaitTermination(120, TimeUnit.MINUTES);
 		} catch (InterruptedException e) {

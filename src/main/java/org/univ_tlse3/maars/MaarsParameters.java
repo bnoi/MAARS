@@ -380,7 +380,6 @@ public class MaarsParameters {
 	 * 
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
-	 * @return MAXIMUM_NUMBER_OF_SPOT of corresponding channel
 	 */
 	public void setChMaxNbSpot(String ch, String maxNbSpot) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(MAXIMUM_NUMBER_OF_SPOT)
@@ -391,7 +390,6 @@ public class MaarsParameters {
 	 * 
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
-	 * @return SPOT_RADIUS of corresponding channel
 	 */
 	public void setChSpotRaius(String ch, String spotRaidus) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(SPOT_RADIUS)
@@ -402,7 +400,6 @@ public class MaarsParameters {
 	 * 
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
-	 * @return SPOT_RADIUS of corresponding channel
 	 */
 	public void setChQuality(String ch, String quality) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(QUALITY).setText(quality);

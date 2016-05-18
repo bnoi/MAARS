@@ -10,6 +10,7 @@ import org.univ_tlse3.cellstateanalysis.SpotsContainer;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlWriter;
+import org.univ_tlse3.utils.FileUtils;
 
 public class MAARSSpotsSaver {
 	private String spotsXmlDir;
@@ -17,9 +18,7 @@ public class MAARSSpotsSaver {
 
 	public MAARSSpotsSaver(String pathToFluoDir) {
 		spotsXmlDir = pathToFluoDir + File.separator + "spots" + File.separator;
-		if (!new File(spotsXmlDir).exists()) {
-			new File(spotsXmlDir).mkdirs();
-		}
+		FileUtils.createFolder(spotsXmlDir);
 	}
 
 	private void saveSpots(String channel, SpotCollection spotsInChannel, String cellNb) {
