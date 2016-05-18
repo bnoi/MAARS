@@ -164,7 +164,7 @@ public class ImgUtils {
      * crop ROIs from merged field-wide image
      *
      * @param mergedImg merged full field fluo image
-     * @return HashMap<cellNB,HashMap<channel, corresponding cropped img>>
+     * @return HashMap<cellNB,corresponding cropped img>
      */
     public static HashMap<String, ImagePlus> cropMergedImpWithRois(Cell cell, ImagePlus mergedImg,
                                                                    Boolean splitChannel) {
