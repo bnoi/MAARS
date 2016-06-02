@@ -141,7 +141,7 @@ public class MAARS implements Runnable {
                     ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
                     Collections.sort(spotInBtwnFrames);
                     if (spotInBtwnFrames.size() > 0) {
-                        if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) > anaBOnsetFrame) {
+                        if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 3) {
                             out.println(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
                                     .format(Calendar.getInstance().getTime());
