@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[ ]:
+# In[2]:
 
 #!/usr/bin/env python3
 import numpy as np
@@ -37,6 +37,10 @@ def find_slope_change_point(frames, spLens, majorAxieLen, figureDir, cellNb, sav
     idxQueue = deque()
     queue = deque()
     spLens = spLens/majorAxieLen
+    
+    nans, x= nan_helper(spLens)
+    spLens[nans]= np.interp(x(nans), x(~nans), spLens[~nans])
+    
     if len(spLens) > 2*minSegLen:
         fig, ax = plt.subplots(figsize=(15, 10))
         for i in range(0, len(spLens)):
@@ -440,10 +444,10 @@ class getMitosisFiles(object):
                     copyfile(self._baseDir + self._fluo_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv", self._baseDir + self._mitosis_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv");
 if __name__ == '__main__':
     
-    baseDir="/Volumes/Macintosh/curioData/102/25-03-1/X0_Y0"
+    baseDir="/home/tong/Documents/movies/rad21/04-06-1/X0_Y0"
     channels = ['CFP','GFP', 'TxRed', 'DAPI']
     launcher = getMitosisFiles(baseDir, channels[0])
-    launcher.set_attributes_from_cmd_line()
+    #launcher.set_attributes_from_cmd_line()
     cellNbs, features_dir = launcher.getAllCellNumbers()
     cellNbs = [int(n) for n in cellNbs]
     predictedList = launcher.getMitosisCellNbs(channels[0],features_dir,cellNbs,0)
