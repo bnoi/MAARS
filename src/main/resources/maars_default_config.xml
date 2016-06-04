@@ -42,7 +42,7 @@
       </BF>
       <CFP>
         <COLOR>BLUE</COLOR>
-        <EXPOSURE>100</EXPOSURE>
+        <EXPOSURE>120</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </CFP>
       <DAPI>
@@ -52,7 +52,7 @@
       </DAPI>
       <GFP>
         <COLOR>GREEN</COLOR>
-        <EXPOSURE>70</EXPOSURE>
+        <EXPOSURE>90</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </GFP>
       <TxRed>
