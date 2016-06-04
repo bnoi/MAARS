@@ -447,7 +447,7 @@ if __name__ == '__main__':
     baseDir="/home/tong/Documents/movies/rad21/04-06-1/X0_Y0"
     channels = ['CFP','GFP', 'TxRed', 'DAPI']
     launcher = getMitosisFiles(baseDir, channels[0])
-    #launcher.set_attributes_from_cmd_line()
+    launcher.set_attributes_from_cmd_line()
     cellNbs, features_dir = launcher.getAllCellNumbers()
     cellNbs = [int(n) for n in cellNbs]
     predictedList = launcher.getMitosisCellNbs(channels[0],features_dir,cellNbs,0)
