@@ -205,6 +205,7 @@ class SpotSetAnalyzor {
 	private double getSpAngToMajAxis(Vector3D polesVec) {
 		Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(angle)),
 				major * FastMath.sin(FastMath.toRadians(angle)), fakeSpotZ);
+		//TODO zero norm error but i do not know why
 		return rad2AngLessThan90(Vector3D.angle(cellMajAxisVec, polesVec));
 	}
 
