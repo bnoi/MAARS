@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
   <EXPLORATION_PARAMETERS>
-    <X_FIELD_NUMBER>5</X_FIELD_NUMBER>
-    <Y_FIELD_NUMBER>5</Y_FIELD_NUMBER>
+    <X_FIELD_NUMBER>1</X_FIELD_NUMBER>
+    <Y_FIELD_NUMBER>1</Y_FIELD_NUMBER>
   </EXPLORATION_PARAMETERS>
   <FLUO_ANALYSIS_PARAMETERS>
     <DYNAMIC>true</DYNAMIC>
@@ -18,7 +18,7 @@
       <GFP>
         <MAXIMUM_NUMBER_OF_SPOT>6</MAXIMUM_NUMBER_OF_SPOT>
         <SPOT_RADIUS>0.2</SPOT_RADIUS>
-        <QUALITY>5</QUALITY></GFP>
+        <QUALITY>10</QUALITY></GFP>
       <TxRed>
         <MAXIMUM_NUMBER_OF_SPOT>2</MAXIMUM_NUMBER_OF_SPOT>
         <SPOT_RADIUS>0.25</SPOT_RADIUS>
@@ -42,7 +42,7 @@
       </BF>
       <CFP>
         <COLOR>BLUE</COLOR>
-        <EXPOSURE>150</EXPOSURE>
+        <EXPOSURE>100</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </CFP>
       <DAPI>
@@ -52,7 +52,7 @@
       </DAPI>
       <GFP>
         <COLOR>GREEN</COLOR>
-        <EXPOSURE>90</EXPOSURE>
+        <EXPOSURE>70</EXPOSURE>
         <SHUTTER>Spectra</SHUTTER>
       </GFP>
       <TxRed>
