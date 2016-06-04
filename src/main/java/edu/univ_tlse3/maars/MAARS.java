@@ -148,11 +148,11 @@ public class MAARS implements Runnable {
                             // IJ.log(timeStamp + " : cell " + cellNb + "_" +
                             // abnormalStateTimes * timeInterval + " s.");
                             if (splitChannel) {
-                                merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "cropImgs"
+                                merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
                                         + File.separator + cellNb + "_GFP.tif");
                                 merotelyImp.show();
                             } else {
-                                merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "cropImgs"
+                                merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
                                         + File.separator + cellNb + "_merged.tif");
                                 merotelyImp.show();
                             }
