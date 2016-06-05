@@ -11,7 +11,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
 import fiji.plugin.trackmate.Spot;
 
-class SpotSetAnalyzor {
+public class SpotSetAnalyzor {
 	// Names of parameters
 	private final static String NbOfSpotDetected = "NbOfSpotDetected";
 	private final static String SpAngToMaj = "SpAngToMaj";
@@ -171,7 +171,7 @@ class SpotSetAnalyzor {
      * the second spot
 	 * @return distance
 	 */
-	private double distance(Spot s1, Spot s2) {
+	public static double distance(Spot s1, Spot s2) {
 		double dx = s1.getFeature(Spot.POSITION_X) - s2.getFeature(Spot.POSITION_X);
 		double dy = s1.getFeature(Spot.POSITION_Y) - s2.getFeature(Spot.POSITION_Y);
 		double dz = s1.getFeature(Spot.POSITION_Z) - s2.getFeature(Spot.POSITION_Z);
