@@ -141,7 +141,7 @@ public class MAARS implements Runnable {
                     ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
                     Collections.sort(spotInBtwnFrames);
                     if (spotInBtwnFrames.size() > 0) {
-                        if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 3) {
+                        if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 2) {
                             out.println(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
                                     .format(Calendar.getInstance().getTime());
@@ -296,7 +296,7 @@ public class MAARS implements Runnable {
             SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters);
             segAcq.setBaseSaveDir(pathToSegDir);
             IJ.log("Acquire bright field image...");
-            ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL), zFocus,
+            ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL),
                     true);
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
@@ -330,7 +330,7 @@ public class MAARS implements Runnable {
                     while (System.currentTimeMillis() - startTime <= timeLimit) {
                         double beginAcq = System.currentTimeMillis();
                         for (String channel : arrayChannels) {
-                            ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, saveFilm);
+                            ImagePlus fluoImage = fluoAcq.acquire(frame, channel, saveFilm);
                             if (do_analysis) {
                                 es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -356,7 +356,7 @@ public class MAARS implements Runnable {
                 } else {
                     // being static acquisition
                     for (String channel : arrayChannels) {
-                        ImagePlus fluoImage = fluoAcq.acquire(frame, channel, zFocus, saveFilm);
+                        ImagePlus fluoImage = fluoAcq.acquire(frame, channel, saveFilm);
                         if (do_analysis) {
                             es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),

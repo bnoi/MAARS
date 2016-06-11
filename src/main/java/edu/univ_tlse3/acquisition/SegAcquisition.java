@@ -21,9 +21,9 @@ public class SegAcquisition extends SuperClassAcquisition {
 		this.step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 	}
 
-	public ImagePlus acquire(String channelName, double zFocus, Boolean save) {
+	public ImagePlus acquire(String channelName, Boolean save) {
 		int frame = 0;
-		List<Image> listImg = super.acquire(channelName, zFocus);
+		List<Image> listImg = super.acquire(channelName);
 		if (save){
 			super.save(listImg, frame, channelName, step);
 		}

@@ -215,11 +215,9 @@ public class SuperClassAcquisition {
 	 * 
 	 * @param channelName
 	 *            name of the current channel (ex. BF, CFP, GFP, TXRED)
-	 * @param zFocus
-	 *            zFocus where maximum # of spot can be seen
 	 * @return a duplicate of acquired images.
 	 */
-	public List<Image> acquire(String channelName, double zFocus) {
+	public List<Image> acquire(String channelName) {
 		double range;
 		double step;
 		if (!channelName.equals(parameters.getSegmentationParameter(MaarsParameters.CHANNEL))) {
@@ -256,6 +254,14 @@ public class SuperClassAcquisition {
 			e.printStackTrace();
 		}
 		String focusDevice = mmc.getFocusDevice();
+        double zFocus = 0;
+        try {
+			zFocus = mmc.getPosition(focusDevice);
+			mmc.waitForDevice(focusDevice);
+		} catch (Exception e) {
+			ReportingUtils.logMessage("could not get z current position");
+			e.printStackTrace();
+		}
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
@@ -271,9 +277,9 @@ public class SuperClassAcquisition {
 			z = z + step;
 			listImg.add(mm.live().snap(false).get(0));
 			//TODO sometime this display make the program crash
-//			if (k == 0) {
-//				setDisplay(chColor);
-//			}
+			if (k == 0) {
+				setDisplay(chColor);
+			}
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
 		try {
