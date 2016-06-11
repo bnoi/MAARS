@@ -277,9 +277,9 @@ public class SuperClassAcquisition {
 			z = z + step;
 			listImg.add(mm.live().snap(false).get(0));
 			//TODO sometime this display make the program crash
-			if (k == 0) {
-				setDisplay(chColor);
-			}
+//			if (k == 0) {
+//				setDisplay(chColor);
+//			}
 		}
 		ReportingUtils.logMessage("--- Acquisition done.");
 		try {

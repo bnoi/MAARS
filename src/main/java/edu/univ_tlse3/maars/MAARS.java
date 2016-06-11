@@ -284,15 +284,6 @@ public class MAARS implements Runnable {
                     .convertPath(parameters.getSavingPath() + File.separator + "X" + xPos + "_Y" + yPos);
             String pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
             // autofocus(mm, mmc);
-            double zFocus = 0;
-            String focusDevice = mmc.getFocusDevice();
-            try {
-                zFocus = mmc.getPosition(focusDevice);
-                mmc.waitForDevice(focusDevice);
-            } catch (Exception e) {
-                ReportingUtils.logMessage("could not get z current position");
-                e.printStackTrace();
-            }
             SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters);
             segAcq.setBaseSaveDir(pathToSegDir);
             IJ.log("Acquire bright field image...");
