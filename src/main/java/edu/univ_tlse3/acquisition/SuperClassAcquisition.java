@@ -1,5 +1,6 @@
 package edu.univ_tlse3.acquisition;
 
+import ij.IJ;
 import mmcorej.CMMCore;
 
 import java.awt.Color;
@@ -217,7 +218,7 @@ public class SuperClassAcquisition {
 	 *            name of the current channel (ex. BF, CFP, GFP, TXRED)
 	 * @return a duplicate of acquired images.
 	 */
-	public List<Image> acquire(String channelName) {
+	public List<Image> acquire(String channelName, double zFocus) {
 		double range;
 		double step;
 		if (!channelName.equals(parameters.getSegmentationParameter(MaarsParameters.CHANNEL))) {
@@ -254,14 +255,6 @@ public class SuperClassAcquisition {
 			e.printStackTrace();
 		}
 		String focusDevice = mmc.getFocusDevice();
-        double zFocus = 0;
-        try {
-			zFocus = mmc.getPosition(focusDevice);
-			mmc.waitForDevice(focusDevice);
-		} catch (Exception e) {
-			ReportingUtils.logMessage("could not get z current position");
-			e.printStackTrace();
-		}
 		ReportingUtils.logMessage("-> z focus is " + zFocus);
 		ReportingUtils.logMessage("... start acquisition");
 		double z = zFocus - (range / 2);
@@ -287,13 +280,14 @@ public class SuperClassAcquisition {
 			mmc.setPosition(focusDevice, zFocus);
 			mmc.waitForDevice(focusDevice);
 			double currentZ = mmc.getPosition(focusDevice);
-			while (currentZ > zFocus + 0.03 || currentZ < zFocus - 0.03) {
+			while (currentZ > zFocus + 0.001 || currentZ < zFocus - 0.001) {
 				mmc.setPosition(focusDevice, zFocus);
 				mmc.waitForDevice(focusDevice);
 				currentZ = mmc.getPosition(focusDevice);
 			}
 			mmc.waitForSystem();
-		} catch (Exception e) {
+            IJ.log("focus: " + zFocus + "; current :" + currentZ);
+        } catch (Exception e) {
 			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
 		}

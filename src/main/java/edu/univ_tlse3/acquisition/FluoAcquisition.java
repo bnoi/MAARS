@@ -21,8 +21,8 @@ public class FluoAcquisition extends SuperClassAcquisition {
 		this.step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
 	}
 
-	public ImagePlus acquire(int frame, String channelName, Boolean save) {
-		List<Image> listImg = super.acquire(channelName);
+	public ImagePlus acquire(int frame, String channelName, Boolean save, double zFocus) {
+		List<Image> listImg = super.acquire(channelName, zFocus);
 		if (save){
 			
 			super.save(listImg, frame, channelName, step);
