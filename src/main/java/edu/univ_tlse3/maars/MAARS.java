@@ -284,11 +284,20 @@ public class MAARS implements Runnable {
                     .convertPath(parameters.getSavingPath() + File.separator + "X" + xPos + "_Y" + yPos);
             String pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
             // autofocus(mm, mmc);
+            String focusDevice = mmc.getFocusDevice();
+            double zFocus = 0;
+            try {
+                zFocus = mmc.getPosition(focusDevice);
+                mmc.waitForDevice(focusDevice);
+            } catch (Exception e) {
+                ReportingUtils.logMessage("could not get z current position");
+                e.printStackTrace();
+            }
             SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters);
             segAcq.setBaseSaveDir(pathToSegDir);
             IJ.log("Acquire bright field image...");
             ImagePlus segImg = segAcq.acquire(parameters.getSegmentationParameter(MaarsParameters.CHANNEL),
-                    true);
+                    true, zFocus);
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
             ms.segmentation(segImg, pathToSegDir);
@@ -320,8 +329,15 @@ public class MAARS implements Runnable {
                             * 1000;
                     while (System.currentTimeMillis() - startTime <= timeLimit) {
                         double beginAcq = System.currentTimeMillis();
+                        try {
+                            zFocus = mmc.getPosition(focusDevice);
+                            mmc.waitForDevice(focusDevice);
+                        } catch (Exception e) {
+                            ReportingUtils.logMessage("could not get z current position");
+                            e.printStackTrace();
+                        }
                         for (String channel : arrayChannels) {
-                            ImagePlus fluoImage = fluoAcq.acquire(frame, channel, saveFilm);
+                            ImagePlus fluoImage = fluoAcq.acquire(frame, channel, saveFilm, zFocus);
                             if (do_analysis) {
                                 es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -347,7 +363,14 @@ public class MAARS implements Runnable {
                 } else {
                     // being static acquisition
                     for (String channel : arrayChannels) {
-                        ImagePlus fluoImage = fluoAcq.acquire(frame, channel, saveFilm);
+                        try {
+                            zFocus = mmc.getPosition(focusDevice);
+                            mmc.waitForDevice(focusDevice);
+                        } catch (Exception e) {
+                            ReportingUtils.logMessage("could not get z current position");
+                            e.printStackTrace();
+                        }
+                        ImagePlus fluoImage = fluoAcq.acquire(frame, channel, saveFilm,zFocus);
                         if (do_analysis) {
                             es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),

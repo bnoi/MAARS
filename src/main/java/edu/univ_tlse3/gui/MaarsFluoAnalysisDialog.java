@@ -367,9 +367,18 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	}
 
 	private ImagePlus acquireTestImg(JPanel jp) {
+		String focusDevice = mmc.getFocusDevice();
+		double zFocus = 0;
+		try {
+			zFocus = mmc.getPosition(focusDevice);
+			mmc.waitForDevice(focusDevice);
+		} catch (Exception e) {
+			ReportingUtils.logMessage("could not get z current position");
+			e.printStackTrace();
+		}
 		SuperClassAcquisition acq = new SuperClassAcquisition(mm, mmc, parameters);
 		String channelName = getSelectedChannel(jp);
-		return acq.convert2Imp(acq.acquire(channelName), channelName, Double.parseDouble(step.getText()));
+		return acq.convert2Imp(acq.acquire(channelName,zFocus), channelName, Double.parseDouble(step.getText()));
 	}
 
 	private String getSelectedChannel(JPanel jp) {
