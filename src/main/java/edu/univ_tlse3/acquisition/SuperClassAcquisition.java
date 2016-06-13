@@ -280,7 +280,7 @@ public class SuperClassAcquisition {
 			mmc.setPosition(focusDevice, zFocus);
 			mmc.waitForDevice(focusDevice);
 			double currentZ = mmc.getPosition(focusDevice);
-			while (currentZ > zFocus + 0.001 || currentZ < zFocus - 0.001) {
+			while (currentZ >= zFocus + 0.025 || currentZ <= zFocus - 0.025) {
 				mmc.setPosition(focusDevice, zFocus);
 				mmc.waitForDevice(focusDevice);
 				currentZ = mmc.getPosition(focusDevice);
