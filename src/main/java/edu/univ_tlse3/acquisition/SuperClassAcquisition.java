@@ -6,9 +6,12 @@ import mmcorej.CMMCore;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.micromanager.IAcquisitionEngine2010;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.Image;
@@ -221,6 +224,8 @@ public class SuperClassAcquisition {
 	public List<Image> acquire(String channelName, double zFocus) {
 		double range;
 		double step;
+        NumberFormat numberFormat = new DecimalFormat("####.###");
+        zFocus = Double.valueOf(numberFormat.format(String.valueOf(zFocus)));
 		if (!channelName.equals(parameters.getSegmentationParameter(MaarsParameters.CHANNEL))) {
 			// initialize parameters for FLUO Acquisitions
 			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
@@ -280,13 +285,16 @@ public class SuperClassAcquisition {
 			mmc.setPosition(focusDevice, zFocus);
 			mmc.waitForDevice(focusDevice);
 			double currentZ = mmc.getPosition(focusDevice);
+            currentZ = Double.valueOf(numberFormat.format(String.valueOf(currentZ)));
+            IJ.log("first focus: " + zFocus);
 			while (currentZ >= zFocus + 0.025 || currentZ <= zFocus - 0.025) {
 				mmc.setPosition(focusDevice, zFocus);
 				mmc.waitForDevice(focusDevice);
 				currentZ = mmc.getPosition(focusDevice);
 			}
-			mmc.waitForSystem();
-            IJ.log("focus: " + zFocus + "; current :" + currentZ);
+            mmc.waitForDevice(focusDevice);
+            mm.updateZPos(zFocus);
+            IJ.log("Final focus :" + currentZ);
         } catch (Exception e) {
 			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
 			e.printStackTrace();
