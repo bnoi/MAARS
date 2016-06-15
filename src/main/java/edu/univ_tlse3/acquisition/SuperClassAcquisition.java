@@ -287,7 +287,6 @@ public class SuperClassAcquisition {
 			mmc.setPosition(focusDevice, zFocus);
 			mmc.waitForDevice(focusDevice);
 			double currentZ = mmc.getPosition(focusDevice);
-			currentZ = Double.parseDouble(String.valueOf(currentZ).replace(",", "."));
             currentZ = Double.parseDouble(numberFormat.format(currentZ));
             IJ.log("first focus: " + zFocus);
 			while (currentZ >= zFocus + 0.025 || currentZ <= zFocus - 0.025) {
