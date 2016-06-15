@@ -8,12 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-import org.micromanager.IAcquisitionEngine2010;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.Image;
@@ -295,9 +292,9 @@ public class SuperClassAcquisition {
             IJ.log("first focus: " + zFocus);
 			while (currentZ >= zFocus + 0.025 || currentZ <= zFocus - 0.025) {
 				mmc.setPosition(focusDevice, zFocus);
-				mmc.waitForDevice(focusDevice);
 				currentZ = mmc.getPosition(focusDevice);
                 currentZ = Double.parseDouble(numberFormat.format(currentZ));
+                mmc.waitForDevice(focusDevice);
 			}
             mmc.waitForDevice(focusDevice);
             mm.updateZPos(zFocus);
