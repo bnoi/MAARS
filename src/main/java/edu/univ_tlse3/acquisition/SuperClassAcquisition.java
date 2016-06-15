@@ -7,9 +7,11 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.micromanager.IAcquisitionEngine2010;
 import org.micromanager.data.Datastore;
@@ -224,8 +226,11 @@ public class SuperClassAcquisition {
 	public List<Image> acquire(String channelName, double zFocus) {
 		double range;
 		double step;
-        NumberFormat numberFormat = new DecimalFormat("####.###");
-        zFocus = Double.valueOf(numberFormat.format(String.valueOf(zFocus)));
+        DecimalFormat numberFormat = new DecimalFormat("#.###");
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        numberFormat.setDecimalFormatSymbols(dfs);
+		zFocus = Double.parseDouble(numberFormat.format(zFocus));
 		if (!channelName.equals(parameters.getSegmentationParameter(MaarsParameters.CHANNEL))) {
 			// initialize parameters for FLUO Acquisitions
 			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
@@ -285,12 +290,14 @@ public class SuperClassAcquisition {
 			mmc.setPosition(focusDevice, zFocus);
 			mmc.waitForDevice(focusDevice);
 			double currentZ = mmc.getPosition(focusDevice);
-            currentZ = Double.valueOf(numberFormat.format(String.valueOf(currentZ)));
+			currentZ = Double.parseDouble(String.valueOf(currentZ).replace(",", "."));
+            currentZ = Double.parseDouble(numberFormat.format(currentZ));
             IJ.log("first focus: " + zFocus);
 			while (currentZ >= zFocus + 0.025 || currentZ <= zFocus - 0.025) {
 				mmc.setPosition(focusDevice, zFocus);
 				mmc.waitForDevice(focusDevice);
 				currentZ = mmc.getPosition(focusDevice);
+                currentZ = Double.parseDouble(numberFormat.format(currentZ));
 			}
             mmc.waitForDevice(focusDevice);
             mm.updateZPos(zFocus);
