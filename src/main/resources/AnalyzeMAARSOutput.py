@@ -209,15 +209,16 @@ class getMitosisFiles(object):
                         spLens[i] = max(spLens)
                     mito_region = list()
                     f = list()
-                    for i in range(lastMinIndex,firstMaxIndex+1):
-                        mito_region.append(spLens[i])
-                        f.append(i)
-                    if len(f)>0:
-                        slope, intercept, r_value, p_value, std_err = stats.linregress(f, mito_region)
+                    if firstMaxIndex - lastMinIndex > 5:
+                        for i in range(lastMinIndex,firstMaxIndex+1):
+                            mito_region.append(spLens[i])
+                            f.append(i)
+                        if len(f)>0:
+                            slope, intercept, r_value, p_value, std_err = stats.linregress(f, mito_region)
 #                         print(r_value, p_value, std_err)
-                        if p_value < 3*10**(-9):
-                            if cellNb not in mitosis_cellNbs:
-                                mitosis_cellNbs.append(cellNb)
+                            if p_value < 3*10**(-9):
+                                if cellNb not in mitosis_cellNbs:
+                                    mitosis_cellNbs.append(cellNb)
         return mitosis_cellNbs
     
     def load_rois(self):
