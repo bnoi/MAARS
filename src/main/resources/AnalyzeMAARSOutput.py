@@ -209,7 +209,7 @@ class getMitosisFiles(object):
                         spLens[i] = max(spLens)
                     mito_region = list()
                     f = list()
-                    if firstMaxIndex - lastMinIndex > 5:
+                    if (firstMaxIndex - lastMinIndex) * self._acq_interval > 120:
                         for i in range(lastMinIndex,firstMaxIndex+1):
                             mito_region.append(spLens[i])
                             f.append(i)
