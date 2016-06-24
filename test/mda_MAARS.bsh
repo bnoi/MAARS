@@ -1,0 +1,2 @@
+import org.micromanager.acquisition.SequenceSettings;
+settings = new SequenceSettings();
