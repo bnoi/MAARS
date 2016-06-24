@@ -1,6 +1,8 @@
 package edu.univ_tlse3.acquisition;
 
+import edu.univ_tlse3.maars.MAARS;
 import ij.IJ;
+import ij.process.FloatProcessor;
 import mmcorej.CMMCore;
 
 import java.awt.Color;
@@ -10,7 +12,13 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import org.micromanager.SequenceSettings;
+import org.micromanager.data.Coords;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.Image;
@@ -18,6 +26,9 @@ import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
 import org.micromanager.display.DisplaySettings.DisplaySettingsBuilder;
 import org.micromanager.display.DisplayWindow;
 import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ChannelSpec;
+import org.micromanager.internal.utils.MMException;
+import org.micromanager.internal.utils.MMScriptException;
 import org.micromanager.internal.utils.ReportingUtils;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
@@ -223,87 +234,126 @@ public class SuperClassAcquisition {
 	public List<Image> acquire(String channelName, double zFocus) {
 		double range;
 		double step;
-        DecimalFormat numberFormat = new DecimalFormat("#.###");
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
-        numberFormat.setDecimalFormatSymbols(dfs);
-		zFocus = Double.parseDouble(numberFormat.format(zFocus));
-		if (!channelName.equals(parameters.getSegmentationParameter(MaarsParameters.CHANNEL))) {
-			// initialize parameters for FLUO Acquisitions
-			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
-			step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
-		} else {
-			// initialize parameters for Bright-Field Acquisitions
-			range = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
-			step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
-		}
+        range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+        step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
+        double z = zFocus - (range / 2);
+        int sliceNumber = (int) Math.round(range / step);
+        ArrayList<Double> slices = new ArrayList<Double>();
+        for (int k = 0; k <= sliceNumber; k++) {
+            slices.add(z);
+            z = z + step;
+        }
+		SequenceSettings acqSettings = new SequenceSettings();
+		acqSettings.save = true;
+		acqSettings.prefix = "";
+		acqSettings.root = "D:/Data/Tong/mal3" ;
+        acqSettings.keepShutterOpenChannels = true;
+        acqSettings.slices = slices;
+        ArrayList<ChannelSpec> channels = new ArrayList<ChannelSpec>();
+		ChannelSpec gfp_spec = new ChannelSpec();
+		gfp_spec.color = MaarsParameters.getColor(parameters.getChColor(channelName));
+        gfp_spec.config = channelName;
+        gfp_spec.exposure = Double.parseDouble(parameters.getChExposure(channelName));
+        channels.add(gfp_spec);
+        acqSettings.channels = channels;
+        Datastore ds = null;
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        Future<Datastore> task = executor.submit(new MAARS_mda(mm,acqSettings, channelGroup));
+        try {
+            ds = task.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        executor.shutdown();
+        List<Image> listImg = new ArrayList<Image>();
+        for (Coords coords : ds.getUnorderedImageCoords()){
+            IJ.log(coords.getChannel() + "-" + coords.getTime() +"-"+ coords.getZ());
+            listImg.add(ds.getImage(coords));
+        }
+//        listImg.add(ds.getAnyImage());
+//        DecimalFormat numberFormat = new DecimalFormat("#.###");
+//        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+//        dfs.setDecimalSeparator('.');
+//        numberFormat.setDecimalFormatSymbols(dfs);
+//		zFocus = Double.parseDouble(numberFormat.format(zFocus));
+//		if (!channelName.equals(parameters.getSegmentationParameter(MaarsParameters.CHANNEL))) {
+//			// initialize parameters for FLUO Acquisitions
+//			range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+//
+//		} else {
+//			// initialize parameters for Bright-Field Acquisitions
+//			range = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+//			step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
+//		}
+//
+//		String shutterLable = parameters.getChShutter(channelName);
+//
+//		int exposure = Integer.parseInt(parameters.getChExposure(channelName));
+//		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
+//
+//		cleanUp();
+//		mmc.setAutoShutter(false);
+//		setShutter(shutterLable);
+//		setChExposure(exposure);
+//		try {
+//			mmc.setConfig(channelGroup, channelName);
+//			mmc.waitForConfig(channelGroup, channelName);
+//		} catch (Exception e1) {
+//			System.out.println("Can not set config");
+//			e1.printStackTrace();
+//		}
+//		try {
+//			mmc.setShutterOpen(true);
+//			mmc.waitForDevice(shutterLable);
+//		} catch (Exception e) {
+//			ReportingUtils.logMessage("Can not open shutter");
+//			e.printStackTrace();
+//		}
+//		String focusDevice = mmc.getFocusDevice();
+//		ReportingUtils.logMessage("-> z focus is " + zFocus);
+//		ReportingUtils.logMessage("... start acquisition");
+//		double z = zFocus - (range / 2);
 
-		String shutterLable = parameters.getChShutter(channelName);
-		int sliceNumber = (int) Math.round(range / step);
-		int exposure = Integer.parseInt(parameters.getChExposure(channelName));
-		Color chColor = MaarsParameters.getColor(parameters.getChColor(channelName));
-
-		cleanUp();
-		mmc.setAutoShutter(false);
-		setShutter(shutterLable);
-		setChExposure(exposure);
-		try {
-			mmc.setConfig(channelGroup, channelName);
-			mmc.waitForConfig(channelGroup, channelName);
-		} catch (Exception e1) {
-			System.out.println("Can not set config");
-			e1.printStackTrace();
-		}
-		try {
-			mmc.setShutterOpen(true);
-			mmc.waitForDevice(shutterLable);
-		} catch (Exception e) {
-			ReportingUtils.logMessage("Can not open shutter");
-			e.printStackTrace();
-		}
-		String focusDevice = mmc.getFocusDevice();
-		ReportingUtils.logMessage("-> z focus is " + zFocus);
-		ReportingUtils.logMessage("... start acquisition");
-		double z = zFocus - (range / 2);
-		List<Image> listImg = new ArrayList<Image>();
-		for (int k = 0; k <= sliceNumber; k++) {
-			z = Double.parseDouble(numberFormat.format(z));
-			System.out.println("- set focus device at position " + z);
-			try {
-				mmc.setPosition(focusDevice, z);
-				mmc.waitForDevice(focusDevice);
-			} catch (Exception e) {
-				ReportingUtils.logMessage("could not set focus device at position");
-			}
-			z = z + step;
-			listImg.add(mm.live().snap(false).get(0));
-			//TODO sometime this display make the program crash
-//			if (k == 0) {
-//				setDisplay(chColor);
+//		for (int k = 0; k <= sliceNumber; k++) {
+//			z = Double.parseDouble(numberFormat.format(z));
+//			System.out.println("- set focus device at position " + z);
+//			try {
+//				mmc.setPosition(focusDevice, z);
+//				mmc.waitForDevice(focusDevice);
+//			} catch (Exception e) {
+//				ReportingUtils.logMessage("could not set focus device at position");
 //			}
-		}
-		ReportingUtils.logMessage("--- Acquisition done.");
-		try {
-			mmc.setShutterOpen(false);
-			mmc.setPosition(focusDevice, zFocus);
-			mmc.waitForDevice(focusDevice);
-			double currentZ = mmc.getPosition(focusDevice);
-            currentZ = Double.parseDouble(numberFormat.format(currentZ));
-            IJ.log("first focus: " + zFocus);
-			while (currentZ >= zFocus + 0.025 || currentZ <= zFocus - 0.025) {
-				mmc.setPosition(focusDevice, zFocus);
-				currentZ = mmc.getPosition(focusDevice);
-                currentZ = Double.parseDouble(numberFormat.format(currentZ));
-                mmc.waitForDevice(focusDevice);
-			}
-            mmc.waitForDevice(focusDevice);
-            mm.updateZPos(zFocus);
-            IJ.log("Final focus :" + currentZ);
-        } catch (Exception e) {
-			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
-			e.printStackTrace();
-		}
-		mmc.setAutoShutter(true);
+//			z = z + step;
+//			listImg.add(mm.live().snap(false).get(0));
+//			//TODO sometime this display make the program crash
+////			if (k == 0) {
+////				setDisplay(chColor);
+////			}
+//		}
+//		ReportingUtils.logMessage("--- Acquisition done.");
+//		try {
+//			mmc.setShutterOpen(false);
+//			mmc.setPosition(focusDevice, zFocus);
+//			mmc.waitForDevice(focusDevice);
+//			double currentZ = mmc.getPosition(focusDevice);
+//            currentZ = Double.parseDouble(numberFormat.format(currentZ));
+//            IJ.log("first focus: " + zFocus);
+//			while (currentZ >= zFocus + 0.025 || currentZ <= zFocus - 0.025) {
+//				mmc.setPosition(focusDevice, zFocus);
+//				currentZ = mmc.getPosition(focusDevice);
+//                currentZ = Double.parseDouble(numberFormat.format(currentZ));
+//                mmc.waitForDevice(focusDevice);
+//			}
+//            mmc.waitForDevice(focusDevice);
+//            mm.updateZPos(zFocus);
+//            IJ.log("Final focus :" + currentZ);
+//        } catch (Exception e) {
+//			ReportingUtils.logMessage("could not set focus device back to position and close shutter");
+//			e.printStackTrace();
+//		}
+//		mmc.setAutoShutter(true);
 		return listImg;
 	}
 }
