@@ -37,13 +37,13 @@ public class MaarsSegmentation {
 	 * @param img
 	 *            : image to segmente
 	 */
-	public void segmentation(ImagePlus img, String pathToSegDir) {
+	public void segmentation(ImagePlus img) {
 
 		IJ.log("Prepare parameters for segmentation...");
         SegPombeParameters segPombeParam = new SegPombeParameters();
 
 		segPombeParam.setImageToAnalyze(img);
-		segPombeParam.setSavingPath(pathToSegDir);
+		segPombeParam.setSavingPath(parameters.getSavingPath());
 
 		segPombeParam.setFilterAbnormalShape(
 				Boolean.parseBoolean(parameters.getSegmentationParameter(MaarsParameters.FILTER_SOLIDITY)));

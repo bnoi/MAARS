@@ -4,12 +4,10 @@ import org.micromanager.data.Datastore;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 
-import java.util.concurrent.Callable;
-
 /**
- * Created by NIKON-inver on 24/06/2016.
+ * Created by Tong LI on 24/06/2016.
  */
-public class MAARS_mda implements Callable<Datastore> {
+public class MAARS_mda{
     MMStudio mm_;
     SequenceSettings acqSettings_;
     String channelGroup_;
@@ -19,8 +17,7 @@ public class MAARS_mda implements Callable<Datastore> {
         channelGroup_ = channelGroup;
     }
 
-    @Override
-    public Datastore call() throws Exception {
+    public Datastore acquire() {
         mm_.getAcquisitionEngine().setSequenceSettings(acqSettings_);
         mm_.getAcquisitionEngine().setChannelGroup(channelGroup_);
         Datastore ds = null;
@@ -30,7 +27,11 @@ public class MAARS_mda implements Callable<Datastore> {
             e.printStackTrace();
         }
         while (mm_.isAcquisitionRunning()){
-            Thread.sleep(500);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return ds;
     }

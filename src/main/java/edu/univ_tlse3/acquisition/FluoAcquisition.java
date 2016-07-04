@@ -15,18 +15,12 @@ import ij.ImagePlus;
  * @version Nov 19, 2015
  */
 public class FluoAcquisition extends SuperClassAcquisition {
-	private double step;
-	public FluoAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
-		super(mm, mmc, parameters);
-		this.step = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
+	public FluoAcquisition(MMStudio mm, CMMCore mmc) {
+		super(mm, mmc);
 	}
 
-	public ImagePlus acquire(int frame, String channelName, Boolean save, double zFocus) {
+	public ImagePlus acquire(String channelName, double zFocus) {
 		List<Image> listImg = super.acquire(channelName, zFocus);
-		if (save){
-			
-			super.save(listImg, frame, channelName, step);
-		}
 		return super.convert2Imp(listImg, channelName, step); 
 	}
 }
