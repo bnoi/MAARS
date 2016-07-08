@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[4]:
 
 #!/usr/bin/env python3
 import numpy as np
@@ -30,29 +30,36 @@ def findKeyWithSmallestVal(dic):
 
 def find_slope_change_point(frames, spLens, majorAxieLen, figureDir, cellNb, save):
     slopes= dict()
+#   all in second
     minSegTimeLen = 180
     timeInterval = 20
-    changePointMinimalLen = 20;
+    changePointMinInterval = 240;
+    
+#     sliding window size for slope detection
     minSegLen = int(minSegTimeLen/timeInterval)
+#     normaliz spindle size with cell length
+    normed_spLens = spLens/majorAxieLen
     idxQueue = deque()
     queue = deque()
-    spLens = spLens/majorAxieLen
     
-    nans, x= nan_helper(spLens)
-    spLens[nans]= np.interp(x(nans), x(~nans), spLens[~nans])
+#     fill nan numbers in spindle detection time point
+    nans, x= nan_helper(normed_spLens)
+    normed_spLens[nans]= np.interp(x(nans), x(~nans), normed_spLens[~nans])
     
-    if len(spLens) > 2*minSegLen:
+#     ensure to have at least two slope change values
+    if len(normed_spLens) > 2*minSegLen:
         fig, ax = plt.subplots(figsize=(15, 10))
-        for i in range(0, len(spLens)):
-            queue.append(spLens[i])
+        for i in range(0, len(normed_spLens)):
+            queue.append(normed_spLens[i])
             idxQueue.append(frames[i])
-            if len(queue) > minSegLen:
+            if len(queue) == minSegLen:
                 idxQueue.popleft()
                 queue.popleft()
                 par = np.polyfit(idxQueue, queue, 1 ,full = True)
                 slope=par[0][0]
                 slopes[frames[i]] = slope
                 intercept=par[0][1]
+#                 show the fitted lines
                 theo_line1_x = np.arange(frames[i]- minSegLen, frames[i],1)
                 theo_line1_y = []
                 for x in theo_line1_x:
@@ -65,47 +72,40 @@ def find_slope_change_point(frames, spLens, majorAxieLen, figureDir, cellNb, sav
         slopesFrames = list(slopes.keys())
         for x in range(int(minSegLen), len(slopesFrames)):
             diffrences[slopesFrames[x- minSegLen]] = slopes[slopesFrames[x]] - slopes[slopesFrames[x - minSegLen]]
+#         for visualization
+        diff_f = list(diffrences.keys())
         diffValues = DataFrame.from_dict(diffrences, 'index')
-        positiveDiffValues = diffValues[diffValues>=0]
-        ax.plot(list(diffrences.keys()), positiveDiffValues, lw = 5, c = 'red')
-        negativeDiffValues = diffValues[diffValues<0]
-        ax.plot(list(diffrences.keys()), negativeDiffValues, lw = 5, c = 'blue')
-        change_points_values = dict()
-        for f in diffrences.keys():
-            idx = 0
-            for y in range(0, len(frames)):
-                if frames[y] == f:
-                    idx = y
-            change_points_values[f] = diffrences[f]
-            if len(change_points_values) == 4:
-                key_to_pop = findKeyWithSmallestVal(change_points_values)
-                change_points_values.pop(key_to_pop, None)
-        ax.plot(frames, spLens, '-o')
-        ax.axhline(0)
+        upper = np.ma.masked_where(diffValues < 0, diffValues)
+        lower = np.ma.masked_where(diffValues >= 0, diffValues)
+        plt.plot(diff_f, lower, 'bs', diff_f, upper, 'r^', lw = 5)
+        
+#         find the 2 maximum change points
+        change_points_values = list()
+        while len(change_points_values) <2 and len(diffrences) > 0 :
+            maxInd = max(diffrences, key=diffrences.get)
+            change_points_values.append(maxInd)
+            new_diff = diffrences.copy()
+            for ind in diffrences.keys():
+                if ind <  maxInd + changePointMinInterval / timeInterval and ind > maxInd - changePointMinInterval / timeInterval:
+                    new_diff.pop(ind,None)
+            diffrences = new_diff
+        ax.plot(frames, normed_spLens, '-o')
         ax.axhline(1 , c = 'red' , lw = 10)
         doPlot = True
-        plotedPoints = list()
-        for p in list(change_points_values.keys()):
-            idx = 0
+        for p in change_points_values:
+            ind = 0
             for y in range(0, len(frames)):
                 if frames[y] == p:
-                    idx = y
-            for point in plotedPoints:
-                if np.abs(point - idx) < changePointMinimalLen:
-                    doPlot = False
-                else:
-                    doPlot = True
-            if doPlot and spLens[idx] > 0.15:
-                ax.axvline(frames[idx])
-                ax.axhline(spLens[idx])
-                plotedPoints.append(int(round(frames[idx])))
-        changePoints = "_".join(str(e) for e in sorted(plotedPoints))
+                    ind = y
+            ax.axvline(frames[ind])
+            ax.axhline(normed_spLens[ind])
+        changePoints = "_".join(str(int(e)) for e in sorted(change_points_values))
         plt.ylabel("Scaled spindle length (to cell major axe)", fontsize=20)
         plt.xlabel("Change_Point(s)_" + changePoints, fontsize=20)
         plt.xlim(0)
         plt.ylim(-0.05, 1)
         if save:
-            plt.savefig(figureDir + str(cellNb) + "_slopChangePoints_" + changePoints)
+            plt.savefig(figureDir + str(cellNb) + "_slopChangePoints_" + changePoints + ".png")
         else:
             plt.show()
         plt.close(fig)
@@ -209,7 +209,7 @@ class getMitosisFiles(object):
                         spLens[i] = max(spLens)
                     mito_region = list()
                     f = list()
-                    if firstMaxIndex - lastMinIndex > 5:
+                    if (firstMaxIndex - lastMinIndex) * self._acq_interval > 120:
                         for i in range(lastMinIndex,firstMaxIndex+1):
                             mito_region.append(spLens[i])
                             f.append(i)
@@ -445,7 +445,7 @@ class getMitosisFiles(object):
                     copyfile(self._baseDir + self._fluo_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv", self._baseDir + self._mitosis_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv");
 if __name__ == '__main__':
     
-    baseDir="/home/tong/Documents/movies/rad21/04-06-1/X0_Y0"
+    baseDir="/Volumes/Macintosh/curioData/102/11-06-1/X0_Y0"
     channels = ['CFP','GFP', 'TxRed', 'DAPI']
     launcher = getMitosisFiles(baseDir, channels[0])
     launcher.set_attributes_from_cmd_line()

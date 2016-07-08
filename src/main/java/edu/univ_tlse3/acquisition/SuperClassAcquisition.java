@@ -1,26 +1,19 @@
 package edu.univ_tlse3.acquisition;
 
 import ij.IJ;
-import mmcorej.CMMCore;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-
-import org.micromanager.SequenceSettings;
-import org.micromanager.data.Coords;
-import org.micromanager.data.Datastore;
-import org.micromanager.data.DatastoreFrozenException;
-import org.micromanager.data.Image;
-import org.micromanager.internal.MMStudio;
-import edu.univ_tlse3.maars.MaarsParameters;
-
-
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
+import mmcorej.CMMCore;
+import org.micromanager.SequenceSettings;
+import org.micromanager.data.Coords;
+import org.micromanager.data.Datastore;
+import org.micromanager.data.Image;
+import org.micromanager.internal.MMStudio;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -29,66 +22,61 @@ import ij.process.ImageProcessor;
 
 public class SuperClassAcquisition {
 
-	private MMStudio mm;
-	private CMMCore mmc;
-	private String baseSaveDir;
+    private MMStudio mm;
+    private CMMCore mmc;
 
-	/**
-	 * Constructor :
-	 *
-	 * @param mm
-	 *            : graphical user interface of Micro-Manager
-	 * @param mmc
-	 *            : Core object of Micro-Manager
-	 */
-	public SuperClassAcquisition(MMStudio mm, CMMCore mmc) {
-		this.mm = mm;
-		this.mmc = mmc;
-	}
-
-	/**
-	 * clear ROI selected, close previously opened display windows
-	 */
-	private void cleanUp() {
-		try {
-			mmc.clearROI();
-		} catch (Exception e) {
-			System.out.println("Can not clear ROI for MM acquisition");
-			e.printStackTrace();
-		}
-		mm.getDisplayManager().closeAllDisplayWindows(false);
-	}
-	
-	public ImagePlus convert2Imp(List<Image> listImg, String channelName){
-		ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-		for (Image img : listImg) {
-			// Prepare a imagePlus (for analysis)
-			ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
-			imageStack.addSlice(imgProcessor.convertToShortProcessor());
-		}
-		// ImagePlus for further analysis
-		ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
-		Calibration cal = new Calibration();
-		cal.setUnit("micron");
-		cal.pixelWidth = mmc.getPixelSizeUm();
-		cal.pixelHeight = mmc.getPixelSizeUm();
-		imagePlus.setCalibration(cal);
-		return imagePlus;
-	}
-
-	/**
-	 * 
-	 * @param acqSettings
+    /**
+     * Constructor :
      *
-	 * @return a duplicate of acquired images.
-	 */
-	public List<Image> acquire(SequenceSettings acqSettings, String channelGroup) {
-        MAARS_mda mda = new MAARS_mda(mm,acqSettings, channelGroup);
-		Datastore ds = mda.acquire();
+     * @param mm  : graphical user interface of Micro-Manager
+     * @param mmc : Core object of Micro-Manager
+     */
+    public SuperClassAcquisition(MMStudio mm, CMMCore mmc) {
+        this.mm = mm;
+        this.mmc = mmc;
+    }
+
+    /**
+     * clear ROI selected, close previously opened display windows
+     */
+    private void cleanUp() {
+        try {
+            mmc.clearROI();
+        } catch (Exception e) {
+            System.out.println("Can not clear ROI for MM acquisition");
+            e.printStackTrace();
+        }
+        mm.getDisplayManager().closeAllDisplayWindows(false);
+    }
+
+    public ImagePlus convert2Imp(List<Image> listImg, String channelName) {
+        ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+        for (Image img : listImg) {
+            // Prepare a imagePlus (for analysis)
+            ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
+            imageStack.addSlice(imgProcessor.convertToShortProcessor());
+        }
+        // ImagePlus for further analysis
+        ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
+        Calibration cal = new Calibration();
+        cal.setUnit("micron");
+        cal.pixelWidth = mmc.getPixelSizeUm();
+        cal.pixelHeight = mmc.getPixelSizeUm();
+        imagePlus.setCalibration(cal);
+        return imagePlus;
+    }
+
+    /**
+     * @param acqSettings
+     * @return a duplicate of acquired images.
+     */
+    public List<Image> acquire(SequenceSettings acqSettings, String channelGroup) {
+        MAARS_mda mda = new MAARS_mda(mm, acqSettings, channelGroup);
+        Datastore ds = mda.acquire();
 
         List<Image> listImg = new ArrayList<Image>();
-        for (Coords coords : ds.getUnorderedImageCoords()){
-            IJ.log(coords.getChannel() + "-" + coords.getTime() +"-"+ coords.getZ());
+        for (Coords coords : ds.getUnorderedImageCoords()) {
+            IJ.log(coords.getChannel() + "-" + coords.getTime() + "-" + coords.getZ());
             listImg.add(ds.getImage(coords));
         }
 //        listImg.add(ds.getAnyImage());
@@ -173,6 +161,6 @@ public class SuperClassAcquisition {
 //			e.printStackTrace();
 //		}
 //		mmc.setAutoShutter(true);
-		return listImg;
-	}
+        return listImg;
+    }
 }
