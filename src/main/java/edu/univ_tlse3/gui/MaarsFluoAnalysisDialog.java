@@ -10,6 +10,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -20,9 +22,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import edu.univ_tlse3.acquisition.FluoAcquisition;
 import edu.univ_tlse3.acquisition.SuperClassAcquisition;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
+import org.micromanager.SequenceSettings;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 import edu.univ_tlse3.utils.FileUtils;
@@ -376,9 +380,16 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 			ReportingUtils.logMessage("could not get z current position");
 			e.printStackTrace();
 		}
-		SuperClassAcquisition acq = new SuperClassAcquisition(mm, mmc, parameters);
+        FluoAcquisition acq = new FluoAcquisition(mm, mmc, parameters);
 		String channelName = getSelectedChannel(jp);
-		return acq.convert2Imp(acq.acquire(channelName,zFocus), channelName, Double.parseDouble(step.getText()));
+		IJ.log(channelName);
+        double zRange = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+        double zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
+        ArrayList<Double> slices = SuperClassAcquisition.computZSlices(zRange,zStep,zFocus);
+        SequenceSettings fluoAcqSettings = acq.buildSeqSetting("",channelName,parameters,slices,false);
+
+
+		return acq.acquire(fluoAcqSettings);
 	}
 
 	private String getSelectedChannel(JPanel jp) {
