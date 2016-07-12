@@ -3,6 +3,7 @@ package edu.univ_tlse3.acquisition;
 import edu.univ_tlse3.maars.MaarsParameters;
 import mmcorej.CMMCore;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,44 +20,49 @@ import org.micromanager.internal.utils.ChannelSpec;
  */
 public class SegAcquisition extends SuperClassAcquisition {
     private String channelGroup;
-    private String bf;
-	public SegAcquisition(MMStudio mm, CMMCore mmc) {
+    private String ch;
+    private double zRange;
+    private double zStep;
+    private Color chColor;
+    private double chExpose;
+    private String savingRoot;
+    private ArrayList<ChannelSpec> channelSetting;
+
+	public SegAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 		super(mm, mmc);
+		this.ch = parameters.getSegmentationParameter(MaarsParameters.CHANNEL);
+		this.channelGroup = parameters.getChannelGroup();
+        this.zRange = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+        this.zStep = Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP));
+        this.chColor = MaarsParameters.getColor(parameters.getChColor(ch));
+        this.chExpose = Double.parseDouble(parameters.getChExposure(ch));
+        this.savingRoot = parameters.getSavingPath();
+
+        channelSetting = new ArrayList<ChannelSpec>();
+        ChannelSpec bf_spec = new ChannelSpec();
+        bf_spec.config = ch;
+        bf_spec.color = chColor;
+        bf_spec.exposure = chExpose;
+        channelSetting.add(bf_spec);
 	}
 
-    public SequenceSettings buildSeqSetting(MaarsParameters parameters, double zFocus) {
-        this.bf = parameters.getSegmentationParameter(MaarsParameters.CHANNEL);
-        this.channelGroup = parameters.getChannelGroup();
-        double range = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
-        double step = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
-        double z = zFocus - (range / 2);
+    public ArrayList<Double> computZSlices(double zFocus){
+        return SuperClassAcquisition.computZSlices(zRange,zStep,zFocus);
+    }
 
-        int sliceNumber = (int) Math.round(range / step);
-        ArrayList<Double> slices = new ArrayList<Double>();
-        for (int k = 0; k <= sliceNumber; k++) {
-            slices.add(z);
-            z = z + step;
-        }
-
-        ArrayList<ChannelSpec> channels = new ArrayList<ChannelSpec>();
-        ChannelSpec bf_spec = new ChannelSpec();
-        bf_spec.config = bf;
-        bf_spec.color = MaarsParameters.getColor(parameters.getChColor(bf));
-        bf_spec.exposure = Double.parseDouble(parameters.getChExposure(bf));
-        channels.add(bf_spec);
-
-        SequenceSettings acqSettings = new SequenceSettings();
-        acqSettings.save = true;
-        acqSettings.prefix = "";
-        acqSettings.root = parameters.getSavingPath();
-        acqSettings.keepShutterOpenChannels = true;
-        acqSettings.slices = slices;
-        acqSettings.channels = channels;
-        return acqSettings;
+    public SequenceSettings buildSeqSetting(ArrayList<Double> slices, boolean save) {
+        SequenceSettings segAcqSettings = new SequenceSettings();
+		segAcqSettings.save = save;
+		segAcqSettings.prefix = "";
+		segAcqSettings.root = this.savingRoot;
+		segAcqSettings.keepShutterOpenChannels = false;
+		segAcqSettings.slices = slices;
+		segAcqSettings.channels = this.channelSetting;
+        return segAcqSettings;
     }
 
 	public ImagePlus acquire(SequenceSettings acqSettings) {
 		List<Image> listImg = super.acquire(acqSettings, channelGroup);
-		return super.convert2Imp(listImg, this.bf);
+		return super.convert2Imp(listImg, this.ch);
 	}
 }

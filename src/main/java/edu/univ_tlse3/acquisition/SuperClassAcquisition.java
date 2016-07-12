@@ -36,19 +36,6 @@ public class SuperClassAcquisition {
         this.mmc = mmc;
     }
 
-    /**
-     * clear ROI selected, close previously opened display windows
-     */
-    private void cleanUp() {
-        try {
-            mmc.clearROI();
-        } catch (Exception e) {
-            System.out.println("Can not clear ROI for MM acquisition");
-            e.printStackTrace();
-        }
-        mm.getDisplayManager().closeAllDisplayWindows(false);
-    }
-
     public ImagePlus convert2Imp(List<Image> listImg, String channelName) {
         ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
         for (Image img : listImg) {
@@ -65,6 +52,18 @@ public class SuperClassAcquisition {
         imagePlus.setCalibration(cal);
         return imagePlus;
     }
+
+	public static ArrayList<Double> computZSlices(double zRange, double zStep, double zFocus){
+        double z = zFocus - (zRange / 2);
+        int sliceNumber = (int) Math.round(zRange / zStep);
+        ArrayList<Double> slices = new ArrayList<Double>();
+        for (int k = 0; k <= sliceNumber; k++) {
+            slices.add(z);
+            z = z + zStep;
+        }
+        return slices;
+    }
+
 
     /**
      * @param acqSettings
