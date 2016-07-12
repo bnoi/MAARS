@@ -27,7 +27,6 @@ public class FluoAcquisition extends SuperClassAcquisition {
     private Color chColor;
     private double chExpose;
     private String savingRoot;
-    private ArrayList<ChannelSpec> channelSetting;
 
 	public FluoAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
 		super(mm, mmc);
@@ -35,13 +34,6 @@ public class FluoAcquisition extends SuperClassAcquisition {
         this.zRange = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
         this.zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
         this.savingRoot = parameters.getSavingPath() + "_FLUO";
-
-        channelSetting = new ArrayList<ChannelSpec>();
-        ChannelSpec channel_spec = new ChannelSpec();
-        channel_spec.config = ch;
-        channel_spec.color = chColor;
-        channel_spec.exposure = chExpose;
-        channelSetting.add(channel_spec);
 	}
 
     public ArrayList<Double> computZSlices(double zFocus){
@@ -53,13 +45,19 @@ public class FluoAcquisition extends SuperClassAcquisition {
         this.chColor = MaarsParameters.getColor(parameters.getChColor(ch));
         this.chExpose = Double.parseDouble(parameters.getChExposure(ch));
 
+        ArrayList<ChannelSpec> channelSetting = new ArrayList<ChannelSpec>();
+        ChannelSpec channel_spec = new ChannelSpec();
+        channel_spec.config = ch;
+        channel_spec.color = chColor;
+        channel_spec.exposure = chExpose;
+        channelSetting.add(channel_spec);
+
         SequenceSettings fluoAcqSetting = new SequenceSettings();
         fluoAcqSetting.save = save;
         fluoAcqSetting.prefix = frame;
         fluoAcqSetting.root = this.savingRoot;
-        fluoAcqSetting.keepShutterOpenChannels = false;
         fluoAcqSetting.slices = slices;
-        fluoAcqSetting.channels = this.channelSetting;
+        fluoAcqSetting.channels = channelSetting;
         return fluoAcqSetting;
     }
 

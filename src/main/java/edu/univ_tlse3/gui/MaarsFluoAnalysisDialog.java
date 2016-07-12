@@ -382,6 +382,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		}
         FluoAcquisition acq = new FluoAcquisition(mm, mmc, parameters);
 		String channelName = getSelectedChannel(jp);
+		IJ.log(channelName);
         double zRange = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
         double zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
         ArrayList<Double> slices = SuperClassAcquisition.computZSlices(zRange,zStep,zFocus);

@@ -55,7 +55,7 @@ public class SegAcquisition extends SuperClassAcquisition {
 		segAcqSettings.save = save;
 		segAcqSettings.prefix = "";
 		segAcqSettings.root = this.savingRoot;
-		segAcqSettings.keepShutterOpenChannels = false;
+        segAcqSettings.keepShutterOpenSlices = true;
 		segAcqSettings.slices = slices;
 		segAcqSettings.channels = this.channelSetting;
         return segAcqSettings;
