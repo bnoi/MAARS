@@ -43,7 +43,7 @@ public class MaarsSegmentation {
         SegPombeParameters segPombeParam = new SegPombeParameters();
 
 		segPombeParam.setImageToAnalyze(img);
-		segPombeParam.setSavingPath(pathToSegDir);
+		segPombeParam.setSavingPath(parameters.getSavingPath());
 
 		segPombeParam.setFilterAbnormalShape(
 				Boolean.parseBoolean(parameters.getSegmentationParameter(MaarsParameters.FILTER_SOLIDITY)));

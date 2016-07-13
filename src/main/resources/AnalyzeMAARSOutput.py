@@ -1,7 +1,8 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[ ]:
+
 
 #!/usr/bin/env python3
 import numpy as np
@@ -28,84 +29,85 @@ def findKeyWithSmallestVal(dic):
             smallest_key = k
     return smallest_key
 
-def find_slope_change_point(frames, spLens, majorAxieLen, figureDir, cellNb, save):
+def find_slope_change_point(frames, spLens, timeInterval,majorAxieLen, figureDir, cellNb, save):
     slopes= dict()
+#   all in second
     minSegTimeLen = 180
-    timeInterval = 20
-    changePointMinimalLen = 20;
+    changePointMinInterval = 240;
+    
+#     sliding window size for slope detection
     minSegLen = int(minSegTimeLen/timeInterval)
+#     normaliz spindle size with cell length
+    normed_spLens = spLens/majorAxieLen
     idxQueue = deque()
     queue = deque()
-    spLens = spLens/majorAxieLen
     
-    nans, x= nan_helper(spLens)
-    spLens[nans]= np.interp(x(nans), x(~nans), spLens[~nans])
+#     fill nan numbers in spindle detection time point
+    nans, x= nan_helper(normed_spLens)
+    normed_spLens[nans]= np.interp(x(nans), x(~nans), normed_spLens[~nans])
     
-    if len(spLens) > 2*minSegLen:
+#     ensure to have at least two slope change values
+    if len(normed_spLens) > 2*minSegLen:
         fig, ax = plt.subplots(figsize=(15, 10))
-        for i in range(0, len(spLens)):
-            queue.append(spLens[i])
+        for i in range(0, len(normed_spLens)):
+            queue.append(normed_spLens[i])
             idxQueue.append(frames[i])
-            if len(queue) > minSegLen:
+            if len(queue) == minSegLen:
                 idxQueue.popleft()
                 queue.popleft()
                 par = np.polyfit(idxQueue, queue, 1 ,full = True)
                 slope=par[0][0]
                 slopes[frames[i]] = slope
                 intercept=par[0][1]
+#                 show the fitted lines
                 theo_line1_x = np.arange(frames[i]- minSegLen, frames[i],1)
                 theo_line1_y = []
                 for x in theo_line1_x:
                     theo_line1_y.append(x * slope + intercept)
                 if (slope>=0):
-                    ax.plot(theo_line1_x,theo_line1_y, lw = 1 + i*0.1, c='red')
+                    ax.plot(theo_line1_x,theo_line1_y, lw = 1 + i*0.1, c='red', alpha = 0.2)
                 else:
-                    ax.plot(theo_line1_x,theo_line1_y, lw = 1 + i*0.1, c = 'blue')
+                    ax.plot(theo_line1_x,theo_line1_y, lw = 1 + i*0.1,c = 'blue', alpha = 0.2)
         diffrences = dict()
         slopesFrames = list(slopes.keys())
         for x in range(int(minSegLen), len(slopesFrames)):
             diffrences[slopesFrames[x- minSegLen]] = slopes[slopesFrames[x]] - slopes[slopesFrames[x - minSegLen]]
+#         for visualization
+        diff_f = list(diffrences.keys())
         diffValues = DataFrame.from_dict(diffrences, 'index')
-        positiveDiffValues = diffValues[diffValues>=0]
-        ax.plot(list(diffrences.keys()), positiveDiffValues, lw = 5, c = 'red')
-        negativeDiffValues = diffValues[diffValues<0]
-        ax.plot(list(diffrences.keys()), negativeDiffValues, lw = 5, c = 'blue')
-        change_points_values = dict()
-        for f in diffrences.keys():
-            idx = 0
-            for y in range(0, len(frames)):
-                if frames[y] == f:
-                    idx = y
-            change_points_values[f] = diffrences[f]
-            if len(change_points_values) == 4:
-                key_to_pop = findKeyWithSmallestVal(change_points_values)
-                change_points_values.pop(key_to_pop, None)
-        ax.plot(frames, spLens, '-o')
-        ax.axhline(0)
+        upper = np.ma.masked_where(diffValues < 0, diffValues)
+        lower = np.ma.masked_where(diffValues >= 0, diffValues)
+        plt.plot(diff_f, lower, 'bs', diff_f, upper, 'r^', lw = 5)
+        
+#         find the 2 maximum change points
+        change_points_values = list()
+        while len(change_points_values) <2 and len(diffrences) > 0 :
+            maxInd = max(diffrences, key=diffrences.get)
+            change_points_values.append(maxInd)
+            new_diff = diffrences.copy()
+            for ind in diffrences.keys():
+                if ind <  maxInd + changePointMinInterval / timeInterval and ind > maxInd - changePointMinInterval / timeInterval:
+                    new_diff.pop(ind,None)
+            diffrences = new_diff
+        ax.plot(frames, normed_spLens, '-o', c  = "black")
         ax.axhline(1 , c = 'red' , lw = 10)
         doPlot = True
-        plotedPoints = list()
-        for p in list(change_points_values.keys()):
-            idx = 0
+        for p in change_points_values:
+            ind = 0
             for y in range(0, len(frames)):
                 if frames[y] == p:
-                    idx = y
-            for point in plotedPoints:
-                if np.abs(point - idx) < changePointMinimalLen:
-                    doPlot = False
-                else:
-                    doPlot = True
-            if doPlot and spLens[idx] > 0.15:
-                ax.axvline(frames[idx])
-                ax.axhline(spLens[idx])
-                plotedPoints.append(int(round(frames[idx])))
-        changePoints = "_".join(str(e) for e in sorted(plotedPoints))
-        plt.ylabel("Scaled spindle length (to cell major axe)", fontsize=20)
+                    ind = y
+            ax.axvline(frames[ind], linestyle = "--", c = "grey", alpha = 0.8)
+            ax.axhline(normed_spLens[ind], linestyle = "--", c = "grey", alpha = 0.8)
+        changePoints = "_".join(str(int(e)) for e in sorted(change_points_values))
+        plt.ylabel("Rescaled spindle length (to cell major axe)", fontsize=20)
         plt.xlabel("Change_Point(s)_" + changePoints, fontsize=20)
         plt.xlim(0)
         plt.ylim(-0.05, 1)
+        plt.tick_params(axis='both', which='major', labelsize=20)
+        plt.xlim(0, frames[-1])
         if save:
-            plt.savefig(figureDir + str(cellNb) + "_slopChangePoints_" + changePoints)
+            plt.savefig(figureDir + str(cellNb) + "_slopChangePoints_" + changePoints + ".png",transparent = True, bbox_inches='tight')
         else:
             plt.show()
         plt.close(fig)
@@ -145,7 +147,7 @@ class getMitosisFiles(object):
         self._baseDir = baseDir
         self._channel = channel
         self._calibration = 0.1075
-        self._minimumPeriod = 100
+        self._minimumPeriod = 180
         self._acq_interval = 20
         self._fluo_suffix = "_FLUO/"
         self._mitosis_suffix = "_MITOSIS/"
@@ -189,11 +191,11 @@ class getMitosisFiles(object):
                 all_cell_nbs.append(current_cell_nb)
         return all_cell_nbs, features_dir
     
-    def getMitosisCellNbs(self, channel,features_dir,cellNbs, p):
+    def getMitosisCellNbs(self,features_dir,cellNbs, p):
         mitosis_cellNbs = list()
         minimumSegLength = self._minimumPeriod/self._acq_interval
         for cellNb in cellNbs:
-            csvPath = features_dir + "/" + str(cellNb) + '_' + channel+'.csv'
+            csvPath = features_dir + "/" + str(cellNb) + '_' + self._channel+'.csv'
             if path.lexists(csvPath) : 
                 oneCell = genfromtxt(csvPath, delimiter=',', names=True, dtype= float)
                 spLens = oneCell['SpLength']
@@ -209,14 +211,13 @@ class getMitosisFiles(object):
                         spLens[i] = max(spLens)
                     mito_region = list()
                     f = list()
-                    if firstMaxIndex - lastMinIndex > 5:
+                    if (firstMaxIndex - lastMinIndex) * self._acq_interval > 120:
                         for i in range(lastMinIndex,firstMaxIndex+1):
                             mito_region.append(spLens[i])
                             f.append(i)
                         if len(f)>0:
                             slope, intercept, r_value, p_value, std_err = stats.linregress(f, mito_region)
-#                         print(r_value, p_value, std_err)
-                            if p_value < 3*10**(-9):
+                            if np.log10(p_value) < -11:
                                 if cellNb not in mitosis_cellNbs:
                                     mitosis_cellNbs.append(cellNb)
         return mitosis_cellNbs
@@ -273,7 +274,7 @@ class getMitosisFiles(object):
                                                          current_spot_0_y, 0]))
                             concat_data.append(np.array([i,
                                                          cell_major_length,
-                                                         spAng2MajVal,
+                                                         spAng2MajVal, 
                                                          np.nan,
                                                          np.nan, 1]))
                             last_spot_0_x_y = [current_spot_0_x, current_spot_0_y]  
@@ -384,13 +385,13 @@ class getMitosisFiles(object):
         plt.ylabel("Absolute y in original fluo image (pixel)", fontsize=20)
         plt.xlabel("Absolute x in original fluo image (pixel)", fontsize=20)
         if save:
-            plt.savefig(figureDir + str(cellNb) + "_SPBtracks")
+            plt.savefig(figureDir + str(cellNb) + "_SPBtracks",transparent = True, bbox_inches='tight')
         else:
             plt.show()
         plt.close(fig)
         return concat_data
 
-    def analyze(self, save, mitosis_cellNbs, allCellNbs, channel):
+    def analyze(self, save, mitosis_cellNbs):
         all_mitoregion_spLens = dict()
         all_slope_changes = dict()
         major = 'Major'
@@ -399,38 +400,37 @@ class getMitosisFiles(object):
         for cellNb in mitosis_cellNbs:
             fig, ax = plt.subplots(figsize=(15, 8))
             current_major_length = cellRois.loc[int(cellNb)][major] * self._calibration
-            cellFeaturesPath = mitosisDir + self._features + "/" + str(cellNb) + '_' + channel+'.csv'
-            currentCellFeatures = genfromtxt(self._baseDir + self._fluo_suffix + self._features + "/"  + str(cellNb) + "_" + channel + ".csv", delimiter=',', names=True, dtype= float)
+            cellFeaturesPath = mitosisDir + self._features + "/" + str(cellNb) + '_' + self._channel+'.csv'
+            currentCellFeatures = genfromtxt(self._baseDir + self._fluo_suffix + self._features + "/"  + str(cellNb) + "_" + self._channel + ".csv", delimiter=',', names=True, dtype= float)
             spLens = currentCellFeatures['SpLength']
             frames = currentCellFeatures['Frame']
             
             ax.axhline(current_major_length,  c= 'red', lw = 10)
             plt.ylabel("Spindle Length ($μm$)", fontsize=20)
             plt.tick_params(axis='both', which='major', labelsize=20)
-            plt.xlabel("Frame // cell " + str(cellNb), fontsize=20)
-            plt.xlim(0, len(spLens))
+            plt.xlabel("Timepoint // interval " + str(self._acq_interval), fontsize=20)
+            plt.xlim(0, frames[-1])
             plt.ylim(0, current_major_length)
             maxValue = np.nanmax(spLens)
             firstMaxIndex = np.where(spLens == maxValue)[0]
             for i in range(firstMaxIndex, len(spLens)):
                 spLens[i] = maxValue
-#             ax.plot(frames, spLens, '-o')
             mito_region = dict()
             minValue = np.nanmin(spLens)
             lastMinIndex = np.where(spLens == minValue)[-1]
             for i in range(lastMinIndex,firstMaxIndex+1):
                 mito_region[frames[i]] = spLens[i]
-            ax.plot(list(mito_region.keys()), list(mito_region.values()), "-o")
+            ax.plot(list(mito_region.keys()), list(mito_region.values()), "-o", c="black")
             all_mitoregion_spLens[cellNb] = mito_region
             #
             figureDir = mitosisDir + self._figs + "/"
-            all_slope_changes[cellNb] = find_slope_change_point(frames, spLens, current_major_length, figureDir, cellNb, save)
+            all_slope_changes[cellNb] = find_slope_change_point(frames, spLens, self._acq_interval, current_major_length, figureDir, cellNb, save)
             
             #
-            d = self.analyzeSPBTrack(self._baseDir, cellNb, channel, figureDir, current_major_length, save)
+            d = self.analyzeSPBTrack(self._baseDir, cellNb, self._channel, figureDir, current_major_length, save)
             d.to_csv(mitosisDir + self._csv + "/d_" + str(cellNb) + ".csv", sep='\t')
             if save:
-                plt.savefig(figureDir + str(cellNb) + "_elongation", bbox_inches='tight')
+                plt.savefig(figureDir + str(cellNb) + "_elongation", transparent = True, bbox_inches='tight')
             else:
                 plt.show()
             plt.close(fig)
@@ -443,17 +443,17 @@ class getMitosisFiles(object):
                     copyfile(self._baseDir + self._fluo_suffix + self._cropImgs + "/" + str(cellNb) + "_" + ch + ".tif",  self._baseDir + self._mitosis_suffix + self._cropImgs + "/" + str(cellNb) + "_" + ch +".tif")
                     copyfile(self._baseDir + self._fluo_suffix + self._spots + "/" + str(cellNb) + "_" + ch + ".xml", self._baseDir + self._mitosis_suffix + self._spots + "/" + str(cellNb) + "_" + ch + ".xml")
                     copyfile(self._baseDir + self._fluo_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv", self._baseDir + self._mitosis_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv");
+
 if __name__ == '__main__':
-    
-    baseDir="/home/tong/Documents/movies/rad21/04-06-1/X0_Y0"
+    baseDir="/Volumes/Macintosh/curioData/102/19-05-1/X0_Y0"
     channels = ['CFP','GFP', 'TxRed', 'DAPI']
     launcher = getMitosisFiles(baseDir, channels[0])
     launcher.set_attributes_from_cmd_line()
     cellNbs, features_dir = launcher.getAllCellNumbers()
     cellNbs = [int(n) for n in cellNbs]
-    predictedList = launcher.getMitosisCellNbs(channels[0],features_dir,cellNbs,0)
+    predictedList = launcher.getMitosisCellNbs(features_dir,cellNbs,0)
     predictedList = [int(n) for n in predictedList]
-    all_mitoregion_spLens, all_slope_changes = launcher.analyze(True,predictedList,cellNbs, channels[0])
+    all_mitoregion_spLens, all_slope_changes = launcher.analyze(True,predictedList)
     launcher.pick_mitosis_files(predictedList, channels)
     print("Done")
 
