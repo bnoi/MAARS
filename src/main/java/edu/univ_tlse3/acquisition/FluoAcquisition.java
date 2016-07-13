@@ -5,7 +5,6 @@ import mmcorej.CMMCore;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.micromanager.SequenceSettings;
@@ -33,7 +32,7 @@ public class FluoAcquisition extends SuperClassAcquisition {
         this.channelGroup = parameters.getChannelGroup();
         this.zRange = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
         this.zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
-        this.savingRoot = parameters.getSavingPath() + "_FLUO";
+        this.savingRoot = parameters.getSavingPath();
 	}
 
     public ArrayList<Double> computZSlices(double zFocus){
@@ -54,7 +53,7 @@ public class FluoAcquisition extends SuperClassAcquisition {
 
         SequenceSettings fluoAcqSetting = new SequenceSettings();
         fluoAcqSetting.save = save;
-        fluoAcqSetting.prefix = frame;
+        fluoAcqSetting.prefix = frame + "_" + channel;
         fluoAcqSetting.root = this.savingRoot;
         fluoAcqSetting.slices = slices;
         fluoAcqSetting.channels = channelSetting;
