@@ -63,6 +63,8 @@ public class MAARSNoAcq implements Runnable {
             String pathToSegDir = FileUtils.convertPath(rootDir + "/X" + xPos + "_Y" + yPos);
             String pathToFluoDir = pathToSegDir + "_FLUO/";
             String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "/MMStack.ome.tif");
+            //update saving path
+            parameters.setSavingPath(pathToSegDir);
             ImagePlus segImg = null;
             try {
                 segImg = IJ.openImage(pathToSegMovie);
