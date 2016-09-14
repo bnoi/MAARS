@@ -280,8 +280,9 @@ public class MAARS implements Runnable {
             String xPos = String.valueOf(Math.round(explo.getX(i)));
             String yPos = String.valueOf(Math.round(explo.getY(i)));
             IJ.log("Current position : X_" + xPos + " Y_" + yPos);
+            String original_folder = FileUtils.convertPath(parameters.getSavingPath());
             String pathToSegDir = FileUtils
-                    .convertPath(parameters.getSavingPath() + File.separator + "X" + xPos + "_Y" + yPos);
+                    .convertPath(original_folder + File.separator + "X" + xPos + "_Y" + yPos);
             //update saving path
             parameters.setSavingPath(pathToSegDir);
             // autofocus(mm, mmc);
@@ -301,9 +302,11 @@ public class MAARS implements Runnable {
 
             IJ.log("Acquire bright field image...");
             ImagePlus segImg = segAcq.acquire(acqSettings);
+
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
             ms.segmentation(segImg);
+            parameters.setSavingPath(original_folder);
             if (ms.roiDetected()) {
                 String pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
                 parameters.setSavingPath(pathToFluoDir);
