@@ -1,16 +1,15 @@
 package edu.univ_tlse3.resultSaver;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.SpotsContainer;
-
+import edu.univ_tlse3.utils.FileUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlWriter;
-import edu.univ_tlse3.utils.FileUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class MAARSSpotsSaver {
 	private String spotsXmlDir;

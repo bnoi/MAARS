@@ -1,22 +1,11 @@
 package edu.univ_tlse3.gui;
 
-import java.awt.Button;
-import java.awt.Color;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Label;
+import edu.univ_tlse3.maars.MaarsParameters;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-
-import edu.univ_tlse3.maars.MaarsParameters;
 
 /**
  * Class to create and display a dialog to get parameters for the image

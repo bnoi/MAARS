@@ -1,6 +1,7 @@
 package edu.univ_tlse3.acquisition;
 
 import edu.univ_tlse3.maars.MaarsParameters;
+import ij.ImagePlus;
 import mmcorej.CMMCore;
 
 import java.awt.*;
@@ -13,6 +14,10 @@ import org.micromanager.internal.MMStudio;
 
 import ij.ImagePlus;
 import org.micromanager.acquisition.ChannelSpec;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com

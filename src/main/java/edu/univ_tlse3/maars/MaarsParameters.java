@@ -5,17 +5,17 @@ package edu.univ_tlse3.maars;
  * @version Nov 10, 2015
  */
 
-import java.awt.Color;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+
+import java.awt.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 
 /*
  * MaarsParameters reads a configuration file written as a XML,

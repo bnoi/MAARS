@@ -1,18 +1,14 @@
 package fiji.plugin.maars.maarslib;
 
-import ij.IJ;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-
-import org.micromanager.internal.utils.ReportingUtils;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 	/*
 	* AllMaarsParameters reads a configuration file written as a JsonObject,
 	* then allows to access values thanks to all constants defined.

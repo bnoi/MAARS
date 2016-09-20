@@ -3,7 +3,6 @@ package edu.univ_tlse3.maars;
 import edu.univ_tlse3.segmentPombe.ParametersProcessor;
 import edu.univ_tlse3.segmentPombe.SegPombe;
 import edu.univ_tlse3.segmentPombe.SegPombeParameters;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;

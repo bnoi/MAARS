@@ -1,10 +1,5 @@
 package fiji.plugin.maars.cellboundaries;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -18,6 +13,11 @@ import ij.process.AutoThresholder;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
 
 
 public class CellsBoundariesIdentification {

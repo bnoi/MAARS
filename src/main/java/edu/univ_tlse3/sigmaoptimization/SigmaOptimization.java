@@ -1,12 +1,12 @@
 package edu.univ_tlse3.sigmaoptimization;
 
+import edu.univ_tlse3.segmentPombe.ComputeCorrelation;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
-import edu.univ_tlse3.segmentPombe.ComputeCorrelation;
 
 import java.awt.*;
 import java.io.BufferedWriter;

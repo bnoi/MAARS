@@ -1,13 +1,12 @@
 package edu.univ_tlse3.cellstateanalysis;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import edu.univ_tlse3.utils.ImgUtils;
-
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import ij.gui.Roi;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
