@@ -1,6 +1,8 @@
 package edu.univ_tlse3.cellstateanalysis;
 
 import com.google.common.collect.Lists;
+import edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory.FindMerotely;
+import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
@@ -8,8 +10,6 @@ import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.process.FloatProcessor;
-import edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory.FindMerotely;
-import edu.univ_tlse3.utils.ImgUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

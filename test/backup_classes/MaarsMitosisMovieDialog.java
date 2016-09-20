@@ -1,14 +1,9 @@
 package fiji.plugin.maars.maarslib;
 
-import java.awt.Button;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Label;
-
 import com.google.gson.JsonElement;
-
 import ij.gui.GenericDialog;
+
+import java.awt.*;
 
 /**
  * Class to create and display a dialog to get parameters for the mitosis movie

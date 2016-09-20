@@ -1,5 +1,7 @@
 package fiji.plugin.maars.maarslib;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import fiji.plugin.maars.cellstateanalysis.Cell;
 import fiji.plugin.maars.cellstateanalysis.Spindle;
 import ij.ImagePlus;
@@ -8,13 +10,8 @@ import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
 import ij.process.ShortProcessor;
-
-import java.awt.Color;
-import java.util.Iterator;
-
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
-
 import org.micromanager.MMStudio;
 import org.micromanager.acquisition.MMAcquisition;
 import org.micromanager.api.Autofocus;
@@ -22,8 +19,8 @@ import org.micromanager.utils.MMException;
 import org.micromanager.utils.MMScriptException;
 import org.micromanager.utils.ReportingUtils;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import java.awt.*;
+import java.util.Iterator;
 
 /**
  * Class to film mitosis.

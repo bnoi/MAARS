@@ -1,18 +1,16 @@
 package edu.univ_tlse3.acquisition;
 
 import edu.univ_tlse3.maars.MaarsParameters;
+import ij.ImagePlus;
 import mmcorej.CMMCore;
+import org.micromanager.SequenceSettings;
+import org.micromanager.data.Image;
+import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ChannelSpec;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.micromanager.SequenceSettings;
-import org.micromanager.data.Image;
-import org.micromanager.internal.MMStudio;
-
-import ij.ImagePlus;
-import org.micromanager.internal.utils.ChannelSpec;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com

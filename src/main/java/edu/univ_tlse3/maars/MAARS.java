@@ -2,7 +2,6 @@ package edu.univ_tlse3.maars;
 
 import edu.univ_tlse3.acquisition.FluoAcquisition;
 import edu.univ_tlse3.acquisition.SegAcquisition;
-import edu.univ_tlse3.acquisition.SuperClassAcquisition;
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
@@ -10,6 +9,7 @@ import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.resultSaver.MAARSGeometrySaver;
 import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.resultSaver.MAARSSpotsSaver;
+import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -20,7 +20,6 @@ import org.micromanager.SequenceSettings;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
-import edu.univ_tlse3.utils.FileUtils;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
