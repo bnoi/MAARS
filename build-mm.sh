@@ -9,8 +9,8 @@ set -e
 
 CURR_DIR=$(pwd)
 
-if [ ! -f "ij149.zip" ]; then
-    echo "Please download ij149.zip with wget http://rsb.info.nih.gov/ij/download/zips/ij149.zip"
+if [ ! -f "ij150.zip" ]; then
+    echo "Please download ij150.zip with wget wsr.imagej.net/distros/cross-platform/ij150.zip"
     exit 1
 fi
 
@@ -29,6 +29,10 @@ fi
 
 cd micro-manager/
 GIT_HASH=$(git rev-parse --short HEAD)
+
+#clean environment
+make clean
+autoreconf
 
 # Build MM
 ./autogen.sh

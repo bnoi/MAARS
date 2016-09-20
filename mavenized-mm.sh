@@ -35,14 +35,14 @@ vercomp () {
 
 if [ -z "$1" ]
 then
-    echo "Usage : ./update-mm.sh /path/to/mm/folder"
+    echo "Usage : ./mavenized-mm.sh /path/to/mm/folder"
     exit 1
 fi
 
 MM_FOLDER=$1
 
 # Need to be manually updated
-BASE_MM_VERSION="2.0.0.1"
+BASE_MM_VERSION="2.0.0.2"
 
 # Specify which file you want to mavenized (only MM jars)
 declare -a mm_jars=("MMJ_" "MMCoreJ" "MMAcqEngine")

@@ -16,7 +16,7 @@ import ij.ImagePlus;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 import org.micromanager.AutofocusPlugin;
-import org.micromanager.SequenceSettings;
+import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
@@ -204,7 +204,7 @@ public class MAARS implements Runnable {
 
         // Get autofocus manager
         IJ.log("First autofocus");
-        AutofocusPlugin autofocus = mm.getAutofocus();
+        AutofocusPlugin autofocus = mm.getAutofocusManager().getAutofocusMethod();
         double firstPosition = 0;
         try {
             mmc.setShutterOpen(true);

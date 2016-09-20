@@ -1,5 +1,5 @@
 package edu.univ_tlse3.acquisition;
-import org.micromanager.SequenceSettings;
+import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Datastore;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
@@ -26,7 +26,7 @@ public class MAARS_mda{
         } catch (MMException e) {
             e.printStackTrace();
         }
-        while (mm_.isAcquisitionRunning()){
+        while (mm_.getAcquisitionManager().isAcquisitionRunning()){
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {

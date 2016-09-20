@@ -10,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -26,7 +25,7 @@ import edu.univ_tlse3.acquisition.FluoAcquisition;
 import edu.univ_tlse3.acquisition.SuperClassAcquisition;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
-import org.micromanager.SequenceSettings;
+import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 import edu.univ_tlse3.utils.FileUtils;
