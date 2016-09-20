@@ -30,13 +30,9 @@ fi
 cd micro-manager/
 GIT_HASH=$(git rev-parse --short HEAD)
 
-#clean environment
-make clean
-autoreconf
-
 # Build MM
 ./autogen.sh
-CC=gcc CXX=g++ ./configure --enable-imagej-plugin=$CURR_DIR/ImageJ JAVA_HOME=/usr/lib/jvm/default-java/
+CC=gcc CXX=g++ ./configure --enable-imagej-plugin=$CURR_DIR/ImageJ --with-ij-jar=$CURR_DIR/ImageJ/ij.jar JAVA_HOME=/usr/lib/jvm/default-java/
 make fetchdeps
 make
 
