@@ -63,6 +63,7 @@ public class SegAcquisition extends SuperClassAcquisition {
         segAcqSettings.keepShutterOpenSlices = true;
 		segAcqSettings.slices = slices;
 		segAcqSettings.channels = this.channelSetting;
+        segAcqSettings.shouldDisplayImages= true;
         return segAcqSettings;
     }
 

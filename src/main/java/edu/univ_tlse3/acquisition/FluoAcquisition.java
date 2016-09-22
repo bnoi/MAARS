@@ -57,6 +57,7 @@ public class FluoAcquisition extends SuperClassAcquisition {
         fluoAcqSetting.root = this.savingRoot;
         fluoAcqSetting.slices = slices;
         fluoAcqSetting.channels = channelSetting;
+        fluoAcqSetting.shouldDisplayImages= false;
         return fluoAcqSetting;
     }
 

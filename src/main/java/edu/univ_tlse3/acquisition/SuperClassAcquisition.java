@@ -75,7 +75,6 @@ public class SuperClassAcquisition {
 
         List<Image> listImg = new ArrayList<Image>();
         for (Coords coords : ds.getUnorderedImageCoords()) {
-            IJ.log(coords.getChannel() + "-" + coords.getTime() + "-" + coords.getZ());
             listImg.add(ds.getImage(coords));
         }
         return listImg;
