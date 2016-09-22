@@ -12,12 +12,7 @@ import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
-import ij.ImagePlus;
 import org.micromanager.acquisition.ChannelSpec;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
