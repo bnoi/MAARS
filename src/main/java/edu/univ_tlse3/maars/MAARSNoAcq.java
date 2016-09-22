@@ -62,7 +62,7 @@ public class MAARSNoAcq implements Runnable {
             IJ.log("x : " + xPos + " y : " + yPos);
             String pathToSegDir = FileUtils.convertPath(rootDir + "/X" + xPos + "_Y" + yPos);
             String pathToFluoDir = pathToSegDir + "_FLUO/";
-            String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "/MMStack.ome.tif");
+            String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "/_1/_1_MMStack_Pos0.ome.tif");
             //update saving path
             parameters.setSavingPath(pathToSegDir);
             ImagePlus segImg = null;
@@ -120,7 +120,7 @@ public class MAARSNoAcq implements Runnable {
                     for (String channel : arrayChannels) {
                         int current_frame = arrayImgFrame;
                         IJ.log("Analysing channel " + channel + "_" + current_frame);
-                        String pathToFluoMovie = pathToFluoDir + current_frame + "_" + channel + "/MMStack.ome.tif";
+                        String pathToFluoMovie = pathToFluoDir + current_frame + "_" + channel + "_1/"+current_frame + "_" + channel + "_1_MMStack_Pos0.ome.tif";
                         ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
                         future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
                                 Integer.parseInt(parameters.getChMaxNbSpot(channel)),
