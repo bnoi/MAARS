@@ -1,39 +1,21 @@
 package edu.univ_tlse3.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Label;
+import edu.univ_tlse3.maars.MAARS;
+import edu.univ_tlse3.maars.MAARSNoAcq;
+import edu.univ_tlse3.maars.MaarsParameters;
+import edu.univ_tlse3.utils.FileUtils;
+import ij.IJ;
+import mmcorej.CMMCore;
+import org.micromanager.internal.MMStudio;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.SwingConstants;
-
-import edu.univ_tlse3.maars.MaarsParameters;
-import mmcorej.CMMCore;
-
-import org.micromanager.internal.MMStudio;
-
-import ij.IJ;
-
-import edu.univ_tlse3.maars.MAARS;
-import edu.univ_tlse3.maars.MAARSNoAcq;
-import edu.univ_tlse3.utils.FileUtils;
 
 /**
  * Class to create and display a dialog to get parameters of the whole analysis

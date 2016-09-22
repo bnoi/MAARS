@@ -1,7 +1,8 @@
 package edu.univ_tlse3.utils;
 
-import java.io.File;
 import ij.IJ;
+
+import java.io.File;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com

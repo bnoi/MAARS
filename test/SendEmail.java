@@ -1,10 +1,6 @@
 
 // File Name SendEmail.java
 
-import java.util.*;
-import javax.mail.*;
-import javax.mail.internet.*;
-
 public class SendEmail {
 
 	public static void main(String[] args) {

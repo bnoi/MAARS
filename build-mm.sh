@@ -9,8 +9,8 @@ set -e
 
 CURR_DIR=$(pwd)
 
-if [ ! -f "ij149.zip" ]; then
-    echo "Please download ij149.zip with wget http://rsb.info.nih.gov/ij/download/zips/ij149.zip"
+if [ ! -f "ij150.zip" ]; then
+    echo "Please download ij150.zip with wget wsr.imagej.net/distros/cross-platform/ij150.zip"
     exit 1
 fi
 
@@ -32,7 +32,7 @@ GIT_HASH=$(git rev-parse --short HEAD)
 
 # Build MM
 ./autogen.sh
-CC=gcc CXX=g++ ./configure --enable-imagej-plugin=$CURR_DIR/ImageJ JAVA_HOME=/usr/lib/jvm/default-java/
+CC=gcc CXX=g++ ./configure --enable-imagej-plugin=$CURR_DIR/ImageJ --with-ij-jar=$CURR_DIR/ImageJ/ij.jar JAVA_HOME=/usr/lib/jvm/default-java/
 make fetchdeps
 make
 

@@ -1,10 +1,10 @@
 package edu.univ_tlse3.resultSaver;
 
+import edu.univ_tlse3.utils.FileUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import loci.plugins.LociExporter;
-import edu.univ_tlse3.utils.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;

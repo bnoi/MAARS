@@ -1,6 +1,5 @@
 package org.micromanager.cellstateanalysis;
 
-import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.Roi;
 import ij.measure.Calibration;

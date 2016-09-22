@@ -1,8 +1,9 @@
+import edu.univ_tlse3.gui.MaarsMainDialog;
+import edu.univ_tlse3.maars.MaarsParameters;
+import edu.univ_tlse3.utils.FileUtils;
 import org.micromanager.MenuPlugin;
 import org.micromanager.Studio;
-import edu.univ_tlse3.gui.MaarsMainDialog;
 import org.micromanager.internal.MMStudio;
-import edu.univ_tlse3.maars.MaarsParameters;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
@@ -10,8 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-
-import edu.univ_tlse3.utils.FileUtils;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com

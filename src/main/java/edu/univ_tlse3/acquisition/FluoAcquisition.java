@@ -7,12 +7,12 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.micromanager.SequenceSettings;
+import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import ij.ImagePlus;
-import org.micromanager.internal.utils.ChannelSpec;
+import org.micromanager.acquisition.ChannelSpec;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -57,6 +57,7 @@ public class FluoAcquisition extends SuperClassAcquisition {
         fluoAcqSetting.root = this.savingRoot;
         fluoAcqSetting.slices = slices;
         fluoAcqSetting.channels = channelSetting;
+        fluoAcqSetting.shouldDisplayImages= false;
         return fluoAcqSetting;
     }
 

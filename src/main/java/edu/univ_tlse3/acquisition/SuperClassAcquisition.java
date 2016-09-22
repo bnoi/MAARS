@@ -6,7 +6,7 @@ import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 import mmcorej.CMMCore;
-import org.micromanager.SequenceSettings;
+import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Coords;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.Image;
@@ -75,7 +75,6 @@ public class SuperClassAcquisition {
 
         List<Image> listImg = new ArrayList<Image>();
         for (Coords coords : ds.getUnorderedImageCoords()) {
-            IJ.log(coords.getChannel() + "-" + coords.getTime() + "-" + coords.getZ());
             listImg.add(ds.getImage(coords));
         }
         return listImg;

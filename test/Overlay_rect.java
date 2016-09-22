@@ -1,10 +1,8 @@
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Line;
 import ij.gui.PointRoi;
-
 import org.apache.commons.math3.util.FastMath;
-
-import ij.IJ;
 
 public class Overlay_rect {
 	public Overlay_rect() {

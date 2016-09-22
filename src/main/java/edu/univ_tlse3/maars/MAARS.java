@@ -2,7 +2,6 @@ package edu.univ_tlse3.maars;
 
 import edu.univ_tlse3.acquisition.FluoAcquisition;
 import edu.univ_tlse3.acquisition.SegAcquisition;
-import edu.univ_tlse3.acquisition.SuperClassAcquisition;
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
@@ -10,17 +9,17 @@ import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.resultSaver.MAARSGeometrySaver;
 import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.resultSaver.MAARSSpotsSaver;
+import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 import org.micromanager.AutofocusPlugin;
-import org.micromanager.SequenceSettings;
+import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
-import edu.univ_tlse3.utils.FileUtils;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -204,7 +203,7 @@ public class MAARS implements Runnable {
 
         // Get autofocus manager
         IJ.log("First autofocus");
-        AutofocusPlugin autofocus = mm.getAutofocus();
+        AutofocusPlugin autofocus = mm.getAutofocusManager().getAutofocusMethod();
         double firstPosition = 0;
         try {
             mmc.setShutterOpen(true);
@@ -280,8 +279,9 @@ public class MAARS implements Runnable {
             String xPos = String.valueOf(Math.round(explo.getX(i)));
             String yPos = String.valueOf(Math.round(explo.getY(i)));
             IJ.log("Current position : X_" + xPos + " Y_" + yPos);
+            String original_folder = FileUtils.convertPath(parameters.getSavingPath());
             String pathToSegDir = FileUtils
-                    .convertPath(parameters.getSavingPath() + File.separator + "X" + xPos + "_Y" + yPos);
+                    .convertPath(original_folder + File.separator + "X" + xPos + "_Y" + yPos);
             //update saving path
             parameters.setSavingPath(pathToSegDir);
             // autofocus(mm, mmc);
@@ -301,9 +301,11 @@ public class MAARS implements Runnable {
 
             IJ.log("Acquire bright field image...");
             ImagePlus segImg = segAcq.acquire(acqSettings);
+
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
             ms.segmentation(segImg);
+            parameters.setSavingPath(original_folder);
             if (ms.roiDetected()) {
                 String pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
                 parameters.setSavingPath(pathToFluoDir);

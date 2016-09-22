@@ -1,18 +1,23 @@
 package edu.univ_tlse3.acquisition;
 
 import edu.univ_tlse3.maars.MaarsParameters;
+import ij.ImagePlus;
 import mmcorej.CMMCore;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.micromanager.SequenceSettings;
+import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import ij.ImagePlus;
-import org.micromanager.internal.utils.ChannelSpec;
+import org.micromanager.acquisition.ChannelSpec;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -58,6 +63,7 @@ public class SegAcquisition extends SuperClassAcquisition {
         segAcqSettings.keepShutterOpenSlices = true;
 		segAcqSettings.slices = slices;
 		segAcqSettings.channels = this.channelSetting;
+        segAcqSettings.shouldDisplayImages= true;
         return segAcqSettings;
     }
 

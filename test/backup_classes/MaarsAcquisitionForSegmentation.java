@@ -1,18 +1,17 @@
 package org.micromanager.maarslib;
 
-import java.awt.Color;
-import java.io.IOException;
-import java.util.HashMap;
-
-import org.micromanager.internal.MMStudio;
+import mmcorej.CMMCore;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.DatastoreFrozenException;
 import org.micromanager.data.SummaryMetadata;
 import org.micromanager.data.SummaryMetadata.SummaryMetadataBuilder;
+import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 import org.micromanager.maars.MaarsParameters;
 
-import mmcorej.CMMCore;
+import java.awt.*;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Acquisition calibrated for image segmentation using package CellsBoundaries_
