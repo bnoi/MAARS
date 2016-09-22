@@ -6,7 +6,7 @@ import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 import mmcorej.CMMCore;
-import org.micromanager.SequenceSettings;
+import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Coords;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.Image;
