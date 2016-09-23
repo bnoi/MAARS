@@ -139,12 +139,12 @@ public class ImgUtils {
         Collections.sort(listAcqNames, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
-                return Integer.valueOf(o1.split("_", -1)[0]).compareTo(Integer.valueOf(o2.split("_", -1)[0]));
+                return Integer.valueOf(o1.split("_", -2)[0]).compareTo(Integer.valueOf(o2.split("_", -2)[0]));
             }
         });
         for (String acqName : listAcqNames) {
             if (Pattern.matches(pattern, acqName)) {
-                fluoImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + "MMStack.ome.tif");
+                fluoImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName+ "_MMStack_Pos0.ome.tif");
                 zprojectImg = ImgUtils.zProject(fluoImg);
                 if (fluoImgCalib == null) {
                     fluoImgCalib = fluoImg.getCalibration();
