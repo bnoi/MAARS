@@ -1,4 +1,5 @@
 package edu.univ_tlse3.acquisition;
+import edu.univ_tlse3.utils.FileUtils;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Datastore;
 import org.micromanager.internal.MMStudio;
@@ -18,6 +19,7 @@ public class MAARS_mda{
     }
 
     public Datastore acquire() {
+        FileUtils.createFolder(acqSettings_.root);
         mm_.getAcquisitionEngine().setSequenceSettings(acqSettings_);
         mm_.getAcquisitionEngine().setChannelGroup(channelGroup_);
         Datastore ds = null;
@@ -26,7 +28,7 @@ public class MAARS_mda{
         } catch (MMException e) {
             e.printStackTrace();
         }
-        while (mm_.getAcquisitionManager().isAcquisitionRunning()){
+        while (mm_.getAcquisitionEngine().isAcquisitionRunning()){
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
