@@ -10,6 +10,7 @@ import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Coords;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.Image;
+import org.micromanager.data.internal.DefaultCoords;
 import org.micromanager.internal.MMStudio;
 
 import java.util.ArrayList;
@@ -37,11 +38,12 @@ public class SuperClassAcquisition {
     }
 
     public ImagePlus convert2Imp(List<Image> listImg, String channelName) {
-        ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+        ImageStack imageStack = new ImageStack();
+//        ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
         for (Image img : listImg) {
             // Prepare a imagePlus (for analysis)
             ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
-            imageStack.addSlice(imgProcessor.convertToShortProcessor());
+            imageStack.addSlice(imgProcessor.convertToByteProcessor());
         }
         // ImagePlus for further analysis
         ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
@@ -69,14 +71,11 @@ public class SuperClassAcquisition {
      * @param acqSettings
      * @return a duplicate of acquired images.
      */
-    public List<Image> acquire(SequenceSettings acqSettings, String channelGroup) {
-        MAARS_mda mda = new MAARS_mda(mm, acqSettings, channelGroup);
+    public List<Image> acquire(SequenceSettings acqSettings) {
+        MAARS_mda mda = new MAARS_mda(mm, acqSettings);
         Datastore ds = mda.acquire();
-
-        List<Image> listImg = new ArrayList<Image>();
-        for (Coords coords : ds.getUnorderedImageCoords()) {
-            listImg.add(ds.getImage(coords));
-        }
-        return listImg;
+        Coords.CoordsBuilder coordsBuilder = new DefaultCoords.Builder();
+        coordsBuilder.time(ds.getMaxIndex(Coords.TIME));
+        return ds.getImagesMatching(coordsBuilder.build());
     }
 }

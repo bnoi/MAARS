@@ -300,7 +300,7 @@ public class MAARS implements Runnable {
             SequenceSettings acqSettings = segAcq.buildSeqSetting(segAcq.computZSlices(zFocus), true);
 
             IJ.log("Acquire bright field image...");
-            ImagePlus segImg = segAcq.acquire(acqSettings);
+            ImagePlus segImg = segAcq.acquireToImp(acqSettings);
 
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
@@ -345,7 +345,7 @@ public class MAARS implements Runnable {
                         for (String channel : arrayChannels) {
                             SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(String.valueOf(frame),
                                     channel, parameters, fluoAcq.computZSlices(zFocus), saveFilm);
-                            ImagePlus fluoImage = fluoAcq.acquire(fluoAcqSettings);
+                            ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
                             if (do_analysis) {
                                 es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -381,7 +381,7 @@ public class MAARS implements Runnable {
                         }
                         SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(String.valueOf(frame),
                                 channel, parameters, fluoAcq.computZSlices(zFocus), saveFilm);
-                        ImagePlus fluoImage = fluoAcq.acquire(fluoAcqSettings);
+                        ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
                         if (do_analysis) {
                             es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),

@@ -59,11 +59,12 @@ public class SegAcquisition extends SuperClassAcquisition {
 		segAcqSettings.slices = slices;
 		segAcqSettings.channels = this.channelSetting;
         segAcqSettings.shouldDisplayImages= true;
+        segAcqSettings.channelGroup = channelGroup;
         return segAcqSettings;
     }
 
-	public ImagePlus acquire(SequenceSettings acqSettings) {
-		List<Image> listImg = super.acquire(acqSettings, channelGroup);
+	public ImagePlus acquireToImp(SequenceSettings acqSettings) {
+		List<Image> listImg = super.acquire(acqSettings);
 		return super.convert2Imp(listImg, this.ch);
 	}
 }

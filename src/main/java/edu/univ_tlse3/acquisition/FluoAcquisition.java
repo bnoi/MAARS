@@ -58,12 +58,13 @@ public class FluoAcquisition extends SuperClassAcquisition {
         fluoAcqSetting.slices = slices;
         fluoAcqSetting.channels = channelSetting;
         fluoAcqSetting.shouldDisplayImages= false;
+        fluoAcqSetting.keepShutterOpenSlices = true;
+        fluoAcqSetting.channelGroup = channelGroup;
         return fluoAcqSetting;
     }
 
-
-    public ImagePlus acquire(SequenceSettings acqSettings) {
-        List<Image> listImg = super.acquire(acqSettings, channelGroup);
+    public ImagePlus acquireToImp(SequenceSettings acqSettings) {
+        List<Image> listImg = super.acquire(acqSettings);
         return super.convert2Imp(listImg, this.ch);
     }
 }
