@@ -3,6 +3,7 @@ package edu.univ_tlse3.maars;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -113,43 +114,32 @@ public class MAARSNoAcq implements Runnable {
                 Collections.sort(arrayImgFrames);
                 int nThread = Runtime.getRuntime().availableProcessors();
                 es = Executors.newFixedThreadPool(nThread);
-                Future<FloatProcessor> future;
-                ArrayList<Map<String, Future<FloatProcessor>>> futureSet = new ArrayList<Map<String, Future<FloatProcessor>>>();
+                ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
+
+//                ArrayList<Map<String, FloatProcessor>> futureSet = new ArrayList<Map<String, FloatProcessor>>();
                 for (Integer arrayImgFrame : arrayImgFrames) {
-                    Map<String, Future<FloatProcessor>> channelsInFrame = new HashMap<String, Future<FloatProcessor>>();
+                    Map<String, FloatProcessor> channelsInFrame = new HashMap<String, FloatProcessor>();
                     for (String channel : arrayChannels) {
                         int current_frame = arrayImgFrame;
                         IJ.log("Analysing channel " + channel + "_" + current_frame);
                         String pathToFluoMovie = pathToFluoDir + current_frame + "_" + channel + "_1/"+current_frame + "_" + channel + "_1_MMStack_Pos0.ome.tif";
                         ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
-                        future = es.submit(new FluoAnalyzer(fluoImage, bfImgCal, soc, channel,
+                        ImagePlus zProjectedFluoImg;
+                        zProjectedFluoImg = ImgUtils.zProject(fluoImage);
+                        zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
+                        zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
+                        es.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc, channel,
                                 Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                 Double.parseDouble(parameters.getChSpotRaius(channel)),
                                 Double.parseDouble(parameters.getChQuality(channel)), current_frame));
-                        channelsInFrame.put(channel, future);
+                        fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
                     }
-                    futureSet.add(channelsInFrame);
                 }
                 assert segImg != null;
-                ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
-                try {
-                    for (Map<String, Future<FloatProcessor>> aFutureSet : futureSet) {
-                        for (String channel : aFutureSet.keySet()) {
-                            fluoStack.addSlice(channel, aFutureSet.get(channel).get());
-                        }
-                    }
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                } catch (ExecutionException e1) {
-                    e1.printStackTrace();
-                }
                 ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
-                if (segImg != null) {
-                    mergedImg.setCalibration(segImg.getCalibration());
-                }
-                if (fluoStack != null) {
-                    mergedImg.setT(fluoStack.getSize());
-                }
+                mergedImg.setCalibration(segImg.getCalibration());
+                assert fluoStack != null;
+                mergedImg.setT(fluoStack.getSize());
                 RoiManager.getInstance().reset();
                 RoiManager.getInstance().close();
                 double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));

@@ -65,9 +65,14 @@ public class FluoAnalyzer implements Runnable {
             fluoImage = ImgUtils.unitCmToMicron(fluoImage);
         }
         // TODO project or not. Do not project if do 3D detection
-        ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
-        zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
-        zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
+        ImagePlus zProjectedFluoImg;
+        if(fluoImage.getImageStackSize()==1){
+            zProjectedFluoImg = fluoImage;
+        }else{
+            zProjectedFluoImg = ImgUtils.zProject(fluoImage);
+            zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
+            zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
+        }
         // if (frame == 0) {
         // ResultsTable resultTable = new ResultsTable();
         // Analyzer analyzer = new Analyzer(zProjectedFluoImg,
