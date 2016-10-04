@@ -9,8 +9,6 @@ import fiji.plugin.trackmate.SpotCollection;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.process.FloatProcessor;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.*;
@@ -19,7 +17,7 @@ import java.util.concurrent.*;
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
  * @version Nov 19, 2015
  */
-public class FluoAnalyzer implements Callable<FloatProcessor> {
+public class FluoAnalyzer implements Runnable {
 
     private ImagePlus fluoImage;
     private SetOfCells soc;
@@ -62,7 +60,7 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
      * acquire images as soon as possible
      */
     @Override
-    public FloatProcessor call() throws Exception {
+    public void run() {
         if (fluoImage.getCalibration().getUnit().equals("cm")) {
             fluoImage = ImgUtils.unitCmToMicron(fluoImage);
         }
@@ -109,15 +107,23 @@ public class FluoAnalyzer implements Callable<FloatProcessor> {
         }
         es.shutdown();
         if (future != null) {
-            future.get();
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
         try {
             es.awaitTermination(10, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return zProjectedFluoImg.getProcessor().convertToFloatProcessor();
     }
+
+    //private class for analysing cells
+    //--------------------------------------------------------------------------------------//
 
     /**
      * analyzer of subset
