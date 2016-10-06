@@ -4,7 +4,7 @@ MAARS (Mitotic Analysing And Recording System) is a Micro-Manager plugin designe
 
 The plugin is designed to be flexible and easy to use whatever the hardware and the type of cells you have.
 
-## Installation
+## Installation (now up to date. latest version coming soon...)
 
 - Copy MAARS plugin (`jars/MAARS_-1.0-SNAPSHOT.jar`) inside `Micro Manager folder/mmplugins`.
 
