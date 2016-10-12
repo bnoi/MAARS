@@ -3,6 +3,7 @@ import edu.univ_tlse3.utils.FileUtils;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Datastore;
 import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.MMException;
 
 /**
  * Created by Tong LI on 24/06/2016.
@@ -14,12 +15,18 @@ public class MAARS_mda{
     }
     public Datastore acquire(SequenceSettings acqSettings) {
         FileUtils.createFolder(acqSettings.root);
-        //TODO there is a bug here, the acquisition manager do not read correctly my sequence setting
-        mm_.getAcquisitionManager().setAcquisitionSettings(acqSettings);
-        Datastore ds = mm_.getAcquisitionManager().runAcquisition(acqSettings.prefix, acqSettings.root);
+        mm_.getAcquisitionEngine().setSequenceSettings(acqSettings);
+        mm_.getAcquisitionEngine().setChannelGroup(acqSettings.channelGroup);
+//        Datastore ds = mm_.getAcquisitionManager().runAcquisition(acqSettings.prefix, acqSettings.root);
+        Datastore ds = null;
+        try {
+            ds = mm_.getAcquisitionEngine().acquire();
+        } catch (MMException e) {
+            e.printStackTrace();
+        }
         while (mm_.getAcquisitionEngine().isAcquisitionRunning()){
             try {
-                Thread.sleep(100);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
