@@ -126,16 +126,17 @@
 			<version>1.4</version>
 		</dependency>
 
-		<dependency>
-			<groupId>weka</groupId>
-			<artifactId>weka</artifactId>
-			<version>3.7.6</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>weka</groupId>-->
+			<!--<artifactId>weka</artifactId>-->
+			<!--<version>3.7.6</version>-->
+		<!--</dependency>-->
 
-		<!-- Need for write Big Tiff -->
+		<!-- Need this plugin for writing Big Tiff -->
 		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>bio-formats_plugins</artifactId>
+			<version>5.2.3</version>
 		</dependency>
     </dependencies>
 

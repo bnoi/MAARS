@@ -10,6 +10,7 @@ import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
 import ij.process.ImageProcessor;
+import loci.plugins.LociImporter;
 import mmcorej.CMMCore;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
@@ -220,5 +221,14 @@ public class ImgUtils {
         cal.pixelHeight = mmc.getPixelSizeUm();
         imagePlus.setCalibration(cal);
         return imagePlus;
+    }
+
+    /**
+     * @param pathToImage
+     * @return ImagePlus
+     */
+    public static void loadBigTiff(String pathToImage){
+        LociImporter importer = new LociImporter();
+        importer.run(pathToImage);
     }
 }
