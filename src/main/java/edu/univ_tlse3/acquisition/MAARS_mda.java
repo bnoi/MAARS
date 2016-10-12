@@ -1,4 +1,6 @@
 package edu.univ_tlse3.acquisition;
+import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
+import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Datastore;
@@ -13,10 +15,18 @@ public class MAARS_mda{
     public MAARS_mda(MMStudio mm) {
         mm_ = mm;
     }
-    public Datastore acquire(SequenceSettings acqSettings) {
+    public void acquire(SequenceSettings acqSettings, MaarsParameters parameters) {
         FileUtils.createFolder(acqSettings.root);
+        //acqSettings.usePositionList = true;
         mm_.getAcquisitionEngine().setSequenceSettings(acqSettings);
         mm_.getAcquisitionEngine().setChannelGroup(acqSettings.channelGroup);
+        Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
+//        if (do_analysis) {
+//            es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
+//                    Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+//                    Double.parseDouble(parameters.getChSpotRaius(channel)),
+//                    Double.parseDouble(parameters.getChQuality(channel)), frame));
+//        }
 //        Datastore ds = mm_.getAcquisitionManager().runAcquisition(acqSettings.prefix, acqSettings.root);
         Datastore ds = null;
         try {
@@ -31,6 +41,5 @@ public class MAARS_mda{
                 e.printStackTrace();
             }
         }
-        return ds;
     }
 }

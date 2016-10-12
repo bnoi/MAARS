@@ -259,12 +259,8 @@ public class MAARS implements Runnable {
             e1.printStackTrace();
         }
 
-        ArrayList<String> arrayChannels = new ArrayList<String>();
-        Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
-
         // Acquisition path arrangement
         ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
-        this.fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
         //prepare executor for image analysis
         int nThread = Runtime.getRuntime().availableProcessors();
         ExecutorService es = Executors.newFixedThreadPool(nThread);
@@ -314,7 +310,15 @@ public class MAARS implements Runnable {
                 soc.loadCells(pathToSegDir);
                 soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
                 // ----------------start acquisition and analysis --------//
+                try {
+                    zFocus = mmc.getPosition(focusDevice);
+                    mmc.waitForDevice(focusDevice);
+                } catch (Exception e) {
+                    ReportingUtils.logMessage("could not get z current position");
+                    e.printStackTrace();
+                }
                 FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters);
+                SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(parameters, fluoAcq.computZSlices(zFocus));
                 try {
                     PrintStream ps = new PrintStream(pathToSegDir + File.separator + "CellStateAnalysis.LOG");
                     curr_err = System.err;
@@ -324,48 +328,8 @@ public class MAARS implements Runnable {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                int frame = 0;
-                Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
-                Boolean saveFilm = Boolean
-                        .parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
                 if (parameters.useDynamic()) {
-                    // being dynamic acquisition
-                    double startTime = System.currentTimeMillis();
-                    double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
-                            * 1000;
-                    while (System.currentTimeMillis() - startTime <= timeLimit) {
-                        double beginAcq = System.currentTimeMillis();
-                        try {
-                            zFocus = mmc.getPosition(focusDevice);
-                            mmc.waitForDevice(focusDevice);
-                        } catch (Exception e) {
-                            ReportingUtils.logMessage("could not get z current position");
-                            e.printStackTrace();
-                        }
-                        for (String channel : arrayChannels) {
-                            SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(String.valueOf(frame),
-                                    channel, parameters, fluoAcq.computZSlices(zFocus), saveFilm);
-                            ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
-                            if (do_analysis) {
-                                es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
-                                        Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-                                        Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                        Double.parseDouble(parameters.getChQuality(channel)), frame));
-                            }
-                        }
-                        frame++;
-                        double acqTook = System.currentTimeMillis() - beginAcq;
-                        System.out.println(String.valueOf(acqTook));
-                        if (this.fluoTimeInterval > acqTook) {
-                            try {
-                                Thread.sleep((long) (this.fluoTimeInterval - acqTook));
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            IJ.log("Attention : acquisition before took longer than " + this.fluoTimeInterval
-                                    / 1000 + " s.");
-                        }
+                        ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
                     }
                     // dynamic acquisition finished, find whether there is
                     // merotely cells.

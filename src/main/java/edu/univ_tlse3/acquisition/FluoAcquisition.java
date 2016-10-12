@@ -5,6 +5,7 @@ import mmcorej.CMMCore;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.internal.MMStudio;
@@ -18,11 +19,8 @@ import org.micromanager.acquisition.ChannelSpec;
  */
 public class FluoAcquisition extends SuperClassAcquisition {
     private String channelGroup;
-    private String ch;
     private double zRange;
     private double zStep;
-    private Color chColor;
-    private double chExpose;
     private String savingRoot;
 
 	public FluoAcquisition(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
@@ -37,27 +35,36 @@ public class FluoAcquisition extends SuperClassAcquisition {
         return SuperClassAcquisition.computZSlices(zRange,zStep,zFocus);
     }
 
-	public SequenceSettings buildSeqSetting(String frame,  String channel, MaarsParameters parameters, ArrayList<Double> slices, boolean save){
-        this.ch = channel;
-        this.chColor = MaarsParameters.getColor(parameters.getChColor(ch));
-        this.chExpose = Double.parseDouble(parameters.getChExposure(ch));
+	public SequenceSettings buildSeqSetting(MaarsParameters parameters, ArrayList<Double> slices){
+        ArrayList<String> arrayChannels = new ArrayList<String>();
+        Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
 
         ArrayList<ChannelSpec> channelSetting = new ArrayList<ChannelSpec>();
-        ChannelSpec channel_spec = new ChannelSpec();
-        channel_spec.config = ch;
-        channel_spec.color = chColor;
-        channel_spec.exposure = chExpose;
-        channelSetting.add(channel_spec);
+        Color chColor;
+        double chExpose;
+        for (String ch : arrayChannels){
+            chColor = MaarsParameters.getColor(parameters.getChColor(ch));
+            chExpose = Double.parseDouble(parameters.getChExposure(ch));
+            ChannelSpec channel_spec = new ChannelSpec();
+            channel_spec.config = ch;
+            channel_spec.color = chColor;
+            channel_spec.exposure = chExpose;
+            channelSetting.add(channel_spec);
+        }
 
         SequenceSettings fluoAcqSetting = new SequenceSettings();
-        fluoAcqSetting.save = save;
-        fluoAcqSetting.prefix = frame + "_" + channel;
+        fluoAcqSetting.save = Boolean
+                .parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
+        fluoAcqSetting.prefix = "";
         fluoAcqSetting.root = this.savingRoot;
         fluoAcqSetting.slices = slices;
         fluoAcqSetting.channels = channelSetting;
-        fluoAcqSetting.shouldDisplayImages= false;
+        fluoAcqSetting.shouldDisplayImages= true;
         fluoAcqSetting.keepShutterOpenSlices = true;
+        fluoAcqSetting.keepShutterOpenChannels = false;
         fluoAcqSetting.channelGroup = channelGroup;
+        fluoAcqSetting.slicesFirst = true;
+        fluoAcqSetting.intervalMs = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
         return fluoAcqSetting;
     }
 
