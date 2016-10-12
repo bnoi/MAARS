@@ -1,5 +1,6 @@
 package edu.univ_tlse3.acquisition;
 
+import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -37,24 +38,6 @@ public class SuperClassAcquisition {
         this.mmc = mmc;
     }
 
-    public ImagePlus convert2Imp(List<Image> listImg, String channelName) {
-        ImageStack imageStack = new ImageStack();
-//        ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-        for (Image img : listImg) {
-            // Prepare a imagePlus (for analysis)
-            ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
-            imageStack.addSlice(imgProcessor.convertToByteProcessor());
-        }
-        // ImagePlus for further analysis
-        ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
-        Calibration cal = new Calibration();
-        cal.setUnit("micron");
-        cal.pixelWidth = mmc.getPixelSizeUm();
-        cal.pixelHeight = mmc.getPixelSizeUm();
-        imagePlus.setCalibration(cal);
-        return imagePlus;
-    }
-
 	public static ArrayList<Double> computZSlices(double zRange, double zStep, double zFocus){
         double z = zFocus - (zRange / 2);
         int sliceNumber = (int) Math.round(zRange / zStep);
@@ -71,11 +54,12 @@ public class SuperClassAcquisition {
      * @param acqSettings
      * @return a duplicate of acquired images.
      */
-    public List<Image> acquire(SequenceSettings acqSettings) {
+    public ImagePlus acquire(SequenceSettings acqSettings) {
         MAARS_mda mda = new MAARS_mda(mm, acqSettings);
         Datastore ds = mda.acquire();
         Coords.CoordsBuilder coordsBuilder = new DefaultCoords.Builder();
         coordsBuilder.time(ds.getMaxIndex(Coords.TIME));
-        return ds.getImagesMatching(coordsBuilder.build());
+        return ImgUtils.convertImages2Imp(ds.getImagesMatching(coordsBuilder.build()),
+                acqSettings.channels.get(0).config, mm, mmc);
     }
 }

@@ -5,10 +5,8 @@ import mmcorej.CMMCore;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.micromanager.acquisition.SequenceSettings;
-import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import ij.ImagePlus;
@@ -64,7 +62,6 @@ public class FluoAcquisition extends SuperClassAcquisition {
     }
 
     public ImagePlus acquireToImp(SequenceSettings acqSettings) {
-        List<Image> listImg = super.acquire(acqSettings);
-        return super.convert2Imp(listImg, this.ch);
+        return super.acquire(acqSettings);
     }
 }

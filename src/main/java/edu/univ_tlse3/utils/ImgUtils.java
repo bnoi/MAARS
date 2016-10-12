@@ -9,12 +9,13 @@ import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
+import ij.process.ImageProcessor;
+import mmcorej.CMMCore;
+import org.micromanager.data.Image;
+import org.micromanager.internal.MMStudio;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -193,5 +194,32 @@ public class ImgUtils {
             croppedImgInChannel.put("merged", croppedImg);
         }
         return croppedImgInChannel;
+    }
+
+    /**
+     * convert a list of Image to an ImagePlus
+     *
+     * @param listImg list of Images
+     * @param channelName
+     * @param mm
+     * @param mmc
+     * @return imageplus
+     */
+    public static ImagePlus convertImages2Imp(List<Image> listImg, String channelName, MMStudio mm, CMMCore mmc) {
+        ImageStack imageStack = new ImageStack();
+//        ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+        for (Image img : listImg) {
+            // Prepare a imagePlus (for analysis)
+            ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
+            imageStack.addSlice(imgProcessor.convertToByteProcessor());
+        }
+        // ImagePlus for further analysis
+        ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
+        Calibration cal = new Calibration();
+        cal.setUnit("micron");
+        cal.pixelWidth = mmc.getPixelSizeUm();
+        cal.pixelHeight = mmc.getPixelSizeUm();
+        imagePlus.setCalibration(cal);
+        return imagePlus;
     }
 }

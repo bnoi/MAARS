@@ -388,9 +388,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
         double zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
         ArrayList<Double> slices = SuperClassAcquisition.computZSlices(zRange,zStep,zFocus);
         SequenceSettings fluoAcqSettings = acq.buildSeqSetting("",channelName,parameters,slices,false);
-
-
-		return acq.acquire(fluoAcqSettings);
+		SuperClassAcquisition testSuperClass  = new SuperClassAcquisition(mm, mmc);
+		return testSuperClass.acquire(fluoAcqSettings);
 	}
 
 	private String getSelectedChannel(JPanel jp) {
