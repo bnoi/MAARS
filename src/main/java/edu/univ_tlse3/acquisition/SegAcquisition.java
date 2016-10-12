@@ -1,6 +1,7 @@
 package edu.univ_tlse3.acquisition;
 
 import edu.univ_tlse3.maars.MaarsParameters;
+import ij.IJ;
 import ij.ImagePlus;
 import mmcorej.CMMCore;
 
@@ -35,7 +36,11 @@ public class SegAcquisition extends SuperClassAcquisition {
         this.chColor = MaarsParameters.getColor(parameters.getChColor(ch));
         this.chExpose = Double.parseDouble(parameters.getChExposure(ch));
         this.savingRoot = parameters.getSavingPath();
-
+        try {
+            mmc.getConfigGroupState(channelGroup);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         channelSetting = new ArrayList<ChannelSpec>();
         ChannelSpec bf_spec = new ChannelSpec();
         bf_spec.config = ch;
@@ -54,6 +59,7 @@ public class SegAcquisition extends SuperClassAcquisition {
 		segAcqSettings.prefix = "";
 		segAcqSettings.root = this.savingRoot;
         segAcqSettings.keepShutterOpenSlices = true;
+        segAcqSettings.keepShutterOpenChannels = true;
 		segAcqSettings.slices = slices;
 		segAcqSettings.channels = this.channelSetting;
         segAcqSettings.shouldDisplayImages= true;

@@ -55,8 +55,8 @@ public class SuperClassAcquisition {
      * @return a duplicate of acquired images.
      */
     public ImagePlus acquire(SequenceSettings acqSettings) {
-        MAARS_mda mda = new MAARS_mda(mm, acqSettings);
-        Datastore ds = mda.acquire();
+        MAARS_mda mda = new MAARS_mda(mm);
+        Datastore ds = mda.acquire(acqSettings);
         Coords.CoordsBuilder coordsBuilder = new DefaultCoords.Builder();
         coordsBuilder.time(ds.getMaxIndex(Coords.TIME));
         return ImgUtils.convertImages2Imp(ds.getImagesMatching(coordsBuilder.build()),

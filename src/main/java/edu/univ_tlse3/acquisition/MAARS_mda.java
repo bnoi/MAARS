@@ -9,15 +9,14 @@ import org.micromanager.internal.MMStudio;
  */
 public class MAARS_mda{
     MMStudio mm_;
-    SequenceSettings acqSettings_;
-    public MAARS_mda(MMStudio mm, SequenceSettings acqSettings) {
+    public MAARS_mda(MMStudio mm) {
         mm_ = mm;
-        acqSettings_ = acqSettings;
     }
-    public Datastore acquire() {
-        FileUtils.createFolder(acqSettings_.root);
-        mm_.getAcquisitionManager().runAcquisitionWithSettings(acqSettings_, true);
-        Datastore ds = mm_.getAcquisitionManager().runAcquisition();
+    public Datastore acquire(SequenceSettings acqSettings) {
+        FileUtils.createFolder(acqSettings.root);
+        //TODO there is a bug here, the acquisition manager do not read correctly my sequence setting
+        mm_.getAcquisitionManager().setAcquisitionSettings(acqSettings);
+        Datastore ds = mm_.getAcquisitionManager().runAcquisition(acqSettings.prefix, acqSettings.root);
         while (mm_.getAcquisitionEngine().isAcquisitionRunning()){
             try {
                 Thread.sleep(100);

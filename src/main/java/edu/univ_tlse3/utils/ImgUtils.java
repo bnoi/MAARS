@@ -206,8 +206,7 @@ public class ImgUtils {
      * @return imageplus
      */
     public static ImagePlus convertImages2Imp(List<Image> listImg, String channelName, MMStudio mm, CMMCore mmc) {
-        ImageStack imageStack = new ImageStack();
-//        ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+        ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
         for (Image img : listImg) {
             // Prepare a imagePlus (for analysis)
             ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
