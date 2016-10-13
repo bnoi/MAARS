@@ -41,22 +41,28 @@ That's all !
 
 - Mainteners and contact
     - Hadrien Mary (hadrien.mary@gmail.com)
-    - Tong Li (tongli.bioinfo@gmail.com)
-
-- Original author
+    - Tong Li (tong.li@univ-tlse3.fr)
+    
+- Co-author
+    - Simon Cabello (marie.grosjean.31@gmail.com)
     - Marie Grosjean (marie.grosjean.31@gmail.com)
+    - Jonathan Fouchard (j.fouchard@ucl.ac.uk)
+    - Céline Reyes (celine.reyes-villain@univ-tlse3.fr)
+    - Sylvie Tournier (sylvie.tournier-gachet@univ-tlse3.fr)
+    - Yannick Gachet (yannick.gachet@univ-tlse3.fr)
 
 # Funding
-Centre national de la recherche scientifique (CNRS)
+Tong LI was supported by Ministère de l'enseigenment supérieur et de la recherche
 
-université paul sabatier
+Hadien Mary was supported by the Fondation pour la Recherche Medicale. 
 
-centre de biologie intégrative (CBI)
+Jonathan Fouchard and Simon Cabello were supported by the plan Cancer 2009-2013 ‘Systems Biology’. 
 
-Laboratoire de biologie cellulaire et moléculaire du contrôle de la prolifération (LBCMCP)
+This work was funded by the ANR-blanc120601 ‘Chromocatch’ and the plan Cancer 2009–2013 ‘Systems
+Biology’.
 
 Fondation pour la Recherche Médicale (FRM)
 
-plan cancer 2009
+plan cancer 2009 - 2013
 
 Agence Nationale de la Recherche (ANR)
