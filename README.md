@@ -71,4 +71,4 @@ Agence Nationale de la Recherche (ANR)
 
 LBCMCP, Centre de Biologie Intégrative (CBI), Université de Toulouse, CNRS, UPS, France
 
-http://cbi-toulouse.fr/fr/
+http://cbi-toulouse.fr/eng/
