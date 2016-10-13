@@ -66,3 +66,9 @@ Fondation pour la Recherche Médicale (FRM)
 plan cancer 2009 - 2013
 
 Agence Nationale de la Recherche (ANR)
+
+# Where is our lab
+
+LBCMCP, Centre de Biologie Intégrative (CBI), Université de Toulouse, CNRS, UPS, France
+
+http://cbi-toulouse.fr/fr/
