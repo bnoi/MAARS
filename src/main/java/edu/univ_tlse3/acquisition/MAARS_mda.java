@@ -36,10 +36,11 @@ public class MAARS_mda{
         }
         while (mm_.getAcquisitionEngine().isAcquisitionRunning()){
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        mm_.getAcquisitionEngine().shutdown();
     }
 }

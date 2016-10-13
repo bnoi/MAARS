@@ -329,10 +329,8 @@ public class MAARS implements Runnable {
                     e.printStackTrace();
                 }
                 if (parameters.useDynamic()) {
-                        ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
+                    ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
                     }
-                    // dynamic acquisition finished, find whether there is
-                    // merotely cells.
                 } else {
                     // being static acquisition
                     for (String channel : arrayChannels) {
