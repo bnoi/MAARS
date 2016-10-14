@@ -17,29 +17,13 @@ public class MAARS_mda{
     }
     public Datastore acquire(SequenceSettings acqSettings, MaarsParameters parameters) {
         FileUtils.createFolder(acqSettings.root);
-        //acqSettings.usePositionList = true;
         mm_.getAcquisitionEngine().setSequenceSettings(acqSettings);
         mm_.getAcquisitionEngine().setChannelGroup(acqSettings.channelGroup);
-
-//        if (do_analysis) {
-//            es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
-//                    Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-//                    Double.parseDouble(parameters.getChSpotRaius(channel)),
-//                    Double.parseDouble(parameters.getChQuality(channel)), frame));
-//        }
-//        Datastore ds = mm_.getAcquisitionManager().runAcquisition(acqSettings.prefix, acqSettings.root);
         Datastore ds = null;
         try {
             ds = mm_.getAcquisitionEngine().acquire();
         } catch (MMException e) {
             e.printStackTrace();
-        }
-        while (mm_.getAcquisitionEngine().isAcquisitionRunning()){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
         mm_.getAcquisitionEngine().shutdown();
         return ds;

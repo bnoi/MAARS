@@ -208,8 +208,10 @@ public class ImgUtils {
      */
     public static ImagePlus convertImages2Imp(List<Image> listImg, String channelName, MMStudio mm, CMMCore mmc) {
         ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
-        for (Image img : listImg) {
+        Image img;
+        for (int i = 0; i < listImg.size(); i++) {
             // Prepare a imagePlus (for analysis)
+            img = listImg.get(i);
             ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
             imageStack.addSlice(imgProcessor.convertToByteProcessor());
         }

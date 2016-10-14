@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import edu.univ_tlse3.acquisition.FluoAcquisition;
+import edu.univ_tlse3.acquisition.BuildFluoAcqSetting;
 import edu.univ_tlse3.acquisition.SuperClassAcquisition;
 import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
 
@@ -381,9 +381,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 			ReportingUtils.logMessage("could not get z current position");
 			e.printStackTrace();
 		}
-        FluoAcquisition acq = new FluoAcquisition(mm, mmc, parameters);
-		String channelName = getSelectedChannel(jp);
-		IJ.log(channelName);
+        BuildFluoAcqSetting acq = new BuildFluoAcqSetting(mm, mmc, parameters);
         double zRange = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
         double zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
         ArrayList<Double> slices = SuperClassAcquisition.computZSlices(zRange,zStep,zFocus);

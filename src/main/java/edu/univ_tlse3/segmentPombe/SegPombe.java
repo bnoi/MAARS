@@ -200,7 +200,7 @@ public class SegPombe {
         byteImage.applyLut();
         // if the thresholding and the making binary image produced a white
         // background, change it
-        if (byteImage.getStatistics().mode > 127) {
+        if (byteImage.getStatistics().mode < 127) {
             System.out.println("Invert image");
             byteImage.invert();
         }

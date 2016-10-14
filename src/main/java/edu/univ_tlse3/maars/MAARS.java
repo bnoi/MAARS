@@ -1,7 +1,7 @@
 package edu.univ_tlse3.maars;
 
-import edu.univ_tlse3.acquisition.FluoAcquisition;
-import edu.univ_tlse3.acquisition.SegAcquisition;
+import edu.univ_tlse3.acquisition.BuildSegAcqSetting;
+import edu.univ_tlse3.acquisition.BuildFluoAcqSetting;
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
@@ -32,9 +32,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -255,12 +252,9 @@ public class MAARS implements Runnable {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-
+        mm.getPipelineFrame().clearPipeline();
         // Acquisition path arrangement
         ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
-        //prepare executor for image analysis
-        int nThread = Runtime.getRuntime().availableProcessors();
-        ExecutorService es = Executors.newFixedThreadPool(nThread);
         for (int i = 0; i < explo.length(); i++) {
             try {
                 mm.core().setXYPosition(explo.getX(i), explo.getY(i));
@@ -289,12 +283,12 @@ public class MAARS implements Runnable {
             }
 
             //acquisition
-            SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters);
+            BuildSegAcqSetting segAcq = new BuildSegAcqSetting(mm, mmc, parameters);
             SequenceSettings acqSettings = segAcq.buildSeqSetting(segAcq.computZSlices(zFocus), true);
 
             IJ.log("Acquire bright field image...");
             ImagePlus segImg = segAcq.acquireToImp(acqSettings, parameters);
-
+            segImg.show();
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
             ms.segmentation(segImg);
@@ -323,9 +317,21 @@ public class MAARS implements Runnable {
                     ReportingUtils.logMessage("could not get z current position");
                     e.printStackTrace();
                 }
-                FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters);
-                SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(parameters, fluoAcq.computZSlices(zFocus));
+                BuildFluoAcqSetting fluoAcq = new BuildFluoAcqSetting(mm, mmc, parameters);
+                ArrayList<Double> slices = fluoAcq.computZSlices(zFocus);
+                SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(parameters, slices);
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
+
+                //TODO need a z-project instead of combiner
+//                PropertyMap.PropertyMapBuilder builder = mm.data().getPropertyMapBuilder();
+//                builder.putString("processorAlgo", FrameCombinerPlugin.PROCESSOR_ALGO_MAX);
+//                IJ.log(String.valueOf(slices.size()));
+//                builder.putInt("numerOfImagesToProcess", 1);
+//                builder.putString("channelsToAvoid","");
+//                FrameCombinerPlugin combiner = new FrameCombinerPlugin();
+//                combiner.setContext(mm);
+//                mm.getPipelineFrame().addConfiguredProcessor(combiner.createConfigurator(builder.build()),combiner);
+
                 fluoAcq.acquireToImp(fluoAcqSettings, parameters);
                 RoiManager.getInstance().reset();
                 RoiManager.getInstance().close();
@@ -345,12 +351,7 @@ public class MAARS implements Runnable {
             }
         }
         mmc.setAutoShutter(true);
-        es.shutdown();
-        try {
-            es.awaitTermination(600, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        mm.getPipelineFrame().clearPipeline();
         System.setErr(curr_err);
         System.setOut(curr_out);
         IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");

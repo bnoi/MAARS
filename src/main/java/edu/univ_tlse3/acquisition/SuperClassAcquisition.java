@@ -53,6 +53,7 @@ public class SuperClassAcquisition {
     public ImagePlus acquire(SequenceSettings acqSettings, MaarsParameters parameters) {
         MAARS_mda mda = new MAARS_mda(mm);
         Datastore ds = mda.acquire(acqSettings, parameters);
+        //TODO this need to be solved, we need z project once every n frames
         Coords.CoordsBuilder coordsBuilder = new DefaultCoords.Builder();
         coordsBuilder.time(ds.getMaxIndex(Coords.TIME));
         return ImgUtils.convertImages2Imp(ds.getImagesMatching(coordsBuilder.build()),
