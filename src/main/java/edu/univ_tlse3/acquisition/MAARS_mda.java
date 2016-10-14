@@ -15,12 +15,12 @@ public class MAARS_mda{
     public MAARS_mda(MMStudio mm) {
         mm_ = mm;
     }
-    public void acquire(SequenceSettings acqSettings, MaarsParameters parameters) {
+    public Datastore acquire(SequenceSettings acqSettings, MaarsParameters parameters) {
         FileUtils.createFolder(acqSettings.root);
         //acqSettings.usePositionList = true;
         mm_.getAcquisitionEngine().setSequenceSettings(acqSettings);
         mm_.getAcquisitionEngine().setChannelGroup(acqSettings.channelGroup);
-        Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
+
 //        if (do_analysis) {
 //            es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
 //                    Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -42,5 +42,6 @@ public class MAARS_mda{
             }
         }
         mm_.getAcquisitionEngine().shutdown();
+        return ds;
     }
 }

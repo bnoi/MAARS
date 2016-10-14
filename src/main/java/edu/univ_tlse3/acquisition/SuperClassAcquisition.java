@@ -1,21 +1,17 @@
 package edu.univ_tlse3.acquisition;
 
+import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.ImgUtils;
-import ij.IJ;
+
 import ij.ImagePlus;
-import ij.ImageStack;
-import ij.measure.Calibration;
-import ij.process.ImageProcessor;
 import mmcorej.CMMCore;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Coords;
 import org.micromanager.data.Datastore;
-import org.micromanager.data.Image;
 import org.micromanager.data.internal.DefaultCoords;
 import org.micromanager.internal.MMStudio;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Tong LI, mail:tongli.bioinfo@gmail.com
@@ -54,9 +50,9 @@ public class SuperClassAcquisition {
      * @param acqSettings
      * @return a duplicate of acquired images.
      */
-    public ImagePlus acquire(SequenceSettings acqSettings) {
+    public ImagePlus acquire(SequenceSettings acqSettings, MaarsParameters parameters) {
         MAARS_mda mda = new MAARS_mda(mm);
-        Datastore ds = mda.acquire(acqSettings);
+        Datastore ds = mda.acquire(acqSettings, parameters);
         Coords.CoordsBuilder coordsBuilder = new DefaultCoords.Builder();
         coordsBuilder.time(ds.getMaxIndex(Coords.TIME));
         return ImgUtils.convertImages2Imp(ds.getImagesMatching(coordsBuilder.build()),

@@ -68,7 +68,7 @@ public class FluoAcquisition extends SuperClassAcquisition {
         return fluoAcqSetting;
     }
 
-    public ImagePlus acquireToImp(SequenceSettings acqSettings) {
-        return super.acquire(acqSettings);
+    public ImagePlus acquireToImp(SequenceSettings acqSettings, MaarsParameters parameters) {
+        return super.acquire(acqSettings, parameters);
     }
 }

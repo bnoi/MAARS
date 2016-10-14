@@ -147,7 +147,7 @@ public class MAARSNoAcq implements Runnable {
                     long startWriting = System.currentTimeMillis();
                     Boolean splitChannel = true;
                     mergedImg.getCalibration().frameInterval = timeInterval / 1000;
-                    MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
+                    MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
                     MAARS.analyzeMitosisDynamic(soc, timeInterval, splitChannel, pathToSegDir, true);
                     IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                             + " sec for writing results");

@@ -35,10 +35,10 @@ public class MAARSImgSaver {
         }
     }
 
-    public void exportChannelBtf(Boolean splitChannel, ArrayList<String> arrayChannels) {
+    public void exportChannelBtf(Boolean splitChannel) {
         LociExporter lociExporter = new LociExporter();
         if (splitChannel) {
-            for (String channel : arrayChannels) {
+            for (String channel : this.mergedFullFieldImg.getStack().getSliceLabels()) {
                 final String btfPath = pathToFluoDir + File.separator + channel + ".ome.btf";
                 if (!FileUtils.exists(btfPath)) {
                     ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(),
