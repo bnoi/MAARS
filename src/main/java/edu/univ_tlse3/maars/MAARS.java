@@ -111,7 +111,9 @@ public class MAARS implements Runnable {
             HashMap<String, ImagePlus> croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
             imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
         }
-        imgSaver.exportChannelBtf(splitChannel);
+        IJ.log("Cropped images and its analysis results saved");
+        //TODO exporter hangs after save, do not understand why...
+//        imgSaver.exportChannelBtf(splitChannel);
     }
 
     private static void showChromLaggingCells(String pathToSegDir,
@@ -342,6 +344,8 @@ public class MAARS implements Runnable {
                     ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
                     mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
                     MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
+                    IJ.log("Cropped images and its analysis results Saved");
+                    IJ.log("Find cells in mitosis...");
                     MAARS.analyzeMitosisDynamic(soc, fluoTimeInterval / 1000,
                             splitChannel, pathToSegDir, true);
                     ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
