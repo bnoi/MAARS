@@ -1,8 +1,9 @@
 package edu.univ_tlse3.maars;
 
-import edu.univ_tlse3.acquisition.BuildSegAcqSetting;
-import edu.univ_tlse3.acquisition.BuildFluoAcqSetting;
+import edu.univ_tlse3.acquisition.FluoAcquisition;
+import edu.univ_tlse3.acquisition.SegAcquisition;
 import edu.univ_tlse3.cellstateanalysis.Cell;
+import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.resultSaver.MAARSGeometrySaver;
@@ -32,6 +33,9 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -43,6 +47,7 @@ import java.util.regex.Pattern;
 public class MAARS implements Runnable {
     private PrintStream curr_err;
     private PrintStream curr_out;
+    private double fluoTimeInterval;
     private MMStudio mm;
     private CMMCore mmc;
     private MaarsParameters parameters;
@@ -101,7 +106,8 @@ public class MAARS implements Runnable {
         }
     }
 
-    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean splitChannel) {
+    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
+                        ArrayList<String> arrayChannels, Boolean splitChannel) {
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
@@ -111,9 +117,7 @@ public class MAARS implements Runnable {
             HashMap<String, ImagePlus> croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
             imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
         }
-        IJ.log("Cropped images and its analysis results saved");
-        //TODO exporter hangs after save, do not understand why...
-//        imgSaver.exportChannelBtf(splitChannel);
+        imgSaver.exportChannelBtf(splitChannel, arrayChannels);
     }
 
     private static void showChromLaggingCells(String pathToSegDir,
@@ -254,9 +258,16 @@ public class MAARS implements Runnable {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        mm.getPipelineFrame().clearPipeline();
+
+        ArrayList<String> arrayChannels = new ArrayList<String>();
+        Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
+
         // Acquisition path arrangement
         ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
+        this.fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+        //prepare executor for image analysis
+        int nThread = Runtime.getRuntime().availableProcessors();
+        ExecutorService es = Executors.newFixedThreadPool(nThread);
         for (int i = 0; i < explo.length(); i++) {
             try {
                 mm.core().setXYPosition(explo.getX(i), explo.getY(i));
@@ -285,12 +296,12 @@ public class MAARS implements Runnable {
             }
 
             //acquisition
-            BuildSegAcqSetting segAcq = new BuildSegAcqSetting(mm, mmc, parameters);
+            SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters);
             SequenceSettings acqSettings = segAcq.buildSeqSetting(segAcq.computZSlices(zFocus), true);
 
             IJ.log("Acquire bright field image...");
-            ImagePlus segImg = segAcq.acquireToImp(acqSettings, parameters);
-            segImg.show();
+            ImagePlus segImg = segAcq.acquireToImp(acqSettings);
+
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
             ms.segmentation(segImg);
@@ -302,6 +313,8 @@ public class MAARS implements Runnable {
                 soc.reset();
                 soc.loadCells(pathToSegDir);
                 soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
+                // ----------------start acquisition and analysis --------//
+                FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters);
                 try {
                     PrintStream ps = new PrintStream(pathToSegDir + File.separator + "CellStateAnalysis.LOG");
                     curr_err = System.err;
@@ -311,42 +324,81 @@ public class MAARS implements Runnable {
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                // ----------------start acquisition and analysis --------//
-                try {
-                    zFocus = mmc.getPosition(focusDevice);
-                    mmc.waitForDevice(focusDevice);
-                } catch (Exception e) {
-                    ReportingUtils.logMessage("could not get z current position");
-                    e.printStackTrace();
-                }
-                BuildFluoAcqSetting fluoAcq = new BuildFluoAcqSetting(mm, mmc, parameters);
-                ArrayList<Double> slices = fluoAcq.computZSlices(zFocus);
-                SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(parameters, slices);
+                int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
-
-                //TODO need a z-project instead of combiner
-//                PropertyMap.PropertyMapBuilder builder = mm.data().getPropertyMapBuilder();
-//                builder.putString("processorAlgo", FrameCombinerPlugin.PROCESSOR_ALGO_MAX);
-//                IJ.log(String.valueOf(slices.size()));
-//                builder.putInt("numerOfImagesToProcess", 1);
-//                builder.putString("channelsToAvoid","");
-//                FrameCombinerPlugin combiner = new FrameCombinerPlugin();
-//                combiner.setContext(mm);
-//                mm.getPipelineFrame().addConfiguredProcessor(combiner.createConfigurator(builder.build()),combiner);
-
-                fluoAcq.acquireToImp(fluoAcqSettings, parameters);
+                Boolean saveFilm = Boolean
+                        .parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
+                if (parameters.useDynamic()) {
+                    // being dynamic acquisition
+                    double startTime = System.currentTimeMillis();
+                    double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
+                            * 1000;
+                    while (System.currentTimeMillis() - startTime <= timeLimit) {
+                        double beginAcq = System.currentTimeMillis();
+                        try {
+                            zFocus = mmc.getPosition(focusDevice);
+                            mmc.waitForDevice(focusDevice);
+                        } catch (Exception e) {
+                            ReportingUtils.logMessage("could not get z current position");
+                            e.printStackTrace();
+                        }
+                        for (String channel : arrayChannels) {
+                            SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(String.valueOf(frame),
+                                    channel, parameters, fluoAcq.computZSlices(zFocus), saveFilm);
+                            ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
+                            if (do_analysis) {
+                                es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
+                                        Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+                                        Double.parseDouble(parameters.getChSpotRaius(channel)),
+                                        Double.parseDouble(parameters.getChQuality(channel)), frame));
+                            }
+                        }
+                        frame++;
+                        double acqTook = System.currentTimeMillis() - beginAcq;
+                        System.out.println(String.valueOf(acqTook));
+                        if (this.fluoTimeInterval > acqTook) {
+                            try {
+                                Thread.sleep((long) (this.fluoTimeInterval - acqTook));
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            IJ.log("Attention : acquisition before took longer than " + this.fluoTimeInterval
+                                    / 1000 + " s.");
+                        }
+                    }
+                    // dynamic acquisition finished, find whether there is
+                    // merotely cells.
+                } else {
+                    // being static acquisition
+                    for (String channel : arrayChannels) {
+                        try {
+                            zFocus = mmc.getPosition(focusDevice);
+                            mmc.waitForDevice(focusDevice);
+                        } catch (Exception e) {
+                            ReportingUtils.logMessage("could not get z current position");
+                            e.printStackTrace();
+                        }
+                        SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(String.valueOf(frame),
+                                channel, parameters, fluoAcq.computZSlices(zFocus), saveFilm);
+                        ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
+                        if (do_analysis) {
+                            es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
+                                    Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+                                    Double.parseDouble(parameters.getChSpotRaius(channel)),
+                                    Double.parseDouble(parameters.getChQuality(channel)), frame));
+                        }
+                    }
+                }
                 RoiManager.getInstance().reset();
                 RoiManager.getInstance().close();
                 if (soc.size() != 0 && do_analysis) {
                     long startWriting = System.currentTimeMillis();
-                    Double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
                     Boolean splitChannel = true;
                     ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-                    mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-                    MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
-                    IJ.log("Cropped images and its analysis results Saved");
-                    IJ.log("Find cells in mitosis...");
-                    MAARS.analyzeMitosisDynamic(soc, fluoTimeInterval / 1000,
+                    mergedImg.getCalibration().frameInterval = this.fluoTimeInterval / 1000;
+                    MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
+                    MAARS.analyzeMitosisDynamic(soc, this.fluoTimeInterval / 1000,
                             splitChannel, pathToSegDir, true);
                     ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                             + " sec for writing results");
@@ -355,7 +407,13 @@ public class MAARS implements Runnable {
             }
         }
         mmc.setAutoShutter(true);
-        mm.getPipelineFrame().clearPipeline();
+        es.shutdown();
+        try {
+            // TODO no acq should be more than 3 hours
+            es.awaitTermination(180, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         System.setErr(curr_err);
         System.setOut(curr_out);
         IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");

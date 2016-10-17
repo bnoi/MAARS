@@ -7,6 +7,7 @@ import ij.ImageStack;
 import loci.plugins.LociExporter;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MAARSImgSaver {
@@ -34,12 +35,11 @@ public class MAARSImgSaver {
         }
     }
 
-    public void exportChannelBtf(Boolean splitChannel) {
+    public void exportChannelBtf(Boolean splitChannel, ArrayList<String> arrayChannels) {
         LociExporter lociExporter = new LociExporter();
         if (splitChannel) {
-            for (String channel : this.mergedFullFieldImg.getStack().getSliceLabels()) {
-                IJ.log(channel);
-                String btfPath = pathToFluoDir + File.separator + channel + ".ome.btf";
+            for (String channel : arrayChannels) {
+                final String btfPath = pathToFluoDir + File.separator + channel + ".ome.btf";
                 if (!FileUtils.exists(btfPath)) {
                     ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(),
                             mergedFullFieldImg.getHeight());
@@ -65,6 +65,5 @@ public class MAARSImgSaver {
                 lociExporter.run(null);
             }
         }
-        IJ.log("Stacked big tiff Saved");
     }
 }

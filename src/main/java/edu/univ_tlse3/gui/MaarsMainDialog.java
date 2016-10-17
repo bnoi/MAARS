@@ -34,6 +34,7 @@ public class MaarsMainDialog implements ActionListener {
 	private final double calibration;
 	private JButton autofocusButton;
 	private JButton okMainDialogButton;
+	private JButton stopMainDialogButton;
 	private JButton segmButton;
 	private JButton fluoAnalysisButton;
 	private JFormattedTextField savePathTf;
@@ -225,6 +226,14 @@ public class MaarsMainDialog implements ActionListener {
 		mainDialog.getRootPane().setDefaultButton(okMainDialogButton);
 		okPanel.add(okMainDialogButton);
 
+		// halt acquisitions button
+
+		JPanel stopPanel = new JPanel(new GridLayout(1, 0));
+		stopMainDialogButton = new JButton("Stop!");
+		stopMainDialogButton.addActionListener(this);
+		mainDialog.getRootPane().setDefaultButton(stopMainDialogButton);
+		stopPanel.add(stopMainDialogButton);
+
 		// ------------set up and add components to Panel then to
 		// Frame---------------//
 
@@ -244,6 +253,7 @@ public class MaarsMainDialog implements ActionListener {
 		mainPanel.add(savePathLabelPanel);
 		mainPanel.add(savePathTfPanel);
 		mainPanel.add(okPanel);
+		mainPanel.add(stopPanel);
 		mainDialog.add(mainPanel);
 		IJ.log("Done.");
 		mainDialog.pack();
@@ -378,6 +388,8 @@ public class MaarsMainDialog implements ActionListener {
 				heightTf.setEditable(true);
 				refreshNumField();
 			}
+		} else if (e.getSource() == stopMainDialogButton) {
+			mm.getAcquisitionManager().haltAcquisition();
 		} else {
 			IJ.log("MAARS don't understand what you want, sorry");
 		}

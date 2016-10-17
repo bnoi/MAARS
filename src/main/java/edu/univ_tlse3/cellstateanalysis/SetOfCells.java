@@ -25,12 +25,13 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
     /**
      */
     public void loadCells(String pathToSegDir) {
+        IJ.log("Loading Cells");
         Roi[] roiArray = getRoisAsArray(pathToSegDir + "/ROI.zip");
         cellArray = new ArrayList<Cell>();
         for (int i = 1; i <= roiArray.length; i++) {
             cellArray.add(i - 1, new Cell(roiArray[i - 1], i));
         }
-        IJ.log("Cell loading is finished.");
+        IJ.log("Done.");
     }
 
     /**

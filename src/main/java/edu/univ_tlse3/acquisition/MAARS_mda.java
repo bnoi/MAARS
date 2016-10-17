@@ -1,6 +1,4 @@
 package edu.univ_tlse3.acquisition;
-import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
-import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.data.Datastore;
@@ -15,17 +13,24 @@ public class MAARS_mda{
     public MAARS_mda(MMStudio mm) {
         mm_ = mm;
     }
-    public Datastore acquire(SequenceSettings acqSettings, MaarsParameters parameters) {
+    public Datastore acquire(SequenceSettings acqSettings) {
         FileUtils.createFolder(acqSettings.root);
         mm_.getAcquisitionEngine().setSequenceSettings(acqSettings);
         mm_.getAcquisitionEngine().setChannelGroup(acqSettings.channelGroup);
+//        Datastore ds = mm_.getAcquisitionManager().runAcquisition(acqSettings.prefix, acqSettings.root);
         Datastore ds = null;
         try {
             ds = mm_.getAcquisitionEngine().acquire();
         } catch (MMException e) {
             e.printStackTrace();
         }
-        mm_.getAcquisitionEngine().shutdown();
+        while (mm_.getAcquisitionEngine().isAcquisitionRunning()){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         return ds;
     }
 }
