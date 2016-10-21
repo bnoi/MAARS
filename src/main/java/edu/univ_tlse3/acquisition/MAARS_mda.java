@@ -15,11 +15,7 @@ public class MAARS_mda{
     public MAARS_mda(MMStudio mm) {
         mm_ = mm;
     }
-    public Datastore acquire(SequenceSettings acqSettings) {
-        FileUtils.createFolder(acqSettings.root);
-//        mm_.getAcquisitionManager().setAcquisitionSettings(acqSettings);
-        AcquisitionWrapperEngine acqEng = new AcquisitionWrapperEngine();
-        acqEng.setSequenceSettings(acqSettings);
+    public Datastore acquire(AcquisitionWrapperEngine acqEng) {
         mm_.setAcquisitionEngine(acqEng);
         Datastore ds = null;
         try {

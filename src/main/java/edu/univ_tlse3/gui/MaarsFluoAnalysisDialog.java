@@ -22,12 +22,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import edu.univ_tlse3.acquisition.BuildFluoAcqSetting;
+import edu.univ_tlse3.acquisition.FluoAcqSetting;
 import edu.univ_tlse3.acquisition.AcqLauncher;
 import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
 
 import edu.univ_tlse3.maars.MaarsParameters;
 import org.micromanager.acquisition.SequenceSettings;
+import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -372,24 +373,24 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	}
 
 	private ImagePlus acquireTestImg(JPanel jp) {
-		String focusDevice = mmc.getFocusDevice();
-		double zFocus = 0;
-		try {
-			zFocus = mmc.getPosition(focusDevice);
-			mmc.waitForDevice(focusDevice);
-		} catch (Exception e) {
-			ReportingUtils.logMessage("could not get z current position");
-			e.printStackTrace();
-		}
-        BuildFluoAcqSetting acq = new BuildFluoAcqSetting(mm, mmc, parameters);
-		String channelName = getSelectedChannel(jp);
-		IJ.log(channelName);
         double zRange = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
         double zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
-        ArrayList<Double> slices = AcqLauncher.computZSlices(zRange,zStep,zFocus);
-        SequenceSettings fluoAcqSettings = acq.buildSeqSetting(parameters,slices);
-		AcqLauncher testSuperClass  = new AcqLauncher(mm, mmc);
-		return testSuperClass.acquire(fluoAcqSettings);
+
+		MaarsParameters testParam = parameters.duplicate();
+		String channelName = getSelectedChannel(jp);
+		testParam.setUsingChannels(channelName);
+		testParam.setFluoParameter(MaarsParameters.TIME_LIMIT, "0");
+		testParam.setFluoParameter(MaarsParameters.TIME_INTERVAL, this.timeInterval.getText());
+		testParam.setFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES, "false");
+		FluoAcqSetting acq = new FluoAcqSetting(testParam);
+
+		SequenceSettings fluoAcqSetting = acq.configAcqSettings(acq.configChannels(channelName));
+		AcquisitionWrapperEngine acqEng = mm.getAcquisitionEngine();
+		acqEng.setSequenceSettings(fluoAcqSetting);
+		acqEng.setSlices(-zRange/2, zRange/2, zStep, false);
+		IJ.log(fluoAcqSetting.channelGroup);
+		acqEng.setChannelGroup(fluoAcqSetting.channelGroup);
+		return AcqLauncher.acquire(acqEng);
 	}
 
 	private String getSelectedChannel(JPanel jp) {

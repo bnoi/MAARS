@@ -147,7 +147,7 @@ public class MaarsParameters {
 
 	/**
 	 * Constructor of Element need path to configuration file
-	 * 
+	 *
 	 * @param defaultParametersStream
 	 */
 	public MaarsParameters(InputStream defaultParametersStream) {
@@ -166,8 +166,13 @@ public class MaarsParameters {
 	}
 
 	/**
+	 * empty
+	 */
+	public MaarsParameters(){}
+
+	/**
 	 * Write the parameters into the configuration file
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	public void save() throws IOException {
@@ -180,7 +185,7 @@ public class MaarsParameters {
 	/**
 	 * The few following colors are return as Color object : GREEN, CYAN, RED,
 	 * BLUE, WHITE NB : return GRAY if unknown color
-	 * 
+	 *
 	 * @param colorName
 	 * @return Color
 	 */
@@ -210,7 +215,7 @@ public class MaarsParameters {
 
 	// Getter
 	/**
-	 * 
+	 *
 	 * @param xOrY
 	 *            : is a final static string in MaarsParameters
 	 * @return : the value of X or Y field
@@ -220,7 +225,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return analysis with dynamic or not
 	 */
 	public boolean useDynamic() {
@@ -228,7 +233,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return saving folder of MAARS output
 	 */
 	public String getSavingPath() {
@@ -236,7 +241,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return time limit of fluorescence acquisition for one acquisition
 	 */
 	public String getFluoParameter(final String parameter) {
@@ -244,7 +249,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return time limit of fluorescence acquisition for one acquisition
 	 */
 	public String getSegmentationParameter(final String parameter) {
@@ -252,7 +257,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the name of channel group set in micromanager
 	 */
 	public String getChannelGroup() {
@@ -260,7 +265,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch
 	 *            : GFP, CFP, DAPI, TXRED
 	 * @return corresponding channel shutter
@@ -271,7 +276,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch
 	 *            : GFP, CFP, DAPI, TXRED
 	 * @return corresponding channel color
@@ -282,7 +287,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch
 	 *            : GFP, CFP, DAPI, TXRED
 	 * @return corresponding channel color
@@ -293,7 +298,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
 	 * @return MAXIMUM_NUMBER_OF_SPOT of corresponding channel
@@ -304,7 +309,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
 	 * @return SPOT_RADIUS of corresponding channel
@@ -314,7 +319,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
 	 * @return SPOT_RADIUS of corresponding channel
@@ -324,7 +329,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return get channels used for fluo analysis
 	 */
 	public String getUsingChannels() {
@@ -334,7 +339,7 @@ public class MaarsParameters {
 	//////////// Setters
 	/**
 	 * update value of x or y field number of exloration
-	 * 
+	 *
 	 * @param xOrY
 	 * @param value
 	 */
@@ -344,7 +349,7 @@ public class MaarsParameters {
 
 	/**
 	 * set segmentation parameter
-	 * 
+	 *
 	 * @param parameter
 	 *            : static final String of MaarsParameters
 	 * @param value
@@ -356,7 +361,7 @@ public class MaarsParameters {
 
 	/**
 	 * set fluo analysis parameter
-	 * 
+	 *
 	 * @param parameter
 	 *            : static final String of MaarsParameters
 	 * @param value
@@ -368,7 +373,7 @@ public class MaarsParameters {
 
 	/**
 	 * set saving path
-	 * 
+	 *
 	 * @param path
 	 *            : corresponding value of parameter
 	 */
@@ -377,7 +382,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
 	 */
@@ -387,7 +392,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
 	 */
@@ -397,7 +402,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param ch:
 	 *            GFP, CFP, DAPI, TXRED
 	 */
@@ -407,10 +412,26 @@ public class MaarsParameters {
 
 	/**
 	 * set channels to USING channel
-	 * 
+	 *
 	 * @param channels
 	 */
 	public void setUsingChannels(String channels) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(USING).setText(channels);
+	}
+
+	/**
+	 *
+	 */
+	public void setRoot(Element root){
+		this.root = root;
+	}
+	/**
+	 * duplicate this object
+	 */
+	public MaarsParameters duplicate(){
+		Element newRoot = root.clone();
+		MaarsParameters newParams = new MaarsParameters();
+		newParams.setRoot(newRoot);
+		return newParams;
 	}
 }
