@@ -64,8 +64,8 @@ public class SegAcqSetting {
         return segAcqSettings;
     }
 
-    public AcquisitionWrapperEngine buildSegAcqEngine(SequenceSettings segAcqSettings) {
-        AcquisitionWrapperEngine acqEng = new AcquisitionWrapperEngine();
+    public AcquisitionWrapperEngine buildSegAcqEngine(SequenceSettings segAcqSettings, MMStudio mm) {
+        AcquisitionWrapperEngine acqEng = mm.getAcquisitionEngine();
         acqEng.setSequenceSettings(segAcqSettings);
         acqEng.enableZSliceSetting(true);
         acqEng.setSlices(-zRange/2,zRange/2,zStep,false);

@@ -387,8 +387,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		SequenceSettings fluoAcqSetting = acq.configAcqSettings(acq.configChannels(channelName));
 		AcquisitionWrapperEngine acqEng = mm.getAcquisitionEngine();
 		acqEng.setSequenceSettings(fluoAcqSetting);
+		acqEng.enableZSliceSetting(true);
 		acqEng.setSlices(-zRange/2, zRange/2, zStep, false);
-		IJ.log(fluoAcqSetting.channelGroup);
 		acqEng.setChannelGroup(fluoAcqSetting.channelGroup);
 		return AcqLauncher.acquire(acqEng);
 	}

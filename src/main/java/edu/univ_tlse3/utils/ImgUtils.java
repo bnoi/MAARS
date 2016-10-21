@@ -12,7 +12,6 @@ import ij.plugin.ZProjector;
 import ij.process.ImageProcessor;
 import loci.plugins.LociImporter;
 import mmcorej.CMMCore;
-import mmcorej.MMCoreJ;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
@@ -132,17 +131,12 @@ public class ImgUtils {
         ImagePlus zprojectImg;
         ImageStack fieldStack = null;
         Calibration fluoImgCalib = null;
-        ArrayList<String> listAcqNames = new ArrayList<String>();
-        String pattern = "(\\d+)(_)(\\w+)";
-        for (String acqName : new File(fluoDir).list()) {
-            if (Pattern.matches(pattern, acqName)) {
-                listAcqNames.add(acqName);
-            }
-        }
-        Collections.sort(listAcqNames, new Comparator<String>() {
+        String[] listAcqNames = new File(fluoDir).list();
+        String pattern = "(\\w+)(_)(\\d+)";
+        Arrays.sort(listAcqNames, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
-                return Integer.valueOf(o1.split("_", -2)[0]).compareTo(Integer.valueOf(o2.split("_", -2)[0]));
+                return Integer.valueOf(o1.split("_", -1)[1]).compareTo(Integer.valueOf(o2.split("_", -1)[1]));
             }
         });
         for (String acqName : listAcqNames) {

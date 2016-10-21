@@ -120,7 +120,7 @@ public class MAARS implements Runnable {
             HashMap<String, ImagePlus> croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
             imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
         }
-        imgSaver.exportChannelBtf(splitChannel, arrayChannels);
+//        imgSaver.exportChannelBtf(splitChannel, arrayChannels);
     }
 
     private static void showChromLaggingCells(String pathToSegDir,
@@ -305,7 +305,7 @@ public class MAARS implements Runnable {
             FileUtils.createFolder(acqSettings.root);
 
             IJ.log("Acquire bright field image...");
-            ImagePlus segImg = AcqLauncher.acquire(segAcq.buildSegAcqEngine(acqSettings));
+            ImagePlus segImg = AcqLauncher.acquire(segAcq.buildSegAcqEngine(acqSettings, mm));
 
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
@@ -343,7 +343,7 @@ public class MAARS implements Runnable {
                         double beginAcq = System.currentTimeMillis();
                         for (String channel : arrayChannels) {
                             SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
-                            ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting));
+                            ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm));
                             if (do_analysis) {
                                 es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -369,7 +369,7 @@ public class MAARS implements Runnable {
                     // being static acquisition
                     for (String channel : arrayChannels) {
                         SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
-                        ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting));
+                        ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm));
                         if (do_analysis) {
                             es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),

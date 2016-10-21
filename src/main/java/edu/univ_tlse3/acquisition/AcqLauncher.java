@@ -36,6 +36,6 @@ public class AcqLauncher {
         for (Coords coords : ds.getUnorderedImageCoords()){
             imageList.add(ds.getImage(coords));
         }
-        return ImgUtils.convertImages2Imp(imageList, acqEng.getChannelConfigs()[0]);
+        return ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
     }
 }

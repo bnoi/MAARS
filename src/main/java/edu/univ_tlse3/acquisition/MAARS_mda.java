@@ -23,6 +23,9 @@ public class MAARS_mda{
         } catch (MMException e) {
             e.printStackTrace();
         }
+        while (mm_.getAcquisitionEngine().isAcquisitionRunning()){
+            mm_.getCore().sleep(1000);
+        }
         return ds;
     }
 }

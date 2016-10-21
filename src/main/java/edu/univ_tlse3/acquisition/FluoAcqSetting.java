@@ -42,7 +42,6 @@ public class FluoAcqSetting {
         channel_spec.color = chColor;
         channel_spec.exposure = chExpose;
         channel_spec.doZStack = true;
-        channel_spec.camera = "HighRes";
         channelSpecs.add(channel_spec);
         return channelSpecs;
     }
@@ -53,11 +52,11 @@ public class FluoAcqSetting {
         Double duration = Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.TIME_LIMIT));
         fluoAcqSetting.save = Boolean
                 .parseBoolean(parameters_.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
-        fluoAcqSetting.prefix = "";
+        fluoAcqSetting.prefix = channelSpecs.get(0).config;
         fluoAcqSetting.root = savingRoot_;
         fluoAcqSetting.channels = channelSpecs;
-        fluoAcqSetting.shouldDisplayImages= true;
-        fluoAcqSetting.keepShutterOpenSlices = true;
+        fluoAcqSetting.shouldDisplayImages= false;
+        fluoAcqSetting.keepShutterOpenSlices = false;
         fluoAcqSetting.keepShutterOpenChannels = false;
         fluoAcqSetting.channelGroup = channelGroup_;
         fluoAcqSetting.slicesFirst = true;
@@ -66,8 +65,8 @@ public class FluoAcqSetting {
         return fluoAcqSetting;
     }
 
-    public AcquisitionWrapperEngine buildFluoAcqEngine(SequenceSettings fluoAcqSettings){
-        AcquisitionWrapperEngine acqEng = new AcquisitionWrapperEngine();
+    public AcquisitionWrapperEngine buildFluoAcqEngine(SequenceSettings fluoAcqSettings, MMStudio mm){
+        AcquisitionWrapperEngine acqEng = mm.getAcquisitionEngine();
         acqEng.setSequenceSettings(fluoAcqSettings);
         acqEng.enableZSliceSetting(true);
         acqEng.setSlices(-zRange_/2,zRange_/2,zStep_,false);
