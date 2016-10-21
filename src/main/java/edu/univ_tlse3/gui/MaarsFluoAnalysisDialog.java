@@ -22,8 +22,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import edu.univ_tlse3.acquisition.FluoAcquisition;
-import edu.univ_tlse3.acquisition.SuperClassAcquisition;
+import edu.univ_tlse3.acquisition.BuildFluoAcqSetting;
+import edu.univ_tlse3.acquisition.AcqLauncher;
 import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
 
 import edu.univ_tlse3.maars.MaarsParameters;
@@ -381,14 +381,14 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 			ReportingUtils.logMessage("could not get z current position");
 			e.printStackTrace();
 		}
-        FluoAcquisition acq = new FluoAcquisition(mm, mmc, parameters);
+        BuildFluoAcqSetting acq = new BuildFluoAcqSetting(mm, mmc, parameters);
 		String channelName = getSelectedChannel(jp);
 		IJ.log(channelName);
         double zRange = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
         double zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
-        ArrayList<Double> slices = SuperClassAcquisition.computZSlices(zRange,zStep,zFocus);
-        SequenceSettings fluoAcqSettings = acq.buildSeqSetting("",channelName,parameters,slices,false);
-		SuperClassAcquisition testSuperClass  = new SuperClassAcquisition(mm, mmc);
+        ArrayList<Double> slices = AcqLauncher.computZSlices(zRange,zStep,zFocus);
+        SequenceSettings fluoAcqSettings = acq.buildSeqSetting(parameters,slices);
+		AcqLauncher testSuperClass  = new AcqLauncher(mm, mmc);
 		return testSuperClass.acquire(fluoAcqSettings);
 	}
 

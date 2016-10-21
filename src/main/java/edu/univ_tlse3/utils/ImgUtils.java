@@ -12,6 +12,7 @@ import ij.plugin.ZProjector;
 import ij.process.ImageProcessor;
 import loci.plugins.LociImporter;
 import mmcorej.CMMCore;
+import mmcorej.MMCoreJ;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
@@ -202,18 +203,14 @@ public class ImgUtils {
      *
      * @param listImg list of Images
      * @param channelName
-     * @param mm
-     * @param mmc
      * @return imageplus
      */
-    public static ImagePlus convertImages2Imp(List<Image> listImg, String channelName, MMStudio mm, CMMCore mmc) {
+    public static ImagePlus convertImages2Imp(List<Image> listImg, String channelName) {
+        CMMCore mmc = MMStudio.getInstance().getCore();
         ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
         for (Image img : listImg) {
-            // Prepare a imagePlus (for analysis)
-            ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(img);
-            imageStack.addSlice(imgProcessor.convertToByteProcessor());
+            imageStack.addSlice(ImgUtils.image2imp(img));
         }
-        // ImagePlus for further analysis
         ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
         Calibration cal = new Calibration();
         cal.setUnit("micron");
@@ -230,5 +227,15 @@ public class ImgUtils {
     public static void loadBigTiff(String pathToImage){
         LociImporter importer = new LociImporter();
         importer.run(pathToImage);
+    }
+
+    /**
+     * @param image from micro-manager
+     * @return ImageProcessor
+     */
+    public static ImageProcessor image2imp(Image image){
+        MMStudio mm = MMStudio.getInstance();
+        ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
+        return imgProcessor.convertToByteProcessor();
     }
 }

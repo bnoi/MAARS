@@ -22,7 +22,7 @@ import java.util.List;
  * @version Nov 19, 2015
  */
 
-public class SuperClassAcquisition {
+public class AcqLauncher {
 
     private MMStudio mm;
     private CMMCore mmc;
@@ -33,7 +33,7 @@ public class SuperClassAcquisition {
      * @param mm  : graphical user interface of Micro-Manager
      * @param mmc : Core object of Micro-Manager
      */
-    public SuperClassAcquisition(MMStudio mm, CMMCore mmc) {
+    public AcqLauncher(MMStudio mm, CMMCore mmc) {
         this.mm = mm;
         this.mmc = mmc;
     }
@@ -54,12 +54,15 @@ public class SuperClassAcquisition {
      * @param acqSettings
      * @return a duplicate of acquired images.
      */
-    public ImagePlus acquire(SequenceSettings acqSettings) {
-        MAARS_mda mda = new MAARS_mda(mm);
+    public static ImagePlus acquire(SequenceSettings acqSettings) {
+        MAARS_mda mda = new MAARS_mda(MMStudio.getInstance());
         Datastore ds = mda.acquire(acqSettings);
-        Coords.CoordsBuilder coordsBuilder = new DefaultCoords.Builder();
-        coordsBuilder.time(ds.getMaxIndex(Coords.TIME));
-        return ImgUtils.convertImages2Imp(ds.getImagesMatching(coordsBuilder.build()),
-                acqSettings.channels.get(0).config, mm, mmc);
+        List<Image> imageList = new ArrayList<Image>();
+        //TODO unordered
+        for (Coords coords : ds.getUnorderedImageCoords()){
+            imageList.add(ds.getImage(coords));
+        }
+        return ImgUtils.convertImages2Imp(imageList,
+                acqSettings.channels.get(0).config);
     }
 }

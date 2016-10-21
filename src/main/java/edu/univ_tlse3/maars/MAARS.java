@@ -1,7 +1,8 @@
 package edu.univ_tlse3.maars;
 
-import edu.univ_tlse3.acquisition.FluoAcquisition;
-import edu.univ_tlse3.acquisition.SegAcquisition;
+import edu.univ_tlse3.acquisition.AcqLauncher;
+import edu.univ_tlse3.acquisition.BuildFluoAcqSetting;
+import edu.univ_tlse3.acquisition.BuildSegAcqSetting;
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
@@ -296,11 +297,11 @@ public class MAARS implements Runnable {
             }
 
             //acquisition
-            SegAcquisition segAcq = new SegAcquisition(mm, mmc, parameters);
+            BuildSegAcqSetting segAcq = new BuildSegAcqSetting(mmc, parameters);
             SequenceSettings acqSettings = segAcq.buildSeqSetting(segAcq.computZSlices(zFocus), true);
 
             IJ.log("Acquire bright field image...");
-            ImagePlus segImg = segAcq.acquireToImp(acqSettings);
+            ImagePlus segImg = AcqLauncher.acquire(acqSettings);
 
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
@@ -314,7 +315,7 @@ public class MAARS implements Runnable {
                 soc.loadCells(pathToSegDir);
                 soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
                 // ----------------start acquisition and analysis --------//
-                FluoAcquisition fluoAcq = new FluoAcquisition(mm, mmc, parameters);
+                BuildFluoAcqSetting fluoAcq = new BuildFluoAcqSetting(mm, mmc, parameters);
                 try {
                     PrintStream ps = new PrintStream(pathToSegDir + File.separator + "CellStateAnalysis.LOG");
                     curr_err = System.err;
@@ -343,9 +344,8 @@ public class MAARS implements Runnable {
                             e.printStackTrace();
                         }
                         for (String channel : arrayChannels) {
-                            SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(String.valueOf(frame),
-                                    channel, parameters, fluoAcq.computZSlices(zFocus), saveFilm);
-                            ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
+                            SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(parameters, fluoAcq.computZSlices(zFocus));
+                            ImagePlus fluoImage = AcqLauncher.acquire(fluoAcqSettings);
                             if (do_analysis) {
                                 es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -379,9 +379,8 @@ public class MAARS implements Runnable {
                             ReportingUtils.logMessage("could not get z current position");
                             e.printStackTrace();
                         }
-                        SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(String.valueOf(frame),
-                                channel, parameters, fluoAcq.computZSlices(zFocus), saveFilm);
-                        ImagePlus fluoImage = fluoAcq.acquireToImp(fluoAcqSettings);
+                        SequenceSettings fluoAcqSettings = fluoAcq.buildSeqSetting(parameters, fluoAcq.computZSlices(zFocus));
+                        ImagePlus fluoImage = AcqLauncher.acquire(acqSettings);
                         if (do_analysis) {
                             es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),
