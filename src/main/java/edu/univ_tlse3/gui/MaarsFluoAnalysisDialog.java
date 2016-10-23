@@ -36,7 +36,6 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
-import mmcorej.CMMCore;
 
 import javax.swing.*;
 
@@ -76,9 +75,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	private JButton test2;
 	private JButton test3;
 	private JButton okFluoAnaParamButton;
-	private JComboBox<String> channel1Combo;
-	private JComboBox<String> channel2Combo;
-	private JComboBox<String> channel3Combo;
+	private JComboBox channel1Combo;
+	private JComboBox channel2Combo;
+	private JComboBox channel3Combo;
 	private static String NONE = "None";
 
 	/**
@@ -87,11 +86,10 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	 * @param parameters
 	 *            : parameters displayed in dialog
 	 */
-	MaarsFluoAnalysisDialog(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
+	MaarsFluoAnalysisDialog(MMStudio mm, MaarsParameters parameters) {
 
 		// set up this dialog
 		this.mm = mm;
-		this.mmc = mmc;
 		this.parameters = parameters;
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		// this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
@@ -182,7 +180,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		channel1Panel = new JPanel(new GridLayout(1, 0));
 		String[] channelList = {"GFP", "CFP", "TxRed", "DAPI"};
-		channel1Combo = new JComboBox<String>(channelList);
+		channel1Combo = new JComboBox(channelList);
 		maxNumberSpotCh1Tf = new JFormattedTextField(Integer.class);
 		spotRadiusCh1Tf = new JFormattedTextField(Double.class);
 		qualityCh1Tf = new JFormattedTextField(Double.class);
@@ -199,7 +197,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 		channel2Panel = new JPanel(new GridLayout(1, 0));
 		String[] channelListWithNone = {NONE, "GFP", "CFP", "TxRed", "DAPI"};
-		channel2Combo = new JComboBox<String>(channelListWithNone);
+		channel2Combo = new JComboBox(channelListWithNone);
 		channel2Combo.addActionListener(this);
 		maxNumberSpotCh2Tf = new JFormattedTextField(Integer.class);
 		spotRadiusCh2Tf = new JFormattedTextField(Double.class);
@@ -220,7 +218,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		//
 
 		channel3Panel = new JPanel(new GridLayout(1, 0));
-		channel3Combo = new JComboBox<String>(channelListWithNone);
+		channel3Combo = new JComboBox(channelListWithNone);
 		channel3Combo.addActionListener(this);
 		maxNumberSpotCh3Tf = new JFormattedTextField(Integer.class);
 		spotRadiusCh3Tf = new JFormattedTextField(Double.class);
@@ -294,7 +292,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
 	private void setChPanelValue(JPanel jp, String ch) {
 		@SuppressWarnings("unchecked")
-		JComboBox<String> tmpCombo = (JComboBox<String>) jp.getComponent(0);
+		JComboBox tmpCombo = (JComboBox) jp.getComponent(0);
 		tmpCombo.setSelectedItem(ch);
 
 		JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(1);
@@ -390,8 +388,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	}
 
 	private String getSelectedChannel(JPanel jp) {
-		@SuppressWarnings("unchecked")
-		JComboBox<String> tmpCombo = (JComboBox<String>) jp.getComponent(0);
+		JComboBox tmpCombo = (JComboBox) jp.getComponent(0);
 		return (String) tmpCombo.getSelectedItem();
 	}
 
