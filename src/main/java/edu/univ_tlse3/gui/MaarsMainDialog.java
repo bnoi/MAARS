@@ -367,7 +367,7 @@ public class MaarsMainDialog implements ActionListener {
 			new MaarsSegmentationDialog(parameters);
 		} else if (e.getSource() == fluoAnalysisButton) {
 			saveParameters();
-			new MaarsFluoAnalysisDialog(mm, mmc, parameters);
+			new MaarsFluoAnalysisDialog(mm, parameters);
 		} else if (e.getSource() == dynamicOpt) {
 			setAnalysisStrategy();
 			fluoAcqDurationTf.setEditable(true);

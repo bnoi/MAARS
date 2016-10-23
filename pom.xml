@@ -52,7 +52,7 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>TrackMate_</artifactId>
-			<version>3.0.0</version>
+			<!--<version>3.0.0</version>-->
 		</dependency>
 
 		<dependency>
@@ -126,17 +126,10 @@
 			<version>1.4</version>
 		</dependency>
 
-		<!--<dependency>-->
-			<!--<groupId>weka</groupId>-->
-			<!--<artifactId>weka</artifactId>-->
-			<!--<version>3.7.6</version>-->
-		<!--</dependency>-->
-
-		<!-- Need this plugin for writing Big Tiff -->
 		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>bio-formats_plugins</artifactId>
-			<version>5.2.3</version>
+			<!--<version>5.2.3</version>-->
 		</dependency>
     </dependencies>
 
