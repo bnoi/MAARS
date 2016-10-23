@@ -1,7 +1,5 @@
 package edu.univ_tlse3.acquisition;
-import edu.univ_tlse3.utils.FileUtils;
-import ij.IJ;
-import org.micromanager.acquisition.SequenceSettings;
+
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Datastore;
 import org.micromanager.internal.MMStudio;

@@ -1,6 +1,5 @@
 package edu.univ_tlse3.gui;
 
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -11,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -30,7 +28,6 @@ import edu.univ_tlse3.maars.MaarsParameters;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
@@ -57,7 +54,6 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	 */
 	private static final long serialVersionUID = 1L;
 	private MMStudio mm;
-	private CMMCore mmc;
 	private MaarsParameters parameters;
 	private JTextField range;
 	private JTextField step;

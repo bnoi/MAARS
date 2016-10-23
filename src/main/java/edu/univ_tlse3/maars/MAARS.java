@@ -19,7 +19,6 @@ import mmcorej.CMMCore;
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.ChannelSpec;
 import org.micromanager.acquisition.SequenceSettings;
-import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;

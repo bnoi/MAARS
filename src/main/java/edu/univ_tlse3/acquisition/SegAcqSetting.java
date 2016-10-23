@@ -1,8 +1,6 @@
 package edu.univ_tlse3.acquisition;
 
 import edu.univ_tlse3.maars.MaarsParameters;
-import ij.ImagePlus;
-import mmcorej.CMMCore;
 
 import java.awt.*;
 import java.util.ArrayList;
