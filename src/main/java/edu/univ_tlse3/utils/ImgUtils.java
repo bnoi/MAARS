@@ -149,7 +149,7 @@ public class ImgUtils {
                 if (fieldStack == null) {
                     fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight());
                 }
-                fieldStack.addSlice(acqName.split("_", -1)[1], zprojectImg.getStack().getProcessor(1));
+                fieldStack.addSlice(acqName.split("_", -1)[0], zprojectImg.getStack().getProcessor(1));
             }
         }
         ImagePlus fieldImg = new ImagePlus("merged", fieldStack);

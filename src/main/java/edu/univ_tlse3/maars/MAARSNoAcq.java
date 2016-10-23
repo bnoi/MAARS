@@ -97,12 +97,12 @@ public class MAARSNoAcq implements Runnable {
                     e.printStackTrace();
                 }
                 String[] listAcqNames = new File(pathToFluoDir).list();
-                String pattern = "(\\d+)(_)(\\w+)";
+                String pattern = "(\\w+)(_)(\\d+)";
                 ArrayList<Integer> arrayImgFrames = new ArrayList<Integer>();
                 for (String acqName : listAcqNames) {
                     if (Pattern.matches(pattern, acqName)) {
-                        String current_channel = acqName.split("_", -1)[1];
-                        String current_frame = acqName.split("_", -1)[0];
+                        String current_channel = acqName.split("_", -1)[0];
+                        String current_frame = acqName.split("_", -1)[1];
                         if (!arrayChannels.contains(current_channel)) {
                             arrayChannels.add(current_channel);
                         }
@@ -122,7 +122,7 @@ public class MAARSNoAcq implements Runnable {
                     for (String channel : arrayChannels) {
                         int current_frame = arrayImgFrame;
                         IJ.log("Analysing channel " + channel + "_" + current_frame);
-                        String pathToFluoMovie = pathToFluoDir + current_frame + "_" + channel + "_1/"+current_frame + "_" + channel + "_1_MMStack_Pos0.ome.tif";
+                        String pathToFluoMovie = pathToFluoDir + channel+ "_" + current_frame + "/" + channel + "_" + current_frame + "_MMStack_Pos0.ome.tif";
                         ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
                         ImagePlus zProjectedFluoImg;
                         zProjectedFluoImg = ImgUtils.zProject(fluoImage);
@@ -140,6 +140,12 @@ public class MAARSNoAcq implements Runnable {
                 mergedImg.setCalibration(segImg.getCalibration());
                 assert fluoStack != null;
                 mergedImg.setT(fluoStack.getSize());
+                es.shutdown();
+                try {
+                    es.awaitTermination(3, TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 RoiManager.getInstance().reset();
                 RoiManager.getInstance().close();
                 double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
@@ -156,8 +162,10 @@ public class MAARSNoAcq implements Runnable {
         }
         try {
             assert es != null;
-            es.shutdown();
-            es.awaitTermination(120, TimeUnit.MINUTES);
+            if (!es.isShutdown()){
+                es.shutdown();
+                es.awaitTermination(120, TimeUnit.MINUTES);
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

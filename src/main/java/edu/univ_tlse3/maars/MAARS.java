@@ -332,8 +332,6 @@ public class MAARS implements Runnable {
                 }
                 int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
-                Boolean saveFilm = Boolean
-                        .parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES));
                 if (parameters.useDynamic()) {
                     // being dynamic acquisition
                     double startTime = System.currentTimeMillis();
@@ -364,6 +362,7 @@ public class MAARS implements Runnable {
                             IJ.log("Attention : acquisition before took longer than " + this.fluoTimeInterval
                                     / 1000 + " s.");
                         }
+                        IJ.log("Acquisition Done, proceeding to post-analysis");
                     }
                 } else {
                     // being static acquisition
