@@ -361,8 +361,8 @@ public class MAARS implements Runnable {
                             IJ.log("Attention : acquisition before took longer than " + this.fluoTimeInterval
                                     / 1000 + " s.");
                         }
-                        IJ.log("Acquisition Done, proceeding to post-analysis");
                     }
+                    IJ.log("Acquisition Done, proceeding to post-analysis");
                 } else {
                     // being static acquisition
                     for (String channel : arrayChannels) {

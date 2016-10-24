@@ -43,7 +43,7 @@ public class MAARSImgSaver {
                 if (!FileUtils.exists(btfPath)) {
                     ImageStack currentStack = new ImageStack(mergedFullFieldImg.getWidth(),
                             mergedFullFieldImg.getHeight());
-                    for (int j = 1; j <= mergedFullFieldImg.getImageStack().size(); j++) {
+                    for (int j = 1; j <= mergedFullFieldImg.getImageStack().getSize(); j++) {
                         if (mergedFullFieldImg.getStack().getSliceLabel(j).equals(channel)) {
                             currentStack.addSlice(mergedFullFieldImg.getStack().getProcessor(j));
                         }

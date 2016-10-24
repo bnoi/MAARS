@@ -169,7 +169,7 @@ public class ImgUtils {
         if (splitChannel) {
             ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
             HashMap<String, ImageStack> channelStacks = new HashMap<String, ImageStack>();
-            for (int j = 1; j <= croppedImg.getImageStack().size(); j++) {
+            for (int j = 1; j <= croppedImg.getImageStack().getSize(); j++) {
                 // TODO problem here
                 String currentLabel = croppedImg.getImageStack().getSliceLabel(j);
                 if (!channelStacks.containsKey(currentLabel)) {
