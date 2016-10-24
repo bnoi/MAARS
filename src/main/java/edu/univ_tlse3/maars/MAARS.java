@@ -174,7 +174,7 @@ public class MAARS implements Runnable {
                                       Boolean splitChannel, String pathToSegDir, Boolean showChromLagging) {
         // TODO
         PythonPipeline.getMitosisFiles(pathToSegDir, "CFP", "0.1075", "200",
-                String.valueOf(Math.round((fluoTimeInterval/1000))));
+                String.valueOf((Math.round(fluoTimeInterval))));
         if (showChromLagging) {
             MAARS.showChromLaggingCells(pathToSegDir, soc, splitChannel);
         }
