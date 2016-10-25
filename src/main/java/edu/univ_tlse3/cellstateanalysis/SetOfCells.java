@@ -18,6 +18,7 @@ import java.util.NoSuchElementException;
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
     private int iteratorCount = 0;
     private ArrayList<Cell> cellArray;
+    private ArrayList<Integer> cellsWithMoreThan2Spots_ = new ArrayList<Integer>();
 
     public SetOfCells() {
     }
@@ -53,7 +54,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
     /**
      * Method to get Cell corresponding to index
      *
-     * @param index index of cell in cellArray
+     * @param index cell number
      * @return Cell corresponding to index
      */
     public Cell getCell(int index) {
@@ -81,6 +82,16 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
     public void reset() {
         this.iteratorCount = 0;
         this.cellArray = null;
+    }
+
+    public void addPotentialMitosisCell(Integer cellNb){
+        if (!cellsWithMoreThan2Spots_.contains(cellNb)){
+            cellsWithMoreThan2Spots_.add(cellNb);
+        }
+    }
+
+    public ArrayList<Integer> getPotentialMitosisCell(){
+        return cellsWithMoreThan2Spots_;
     }
 
     // iterator related
