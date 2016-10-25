@@ -2,6 +2,7 @@ package edu.univ_tlse3.cellstateanalysis;
 
 import com.google.common.collect.Lists;
 import edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory.FindLagging;
+import edu.univ_tlse3.display.SOCDisplayer;
 import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -30,6 +31,7 @@ public class FluoAnalyzer implements Runnable {
     private int frame;
     private SpotCollection collection;
     private Model model;
+    private SOCDisplayer socDisplayer_;
 
     /**
      * @param fluoImage image to analyze zProjectedFluoImg
@@ -43,7 +45,7 @@ public class FluoAnalyzer implements Runnable {
      */
 
     public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-                        double radius, double quality, int frame) {
+                        double radius, double quality, int frame, SOCDisplayer socDisplayer) {
         this.fluoImage = fluoImage;
         this.fluoImgCal = fluoImage.getCalibration();
         this.soc = soc;
@@ -53,6 +55,7 @@ public class FluoAnalyzer implements Runnable {
         this.radius = radius;
         this.quality = quality;
         this.frame = frame;
+        socDisplayer_ = socDisplayer;
     }
 
     /**
@@ -104,6 +107,7 @@ public class FluoAnalyzer implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        socDisplayer_.updateCellsDisplay(soc);
     }
 
     //private class for analysing cells
@@ -184,8 +188,6 @@ public class FluoAnalyzer implements Runnable {
                     cell.putGeometry(channel, frame, geometry);
                     soc.addPotentialMitosisCell(cell.getCellNumber());
                 }
-                ArrayList<Integer> cellsToDisplay = soc.getPotentialMitosisCell();
-
             }
         }
     }

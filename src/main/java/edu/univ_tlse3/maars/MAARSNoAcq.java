@@ -2,6 +2,7 @@ package edu.univ_tlse3.maars;
 
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
+import edu.univ_tlse3.display.SOCDisplayer;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
@@ -11,6 +12,7 @@ import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatProcessor;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -82,6 +84,16 @@ public class MAARSNoAcq implements Runnable {
                 soc.loadCells(pathToSegDir);
                 // Get the focus slice of BF image
                 soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
+
+                final SOCDisplayer socDisplayer = new SOCDisplayer(soc);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        //Turn off metal's use of bold fonts
+//                        UIManager.put("swing.boldMetal", Boolean.FALSE);
+                        SOCDisplayer.createAndShowGUI(socDisplayer);
+                    }
+                });
+
                 Calibration bfImgCal = null;
                 if (segImg != null) {
                     bfImgCal = segImg.getCalibration();
@@ -131,7 +143,7 @@ public class MAARSNoAcq implements Runnable {
                         es.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc, channel,
                                 Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                 Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                Double.parseDouble(parameters.getChQuality(channel)), current_frame));
+                                Double.parseDouble(parameters.getChQuality(channel)), current_frame, socDisplayer));
                         fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
                     }
                 }

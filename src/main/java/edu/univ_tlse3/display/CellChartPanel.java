@@ -27,7 +27,7 @@ import org.jfree.ui.RefineryUtilities;
 /**
  * Created by tong on 25/10/16.
  */
-public class DisplayCellChart extends ApplicationFrame implements ActionListener{
+public class CellChartPanel extends ApplicationFrame implements ActionListener{
     /** The number of subplots. */
     public static final int SUBPLOT_COUNT = 3;
 
@@ -44,7 +44,7 @@ public class DisplayCellChart extends ApplicationFrame implements ActionListener
      *
      * @param title  the frame title.
      */
-    public DisplayCellChart(final String title) {
+    public CellChartPanel(final String title) {
 
         super(title);
 
@@ -80,28 +80,28 @@ public class DisplayCellChart extends ApplicationFrame implements ActionListener
         axis.setAutoRange(true);
         axis.setFixedAutoRange(60000.0);  // 60 seconds
 
-        final JPanel content = new JPanel(new BorderLayout());
+//        final JPanel content = new JPanel(new BorderLayout());
 
         chartPanel_ = new ChartPanel(chart);
-        content.add(chartPanel_);
+//        content.add(chartPanel_);
 
-        final JPanel buttonPanel = new JPanel(new FlowLayout());
+//        final JPanel buttonPanel = new JPanel(new FlowLayout());
+//
+//        for (int i = 0; i < SUBPLOT_COUNT; i++) {
+//            final JButton button = new JButton("Series " + i);
+//            button.setActionCommand("ADD_DATA_" + i);
+//            button.addActionListener(this);
+//            buttonPanel.add(button);
+//        }
+//        final JButton buttonAll = new JButton("ALL");
+//        buttonAll.setActionCommand("ADD_ALL");
+//        buttonAll.addActionListener(this);
+//        buttonPanel.add(buttonAll);
 
-        for (int i = 0; i < SUBPLOT_COUNT; i++) {
-            final JButton button = new JButton("Series " + i);
-            button.setActionCommand("ADD_DATA_" + i);
-            button.addActionListener(this);
-            buttonPanel.add(button);
-        }
-        final JButton buttonAll = new JButton("ALL");
-        buttonAll.setActionCommand("ADD_ALL");
-        buttonAll.addActionListener(this);
-        buttonPanel.add(buttonAll);
-
-        content.add(buttonPanel, BorderLayout.SOUTH);
+//        content.add(buttonPanel, BorderLayout.SOUTH);
         chartPanel_.setPreferredSize(new java.awt.Dimension(500, 470));
         chartPanel_.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        setContentPane(content);
+//        setContentPane(content);
 
     }
 
@@ -147,17 +147,16 @@ public class DisplayCellChart extends ApplicationFrame implements ActionListener
 
     }
 
-    /**
-     * Starting point for the demonstration application.
-     *
-     * @param args  ignored.
-     */
-    public static void main(final String[] args) {
-
-        final DisplayCellChart demo = new DisplayCellChart("Dynamic Data Demo");
-        demo.pack();
-        RefineryUtilities.centerFrameOnScreen(demo);
-        demo.setVisible(true);
-
-    }
+//    /**
+//     * Starting point for the demonstration application.
+//     *
+//     * @param args  ignored.
+//     */
+//    public static void main(final String[] args) {
+//
+//        final CellChartPanel demo = new CellChartPanel("Dynamic Data Demo");
+//        demo.pack();
+//        RefineryUtilities.centerFrameOnScreen(demo);
+//        demo.setVisible(true);
+//    }
 }

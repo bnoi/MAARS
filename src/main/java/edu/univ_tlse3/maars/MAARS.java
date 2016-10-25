@@ -7,6 +7,7 @@ import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
+import edu.univ_tlse3.display.SOCDisplayer;
 import edu.univ_tlse3.resultSaver.MAARSGeometrySaver;
 import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.resultSaver.MAARSSpotsSaver;
@@ -29,6 +30,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -309,6 +311,16 @@ public class MAARS implements Runnable {
                 soc.reset();
                 soc.loadCells(pathToSegDir);
                 soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
+
+                final SOCDisplayer socDisplayer = new SOCDisplayer(soc);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        //Turn off metal's use of bold fonts
+//                        UIManager.put("swing.boldMetal", Boolean.FALSE);
+                        SOCDisplayer.createAndShowGUI(socDisplayer);
+                    }
+                });
+
                 // ----------------start acquisition and analysis --------//
                 FluoAcqSetting fluoAcq = new FluoAcqSetting(parameters);
                 try {
@@ -336,7 +348,7 @@ public class MAARS implements Runnable {
                                 es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                         Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                        Double.parseDouble(parameters.getChQuality(channel)), frame));
+                                        Double.parseDouble(parameters.getChQuality(channel)), frame, socDisplayer));
                             }
                         }
                         frame++;
@@ -363,7 +375,7 @@ public class MAARS implements Runnable {
                             es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                     Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                    Double.parseDouble(parameters.getChQuality(channel)), frame));
+                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socDisplayer));
                         }
                     }
                 }
