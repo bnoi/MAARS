@@ -142,6 +142,7 @@ public class MAARS implements Runnable {
                     int anaBOnsetFrame = Integer.parseInt(
                             splitName[splitName.length - 1].substring(0, splitName[splitName.length - 1].length() - 4));
                     Cell cell = soc.getCell(cellNb);
+                    cell.setAnaBOnsetFrame(anaBOnsetFrame);
                     ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
                     Collections.sort(spotInBtwnFrames);
                     if (spotInBtwnFrames.size() > 0) {

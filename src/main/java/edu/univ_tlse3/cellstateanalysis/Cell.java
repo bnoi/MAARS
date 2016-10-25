@@ -25,6 +25,7 @@ public class Cell {
 	private SpotsContainer spotContainer;
 	private GeometryContainer geoContainer;
 	private ArrayList<Integer> spotInBetweenFrames = new ArrayList<Integer>();
+	private int anaBOnsetFrame_;
 
 	/**
 	 * @param roiCellShape
@@ -106,5 +107,9 @@ public class Cell {
 
 	public ArrayList<Integer> getSpotInBtwnFrames() {
 		return this.spotInBetweenFrames;
+	}
+
+	public void setAnaBOnsetFrame(int anaBOnsetFrame){
+		anaBOnsetFrame_ = anaBOnsetFrame;
 	}
 }
