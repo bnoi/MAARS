@@ -49,7 +49,6 @@ import java.util.regex.Pattern;
 public class MAARS implements Runnable {
     private PrintStream curr_err;
     private PrintStream curr_out;
-    private double fluoTimeInterval;
     private MMStudio mm;
     private CMMCore mmc;
     private MaarsParameters parameters;
@@ -266,7 +265,7 @@ public class MAARS implements Runnable {
 
         // Acquisition path arrangement
         ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
-        this.fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+        double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
         //prepare executor for image analysis
         int nThread = Runtime.getRuntime().availableProcessors();
         ExecutorService es = Executors.newFixedThreadPool(nThread);
@@ -286,16 +285,7 @@ public class MAARS implements Runnable {
                     .convertPath(original_folder + File.separator + "X" + xPos + "_Y" + yPos);
             //update saving path
             parameters.setSavingPath(pathToSegDir);
-            // autofocus(mm, mmc);
-            String focusDevice = mmc.getFocusDevice();
-            double zFocus = 0;
-            try {
-                zFocus = mmc.getPosition(focusDevice);
-                mmc.waitForDevice(focusDevice);
-            } catch (Exception e) {
-                ReportingUtils.logMessage("could not get z current position");
-                e.printStackTrace();
-            }
+            autofocus(mm, mmc);
 
             //acquisition
             SegAcqSetting segAcq = new SegAcqSetting(parameters);
@@ -351,14 +341,14 @@ public class MAARS implements Runnable {
                         frame++;
                         double acqTook = System.currentTimeMillis() - beginAcq;
                         System.out.println(String.valueOf(acqTook));
-                        if (this.fluoTimeInterval > acqTook) {
+                        if (fluoTimeInterval > acqTook) {
                             try {
-                                Thread.sleep((long) (this.fluoTimeInterval - acqTook));
+                                Thread.sleep((long) (fluoTimeInterval - acqTook));
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         } else {
-                            IJ.log("Attention : acquisition before took longer than " + this.fluoTimeInterval
+                            IJ.log("Attention : acquisition before took longer than " + fluoTimeInterval
                                     / 1000 + " s.");
                         }
                     }
@@ -382,9 +372,9 @@ public class MAARS implements Runnable {
                     long startWriting = System.currentTimeMillis();
                     Boolean splitChannel = true;
                     ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-                    mergedImg.getCalibration().frameInterval = this.fluoTimeInterval / 1000;
+                    mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
                     MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
-                    MAARS.analyzeMitosisDynamic(soc, this.fluoTimeInterval / 1000,
+                    MAARS.analyzeMitosisDynamic(soc, fluoTimeInterval / 1000,
                             splitChannel, pathToSegDir, true);
                     ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                             + " sec for writing results");

@@ -1,7 +1,7 @@
 package edu.univ_tlse3.cellstateanalysis;
 
 import com.google.common.collect.Lists;
-import edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory.FindMerotely;
+import edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory.FindLagging;
 import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
@@ -64,7 +64,7 @@ public class FluoAnalyzer implements Runnable {
         if (fluoImage.getCalibration().getUnit().equals("cm")) {
             fluoImage = ImgUtils.unitCmToMicron(fluoImage);
         }
-        // TODO project or not. Do not project if do 3D detection
+        // TODO projection or not
         ImagePlus zProjectedFluoImg;
         if(fluoImage.getImageStackSize()==1){
             zProjectedFluoImg = fluoImage;
@@ -73,29 +73,8 @@ public class FluoAnalyzer implements Runnable {
             zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
             zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
         }
-        // if (frame == 0) {
-        // ResultsTable resultTable = new ResultsTable();
-        // Analyzer analyzer = new Analyzer(zProjectedFluoImg,
-        // Measurements.MEAN + Measurements.STD_DEV + Measurements.MIN_MAX,
-        // resultTable);
-        // Iterator<Cell> it = soc.iterator();
-        // while (it.hasNext()) {
-        // zProjectedFluoImg.setRoi(it.next().getCellShapeRoi());
-        // analyzer.measure();
-        // zProjectedFluoImg.deleteRoi();
-        // }
-        // resultTable.show(channel + " 0 frame fluo measure");
-        // }
-        // Call trackmate to detect spots
         MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
-
         this.model = trackmate.doDetection(true);
-//		if (frame == 0) {
-//			SelectionModel selectionModel = new SelectionModel(model);
-//			HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);
-//			displayer.render();
-//			displayer.refresh();
-//		}
         int nbCell = soc.size();
         collection = SpotsContainer.getNBestqualitySpots(model.getSpots(), nbCell, maxNbSpot);
         double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
@@ -201,7 +180,7 @@ public class FluoAnalyzer implements Runnable {
                     HashMap<String, Object> geometry = new HashMap<String, Object>();
                     spotSetAnalyzor.compute(geometry, spotSet);
                     ArrayList<Spot> poles = spotSetAnalyzor.getPoles();
-                    new FindMerotely(cell, spotSet, fluoImgCal, poles, radius, frame);
+                    new FindLagging(cell, spotSet, fluoImgCal, poles, radius, frame);
                     cell.putGeometry(channel, frame, geometry);
                 }
             }

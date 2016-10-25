@@ -10,10 +10,10 @@ import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 
-public class FindMerotely {
+public class FindLagging {
 
-    public FindMerotely(Cell cell, Iterable<Spot> spotSet, Calibration fluoImgCal,
-                        ArrayList<Spot> poles, double radius, int frame) {
+    public FindLagging(Cell cell, Iterable<Spot> spotSet, Calibration fluoImgCal,
+                       ArrayList<Spot> poles, double radius, int frame) {
         // TODO to specify in gui that GFP for Kt and cfp for
         // spbs for exemple
         double discardLaggingSpotRange = 1;
