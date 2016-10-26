@@ -179,48 +179,48 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--<plugin>-->
-				<!--<artifactId>maven-enforcer-plugin</artifactId>-->
-				<!--<configuration>-->
-					<!--<rules>-->
-						<!--<banClasses-->
-							<!--implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">-->
-							<!--<dependencies>-->
-								<!--&lt;!&ndash; org.json clashes &ndash;&gt;-->
-								<!--<dependency>-->
-									<!--<artifactId>MMJ_</artifactId>-->
-									<!--<ignoreClasses>-->
-										<!--<ignoreClass>org/json/*</ignoreClass>-->
-									<!--</ignoreClasses>-->
-								<!--</dependency>-->
-								<!--<dependency>-->
-									<!--<artifactId>mines-jtk</artifactId>-->
-									<!--<ignoreClasses>-->
-										<!--<ignoreClass>edu/mines/jtk/*</ignoreClass>-->
-									<!--</ignoreClasses>-->
-								<!--</dependency>-->
-								<!--<dependency>-->
-									<!--<artifactId>batik</artifactId>-->
-									<!--<ignoreClasses>-->
-										<!--<ignoreClass>org/apache/commons/io/*</ignoreClass>-->
-										<!--<ignoreClass>org/apache/xerces/*</ignoreClass>-->
-										<!--<ignoreClass>org/apache/html/*</ignoreClass>-->
-										<!--<ignoreClass>org/apache/wml/*</ignoreClass>-->
-										<!--<ignoreClass>org/w3c/dom/*</ignoreClass>-->
-										<!--<ignoreClass>javax/xml/*</ignoreClass>-->
-										<!--<ignoreClass>org/xml/sax/helpers/*</ignoreClass>-->
-										<!--<ignoreClass>org/apache/commons/logging/*</ignoreClass>-->
-										<!--<ignoreClass>org/xml/sax/*</ignoreClass>-->
-										<!--<ignoreClass>org/apache/xmlcommons/*</ignoreClass>-->
-										<!--<ignoreClass>org/apache/xml/serialize/*</ignoreClass>-->
-									<!--</ignoreClasses>-->
-								<!--</dependency>-->
-							<!--</dependencies>-->
-							<!--<findAllDuplicates>true</findAllDuplicates>-->
-						<!--</banClasses>-->
-					<!--</rules>-->
-				<!--</configuration>-->
-			<!--</plugin>-->
+			<plugin>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<configuration>
+					<rules>
+						<banClasses
+							implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
+							<dependencies>
+								<!-- org.json clashes -->
+								<dependency>
+									<artifactId>MMJ_</artifactId>
+									<ignoreClasses>
+										<ignoreClass>org/json/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>mines-jtk</artifactId>
+									<ignoreClasses>
+										<ignoreClass>edu/mines/jtk/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+								<dependency>
+									<artifactId>batik</artifactId>
+									<ignoreClasses>
+										<ignoreClass>org/apache/commons/io/*</ignoreClass>
+										<ignoreClass>org/apache/xerces/*</ignoreClass>
+										<ignoreClass>org/apache/html/*</ignoreClass>
+										<ignoreClass>org/apache/wml/*</ignoreClass>
+										<ignoreClass>org/w3c/dom/*</ignoreClass>
+										<ignoreClass>javax/xml/*</ignoreClass>
+										<ignoreClass>org/xml/sax/helpers/*</ignoreClass>
+										<ignoreClass>org/apache/commons/logging/*</ignoreClass>
+										<ignoreClass>org/xml/sax/*</ignoreClass>
+										<ignoreClass>org/apache/xmlcommons/*</ignoreClass>
+										<ignoreClass>org/apache/xml/serialize/*</ignoreClass>
+									</ignoreClasses>
+								</dependency>
+							</dependencies>
+							<findAllDuplicates>true</findAllDuplicates>
+						</banClasses>
+					</rules>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
