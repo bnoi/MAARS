@@ -7,7 +7,7 @@ import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
-import edu.univ_tlse3.display.SOCDisplayer;
+import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.resultSaver.MAARSGeometrySaver;
 import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.resultSaver.MAARSSpotsSaver;
@@ -312,12 +312,12 @@ public class MAARS implements Runnable {
                 soc.loadCells(pathToSegDir);
                 soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 
-                final SOCDisplayer socDisplayer = new SOCDisplayer(soc);
+                final SOCVisualizer socVisualizer = new SOCVisualizer();
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         //Turn off metal's use of bold fonts
-//                        UIManager.put("swing.boldMetal", Boolean.FALSE);
-                        SOCDisplayer.createAndShowGUI(socDisplayer);
+                        UIManager.put("swing.boldMetal", Boolean.FALSE);
+                        socVisualizer.createAndShowGUI();
                     }
                 });
 
@@ -348,7 +348,7 @@ public class MAARS implements Runnable {
                                 es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                         Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                        Double.parseDouble(parameters.getChQuality(channel)), frame, socDisplayer));
+                                        Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer));
                             }
                         }
                         frame++;
@@ -375,7 +375,7 @@ public class MAARS implements Runnable {
                             es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                     Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socDisplayer));
+                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer));
                         }
                     }
                 }

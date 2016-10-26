@@ -10,14 +10,15 @@ import java.util.HashMap;
 
 public class SpotSetAnalyzor {
 	// Names of parameters
-	private final static String NbOfSpotDetected = "NbOfSpotDetected";
-	private final static String SpAngToMaj = "SpAngToMaj";
-	private final static String SpLength = "SpLength";
-	private final static String SpCenterX = "SpCenterX";
-	private final static String SpCenterY = "SpCenterY";
-	private final static String SpCenterZ = "SpCenterZ";
-	private final static String CellCenterToSpCenterLen = "CellCenterToSpCenterLen";
-	private final static String CellCenterToSpCenterAng = "CellCenterToSpCenterAng";
+	public final static String NbOfSpotDetected = "NbOfSpotDetected";
+	public final static String SpAngToMaj = "SpAngToMaj";
+	public final static String SpLength = "SpLength";
+	public final static String SpCenterX = "SpCenterX";
+	public final static String SpCenterY = "SpCenterY";
+	public final static String SpCenterZ = "SpCenterZ";
+	public final static String CellCenterToSpCenterLen = "CellCenterToSpCenterLen";
+	public final static String CellCenterToSpCenterAng = "CellCenterToSpCenterAng";
+	public final static String[] GeoParamSet = {NbOfSpotDetected, SpAngToMaj, SpLength, CellCenterToSpCenterLen, CellCenterToSpCenterAng};
 	private double fakeSpotQuality = 0;
 	// z equals to 0 because fitting ellipse in Analyzer do not give z
 	// position.
@@ -63,7 +64,7 @@ public class SpotSetAnalyzor {
 		// soc, because it's back-up
 		// cptgeometry.centerSpots(spotSet);
 		int setSize = Iterables.size(spotSet);
-		geometry.put(SpotSetAnalyzor.NbOfSpotDetected, setSize);
+		geometry.put(NbOfSpotDetected, setSize);
 		if (setSize > 1) {
 			poles = findMostDistant2Spots(spotSet);
 			Vector3D polesVec = getSpAsVector(poles);

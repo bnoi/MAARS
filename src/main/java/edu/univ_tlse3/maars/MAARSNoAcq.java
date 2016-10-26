@@ -2,7 +2,7 @@ package edu.univ_tlse3.maars;
 
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
-import edu.univ_tlse3.display.SOCDisplayer;
+import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
@@ -85,12 +85,12 @@ public class MAARSNoAcq implements Runnable {
                 // Get the focus slice of BF image
                 soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 
-                final SOCDisplayer socDisplayer = new SOCDisplayer(soc);
+                final SOCVisualizer socVisualizer = new SOCVisualizer();
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         //Turn off metal's use of bold fonts
-//                        UIManager.put("swing.boldMetal", Boolean.FALSE);
-                        SOCDisplayer.createAndShowGUI(socDisplayer);
+                        UIManager.put("swing.boldMetal", Boolean.FALSE);
+                        socVisualizer.createAndShowGUI();
                     }
                 });
 
@@ -143,7 +143,7 @@ public class MAARSNoAcq implements Runnable {
                         es.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc, channel,
                                 Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                 Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                Double.parseDouble(parameters.getChQuality(channel)), current_frame, socDisplayer));
+                                Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer));
                         fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
                     }
                 }
