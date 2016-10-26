@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>sc.fiji</groupId>
 		<artifactId>pom-fiji</artifactId>
-		<version>17.0.0</version>
+		<version>26.1.1</version>
 	</parent>
 
 	<artifactId>MAARS_</artifactId>
@@ -16,7 +16,8 @@
 	<description>A Micro-Manager plugin for cell biology analysis</description>
 
 	<properties>
-		<scijava.jvm.version>1.7</scijava.jvm.version>
+		<scijava.jvm.version>1.8</scijava.jvm.version>
+		<!--<maven.javadoc.skip>true</maven.javadoc.skip>-->
 	</properties>
 
 	<developers>

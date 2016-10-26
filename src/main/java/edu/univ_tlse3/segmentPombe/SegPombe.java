@@ -68,6 +68,7 @@ public class SegPombe {
 
     /**
      * Constructor
+     * @param parameters parameters for segmentation
      */
     public SegPombe(SegPombeParameters parameters) {
         this.imageToAnalyze = parameters.getImageToAnalyze();
@@ -415,6 +416,7 @@ public class SegPombe {
 
     /**
      * Return if any roi detected
+     * @return if MAARS got cells detected
      */
     public boolean roiDetected() {
         return this.roiDetected;

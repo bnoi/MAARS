@@ -42,8 +42,9 @@ public class FluoAnalyzer implements Runnable {
      * @param maxNbSpot max number of spot in corresponding channel
      * @param radius    radius of spot in corresponding channel
      * @param frame     time point
+     * @param quality   user predefined quality threshold for spot selection
+     * @param socVisualizer a JFreeChart based display to show cell params
      */
-
     public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
                         double radius, double quality, int frame, SOCVisualizer socVisualizer) {
         this.fluoImage = fluoImage;

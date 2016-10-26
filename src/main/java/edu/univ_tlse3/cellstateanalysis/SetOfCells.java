@@ -24,6 +24,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
     }
 
     /**
+     * @param pathToSegDir path to segmentation directory
      */
     public void loadCells(String pathToSegDir) {
         IJ.log("Loading Cells");

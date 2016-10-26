@@ -183,7 +183,7 @@ public class MAARS implements Runnable {
     }
 
     /**
-     * A MAARS need specific autofocus process based on JAF(H&P) sharpness
+     * A MAARS need specific autofocus process based on JAF(HP) sharpness
      * autofocus
      *
      * @param mm  MMStudio object (gui)

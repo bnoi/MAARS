@@ -5,15 +5,16 @@ import mmcorej.CMMCore;
 /**
  * ExplorationXYPositions give positions for exploration of an area following this pattern :
  *        X
- *   +--------------->
- *   |  1    6 -> 7
+ *   +---------------
+ *   |  1    6 -  7
  *   |  |    ^    |
  *   |  v    |    v
  * Y |  2    5    8
  *   |  |    ^    |
  *   |  v    |    v
- *   |  3 -> 4    9
+ *   |  3 -  4    9
  *   |
+ *   v
  *   v
  * this is an example for 3 fields x and 3 fields y
  * 
@@ -30,6 +31,7 @@ public class ExplorationXYPositions {
 	 * in microns
 	 * 
 	 * @param parameters
+	 * @param mmc
 	 * MAARS Parameters object
 	 */
 	public ExplorationXYPositions(CMMCore mmc, MaarsParameters parameters) {

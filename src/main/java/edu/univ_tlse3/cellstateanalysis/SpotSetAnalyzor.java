@@ -112,6 +112,8 @@ public class SpotSetAnalyzor {
 	/**
 	 * re-calculate the position of poles. Newly returned coordinates
 	 * corresponding the one in cropped image
+	 * @param spotSet set of spots
+	 * @return spotSet changed set of spots
 	 */
 	public Iterable<Spot> centerSpots(Iterable<Spot> spotSet) {
 		for (Spot s : spotSet) {

@@ -159,9 +159,10 @@ public class ImgUtils {
 
     /**
      * crop ROIs from merged field-wide image
-     *
+     * @param cell  Cell object from MAARS
+     * @param splitChannel  return data in splitChannels or not
      * @param mergedImg merged full field fluo image
-     * @return HashMap<cellNB,corresponding cropped img>
+     * @return HashMap of cellNB,corresponding cropped img
      */
     public static HashMap<String, ImagePlus> cropMergedImpWithRois(Cell cell, ImagePlus mergedImg,
                                                                    Boolean splitChannel) {
@@ -196,7 +197,7 @@ public class ImgUtils {
      * convert a list of Image to an ImagePlus
      *
      * @param listImg list of Images
-     * @param channelName
+     * @param channelName name of the channel
      * @return imageplus
      */
     public static ImagePlus convertImages2Imp(List<Image> listImg, String channelName) {
@@ -215,8 +216,7 @@ public class ImgUtils {
     }
 
     /**
-     * @param pathToImage
-     * @return ImagePlus
+     * @param pathToImage saving path of big tiff file
      */
     public static void loadBigTiff(String pathToImage){
         LociImporter importer = new LociImporter();

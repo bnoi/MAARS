@@ -173,7 +173,7 @@ public class MaarsParameters {
 	/**
 	 * Write the parameters into the configuration file
 	 *
-	 * @throws IOException
+	 * @throws IOException error than can not write xml file
 	 */
 	public void save() throws IOException {
 		doc.setContent(root);
@@ -186,7 +186,7 @@ public class MaarsParameters {
 	 * The few following colors are return as Color object : GREEN, CYAN, RED,
 	 * BLUE, WHITE NB : return GRAY if unknown color
 	 *
-	 * @param colorName
+	 * @param colorName name of the color
 	 * @return Color
 	 */
 	public static Color getColor(String colorName) {
@@ -241,7 +241,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 *
+	 * @param parameter name of fluo parameter
 	 * @return time limit of fluorescence acquisition for one acquisition
 	 */
 	public String getFluoParameter(final String parameter) {
@@ -249,7 +249,7 @@ public class MaarsParameters {
 	}
 
 	/**
-	 *
+	 * @param parameter name of fluo parameter
 	 * @return time limit of fluorescence acquisition for one acquisition
 	 */
 	public String getSegmentationParameter(final String parameter) {
@@ -340,8 +340,8 @@ public class MaarsParameters {
 	/**
 	 * update value of x or y field number of exloration
 	 *
-	 * @param xOrY
-	 * @param value
+	 * @param xOrY dimension to be updated
+	 * @param value new value
 	 */
 	public void setFieldNb(final String xOrY, String value) {
 		root.getChild(EXPLORATION_PARAMETERS).getChild(xOrY).setText(value);
@@ -382,9 +382,8 @@ public class MaarsParameters {
 	}
 
 	/**
-	 *
-	 * @param ch:
-	 *            GFP, CFP, DAPI, TXRED
+	 * @param ch	GFP, CFP, DAPI, TXRED
+	 * @param maxNbSpot maximum number of spot for corresponding channel
 	 */
 	public void setChMaxNbSpot(String ch, String maxNbSpot) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(MAXIMUM_NUMBER_OF_SPOT)
@@ -393,8 +392,8 @@ public class MaarsParameters {
 
 	/**
 	 *
-	 * @param ch:
-	 *            GFP, CFP, DAPI, TXRED
+	 * @param ch	GFP, CFP, DAPI, TXRED
+	 * @param spotRaidus spotRaidus for corresponding channel
 	 */
 	public void setChSpotRaius(String ch, String spotRaidus) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(SPOT_RADIUS)
@@ -403,8 +402,8 @@ public class MaarsParameters {
 
 	/**
 	 *
-	 * @param ch:
-	 *            GFP, CFP, DAPI, TXRED
+	 * @param ch	GFP, CFP, DAPI, TXRED
+	 * @param quality    quality of spots for corresponding channel
 	 */
 	public void setChQuality(String ch, String quality) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(QUALITY).setText(quality);
@@ -413,20 +412,21 @@ public class MaarsParameters {
 	/**
 	 * set channels to USING channel
 	 *
-	 * @param channels
+	 * @param channels channels that are being using for acquisitions
 	 */
 	public void setUsingChannels(String channels) {
 		root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(USING).setText(channels);
 	}
 
 	/**
-	 *
+	 * @param root the dataset of this class
 	 */
 	public void setRoot(Element root){
 		this.root = root;
 	}
 	/**
 	 * duplicate this object
+	 * @return the a duplicate version of this class
 	 */
 	public MaarsParameters duplicate(){
 		Element newRoot = root.clone();

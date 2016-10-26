@@ -39,8 +39,8 @@ public class FileUtils {
 	/**
 	 * if current path do not exists, create a new one
 	 * 
-	 * @param pathToFluoDir
-	 * folder to create
+	 * @param pathToFluoDir	folder to create
+	 * @return succeed to create de dir or not
 	 */
 	public static Boolean createFolder(String pathToFluoDir) {
 		File fluoDir = new File(pathToFluoDir);

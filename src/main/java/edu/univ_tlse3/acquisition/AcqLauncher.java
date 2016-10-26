@@ -25,7 +25,7 @@ public class AcqLauncher {
     }
 
     /**
-     * @param acqEng
+     * @param acqEng customized acquisition engine
      * @return a duplicate of acquired images.
      */
     public static ImagePlus acquire(AcquisitionWrapperEngine acqEng) {

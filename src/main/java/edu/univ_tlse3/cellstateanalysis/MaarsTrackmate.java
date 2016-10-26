@@ -44,6 +44,8 @@ public class MaarsTrackmate {
     /**
      * Take parameters in the constructor then initalize trakemate object to get
      * unfiltered spots.
+     * @param computeFeatures to compute or not features of spots
+     * @return Model a Trackmate style data structure
      */
     public Model doDetection(boolean computeFeatures) {
         TrackMate trackmate = new TrackMate(settings);

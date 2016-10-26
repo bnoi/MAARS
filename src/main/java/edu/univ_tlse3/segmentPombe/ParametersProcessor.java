@@ -256,6 +256,8 @@ public class ParametersProcessor {
     /**
      * Method to shrink the image scale if it is bigger than supposed to the
      * maximum width an height that are in pixels
+     * @param maxHeight new height
+     * @param maxWidth  new width
      */
     public void changeScale(int maxWidth, int maxHeight) {
         int newWidth;
@@ -432,8 +434,10 @@ public class ParametersProcessor {
     /**
      * Allows to convert width or height or depth of a size in pixels to a size
      * in microns. To choose if you want to convert width or height you can use
-     * CellsBoundaries constants : WIDTH and HEIGHT and DEPTH. Return an double
-     * width or height in microns.
+     * CellsBoundaries constants : WIDTH and HEIGHT and DEPTH.
+     * @param pixelSize     a size in pixels
+     * @param widthOrHeightOrDepth Dimension
+     * @return Return an double width or height in microns.
      */
     public double convertPixelToMicron(int pixelSize, int widthOrHeightOrDepth) {
 

@@ -37,6 +37,7 @@ public class CellChartPanel {
 
     /**
      * Constructs a new demonstration application.
+     * @param c cell object of MAARS
      */
     public CellChartPanel(Cell c) {
 

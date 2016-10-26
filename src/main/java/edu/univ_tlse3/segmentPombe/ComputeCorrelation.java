@@ -9,12 +9,11 @@ public class ComputeCorrelation {
     // it is -1 for image with cell boundaries be black then white
     // it is 1 for image with cell boundaries be white then black
 
-	/*
+	/**
      * f is the function which is going to be integrated on z : Iz[z] * (z - zf)
 	 * * np.exp(-(zf - z) ** 2 / (2 * sigma ** 2)) CorrelationPixVal f = new
 	 * CorrelationPixVal(iz, zf, sigma);
 	 */
-
     public ComputeCorrelation(float[] iz, float zf, float sigma, int direction) {
         this.iz = iz;
         this.zf = zf;
@@ -34,6 +33,9 @@ public class ComputeCorrelation {
     /**********************************************************************
      * Integrate f from a to b using Simpson's rule. Increase N for more
      * precision.
+     * @param a beginning of interval
+     * @param b end of interval
+     * @return double integrate number
      **********************************************************************/
     public double integrate(double a, double b) {
         int N = 100; // precision parameter
