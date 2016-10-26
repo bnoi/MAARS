@@ -288,7 +288,7 @@ public class MAARS implements Runnable {
                     .convertPath(original_folder + File.separator + "X" + xPos + "_Y" + yPos);
             //update saving path
             parameters.setSavingPath(pathToSegDir);
-            autofocus(mm, mmc);
+//            autofocus(mm, mmc);
 
             //acquisition
             SegAcqSetting segAcq = new SegAcqSetting(parameters);
@@ -362,7 +362,7 @@ public class MAARS implements Runnable {
                             }
                         } else {
                             IJ.log("Attention : acquisition before took longer than " + fluoTimeInterval
-                                    / 1000 + " s.");
+                                    / 1000 + " s : " + acqTook);
                         }
                     }
                     IJ.log("Acquisition Done, proceeding to post-analysis");

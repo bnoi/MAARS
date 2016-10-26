@@ -343,6 +343,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		tmpTf = (JFormattedTextField) jp.getComponent(3);
 		double quality = Double.parseDouble((String) tmpTf.getValue());
 		// ImagePlus img = IJ.getImage().duplicate();
+		img.show();
 		ImagePlus zProjectedFluoImg = ImgUtils.zProject(img);
 		zProjectedFluoImg.setCalibration(img.getCalibration());
 		MaarsTrackmate tmTest = new MaarsTrackmate(zProjectedFluoImg, spotRadius, quality);
@@ -379,6 +380,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		FluoAcqSetting acq = new FluoAcqSetting(testParam);
 
 		SequenceSettings fluoAcqSetting = acq.configAcqSettings(acq.configChannels(channelName));
+		fluoAcqSetting.keepShutterOpenSlices = true;
 		AcquisitionWrapperEngine acqEng = mm.getAcquisitionEngine();
 		acqEng.setSequenceSettings(fluoAcqSetting);
 		acqEng.enableZSliceSetting(true);

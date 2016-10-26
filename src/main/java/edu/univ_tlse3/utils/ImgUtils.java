@@ -230,6 +230,6 @@ public class ImgUtils {
     public static ImageProcessor image2imp(Image image){
         MMStudio mm = MMStudio.getInstance();
         ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
-        return imgProcessor.convertToByteProcessor();
+        return imgProcessor.convertToFloatProcessor();
     }
 }

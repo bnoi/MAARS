@@ -53,8 +53,8 @@ public class FluoAcqSetting {
         fluoAcqSetting.root = savingRoot_;
         fluoAcqSetting.channels = channelSpecs;
         fluoAcqSetting.shouldDisplayImages= false;
-        fluoAcqSetting.keepShutterOpenSlices = false;
-        fluoAcqSetting.keepShutterOpenChannels = false;
+        fluoAcqSetting.keepShutterOpenSlices = true;
+        fluoAcqSetting.keepShutterOpenChannels = true;
         fluoAcqSetting.channelGroup = channelGroup_;
         fluoAcqSetting.slicesFirst = true;
         fluoAcqSetting.intervalMs = interval;

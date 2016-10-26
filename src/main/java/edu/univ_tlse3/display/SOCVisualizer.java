@@ -53,13 +53,14 @@ public class SOCVisualizer extends JPanel{
                     cellChartPanel.getChartPanel().setVisible(true);
                     contentPane.add(cellChartPanel.getChartPanel());
                     lastChartPanel[0] = cellChartPanel.getChartPanel();
-                    frame.repaint();
-                    frame.revalidate();
+                    SwingUtilities.updateComponentTreeUI(frame);
                 }
             }
         });
         //Add content to the window.
-        contentPane.add(new JScrollPane(cellToDisplayList), BorderLayout.WEST,0);
+        JScrollPane scrollPane = new JScrollPane(cellToDisplayList);
+        scrollPane.setMinimumSize(new Dimension(200,400));
+        contentPane.add(scrollPane, BorderLayout.WEST,0);
         contentPane.add(lastChartPanel[0], BorderLayout.CENTER,1);
 
         frame.validate();
