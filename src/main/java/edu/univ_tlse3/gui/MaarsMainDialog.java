@@ -43,6 +43,7 @@ public class MaarsMainDialog implements ActionListener {
    private JCheckBox withOutAcqChk;
    private JRadioButton dynamicOpt;
    private JRadioButton staticOpt;
+   private MaarsFluoAnalysisDialog fluoDialog_;
 
    /**
     * Constructor
@@ -363,7 +364,11 @@ public class MaarsMainDialog implements ActionListener {
          new MaarsSegmentationDialog(parameters);
       } else if (e.getSource() == fluoAnalysisButton) {
          saveParameters();
-         new MaarsFluoAnalysisDialog(mm, parameters);
+         if (fluoDialog_ != null){
+            fluoDialog_.setVisible(true);
+         }else{
+            fluoDialog_ = new MaarsFluoAnalysisDialog(mm, parameters);
+         }
       } else if (e.getSource() == dynamicOpt) {
          setAnalysisStrategy();
          fluoAcqDurationTf.setEditable(true);

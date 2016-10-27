@@ -17,7 +17,7 @@ import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
+import java.util.List;
 
 /*
  * MaarsParameters reads a configuration file written as a XML,
@@ -324,8 +324,8 @@ public class MaarsParameters {
    /**
     *@return iterator of all channels
     */
-   public Iterator<Attribute> getAllChannels(){
-      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getAttributes().iterator();
+   public List<Element> getAllChannels(){
+      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChildren();
    }
 
    //////////// Setters

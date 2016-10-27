@@ -12,7 +12,8 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
 
-import org.jdom2.Attribute;
+import org.apache.commons.lang.StringUtils;
+import org.jdom2.Element;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.internal.MMStudio;
@@ -25,10 +26,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
- * Class to create and display a dialog to get parameters of the fluorescent
+ * Class to create and display a dialog to get parameters_ of the fluorescent
  * analysis (detection and measurement of mitotic spindle)
  *
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
@@ -39,9 +40,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     *
     */
    private static final long serialVersionUID = 1L;
-   private static String NONE = "None";
    private MMStudio mm;
-   private MaarsParameters parameters;
+   private MaarsParameters parameters_;
    private JTextField range;
    private JTextField step;
    private JTextField timeInterval;
@@ -71,28 +71,29 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JCheckBox useChannel2_;
    private JCheckBox useChannel3_;
    private static Integer TOTAL_PARAMETERS = 4;
+   private ArrayList<JPanel> chPanels = new ArrayList<JPanel>();
 
    /**
     * Constructor :
     *
-    * @param parameters : parameters displayed in dialog
+    * @param parameters : parameters_ displayed in dialog
     */
    public MaarsFluoAnalysisDialog(MMStudio mm, MaarsParameters parameters) {
 
       // set up this dialog
       this.mm = mm;
-      this.parameters = parameters;
+      this.parameters_ = parameters;
       this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       // this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-      this.setTitle("MAARS - Fluorescent Analysis parameters");
+      this.setTitle("MAARS - Fluorescent Analysis parameters_");
       this.setBackground(Color.WHITE);
       this.setLayout(new GridLayout(0, 1));
       this.setMinimumSize(new Dimension(250, 500));
       Color labelColor = Color.ORANGE;
 
-      // Movie parameters label
+      // Movie parameters_ label
 
-      Label fluoMovieLabel = new Label("Movie parameters", Label.CENTER);
+      Label fluoMovieLabel = new Label("Movie parameters_", Label.CENTER);
       fluoMovieLabel.setBackground(labelColor);
 
       //
@@ -100,7 +101,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       JPanel fluoRangePanel = new JPanel(new GridLayout(1, 2));
       JLabel rangeTitle = new JLabel("Range (micron) : ", SwingConstants.CENTER);
       int fieldLength = 8;
-      range = new JTextField(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE), fieldLength);
+      range = new JTextField(parameters_.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE), fieldLength);
       fluoRangePanel.add(rangeTitle);
       fluoRangePanel.add(range);
 
@@ -108,7 +109,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       JPanel fluoStepPanel = new JPanel(new GridLayout(1, 2));
       JLabel stepTitle = new JLabel("Step (micron) : ", SwingConstants.CENTER);
-      step = new JTextField(parameters.getFluoParameter(MaarsParameters.STEP), fieldLength);
+      step = new JTextField(parameters_.getFluoParameter(MaarsParameters.STEP), fieldLength);
       fluoStepPanel.add(stepTitle);
       fluoStepPanel.add(step);
 
@@ -116,7 +117,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       JPanel timeIntervalPanel = new JPanel(new GridLayout(1, 2));
       JLabel timeIntervalTitle = new JLabel("Time Interval (ms) : ", SwingConstants.CENTER);
-      timeInterval = new JTextField(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL), fieldLength);
+      timeInterval = new JTextField(parameters_.getFluoParameter(MaarsParameters.TIME_INTERVAL), fieldLength);
       timeIntervalPanel.add(timeIntervalTitle);
       timeIntervalPanel.add(timeInterval);
       timeInterval.addKeyListener(new KeyListener() {
@@ -144,7 +145,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       JPanel checkBoxPanel = new JPanel(new GridLayout(1, 0));
       saveFlims = new JCheckBox("Save Movies",
-              Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
+              Boolean.parseBoolean(parameters_.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
       doAnalysis = new JCheckBox("Do Analysis", true);
       checkBoxPanel.add(saveFlims);
       checkBoxPanel.add(doAnalysis);
@@ -203,6 +204,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel1Panel.add(spotRadiusCh1Tf);
       channel1Panel.add(qualityCh1Tf);
       channel1Panel.add(test1);
+      chPanels.add(channel1Panel);
       //
 
       channel2Panel = new JPanel(new GridLayout(1, 0));
@@ -240,6 +242,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel2Panel.add(spotRadiusCh2Tf);
       channel2Panel.add(qualityCh2Tf);
       channel2Panel.add(test2);
+      chPanels.add(channel2Panel);
 
       //
 
@@ -277,21 +280,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel3Panel.add(spotRadiusCh3Tf);
       channel3Panel.add(qualityCh3Tf);
       channel3Panel.add(test3);
-
-      //
-
-      String channelsString = parameters.getUsingChannels();
-      String[] arrayChannels = channelsString.split(",", -1);
-//      if (arrayChannels.length == 1) {
-//         setChPanelValue(channel1Panel, arrayChannels[0]);
-//      } else if (arrayChannels.length == 2) {
-//         setChPanelValue(channel1Panel, arrayChannels[0]);
-//         setChPanelValue(channel2Panel, arrayChannels[1]);
-//      } else if (arrayChannels.length == 3) {
-//         setChPanelValue(channel1Panel, arrayChannels[0]);
-//         setChPanelValue(channel2Panel, arrayChannels[1]);
-//         setChPanelValue(channel3Panel, arrayChannels[2]);
-//      }
+      chPanels.add(channel3Panel);
 
       //
 
@@ -309,9 +298,20 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       configurationCombo_ = new JComboBox(mm.getCore().getAvailableConfigGroups().toArray());
       configurationCombo_.addActionListener(this);
-      configurationCombo_.setSelectedItem(parameters.getChannelGroup());
+      configurationCombo_.setSelectedItem(parameters_.getChannelGroup());
       configurationGroupPanel.add(configurationGroupLabel, BorderLayout.NORTH);
       configurationGroupPanel.add(configurationCombo_, BorderLayout.SOUTH);
+
+      //
+
+
+      String channelsString = parameters_.getUsingChannels();
+      String[] arrayChannels = channelsString.split(",", -1);
+      for (int i = 0; i<arrayChannels.length; i++){
+         JComboBox tmpChannelCombo = (JComboBox) chPanels.get(i).getComponent(1);
+         tmpChannelCombo.setSelectedItem(arrayChannels[i]);
+      }
+
       //
 
 
@@ -340,26 +340,38 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    }
 
    /**
-    * @return parameters
+    *
+    * @param jp   the panel which contains informations about corresponding panel
+    * @param ch   channel name
     */
-   public MaarsParameters getParameters() {
-      return parameters;
-   }
-
    private void setChPanelValue(JPanel jp, String ch) {
-      Iterator<Attribute> itr = parameters.getAllChannels();
-      while (itr.hasNext()){
-         if (ch.equals(itr.next())){
+      for (Element element : parameters_.getAllChannels()){
+         if (ch != null && ch.equals(element.getName())){
+             JCheckBox tmpChk = (JCheckBox) jp.getComponent(0);
+             if (tmpChk.isSelected()){
+                 JButton tmpButton = (JButton) jp.getComponent(TOTAL_PARAMETERS+1);
+                 tmpButton.setEnabled(true);
+             }
             JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(2);
-            tmpTf.setValue(parameters.getChMaxNbSpot(ch));
+            tmpTf.setValue(parameters_.getChMaxNbSpot(ch));
             tmpTf = (JFormattedTextField) jp.getComponent(3);
-            tmpTf.setValue(parameters.getChSpotRaius(ch));
+            tmpTf.setValue(parameters_.getChSpotRaius(ch));
             tmpTf = (JFormattedTextField) jp.getComponent(4);
-            tmpTf.setValue(parameters.getChQuality(ch));
+            tmpTf.setValue(parameters_.getChQuality(ch));
+            JComboBox tmpCombo = (JComboBox)jp.getComponent(1);
+            String tmpCh = (String) tmpCombo.getSelectedItem();
+            if (tmpCh!=null && !tmpCh.equals(ch)){
+               tmpCombo.setSelectedItem(ch);
+            }
          }
       }
    }
 
+   /**
+    *
+    * @param jp   the panel which contains informations about corresponding panel
+    * @param enable  enable or not
+    */
    private void enableChannelPanel(JPanel jp, Boolean enable){
       if (enable) {
          for (int i = 1; i <= TOTAL_PARAMETERS+1; i++){
@@ -373,6 +385,10 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    }
 
+   /**
+    *
+    * @param jp   the panel which contains informations about corresponding panel
+    */
    private void updateChSetting(JPanel jp){
       JComboBox tmpCombo = (JComboBox) jp.getComponent(1);
       String selectedChannel = (String) tmpCombo.getSelectedItem();
@@ -380,38 +396,36 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    }
 
    /**
-    * retrieve parameters from interface and update parameter object, then
+    * retrieve parameters_ from interface and update parameter object, then
     * return selected channels
     *
     * @return channels : list of selected object
     */
-   private String updateMAARSFluoChParameters() {
-      String channels;
-      String channel1 = channel1Combo.getSelectedItem().toString();
-      parameters.setChMaxNbSpot(channel1, maxNumberSpotCh1Tf.getText());
-      parameters.setChSpotRaius(channel1, spotRadiusCh1Tf.getText());
-      parameters.setChQuality(channel1, qualityCh1Tf.getText());
-      if (!channel2Combo.getSelectedItem().equals(NONE)) {
-         String channel2 = channel2Combo.getSelectedItem().toString();
-         parameters.setChMaxNbSpot(channel2, maxNumberSpotCh2Tf.getText());
-         parameters.setChSpotRaius(channel2, spotRadiusCh2Tf.getText());
-         parameters.setChQuality(channel2, qualityCh2Tf.getText());
-         if (!channel3Combo.getSelectedItem().equals(NONE)) {
-            String channel3 = channel3Combo.getSelectedItem().toString();
-            parameters.setChMaxNbSpot(channel3, maxNumberSpotCh3Tf.getText());
-            parameters.setChSpotRaius(channel3, spotRadiusCh3Tf.getText());
-            parameters.setChQuality(channel3, qualityCh3Tf.getText());
-            channels = channel1 + "," + channel2 + "," + channel3;
-         } else {
-            channels = channel1 + "," + channel2;
+   private void updateMAARSFluoChParameters() {
+      ArrayList<String> channels = new ArrayList<String>();
+      for (JPanel p : chPanels){
+         JCheckBox tmpChkBox = (JCheckBox) p.getComponent(0);
+         if (tmpChkBox.isSelected()){
+            JComboBox tmpChannelCombo = (JComboBox) p.getComponent(1);
+            String tmpChannel = (String) tmpChannelCombo.getSelectedItem();
+            JFormattedTextField tmpTf = (JFormattedTextField) p.getComponent(2);
+            parameters_.setChMaxNbSpot(tmpChannel, tmpTf.getText());
+            tmpTf = (JFormattedTextField) p.getComponent(3);
+            parameters_.setChSpotRaius(tmpChannel, tmpTf.getText());
+            tmpTf = (JFormattedTextField) p.getComponent(4);
+            parameters_.setChQuality(tmpChannel, tmpTf.getText());
+            channels.add(tmpChannel);
          }
-      } else {
-         channels = channel1;
       }
-      return channels;
+      parameters_.setUsingChannels(StringUtils.join(channels.toArray(), ","));
 
    }
 
+   /**
+    *
+    * @param jp the panel which contains informations about corresponding panel
+    * @param img image to detect spots on
+    */
    private void testTrackmate(JPanel jp, ImagePlus img) {
       JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(2);
       double spotRadius = Double.parseDouble((String) tmpTf.getValue());
@@ -431,9 +445,13 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       displayer.refresh();
    }
 
+   /**
+    *
+    * @param jp the panel which contains informations about corresponding panel
+    */
    private void testTrackmate(JPanel jp) {
       String channelName = getSelectedChannel(jp);
-      String imgPath = parameters.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator + "0_"
+      String imgPath = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator + "0_"
               + channelName + "_1" + File.separator + "0_" + channelName + "_1_MMStack_Pos0.ome.tif";
       if (FileUtils.exists(imgPath)) {
          testTrackmate(jp, IJ.openImage(imgPath));
@@ -442,11 +460,16 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       }
    }
 
+   /**
+    *
+    * @param jp the panel which contains informations about corresponding panel
+    * @return get the image
+    */
    private ImagePlus acquireTestImg(JPanel jp) {
-      double zRange = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
-      double zStep = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.STEP));
+      double zRange = Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
+      double zStep = Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.STEP));
 
-      MaarsParameters testParam = parameters.duplicate();
+      MaarsParameters testParam = parameters_.duplicate();
       String channelName = getSelectedChannel(jp);
       testParam.setUsingChannels(channelName);
       testParam.setFluoParameter(MaarsParameters.TIME_LIMIT, "0");
@@ -488,63 +511,20 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    public void actionPerformed(ActionEvent e) {
       Object src = e.getSource();
       if (src == okFluoAnaParamButton) {
-         parameters.setFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
-         parameters.setFluoParameter(MaarsParameters.STEP, step.getText());
-         parameters.setFluoParameter(MaarsParameters.DO_ANALYSIS, String.valueOf(doAnalysis.isSelected()));
-         parameters.setFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES,
+         parameters_.setFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
+         parameters_.setFluoParameter(MaarsParameters.STEP, step.getText());
+         parameters_.setFluoParameter(MaarsParameters.DO_ANALYSIS, String.valueOf(doAnalysis.isSelected()));
+         parameters_.setFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES,
                  String.valueOf(saveFlims.isSelected()));
-         parameters.setFluoParameter(MaarsParameters.TIME_INTERVAL, timeInterval.getText());
-         String channelsList = updateMAARSFluoChParameters();
-         parameters.setUsingChannels(channelsList);
+         parameters_.setFluoParameter(MaarsParameters.TIME_INTERVAL, timeInterval.getText());
+         updateMAARSFluoChParameters();
          try {
-            parameters.save();
+            parameters_.save();
          } catch (IOException e1) {
-            System.out.println("Can not save MAARS parameters");
+            System.out.println("Can not save MAARS parameters_");
             e1.printStackTrace();
          }
-         this.dispose();
-      } else if (src == channel2Combo) {
-//         if (channel2Combo.getSelectedItem() != null) {
-//            setChPanelValue(channel2Panel, channel2Combo.getSelectedItem().toString());
-//            channel3Combo.setEnabled(true);
-//            maxNumberSpotCh2Tf.setEditable(true);
-//            spotRadiusCh2Tf.setEditable(true);
-//            qualityCh2Tf.setEditable(true);
-//            test2.setEnabled(true);
-//         } else {
-//            maxNumberSpotCh2Tf.setText("");
-//            spotRadiusCh2Tf.setText("");
-//            qualityCh2Tf.setText("");
-//            maxNumberSpotCh2Tf.setEditable(false);
-//            spotRadiusCh2Tf.setEditable(false);
-//            qualityCh2Tf.setEditable(false);
-//            test2.setEnabled(false);
-//            channel3Combo.setSelectedItem(NONE);
-//            maxNumberSpotCh3Tf.setText("");
-//            spotRadiusCh3Tf.setText("");
-//            qualityCh3Tf.setText("");
-//            channel3Combo.setEnabled(false);
-//            maxNumberSpotCh3Tf.setEditable(false);
-//            spotRadiusCh3Tf.setEditable(false);
-//            qualityCh3Tf.setEditable(false);
-//            test3.setEnabled(false);
-//         }
-      } else if (src == channel3Combo) {
-//         if (channel3Combo.getSelectedItem() != null) {
-//            setChPanelValue(channel3Panel, channel3Combo.getSelectedItem().toString());
-//            maxNumberSpotCh3Tf.setEditable(true);
-//            spotRadiusCh3Tf.setEditable(true);
-//            qualityCh3Tf.setEditable(true);
-//            test3.setEnabled(true);
-//         } else {
-//            maxNumberSpotCh3Tf.setText("");
-//            spotRadiusCh3Tf.setText("");
-//            qualityCh3Tf.setText("");
-//            maxNumberSpotCh3Tf.setEditable(false);
-//            spotRadiusCh3Tf.setEditable(false);
-//            qualityCh3Tf.setEditable(false);
-//            test3.setEnabled(false);
-//         }
+         this.setVisible(false);
       } else if (src == test1) {
          testTrackmate(channel1Panel);
       } else if (src == test2) {
@@ -553,7 +533,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
          testTrackmate(channel3Panel);
       } else if (src == configurationCombo_) {
          String selectedGroup= (String) configurationCombo_.getSelectedItem();
-         parameters.setChannelGroup(selectedGroup);
+         parameters_.setChannelGroup(selectedGroup);
          clearChannelSettings();
          String[] newConfigs = mm.getCore().getAvailableConfigs(selectedGroup).toArray();
          for (String s : newConfigs){
