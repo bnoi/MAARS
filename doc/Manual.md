@@ -15,6 +15,4 @@
 ###Eclipse/Netbean/IntelliJ
 #Configuration
 ##Micro-Manager 2.0
-##Adapte your Micro-Manager setting for MAARS
-Change channel configurations in maars_config.xml under the root Micro-Manager folder. We used "Illumination" as channel group in Micro-Manager. And "BF","CFP","GFP",TxRed" for different illumination. You can also change the channel exposure in this file
 #TroubleShooting
