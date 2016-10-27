@@ -18,24 +18,24 @@ import java.util.List;
 
 public class AcqLauncher {
 
-    /**
-     * Constructor :
-     */
-    public AcqLauncher() {
-    }
+   /**
+    * Constructor :
+    */
+   public AcqLauncher() {
+   }
 
-    /**
-     * @param acqEng customized acquisition engine
-     * @return a duplicate of acquired images.
-     */
-    public static ImagePlus acquire(AcquisitionWrapperEngine acqEng) {
-        MAARS_mda mda = new MAARS_mda(MMStudio.getInstance());
-        Datastore ds = mda.acquire(acqEng);
-        List<Image> imageList = new ArrayList<Image>();
-        //TODO unordered
-        for (Coords coords : ds.getUnorderedImageCoords()){
-            imageList.add(ds.getImage(coords));
-        }
-        return ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
-    }
+   /**
+    * @param acqEng customized acquisition engine
+    * @return a duplicate of acquired images.
+    */
+   public static ImagePlus acquire(AcquisitionWrapperEngine acqEng) {
+      MAARS_mda mda = new MAARS_mda(MMStudio.getInstance());
+      Datastore ds = mda.acquire(acqEng);
+      List<Image> imageList = new ArrayList<Image>();
+      //TODO unordered
+      for (Coords coords : ds.getUnorderedImageCoords()) {
+         imageList.add(ds.getImage(coords));
+      }
+      return ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
+   }
 }

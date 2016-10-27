@@ -7,244 +7,240 @@ import ij.ImagePlus;
  * @version Nov 4, 2015
  */
 public class SegPombeParameters {
-	/**
-	 * Class split from original CellsBoundaries to save all parameters.
-	 */
-	// Segmenration output saving path
-	private String savingPath;
+   public static final int WIDTH = 0;
+   public static final int HEIGHT = 1;
+   public static final int DEPTH = 2;
+   public static final int PIXELS = 0;
+   public static final int MICRONS = 1;
+   /**
+    * Class split from original CellsBoundaries to save all parameters.
+    */
+   // Segmenration output saving path
+   private String savingPath;
+   // Parameters of the algorithm
+   private ImagePlus imageToAnalyze;
+   private float sigma = 3;
+   // it is 1 for image with cell boundaries be black then white
+   // it is -1 for image with cell boundaries be white then black
+   //	public static double acquisitionStep = 0.3;
+   private int focusSlide = 17;
+   private boolean changeScale = true;
+   private int maxWidth = 1500;
+   private int maxHeight = 1500;
+   private int direction = -1; // this is the direction of the equation to integrate
+   // Parameters to filter results
+   private double minParticleSize = 500;
+   private double maxParticleSize = 40000;
+   private double solidityThreshold = 0.84;
+   private double meanGreyValueThreshold = -177660;
+   private boolean filterAbnormalShape = true;
+   private boolean filtrateWithMeanGrayValue = true;
+   // Options related to display and save
+   private boolean showCorrelationImg = false;
+   private boolean showBinaryImg = false;
+   private boolean showDataFrame = false;
+   private boolean showFocusImage = false;
+   private boolean saveCorrelationImg = true;
+   private boolean saveBinaryImg = true;
+   private boolean saveDataFrame = true;
+   private boolean saveFocusImage = true;
+   private boolean saveRoi = true;
+   // Width and Height indexes used in resolution array
+   private double[] scales;
 
-	// Parameters of the algorithm
-	private ImagePlus imageToAnalyze;
-	private float sigma = 3;
-//	public static double acquisitionStep = 0.3;
-	private int focusSlide = 17;
-	private boolean changeScale = true;
-	private int maxWidth = 1500;
-	private int maxHeight = 1500;
-	private int direction = -1; // this is the direction of the equation to integrate
-	// it is 1 for image with cell boundaries be black then white
-	// it is -1 for image with cell boundaries be white then black
-	
-	// Parameters to filter results
-	private double minParticleSize = 500;
-	private double maxParticleSize = 40000;
-	private double solidityThreshold = 0.84;
-	private double meanGreyValueThreshold = -177660;
-	private boolean filterAbnormalShape = true;
-	private boolean filtrateWithMeanGrayValue = true;
+   public String getSavingPath() {
+      return savingPath;
+   }
 
-	// Options related to display and save
-	private boolean showCorrelationImg = false;
-	private boolean showBinaryImg = false;
-	private boolean showDataFrame = false;
-	private boolean showFocusImage = false;
-	private boolean saveCorrelationImg = true;
-	private boolean saveBinaryImg = true;
-	private boolean saveDataFrame = true;
-	private boolean saveFocusImage = true;
-	private boolean saveRoi = true;
+   public void setSavingPath(String savingPath) {
+      this.savingPath = savingPath;
+   }
 
-	// Width and Height indexes used in resolution array
-	private double[] scales;
-	public static final int WIDTH = 0;
-	public static final int HEIGHT = 1;
-	public static final int DEPTH = 2;
-	public static final int PIXELS = 0;
-	public static final int MICRONS = 1;
+   public ImagePlus getImageToAnalyze() {
+      return imageToAnalyze;
+   }
 
-	public String getSavingPath() {
-		return savingPath;
-	}
+   public void setImageToAnalyze(ImagePlus imageToAnalyze) {
+      this.imageToAnalyze = imageToAnalyze;
+   }
 
-	public void setSavingPath(String savingPath) {
-		this.savingPath = savingPath;
-	}
+   public float getSigma() {
+      return sigma;
+   }
 
-	public ImagePlus getImageToAnalyze() {
-		return imageToAnalyze;
-	}
+   public void setSigma(float sigma) {
+      this.sigma = sigma;
+   }
 
-	public void setImageToAnalyze(ImagePlus imageToAnalyze) {
-		this.imageToAnalyze = imageToAnalyze;
-	}
+   public boolean changeScale() {
+      return changeScale;
+   }
 
-	public float getSigma() {
-		return sigma;
-	}
+   public void setChangeScale(boolean changeScale) {
+      this.changeScale = changeScale;
+   }
 
-	public void setSigma(float sigma) {
-		this.sigma = sigma;
-	}
+   public int getMaxWidth() {
+      return maxWidth;
+   }
 
-	public boolean changeScale() {
-		return changeScale;
-	}
+   public void setMaxWidth(int maxWidth) {
+      this.maxWidth = maxWidth;
+   }
 
-	public void setChangeScale(boolean changeScale) {
-		this.changeScale = changeScale;
-	}
+   public int getMaxHeight() {
+      return maxHeight;
+   }
 
-	public int getMaxWidth() {
-		return maxWidth;
-	}
+   public void setMaxHeight(int maxHeight) {
+      this.maxHeight = maxHeight;
+   }
 
-	public void setMaxWidth(int maxWidth) {
-		this.maxWidth = maxWidth;
-	}
+   public int getDirection() {
+      return direction;
+   }
 
-	public int getMaxHeight() {
-		return maxHeight;
-	}
+   public void setDirection(int direction) {
+      this.direction = direction;
+   }
 
-	public void setMaxHeight(int maxHeight) {
-		this.maxHeight = maxHeight;
-	}
+   public boolean showCorrelationImg() {
+      return showCorrelationImg;
+   }
 
-	public int getDirection() {
-		return direction;
-	}
+   public void setShowCorrelationImg(boolean showCorrelationImg) {
+      this.showCorrelationImg = showCorrelationImg;
+   }
 
-	public void setDirection(int direction) {
-		this.direction = direction;
-	}
+   public boolean showBinaryImg() {
+      return showBinaryImg;
+   }
 
-	public boolean showCorrelationImg() {
-		return showCorrelationImg;
-	}
+   public void setShowBinaryImg(boolean showBinaryImg) {
+      this.showBinaryImg = showBinaryImg;
+   }
 
-	public void setShowCorrelationImg(boolean showCorrelationImg) {
-		this.showCorrelationImg = showCorrelationImg;
-	}
+   public boolean showDataFrame() {
+      return showDataFrame;
+   }
 
-	public boolean showBinaryImg() {
-		return showBinaryImg;
-	}
+   public void setShowDataFrame(boolean showDataFrame) {
+      this.showDataFrame = showDataFrame;
+   }
 
-	public void setShowBinaryImg(boolean showBinaryImg) {
-		this.showBinaryImg = showBinaryImg;
-	}
+   public boolean showFocusImage() {
+      return showFocusImage;
+   }
 
-	public boolean showDataFrame() {
-		return showDataFrame;
-	}
+   public void setShowFocusImage(boolean showFocusImage) {
+      this.showFocusImage = showFocusImage;
+   }
 
-	public void setShowDataFrame(boolean showDataFrame) {
-		this.showDataFrame = showDataFrame;
-	}
+   public boolean saveCorrelationImg() {
+      return saveCorrelationImg;
+   }
 
-	public boolean showFocusImage() {
-		return showFocusImage;
-	}
+   public void setSaveCorrelationImg(boolean saveCorrelationImg) {
+      this.saveCorrelationImg = saveCorrelationImg;
+   }
 
-	public void setShowFocusImage(boolean showFocusImage) {
-		this.showFocusImage = showFocusImage;
-	}
+   public boolean saveBinaryImg() {
+      return saveBinaryImg;
+   }
 
-	public boolean saveCorrelationImg() {
-		return saveCorrelationImg;
-	}
+   public void setSaveBinaryImg(boolean saveBinaryImg) {
+      this.saveBinaryImg = saveBinaryImg;
+   }
 
-	public void setSaveCorrelationImg(boolean saveCorrelationImg) {
-		this.saveCorrelationImg = saveCorrelationImg;
-	}
+   public boolean saveDataFrame() {
+      return saveDataFrame;
+   }
 
-	public boolean saveBinaryImg() {
-		return saveBinaryImg;
-	}
+   public void setSaveDataFrame(boolean saveDataFrame) {
+      this.saveDataFrame = saveDataFrame;
+   }
 
-	public void setSaveBinaryImg(boolean saveBinaryImg) {
-		this.saveBinaryImg = saveBinaryImg;
-	}
+   public boolean saveFocusImage() {
+      return saveFocusImage;
+   }
 
-	public boolean saveDataFrame() {
-		return saveDataFrame;
-	}
+   public void setSaveFocusImage(boolean saveFocusImage) {
+      this.saveFocusImage = saveFocusImage;
+   }
 
-	public void setSaveDataFrame(boolean saveDataFrame) {
-		this.saveDataFrame = saveDataFrame;
-	}
+   public boolean saveRoi() {
+      return saveRoi;
+   }
 
-	public boolean saveFocusImage() {
-		return saveFocusImage;
-	}
+   public void setSaveRoi(boolean saveRoi) {
+      this.saveRoi = saveRoi;
+   }
 
-	public void setSaveFocusImage(boolean saveFocusImage) {
-		this.saveFocusImage = saveFocusImage;
-	}
+   public double[] getScales() {
+      return scales;
+   }
 
-	public boolean saveRoi() {
-		return saveRoi;
-	}
+   public void setScale(double[] scales) {
+      this.scales = scales;
+   }
 
-	public void setSaveRoi(boolean saveRoi) {
-		this.saveRoi = saveRoi;
-	}
+   public double getScale(final int INDEX) {
+      return this.scales[INDEX];
+   }
 
-	public double[] getScales() {
-		return scales;
-	}
+   public double getMinParticleSize() {
+      return minParticleSize;
+   }
 
-	public void setScale(double[] scales) {
-		this.scales = scales;
-	}
-	
-	public double getScale(final int INDEX){
-		return this.scales[INDEX];
-	}
+   public void setMinParticleSize(double minParticleSize) {
+      this.minParticleSize = minParticleSize;
+   }
 
-	public double getMinParticleSize() {
-		return minParticleSize;
-	}
+   public double getMaxParticleSize() {
+      return maxParticleSize;
+   }
 
-	public void setMinParticleSize(double minParticleSize) {
-		this.minParticleSize = minParticleSize;
-	}
+   public void setMaxParticleSize(double maxParticleSize) {
+      this.maxParticleSize = maxParticleSize;
+   }
 
-	public double getMaxParticleSize() {
-		return maxParticleSize;
-	}
+   public double getSolidityThreshold() {
+      return solidityThreshold;
+   }
 
-	public void setMaxParticleSize(double maxParticleSize) {
-		this.maxParticleSize = maxParticleSize;
-	}
+   public void setSolidityThreshold(double solidityThreshold) {
+      this.solidityThreshold = solidityThreshold;
+   }
 
-	public double getSolidityThreshold() {
-		return solidityThreshold;
-	}
+   public double getMeanGreyValueThreshold() {
+      return meanGreyValueThreshold;
+   }
 
-	public void setSolidityThreshold(double solidityThreshold) {
-		this.solidityThreshold = solidityThreshold;
-	}
+   public void setMeanGreyValueThreshold(double meanGreyValueThreshold) {
+      this.meanGreyValueThreshold = meanGreyValueThreshold;
+   }
 
-	public double getMeanGreyValueThreshold() {
-		return meanGreyValueThreshold;
-	}
+   public boolean filterAbnormalShape() {
+      return filterAbnormalShape;
+   }
 
-	public void setMeanGreyValueThreshold(double meanGreyValueThreshold) {
-		this.meanGreyValueThreshold = meanGreyValueThreshold;
-	}
+   public void setFilterAbnormalShape(boolean filterAbnormalShape) {
+      this.filterAbnormalShape = filterAbnormalShape;
+   }
 
-	public boolean filterAbnormalShape() {
-		return filterAbnormalShape;
-	}
+   public boolean filtrateWithMeanGrayValue() {
+      return filtrateWithMeanGrayValue;
+   }
 
-	public void setFilterAbnormalShape(boolean filterAbnormalShape) {
-		this.filterAbnormalShape = filterAbnormalShape;
-	}
+   public void setFiltrateWithMeanGrayValue(boolean filtrateWithMeanGrayValue) {
+      this.filtrateWithMeanGrayValue = filtrateWithMeanGrayValue;
+   }
 
-	public boolean filtrateWithMeanGrayValue() {
-		return filtrateWithMeanGrayValue;
-	}
+   public int getFocusSlide() {
+      return focusSlide;
+   }
 
-	public void setFiltrateWithMeanGrayValue(boolean filtrateWithMeanGrayValue) {
-		this.filtrateWithMeanGrayValue = filtrateWithMeanGrayValue;
-	}
-	
-	public int getFocusSlide() {
-		return focusSlide;
-	}
-
-	public void setFocusSlide(int focusSlide) {
-		this.focusSlide = focusSlide;
-	}
+   public void setFocusSlide(int focusSlide) {
+      this.focusSlide = focusSlide;
+   }
 }

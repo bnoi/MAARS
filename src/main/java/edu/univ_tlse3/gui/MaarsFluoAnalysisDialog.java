@@ -1,34 +1,10 @@
 package edu.univ_tlse3.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.IOException;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-
-import edu.univ_tlse3.acquisition.FluoAcqSetting;
 import edu.univ_tlse3.acquisition.AcqLauncher;
+import edu.univ_tlse3.acquisition.FluoAcqSetting;
 import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
-
+import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.maars.MaarsParameters;
-import org.micromanager.acquisition.SequenceSettings;
-import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
-import org.micromanager.internal.MMStudio;
-
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
@@ -36,8 +12,19 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
+import org.micromanager.acquisition.SequenceSettings;
+import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
+import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Class to create and display a dialog to get parameters of the fluorescent
@@ -86,7 +73,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 	 * @param parameters
 	 *            : parameters displayed in dialog
 	 */
-	MaarsFluoAnalysisDialog(MMStudio mm, MaarsParameters parameters) {
+   public MaarsFluoAnalysisDialog(MMStudio mm, MaarsParameters parameters) {
 
 		// set up this dialog
 		this.mm = mm;
@@ -394,8 +381,13 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		return (String) tmpCombo.getSelectedItem();
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
+   public static void main(String[] args) {
+      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
+              + "AnalyzeMAARSOutput.py");
+   }
+
+   @Override
+   public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		if (src == okFluoAnaParamButton) {
 			parameters.setFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
@@ -462,5 +454,5 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 		} else if (src == test3) {
 			testTrackmate(channel3Panel);
 		}
-	}
+   }
 }
