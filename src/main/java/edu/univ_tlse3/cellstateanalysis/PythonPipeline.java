@@ -1,6 +1,7 @@
 package edu.univ_tlse3.cellstateanalysis;
 
 import ij.IJ;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -76,8 +77,48 @@ public class PythonPipeline {
       System.out.println(pythonPath);
       return pythonPath;
    }
-//    public static void main(String[] args) {
+    public static void main(String[] args) {
+   //todo it will be cool if one day anaconda support jython. Though not possible for now
+      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
+              + "AnalyzeMAARSOutput.py");
+//      ScriptEngineManager manager = new ScriptEngineManager();
+//      java.util.List<ScriptEngineFactory> factories = manager.getEngineFactories();
+//      for (ScriptEngineFactory f : factories) {
+//         System.out.println("egine name:" + f.getEngineName());
+//         System.out.println("engine version:" + f.getEngineVersion());
+//         System.out.println("language name:" + f.getLanguageName());
+//         System.out.println("language version:" + f.getLanguageVersion());
+//         System.out.println("names:" + f.getNames());
+//         System.out.println("mime:" + f.getMimeTypes());
+//         System.out.println("extension:" + f.getExtensions());
+//         System.out.println("-----------------------------------------------");
+//      }
+//      ScriptEngine python = new ScriptEngineManager().getEngineByName("python");
+//      try {
+//         python.eval("import sys");
+//         python.eval("print sys.version_info");
+//
+//      } catch (ScriptException e) {
+//         e.printStackTrace();
+//      }
+//
+//      final PythonInterpreter interpreter = new PythonInterpreter();
+//      interpreter.exec("print \"Python - Hello, world!\"");
+//
+//      PyObject result = interpreter.eval("2 + 3");
+//      System.out.println(result.toString());
+//      ClassLoader loader = java.lang.ClassLoader.getSystemClassLoader();
+//      InputStream stream = loader.getResourceAsStream("AnalyzeMAARSOutput.py");
+//      BufferedReader reader = BufferedReader(InputStreamReader(stream));
+//
+//      String script = "";
+//      line = reader.readLine()
+//      while (line != None) :
+//      script += line + "\n"
+//      line = reader.readLine()
+//      ReportingUtils.logMessage(stream.toString());
+//      System.out.println();
 //        PythonPipeline.getMitosisFiles("/Volumes/Macintosh/curioData/102/25-03-1/X0_Y0", "CFP", "0.1075",
 //                "200", "20");
-//    }
+    }
 }

@@ -5,6 +5,7 @@ package edu.univ_tlse3.maars;
  * @version Nov 10, 2015
  */
 
+import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -16,6 +17,7 @@ import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 /*
  * MaarsParameters reads a configuration file written as a XML,
@@ -261,6 +263,13 @@ public class MaarsParameters {
    }
 
    /**
+    * @param channelGroup channel group name
+    */
+   public void setChannelGroup(String channelGroup){
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(CHANNEL_GROUP).setText(channelGroup);
+   }
+
+   /**
     * @param ch : GFP, CFP, DAPI, TXRED
     * @return corresponding channel shutter
     */
@@ -310,6 +319,13 @@ public class MaarsParameters {
     */
    public String getChQuality(String ch) {
       return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChildText(QUALITY);
+   }
+
+   /**
+    *@return iterator of all channels
+    */
+   public Iterator<Attribute> getAllChannels(){
+      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getAttributes().iterator();
    }
 
    //////////// Setters
