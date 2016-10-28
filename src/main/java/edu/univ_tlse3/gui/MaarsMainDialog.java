@@ -353,7 +353,7 @@ public class MaarsMainDialog implements ActionListener {
          if (socVisualizer_ == null){
             socVisualizer_ = createVisualizer();
          }
-         if ((Double) widthTf.getValue() * (Double) heightTf.getValue() == 0) {
+         if (Integer.valueOf(widthTf.getText()) * Integer.valueOf(heightTf.getText()) == 0) {
             IJ.error("Session aborted, 0 field to analyse");
          } else {
             Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
@@ -399,9 +399,9 @@ public class MaarsMainDialog implements ActionListener {
             heightTf.setEditable(false);
             numFieldLabel.setText("Don't worry about this");
          } else {
-            widthTf.setText(String.valueOf(mmc.getImageWidth() * calibration));
+            widthTf.setText(Integer.valueOf(mmc.getImageWidth() * calibration));
             widthTf.setEditable(true);
-            heightTf.setText(String.valueOf(mmc.getImageHeight() * calibration));
+            heightTf.setText(Integer.valueOf(mmc.getImageHeight() * calibration));
             heightTf.setEditable(true);
             refreshNumField();
          }
