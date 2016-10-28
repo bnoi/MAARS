@@ -36,11 +36,13 @@ public class MAARSNoAcq implements Runnable {
    private SetOfCells soc;
    private String rootDir;
    private ArrayList<String> arrayChannels = new ArrayList<String>();
+   private SOCVisualizer socVisualizer_;
 
-   public MAARSNoAcq(MaarsParameters parameters) {
+   public MAARSNoAcq(MaarsParameters parameters, SOCVisualizer socVisualizer) {
       this.parameters = parameters;
       rootDir = parameters.getSavingPath();
       this.soc = new SetOfCells();
+      socVisualizer_ = socVisualizer;
    }
 
    private ArrayList<String[]> getAcqPositions() {
@@ -86,15 +88,6 @@ public class MAARSNoAcq implements Runnable {
             soc.loadCells(pathToSegDir);
             // Get the focus slice of BF image
             soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
-
-            final SOCVisualizer socVisualizer = new SOCVisualizer();
-            SwingUtilities.invokeLater(new Runnable() {
-               public void run() {
-                  //Turn off metal's use of bold fonts
-                  UIManager.put("swing.boldMetal", Boolean.FALSE);
-                  socVisualizer.createAndShowGUI();
-               }
-            });
 
             Calibration bfImgCal = null;
             if (segImg != null) {
@@ -145,7 +138,7 @@ public class MAARSNoAcq implements Runnable {
                   es.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc, channel,
                           Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                           Double.parseDouble(parameters.getChSpotRaius(channel)),
-                          Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer));
+                          Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_));
                   fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
                }
             }

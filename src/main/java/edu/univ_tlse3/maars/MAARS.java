@@ -23,7 +23,6 @@ import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
-import org.python.core.Py;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -31,7 +30,6 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -56,6 +54,7 @@ public class MAARS implements Runnable {
    private CMMCore mmc;
    private MaarsParameters parameters;
    private SetOfCells soc;
+   private SOCVisualizer socVisualizer_;
 
    /**
     * Constructor
@@ -64,11 +63,12 @@ public class MAARS implements Runnable {
     * @param mmc        CMMCore object (core)
     * @param parameters MAARS parameters object
     */
-   public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters) {
+   public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer) {
       this.mmc = mmc;
       this.parameters = parameters;
       this.soc = new SetOfCells();
       this.mm = mm;
+      socVisualizer_ = socVisualizer;
    }
 
    private static void mailNotify() {
@@ -177,7 +177,7 @@ public class MAARS implements Runnable {
                                      Boolean splitChannel, String pathToSegDir, Boolean showChromLagging) {
       // TODO need to find a place for there metadata maybe in images
       ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, "CFP", "0.1075", "200",
-              String.valueOf((Math.round(fluoTimeInterval))));
+              String.valueOf((Math.round(fluoTimeInterval/ 1000))));
       PythonPipeline.savePythonScript(script);
       PythonPipeline.runPythonScript();
       if (showChromLagging) {
@@ -315,15 +315,6 @@ public class MAARS implements Runnable {
             soc.loadCells(pathToSegDir);
             soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 
-            final SOCVisualizer socVisualizer = new SOCVisualizer();
-            SwingUtilities.invokeLater(new Runnable() {
-               public void run() {
-                  //Turn off metal's use of bold fonts
-                  UIManager.put("swing.boldMetal", Boolean.FALSE);
-                  socVisualizer.createAndShowGUI();
-               }
-            });
-
             // ----------------start acquisition and analysis --------//
             FluoAcqSetting fluoAcq = new FluoAcqSetting(parameters);
             try {
@@ -351,7 +342,7 @@ public class MAARS implements Runnable {
                         es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                 Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                 Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer));
+                                Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
                      }
                   }
                   frame++;
@@ -378,7 +369,7 @@ public class MAARS implements Runnable {
                      es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                              Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                              Double.parseDouble(parameters.getChSpotRaius(channel)),
-                             Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer));
+                             Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
                   }
                }
             }

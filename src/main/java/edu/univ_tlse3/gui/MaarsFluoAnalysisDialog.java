@@ -427,9 +427,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     * @param img image to detect spots on
     */
    private void testTrackmate(JPanel jp, ImagePlus img) {
-      JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(2);
+      JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(3);
       double spotRadius = Double.parseDouble((String) tmpTf.getValue());
-      tmpTf = (JFormattedTextField) jp.getComponent(3);
+      tmpTf = (JFormattedTextField) jp.getComponent(4);
       double quality = Double.parseDouble((String) tmpTf.getValue());
       // ImagePlus img = IJ.getImage().duplicate();
       img.show();
@@ -451,8 +451,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     */
    private void testTrackmate(JPanel jp) {
       String channelName = getSelectedChannel(jp);
-      String imgPath = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator + "0_"
-              + channelName + "_1" + File.separator + "0_" + channelName + "_1_MMStack_Pos0.ome.tif";
+      IJ.log(channelName);
+      String imgPath = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator
+              + channelName + "_1" + File.separator + channelName + "_1_MMStack_Pos0.ome.tif";
       if (FileUtils.exists(imgPath)) {
          testTrackmate(jp, IJ.openImage(imgPath));
       } else {

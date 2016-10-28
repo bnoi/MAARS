@@ -5,22 +5,17 @@ import ij.IJ;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PythonPipeline {
    public static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
+   public static final String TRACKMATE_NAME = "trackmate.py";
    public static String PATH2PYTHONSCRIPTS = "plugins" + File.separator;
 
    public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
-      InputStream pythonScript = PythonPipeline.class.getResourceAsStream(File.separator + SCRIPT_NAME);
-      BufferedReader bfr = new BufferedReader(new InputStreamReader(pythonScript));
+      BufferedReader bfr = getBufferReaderOfScript(File.separator + SCRIPT_NAME);
       ArrayList<String> script = new ArrayList<String>();
       Boolean changeParam = false;
       String pattern = "if __name__ == '__main__':";
@@ -57,42 +52,35 @@ public class PythonPipeline {
       return script;
    }
 
-   public static void savePythonScript(ArrayList<String> script) {
-      if (System.getProperty("os.name").matches("(Windows)(.+)")) {
-         if (PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1).endsWith(".jar")){
-            FileUtils.createFolder(PATH2PYTHONSCRIPTS);
-            copyScriptDependency();
-         }else{
-            PATH2PYTHONSCRIPTS = "target"+ File.separator+"classes"+ File.separator;
-         }
-      } else {
-         if(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")){
-            FileUtils.createFolder(PATH2PYTHONSCRIPTS);
-            copyScriptDependency();
-         }else{
-            PATH2PYTHONSCRIPTS = "target"+ File.separator+"classes"+ File.separator;
-         }
+   public static BufferedReader getBufferReaderOfScript(String scriptPathWithJar){
+      InputStream pythonScript = PythonPipeline.class.getResourceAsStream(scriptPathWithJar);
+      return new BufferedReader(new InputStreamReader(pythonScript));
    }
+
+   public static void savePythonScript(ArrayList<String> script) {
+//         if (PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1).endsWith(".jar")){
+//         if(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")){
+      FileUtils.createFolder(PATH2PYTHONSCRIPTS);
+      copyScriptDependency();
       ReportingUtils.logMessage(PATH2PYTHONSCRIPTS + SCRIPT_NAME);
-      Path file = Paths.get(PATH2PYTHONSCRIPTS + SCRIPT_NAME);
-      try {
-         Files.write(file, script, Charset.forName("UTF-8"));
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
+      FileUtils.writeScript(PATH2PYTHONSCRIPTS + SCRIPT_NAME, script);
    }
 
    /**
     *
     */
    public static void copyScriptDependency(){
-      FileUtils.createFolder(PATH2PYTHONSCRIPTS);
+      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+      BufferedReader bfr = getBufferReaderOfScript(File.separator + TRACKMATE_NAME);
+      ArrayList<String> script = new ArrayList<String>();
       try {
-         Files.copy(Paths.get("src"+ File.separator+"main"+ File.separator+"resources"+ File.separator+"trackmate.py")
-                 ,Paths.get(PATH2PYTHONSCRIPTS+ File.separator+"trackmate.py"), StandardCopyOption.REPLACE_EXISTING);
+         while (bfr.ready()) {
+            script.add(bfr.readLine());
+         }
       } catch (IOException e) {
          e.printStackTrace();
       }
+      FileUtils.writeScript(PATH2PYTHONSCRIPTS + TRACKMATE_NAME, script);
    }
 
    /**
@@ -177,6 +165,7 @@ public class PythonPipeline {
     public static void main(String[] args) {
 //       ArrayList<String> script = PythonPipeline.getPythonScript("/home/tong/Documents/movies/26-10-1/X0_Y0", "CFP", "0.1075", "200","20");
 //       PythonPipeline.savePythonScript(script);
+//       PythonPipeline.copyScriptDependency();
 //       PythonPipeline.runPythonScript();
    //todo it will be cool if one day anaconda support jython. Though not possible for now. The codes below is tested with jython
 // /      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)

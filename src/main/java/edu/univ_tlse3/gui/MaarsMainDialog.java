@@ -1,5 +1,7 @@
 package edu.univ_tlse3.gui;
 
+import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
+import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.maars.MAARS;
 import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
@@ -33,7 +35,7 @@ public class MaarsMainDialog implements ActionListener {
    private MaarsParameters parameters;
    private JButton autofocusButton;
    private JButton okMainDialogButton;
-   private JButton stopMainDialogButton;
+   private JButton showDataVisualizer_;
    private JButton segmButton;
    private JButton fluoAnalysisButton;
    private JFormattedTextField savePathTf;
@@ -44,6 +46,7 @@ public class MaarsMainDialog implements ActionListener {
    private JRadioButton dynamicOpt;
    private JRadioButton staticOpt;
    private MaarsFluoAnalysisDialog fluoDialog_;
+   private SOCVisualizer socVisualizer_;
 
    /**
     * Constructor
@@ -216,6 +219,13 @@ public class MaarsMainDialog implements ActionListener {
       savePathTf.setMaximumSize(new Dimension(maxDialogWidth, 1));
       savePathTfPanel.add(savePathTf);
 
+      // show visualiwer acquisitions button
+
+      JPanel stopPanel = new JPanel(new GridLayout(1, 0));
+      showDataVisualizer_ = new JButton("Show visualizer");
+      showDataVisualizer_.addActionListener(this);
+      stopPanel.add(showDataVisualizer_);
+
       // Ok button to run
 
       JPanel okPanel = new JPanel(new GridLayout(1, 0));
@@ -223,14 +233,6 @@ public class MaarsMainDialog implements ActionListener {
       okMainDialogButton.addActionListener(this);
       mainDialog.getRootPane().setDefaultButton(okMainDialogButton);
       okPanel.add(okMainDialogButton);
-
-      // halt acquisitions button
-
-      JPanel stopPanel = new JPanel(new GridLayout(1, 0));
-      stopMainDialogButton = new JButton("Stop!");
-      stopMainDialogButton.addActionListener(this);
-      mainDialog.getRootPane().setDefaultButton(stopMainDialogButton);
-      stopPanel.add(stopMainDialogButton);
 
       // ------------set up and add components to Panel then to
       // Frame---------------//
@@ -333,11 +335,26 @@ public class MaarsMainDialog implements ActionListener {
       return overWrite;
    }
 
+   private SOCVisualizer createVisualizer(){
+      final SOCVisualizer socVisualizer = new SOCVisualizer();
+      SwingUtilities.invokeLater(new Runnable() {
+         public void run() {
+            //Turn off metal's use of bold fonts
+            UIManager.put("swing.boldMetal", Boolean.FALSE);
+            socVisualizer.createAndShowGUI();
+         }
+      });
+      return socVisualizer;
+   }
+
    @Override
    public void actionPerformed(ActionEvent e) {
       if (e.getSource() == autofocusButton) {
          getMM().showAutofocusDialog();
       } else if (e.getSource() == okMainDialogButton) {
+         if (socVisualizer_ == null){
+            socVisualizer_ = createVisualizer();
+         }
          if ((Double) widthTf.getValue() * (Double) heightTf.getValue() == 0) {
             IJ.error("Session aborted, 0 field to analyse");
          } else {
@@ -349,10 +366,11 @@ public class MaarsMainDialog implements ActionListener {
             saveParameters();
             Thread th = null;
             if (withOutAcqChk.isSelected()) {
-               th = new Thread(new MAARSNoAcq(parameters));
+
+               th = new Thread(new MAARSNoAcq(parameters, socVisualizer_));
             } else {
                if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                  th = new Thread(new MAARS(mm, mmc, parameters));
+                  th = new Thread(new MAARS(mm, mmc, parameters, socVisualizer_));
                }
             }
             if (th != null) {
@@ -389,8 +407,13 @@ public class MaarsMainDialog implements ActionListener {
             heightTf.setEditable(true);
             refreshNumField();
          }
-      } else if (e.getSource() == stopMainDialogButton) {
-         mm.getAcquisitionManager().haltAcquisition();
+      } else if (e.getSource() == showDataVisualizer_) {
+//         mm.getAcquisitionManager().haltAcquisition();
+         if (socVisualizer_ == null){
+            socVisualizer_ = createVisualizer();
+         }else{
+            socVisualizer_.showDialog();
+         }
       } else {
          IJ.log("MAARS don't understand what you want, sorry");
       }

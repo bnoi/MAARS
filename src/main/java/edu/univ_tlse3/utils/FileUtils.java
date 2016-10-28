@@ -3,6 +3,11 @@ package edu.univ_tlse3.utils;
 import ij.IJ;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
@@ -43,5 +48,16 @@ public class FileUtils {
    public static Boolean createFolder(String pathToFluoDir) {
       File fluoDir = new File(pathToFluoDir);
       return fluoDir.mkdirs();
+   }
+
+   /**
+    *
+    */
+   public static void writeScript(String path, ArrayList<String> scriptInArray){
+      try {
+         Files.write(Paths.get(path), scriptInArray, Charset.forName("UTF-8"));
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
    }
 }
