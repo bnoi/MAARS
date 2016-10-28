@@ -19,7 +19,7 @@ An extension of MAARS which find anaphase B onset and chromosome lagging, is wri
 
 - Copy MAARS plugin (`jars/MAARS_-1.0-SNAPSHOT.jar`) inside `Micro Manager folder/mmplugins`.
 
-- Copy dependencies (`jars/maars_dependencies/`) inside `Micro Manager folder/plugins/maars_dependencies`.
+- Copy dependencies (`jars/MAARS_deps/`) inside `Micro Manager folder/plugins/MAARS_deps`.
 
 That's all !
 
