@@ -9,7 +9,6 @@ import ij.IJ;
 import mmcorej.CMMCore;
 import org.apache.commons.math3.util.FastMath;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -131,7 +130,7 @@ public class MaarsMainDialog implements ActionListener {
 
       // number of field label
 
-      numFieldLabel = new Label("Number of field : " + defaultXFieldNumber * defaultYFieldNumber);
+      numFieldLabel = new Label("Number of field : " + defaultXFieldNumber * defaultYFieldNumber,  Label.CENTER);
 
       // analysis parameters label
 
@@ -274,26 +273,30 @@ public class MaarsMainDialog implements ActionListener {
       int newWidth;
       int newHeigth;
 
-      newWidth = Integer.valueOf(widthTf.getText());
-      newHeigth = Integer.valueOf(heightTf.getText());
-      double tmpNewWidth =newWidth / (calibration * mmc.getImageWidth());
-      double tmpNewHeight = newHeigth / (calibration * mmc.getImageHeight());
-      double fractionalPartNewWidth =  tmpNewWidth % 1;
-      double fractionalPartNewHeight =  tmpNewHeight % 1;
+      String widthComp = widthTf.getText();
+      String heightComp = heightTf.getText();
+      if (!widthComp.equals("") && !heightComp.equals("")) {
+         newWidth = Integer.valueOf(widthComp);
+         newHeigth = Integer.valueOf(heightComp);
+         double tmpNewWidth = newWidth / (calibration * mmc.getImageWidth());
+         double tmpNewHeight = newHeigth / (calibration * mmc.getImageHeight());
+         double fractionalPartNewWidth = tmpNewWidth % 1;
+         double fractionalPartNewHeight = tmpNewHeight % 1;
 
-      int newXFieldNumber = (int)FastMath.round(tmpNewWidth - fractionalPartNewWidth);
-      int newYFieldNumber = (int)FastMath.round(tmpNewHeight - fractionalPartNewHeight);
-      int totoalNbField = newXFieldNumber * newYFieldNumber;
-      if (totoalNbField == 0) {
-         numFieldLabel.setForeground(Color.red);
-         numFieldLabel.setText("Number of field : " + totoalNbField);
-      } else {
-         numFieldLabel.setForeground(Color.black);
-         numFieldLabel.setText("Number of field : " + totoalNbField);
+         int newXFieldNumber = (int) FastMath.round(tmpNewWidth - fractionalPartNewWidth);
+         int newYFieldNumber = (int) FastMath.round(tmpNewHeight - fractionalPartNewHeight);
+         int totoalNbField = newXFieldNumber * newYFieldNumber;
+         if (totoalNbField == 0) {
+            numFieldLabel.setForeground(Color.red);
+            numFieldLabel.setText("Number of field : " + totoalNbField);
+         } else {
+            numFieldLabel.setForeground(Color.black);
+            numFieldLabel.setText("Number of field : " + totoalNbField);
+         }
+
+         parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, "" + newXFieldNumber);
+         parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, "" + newYFieldNumber);
       }
-
-      parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, "" + newXFieldNumber);
-      parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, "" + newYFieldNumber);
    }
 
    /**
@@ -399,9 +402,9 @@ public class MaarsMainDialog implements ActionListener {
             heightTf.setEditable(false);
             numFieldLabel.setText("Don't worry about this");
          } else {
-            widthTf.setText(Integer.valueOf(mmc.getImageWidth() * calibration));
+            widthTf.setText(FastMath.round(mmc.getImageWidth() * calibration) + "");
             widthTf.setEditable(true);
-            heightTf.setText(Integer.valueOf(mmc.getImageHeight() * calibration));
+            heightTf.setText(FastMath.round(mmc.getImageHeight() * calibration) +"");
             heightTf.setEditable(true);
             refreshNumField();
          }

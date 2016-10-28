@@ -12,7 +12,6 @@ import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatProcessor;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
