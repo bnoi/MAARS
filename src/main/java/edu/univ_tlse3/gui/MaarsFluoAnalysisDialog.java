@@ -488,7 +488,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    }
 
    private String getSelectedChannel(JPanel jp) {
-      JComboBox tmpCombo = (JComboBox) jp.getComponent(0);
+      JComboBox tmpCombo = (JComboBox) jp.getComponent(1);
       return (String) tmpCombo.getSelectedItem();
    }
 

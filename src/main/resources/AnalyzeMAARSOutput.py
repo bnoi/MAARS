@@ -182,6 +182,15 @@ class getMitosisFiles(object):
         self._minimumPeriod = args.minimumPeriod
         self._acq_interval = args.acq_interval
 
+    def set_calibration(self, cal):
+        self._calibration = cal
+
+    def set_minimumPeriod(self, minPeriod):
+        self._minimumPeriod = minPeriod
+
+    def set_acq_interval(self, acq_interval):
+        self._acq_interval = acq_interval
+
     def getAllCellNumbers(self):
         all_cell_nbs=list()
         features_dir = self._baseDir + self._fluo_suffix + self._features
@@ -445,16 +454,19 @@ class getMitosisFiles(object):
                     copyfile(self._baseDir + self._fluo_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv", self._baseDir + self._mitosis_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv");
 
 if __name__ == '__main__':
-    baseDir="/Volumes/Macintosh/curioData/102/19-05-1/X0_Y0"
-    channels = ['CFP','GFP', 'TxRed', 'DAPI']
-    launcher = getMitosisFiles(baseDir, channels[0])
-    launcher.set_attributes_from_cmd_line()
+    baseDir="baseDir of your data"
+    channel ="CFP"
+    launcher = getMitosisFiles(baseDir, channel)
+    launcher.set_acq_interval(20)
+    launcher.set_calibration(0.1065)
+    launcher.set_minimumPeriod(200)
+    # launcher.set_attributes_from_cmd_line()
     cellNbs, features_dir = launcher.getAllCellNumbers()
     cellNbs = [int(n) for n in cellNbs]
     predictedList = launcher.getMitosisCellNbs(features_dir,cellNbs,0)
     predictedList = [int(n) for n in predictedList]
     all_mitoregion_spLens, all_slope_changes = launcher.analyze(True,predictedList)
-    launcher.pick_mitosis_files(predictedList, channels)
+    launcher.pick_mitosis_files(predictedList, ["CFP", "GFP","TxRed","DAPI"])
     print("Done")
 
 

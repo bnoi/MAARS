@@ -1,32 +1,114 @@
 package edu.univ_tlse3.cellstateanalysis;
 
+import edu.univ_tlse3.utils.FileUtils;
 import ij.IJ;
 import org.micromanager.internal.utils.ReportingUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PythonPipeline {
+   public static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
+   public static String PATH2PYTHONSCRIPTS = "plugins" + File.separator;
 
-   public static void getMitosisFiles(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
+   public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
+      InputStream pythonScript = PythonPipeline.class.getResourceAsStream(File.separator + SCRIPT_NAME);
+      BufferedReader bfr = new BufferedReader(new InputStreamReader(pythonScript));
+      ArrayList<String> script = new ArrayList<String>();
+      Boolean changeParam = false;
+      String pattern = "if __name__ == '__main__':";
+      String patternForDir = ".*baseDir=.*";
+      String patternForChannel = ".*channel =.*";
+      String patternForAcqInt = ".*launcher.set_acq_interval.*";
+      String patternForCal = ".*launcher.set_calibration.*";
+      String patternForMinPerio = ".*launcher.set_minimumPeriod.*";
+      String intPat = "\\d+";
+      String decimalPat = "0\\.\\d+";
+      try {
+         while (bfr.ready()) {
+            String line = bfr.readLine();
+            if (Pattern.matches(pattern, line) || changeParam) {
+               if (Pattern.matches(patternForDir, line)) {
+                  line = line.replaceFirst(line.split("\"")[1], acqDir);
+               } else if (Pattern.matches(patternForChannel, line)) {
+                  line = line.replaceFirst(line.split("\"")[1], channel);
+               } else if (Pattern.matches(patternForAcqInt, line)) {
+                  line = replaceSubString(intPat, line, interval);
+               } else if (Pattern.matches(patternForCal, line)) {
+                  line = replaceSubString(decimalPat, line, calibration);
+               } else if (Pattern.matches(patternForMinPerio, line)) {
+                  line = replaceSubString(intPat, line, minimumPeriod);
+               }
+//                ReportingUtils.logMessage(line);
+               changeParam = true;
+            }
+            script.add(line);
+         }
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      return script;
+   }
 
+   public static void savePythonScript(ArrayList<String> script) {
+      if (System.getProperty("os.name").matches("(Windows)(.+)")) {
+         if (PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1).endsWith(".jar")){
+            FileUtils.createFolder(PATH2PYTHONSCRIPTS);
+            copyScriptDependency();
+         }else{
+            PATH2PYTHONSCRIPTS = "target"+ File.separator+"classes"+ File.separator;
+         }
+      } else {
+         if(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")){
+            FileUtils.createFolder(PATH2PYTHONSCRIPTS);
+            copyScriptDependency();
+         }else{
+            PATH2PYTHONSCRIPTS = "target"+ File.separator+"classes"+ File.separator;
+         }
+   }
+      ReportingUtils.logMessage(PATH2PYTHONSCRIPTS + SCRIPT_NAME);
+      Path file = Paths.get(PATH2PYTHONSCRIPTS + SCRIPT_NAME);
+      try {
+         Files.write(file, script, Charset.forName("UTF-8"));
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
+
+   /**
+    *
+    */
+   public static void copyScriptDependency(){
+      FileUtils.createFolder(PATH2PYTHONSCRIPTS);
+      try {
+         Files.copy(Paths.get("src"+ File.separator+"main"+ File.separator+"resources"+ File.separator+"trackmate.py")
+                 ,Paths.get(PATH2PYTHONSCRIPTS+ File.separator+"trackmate.py"), StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
+
+   /**
+    *
+    * @return
+    */
+   public static void runPythonScript() {
       ProcessBuilder probuilder;
       Process process;
       BufferedReader in;
       BufferedReader stdError;
       String[] cmd;
       if (System.getProperty("os.name").matches("(Windows)(.+)")) {
-         cmd = new String[]{PythonPipeline.getPythonInConda(),
-                 PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
-                         + "AnalyzeMAARSOutput.py",
-                 acqDir, channel, "-calibration", calibration, "-minimumPeriod", minimumPeriod, "-acq_interval", interval};
+         cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), PATH2PYTHONSCRIPTS + SCRIPT_NAME};
       } else {
-         cmd = new String[]{PythonPipeline.getPythonInConda(),
-                 PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath()
-                         + "AnalyzeMAARSOutput.py",
-                 acqDir, channel, "-calibration", calibration, "-minimumPeriod", minimumPeriod, "-acq_interval", interval};
+         cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(),PATH2PYTHONSCRIPTS + SCRIPT_NAME};
       }
 
       probuilder = new ProcessBuilder(cmd);
@@ -46,7 +128,7 @@ public class PythonPipeline {
       }
    }
 
-   private static String getPythonInConda() {
+   private static String getPythonDefaultPathInConda() {
       String osName = System.getProperty("os.name");
       String pythonPath = "";
       File condaDir;
@@ -77,11 +159,29 @@ public class PythonPipeline {
       System.out.println(pythonPath);
       return pythonPath;
    }
+
+   /**
+    *
+    * @param pattern the pattern to search for
+    * @param line String to modify
+    * @param value   the string to be inserted
+    * @return modified string
+    */
+   public static String replaceSubString(String pattern, String line, String value){
+      Pattern p = Pattern.compile(pattern);
+      Matcher m = p.matcher(line);
+      line = m.replaceFirst(value);
+      return line;
+   }
+
     public static void main(String[] args) {
-   //todo it will be cool if one day anaconda support jython. Though not possible for now
-      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
-              + "AnalyzeMAARSOutput.py");
-//      ScriptEngineManager manager = new ScriptEngineManager();
+//       ArrayList<String> script = PythonPipeline.getPythonScript("/home/tong/Documents/movies/26-10-1/X0_Y0", "CFP", "0.1075", "200","20");
+//       PythonPipeline.savePythonScript(script);
+//       PythonPipeline.runPythonScript();
+   //todo it will be cool if one day anaconda support jython. Though not possible for now. The codes below is tested with jython
+// /      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
+//              + "AnalyzeMAARSOutput.py");
+// ScriptEngineManager manager = new ScriptEngineManager();
 //      java.util.List<ScriptEngineFactory> factories = manager.getEngineFactories();
 //      for (ScriptEngineFactory f : factories) {
 //         System.out.println("egine name:" + f.getEngineName());

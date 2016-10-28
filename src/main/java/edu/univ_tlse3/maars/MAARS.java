@@ -23,6 +23,7 @@ import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
+import org.python.core.Py;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -174,9 +175,11 @@ public class MAARS implements Runnable {
 
    static void analyzeMitosisDynamic(SetOfCells soc, double fluoTimeInterval,
                                      Boolean splitChannel, String pathToSegDir, Boolean showChromLagging) {
-      // TODO
-      PythonPipeline.getMitosisFiles(pathToSegDir, "CFP", "0.1075", "200",
+      // TODO need to find a place for there metadata maybe in images
+      ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, "CFP", "0.1075", "200",
               String.valueOf((Math.round(fluoTimeInterval))));
+      PythonPipeline.savePythonScript(script);
+      PythonPipeline.runPythonScript();
       if (showChromLagging) {
          MAARS.showChromLaggingCells(pathToSegDir, soc, splitChannel);
       }
