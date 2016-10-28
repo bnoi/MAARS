@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class PythonPipeline {
    public static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
    public static final String TRACKMATE_NAME = "trackmate.py";
-   public static String PATH2PYTHONSCRIPTS = "plugins" + File.separator;
+   public static final String PATH2PYTHONSCRIPTS = "plugins" + File.separator + "MAARS_deps" + File.separator;
 
    public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
       BufferedReader bfr = getBufferReaderOfScript(File.separator + SCRIPT_NAME);

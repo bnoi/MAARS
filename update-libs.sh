@@ -5,9 +5,9 @@ mvn install
 mvn dependency:copy-dependencies
 
 rm -f jars/*.jar
-rm -fr jars/maars_dependencies
-mkdir -p jars/maars_dependencies
-cp target/dependency/*.jar jars/maars_dependencies
+rm -fr jars/MAARS_deps
+mkdir -p jars/MAARS_deps
+cp target/dependency/*.jar jars/MAARS_deps
 
 # Remove duplicated dependencies
 rm -f jars/maars_dependencies/3D_Viewer-*.jar
