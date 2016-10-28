@@ -2,7 +2,7 @@
 ##Basic User
   -Copy built MAARS plugin (`jars/MAARS_-1.0-SNAPSHOT.jar`) inside `Micro Manager folder/mmplugins`.
   
-  -Copy dependencies (`jars/maars_dependencies/`) inside `Micro Manager folder/plugins/maars_dependencies`.
+  -Copy dependencies (`jars/MAARS_deps/`) inside `Micro Manager folder/plugins/MAARS_deps`.
   
 ##Developer
 - `build-mm.sh` : use this script to build Micro-Manager under Linux.
