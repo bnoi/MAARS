@@ -1,6 +1,5 @@
 package edu.univ_tlse3.gui;
 
-import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.maars.MAARS;
 import edu.univ_tlse3.maars.MAARSNoAcq;
@@ -8,14 +7,13 @@ import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import ij.IJ;
 import mmcorej.CMMCore;
+import org.apache.commons.math3.util.FastMath;
 import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -46,7 +44,10 @@ public class MaarsMainDialog implements ActionListener {
    private JRadioButton dynamicOpt;
    private JRadioButton staticOpt;
    private MaarsFluoAnalysisDialog fluoDialog_;
+   private JPanel stopAndVisualizerButtonPanel_;
    private SOCVisualizer socVisualizer_;
+   private JButton stopButton_;
+   private Thread MAARSMainth_;
 
    /**
     * Constructor
@@ -99,20 +100,13 @@ public class MaarsMainDialog implements ActionListener {
       JPanel widthPanel = new JPanel(new GridLayout(1, 0));
       widthPanel.setBackground(bgColor);
       JLabel widthLabel = new JLabel("Width :", SwingConstants.CENTER);
-      widthTf = new JFormattedTextField(Double.class);
-      widthTf.setValue(fieldWidth * defaultXFieldNumber);
-      widthTf.addKeyListener(new KeyListener() {
+      widthTf = new JFormattedTextField(Integer.class);
+      widthTf.setValue((int)FastMath.round(fieldWidth * defaultXFieldNumber));
+      widthTf.addKeyListener(new KeyAdapter() {
          @Override
-         public void keyTyped(KeyEvent e) {
-         }
-
-         @Override
-         public void keyReleased(KeyEvent e) {
+         public void keyReleased(KeyEvent keyEvent) {
+            super.keyReleased(keyEvent);
             refreshNumField();
-         }
-
-         @Override
-         public void keyPressed(KeyEvent e) {
          }
       });
       widthPanel.add(widthLabel);
@@ -123,20 +117,13 @@ public class MaarsMainDialog implements ActionListener {
       JPanel heightPanel = new JPanel(new GridLayout(1, 0));
       heightPanel.setBackground(bgColor);
       JLabel heightLabel = new JLabel("Height :", SwingConstants.CENTER);
-      heightTf = new JFormattedTextField(Double.class);
-      heightTf.setValue(fieldHeight * defaultYFieldNumber);
-      heightTf.addKeyListener(new KeyListener() {
+      heightTf = new JFormattedTextField(Integer.class);
+      heightTf.setValue((int)FastMath.round(fieldHeight * defaultYFieldNumber));
+      heightTf.addKeyListener(new KeyAdapter() {
          @Override
-         public void keyTyped(KeyEvent e) {
-         }
-
-         @Override
-         public void keyReleased(KeyEvent e) {
+         public void keyReleased(KeyEvent keyEvent) {
+            super.keyReleased(keyEvent);
             refreshNumField();
-         }
-
-         @Override
-         public void keyPressed(KeyEvent e) {
          }
       });
       heightPanel.add(heightLabel);
@@ -221,10 +208,17 @@ public class MaarsMainDialog implements ActionListener {
 
       // show visualiwer acquisitions button
 
-      JPanel stopPanel = new JPanel(new GridLayout(1, 0));
+      stopAndVisualizerButtonPanel_ = new JPanel(new GridLayout(1, 0));
       showDataVisualizer_ = new JButton("Show visualizer");
       showDataVisualizer_.addActionListener(this);
-      stopPanel.add(showDataVisualizer_);
+      stopAndVisualizerButtonPanel_.add(showDataVisualizer_);
+
+      //
+
+      stopButton_ = new JButton("Stop(not working)");
+      stopButton_.addActionListener(this);
+      stopAndVisualizerButtonPanel_.add(stopButton_);
+
 
       // Ok button to run
 
@@ -253,7 +247,7 @@ public class MaarsMainDialog implements ActionListener {
       mainPanel.add(savePathLabelPanel);
       mainPanel.add(savePathTfPanel);
       mainPanel.add(okPanel);
-      mainPanel.add(stopPanel);
+      mainPanel.add(stopAndVisualizerButtonPanel_);
       mainDialog.add(mainPanel);
       IJ.log("Done.");
       mainDialog.pack();
@@ -277,14 +271,18 @@ public class MaarsMainDialog implements ActionListener {
     * Method to display number of field the program has to scan
     */
    private void refreshNumField() {
-      double newWidth;
-      double newHeigth;
+      int newWidth;
+      int newHeigth;
 
-      newWidth = (Double) widthTf.getValue();
-      newHeigth = (Double) widthTf.getValue();
+      newWidth = Integer.valueOf(widthTf.getText());
+      newHeigth = Integer.valueOf(heightTf.getText());
+      double tmpNewWidth =newWidth / (calibration * mmc.getImageWidth());
+      double tmpNewHeight = newHeigth / (calibration * mmc.getImageHeight());
+      double fractionalPartNewWidth =  tmpNewWidth % 1;
+      double fractionalPartNewHeight =  tmpNewHeight % 1;
 
-      int newXFieldNumber = (int) Math.round(newWidth / (calibration * mmc.getImageWidth()));
-      int newYFieldNumber = (int) Math.round(newHeigth / (calibration * mmc.getImageHeight()));
+      int newXFieldNumber = (int)FastMath.round(tmpNewWidth - fractionalPartNewWidth);
+      int newYFieldNumber = (int)FastMath.round(tmpNewHeight - fractionalPartNewHeight);
       int totoalNbField = newXFieldNumber * newYFieldNumber;
       if (totoalNbField == 0) {
          numFieldLabel.setForeground(Color.red);
@@ -364,18 +362,18 @@ public class MaarsMainDialog implements ActionListener {
                }
             };
             saveParameters();
-            Thread th = null;
+
             if (withOutAcqChk.isSelected()) {
 
-               th = new Thread(new MAARSNoAcq(parameters, socVisualizer_));
+               MAARSMainth_ = new Thread(new MAARSNoAcq(parameters, socVisualizer_));
             } else {
                if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                  th = new Thread(new MAARS(mm, mmc, parameters, socVisualizer_));
+                  MAARSMainth_ = new Thread(new MAARS(mm, mmc, parameters, socVisualizer_));
                }
             }
-            if (th != null) {
-               th.setUncaughtExceptionHandler(h);
-               th.start();
+            if (MAARSMainth_ != null) {
+               MAARSMainth_.setUncaughtExceptionHandler(h);
+               MAARSMainth_.start();
             }
          }
       } else if (e.getSource() == segmButton) {
@@ -414,6 +412,8 @@ public class MaarsMainDialog implements ActionListener {
          }else{
             socVisualizer_.showDialog();
          }
+      }else if(e.getSource() == stopButton_){
+         MAARSMainth_.interrupt();
       } else {
          IJ.log("MAARS don't understand what you want, sorry");
       }
