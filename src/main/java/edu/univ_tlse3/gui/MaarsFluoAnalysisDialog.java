@@ -51,12 +51,15 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JFormattedTextField maxNumberSpotCh1Tf;
    private JFormattedTextField spotRadiusCh1Tf;
    private JFormattedTextField qualityCh1Tf;
+   private JFormattedTextField exposureCh1Tf_;
    private JFormattedTextField maxNumberSpotCh2Tf;
    private JFormattedTextField spotRadiusCh2Tf;
    private JFormattedTextField qualityCh2Tf;
+   private JFormattedTextField exposureCh2Tf_;
    private JFormattedTextField maxNumberSpotCh3Tf;
    private JFormattedTextField spotRadiusCh3Tf;
    private JFormattedTextField qualityCh3Tf;
+   private JFormattedTextField exposureCh3Tf_;
    private JCheckBox saveFlims;
    private JCheckBox doAnalysis;
    private JButton test1;
@@ -70,7 +73,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JCheckBox useChannel1_;
    private JCheckBox useChannel2_;
    private JCheckBox useChannel3_;
-   private static Integer TOTAL_PARAMETERS = 4;
+   private static Integer TOTAL_PARAMETERS = 5;
    private ArrayList<JPanel> chPanels = new ArrayList<JPanel>();
 
    /**
@@ -163,11 +166,13 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       JLabel maxNbSpotTitle = new JLabel("Max # of spot", SwingConstants.CENTER);
       JLabel spotRaiusTitle = new JLabel("Spot Radius", SwingConstants.CENTER);
       JLabel qualityTitle = new JLabel("Quality", SwingConstants.CENTER);
+      JLabel exposureTitle = new JLabel("Exposure", SwingConstants.CENTER);
       channelTitlePanel.add(channelCheckTitle);
       channelTitlePanel.add(fluoChannelsTitle);
       channelTitlePanel.add(maxNbSpotTitle);
       channelTitlePanel.add(spotRaiusTitle);
       channelTitlePanel.add(qualityTitle);
+      channelTitlePanel.add(exposureTitle);
       channelTitlePanel.add(new JLabel());
 
       //
@@ -184,6 +189,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       maxNumberSpotCh1Tf = new JFormattedTextField(Integer.class);
       spotRadiusCh1Tf = new JFormattedTextField(Double.class);
       qualityCh1Tf = new JFormattedTextField(Double.class);
+      exposureCh1Tf_ = new JFormattedTextField(Integer.class);
       test1 = new JButton("test");
       test1.setEnabled(false);
       test1.addActionListener(this);
@@ -203,6 +209,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel1Panel.add(maxNumberSpotCh1Tf);
       channel1Panel.add(spotRadiusCh1Tf);
       channel1Panel.add(qualityCh1Tf);
+      channel1Panel.add(exposureCh1Tf_);
       channel1Panel.add(test1);
       chPanels.add(channel1Panel);
       //
@@ -219,12 +226,13 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       maxNumberSpotCh2Tf = new JFormattedTextField(Integer.class);
       spotRadiusCh2Tf = new JFormattedTextField(Double.class);
       qualityCh2Tf = new JFormattedTextField(Double.class);
+      exposureCh2Tf_ = new JFormattedTextField(Integer.class);
       test2 = new JButton("test");
       test2.setEnabled(false);
       test2.addActionListener(this);
-      maxNumberSpotCh2Tf.setText("");
-      spotRadiusCh2Tf.setText("");
-      qualityCh2Tf.setText("");
+//      maxNumberSpotCh2Tf.setText("");
+//      spotRadiusCh2Tf.setText("");
+//      qualityCh2Tf.setText("");
       useChannel2_ = new JCheckBox("",true);
       useChannel2_.addActionListener(new ActionListener() {
          @Override
@@ -241,6 +249,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel2Panel.add(maxNumberSpotCh2Tf);
       channel2Panel.add(spotRadiusCh2Tf);
       channel2Panel.add(qualityCh2Tf);
+      channel2Panel.add(exposureCh2Tf_);
       channel2Panel.add(test2);
       chPanels.add(channel2Panel);
 
@@ -257,6 +266,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       maxNumberSpotCh3Tf = new JFormattedTextField(Integer.class);
       spotRadiusCh3Tf = new JFormattedTextField(Double.class);
       qualityCh3Tf = new JFormattedTextField(Double.class);
+      exposureCh3Tf_ = new JFormattedTextField(Integer.class);
       test3 = new JButton("test");
       test3.setEnabled(false);
       test3.addActionListener(this);
@@ -279,6 +289,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel3Panel.add(maxNumberSpotCh3Tf);
       channel3Panel.add(spotRadiusCh3Tf);
       channel3Panel.add(qualityCh3Tf);
+      channel3Panel.add(exposureCh3Tf_);
       channel3Panel.add(test3);
       chPanels.add(channel3Panel);
 
@@ -358,6 +369,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             tmpTf.setValue(parameters_.getChSpotRaius(ch));
             tmpTf = (JFormattedTextField) jp.getComponent(4);
             tmpTf.setValue(parameters_.getChQuality(ch));
+            tmpTf = (JFormattedTextField) jp.getComponent(5);
+            tmpTf.setValue(parameters_.getChExposure(ch));
             JComboBox tmpCombo = (JComboBox)jp.getComponent(1);
             String tmpCh = (String) tmpCombo.getSelectedItem();
             if (tmpCh!=null && !tmpCh.equals(ch)){
@@ -414,6 +427,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             parameters_.setChSpotRaius(tmpChannel, tmpTf.getText());
             tmpTf = (JFormattedTextField) p.getComponent(4);
             parameters_.setChQuality(tmpChannel, tmpTf.getText());
+            tmpTf = (JFormattedTextField) p.getComponent(5);
+            parameters_.setChExposure(tmpChannel, tmpTf.getText());
             channels.add(tmpChannel);
          }
       }

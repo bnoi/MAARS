@@ -1,6 +1,7 @@
 package edu.univ_tlse3.maars;
 
 /**
+ * This class stores all the parameters need to run MAARS
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 10, 2015
  */
@@ -85,19 +86,19 @@ import java.util.List;
  */
 public class MaarsParameters {
 
-   public static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
-   public static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
-   public static final String EXPLORATION_PARAMETERS = "EXPLORATION_PARAMETERS";
+   private static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
+   private static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
+   private static final String EXPLORATION_PARAMETERS = "EXPLORATION_PARAMETERS";
    public static final String RANGE_SIZE_FOR_MOVIE = "RANGE_SIZE_FOR_MOVIE";
    public static final String STEP = "STEP";
-   public static final String SPOT_RADIUS = "SPOT_RADIUS";
+   private static final String SPOT_RADIUS = "SPOT_RADIUS";
    public static final String SAVE_FLUORESCENT_MOVIES = "SAVE_FLUORESCENT_MOVIES";
-   public static final String MAXIMUM_NUMBER_OF_SPOT = "MAXIMUM_NUMBER_OF_SPOT";
-   public static final String QUALITY = "QUALITY";
+   private static final String MAXIMUM_NUMBER_OF_SPOT = "MAXIMUM_NUMBER_OF_SPOT";
+   private static final String QUALITY = "QUALITY";
    public static final String DYNAMIC = "DYNAMIC";
    public static final String X_FIELD_NUMBER = "X_FIELD_NUMBER";
    public static final String Y_FIELD_NUMBER = "Y_FIELD_NUMBER";
-   public static final String CELL_SIZE = "CELL_SIZE";
+   private static final String CELL_SIZE = "CELL_SIZE";
    public static final String MINIMUM_CELL_AREA = "MINIMUM_CELL_AREA";
    public static final String MAXIMUM_CELL_AREA = "MAXIMUM_CELL_AREA";
    public static final String FILTER_MEAN_GREY_VALUE = "FILTER_MEAN_GREY_VALUE";
@@ -140,7 +141,7 @@ public class MaarsParameters {
    /**
     * Constructor of Element need path to configuration file
     *
-    * @param defaultParametersStream
+    * @param defaultParametersStream input stream conaining xml file information
     */
    public MaarsParameters(InputStream defaultParametersStream) {
 
@@ -335,6 +336,15 @@ public class MaarsParameters {
     */
    public String getUsingChannels() {
       return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChildText(USING);
+   }
+
+   /**
+    * @param ch : GFP, CFP, DAPI, TXRED
+    * @return corresponding channel color
+    */
+   public void setChExposure(String ch, String exposure) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+              .getChild(EXPOSURE).setText(exposure);
    }
 
    /**
