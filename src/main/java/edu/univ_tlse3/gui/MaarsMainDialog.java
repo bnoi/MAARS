@@ -91,7 +91,7 @@ public class MaarsMainDialog implements ActionListener {
 
       // Exploration Label
 
-      Label explorationLabel = new Label("Area to explore");
+      Label explorationLabel = new Label("Area to explore", Label.CENTER);
       explorationLabel.setBackground(labelColor);
 
       // field width Panel (Label + textfield)
@@ -134,7 +134,7 @@ public class MaarsMainDialog implements ActionListener {
 
       // analysis parameters label
 
-      Label analysisParamLabel = new Label("Analysis parameters", SwingConstants.CENTER);
+      Label analysisParamLabel = new Label("Analysis parameters", Label.CENTER);
       analysisParamLabel.setBackground(labelColor);
 
       // autofocus button
@@ -396,15 +396,15 @@ public class MaarsMainDialog implements ActionListener {
          fluoAcqDurationTf.setEditable(false);
       } else if (e.getSource() == withOutAcqChk) {
          if (withOutAcqChk.isSelected()) {
-            widthTf.setText("MAARS do it for you");
+             widthTf.setEnabled(false);
+             heightTf.setEnabled(false);
             widthTf.setEditable(false);
-            heightTf.setText("MAARS do it for you");
             heightTf.setEditable(false);
             numFieldLabel.setText("Don't worry about this");
          } else {
-            widthTf.setText(FastMath.round(mmc.getImageWidth() * calibration) + "");
+             widthTf.setEnabled(true);
+             heightTf.setEnabled(true);
             widthTf.setEditable(true);
-            heightTf.setText(FastMath.round(mmc.getImageHeight() * calibration) +"");
             heightTf.setEditable(true);
             refreshNumField();
          }
@@ -416,7 +416,9 @@ public class MaarsMainDialog implements ActionListener {
             socVisualizer_.showDialog();
          }
       }else if(e.getSource() == stopButton_){
-         MAARSMainth_.interrupt();
+         if (MAARSMainth_ != null){
+            MAARSMainth_.interrupt();
+         }
       } else {
          IJ.log("MAARS don't understand what you want, sorry");
       }

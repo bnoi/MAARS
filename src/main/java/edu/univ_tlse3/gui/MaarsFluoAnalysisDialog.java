@@ -96,7 +96,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       // Movie parameters_ label
 
-      Label fluoMovieLabel = new Label("Movie parameters_", Label.CENTER);
+      Label fluoMovieLabel = new Label("Movie parameters", Label.CENTER);
       fluoMovieLabel.setBackground(labelColor);
 
       //

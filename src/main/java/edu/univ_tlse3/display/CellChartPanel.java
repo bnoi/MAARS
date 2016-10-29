@@ -18,42 +18,30 @@ import java.awt.*;
 /**
  * Created by tong on 25/10/16.
  */
-public class CellChartPanel {
-   final JPanel chartPanel_;
-   Integer SUBPLOT_COUNT = 1;
-   final XYSeriesCollection[] datasets_ = new XYSeriesCollection[SUBPLOT_COUNT];
-   ;
-
-   /**
-    * The most recent value added to series 1.
-    */
-   private double[] lastValue = new double[SUBPLOT_COUNT];
-
+public class CellChartPanel extends JPanel {
    /**
     * waiting for data constructor
     */
-   public CellChartPanel() {
-      chartPanel_ = new JPanel();
-      chartPanel_.add(new JLabel("Waiting for data..."));
+   public CellChartPanel(String s) {
+      super(new BorderLayout());
+      add(new JLabel(s), BorderLayout.CENTER);
    }
 
    /**
-    * Constructs a new demonstration application.
     *
-    * @param c cell object of MAARS
+    * @param cell cell to be investigated
     */
-   public CellChartPanel(Cell c) {
-
-      final CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis());
+   public static ChartPanel updateCellContent(Cell cell) {
+      CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis());
       for (String geoPara : SpotSetAnalyzor.GeoParamSet) {
-         XYPlot subPlot = drawSubplot(c, geoPara);
+         XYPlot subPlot = drawSubplot(cell, geoPara);
          subPlot.setBackgroundPaint(Color.lightGray);
          subPlot.setDomainGridlinePaint(Color.white);
          subPlot.setRangeGridlinePaint(Color.white);
          plot.add(subPlot);
       }
 
-      final JFreeChart chart = new JFreeChart(String.valueOf(c.getCellNumber()), plot);
+      final JFreeChart chart = new JFreeChart(String.valueOf(cell.getCellNumber()), plot);
       chart.setBorderPaint(Color.black);
       chart.setBorderVisible(true);
       chart.setBackgroundPaint(Color.white);
@@ -65,13 +53,13 @@ public class CellChartPanel {
       axis.setAutoRange(true);
       axis.setFixedAutoRange(90);
 
-      chartPanel_ = new ChartPanel(chart);
-      chartPanel_.setPreferredSize(new java.awt.Dimension(500, 470));
-      chartPanel_.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
+      ChartPanel chartPanel = new ChartPanel(chart);
+      chartPanel.setPreferredSize(new java.awt.Dimension(500, 470));
+      chartPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      return chartPanel;
    }
 
-   public XYPlot drawSubplot(Cell cell, String param) {
+   public static XYPlot drawSubplot(Cell cell, String param) {
       final NumberAxis rangeAxis = new NumberAxis(param);
       rangeAxis.setAutoRangeIncludesZero(true);
       XYSeries series;
@@ -91,10 +79,6 @@ public class CellChartPanel {
       );
 
       return subplot;
-   }
-
-   public JPanel getChartPanel() {
-      return chartPanel_;
    }
 
    // ****************************************************************************

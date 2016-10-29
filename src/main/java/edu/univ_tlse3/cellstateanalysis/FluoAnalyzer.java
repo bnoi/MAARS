@@ -1,5 +1,6 @@
 package edu.univ_tlse3.cellstateanalysis;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory.FindLagging;
 import edu.univ_tlse3.display.SOCVisualizer;
@@ -188,7 +189,9 @@ public class FluoAnalyzer implements Runnable {
                ArrayList<Spot> poles = spotSetAnalyzor.getPoles();
                new FindLagging(cell, spotSet, fluoImgCal, poles, radius, frame);
                cell.putGeometry(channel, frame, geometry);
-               soc.addPotentialMitosisCell(cell.getCellNumber());
+               if (Iterables.size(spotSet) > 1){
+                  soc.addPotentialMitosisCell(cell.getCellNumber());
+               }
             }
          }
       }

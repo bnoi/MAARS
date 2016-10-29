@@ -98,7 +98,7 @@ public class MaarsParameters {
    public static final String DYNAMIC = "DYNAMIC";
    public static final String X_FIELD_NUMBER = "X_FIELD_NUMBER";
    public static final String Y_FIELD_NUMBER = "Y_FIELD_NUMBER";
-   private static final String CELL_SIZE = "CELL_SIZE";
+   public static final String CELL_SIZE = "CELL_SIZE";
    public static final String MINIMUM_CELL_AREA = "MINIMUM_CELL_AREA";
    public static final String MAXIMUM_CELL_AREA = "MAXIMUM_CELL_AREA";
    public static final String FILTER_MEAN_GREY_VALUE = "FILTER_MEAN_GREY_VALUE";
