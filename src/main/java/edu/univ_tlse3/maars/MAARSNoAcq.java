@@ -36,12 +36,14 @@ public class MAARSNoAcq implements Runnable {
    private String rootDir;
    private ArrayList<String> arrayChannels = new ArrayList<String>();
    private SOCVisualizer socVisualizer_;
+   private ExecutorService es_;
 
-   public MAARSNoAcq(MaarsParameters parameters, SOCVisualizer socVisualizer) {
+   public MAARSNoAcq(MaarsParameters parameters, SOCVisualizer socVisualizer, ExecutorService es) {
       this.parameters = parameters;
       rootDir = parameters.getSavingPath();
       this.soc = new SetOfCells();
       socVisualizer_ = socVisualizer;
+      es_ = es;
    }
 
    private ArrayList<String[]> getAcqPositions() {
@@ -59,7 +61,6 @@ public class MAARSNoAcq implements Runnable {
 
    @Override
    public void run() {
-      ExecutorService es = null;
       // Start time
       long start = System.currentTimeMillis();
       for (String[] pos : getAcqPositions()) {
@@ -118,8 +119,6 @@ public class MAARSNoAcq implements Runnable {
                }
             }
             Collections.sort(arrayImgFrames);
-            int nThread = Runtime.getRuntime().availableProcessors();
-            es = Executors.newFixedThreadPool(nThread);
             ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
 
 //                ArrayList<Map<String, FloatProcessor>> futureSet = new ArrayList<Map<String, FloatProcessor>>();
@@ -134,7 +133,7 @@ public class MAARSNoAcq implements Runnable {
                   zProjectedFluoImg = ImgUtils.zProject(fluoImage);
                   zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
                   zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
-                  es.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc, channel,
+                  es_.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc, channel,
                           Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                           Double.parseDouble(parameters.getChSpotRaius(channel)),
                           Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_));
@@ -146,9 +145,9 @@ public class MAARSNoAcq implements Runnable {
             mergedImg.setCalibration(segImg.getCalibration());
             assert fluoStack != null;
             mergedImg.setT(fluoStack.getSize());
-            es.shutdown();
+            es_.shutdown();
             try {
-               es.awaitTermination(3, TimeUnit.MINUTES);
+               es_.awaitTermination(3, TimeUnit.MINUTES);
             } catch (InterruptedException e) {
                e.printStackTrace();
             }
@@ -159,7 +158,7 @@ public class MAARSNoAcq implements Runnable {
                long startWriting = System.currentTimeMillis();
                Boolean splitChannel = true;
                mergedImg.getCalibration().frameInterval = timeInterval / 1000;
-               MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
+               MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
                MAARS.analyzeMitosisDynamic(soc, timeInterval, splitChannel, pathToSegDir, true);
                IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                        + " sec for writing results");
@@ -167,10 +166,10 @@ public class MAARSNoAcq implements Runnable {
          }
       }
       try {
-         assert es != null;
-         if (!es.isShutdown()) {
-            es.shutdown();
-            es.awaitTermination(120, TimeUnit.MINUTES);
+         assert es_ != null;
+         if (!es_.isShutdown()) {
+            es_.shutdown();
+            es_.awaitTermination(120, TimeUnit.MINUTES);
          }
       } catch (InterruptedException e) {
          e.printStackTrace();

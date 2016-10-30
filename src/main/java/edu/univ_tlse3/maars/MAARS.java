@@ -55,6 +55,7 @@ public class MAARS implements Runnable {
    private MaarsParameters parameters;
    private SetOfCells soc;
    private SOCVisualizer socVisualizer_;
+   private ExecutorService es_;
 
    /**
     * Constructor
@@ -63,12 +64,13 @@ public class MAARS implements Runnable {
     * @param mmc        CMMCore object (core)
     * @param parameters MAARS parameters object
     */
-   public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer) {
+   public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer, ExecutorService es) {
       this.mmc = mmc;
       this.parameters = parameters;
       this.soc = new SetOfCells();
       this.mm = mm;
       socVisualizer_ = socVisualizer;
+      es_ = es;
    }
 
    private static void mailNotify() {
@@ -111,17 +113,20 @@ public class MAARS implements Runnable {
    }
 
    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
-                       ArrayList<String> arrayChannels, Boolean splitChannel) {
+                       Boolean splitChannel) {
       MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
       MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
       MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
+      HashMap<String, ImagePlus> croppedImgSet = null;
       for (Cell cell : soc) {
          geoSaver.save(cell);
          spotSaver.save(cell);
-         HashMap<String, ImagePlus> croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
+         croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
          imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
       }
-//        imgSaver.exportChannelBtf(splitChannel, arrayChannels);
+//      if (croppedImgSet != null) {
+//         imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());
+//      }
    }
 
    private static void showChromLaggingCells(String pathToSegDir,
@@ -273,8 +278,6 @@ public class MAARS implements Runnable {
       ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
       double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
       //prepare executor for image analysis
-      int nThread = Runtime.getRuntime().availableProcessors();
-      ExecutorService es = Executors.newFixedThreadPool(nThread);
       for (int i = 0; i < explo.length(); i++) {
          try {
             mm.core().setXYPosition(explo.getX(i), explo.getY(i));
@@ -339,7 +342,7 @@ public class MAARS implements Runnable {
                      SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                      ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm));
                      if (do_analysis) {
-                        es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
+                        es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                 Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                 Double.parseDouble(parameters.getChSpotRaius(channel)),
                                 Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
@@ -366,7 +369,7 @@ public class MAARS implements Runnable {
                   SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                   ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm));
                   if (do_analysis) {
-                     es.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
+                     es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                              Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                              Double.parseDouble(parameters.getChSpotRaius(channel)),
                              Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
@@ -380,7 +383,7 @@ public class MAARS implements Runnable {
                Boolean splitChannel = true;
                ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
                mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-               MAARS.saveAll(soc, mergedImg, pathToFluoDir, arrayChannels, splitChannel);
+               MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
                MAARS.analyzeMitosisDynamic(soc, fluoTimeInterval / 1000,
                        splitChannel, pathToSegDir, true);
                ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
@@ -390,10 +393,10 @@ public class MAARS implements Runnable {
          }
       }
       mmc.setAutoShutter(true);
-      es.shutdown();
+      es_.shutdown();
       try {
          // TODO no acq should be more than 3 hours
-         es.awaitTermination(180, TimeUnit.MINUTES);
+         es_.awaitTermination(180, TimeUnit.MINUTES);
       } catch (InterruptedException e) {
          e.printStackTrace();
       }

@@ -15,6 +15,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
@@ -46,7 +48,8 @@ public class MaarsMainDialog implements ActionListener {
    private JPanel stopAndVisualizerButtonPanel_;
    private SOCVisualizer socVisualizer_;
    private JButton stopButton_;
-   private Thread MAARSMainth_;
+//   private Thread MAARSMainth_;
+    private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
    /**
     * Constructor
@@ -214,7 +217,7 @@ public class MaarsMainDialog implements ActionListener {
 
       //
 
-      stopButton_ = new JButton("Stop(not working)");
+      stopButton_ = new JButton("Stop");
       stopButton_.addActionListener(this);
       stopAndVisualizerButtonPanel_.add(stopButton_);
 
@@ -359,24 +362,13 @@ public class MaarsMainDialog implements ActionListener {
          if (Integer.valueOf(widthTf.getText()) * Integer.valueOf(heightTf.getText()) == 0) {
             IJ.error("Session aborted, 0 field to analyse");
          } else {
-            Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
-               public void uncaughtException(Thread th, Throwable ex) {
-                  System.out.println("Uncaught exception: " + ex);
-               }
-            };
             saveParameters();
-
             if (withOutAcqChk.isSelected()) {
-
-               MAARSMainth_ = new Thread(new MAARSNoAcq(parameters, socVisualizer_));
+                es_.submit(new Thread(new MAARSNoAcq(parameters, socVisualizer_, es_)));
             } else {
                if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                  MAARSMainth_ = new Thread(new MAARS(mm, mmc, parameters, socVisualizer_));
+                   es_.submit(new Thread(new MAARS(mm, mmc, parameters, socVisualizer_, es_)));
                }
-            }
-            if (MAARSMainth_ != null) {
-               MAARSMainth_.setUncaughtExceptionHandler(h);
-               MAARSMainth_.start();
             }
          }
       } else if (e.getSource() == segmButton) {
@@ -409,16 +401,13 @@ public class MaarsMainDialog implements ActionListener {
             refreshNumField();
          }
       } else if (e.getSource() == showDataVisualizer_) {
-//         mm.getAcquisitionManager().haltAcquisition();
          if (socVisualizer_ == null){
             socVisualizer_ = createVisualizer();
          }else{
             socVisualizer_.showDialog();
          }
       }else if(e.getSource() == stopButton_){
-         if (MAARSMainth_ != null){
-            MAARSMainth_.interrupt();
-         }
+         es_.shutdownNow();
       } else {
          IJ.log("MAARS don't understand what you want, sorry");
       }

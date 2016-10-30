@@ -9,6 +9,7 @@ import loci.plugins.LociExporter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class MAARSImgSaver {
    private String pathToFluoDir;
@@ -35,7 +36,7 @@ public class MAARSImgSaver {
       }
    }
 
-   public void exportChannelBtf(Boolean splitChannel, ArrayList<String> arrayChannels) {
+   public void exportChannelBtf(Boolean splitChannel, Set<String> arrayChannels) {
       LociExporter lociExporter = new LociExporter();
       if (splitChannel) {
          for (String channel : arrayChannels) {
