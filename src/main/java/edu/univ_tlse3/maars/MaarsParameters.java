@@ -81,6 +81,10 @@ import java.util.List;
  * 								+-----> COLOR
  * 								+-----> EXPOSURE
  * 								+-----> SHUTTER
+ * MITOSIS_DETECTION_PARAMETERS
+ *    |
+ *    +-----MINIMUM_DURATION
+ *    +-----DETECTION_CHANNEL
  * @author Tong LI && Marie
  *
  */
@@ -89,6 +93,9 @@ public class MaarsParameters {
    private static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
    private static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
    private static final String EXPLORATION_PARAMETERS = "EXPLORATION_PARAMETERS";
+    private static final String MITOSIS_DETECTION_PARAMETERS = "MITOSIS_DETECTION_PARAMETERS";
+    private static final String MINIMUM_DURATION = "MINIMUM_DURATION";
+    private static final String DETECTION_CHANNEL = "DETECTION_CHANNEL";
    public static final String RANGE_SIZE_FOR_MOVIE = "RANGE_SIZE_FOR_MOVIE";
    public static final String STEP = "STEP";
    private static final String SPOT_RADIUS = "SPOT_RADIUS";
@@ -263,12 +270,6 @@ public class MaarsParameters {
       return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(CHANNEL_GROUP);
    }
 
-   /**
-    * @param channelGroup channel group name
-    */
-   public void setChannelGroup(String channelGroup){
-      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(CHANNEL_GROUP).setText(channelGroup);
-   }
 
    /**
     * @param ch : GFP, CFP, DAPI, TXRED
@@ -329,14 +330,53 @@ public class MaarsParameters {
       return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChildren();
    }
 
+    /**
+     * @return get channels used for fluo analysis
+     */
+    public String getUsingChannels() {
+        return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChildText(USING);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getMinimumMitosisDuration(){
+        return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(MINIMUM_DURATION);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getDetectionChForMitosis(){
+        return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(DETECTION_CHANNEL);
+    }
+
    //////////// Setters
 
-   /**
-    * @return get channels used for fluo analysis
-    */
-   public String getUsingChannels() {
-      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChildText(USING);
-   }
+    /**
+     *
+     * @param duration minimum mitosis duration (sec)
+     */
+    public void setMinimumMitosisDuration(String duration){
+        root.getChild(MITOSIS_DETECTION_PARAMETERS).getChild(MINIMUM_DURATION).setText(duration);
+    }
+
+    /**
+     *
+     * @param chForMitosis the channel to detection mitosis
+     */
+    public void setDetectionChForMitosis(String chForMitosis){
+        root.getChild(MITOSIS_DETECTION_PARAMETERS).getChild(DETECTION_CHANNEL).setText(chForMitosis);
+    }
+
+    /**
+     * @param channelGroup channel group name
+     */
+    public void setChannelGroup(String channelGroup){
+        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(CHANNEL_GROUP).setText(channelGroup);
+    }
 
    /**
     * @param ch : GFP, CFP, DAPI, TXRED

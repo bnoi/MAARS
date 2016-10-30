@@ -17,6 +17,7 @@ import org.jdom2.Element;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,6 +61,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JFormattedTextField spotRadiusCh3Tf;
    private JFormattedTextField qualityCh3Tf;
    private JFormattedTextField exposureCh3Tf_;
+   private JFormattedTextField mitosisDurationTf_;
    private JCheckBox saveFlims;
    private JCheckBox doAnalysis;
    private JButton test1;
@@ -75,6 +77,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JCheckBox useChannel3_;
    private static Integer TOTAL_PARAMETERS = 5;
    private ArrayList<JPanel> chPanels = new ArrayList<JPanel>();
+   private String spindleChannel_ = null;
 
    /**
     * Constructor :
@@ -167,18 +170,21 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       JLabel spotRaiusTitle = new JLabel("Spot Radius", SwingConstants.CENTER);
       JLabel qualityTitle = new JLabel("Quality", SwingConstants.CENTER);
       JLabel exposureTitle = new JLabel("Exposure", SwingConstants.CENTER);
+       JLabel testButTitle = new JLabel("test detection", SwingConstants.CENTER);
+       JLabel spindleChannel = new JLabel("Spindle ?", SwingConstants.CENTER);
       channelTitlePanel.add(channelCheckTitle);
       channelTitlePanel.add(fluoChannelsTitle);
       channelTitlePanel.add(maxNbSpotTitle);
       channelTitlePanel.add(spotRaiusTitle);
       channelTitlePanel.add(qualityTitle);
       channelTitlePanel.add(exposureTitle);
+       channelTitlePanel.add(testButTitle);
+       channelTitlePanel.add(spindleChannel);
       channelTitlePanel.add(new JLabel());
 
       //
 
       channel1Panel = new JPanel(new GridLayout(1, 0));
-
       channel1Combo = new JComboBox();
       channel1Combo.addActionListener(new ActionListener() {
          @Override
@@ -204,6 +210,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             }
          }
       });
+       final JRadioButton ch1Button = new JRadioButton("");
+       ch1Button.setSelected(true);
       channel1Panel.add(useChannel1_);
       channel1Panel.add(channel1Combo);
       channel1Panel.add(maxNumberSpotCh1Tf);
@@ -211,6 +219,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel1Panel.add(qualityCh1Tf);
       channel1Panel.add(exposureCh1Tf_);
       channel1Panel.add(test1);
+       channel1Panel.add(ch1Button);
       chPanels.add(channel1Panel);
       //
 
@@ -230,9 +239,6 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       test2 = new JButton("test");
       test2.setEnabled(false);
       test2.addActionListener(this);
-//      maxNumberSpotCh2Tf.setText("");
-//      spotRadiusCh2Tf.setText("");
-//      qualityCh2Tf.setText("");
       useChannel2_ = new JCheckBox("",true);
       useChannel2_.addActionListener(new ActionListener() {
          @Override
@@ -244,6 +250,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             }
          }
       });
+       final JRadioButton ch2Button = new JRadioButton("");
+      ch2Button.setActionCommand((String) channel2Combo.getSelectedItem());
+       ch2Button.setSelected(false);
       channel2Panel.add(useChannel2_);
       channel2Panel.add(channel2Combo);
       channel2Panel.add(maxNumberSpotCh2Tf);
@@ -251,6 +260,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel2Panel.add(qualityCh2Tf);
       channel2Panel.add(exposureCh2Tf_);
       channel2Panel.add(test2);
+       channel2Panel.add(ch2Button);
       chPanels.add(channel2Panel);
 
       //
@@ -284,6 +294,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             }
          }
       });
+       final JRadioButton ch3Button = new JRadioButton("");
+       ch3Button.setSelected(false);
       channel3Panel.add(useChannel3_);
       channel3Panel.add(channel3Combo);
       channel3Panel.add(maxNumberSpotCh3Tf);
@@ -291,7 +303,15 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel3Panel.add(qualityCh3Tf);
       channel3Panel.add(exposureCh3Tf_);
       channel3Panel.add(test3);
+       channel3Panel.add(ch3Button);
       chPanels.add(channel3Panel);
+
+       //
+
+      ButtonGroup group = new ButtonGroup();
+      group.add(ch1Button);
+      group.add(ch2Button);
+      group.add(ch3Button);
 
       //
 
@@ -315,6 +335,24 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       //
 
+      JPanel mitosisDurationPanel = new JPanel();
+      mitosisDurationPanel.setLayout(new BorderLayout(1,2));
+
+      Label mitosisDurationLabel = new Label("Minimum mitosis duration (s)", Label.CENTER);
+      mitosisDurationLabel.setBackground(Color.lightGray);
+
+      mitosisDurationTf_ = new JFormattedTextField(Integer.class);
+      mitosisDurationPanel.add(mitosisDurationLabel, BorderLayout.NORTH);
+      mitosisDurationPanel.add(mitosisDurationTf_, BorderLayout.SOUTH);
+      mitosisDurationTf_.setText(parameters.getMinimumMitosisDuration());
+
+
+      JPanel durationAndConfigPanel = new JPanel(new BorderLayout(1,2));
+      durationAndConfigPanel.add(configurationGroupPanel, BorderLayout.WEST);
+      durationAndConfigPanel.add(mitosisDurationPanel, BorderLayout.EAST);
+
+      //
+
 
       String channelsString = parameters_.getUsingChannels();
       String[] arrayChannels = channelsString.split(",", -1);
@@ -322,6 +360,28 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
          JComboBox tmpChannelCombo = (JComboBox) chPanels.get(i).getComponent(1);
          tmpChannelCombo.setSelectedItem(arrayChannels[i]);
       }
+
+      ch1Button.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            ch1Button.setActionCommand((String) channel1Combo.getSelectedItem());
+         }
+      });
+      ch2Button.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            ch2Button.setActionCommand((String) channel2Combo.getSelectedItem());
+         }
+      });
+      ch3Button.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            ch3Button.setActionCommand((String) channel3Combo.getSelectedItem());
+         }
+      });
+      ch1Button.setActionCommand((String) channel1Combo.getSelectedItem());
+      ch2Button.setActionCommand((String) channel2Combo.getSelectedItem());
+      ch3Button.setActionCommand((String) channel3Combo.getSelectedItem());
 
       //
 
@@ -336,7 +396,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       mainPanel.add(timeIntervalPanel);
       mainPanel.add(checkBoxPanel);
       mainPanel.add(fluoAnaParamLabel);
-      mainPanel.add(configurationGroupPanel);
+      mainPanel.add(durationAndConfigPanel);
       mainPanel.add(channelTitlePanel);
       mainPanel.add(channel1Panel);
       mainPanel.add(channel2Panel);
@@ -387,11 +447,11 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     */
    private void enableChannelPanel(JPanel jp, Boolean enable){
       if (enable) {
-         for (int i = 1; i <= TOTAL_PARAMETERS+1; i++){
+         for (int i = 1; i <= TOTAL_PARAMETERS+2; i++){
             jp.getComponent(i).setEnabled(true);
          }
       }else{
-         for (int i = 1; i <= TOTAL_PARAMETERS+1; i++){
+         for (int i = 1; i <= TOTAL_PARAMETERS+2; i++){
             jp.getComponent(i).setEnabled(false);
          }
       }
@@ -527,12 +587,20 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    public void actionPerformed(ActionEvent e) {
       Object src = e.getSource();
       if (src == okFluoAnaParamButton) {
+         for (JPanel jp : chPanels){
+            JRadioButton tmpBut = (JRadioButton) jp.getComponent(TOTAL_PARAMETERS + 2);
+            if (tmpBut.isSelected()){
+               spindleChannel_ = tmpBut.getActionCommand();
+            }
+         }
          parameters_.setFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
          parameters_.setFluoParameter(MaarsParameters.STEP, step.getText());
          parameters_.setFluoParameter(MaarsParameters.DO_ANALYSIS, String.valueOf(doAnalysis.isSelected()));
          parameters_.setFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES,
                  String.valueOf(saveFlims.isSelected()));
          parameters_.setFluoParameter(MaarsParameters.TIME_INTERVAL, timeInterval.getText());
+         parameters_.setDetectionChForMitosis(spindleChannel_);
+         parameters_.setMinimumMitosisDuration(String.valueOf(mitosisDurationTf_.getText()));
          updateMAARSFluoChParameters();
          try {
             parameters_.save();
