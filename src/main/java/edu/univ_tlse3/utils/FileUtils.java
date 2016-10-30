@@ -52,6 +52,8 @@ public class FileUtils {
 
    /**
     *
+    * @param path where to write the script
+    * @param scriptInArray script stored in the ArrayList line by line
     */
    public static void writeScript(String path, ArrayList<String> scriptInArray){
       try {

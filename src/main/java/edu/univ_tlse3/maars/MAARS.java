@@ -62,6 +62,8 @@ public class MAARS implements Runnable {
      * @param mm         MMStudio object (gui)
      * @param mmc        CMMCore object (core)
      * @param parameters MAARS parameters object
+     * @param socVisualizer set of cell visualizer
+     * @param es executer service of MAARS
      */
     public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer, ExecutorService es) {
         this.mmc = mmc;

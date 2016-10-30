@@ -20,7 +20,8 @@ import java.awt.*;
  */
 public class CellChartPanel extends JPanel {
    /**
-    * waiting for data constructor
+    *
+    * @param s the string to be written on the label
     */
    public CellChartPanel(String s) {
       super(new BorderLayout());
@@ -30,6 +31,7 @@ public class CellChartPanel extends JPanel {
    /**
     *
     * @param cell cell to be investigated
+    * @return  chartPanel of the cell
     */
    public static ChartPanel updateCellContent(Cell cell) {
       CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis());

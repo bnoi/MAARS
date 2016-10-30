@@ -29,7 +29,7 @@ public class ExplorationXYPositions {
     * Constructor of ExplorationXYPositions, fieldWidth and fieldHeigth must be
     * in microns
     *
-    * @param parameters
+    * @param parameters MAARS parameters
     * @param mmc        MAARS Parameters object
     */
    public ExplorationXYPositions(CMMCore mmc, MaarsParameters parameters) {

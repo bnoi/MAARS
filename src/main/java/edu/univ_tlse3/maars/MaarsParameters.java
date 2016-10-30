@@ -339,7 +339,7 @@ public class MaarsParameters {
 
     /**
      *
-     * @return
+     * @return the parameter minimum mitosis duration
      */
     public String getMinimumMitosisDuration(){
         return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(MINIMUM_DURATION);
@@ -347,7 +347,7 @@ public class MaarsParameters {
 
     /**
      *
-     * @return
+     * @return the channel to use for mitosis detection
      */
     public String getDetectionChForMitosis(){
         return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(DETECTION_CHANNEL);
@@ -380,7 +380,7 @@ public class MaarsParameters {
 
    /**
     * @param ch : GFP, CFP, DAPI, TXRED
-    * @return corresponding channel color
+    * @param exposure exposure of the corresonding channel
     */
    public void setChExposure(String ch, String exposure) {
       root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
