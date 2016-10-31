@@ -10,19 +10,19 @@ mkdir -p jars/MAARS_deps
 cp target/dependency/*.jar jars/MAARS_deps
 
 # Remove duplicated dependencies
-rm -f jars/maars_dependencies/3D_Viewer-*.jar
-rm -f jars/maars_dependencies/MMJ_*.jar
-rm -f jars/maars_dependencies/MMCoreJ*.jar
-rm -f jars/maars_dependencies/MMAcqEngine*.jar
-rm -f jars/maars_dependencies/miglayout*.jar
-rm -f jars/maars_dependencies/ij-*.jar
-rm -f jars/maars_dependencies/bsh-*.jar
-rm -f jars/maars_dependencies/clojure-*.jar
-rm -f jars/maars_dependencies/eventbus-*.jar
-rm -f jars/maars_dependencies/gentyref-*.jar
-rm -f jars/maars_dependencies/guava-*.jar
-rm -f jars/maars_dependencies/jcommon-*.jar
-rm -f jars/maars_dependencies/jfreechart-*.jar
-rm -f jars/maars_dependencies/rsyntaxtextarea-*.jar
+rm -f jars/MAARS_deps/3D_Viewer-*.jar
+rm -f jars/MAARS_deps/MMJ_*.jar
+rm -f jars/MAARS_deps/MMCoreJ*.jar
+rm -f jars/MAARS_deps/MMAcqEngine*.jar
+rm -f jars/MAARS_deps/miglayout*.jar
+rm -f jars/MAARS_deps/ij-*.jar
+rm -f jars/MAARS_deps/bsh-*.jar
+rm -f jars/MAARS_deps/clojure-*.jar
+rm -f jars/MAARS_deps/eventbus-*.jar
+rm -f jars/MAARS_deps/gentyref-*.jar
+rm -f jars/MAARS_deps/guava-*.jar
+rm -f jars/MAARS_deps/jcommon-*.jar
+rm -f jars/MAARS_deps/jfreechart-*.jar
+rm -f jars/MAARS_deps/rsyntaxtextarea-*.jar
 
 cp target/MAARS_-1.0-SNAPSHOT.jar jars/
