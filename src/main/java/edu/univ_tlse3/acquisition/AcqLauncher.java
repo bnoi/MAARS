@@ -9,6 +9,8 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -32,10 +34,15 @@ public class AcqLauncher {
       MAARS_mda mda = new MAARS_mda(MMStudio.getInstance());
       Datastore ds = mda.acquire(acqEng);
       List<Image> imageList = new ArrayList<Image>();
-      //TODO unordered
       for (Coords coords : ds.getUnorderedImageCoords()) {
          imageList.add(ds.getImage(coords));
       }
+      Collections.sort(imageList, new Comparator<Image>() {
+         @Override
+         public int compare(Image o1, Image o2) {
+            return o1.getCoords().getZ() - o2.getCoords().getZ();
+         }
+      });
       return ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
    }
 }
