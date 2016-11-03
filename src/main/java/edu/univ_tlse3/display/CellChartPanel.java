@@ -53,7 +53,7 @@ public class CellChartPanel extends JPanel {
       plot.setRangeGridlinePaint(Color.white);
       final ValueAxis axis = plot.getDomainAxis();
       axis.setAutoRange(true);
-      axis.setFixedAutoRange(90);
+//      axis.setFixedAutoRange(90);
 
       ChartPanel chartPanel = new ChartPanel(chart);
       chartPanel.setPreferredSize(new java.awt.Dimension(500, 470));

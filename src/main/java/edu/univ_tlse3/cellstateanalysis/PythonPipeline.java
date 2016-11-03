@@ -15,7 +15,7 @@ public class PythonPipeline {
    public static final String PATH2PYTHONSCRIPTS = "plugins" + File.separator + "MAARS_deps" + File.separator;
 
    public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
-      BufferedReader bfr = getBufferReaderOfScript(File.separator + SCRIPT_NAME);
+      BufferedReader bfr = getBufferReaderOfScript(SCRIPT_NAME);
       ArrayList<String> script = new ArrayList<String>();
       Boolean changeParam = false;
       String pattern = "if __name__ == '__main__':";
@@ -52,8 +52,9 @@ public class PythonPipeline {
       return script;
    }
 
-   public static BufferedReader getBufferReaderOfScript(String scriptPathWithJar){
-      InputStream pythonScript = PythonPipeline.class.getResourceAsStream(scriptPathWithJar);
+   public static BufferedReader getBufferReaderOfScript(String scriptName){
+      ClassLoader classLoader = PythonPipeline.class.getClassLoader();
+      InputStream pythonScript = classLoader.getResourceAsStream(scriptName);
       return new BufferedReader(new InputStreamReader(pythonScript));
    }
 
@@ -70,8 +71,7 @@ public class PythonPipeline {
     *
     */
    public static void copyScriptDependency(){
-      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-      BufferedReader bfr = getBufferReaderOfScript(File.separator + TRACKMATE_NAME);
+      BufferedReader bfr = getBufferReaderOfScript(TRACKMATE_NAME);
       ArrayList<String> script = new ArrayList<String>();
       try {
          while (bfr.ready()) {
@@ -162,7 +162,7 @@ public class PythonPipeline {
    }
 
     public static void main(String[] args) {
-//       ArrayList<String> script = PythonPipeline.getPythonScript("/home/tong/Documents/movies/26-10-1/X0_Y0", "CFP", "0.1075", "200","20");
+//       ArrayList<String> script = PythonPipeline.getPythonScript("E:/Starve/WT-11-50-03-11/X0_Y0", "CFP", "0.1075", "200","4");
 //       PythonPipeline.savePythonScript(script);
 //       PythonPipeline.copyScriptDependency();
 //       PythonPipeline.runPythonScript();
