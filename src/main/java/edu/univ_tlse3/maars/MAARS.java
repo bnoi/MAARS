@@ -30,10 +30,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -124,6 +121,16 @@ public class MAARS implements Runnable {
             spotSaver.save(cell);
             croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
             imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
+        }
+        try {
+            FileOutputStream fileOut =
+                    new FileOutputStream(pathToFluoDir + "SetOfCell.serialize");
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(soc);
+            out.close();
+            fileOut.close();
+        }catch(IOException i) {
+            i.printStackTrace();
         }
 //      if (croppedImgSet != null) {
 //         imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());

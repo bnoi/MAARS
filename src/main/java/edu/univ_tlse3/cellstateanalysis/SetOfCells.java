@@ -5,6 +5,7 @@ import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -15,7 +16,7 @@ import java.util.NoSuchElementException;
  *
  * @author Tong LI
  */
-public class SetOfCells implements Iterable<Cell>, Iterator<Cell> {
+public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable {
    private int iteratorCount = 0;
    private ArrayList<Cell> cellArray;
    private ArrayList<Integer> cellsWithMoreThan2Spots_ = new ArrayList<Integer>();
