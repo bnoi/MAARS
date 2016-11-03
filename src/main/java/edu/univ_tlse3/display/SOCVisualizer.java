@@ -7,11 +7,13 @@ import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Created by tong on 25/10/16.
@@ -20,6 +22,7 @@ public class SOCVisualizer {
     private DefaultListModel alreadyShownList_ = new DefaultListModel();
     private SetOfCells setOfCells_;
     private JFrame frame_;
+    private JTextField pathToSoc_;
 
     public SOCVisualizer() {
     }
@@ -33,11 +36,11 @@ public class SOCVisualizer {
                 alreadyShownList_.addElement(cellNb);
             }
         }
-//      sort();
+      sort();
     }
 
     public void sort() {
-        Object[] contents = alreadyShownList_.toArray();
+        Integer[] contents = (Integer[]) alreadyShownList_.toArray();
         Arrays.sort(contents);
         alreadyShownList_.copyInto(contents);
     }
@@ -96,8 +99,44 @@ public class SOCVisualizer {
         //Add content to the window.
         JScrollPane scrollPane = new JScrollPane(cellToDisplayList);
         scrollPane.setMinimumSize(new Dimension(100, 200));
+        JPanel loadSocPanel = new JPanel(new BorderLayout(2,1));
+        JButton loadSocBut = new JButton("Load");
+        JPanel pathToSocTFPanel = new JPanel();
+        pathToSoc_ = new JFormattedTextField(String.class);
+        pathToSocTFPanel.add(pathToSoc_);
+        loadSocBut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    FileInputStream f_in = new
+                            FileInputStream(pathToSoc_.getText());
+                    ObjectInputStream obj_in =
+                            new ObjectInputStream (f_in);
+                    Object obj = obj_in.readObject();
+                    if (obj instanceof SetOfCells)
+                    {
+                        // Cast object to a soc
+                        SetOfCells soc = (SetOfCells) obj;
+                        updateCellsDisplay(soc);
+
+                    }
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        });
+        loadSocPanel.add(pathToSocTFPanel, BorderLayout.CENTER);
+        loadSocPanel.add(loadSocBut, BorderLayout.SOUTH);
+
         contentPane.add(scrollPane, BorderLayout.WEST, 0);
         contentPane.add(lastChartPanel[0], BorderLayout.CENTER, 1);
+        contentPane.add(loadSocPanel,BorderLayout.EAST,2);
 
         frame_.validate();
         //Display the window.

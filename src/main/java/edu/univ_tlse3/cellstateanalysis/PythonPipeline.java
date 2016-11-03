@@ -162,10 +162,9 @@ public class PythonPipeline {
    }
 
     public static void main(String[] args) {
-//       ArrayList<String> script = PythonPipeline.getPythonScript("E:/Starve/WT-11-50-03-11/X0_Y0", "CFP", "0.1075", "200","4");
-//       PythonPipeline.savePythonScript(script);
-//       PythonPipeline.copyScriptDependency();
-//       PythonPipeline.runPythonScript();
+       ArrayList<String> script = PythonPipeline.getPythonScript("/media/tong/74CDBC0B2251059E/cdc25/02-11-1/X0_Y0", "CFP", "0.1075", "200","4");
+       PythonPipeline.savePythonScript(script);
+       PythonPipeline.runPythonScript();
    //todo it will be cool if one day anaconda support jython. Though not possible for now. The codes below is tested with jython
 // /      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
 //              + "AnalyzeMAARSOutput.py");

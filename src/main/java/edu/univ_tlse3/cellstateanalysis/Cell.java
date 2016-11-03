@@ -5,13 +5,14 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import ij.gui.Roi;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * @author Tong LI
  */
-public class Cell {
+public class Cell implements Serializable{
 
    static final int AREA = 1, MEAN = 2, STD_DEV = 3, MIN = 4, MAX = 5, X_CENTROID = 6, Y_CENTROID = 7,
            PERIMETER = 8, MAJOR = 9, MINOR = 10, ANGLE = 11, CIRCULARITY = 12, ASPECT_RATIO = 13, ROUNDNESS = 14,
