@@ -82,8 +82,7 @@ public class SpotSetAnalyzor {
          Spot cellCenter = new Spot(x - calibratedXBase, y - calibratedYBase, fakeSpotZ, fakeSpotRadius,
                  fakeSpotQuality);
          geometry.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
-         geometry.put(CellCenterToSpCenterAng, rad2AngLessThan90(
-                 Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I)));
+         geometry.put(CellCenterToSpCenterAng, Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I));
       } else {
          geometry.put(SpLength, "");
          geometry.put(SpCenterX, "");
@@ -174,9 +173,9 @@ public class SpotSetAnalyzor {
    private Spot getCenter(ArrayList<Spot> poles) {
       Spot s1 = poles.get(0);
       Spot s2 = poles.get(1);
-      double centerx = (s1.getFeature(Spot.POSITION_X) + s2.getFeature(Spot.POSITION_X)) / 2;
-      double centery = (s1.getFeature(Spot.POSITION_Y) + s2.getFeature(Spot.POSITION_Y)) / 2;
-      double centerz = (s1.getFeature(Spot.POSITION_Z) + s2.getFeature(Spot.POSITION_Z)) / 2;
+      double centerx = (s1.getFeature(Spot.POSITION_X) + s2.getFeature(Spot.POSITION_X)) / 2 - calibratedXBase;
+      double centery = (s1.getFeature(Spot.POSITION_Y) + s2.getFeature(Spot.POSITION_Y)) / 2 - calibratedYBase;
+      double centerz = (s1.getFeature(Spot.POSITION_Z) + s2.getFeature(Spot.POSITION_Z)) / 2 - fakeSpotZ;
       return new Spot(centerx, centery, centerz, fakeSpotRadius, fakeSpotQuality);
    }
 
