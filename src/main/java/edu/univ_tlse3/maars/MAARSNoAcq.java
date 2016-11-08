@@ -145,11 +145,13 @@ public class MAARSNoAcq implements Runnable {
             mergedImg.setCalibration(segImg.getCalibration());
             assert fluoStack != null;
             mergedImg.setT(fluoStack.getSize());
-            es_.shutdown();
-            try {
-               es_.awaitTermination(3, TimeUnit.MINUTES);
-            } catch (InterruptedException e) {
-               e.printStackTrace();
+            while (!es_.isShutdown()) {
+               try {
+                  es_.shutdown();
+                  es_.awaitTermination(1, TimeUnit.MINUTES);
+               } catch (InterruptedException e) {
+                  e.printStackTrace();
+               }
             }
             RoiManager.getInstance().reset();
             RoiManager.getInstance().close();
@@ -167,9 +169,8 @@ public class MAARSNoAcq implements Runnable {
       }
       try {
          assert es_ != null;
-         if (!es_.isShutdown()) {
-            es_.shutdown();
-            es_.awaitTermination(120, TimeUnit.MINUTES);
+         while (!es_.isShutdown()) {
+            es_.awaitTermination(1, TimeUnit.MINUTES);
          }
       } catch (InterruptedException e) {
          e.printStackTrace();
