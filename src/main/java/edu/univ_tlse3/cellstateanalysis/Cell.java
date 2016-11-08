@@ -18,7 +18,7 @@ public class Cell implements Serializable{
            PERIMETER = 8, MAJOR = 9, MINOR = 10, ANGLE = 11, CIRCULARITY = 12, ASPECT_RATIO = 13, ROUNDNESS = 14,
            SOLIDITY = 15;
    private int cellNumber;
-   private Roi cellShapeRoi;
+   private transient Roi cellShapeRoi;
    private String[] measurements;
    private SpotsContainer spotContainer;
    private GeometryContainer geoContainer;

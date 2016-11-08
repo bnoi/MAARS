@@ -148,7 +148,7 @@ public class MAARSNoAcq implements Runnable {
             while (!es_.isShutdown()) {
                try {
                   es_.shutdown();
-                  es_.awaitTermination(1, TimeUnit.MINUTES);
+                  es_.awaitTermination(90, TimeUnit.SECONDS);
                } catch (InterruptedException e) {
                   e.printStackTrace();
                }
@@ -170,7 +170,7 @@ public class MAARSNoAcq implements Runnable {
       try {
          assert es_ != null;
          while (!es_.isShutdown()) {
-            es_.awaitTermination(1, TimeUnit.MINUTES);
+            es_.awaitTermination(90, TimeUnit.SECONDS);
          }
       } catch (InterruptedException e) {
          e.printStackTrace();

@@ -143,7 +143,7 @@ public class MAARS implements Runnable {
         if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
             String[] listAcqNames = new File(pathToSegDir + "_MITOSIS" + File.separator + "figs" + File.separator)
                     .list();
-            String pattern = "(\\d+)(_slopChangePoints_)(\\d+)(.png)";
+            String pattern = "(\\d+)(_slopChangePoints_)(\\d+)(_)(\\d+)(.png)";
             ImagePlus merotelyImp;
             PrintWriter out = null;
             try {
@@ -160,8 +160,8 @@ public class MAARS implements Runnable {
                     Cell cell = soc.getCell(cellNb);
                     cell.setAnaBOnsetFrame(anaBOnsetFrame);
                     ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
-                    Collections.sort(spotInBtwnFrames);
                     if (spotInBtwnFrames.size() > 0) {
+                        Collections.sort(spotInBtwnFrames);
                         if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 1) {
                             out.println(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")

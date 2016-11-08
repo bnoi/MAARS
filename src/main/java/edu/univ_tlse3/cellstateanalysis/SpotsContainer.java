@@ -4,11 +4,12 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SpotsContainer {
+public class SpotsContainer implements Serializable {
    private HashMap<String, SpotCollection> spotsInCell;
    private Model trackmateModel;
 

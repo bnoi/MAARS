@@ -1,9 +1,10 @@
 package edu.univ_tlse3.cellstateanalysis;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Set;
 
-public class GeometryContainer {
+public class GeometryContainer implements Serializable{
    private HashMap<String, HashMap<Integer, HashMap<String, Object>>> geosOfCells;
 
    GeometryContainer() {
