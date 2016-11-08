@@ -122,15 +122,26 @@ public class MAARS implements Runnable {
             croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
             imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
         }
+        File f = new File(pathToFluoDir + "SetOfCell.serialize");
+        ObjectOutputStream objOut = null;
+
         try {
-            FileOutputStream fileOut =
-                    new FileOutputStream(pathToFluoDir + "SetOfCell.serialize");
-            ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            out.writeObject(soc);
-            out.close();
-            fileOut.close();
+            objOut = new ObjectOutputStream(new BufferedOutputStream(
+                    new FileOutputStream(f)));
+            objOut.writeObject(soc);
+            objOut.flush();
+
+            ReportingUtils.logMessage("Object is serialized.");
         }catch(IOException i) {
-            i.printStackTrace();
+            ReportingUtils.logError(i.getMessage());
+        }finally {
+            if (objOut != null){
+                try{
+                    objOut.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 //      if (croppedImgSet != null) {
 //         imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());

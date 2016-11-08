@@ -20,7 +20,7 @@ public class Cell implements Serializable{
    private int cellNumber;
    private transient Roi cellShapeRoi;
    private String[] measurements;
-   private SpotsContainer spotContainer;
+   private transient SpotsContainer spotContainer;
    private GeometryContainer geoContainer;
    private ArrayList<Integer> spotInBetweenFrames = new ArrayList<Integer>();
    private int anaBOnsetFrame_;

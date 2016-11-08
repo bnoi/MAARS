@@ -11,6 +11,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,9 +70,10 @@ public class CellChartPanel extends JPanel {
       for (String channel : cell.getGeometryContainer().getUsingChannels()) {
          series = new XYSeries(param + "_" + channel);
          for (Integer frame : cell.getGeometryContainer().getGeosInChannel(channel).keySet()) {
-            if (cell.getGeometryContainer().getGeosInChannel(channel).get(frame).get(param).toString() != "") {
+            String currnetParamvalue = cell.getGeometryContainer().getGeosInChannel(channel).get(frame).get(param).toString();
+            if (!currnetParamvalue.isEmpty()) {
                series.add(Double.valueOf(frame),
-                       new Double(cell.getGeometryContainer().getGeosInChannel(channel).get(frame).get(param).toString()));
+                       new Double(currnetParamvalue));
             }
          }
          seriesCollection.addSeries(series);

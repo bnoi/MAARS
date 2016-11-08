@@ -36,7 +36,7 @@ public class SOCVisualizer {
                 alreadyShownList_.addElement(cellNb);
             }
         }
-      sort();
+//      sort();
     }
 
     public void sort() {
@@ -116,6 +116,7 @@ public class SOCVisualizer {
                     if (obj instanceof SetOfCells)
                     {
                         // Cast object to a soc
+                        ReportingUtils.logMessage("updated");
                         SetOfCells soc = (SetOfCells) obj;
                         updateCellsDisplay(soc);
 
