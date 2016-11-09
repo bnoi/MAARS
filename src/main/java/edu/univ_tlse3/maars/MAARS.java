@@ -33,7 +33,9 @@ import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -353,6 +355,8 @@ public class MAARS implements Runnable {
                 }
                 int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
+                ArrayList<Map<String, Future>> futureSet = new ArrayList<Map<String, Future>>();
+                Future future;
                 if (parameters.useDynamic()) {
                     // being dynamic acquisition
                     double startTime = System.currentTimeMillis();
@@ -360,15 +364,18 @@ public class MAARS implements Runnable {
                             * 1000;
                     while (System.currentTimeMillis() - startTime <= timeLimit) {
                         double beginAcq = System.currentTimeMillis();
+                        Map<String, Future> channelsInFrame = new HashMap<String, Future>();
                         for (String channel : arrayChannels) {
                             SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                             ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm));
                             if (do_analysis) {
-                                es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
+                                future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                         Double.parseDouble(parameters.getChSpotRaius(channel)),
                                         Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
+                                channelsInFrame.put(channel, future);
                             }
+                            futureSet.add(channelsInFrame);
                         }
                         frame++;
                         double acqTook = System.currentTimeMillis() - beginAcq;
@@ -388,13 +395,27 @@ public class MAARS implements Runnable {
                 } else {
                     // being static acquisition
                     for (String channel : arrayChannels) {
+                        Map<String, Future> channelsInFrame = new HashMap<String, Future>();
                         SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                         ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm));
                         if (do_analysis) {
-                            es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
+                            future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                     Double.parseDouble(parameters.getChSpotRaius(channel)),
                                     Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
+                            channelsInFrame.put(channel, future);
+                        }
+                        futureSet.add(channelsInFrame);
+                    }
+                }
+                for (Map<String, Future> aFutureSet : futureSet) {
+                    for (String channel : aFutureSet.keySet()) {
+                        try {
+                            aFutureSet.get(channel).get();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
                         }
                     }
                 }

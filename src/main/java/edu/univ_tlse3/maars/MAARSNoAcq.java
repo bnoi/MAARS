@@ -11,6 +11,7 @@ import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatProcessor;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,9 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.regex.Pattern;
 
 /**
@@ -121,9 +120,10 @@ public class MAARSNoAcq implements Runnable {
             Collections.sort(arrayImgFrames);
             ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
 
-//                ArrayList<Map<String, FloatProcessor>> futureSet = new ArrayList<Map<String, FloatProcessor>>();
+            ArrayList<Map<String, Future>> futureSet = new ArrayList<Map<String, Future>>();
+            Future future;
             for (Integer arrayImgFrame : arrayImgFrames) {
-               Map<String, FloatProcessor> channelsInFrame = new HashMap<String, FloatProcessor>();
+               Map<String, Future> channelsInFrame = new HashMap<String, Future>();
                for (String channel : arrayChannels) {
                   int current_frame = arrayImgFrame;
                   IJ.log("Analysing channel " + channel + "_" + current_frame);
@@ -133,26 +133,32 @@ public class MAARSNoAcq implements Runnable {
                   zProjectedFluoImg = ImgUtils.zProject(fluoImage);
                   zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
                   zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
-                  es_.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc, channel,
+                  future = es_.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc, channel,
                           Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                           Double.parseDouble(parameters.getChSpotRaius(channel)),
                           Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_));
                   fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
+                  channelsInFrame.put(channel, future);
                }
+               futureSet.add(channelsInFrame);
             }
             assert segImg != null;
             ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
             mergedImg.setCalibration(segImg.getCalibration());
             assert fluoStack != null;
             mergedImg.setT(fluoStack.getSize());
-            while (!es_.isShutdown()) {
-               try {
-                  es_.shutdown();
-                  es_.awaitTermination(90, TimeUnit.SECONDS);
-               } catch (InterruptedException e) {
-                  e.printStackTrace();
+            for (Map<String, Future> aFutureSet : futureSet) {
+               for (String channel : aFutureSet.keySet()) {
+                  try {
+                     aFutureSet.get(channel).get();
+                  } catch (InterruptedException e) {
+                     e.printStackTrace();
+                  } catch (ExecutionException e) {
+                     e.printStackTrace();
+                  }
                }
             }
+            es_.shutdownNow();
             RoiManager.getInstance().reset();
             RoiManager.getInstance().close();
             double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
@@ -167,14 +173,8 @@ public class MAARSNoAcq implements Runnable {
             }
          }
       }
-      try {
-         assert es_ != null;
-         while (!es_.isShutdown()) {
-            es_.awaitTermination(90, TimeUnit.SECONDS);
-         }
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
+      assert es_ != null;
+      es_.shutdownNow();
       System.setErr(curr_err);
       System.setOut(curr_out);
       IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");

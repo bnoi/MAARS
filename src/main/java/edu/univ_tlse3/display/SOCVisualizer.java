@@ -66,15 +66,17 @@ public class SOCVisualizer {
         cellToDisplayList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    contentPane.remove(lastChartPanel[0]);
                     int index = cellToDisplayList.locationToIndex(e.getPoint());
-                    Object item = alreadyShownList_.getElementAt(index);
-                    Cell c = setOfCells_.getCell((Integer) item);
-                    ChartPanel chartPanel = CellChartPanel.updateCellContent(c);
-                    chartPanel.setVisible(true);
-                    contentPane.add(chartPanel);
-                    lastChartPanel[0] = chartPanel;
-                    frame_.revalidate();
+                    if (index != -1){
+                        contentPane.remove(lastChartPanel[0]);
+                        Object item = alreadyShownList_.getElementAt(index);
+                        Cell c = setOfCells_.getCell((Integer) item);
+                        ChartPanel chartPanel = CellChartPanel.updateCellContent(c);
+                        chartPanel.setVisible(true);
+                        contentPane.add(chartPanel);
+                        lastChartPanel[0] = chartPanel;
+                        frame_.revalidate();
+                    }
                 }
             }
         });
