@@ -114,6 +114,7 @@ public class MAARS implements Runnable {
 
     static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
                         Boolean splitChannel) {
+        IJ.log("Saving information of each cell");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
@@ -207,7 +208,7 @@ public class MAARS implements Runnable {
                 "0.1075", parameters.getMinimumMitosisDuration(),
                 String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))));
         PythonPipeline.savePythonScript(script);
-        IJ.log("Script saved");
+        IJ.log("Script generated");
         PythonPipeline.runPythonScript();
         if (showChromLagging) {
             MAARS.showChromLaggingCells(pathToSegDir, soc, splitChannel);
