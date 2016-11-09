@@ -74,7 +74,7 @@ public class SOCVisualizer {
                     chartPanel.setVisible(true);
                     contentPane.add(chartPanel);
                     lastChartPanel[0] = chartPanel;
-                    SwingUtilities.updateComponentTreeUI(frame_);
+                    frame_.revalidate();
                 }
             }
         });
@@ -82,7 +82,6 @@ public class SOCVisualizer {
             @Override
             public void keyTyped(KeyEvent keyEvent) {
                 super.keyTyped(keyEvent);
-                ReportingUtils.logMessage(keyEvent.getKeyChar() + "-" + "r".charAt(0));
                 if (keyEvent.getKeyChar() == "r".charAt(0) || keyEvent.getKeyChar() == "R".charAt(0)) {
                     contentPane.remove(lastChartPanel[0]);
                     int index = cellToDisplayList.getSelectedIndex();
@@ -92,7 +91,7 @@ public class SOCVisualizer {
                     chartPanel.setVisible(true);
                     contentPane.add(chartPanel);
                     lastChartPanel[0] = chartPanel;
-                    SwingUtilities.updateComponentTreeUI(frame_);
+                    frame_.revalidate();
                 }
             }
         });

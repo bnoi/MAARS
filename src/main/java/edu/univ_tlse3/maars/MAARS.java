@@ -131,7 +131,7 @@ public class MAARS implements Runnable {
             objOut.writeObject(soc);
             objOut.flush();
 
-            ReportingUtils.logMessage("Object is serialized.");
+            IJ.log("Set of cel object is serialized.");
         }catch(IOException i) {
             ReportingUtils.logError(i.getMessage());
         }finally {
@@ -200,12 +200,12 @@ public class MAARS implements Runnable {
     static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters,
                                       Boolean splitChannel, String pathToSegDir, Boolean showChromLagging) {
         // TODO need to find a place for there metadata maybe in images
-        ReportingUtils.logMessage("Start python analysis");
+        IJ.log("Start python analysis");
         ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, parameters.getDetectionChForMitosis(),
                 "0.1075", parameters.getMinimumMitosisDuration(),
                 String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))));
         PythonPipeline.savePythonScript(script);
-        ReportingUtils.logMessage("Script saved");
+        IJ.log("Script saved");
         PythonPipeline.runPythonScript();
         if (showChromLagging) {
             MAARS.showChromLaggingCells(pathToSegDir, soc, splitChannel);
