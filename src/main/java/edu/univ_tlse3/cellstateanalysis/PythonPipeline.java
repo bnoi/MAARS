@@ -162,7 +162,9 @@ public class PythonPipeline {
    }
 
     public static void main(String[] args) {
-       ArrayList<String> script = PythonPipeline.getPythonScript("/media/tong/74CDBC0B2251059E/cdc25/02-11-1/X0_Y0", "CFP", "0.1075", "200","4");
+       String newPath = FileUtils.convertPathToLinuxType("D:\\Data\\Tong\\Starv\\10-11-2\\X0_Y0");
+       ReportingUtils.logMessage(newPath);
+       ArrayList<String> script = PythonPipeline.getPythonScript(newPath, "CFP", "0.1075", "200","20");
        PythonPipeline.savePythonScript(script);
        PythonPipeline.runPythonScript();
    //todo it will be cool if one day anaconda support jython. Though not possible for now. The codes below is tested with jython

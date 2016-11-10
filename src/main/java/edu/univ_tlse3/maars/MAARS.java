@@ -428,6 +428,9 @@ public class MAARS implements Runnable {
                     ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
                     mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
                     MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
+                    if (IJ.isWindows()){
+                        pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
+                    }
                     MAARS.analyzeMitosisDynamic(soc, parameters,
                             splitChannel, pathToSegDir, true);
                     ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
@@ -437,12 +440,8 @@ public class MAARS implements Runnable {
             }
         }
         mmc.setAutoShutter(true);
-        es_.shutdown();
-        try {
-            // TODO no acq should be more than 3 hours
-            es_.awaitTermination(180, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (Runnable r  : es_.shutdownNow()){
+            ReportingUtils.logMessage(r.toString());
         }
         System.setErr(curr_err);
         System.setOut(curr_out);

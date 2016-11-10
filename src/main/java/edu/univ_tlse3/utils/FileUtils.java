@@ -40,6 +40,16 @@ public class FileUtils {
    }
 
    /**
+    * Convert an windows path in unix path
+    *
+    * @param path path to be converted
+    * @return String path
+    */
+   public static String convertPathToLinuxType(String path) {
+      return path.replace("\\", "/");
+   }
+
+   /**
     * if current path do not exists, create a new one
     *
     * @param pathToFluoDir folder to create
