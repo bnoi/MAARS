@@ -421,12 +421,12 @@ class getMitosisFiles(object):
             plt.xlim(0, frames[-1])
             plt.ylim(0, current_major_length)
             maxValue = np.nanmax(spLens)
-            firstMaxIndex = np.where(spLens == maxValue)[0]
+            firstMaxIndex = np.where(spLens == maxValue)[0][0]
             for i in range(firstMaxIndex, len(spLens)):
                 spLens[i] = maxValue
             mito_region = dict()
             minValue = np.nanmin(spLens)
-            lastMinIndex = np.where(spLens == minValue)[-1]
+            lastMinIndex = np.where(spLens == minValue)[-1][0]
             for i in range(lastMinIndex,firstMaxIndex+1):
                 mito_region[frames[i]] = spLens[i]
             ax.plot(list(mito_region.keys()), list(mito_region.values()), "-o", c="black")
