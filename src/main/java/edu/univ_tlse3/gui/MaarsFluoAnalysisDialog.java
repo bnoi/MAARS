@@ -16,8 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
+import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,7 +27,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Class to create and display a dialog to get parameters_ of the fluorescent
@@ -559,7 +559,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       acqEng.enableZSliceSetting(true);
       acqEng.setSlices(-zRange / 2, zRange / 2, zStep, false);
       acqEng.setChannelGroup(fluoAcqSetting.channelGroup);
-      return AcqLauncher.acquire(acqEng);
+      java.util.List<Image> imageList = AcqLauncher.acquire(acqEng);
+      ImagePlus fluoImage = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
+      return fluoImage;
    }
 
    private String getSelectedChannel(JPanel jp) {
