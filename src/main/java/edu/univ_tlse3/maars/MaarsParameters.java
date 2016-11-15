@@ -214,6 +214,18 @@ public class MaarsParameters {
       xmlOutput.output(doc, new FileWriter("maars_config.xml"));
    }
 
+   /**
+    * Write the parameters into the configuration file
+    *
+    * @throws IOException error than can not write xml file
+    */
+   public void save(String path) throws IOException {
+      doc.setContent(root);
+      XMLOutputter xmlOutput = new XMLOutputter();
+      xmlOutput.setFormat(Format.getPrettyFormat());
+      xmlOutput.output(doc, new FileWriter(path));
+   }
+
    // Getter
 
    /**
