@@ -15,6 +15,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import java.awt.*;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -223,7 +224,7 @@ public class MaarsParameters {
       doc.setContent(root);
       XMLOutputter xmlOutput = new XMLOutputter();
       xmlOutput.setFormat(Format.getPrettyFormat());
-      xmlOutput.output(doc, new FileWriter(path));
+      xmlOutput.output(doc, new FileWriter(path + File.separator + "maars_config.xml"));
    }
 
    // Getter
