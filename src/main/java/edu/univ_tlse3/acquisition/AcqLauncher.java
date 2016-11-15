@@ -30,7 +30,7 @@ public class AcqLauncher {
     * @param acqEng customized acquisition engine
     * @return a duplicate of acquired images.
     */
-   public static ImagePlus acquire(AcquisitionWrapperEngine acqEng) {
+   public static List<Image> acquire(AcquisitionWrapperEngine acqEng) {
       MAARS_mda mda = new MAARS_mda(MMStudio.getInstance());
       Datastore ds = mda.acquire(acqEng);
       List<Image> imageList = new ArrayList<Image>();
@@ -43,6 +43,6 @@ public class AcqLauncher {
             return o1.getCoords().getZ() - o2.getCoords().getZ();
          }
       });
-      return ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
+      return imageList;
    }
 }

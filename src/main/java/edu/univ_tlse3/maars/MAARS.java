@@ -20,6 +20,8 @@ import mmcorej.CMMCore;
 import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.ChannelSpec;
 import org.micromanager.acquisition.SequenceSettings;
+import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
+import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
@@ -36,7 +38,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -328,7 +329,9 @@ public class MAARS implements Runnable {
             FileUtils.createFolder(acqSettings.root);
 
             IJ.log("Acquire bright field image...");
-            ImagePlus segImg = AcqLauncher.acquire(segAcq.buildSegAcqEngine(acqSettings, mm));
+            AcquisitionWrapperEngine acqEng = segAcq.buildSegAcqEngine(acqSettings, mm);
+            List<Image>  imageList = AcqLauncher.acquire(acqEng);
+            ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
 
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters);
@@ -367,8 +370,13 @@ public class MAARS implements Runnable {
                         double beginAcq = System.currentTimeMillis();
                         Map<String, Future> channelsInFrame = new HashMap<String, Future>();
                         for (String channel : arrayChannels) {
+                            if (mm.live().getIsLiveModeOn()){
+                                mm.live().setSuspended(true);
+                            }
                             SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
-                            ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm));
+                            acqEng = fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm);
+                            imageList = AcqLauncher.acquire(acqEng);
+                            ImagePlus fluoImage = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
                             if (do_analysis) {
                                 future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -377,6 +385,12 @@ public class MAARS implements Runnable {
                                 channelsInFrame.put(channel, future);
                             }
                             futureSet.add(channelsInFrame);
+                            if (mm.live().getIsLiveModeOn()){
+                                mm.live().setSuspended(false);
+                                for (Image img : imageList){
+                                    mm.live().displayImage(img);
+                                }
+                            }
                         }
                         frame++;
                         double acqTook = System.currentTimeMillis() - beginAcq;
@@ -398,7 +412,9 @@ public class MAARS implements Runnable {
                     for (String channel : arrayChannels) {
                         Map<String, Future> channelsInFrame = new HashMap<String, Future>();
                         SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
-                        ImagePlus fluoImage = AcqLauncher.acquire(fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm));
+                        acqEng = fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm);
+                        imageList = AcqLauncher.acquire(acqEng);
+                        ImagePlus fluoImage = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
                         if (do_analysis) {
                             future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),
