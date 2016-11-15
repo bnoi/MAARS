@@ -314,7 +314,9 @@ public class MaarsMainDialog implements ActionListener {
       }
       try {
          parameters.save();
-         parameters.save(parameters.getSavingPath());
+         if (FileUtils.exists(parameters.getSavingPath())) {
+            parameters.save(parameters.getSavingPath());
+         }
       } catch (IOException e) {
          IJ.error("Could not save parameters");
       }
