@@ -371,7 +371,7 @@ public class MAARS implements Runnable {
                         Map<String, Future> channelsInFrame = new HashMap<String, Future>();
                         for (String channel : arrayChannels) {
                             if (mm.live().getIsLiveModeOn()){
-                                mm.live().setSuspended(true);
+                                mm.live().setLiveMode(false);
                             }
                             SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                             acqEng = fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm);
@@ -385,9 +385,6 @@ public class MAARS implements Runnable {
                                 channelsInFrame.put(channel, future);
                             }
                             futureSet.add(channelsInFrame);
-                            if (mm.live().getIsLiveModeOn()){
-                                mm.live().setSuspended(false);
-                            }
                             for (Image img : imageList){
                                 mm.live().displayImage(img);
                             }
