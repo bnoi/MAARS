@@ -21,10 +21,7 @@ import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -88,10 +85,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       // set up this dialog
       this.mm = mm;
-      this.parameters_ = parameters;
+      parameters_ = parameters;
       this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-      // this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-      this.setTitle("MAARS - Fluorescent Analysis parameters_");
+      this.setTitle("MAARS - Fluorescent Analysis Parameters");
       this.setBackground(Color.WHITE);
       this.setLayout(new GridLayout(0, 1));
       this.setMinimumSize(new Dimension(250, 500));
@@ -106,6 +102,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       JPanel fluoRangePanel = new JPanel(new GridLayout(1, 2));
       JLabel rangeTitle = new JLabel("Range (micron) : ", SwingConstants.CENTER);
+
       int fieldLength = 8;
       range = new JTextField(parameters_.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE), fieldLength);
       fluoRangePanel.add(rangeTitle);
@@ -126,24 +123,10 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       timeInterval = new JTextField(parameters_.getFluoParameter(MaarsParameters.TIME_INTERVAL), fieldLength);
       timeIntervalPanel.add(timeIntervalTitle);
       timeIntervalPanel.add(timeInterval);
-      timeInterval.addKeyListener(new KeyListener() {
-         @Override
-         public void keyTyped(KeyEvent e) {
-         }
-
+      timeInterval.addKeyListener(new KeyAdapter() {
          @Override
          public void keyReleased(KeyEvent e) {
-            if (Double.parseDouble(timeInterval.getText()) < 10000) {
-               doAnalysis.setSelected(false);
-               doAnalysis.setEnabled(false);
-            } else {
-               doAnalysis.setSelected(true);
-               doAnalysis.setEnabled(true);
-            }
-         }
-
-         @Override
-         public void keyPressed(KeyEvent e) {
+            updateDoAnalysisButton();
          }
       });
 
@@ -153,34 +136,52 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       saveFlims = new JCheckBox("Save Movies",
               Boolean.parseBoolean(parameters_.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
       doAnalysis = new JCheckBox("Do Analysis", true);
+      updateDoAnalysisButton();
       checkBoxPanel.add(saveFlims);
       checkBoxPanel.add(doAnalysis);
 
       //
 
-      Label fluoAnaParamLabel = new Label("Spot identification parameter(s)", Label.CENTER);
+      Label fluoAnaParamLabel = new Label("Fluo-acquisition parameters", Label.CENTER);
       fluoAnaParamLabel.setBackground(labelColor);
 
       //
 
       JPanel channelTitlePanel = new JPanel(new GridLayout(1, 0));
-      JLabel channelCheckTitle = new JLabel("Channels", SwingConstants.CENTER);
-      JLabel fluoChannelsTitle = new JLabel("Config", SwingConstants.CENTER);
+      JPanel tmpPanel = new JPanel(new GridLayout(1, 0));
+      tmpPanel.add(new JLabel());
+      channelTitlePanel.add(tmpPanel);
+      JLabel channelCheckTitle = new JLabel("Using", SwingConstants.CENTER);
+      tmpPanel.add(channelCheckTitle);
+      channelTitlePanel.add(tmpPanel);
+      tmpPanel = new JPanel(new GridLayout(1, 0));
+      JLabel fluoChannelsTitle = new JLabel("Channels", SwingConstants.CENTER);
+      tmpPanel.add(fluoChannelsTitle);
+      channelTitlePanel.add(tmpPanel);
+      tmpPanel = new JPanel(new GridLayout(1, 0));
       JLabel maxNbSpotTitle = new JLabel("Max # of spot", SwingConstants.CENTER);
+      tmpPanel.add(maxNbSpotTitle);
+      channelTitlePanel.add(tmpPanel);
+      tmpPanel = new JPanel(new GridLayout(1, 0));
       JLabel spotRaiusTitle = new JLabel("Spot Radius", SwingConstants.CENTER);
+      tmpPanel.add(spotRaiusTitle);
+      channelTitlePanel.add(tmpPanel);
+      tmpPanel = new JPanel(new GridLayout(1, 0));
       JLabel qualityTitle = new JLabel("Quality", SwingConstants.CENTER);
+      tmpPanel.add(qualityTitle);
+      channelTitlePanel.add(tmpPanel);
+      tmpPanel = new JPanel(new GridLayout(1, 0));
       JLabel exposureTitle = new JLabel("Exposure", SwingConstants.CENTER);
-       JLabel testButTitle = new JLabel("test detection", SwingConstants.CENTER);
-       JLabel spindleChannel = new JLabel("Spindle ?", SwingConstants.CENTER);
-      channelTitlePanel.add(channelCheckTitle);
-      channelTitlePanel.add(fluoChannelsTitle);
-      channelTitlePanel.add(maxNbSpotTitle);
-      channelTitlePanel.add(spotRaiusTitle);
-      channelTitlePanel.add(qualityTitle);
-      channelTitlePanel.add(exposureTitle);
-       channelTitlePanel.add(testButTitle);
-       channelTitlePanel.add(spindleChannel);
-      channelTitlePanel.add(new JLabel());
+      tmpPanel.add(exposureTitle);
+      channelTitlePanel.add(tmpPanel);
+      tmpPanel = new JPanel(new GridLayout(1, 0));
+      JLabel testButTitle = new JLabel("test detection", SwingConstants.CENTER);
+      tmpPanel.add(testButTitle);
+      channelTitlePanel.add(tmpPanel);
+      tmpPanel = new JPanel(new GridLayout(1, 0));
+      JLabel spindleChannel = new JLabel("Spindle ?", SwingConstants.CENTER);
+      tmpPanel.add(spindleChannel);
+      channelTitlePanel.add(tmpPanel);
 
       //
 
@@ -303,7 +304,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel3Panel.add(qualityCh3Tf);
       channel3Panel.add(exposureCh3Tf_);
       channel3Panel.add(test3);
-       channel3Panel.add(ch3Button);
+      channel3Panel.add(ch3Button);
       chPanels.add(channel3Panel);
 
        //
@@ -442,6 +443,19 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    /**
     *
+    */
+   private void updateDoAnalysisButton(){
+      if (Double.parseDouble(timeInterval.getText()) < 10000) {
+         doAnalysis.setSelected(false);
+         doAnalysis.setEnabled(false);
+      } else {
+         doAnalysis.setSelected(true);
+         doAnalysis.setEnabled(true);
+      }
+   }
+
+   /**
+    *
     * @param jp   the panel which contains informations about corresponding panel
     * @param enable  enable or not
     */
@@ -506,8 +520,6 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       double spotRadius = Double.parseDouble((String) tmpTf.getValue());
       tmpTf = (JFormattedTextField) jp.getComponent(4);
       double quality = Double.parseDouble((String) tmpTf.getValue());
-      // ImagePlus img = IJ.getImage().duplicate();
-//      img.show();
       ImagePlus zProjectedFluoImg = ImgUtils.zProject(img);
       zProjectedFluoImg.setCalibration(img.getCalibration());
       MaarsTrackmate tmTest = new MaarsTrackmate(zProjectedFluoImg, spotRadius, quality);

@@ -104,6 +104,7 @@ public class SOCVisualizer {
         JButton loadSocBut = new JButton("Load");
         JPanel pathToSocTFPanel = new JPanel();
         pathToSoc_ = new JFormattedTextField(String.class);
+        pathToSoc_.setColumns(10);
         pathToSocTFPanel.add(pathToSoc_);
         loadSocBut.addActionListener(new ActionListener() {
             @Override
