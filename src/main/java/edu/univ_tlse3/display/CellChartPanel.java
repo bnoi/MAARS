@@ -8,7 +8,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.micromanager.internal.utils.ReportingUtils;
@@ -38,9 +38,6 @@ public class CellChartPanel extends JPanel {
       CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis());
       for (String geoPara : SpotSetAnalyzor.GeoParamSet) {
          XYPlot subPlot = drawSubplot(cell, geoPara);
-         subPlot.setBackgroundPaint(Color.lightGray);
-         subPlot.setDomainGridlinePaint(Color.white);
-         subPlot.setRangeGridlinePaint(Color.white);
          plot.add(subPlot);
       }
 
@@ -66,8 +63,10 @@ public class CellChartPanel extends JPanel {
       final NumberAxis rangeAxis = new NumberAxis(param);
       rangeAxis.setAutoRangeIncludesZero(true);
       XYSeries series;
-      final XYSeriesCollection seriesCollection = new XYSeriesCollection();
+      final XYPlot subplot = new XYPlot();
+      int i = 0;
       for (String channel : cell.getGeometryContainer().getUsingChannels()) {
+         XYSeriesCollection seriesCollection = new XYSeriesCollection();
          series = new XYSeries(param + "_" + channel);
          for (Integer frame : cell.getGeometryContainer().getGeosInChannel(channel).keySet()) {
             String currnetParamvalue = cell.getGeometryContainer().getGeosInChannel(channel).get(frame).get(param).toString();
@@ -77,12 +76,32 @@ public class CellChartPanel extends JPanel {
             }
          }
          seriesCollection.addSeries(series);
+         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+         renderer.setSeriesShapesVisible(0, false);
+         renderer.setSeriesPaint(0, getColor(channel));
+         subplot.setRenderer(i, renderer);
+         subplot.setDataset(i, seriesCollection);
+         i+=1;
       }
-      final XYPlot subplot = new XYPlot(
-              seriesCollection, null, rangeAxis, new StandardXYItemRenderer()
-      );
-
+      subplot.setRangeAxis(rangeAxis);
+      subplot.setBackgroundPaint(Color.lightGray);
+      subplot.setDomainGridlinePaint(Color.white);
+      subplot.setRangeGridlinePaint(Color.white);
       return subplot;
+   }
+
+   public static Color getColor(String channel){
+      if (channel.equals("CFP")) {
+         return Color.CYAN;
+      } else if (channel.equals("GFP")) {
+         return Color.GREEN;
+      } else if (channel.equals("TxRed")) {
+         return Color.RED;
+      } else if (channel.equals("DAPI")) {
+         return Color.BLUE;
+      } else{
+         return null;
+      }
    }
 
    // ****************************************************************************

@@ -8,10 +8,7 @@ import org.micromanager.internal.utils.ReportingUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -111,7 +108,7 @@ public class SOCVisualizer {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
                     FileInputStream f_in = new
-                            FileInputStream(pathToSoc_.getText());
+                            FileInputStream(pathToSoc_.getText() + File.separator +"SetOfCell.serialize");
                     ObjectInputStream obj_in =
                             new ObjectInputStream (f_in);
                     Object obj = obj_in.readObject();
