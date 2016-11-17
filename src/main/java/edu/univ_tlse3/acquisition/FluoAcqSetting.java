@@ -60,11 +60,11 @@ public class FluoAcqSetting {
       return fluoAcqSetting;
    }
 
-   public AcquisitionWrapperEngine buildFluoAcqEngine(SequenceSettings fluoAcqSettings, MMStudio mm) {
+   public AcquisitionWrapperEngine buildFluoAcqEngine(SequenceSettings fluoAcqSettings, MMStudio mm, double currentFocus) {
       AcquisitionWrapperEngine acqEng = mm.getAcquisitionEngine();
       acqEng.setSequenceSettings(fluoAcqSettings);
       acqEng.enableZSliceSetting(true);
-      acqEng.setSlices(-zRange_ / 2, zRange_ / 2, zStep_, false);
+      acqEng.setSlices(currentFocus-zRange_ / 2, currentFocus + zRange_ / 2, zStep_, true);
       return acqEng;
    }
 }

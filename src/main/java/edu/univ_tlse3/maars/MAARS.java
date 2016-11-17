@@ -119,7 +119,7 @@ public class MAARS implements Runnable {
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
-        HashMap<String, ImagePlus> croppedImgSet = null;
+        HashMap<String, ImagePlus> croppedImgSet;
         for (Cell cell : soc) {
             geoSaver.save(cell);
             spotSaver.save(cell);
@@ -373,8 +373,19 @@ public class MAARS implements Runnable {
                             if (mm.live().getIsLiveModeOn()){
                                 mm.live().setLiveMode(false);
                             }
+                            String focusDevice = mmc.getFocusDevice();
+                            double currrentFocus = Double.MIN_VALUE;
+                            try {
+                                currrentFocus = mmc.getPosition(focusDevice);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                             SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
-                            acqEng = fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm);
+                            if (currrentFocus != Double.MIN_VALUE) {
+                                acqEng = fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm, currrentFocus);
+                            }else{
+                                IJ.error("Focus position is infinite negative.");
+                            }
                             imageList = AcqLauncher.acquire(acqEng);
                             ImagePlus fluoImage = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
                             if (do_analysis) {
@@ -408,8 +419,19 @@ public class MAARS implements Runnable {
                     // being static acquisition
                     for (String channel : arrayChannels) {
                         Map<String, Future> channelsInFrame = new HashMap<String, Future>();
+                        String focusDevice = mmc.getFocusDevice();
+                        double currrentFocus = Double.MIN_VALUE;
+                        try {
+                            currrentFocus = mmc.getPosition(focusDevice);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
-                        acqEng = fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm);
+                        if (currrentFocus != Double.MIN_VALUE) {
+                            acqEng = fluoAcq.buildFluoAcqEngine(fluoAcqSetting, mm, currrentFocus);
+                        }else{
+                            IJ.error("Focus position is infinite negative.");
+                        }
                         imageList = AcqLauncher.acquire(acqEng);
                         ImagePlus fluoImage = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
                         if (do_analysis) {
