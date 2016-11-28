@@ -375,7 +375,7 @@ public class MaarsMainDialog implements ActionListener {
             }
          }
       } else if (e.getSource() == segmButton) {
-         new MaarsSegmentationDialog(parameters);
+         new MaarsSegmentationDialog(parameters, mm);
       } else if (e.getSource() == fluoAnalysisButton) {
          saveParameters();
          if (fluoDialog_ != null){

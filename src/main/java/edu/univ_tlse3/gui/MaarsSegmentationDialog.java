@@ -1,11 +1,26 @@
 package edu.univ_tlse3.gui;
 
+import edu.univ_tlse3.acquisition.AcqLauncher;
+import edu.univ_tlse3.acquisition.SegAcqSetting;
 import edu.univ_tlse3.maars.MaarsParameters;
+import edu.univ_tlse3.maars.MaarsSegmentation;
+import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.ImgUtils;
+import ij.IJ;
+import ij.ImagePlus;
+import org.micromanager.acquisition.ChannelSpec;
+import org.micromanager.acquisition.SequenceSettings;
+import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
+import org.micromanager.data.*;
+import org.micromanager.data.Image;
+import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.*;
 
 /**
  * Class to create and display a dialog to get parameters for the image
@@ -35,7 +50,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
     *
     * @param parameters : default parameters (which are going to be displayed)
     */
-   MaarsSegmentationDialog(MaarsParameters parameters) {
+   MaarsSegmentationDialog(final MaarsParameters parameters, final MMStudio mm_) {
 
       this.parameters = parameters;
       this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -161,12 +176,56 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
       //
 
+      JButton testSegBut = new JButton("test");
+      testSegBut.addActionListener(new ActionListener(){
+         @Override
+         public void actionPerformed(ActionEvent actionEvent) {
+            updateMAARSParamters();
+            SegAcqSetting segAcq = new SegAcqSetting(parameters);
+            ArrayList<ChannelSpec> channelSpecs = segAcq.configChannels();
+            SequenceSettings acqSettings = segAcq.configAcqSettings(channelSpecs);
+            acqSettings.save = false;
+            AcquisitionWrapperEngine acqEng = segAcq.buildSegAcqEngine(acqSettings, mm_);
+            java.util.List<Image> imageList = AcqLauncher.acquire(acqEng);
+            ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
+
+            // --------------------------segmentation-----------------------------//
+            MaarsSegmentation ms = new MaarsSegmentation(parameters);
+            ms.segmentation(segImg);
+         }
+      });
+      this.add(testSegBut);
+
+      //
+
       okBut = new Button("OK");
       okBut.addActionListener(this);
       this.add(okBut);
 
+
       // this.pack();
       this.setVisible(true);
+   }
+
+   public void updateMAARSParamters(){
+      parameters.setSegmentationParameter(
+              MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
+      parameters.setSegmentationParameter(MaarsParameters.STEP,
+              step.getText());
+      parameters.setSegmentationParameter(
+              MaarsParameters.MINIMUM_CELL_AREA, minCellArea.getText());
+      parameters.setSegmentationParameter(
+              MaarsParameters.MAXIMUM_CELL_AREA, maxCellArea.getText());
+      parameters.setSegmentationParameter(
+              MaarsParameters.FILTER_MEAN_GREY_VALUE,
+              String.valueOf(greyValueFilter.isSelected()));
+      parameters.setSegmentationParameter(
+              MaarsParameters.MEAN_GREY_VALUE, greyValue.getText());
+      parameters.setSegmentationParameter(
+              MaarsParameters.FILTER_SOLIDITY,
+              String.valueOf(shapeFilter.isSelected()));
+      parameters.setSegmentationParameter(MaarsParameters.SOLIDITY,
+              solidity.getText());
    }
 
    /**
@@ -191,24 +250,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
             greyValue.setEditable(false);
          }
       } else if (e.getSource() == okBut) {
-         parameters.setSegmentationParameter(
-                 MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
-         parameters.setSegmentationParameter(MaarsParameters.STEP,
-                 step.getText());
-         parameters.setSegmentationParameter(
-                 MaarsParameters.MINIMUM_CELL_AREA, minCellArea.getText());
-         parameters.setSegmentationParameter(
-                 MaarsParameters.MAXIMUM_CELL_AREA, maxCellArea.getText());
-         parameters.setSegmentationParameter(
-                 MaarsParameters.FILTER_MEAN_GREY_VALUE,
-                 String.valueOf(greyValueFilter.isSelected()));
-         parameters.setSegmentationParameter(
-                 MaarsParameters.MEAN_GREY_VALUE, greyValue.getText());
-         parameters.setSegmentationParameter(
-                 MaarsParameters.FILTER_SOLIDITY,
-                 String.valueOf(shapeFilter.isSelected()));
-         parameters.setSegmentationParameter(MaarsParameters.SOLIDITY,
-                 solidity.getText());
+         updateMAARSParamters();
          this.setVisible(false);
       }
    }
