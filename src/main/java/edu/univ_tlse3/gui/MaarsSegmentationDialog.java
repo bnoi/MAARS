@@ -14,6 +14,7 @@ import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.*;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -181,17 +182,26 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
          @Override
          public void actionPerformed(ActionEvent actionEvent) {
             updateMAARSParamters();
-            SegAcqSetting segAcq = new SegAcqSetting(parameters);
-            ArrayList<ChannelSpec> channelSpecs = segAcq.configChannels();
-            SequenceSettings acqSettings = segAcq.configAcqSettings(channelSpecs);
-            acqSettings.save = false;
-            AcquisitionWrapperEngine acqEng = segAcq.buildSegAcqEngine(acqSettings, mm_);
-            java.util.List<Image> imageList = AcqLauncher.acquire(acqEng);
-            ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
+            String imgPath = parameters.getSavingPath() + File.separator + "X0_Y0" + File.separator
+                    + "_1" + File.separator  + "_1_MMStack_Pos0.ome.tif";
+            ReportingUtils.logMessage(imgPath);
+            if (FileUtils.exists(imgPath)) {
+               ImagePlus segImg = IJ.openImage(imgPath);
+               MaarsSegmentation ms = new MaarsSegmentation(parameters);
+               ms.segmentation(segImg);
+            } else {
+               SegAcqSetting segAcq = new SegAcqSetting(parameters);
+               ArrayList<ChannelSpec> channelSpecs = segAcq.configChannels();
+               SequenceSettings acqSettings = segAcq.configAcqSettings(channelSpecs);
+               acqSettings.save = false;
+               AcquisitionWrapperEngine acqEng = segAcq.buildSegAcqEngine(acqSettings, mm_);
+               java.util.List<Image> imageList = AcqLauncher.acquire(acqEng);
+               ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
 
-            // --------------------------segmentation-----------------------------//
-            MaarsSegmentation ms = new MaarsSegmentation(parameters);
-            ms.segmentation(segImg);
+               // --------------------------segmentation-----------------------------//
+               MaarsSegmentation ms = new MaarsSegmentation(parameters);
+               ms.segmentation(segImg);
+            }
          }
       });
       this.add(testSegBut);

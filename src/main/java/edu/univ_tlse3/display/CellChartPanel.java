@@ -92,13 +92,13 @@ public class CellChartPanel extends JPanel {
 
    public static Color getColor(String channel){
       if (channel.equals("CFP")) {
-         return Color.CYAN;
+         return Color.BLUE;
       } else if (channel.equals("GFP")) {
          return Color.GREEN;
       } else if (channel.equals("TxRed")) {
          return Color.RED;
       } else if (channel.equals("DAPI")) {
-         return Color.BLUE;
+         return Color.CYAN;
       } else{
          return null;
       }
