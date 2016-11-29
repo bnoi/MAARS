@@ -46,7 +46,7 @@ public class SegPombe {
    private boolean filtrateWithMeanGrayValue;
    // Variables to get results
    private FloatProcessor imgCorrTempProcessor;
-   private ImagePlus binCorrelationImage;
+   private ImagePlus binImage;
    private ImagePlus imgCorrTemp;
    private ResultsTable resultTable;
    private RoiManager roiManager;
@@ -207,11 +207,12 @@ public class SegPombe {
          byteImage.invert();
       }
       BinaryProcessor binImage = new BinaryProcessor(byteImage);
-      binCorrelationImage = new ImagePlus("binary Image", binImage);
+      this.binImage = new ImagePlus("binary Image", binImage);
 
       if (imageToAnalyze.getCalibration().scaled()) {
-         binCorrelationImage.setCalibration(imageToAnalyze.getCalibration());
+         this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
+      this.binImage.show();
    }
 
    /**
@@ -242,9 +243,9 @@ public class SegPombe {
                       + Measurements.ELLIPSE,
               resultTable, minParticleInMicron, maxParticleInMicron);
       System.out.println("minParticleSize " + minParticleInMicron + " maxParticleSize " + maxParticleInMicron);
-      System.out.println("Analyse particles on " + binCorrelationImage.getTitle() + " ...");
+      System.out.println("Analyse particles on " + binImage.getTitle() + " ...");
 
-      particleAnalyzer.analyze(binCorrelationImage);
+      particleAnalyzer.analyze(binImage);
       System.out.println("Done");
       Integer nbRoi = roiManager.getCount();
       if (!nbRoi.equals(0)) {
@@ -384,16 +385,16 @@ public class SegPombe {
 
       if (saveBinaryImg) {
          System.out.println("save binary image");
-         binCorrelationImage.setTitle(bf + "_BinaryImage");
-         FileSaver fileSaver = new FileSaver(binCorrelationImage);
+         binImage.setTitle(bf + "_BinaryImage");
+         FileSaver fileSaver = new FileSaver(binImage);
          fileSaver.saveAsTiff(savingPath + File.separator + bf + "_BinaryImage.tif");
       }
       if (showBinaryImg) {
          System.out.println("show binary image");
-         binCorrelationImage.show();
+         binImage.show();
       } else {
          System.out.println("flush binary image");
-         binCorrelationImage.flush();
+         binImage.flush();
       }
 
       if (saveCorrelationImg) {

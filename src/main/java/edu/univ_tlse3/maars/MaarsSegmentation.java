@@ -83,6 +83,7 @@ public class MaarsSegmentation {
       SegPombe segPombe = new SegPombe(segPombeParam);
       segPombe.createCorrelationImage();
       segPombe.convertCorrelationToBinaryImage();
+//      IJ.run("Adjustable Watershed");
       segPombe.analyseAndFilterParticles();
       segPombe.showAndSaveResultsAndCleanUp();
       IJ.log("Segmentation done");
