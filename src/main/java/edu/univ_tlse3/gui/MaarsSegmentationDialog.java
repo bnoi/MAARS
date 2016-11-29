@@ -55,7 +55,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
       this.parameters = parameters;
       this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-      this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+//      this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
       this.setTitle("MAARS - Segmentation parameters");
       this.setLayout(new GridLayout(0, 1));
       this.setBackground(Color.WHITE);

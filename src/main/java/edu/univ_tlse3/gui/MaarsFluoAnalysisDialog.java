@@ -489,6 +489,14 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     * @return channels : list of selected object
     */
    private void updateMAARSFluoChParameters() {
+      parameters_.setFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
+      parameters_.setFluoParameter(MaarsParameters.STEP, step.getText());
+      parameters_.setFluoParameter(MaarsParameters.DO_ANALYSIS, String.valueOf(doAnalysis.isSelected()));
+      parameters_.setFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES,
+              String.valueOf(saveFlims.isSelected()));
+      parameters_.setFluoParameter(MaarsParameters.TIME_INTERVAL, timeInterval.getText());
+      parameters_.setDetectionChForMitosis(spindleChannel_);
+      parameters_.setMinimumMitosisDuration(String.valueOf(mitosisDurationTf_.getText()));
       ArrayList<String> channels = new ArrayList<String>();
       for (JPanel p : chPanels){
          JCheckBox tmpChkBox = (JCheckBox) p.getComponent(0);
@@ -609,14 +617,6 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
                spindleChannel_ = tmpBut.getActionCommand();
             }
          }
-         parameters_.setFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
-         parameters_.setFluoParameter(MaarsParameters.STEP, step.getText());
-         parameters_.setFluoParameter(MaarsParameters.DO_ANALYSIS, String.valueOf(doAnalysis.isSelected()));
-         parameters_.setFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES,
-                 String.valueOf(saveFlims.isSelected()));
-         parameters_.setFluoParameter(MaarsParameters.TIME_INTERVAL, timeInterval.getText());
-         parameters_.setDetectionChForMitosis(spindleChannel_);
-         parameters_.setMinimumMitosisDuration(String.valueOf(mitosisDurationTf_.getText()));
          updateMAARSFluoChParameters();
          try {
             parameters_.save();
@@ -626,10 +626,13 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
          }
          this.setVisible(false);
       } else if (src == test1) {
+         updateMAARSFluoChParameters();
          testTrackmate(channel1Panel);
       } else if (src == test2) {
+         updateMAARSFluoChParameters();
          testTrackmate(channel2Panel);
       } else if (src == test3) {
+         updateMAARSFluoChParameters();
          testTrackmate(channel3Panel);
       } else if (src == configurationCombo_) {
          String selectedGroup= (String) configurationCombo_.getSelectedItem();

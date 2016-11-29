@@ -145,6 +145,7 @@ public class MaarsMainDialog implements ActionListener {
       JPanel autoFocusPanel = new JPanel(new GridLayout(1, 0));
       autofocusButton = new JButton("Autofocus");
       autofocusButton.addActionListener(this);
+      autofocusButton.setEnabled(false);
       autoFocusPanel.add(autofocusButton);
 
       // segmentation button

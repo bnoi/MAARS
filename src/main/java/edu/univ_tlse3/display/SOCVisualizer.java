@@ -102,6 +102,7 @@ public class SOCVisualizer {
         JPanel pathToSocTFPanel = new JPanel();
         pathToSoc_ = new JFormattedTextField(String.class);
         pathToSoc_.setColumns(10);
+        pathToSoc_.setText("Path to soc object");
         pathToSocTFPanel.add(pathToSoc_);
         loadSocBut.addActionListener(new ActionListener() {
             @Override
