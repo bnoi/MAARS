@@ -212,7 +212,6 @@ public class SegPombe {
       if (imageToAnalyze.getCalibration().scaled()) {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
-      this.binImage.show();
    }
 
    /**

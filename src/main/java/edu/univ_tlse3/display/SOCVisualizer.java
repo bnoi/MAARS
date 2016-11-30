@@ -79,9 +79,9 @@ public class SOCVisualizer {
         });
         cellToDisplayList.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent keyEvent) {
+            public void keyPressed(KeyEvent keyEvent) {
                 super.keyTyped(keyEvent);
-                if (keyEvent.getKeyChar() == "r".charAt(0) || keyEvent.getKeyChar() == "R".charAt(0)) {
+                if (keyEvent.getKeyCode() == KeyEvent.VK_UP || keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
                     contentPane.remove(lastChartPanel[0]);
                     int index = cellToDisplayList.getSelectedIndex();
                     Object item = alreadyShownList_.getElementAt(index);
