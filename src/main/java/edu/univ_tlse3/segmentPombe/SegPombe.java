@@ -194,7 +194,7 @@ public class SegPombe {
       System.out.println("Convert correlation image to binary image");
 
       ByteProcessor byteImage = imgCorrTempProcessor.convertToByteProcessor(true);
-      byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, false, BinaryProcessor.BLACK_AND_WHITE_LUT);
+      byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, true, BinaryProcessor.BLACK_AND_WHITE_LUT);
 
       // image pre-processing
       byteImage.dilate();
@@ -202,10 +202,10 @@ public class SegPombe {
       byteImage.applyLut();
       // if the thresholding and the making binary image produced a white
       // background, change it
-      if (byteImage.getStatistics().mode > 127) {
-         System.out.println("Invert image");
-         byteImage.invert();
-      }
+//      if (byteImage.getStatistics().mode > 127) {
+//         System.out.println("Invert image");
+//         byteImage.invert();
+//      }
       BinaryProcessor binImage = new BinaryProcessor(byteImage);
       this.binImage = new ImagePlus("binary Image", binImage);
 
