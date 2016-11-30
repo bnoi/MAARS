@@ -13,25 +13,18 @@ import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.resultSaver.MAARSSpotsSaver;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
+import edu.univ_tlse3.utils.RemoteNotification;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
-import org.micromanager.AutofocusPlugin;
 import org.micromanager.acquisition.ChannelSpec;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.MMException;
 import org.micromanager.internal.utils.ReportingUtils;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -72,45 +65,6 @@ public class MAARS implements Runnable {
         this.mm = mm;
         socVisualizer_ = socVisualizer;
         es_ = es;
-    }
-
-    private static void mailNotify() {
-        String to = "tongli.bioinfo@gmail.com";
-
-        // Sender's email ID needs to be mentioned
-        String from = "MAARS@univ-tlse3.fr";
-
-        // Get system properties
-        Properties properties = System.getProperties();
-
-        // Setup mail server
-        properties.setProperty("mail.smtp.host", "smtps.univ-tlse3.fr");
-
-        // Get the default Session object.
-        Session session = Session.getDefaultInstance(properties);
-
-        try {
-            // Create a default MimeMessage object.
-            MimeMessage message = new MimeMessage(session);
-
-            // Set From: header field of the header.
-            message.setFrom(new InternetAddress(from));
-
-            // Set To: header field of the header.
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-
-            // Set Subject: header field
-            message.setSubject("Analysis done!");
-
-            // Now set the actual message
-            message.setText("");
-
-            // Send message
-            Transport.send(message);
-            System.out.println("Sent message successfully....");
-        } catch (MessagingException mex) {
-            mex.printStackTrace();
-        }
     }
 
     static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
@@ -213,76 +167,6 @@ public class MAARS implements Runnable {
         PythonPipeline.runPythonScript();
         if (showChromLagging) {
             MAARS.showChromLaggingCells(pathToSegDir, soc, splitChannel);
-        }
-    }
-
-    /**
-     * A MAARS need specific autofocus process based on JAF(HP) sharpness
-     * autofocus
-     *
-     * @param mm  MMStudio object (gui)
-     * @param mmc CMMCore object (core)
-     */
-    public void autofocus(MMStudio mm, CMMCore mmc) {
-        try {
-            mmc.setShutterDevice(parameters.getChShutter(parameters.getSegmentationParameter(MaarsParameters.CHANNEL)));
-        } catch (Exception e2) {
-            IJ.error("Can't set BF channel for autofocusing");
-            e2.printStackTrace();
-        }
-        double initialPosition = 0;
-        String focusDevice = mmc.getFocusDevice();
-        try {
-            initialPosition = mmc.getPosition();
-        } catch (Exception e) {
-            IJ.error("Can't get current z level");
-            e.printStackTrace();
-        }
-
-        // Get autofocus manager
-        IJ.log("First autofocus");
-        AutofocusPlugin autofocus = mm.getAutofocusManager().getAutofocusMethod();
-        double firstPosition = 0;
-        try {
-            mmc.setShutterOpen(true);
-            autofocus.fullFocus();
-            mmc.waitForDevice(focusDevice);
-            firstPosition = mmc.getPosition(mmc.getFocusDevice());
-        } catch (Exception e2) {
-            e2.printStackTrace();
-        }
-
-        try {
-            mmc.waitForDevice(focusDevice);
-            mmc.setPosition(focusDevice, 2 * initialPosition - firstPosition);
-        } catch (Exception e) {
-            IJ.error("Can't set z position");
-            e.printStackTrace();
-        }
-
-        IJ.log("Seconde autofocus");
-        double secondPosition = 0;
-        try {
-            autofocus.fullFocus();
-            mmc.waitForDevice(focusDevice);
-            secondPosition = mmc.getPosition(mmc.getFocusDevice());
-        } catch (MMException e1) {
-            e1.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            mmc.waitForDevice(focusDevice);
-            mmc.setPosition(focusDevice, (secondPosition + firstPosition) / 2);
-        } catch (Exception e) {
-            IJ.error("Can't set z position");
-            e.printStackTrace();
-        }
-        try {
-            mmc.setShutterOpen(false);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -471,7 +355,7 @@ public class MAARS implements Runnable {
                     ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                             + " sec for writing results");
                 }
-                mailNotify();
+                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");
             }
         }
         mmc.setAutoShutter(true);
