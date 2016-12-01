@@ -1,9 +1,12 @@
+import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.gui.MaarsMainDialog;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
+import ij.IJ;
 import org.micromanager.MenuPlugin;
 import org.micromanager.Studio;
 import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ReportingUtils;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
@@ -72,5 +75,16 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 		}
 		MaarsParameters parameters = new MaarsParameters(inStream);
 		new MaarsMainDialog(mmStudio, parameters).show();
+		if (!FileUtils.exists(IJ.getDir("plugins")+"/MAARS_deps")){
+			FileUtils.createFolder(IJ.getDir("plugins")+"/MAARS_deps");
+			installAdjustableWatershred();
+		}
+	}
+
+	public void installAdjustableWatershred(){
+		String runningDir =PythonPipeline.class.getClassLoader().getResource("").toExternalForm();
+		runningDir = runningDir.split(":",-1)[1];
+		ReportingUtils.logMessage(runningDir);
+      IJ.run("Install... ", "install="+runningDir +"/Adjustable_Watershed.java save="+IJ.getDir("plugins")+"/MAARS_deps/Adjustable_Watershed.java");
 	}
 }

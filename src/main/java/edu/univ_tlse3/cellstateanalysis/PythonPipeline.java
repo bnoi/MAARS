@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class PythonPipeline {
    public static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
    public static final String TRACKMATE_NAME = "trackmate.py";
-   public static final String PATH2PYTHONSCRIPTS = "plugins" + File.separator + "MAARS_deps" + File.separator;
+   public static final String PATH2PYTHONSCRIPTS = IJ.getDir("plugins") + "MAARS_deps" + File.separator;
 
    public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
       BufferedReader bfr = getBufferReaderOfScript(SCRIPT_NAME);
@@ -41,7 +41,6 @@ public class PythonPipeline {
                } else if (Pattern.matches(patternForMinPerio, line)) {
                   line = replaceSubString(intPat, line, minimumPeriod);
                }
-//                ReportingUtils.logMessage(line);
                changeParam = true;
             }
             script.add(line);
@@ -59,8 +58,6 @@ public class PythonPipeline {
    }
 
    public static void savePythonScript(ArrayList<String> script) {
-//         if (PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1).endsWith(".jar")){
-//         if(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().endsWith(".jar")){
       FileUtils.createFolder(PATH2PYTHONSCRIPTS);
       copyScriptDependency();
       ReportingUtils.logMessage(PATH2PYTHONSCRIPTS + SCRIPT_NAME);
@@ -161,12 +158,12 @@ public class PythonPipeline {
       return line;
    }
 
-    public static void main(String[] args) {
-       String newPath = FileUtils.convertPathToLinuxType("D:\\Data\\Tong\\Starv\\10-11-2\\X0_Y0");
-       ReportingUtils.logMessage(newPath);
-       ArrayList<String> script = PythonPipeline.getPythonScript(newPath, "CFP", "0.1075", "200","20");
-       PythonPipeline.savePythonScript(script);
-       PythonPipeline.runPythonScript();
+   public static void main(String[] args) {
+//       String newPath = FileUtils.convertPathToLinuxType("D:\\Data\\Tong\\Starv\\10-11-2\\X0_Y0");
+//       ReportingUtils.logMessage(newPath);
+//       ArrayList<String> script = PythonPipeline.getPythonScript(newPath, "CFP", "0.1075", "200","20");
+//       PythonPipeline.savePythonScript(script);
+//       PythonPipeline.runPythonScript();
    //todo it will be cool if one day anaconda support jython. Though not possible for now. The codes below is tested with jython
 // /      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
 //              + "AnalyzeMAARSOutput.py");

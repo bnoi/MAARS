@@ -80,10 +80,15 @@ public class SOCVisualizer {
         cellToDisplayList.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent keyEvent) {
-                super.keyTyped(keyEvent);
-                if (keyEvent.getKeyCode() == KeyEvent.VK_UP || keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
+                super.keyPressed(keyEvent);
+                int index = Integer.MIN_VALUE;
+                if (keyEvent.getKeyCode() == KeyEvent.VK_UP) {
+                    index = cellToDisplayList.getSelectedIndex()-1;
+                }else if(keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
+                    index = cellToDisplayList.getSelectedIndex()+1;
+                }
+                if (index!=Integer.MIN_VALUE) {
                     contentPane.remove(lastChartPanel[0]);
-                    int index = cellToDisplayList.getSelectedIndex();
                     Object item = alreadyShownList_.getElementAt(index);
                     Cell c = setOfCells_.getCell((Integer) item);
                     ChartPanel chartPanel = CellChartPanel.updateCellContent(c);

@@ -176,15 +176,16 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
       //
 
-      JButton testSegBut = new JButton("test");
+      JButton testSegBut = new JButton("test segmentation");
       testSegBut.addActionListener(new ActionListener(){
          @Override
          public void actionPerformed(ActionEvent actionEvent) {
             updateMAARSParamters();
-            String imgPath = parameters.getSavingPath() + File.separator + "X0_Y0" + File.separator
-                    + "_1" + File.separator  + "_1_MMStack_Pos0.ome.tif";
+            String segDir = parameters.getSavingPath() + File.separator + "X0_Y0";
+            String imgPath =  segDir + File.separator + "_1" + File.separator  + "_1_MMStack_Pos0.ome.tif";
             MaarsParameters parameters_dup = parameters.duplicate();
-            parameters_dup.setSavingPath(parameters.getSavingPath() + File.separator + "X0_Y0");
+            parameters_dup.setSavingPath(segDir);
+            FileUtils.createFolder(segDir);
             if (FileUtils.exists(imgPath)) {
                ImagePlus segImg = IJ.openImage(imgPath);
                MaarsSegmentation ms = new MaarsSegmentation(parameters_dup);
