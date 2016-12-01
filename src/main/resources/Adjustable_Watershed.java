@@ -1,5 +1,3 @@
-package edu.univ_tlse3.utils;
-
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.plugin.filter.MaximumFinder;
