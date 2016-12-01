@@ -13,32 +13,39 @@ import ij.measure.ResultsTable;
  *
  * @author Tong LI
  */
-public class MaarsSegmentation {
+public class MaarsSegmentation implements Runnable {
    private MaarsParameters parameters;
    private boolean roiDetected = false;
    private ResultsTable rt;
+   private ImagePlus img_;
 
    /**
     * Constructor :
     *
     * @param parameters : MAARS parameters (see class MaarsParameters)
     */
-   public MaarsSegmentation(MaarsParameters parameters) {
-
+   public MaarsSegmentation(MaarsParameters parameters,ImagePlus img) {
+      img_ = img;
       this.parameters = parameters;
    }
 
    /**
-    * Get the parameters and use them to segment cells
-    *
-    * @param img : image to segmente
+    * @return if no Roi detected
     */
-   public void segmentation(ImagePlus img) {
+   boolean roiDetected() {
+      return this.roiDetected;
+   }
 
+   ResultsTable getRoiMeasurements() {
+      return this.rt;
+   }
+
+   @Override
+   public void run() {
       IJ.log("Prepare parameters for segmentation...");
       SegPombeParameters segPombeParam = new SegPombeParameters();
 
-      segPombeParam.setImageToAnalyze(img);
+      segPombeParam.setImageToAnalyze(img_);
       segPombeParam.setSavingPath(parameters.getSavingPath());
 
       segPombeParam.setFilterAbnormalShape(
@@ -83,7 +90,6 @@ public class MaarsSegmentation {
       SegPombe segPombe = new SegPombe(segPombeParam);
       segPombe.createCorrelationImage();
       segPombe.convertCorrelationToBinaryImage();
-//      IJ.run("Adjustable Watershed");
       segPombe.analyseAndFilterParticles();
       segPombe.showAndSaveResultsAndCleanUp();
       IJ.log("Segmentation done");
@@ -93,16 +99,5 @@ public class MaarsSegmentation {
       } else {
          IJ.log("No ROI detected!! Stop here!");
       }
-   }
-
-   /**
-    * @return if no Roi detected
-    */
-   boolean roiDetected() {
-      return this.roiDetected;
-   }
-
-   ResultsTable getRoiMeasurements() {
-      return this.rt;
    }
 }

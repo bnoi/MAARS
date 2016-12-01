@@ -218,8 +218,8 @@ public class MAARS implements Runnable {
             ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
 
             // --------------------------segmentation-----------------------------//
-            MaarsSegmentation ms = new MaarsSegmentation(parameters);
-            ms.segmentation(segImg);
+            MaarsSegmentation ms = new MaarsSegmentation(parameters,segImg);
+            es_.submit(ms);
             parameters.setSavingPath(original_folder);
             if (ms.roiDetected()) {
                 String pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;

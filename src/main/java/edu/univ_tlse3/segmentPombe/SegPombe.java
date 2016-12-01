@@ -212,6 +212,8 @@ public class SegPombe {
       if (imageToAnalyze.getCalibration().scaled()) {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
+      this.binImage.show();
+      IJ.run(this.binImage, "Adjustable Watershed","");
    }
 
    /**
@@ -369,7 +371,6 @@ public class SegPombe {
          System.out.println("saving roi...");
          roiManager.runCommand("Select All");
          roiManager.runCommand("Save", savingPath + File.separator + "ROI.zip");
-         System.out.println("Done");
          roiManager.runCommand("Select All");
          roiManager.runCommand("Delete");
       }

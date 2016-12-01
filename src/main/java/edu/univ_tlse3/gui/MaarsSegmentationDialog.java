@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Class to create and display a dialog to get parameters for the image
@@ -44,14 +45,15 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
    private JTextField minCellArea;
    private JTextField maxCellArea;
    private Button okBut;
+   private ExecutorService es_;
 
    /**
     * Constructor :
     *
     * @param parameters : default parameters (which are going to be displayed)
     */
-   MaarsSegmentationDialog(final MaarsParameters parameters, final MMStudio mm_) {
-
+   MaarsSegmentationDialog(final MaarsParameters parameters, final MMStudio mm_, ExecutorService es) {
+      es_ = es;
       this.parameters = parameters;
       this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 //      this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
@@ -188,8 +190,8 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
             FileUtils.createFolder(segDir);
             if (FileUtils.exists(imgPath)) {
                ImagePlus segImg = IJ.openImage(imgPath);
-               MaarsSegmentation ms = new MaarsSegmentation(parameters_dup);
-               ms.segmentation(segImg);
+               MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
+               es_.submit(ms);
             } else {
                SegAcqSetting segAcq = new SegAcqSetting(parameters_dup);
                ArrayList<ChannelSpec> channelSpecs = segAcq.configChannels();
@@ -200,8 +202,8 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
                ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
 
                // --------------------------segmentation-----------------------------//
-               MaarsSegmentation ms = new MaarsSegmentation(parameters_dup);
-               ms.segmentation(segImg);
+               MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
+               es_.submit(ms);
             }
          }
       });

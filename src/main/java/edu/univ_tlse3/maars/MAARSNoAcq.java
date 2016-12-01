@@ -79,8 +79,8 @@ public class MAARSNoAcq implements Runnable {
             IJ.error("Invalid path");
          }
          // --------------------------segmentation-----------------------------//
-         MaarsSegmentation ms = new MaarsSegmentation(parameters);
-         ms.segmentation(segImg);
+         MaarsSegmentation ms = new MaarsSegmentation(parameters,segImg);
+         es_.submit(ms);
          if (ms.roiDetected()) {
             soc.reset();
             // from Roi.zip initialize a set of cell
