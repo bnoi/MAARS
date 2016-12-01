@@ -183,13 +183,14 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
             updateMAARSParamters();
             String imgPath = parameters.getSavingPath() + File.separator + "X0_Y0" + File.separator
                     + "_1" + File.separator  + "_1_MMStack_Pos0.ome.tif";
-            ReportingUtils.logMessage(imgPath);
+            MaarsParameters parameters_dup = parameters.duplicate();
+            parameters_dup.setSavingPath(parameters.getSavingPath() + File.separator + "X0_Y0");
             if (FileUtils.exists(imgPath)) {
                ImagePlus segImg = IJ.openImage(imgPath);
-               MaarsSegmentation ms = new MaarsSegmentation(parameters);
+               MaarsSegmentation ms = new MaarsSegmentation(parameters_dup);
                ms.segmentation(segImg);
             } else {
-               SegAcqSetting segAcq = new SegAcqSetting(parameters);
+               SegAcqSetting segAcq = new SegAcqSetting(parameters_dup);
                ArrayList<ChannelSpec> channelSpecs = segAcq.configChannels();
                SequenceSettings acqSettings = segAcq.configAcqSettings(channelSpecs);
                acqSettings.save = false;
@@ -198,7 +199,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
                ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
 
                // --------------------------segmentation-----------------------------//
-               MaarsSegmentation ms = new MaarsSegmentation(parameters);
+               MaarsSegmentation ms = new MaarsSegmentation(parameters_dup);
                ms.segmentation(segImg);
             }
          }

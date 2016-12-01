@@ -45,6 +45,7 @@ public class MaarsMainDialog implements ActionListener {
    private JRadioButton dynamicOpt;
    private JRadioButton staticOpt;
    private MaarsFluoAnalysisDialog fluoDialog_;
+   private MaarsSegmentationDialog segDialog_;
    private JPanel stopAndVisualizerButtonPanel_;
    private SOCVisualizer socVisualizer_;
    private JButton stopButton_;
@@ -282,8 +283,8 @@ public class MaarsMainDialog implements ActionListener {
       if (!widthComp.equals("") && !heightComp.equals("")) {
          newWidth = Integer.valueOf(widthComp);
          newHeigth = Integer.valueOf(heightComp);
-         double tmpNewWidth = newWidth+1 / (calibration * mmc.getImageWidth());
-         double tmpNewHeight = newHeigth+1 / (calibration * mmc.getImageHeight());
+         double tmpNewWidth = (newWidth+1) / (calibration * mmc.getImageWidth());
+         double tmpNewHeight = (newHeigth+1) / (calibration * mmc.getImageHeight());
          double fractionalPartNewWidth = tmpNewWidth % 1;
          double fractionalPartNewHeight = tmpNewHeight % 1;
 
@@ -376,7 +377,13 @@ public class MaarsMainDialog implements ActionListener {
             }
          }
       } else if (e.getSource() == segmButton) {
-         new MaarsSegmentationDialog(parameters, mm);
+         saveParameters();
+         if (segDialog_ != null){
+            segDialog_.setVisible(true);
+         }else{
+            segDialog_ = new MaarsSegmentationDialog(parameters, mm);
+         }
+
       } else if (e.getSource() == fluoAnalysisButton) {
          saveParameters();
          if (fluoDialog_ != null){
