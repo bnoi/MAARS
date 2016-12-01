@@ -18,6 +18,7 @@ import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -83,6 +84,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     */
    public MaarsFluoAnalysisDialog(MMStudio mm, MaarsParameters parameters) {
 
+      String channelsString = parameters.getUsingChannels();
+      String[] arrayChannels = channelsString.split(",", -1);
+      String originSpindleChannel = parameters.getDetectionChForMitosis();
       // set up this dialog
       this.mm = mm;
       parameters_ = parameters;
@@ -201,9 +205,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       test1.setEnabled(false);
       test1.addActionListener(this);
       useChannel1_ = new JCheckBox("",true);
-      useChannel1_.addActionListener(new ActionListener() {
+      useChannel1_.addItemListener(new ItemListener() {
          @Override
-         public void actionPerformed(ActionEvent actionEvent) {
+         public void itemStateChanged(ItemEvent itemEvent) {
             if (useChannel1_.isSelected()){
                enableChannelPanel(channel1Panel, true);
             }else{
@@ -212,8 +216,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
          }
       });
        final JRadioButton ch1Button = new JRadioButton("");
-       ch1Button.setSelected(true);
-      channel1Panel.add(useChannel1_);
+      channel1Panel.add(useChannel1_,0);
       channel1Panel.add(channel1Combo);
       channel1Panel.add(maxNumberSpotCh1Tf);
       channel1Panel.add(spotRadiusCh1Tf);
@@ -238,12 +241,11 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       qualityCh2Tf = new JFormattedTextField(Double.class);
       exposureCh2Tf_ = new JFormattedTextField(Integer.class);
       test2 = new JButton("test");
-      test2.setEnabled(false);
       test2.addActionListener(this);
-      useChannel2_ = new JCheckBox("",true);
-      useChannel2_.addActionListener(new ActionListener() {
+      useChannel2_ = new JCheckBox("", true);
+      useChannel2_.addItemListener(new ItemListener() {
          @Override
-         public void actionPerformed(ActionEvent actionEvent) {
+         public void itemStateChanged(ItemEvent itemEvent) {
             if (useChannel2_.isSelected()){
                enableChannelPanel(channel2Panel, true);
             }else{
@@ -253,8 +255,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       });
        final JRadioButton ch2Button = new JRadioButton("");
       ch2Button.setActionCommand((String) channel2Combo.getSelectedItem());
-       ch2Button.setSelected(false);
-      channel2Panel.add(useChannel2_);
+      channel2Panel.add(useChannel2_,0);
       channel2Panel.add(channel2Combo);
       channel2Panel.add(maxNumberSpotCh2Tf);
       channel2Panel.add(spotRadiusCh2Tf);
@@ -279,15 +280,14 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       qualityCh3Tf = new JFormattedTextField(Double.class);
       exposureCh3Tf_ = new JFormattedTextField(Integer.class);
       test3 = new JButton("test");
-      test3.setEnabled(false);
       test3.addActionListener(this);
       maxNumberSpotCh3Tf.setText("");
       spotRadiusCh3Tf.setText("");
       qualityCh3Tf.setText("");
-      useChannel3_ = new JCheckBox("",true);
-      useChannel3_.addActionListener(new ActionListener() {
+      useChannel3_ = new JCheckBox("", true);
+      useChannel3_.addItemListener(new ItemListener() {
          @Override
-         public void actionPerformed(ActionEvent actionEvent) {
+         public void itemStateChanged(ItemEvent itemEvent) {
             if (useChannel3_.isSelected()){
                enableChannelPanel(channel3Panel, true);
             }else{
@@ -296,8 +296,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
          }
       });
        final JRadioButton ch3Button = new JRadioButton("");
-       ch3Button.setSelected(false);
-      channel3Panel.add(useChannel3_);
+      channel3Panel.add(useChannel3_,0);
       channel3Panel.add(channel3Combo);
       channel3Panel.add(maxNumberSpotCh3Tf);
       channel3Panel.add(spotRadiusCh3Tf);
@@ -354,12 +353,21 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       //
 
-
-      String channelsString = parameters_.getUsingChannels();
-      String[] arrayChannels = channelsString.split(",", -1);
-      for (int i = 0; i<arrayChannels.length; i++){
-         JComboBox tmpChannelCombo = (JComboBox) chPanels.get(i).getComponent(1);
-         tmpChannelCombo.setSelectedItem(arrayChannels[i]);
+      int j = 0;
+      for (int i = 0; i<chPanels.size(); i++){
+         JCheckBox tmpChkbox = (JCheckBox) chPanels.get(i).getComponent(0);
+         if (j<arrayChannels.length) {
+            JComboBox tmpChannelCombo = (JComboBox) chPanels.get(i).getComponent(1);
+            tmpChannelCombo.setSelectedItem(arrayChannels[j]);
+            tmpChkbox.setSelected(true);
+            if (originSpindleChannel.equals(arrayChannels[j])){
+               JRadioButton tmpRadio = (JRadioButton) chPanels.get(i).getComponent(7);
+               tmpRadio.setSelected(true);
+            }
+            j += 1;
+         }else{
+            tmpChkbox.setSelected(false);
+         }
       }
 
       ch1Button.addActionListener(new ActionListener() {
