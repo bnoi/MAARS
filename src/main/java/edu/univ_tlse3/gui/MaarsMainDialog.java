@@ -282,8 +282,8 @@ public class MaarsMainDialog implements ActionListener {
       if (!widthComp.equals("") && !heightComp.equals("")) {
          newWidth = Integer.valueOf(widthComp);
          newHeigth = Integer.valueOf(heightComp);
-         double tmpNewWidth = newWidth / (calibration * mmc.getImageWidth());
-         double tmpNewHeight = newHeigth / (calibration * mmc.getImageHeight());
+         double tmpNewWidth = newWidth+1 / (calibration * mmc.getImageWidth());
+         double tmpNewHeight = newHeigth+1 / (calibration * mmc.getImageHeight());
          double fractionalPartNewWidth = tmpNewWidth % 1;
          double fractionalPartNewHeight = tmpNewHeight % 1;
 
