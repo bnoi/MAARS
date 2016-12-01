@@ -80,7 +80,14 @@ public class MAARSNoAcq implements Runnable {
          }
          // --------------------------segmentation-----------------------------//
          MaarsSegmentation ms = new MaarsSegmentation(parameters,segImg);
-         es_.submit(ms);
+         Future future = es_.submit(ms);
+         try {
+            future.get();
+         } catch (InterruptedException e) {
+            e.printStackTrace();
+         } catch (ExecutionException e) {
+            e.printStackTrace();
+         }
          if (ms.roiDetected()) {
             soc.reset();
             // from Roi.zip initialize a set of cell
@@ -121,7 +128,6 @@ public class MAARSNoAcq implements Runnable {
             ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
 
             ArrayList<Map<String, Future>> futureSet = new ArrayList<Map<String, Future>>();
-            Future future;
             for (Integer arrayImgFrame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<String, Future>();
                for (String channel : arrayChannels) {

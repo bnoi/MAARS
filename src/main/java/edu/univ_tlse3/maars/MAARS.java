@@ -219,7 +219,14 @@ public class MAARS implements Runnable {
 
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters,segImg);
-            es_.submit(ms);
+            Future future = es_.submit(ms);
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             parameters.setSavingPath(original_folder);
             if (ms.roiDetected()) {
                 String pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
@@ -244,7 +251,6 @@ public class MAARS implements Runnable {
                 int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
                 ArrayList<Map<String, Future>> futureSet = new ArrayList<Map<String, Future>>();
-                Future future;
                 if (parameters.useDynamic()) {
                     // being dynamic acquisition
                     double startTime = System.currentTimeMillis();
