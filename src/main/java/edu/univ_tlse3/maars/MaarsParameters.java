@@ -1,12 +1,11 @@
 package edu.univ_tlse3.maars;
 
 /**
- * This class stores all the parameters need to run MAARS
+ * This class stores all the parameters that are needed to run MAARS
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 10, 2015
  */
 
-import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -94,9 +93,9 @@ public class MaarsParameters {
    private static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
    private static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
    private static final String EXPLORATION_PARAMETERS = "EXPLORATION_PARAMETERS";
-    private static final String MITOSIS_DETECTION_PARAMETERS = "MITOSIS_DETECTION_PARAMETERS";
-    private static final String MINIMUM_DURATION = "MINIMUM_DURATION";
-    private static final String DETECTION_CHANNEL = "DETECTION_CHANNEL";
+   private static final String MITOSIS_DETECTION_PARAMETERS = "MITOSIS_DETECTION_PARAMETERS";
+   private static final String MINIMUM_DURATION = "MINIMUM_DURATION";
+   private static final String DETECTION_CHANNEL = "DETECTION_CHANNEL";
    public static final String RANGE_SIZE_FOR_MOVIE = "RANGE_SIZE_FOR_MOVIE";
    public static final String STEP = "STEP";
    private static final String SPOT_RADIUS = "SPOT_RADIUS";
