@@ -19,7 +19,7 @@
 		<scijava.jvm.version>1.8</scijava.jvm.version>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
 		<project.micromanager.dependencies>
-			/home/tong/Documents/code/ImageJ/plugins/Micro-Manager/
+			/Applications/Micro-Manager-2.0.0-beta3-20161211/plugins/Micro-Manager/
 		</project.micromanager.dependencies>
 		<project.micromanager.version>
 			ref_MM_dependency
