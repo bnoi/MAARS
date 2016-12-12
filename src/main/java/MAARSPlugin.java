@@ -82,9 +82,7 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 	}
 
 	public void installAdjustableWatershred(){
-		String runningDir =PythonPipeline.class.getClassLoader().getResource("").toExternalForm();
-		runningDir = runningDir.split(":",-1)[1];
-		ReportingUtils.logMessage(runningDir);
-      IJ.run("Install... ", "install="+runningDir +"/Adjustable_Watershed.java save="+IJ.getDirectory("plugins")+"/MAARS_deps/Adjustable_Watershed.java");
+		FileUtils.copyScriptDependency(IJ.getDirectory("plugins") + "/MAARS_deps/","Adjustable_Watershed.java");
+//      	IJ.run("Install... ", "install="+runningDir +"/Adjustable_Watershed.java save="+IJ.getDirectory("plugins")+"/MAARS_deps/Adjustable_Watershed.java");
 	}
 }

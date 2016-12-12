@@ -213,7 +213,8 @@ public class SegPombe {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
       this.binImage.show();
-      IJ.run(this.binImage, "Adjustable Watershed","");
+      IJ.run("Install... ", "install="+IJ.getDirectory("plugins") + "/MAARS_deps/Adjustable_Watershed.java save="+IJ.getDirectory("plugins")+"/MAARS_deps/Adjustable_Watershed.java");
+//      IJ.run(this.binImage, "Adjustable Watershed","");
    }
 
    /**

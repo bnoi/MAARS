@@ -15,7 +15,7 @@ public class PythonPipeline {
    public static final String PATH2PYTHONSCRIPTS = IJ.getDirectory("plugins") + "MAARS_deps" + File.separator;
 
    public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
-      BufferedReader bfr = getBufferReaderOfScript(SCRIPT_NAME);
+      BufferedReader bfr = FileUtils.getBufferReaderOfScript(SCRIPT_NAME);
       ArrayList<String> script = new ArrayList<String>();
       Boolean changeParam = false;
       String pattern = "if __name__ == '__main__':";
@@ -51,33 +51,11 @@ public class PythonPipeline {
       return script;
    }
 
-   public static BufferedReader getBufferReaderOfScript(String scriptName){
-      ClassLoader classLoader = PythonPipeline.class.getClassLoader();
-      InputStream pythonScript = classLoader.getResourceAsStream(scriptName);
-      return new BufferedReader(new InputStreamReader(pythonScript));
-   }
-
    public static void savePythonScript(ArrayList<String> script) {
       FileUtils.createFolder(PATH2PYTHONSCRIPTS);
-      copyScriptDependency();
+      FileUtils.copyScriptDependency(PATH2PYTHONSCRIPTS, TRACKMATE_NAME);
       ReportingUtils.logMessage(PATH2PYTHONSCRIPTS + SCRIPT_NAME);
       FileUtils.writeScript(PATH2PYTHONSCRIPTS + SCRIPT_NAME, script);
-   }
-
-   /**
-    *
-    */
-   public static void copyScriptDependency(){
-      BufferedReader bfr = getBufferReaderOfScript(TRACKMATE_NAME);
-      ArrayList<String> script = new ArrayList<String>();
-      try {
-         while (bfr.ready()) {
-            script.add(bfr.readLine());
-         }
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-      FileUtils.writeScript(PATH2PYTHONSCRIPTS + TRACKMATE_NAME, script);
    }
 
    /**

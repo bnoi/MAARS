@@ -12,7 +12,6 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
 
-import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
@@ -521,7 +520,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             channels.add(tmpChannel);
          }
       }
-      parameters_.setUsingChannels(StringUtils.join(channels.toArray(), ","));
+
+      parameters_.setUsingChannels(String.join(",", channels));
 
    }
 

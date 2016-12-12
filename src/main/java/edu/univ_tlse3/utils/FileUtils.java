@@ -1,9 +1,9 @@
 package edu.univ_tlse3.utils;
 
+import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import ij.IJ;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -71,5 +71,32 @@ public class FileUtils {
       } catch (IOException e) {
          e.printStackTrace();
       }
+   }
+
+   /**
+    *
+    * @param scriptName
+    * @return
+    */
+   public static BufferedReader getBufferReaderOfScript(String scriptName){
+      ClassLoader classLoader = PythonPipeline.class.getClassLoader();
+      InputStream pythonScript = classLoader.getResourceAsStream(scriptName);
+      return new BufferedReader(new InputStreamReader(pythonScript));
+   }
+
+   /**
+    *
+    */
+   public static void copyScriptDependency(String folderPath, String scriptName){
+      BufferedReader bfr = getBufferReaderOfScript(scriptName);
+      ArrayList<String> script = new ArrayList<String>();
+      try {
+         while (bfr.ready()) {
+            script.add(bfr.readLine());
+         }
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      FileUtils.writeScript(folderPath + scriptName, script);
    }
 }
