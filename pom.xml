@@ -19,7 +19,7 @@
 		<scijava.jvm.version>1.8</scijava.jvm.version>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
 		<project.micromanager.dependencies>
-			/Applications/ImageJ/plugins/Micro-Manager/
+			/home/tong/Documents/code/ImageJ/plugins/Micro-Manager/
 		</project.micromanager.dependencies>
 		<project.micromanager.version>
 			ref_MM_dependency
@@ -120,28 +120,27 @@
 	</repositories>
 
 	<build>
-	<plugins>
-	<plugin>
-	<artifactId>maven-enforcer-plugin</artifactId>
-	<configuration>
-	<rules>
-	<banClasses
-	implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
-	<dependencies>
-	<!-- org.json clashes -->
-	<dependency>
-	<artifactId>MMJ_</artifactId>
-	<ignoreClasses>
-	<ignoreClass>org/json/*</ignoreClass>
-	</ignoreClasses>
-	</dependency>
-	</dependencies>
-	<findAllDuplicates>true</findAllDuplicates>
-	</banClasses>
-	</rules>
-	</configuration>
-	</plugin>
-
+		<plugins>
+		<plugin>
+		<artifactId>maven-enforcer-plugin</artifactId>
+			<configuration>
+				<rules>
+					<banClasses
+					implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
+						<dependencies>
+						<!-- org.json clashes -->
+						<dependency>
+						<artifactId>MMJ_</artifactId>
+							<ignoreClasses>
+							<ignoreClass>org/json/*</ignoreClass>
+							</ignoreClasses>
+						</dependency>
+						</dependencies>
+					<findAllDuplicates>true</findAllDuplicates>
+					</banClasses>
+				</rules>
+			</configuration>
+		</plugin>
 	</plugins>
 	</build>
 </project>
