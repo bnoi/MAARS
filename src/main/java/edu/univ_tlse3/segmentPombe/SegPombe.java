@@ -14,6 +14,7 @@ import ij.process.AutoThresholder;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -214,8 +215,9 @@ public class SegPombe {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
       this.binImage.show();
-      IJ.run("Compile and Run...", "compile=" + IJ.getDirectory("plugins") + "/MAARS_deps/Adjustable_Watershed.java");
+      IJ.run("Compile and Run...", "compile=[" +IJ.getDirectory("plugins") + "MAARS_deps"+File.separator+"Adjustable_Watershed.java]");
       WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Test your tolerance and then click ok");
+      waitForUserDialog.setAlwaysOnTop(false);
       waitForUserDialog.show();
       this.binImage.hide();
    }
