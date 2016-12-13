@@ -12,14 +12,11 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
 
-import ij.gui.WaitForUserDialog;
 import ij.gui.YesNoCancelDialog;
-import org.jdom2.Element;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
