@@ -215,11 +215,12 @@ public class SegPombe {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
       this.binImage.show();
-      if (IJ.isWindows()){
-         IJ.run("Compile and Run...", "compile=[" +IJ.getDirectory("plugins") + "MAARS_deps"+File.separator+"Adjustable_Watershed.java]");
-      }else{
-         IJ.run("Compile and Run...", "compile=" +IJ.getDirectory("plugins") + "/MAARS_deps"+File.separator+"Adjustable_Watershed.java");
-      }
+      IJ.run("Adjustable Watershed");
+//      if (IJ.isWindows()){
+//         IJ.run("Compile and Run...", "compile=[" +IJ.getDirectory("plugins") + "MAARS_deps"+File.separator+"Adjustable_Watershed.java]");
+//      }else{
+//         IJ.run("Compile and Run...", "compile=" +IJ.getDirectory("plugins") + "/MAARS_deps"+File.separator+"Adjustable_Watershed.java");
+//      }
 
       WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Test your tolerance and then click ok");
       waitForUserDialog.setAlwaysOnTop(false);
