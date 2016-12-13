@@ -3,6 +3,7 @@ package edu.univ_tlse3.segmentPombe;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
+import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
@@ -214,9 +215,9 @@ public class SegPombe {
       }
       this.binImage.show();
       IJ.run("Compile and Run...", "compile=" + IJ.getDirectory("plugins") + "/MAARS_deps/Adjustable_Watershed.java");
-      while (IJ.macroRunning()){
-         IJ.wait(1000);
-      }
+      WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Test your tolerance and then click ok");
+      waitForUserDialog.show();
+      this.binImage.hide();
    }
 
    /**
