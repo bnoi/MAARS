@@ -24,5 +24,8 @@ rm -f jars/MAARS_deps/guava-*.jar
 rm -f jars/MAARS_deps/jcommon-*.jar
 rm -f jars/MAARS_deps/jfreechart-*.jar
 rm -f jars/MAARS_deps/rsyntaxtextarea-*.jar
+rm -f jars/MAARS_deps/kyro-*.jar
+rm -f jars/MAARS_deps/minlog-*.jar
+rm -f jars/MAARS_deps/objenesis-*.jar
 
 cp target/MAARS_-1.0-SNAPSHOT.jar jars/
