@@ -19,7 +19,7 @@
 		<scijava.jvm.version>1.8</scijava.jvm.version>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
 		<project.micromanager.dependencies>
-			/Applications/Micro-Manager-2.0.0-beta3-20161211/plugins/Micro-Manager/
+			/home/tong/Documents/code/ImageJ
 		</project.micromanager.dependencies>
 		<project.micromanager.version>
 			ref_MM_dependency
@@ -58,7 +58,7 @@
 			<artifactId>MMJ_</artifactId>
 			<version>${project.micromanager.version}</version>
 			<scope>system</scope>
-			<systemPath>${project.micromanager.dependencies}MMJ_.jar</systemPath>
+			<systemPath>${project.micromanager.dependencies}/plugins/Micro-Manager/MMJ_.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -66,7 +66,7 @@
 			<artifactId>MMCoreJ</artifactId>
 			<version>${project.micromanager.version}</version>
 			<scope>system</scope>
-			<systemPath>${project.micromanager.dependencies}MMCoreJ.jar</systemPath>
+			<systemPath>${project.micromanager.dependencies}/plugins/Micro-Manager/MMCoreJ.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -74,7 +74,7 @@
 			<artifactId>MMAcqEngine</artifactId>
 			<version>${project.micromanager.version}</version>
 			<scope>system</scope>
-			<systemPath>${project.micromanager.dependencies}MMAcqEngine.jar</systemPath>
+			<systemPath>${project.micromanager.dependencies}/plugins/Micro-Manager/MMAcqEngine.jar</systemPath>
 		</dependency>
 
 		<dependency>
@@ -82,7 +82,7 @@
 			<artifactId>commons</artifactId>
 			<version>${project.micromanager.version}</version>
 			<scope>system</scope>
-			<systemPath>${project.micromanager.dependencies}commons-math3-3.4.1.jar</systemPath>
+			<systemPath>${project.micromanager.dependencies}/plugins/Micro-Manager/commons-math3-3.4.1.jar</systemPath>
 		</dependency>
 
 		<!--MAARS specific dependencies -->
@@ -96,7 +96,6 @@
 		<dependency>
 			<groupId>ome</groupId>
 			<artifactId>bio-formats_plugins</artifactId>
-			<!--<version>5.2.0</version>-->
 		</dependency>
 
 		<dependency>
@@ -107,7 +106,6 @@
 		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>jdom2</artifactId>
-			<version>2.0.6</version>
 		</dependency>
 
     </dependencies>
