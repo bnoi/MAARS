@@ -12,11 +12,14 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
 
+import ij.gui.WaitForUserDialog;
+import ij.gui.YesNoCancelDialog;
 import org.jdom2.Element;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
+import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +27,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 /**
  * Class to create and display a dialog to get parameters_ of the fluorescent
@@ -31,7 +35,7 @@ import java.util.*;
  *
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  */
-class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
+class MaarsFluoAnalysisDialog extends Frame implements ActionListener {
 
    /**
     *
@@ -88,7 +92,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       // set up this dialog
       this.mm = mm;
       parameters_ = parameters;
-      this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+//      this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       this.setTitle("MAARS - Fluorescent Analysis Parameters");
       this.setBackground(Color.WHITE);
       this.setLayout(new GridLayout(0, 1));
@@ -392,7 +396,6 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       //
 
-
       JPanel mainPanel = new JPanel();
       mainPanel.setBackground(Color.WHITE);
       mainPanel.setLayout(new GridLayout(0, 1));
@@ -423,8 +426,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     * @param ch   channel name
     */
    private void setChPanelValue(JPanel jp, String ch) {
-      for (Element element : parameters_.getAllChannels()){
-         if (ch != null && ch.equals(element.getName())){
+      for (String channel : parameters_.getAllChannels()){
+         if (ch != null && ch.equals(channel)){
              JCheckBox tmpChk = (JCheckBox) jp.getComponent(0);
              if (tmpChk.isSelected()){
                  JButton tmpButton = (JButton) jp.getComponent(TOTAL_PARAMETERS+1);
@@ -503,12 +506,26 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       parameters_.setFluoParameter(MaarsParameters.TIME_INTERVAL, timeInterval.getText());
       parameters_.setDetectionChForMitosis(spindleChannel_);
       parameters_.setMinimumMitosisDuration(String.valueOf(mitosisDurationTf_.getText()));
+      List<String> existingChannels = parameters_.getAllChannels();
       ArrayList<String> channels = new ArrayList<String>();
       for (JPanel p : chPanels){
          JCheckBox tmpChkBox = (JCheckBox) p.getComponent(0);
          if (tmpChkBox.isSelected()){
             JComboBox tmpChannelCombo = (JComboBox) p.getComponent(1);
             String tmpChannel = (String) tmpChannelCombo.getSelectedItem();
+            if (!existingChannels.contains(tmpChannel)){
+               YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(this, "Channel not in config file", "add this channel " + tmpChannel + " into the config file?");
+               if (yesNoCancelDialog.yesPressed()){
+                  String shutterLabel = (String) JOptionPane.showInputDialog(this, "shutter for this channel ?","Shutter configuration", JOptionPane.QUESTION_MESSAGE, null,mm.getShutterManager().getShutterDevices().toArray() ,mm.getShutterManager().getShutterDevices().get(0));
+                  String colorLabel = (String) JOptionPane.showInputDialog(this, "Color for this channel ?","Color configuration", JOptionPane.QUESTION_MESSAGE, null,parameters_.availiableColors(),parameters_.availiableColors()[0]);
+                  parameters_.addChannel(tmpChannel);
+                  parameters_.setChShutter(tmpChannel, shutterLabel);
+                  parameters_.setChColor(tmpChannel, colorLabel);
+               }else{
+                  tmpChkBox.setSelected(false);
+                  continue;
+               }
+            }
             JFormattedTextField tmpTf = (JFormattedTextField) p.getComponent(2);
             parameters_.setChMaxNbSpot(tmpChannel, tmpTf.getText());
             tmpTf = (JFormattedTextField) p.getComponent(3);
@@ -520,7 +537,6 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             channels.add(tmpChannel);
          }
       }
-
       parameters_.setUsingChannels(String.join(",", channels));
 
    }

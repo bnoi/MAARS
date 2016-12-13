@@ -83,6 +83,5 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 
 	public void installAdjustableWatershred(){
 		FileUtils.copyScriptDependency(IJ.getDirectory("plugins") + "/MAARS_deps/","Adjustable_Watershed.java");
-//      	IJ.run("Install... ", "install="+runningDir +"/Adjustable_Watershed.java save="+IJ.getDirectory("plugins")+"/MAARS_deps/Adjustable_Watershed.java");
 	}
 }

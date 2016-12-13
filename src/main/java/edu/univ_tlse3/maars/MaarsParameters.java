@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -51,16 +52,7 @@ import java.util.List;
  *    +-----> RANGE_SIZE_FOR_MOVIE
  *    +-----> STEP
  *    +-----> SAVE_FLUORESCENT_MOVIES
- *    +-----> FLUO_CHANNELS
- *    		|
- *    		+----->USING
- *    				|
- *    				+----->channel name
- *    		+----->channel name
- *    				|
- *    				+-----> SPOT_RADIUS
- *    				+-----> MAXIMUM_NUMBER_OF_SPOT
- *    				+-----> QUALITY
+ *    +-----> USING
  *    +-----> DYNAMIC
  *    +-----> TIME_LIMIT
  *    +-----> TIME_INTERVAL
@@ -81,6 +73,9 @@ import java.util.List;
  * 								+-----> COLOR
  * 								+-----> EXPOSURE
  * 								+-----> SHUTTER
+ * 							   +-----> SPOT_RADIUS
+ *    				         +-----> MAXIMUM_NUMBER_OF_SPOT
+ *    				         +-----> QUALITY
  * MITOSIS_DETECTION_PARAMETERS
  *    |
  *    +-----MINIMUM_DURATION
@@ -127,7 +122,6 @@ public class MaarsParameters {
    public static final String COLOR = "COLOR";
    public static final String EXPOSURE = "EXPOSURE";
    public static final String CHANNEL = "CHANNEL";
-   public static final String FLUO_CHANNELS = "FLUO_CHANNELS";
    public static final String USING = "USING";
    public static final String GFP = "GFP";
    public static final String CFP = "CFP";
@@ -144,6 +138,7 @@ public class MaarsParameters {
    public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
    private Document doc;
    private Element root;
+   private String[] allColors = {"GREEN","CYAN","RED", "BLUE", "WHITE","GRAY"};
 
    /**
     * Constructor of Element need path to configuration file
@@ -310,12 +305,30 @@ public class MaarsParameters {
               .getChildText(EXPOSURE);
    }
 
+//   /**
+//    * @param ch : GFP, CFP, DAPI, TXRED
+//    * @return corresponding channel color
+//    */
+//   public String getchColor(String ch) {
+//      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+//              .getChildText(COLOR);
+//   }
+//
+//   /**
+//    * @param ch : GFP, CFP, DAPI, TXRED
+//    * @return corresponding channel color
+//    */
+//   public String getchShutter(String ch) {
+//      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+//              .getChildText(SHUTTER);
+//   }
+
    /**
     * @param ch: GFP, CFP, DAPI, TXRED
     * @return MAXIMUM_NUMBER_OF_SPOT of corresponding channel
     */
    public String getChMaxNbSpot(String ch) {
-      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch)
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
               .getChildText(MAXIMUM_NUMBER_OF_SPOT);
    }
 
@@ -324,7 +337,7 @@ public class MaarsParameters {
     * @return SPOT_RADIUS of corresponding channel
     */
    public String getChSpotRaius(String ch) {
-      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChildText(SPOT_RADIUS);
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChildText(SPOT_RADIUS);
    }
 
    /**
@@ -332,21 +345,25 @@ public class MaarsParameters {
     * @return SPOT_RADIUS of corresponding channel
     */
    public String getChQuality(String ch) {
-      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChildText(QUALITY);
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChildText(QUALITY);
    }
 
    /**
-    *@return iterator of all channels
+    *@return list of all channels
     */
-   public List<Element> getAllChannels(){
-      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChildren();
+   public List<String> getAllChannels(){
+      ArrayList<String> channelNames = new ArrayList<>();
+      for (Element e: root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren()){
+         channelNames.add(e.getName());
+      }
+      return channelNames;
    }
 
     /**
      * @return get channels used for fluo analysis
      */
     public String getUsingChannels() {
-        return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChildText(USING);
+        return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(USING);
     }
 
     /**
@@ -400,12 +417,30 @@ public class MaarsParameters {
    }
 
    /**
+    * @param ch : GFP, CFP, DAPI, TXRED
+    * @param color
+    */
+   public void setChColor(String ch, String color) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+              .getChild(COLOR).setText(color);
+   }
+
+   /**
+    * @param ch : GFP, CFP, DAPI, TXRED
+    * @param shutter
+    */
+   public void setChShutter(String ch, String shutter) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+              .getChild(SHUTTER).setText(shutter);
+   }
+
+   /**
     * set channels to USING channel
     *
     * @param channels channels that are being using for acquisitions
     */
    public void setUsingChannels(String channels) {
-      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(USING).setText(channels);
+      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(USING).setText(channels);
    }
 
    /**
@@ -443,7 +478,7 @@ public class MaarsParameters {
     * @param maxNbSpot maximum number of spot for corresponding channel
     */
    public void setChMaxNbSpot(String ch, String maxNbSpot) {
-      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(MAXIMUM_NUMBER_OF_SPOT)
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(MAXIMUM_NUMBER_OF_SPOT)
               .setText(maxNbSpot);
    }
 
@@ -452,7 +487,7 @@ public class MaarsParameters {
     * @param spotRaidus spotRaidus for corresponding channel
     */
    public void setChSpotRaius(String ch, String spotRaidus) {
-      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(SPOT_RADIUS)
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(SPOT_RADIUS)
               .setText(spotRaidus);
    }
 
@@ -461,14 +496,32 @@ public class MaarsParameters {
     * @param quality quality of spots for corresponding channel
     */
    public void setChQuality(String ch, String quality) {
-      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(FLUO_CHANNELS).getChild(ch).getChild(QUALITY).setText(quality);
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(QUALITY).setText(quality);
    }
 
+   /**
+    *
+    * @return availiableColors
+    */
+   public String[] availiableColors(){
+      return allColors;
+   }
    /**
     * @param root the dataset of this class
     */
    public void setRoot(Element root) {
       this.root = root;
+   }
+
+   public void addChannel(String newChannel){
+      Element anotherChannel = root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren().get(2);
+      List<Element> attributes = new ArrayList<>();
+      for (Element e : anotherChannel.getChildren()){
+         attributes.add(e.clone());
+      }
+      Element newChannelElement = new Element(newChannel);
+      newChannelElement.addContent(attributes);
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).addContent(newChannelElement);
    }
 
    /**
