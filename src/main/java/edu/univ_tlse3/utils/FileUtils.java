@@ -79,9 +79,18 @@ public class FileUtils {
     * @return
     */
    public static BufferedReader getBufferReaderOfScript(String scriptName){
-      ClassLoader classLoader = PythonPipeline.class.getClassLoader();
-      InputStream pythonScript = classLoader.getResourceAsStream(scriptName);
+      InputStream pythonScript = getInputStreamOfScript(scriptName);
       return new BufferedReader(new InputStreamReader(pythonScript));
+   }
+
+   /**
+    *
+    * @param scriptName
+    * @return
+    */
+   public static InputStream getInputStreamOfScript(String scriptName){
+      ClassLoader classLoader = PythonPipeline.class.getClassLoader();
+      return classLoader.getResourceAsStream(scriptName);
    }
 
    /**

@@ -71,17 +71,17 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 			}
 
 		} else {
-			inStream = getClass().getResourceAsStream(File.separator + "maars_default_config.xml");
+			inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
 		}
 		MaarsParameters parameters = new MaarsParameters(inStream);
 		new MaarsMainDialog(mmStudio, parameters).show();
 		if (!FileUtils.exists(IJ.getDirectory("plugins")+"/MAARS_deps")){
 			FileUtils.createFolder(IJ.getDirectory("plugins")+"/MAARS_deps");
-			installAdjustableWatershred();
 		}
+		copyAdjustableWatershred();
 	}
 
-	public void installAdjustableWatershred(){
+	public void copyAdjustableWatershred(){
 		FileUtils.copyScriptDependency(IJ.getDirectory("plugins") + "/MAARS_deps/","Adjustable_Watershed.java");
 	}
 }
