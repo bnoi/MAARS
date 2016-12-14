@@ -501,6 +501,14 @@ public class MaarsParameters {
 
    /**
     *
+    * @param bfChannel
+    */
+   public void setSegChannel(String bfChannel){
+      root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(bfChannel);
+   }
+
+   /**
+    *
     * @return availiableColors
     */
    public String[] availiableColors(){

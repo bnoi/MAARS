@@ -35,7 +35,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
     *
     */
    private static final long serialVersionUID = 1L;
-   private MaarsParameters parameters;
+   private MaarsParameters parameters_;
    private JCheckBox shapeFilter;
    private JTextField solidity;
    private JCheckBox greyValueFilter;
@@ -46,6 +46,8 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
    private JTextField maxCellArea;
    private Button okBut;
    private ExecutorService es_;
+   private JComboBox configurationCombo_;
+   private JComboBox bfChannelCombo_;
 
    /**
     * Constructor :
@@ -54,13 +56,13 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
     */
    MaarsSegmentationDialog(final MaarsParameters parameters, final MMStudio mm_, ExecutorService es) {
       es_ = es;
-      this.parameters = parameters;
+      this.parameters_ = parameters;
       this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 //      this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
       this.setTitle("MAARS - Segmentation parameters");
       this.setLayout(new GridLayout(0, 1));
       this.setBackground(Color.WHITE);
-      this.setMinimumSize(new Dimension(300, 600));
+      this.setMinimumSize(new Dimension(400, 750));
       Color labelColor = Color.ORANGE;
 
       //
@@ -178,6 +180,49 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
       //
 
+      JPanel bfChannelPanel = new JPanel();
+      bfChannelPanel.setLayout(new BorderLayout(1,2));
+
+      Label bfChannelLabel = new Label("Bright-field Channel ?", Label.CENTER);
+      bfChannelLabel.setBackground(Color.lightGray);
+      bfChannelCombo_ = new JComboBox();
+      bfChannelPanel.add(bfChannelLabel, BorderLayout.NORTH);
+      bfChannelPanel.add(bfChannelCombo_, BorderLayout.SOUTH);
+
+      //
+
+      JPanel configurationGroupPanel = new JPanel();
+      configurationGroupPanel.setLayout(new BorderLayout(1,2));
+
+      Label configurationGroupLabel = new Label("Configuration Group", Label.CENTER);
+      configurationGroupLabel.setBackground(Color.lightGray);
+
+      configurationCombo_ = new JComboBox(mm_.getCore().getAvailableConfigGroups().toArray());
+      configurationCombo_.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent actionEvent) {
+            String selectedGroup= (String) configurationCombo_.getSelectedItem();
+            parameters_.setChannelGroup(selectedGroup);
+            bfChannelCombo_.removeAllItems();
+            String[] newConfigs = mm_.getCore().getAvailableConfigs(selectedGroup).toArray();
+            for (String s : newConfigs){
+               bfChannelCombo_.addItem(s);
+            }
+         }
+      });
+      configurationCombo_.setSelectedItem(parameters_.getChannelGroup());
+      configurationGroupPanel.add(configurationGroupLabel, BorderLayout.NORTH);
+      configurationGroupPanel.add(configurationCombo_, BorderLayout.SOUTH);
+
+
+      //
+
+      JPanel bfPanel = new JPanel();
+      bfPanel.add(configurationGroupPanel);
+      bfPanel.add(bfChannelPanel);
+      this.add(bfPanel);
+      //
+
       JButton testSegBut = new JButton("test segmentation");
       testSegBut.addActionListener(new ActionListener(){
          @Override
@@ -221,31 +266,32 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
    }
 
    public void updateMAARSParamters(){
-      parameters.setSegmentationParameter(
+      parameters_.setSegmentationParameter(
               MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
-      parameters.setSegmentationParameter(MaarsParameters.STEP,
+      parameters_.setSegmentationParameter(MaarsParameters.STEP,
               step.getText());
-      parameters.setSegmentationParameter(
+      parameters_.setSegmentationParameter(
               MaarsParameters.MINIMUM_CELL_AREA, minCellArea.getText());
-      parameters.setSegmentationParameter(
+      parameters_.setSegmentationParameter(
               MaarsParameters.MAXIMUM_CELL_AREA, maxCellArea.getText());
-      parameters.setSegmentationParameter(
+      parameters_.setSegmentationParameter(
               MaarsParameters.FILTER_MEAN_GREY_VALUE,
               String.valueOf(greyValueFilter.isSelected()));
-      parameters.setSegmentationParameter(
+      parameters_.setSegmentationParameter(
               MaarsParameters.MEAN_GREY_VALUE, greyValue.getText());
-      parameters.setSegmentationParameter(
+      parameters_.setSegmentationParameter(
               MaarsParameters.FILTER_SOLIDITY,
               String.valueOf(shapeFilter.isSelected()));
-      parameters.setSegmentationParameter(MaarsParameters.SOLIDITY,
+      parameters_.setSegmentationParameter(MaarsParameters.SOLIDITY,
               solidity.getText());
+      parameters_.setSegChannel((String) bfChannelCombo_.getSelectedItem());
    }
 
    /**
     * @return parameters
     */
    public MaarsParameters getParameters() {
-      return parameters;
+      return parameters_;
    }
 
    @Override
