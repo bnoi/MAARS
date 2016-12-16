@@ -25,7 +25,7 @@ the more the better. The minimum requirement depends on:
 _Important :_ Don't forget to configure ImageJ's RAM allocation. In `Edit/Options/Memory & Threads...` ![][image3]
 
 ## Installation
-Find the .jar file *MAARS_1.0.0.jar* and the *MAARS_deps* folder in `jars` folder of MAARS's root folder. Then copy them into your `plugins` folder under MM’s root folder.  
+Unzip the `MAARS_1.0.0.zip` into your `plugins` folder under MM’s root folder. You will get a `MAARS_1.0.0.jar` and its dependencies in a folder called `MAARS_deps`.
 ![][image4]
 
 ## Developers
@@ -46,4 +46,4 @@ Find the .jar file *MAARS_1.0.0.jar* and the *MAARS_deps* folder in `jars` folde
 [image1]: images/Micro-Manager_download_page.png "Micro-Manager version 2.0 download page"
 [image2]: images/imagej_java8.png 
 [image3]: images/configure_ram_imagej.png
-[image4]: images/copy_dependencies.png
+[image4]: images/unzip.png
