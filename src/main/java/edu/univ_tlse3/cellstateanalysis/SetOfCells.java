@@ -96,6 +96,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
       return cellsWithMoreThan2Spots_;
    }
 
+   public void cleanUp(){
+      iteratorCount = 0;
+      cellArray = null;
+      cellArray = new ArrayList<>();
+      cellsWithMoreThan2Spots_ = null;
+      cellsWithMoreThan2Spots_ = new ArrayList<>();
+   }
+
    // iterator related
    @Override
    public Iterator<Cell> iterator() {

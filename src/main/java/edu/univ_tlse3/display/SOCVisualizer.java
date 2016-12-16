@@ -42,8 +42,8 @@ public class SOCVisualizer {
         alreadyShownList_.copyInto(contents);
     }
 
-    public void showDialog() {
-        frame_.setVisible(true);
+    public void showDialog(Boolean show) {
+        frame_.setVisible(show);
     }
 
     /**
@@ -149,5 +149,9 @@ public class SOCVisualizer {
         frame_.setPreferredSize(new java.awt.Dimension(600, 570));
         frame_.pack();
         frame_.setVisible(true);
+    }
+
+    public void cleanUp(){
+        alreadyShownList_.clear();
     }
 }

@@ -1,11 +1,14 @@
 package edu.univ_tlse3.gui;
 
+import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.maars.MAARS;
 import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import ij.IJ;
+import ij.gui.MessageDialog;
+import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 import org.apache.commons.math3.util.FastMath;
@@ -16,7 +19,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -26,7 +28,7 @@ import java.util.concurrent.*;
  * @author Tong LI
  */
 
-public class MaarsMainDialog implements ActionListener {
+public class MaarsMainDialog extends Frame implements ActionListener {
 
    private final Label numFieldLabel;
    private final MMStudio mm;
@@ -49,6 +51,7 @@ public class MaarsMainDialog implements ActionListener {
    private MaarsFluoAnalysisDialog fluoDialog_;
    private MaarsSegmentationDialog segDialog_;
    private JPanel stopAndVisualizerButtonPanel_;
+   private SetOfCells soc_ = new SetOfCells();
    private SOCVisualizer socVisualizer_;
    private JButton stopButton_;
    private MAARS maars_;
@@ -353,7 +356,7 @@ public class MaarsMainDialog implements ActionListener {
       SwingUtilities.invokeLater(new Runnable() {
          public void run() {
             //Turn off metal's use of bold fonts
-            UIManager.put("swing.boldMetal", Boolean.FALSE);
+//            UIManager.put("swing.boldMetal", Boolean.FALSE);
             socVisualizer.createAndShowGUI();
          }
       });
@@ -370,8 +373,10 @@ public class MaarsMainDialog implements ActionListener {
             } catch (ExecutionException e) {
                e.printStackTrace();
             }
+            IJ.showStatus("Terminating analysis...");
          }
       }
+      IJ.showMessage("Analysis finished", "Analysis finished!");
    }
 
    public void setSkipTheRest(Boolean skip){
@@ -397,10 +402,10 @@ public class MaarsMainDialog implements ActionListener {
             saveParameters();
             setSkipTheRest(false);
             if (withOutAcqChk.isSelected()) {
-               maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, es_, tasksSet_);
+               maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, es_, tasksSet_, soc_);
                 es_.submit(new Thread(maarsNoAcq_));
             } else {
-               maars_ = new MAARS(mm, mmc, parameters, socVisualizer_, es_, tasksSet_);
+               maars_ = new MAARS(mm, mmc, parameters, socVisualizer_, es_, tasksSet_, soc_);
                if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
                    es_.submit(new Thread(maars_));
                }
@@ -445,16 +450,24 @@ public class MaarsMainDialog implements ActionListener {
          if (socVisualizer_ == null){
             socVisualizer_ = createVisualizer();
          }else{
-            socVisualizer_.showDialog();
+            socVisualizer_.showDialog(true);
          }
       }else if(e.getSource() == stopButton_){
-         setSkipTheRest(true);
-         MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
-         RoiManager roiManager = RoiManager.getInstance();
-         roiManager.runCommand("Select All");
-         roiManager.runCommand("Delete");
-         roiManager.reset();
-         roiManager.close();
+         YesNoCancelDialog yesNoCancelDialog =  new YesNoCancelDialog(this, "Abandon current acquisition?",
+                 "Stop current analysis ?");
+         yesNoCancelDialog.setAlwaysOnTop(true);
+         if (yesNoCancelDialog.yesPressed()) {
+            setSkipTheRest(true);
+            RoiManager roiManager = RoiManager.getInstance();
+            roiManager.runCommand("Select All");
+            roiManager.runCommand("Delete");
+            roiManager.reset();
+            roiManager.close();
+            soc_.cleanUp();
+            socVisualizer_.cleanUp();
+            socVisualizer_.showDialog(false);
+            socVisualizer_.createAndShowGUI();
+         }
       } else {
          IJ.log("MAARS don't understand what you want, sorry");
       }
