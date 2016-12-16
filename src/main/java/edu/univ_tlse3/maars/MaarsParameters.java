@@ -352,7 +352,7 @@ public class MaarsParameters {
     *@return list of all channels
     */
    public List<String> getAllChannels(){
-      ArrayList<String> channelNames = new ArrayList<>();
+      ArrayList<String> channelNames = new ArrayList<String>();
       for (Element e: root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren()){
          channelNames.add(e.getName());
       }
@@ -523,7 +523,7 @@ public class MaarsParameters {
 
    public void addChannel(String newChannel){
       Element anotherChannel = root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren().get(2);
-      List<Element> attributes = new ArrayList<>();
+      List<Element> attributes = new ArrayList<Element>();
       for (Element e : anotherChannel.getChildren()){
          attributes.add(e.clone());
       }
