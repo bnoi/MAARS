@@ -3,6 +3,7 @@ package edu.univ_tlse3.maars;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
+import edu.univ_tlse3.gui.MaarsMainDialog;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
@@ -36,9 +37,12 @@ public class MAARSNoAcq implements Runnable {
    private ArrayList<String> arrayChannels = new ArrayList<String>();
    private SOCVisualizer socVisualizer_;
    private ExecutorService es_;
+   public boolean skipAllRestFrames = false;
+   private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
 
-   public MAARSNoAcq(MaarsParameters parameters, SOCVisualizer socVisualizer, ExecutorService es) {
+   public MAARSNoAcq(MaarsParameters parameters, SOCVisualizer socVisualizer, ExecutorService es, CopyOnWriteArrayList<Map<String, Future>> tasksSet) {
       this.parameters = parameters;
+      tasksSet_ = tasksSet;
       rootDir = parameters.getSavingPath();
       this.soc = new SetOfCells();
       socVisualizer_ = socVisualizer;
@@ -63,6 +67,9 @@ public class MAARSNoAcq implements Runnable {
       // Start time
       long start = System.currentTimeMillis();
       for (String[] pos : getAcqPositions()) {
+         if (skipAllRestFrames) {
+            break;
+         }
          String xPos = pos[0];
          String yPos = pos[1];
          IJ.log("x : " + xPos + " y : " + yPos);
@@ -127,7 +134,6 @@ public class MAARSNoAcq implements Runnable {
             Collections.sort(arrayImgFrames);
             ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
 
-            ArrayList<Map<String, Future>> futureSet = new ArrayList<Map<String, Future>>();
             for (Integer arrayImgFrame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<String, Future>();
                for (String channel : arrayChannels) {
@@ -146,44 +152,36 @@ public class MAARSNoAcq implements Runnable {
                   fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
                   channelsInFrame.put(channel, future);
                }
-               futureSet.add(channelsInFrame);
+               tasksSet_.add(channelsInFrame);
+               if (skipAllRestFrames){
+                  break;
+               }
             }
-            assert segImg != null;
-            ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
-            mergedImg.setCalibration(segImg.getCalibration());
-            assert fluoStack != null;
-            mergedImg.setT(fluoStack.getSize());
-            for (Map<String, Future> aFutureSet : futureSet) {
-               for (String channel : aFutureSet.keySet()) {
-                  try {
-                     aFutureSet.get(channel).get();
-                  } catch (InterruptedException e) {
-                     e.printStackTrace();
-                  } catch (ExecutionException e) {
-                     e.printStackTrace();
+            if (!skipAllRestFrames) {
+               assert segImg != null;
+               ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
+               mergedImg.setCalibration(segImg.getCalibration());
+               assert fluoStack != null;
+               mergedImg.setT(fluoStack.getSize());
+               MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
+               RoiManager.getInstance().reset();
+               RoiManager.getInstance().close();
+               double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+               if (soc.size() != 0) {
+                  long startWriting = System.currentTimeMillis();
+                  Boolean splitChannel = true;
+                  mergedImg.getCalibration().frameInterval = timeInterval / 1000;
+                  MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
+                  if (IJ.isWindows()) {
+                     pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
                   }
+                  MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir, true);
+                  IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+                          + " sec for writing results");
                }
-            }
-            es_.shutdownNow();
-            RoiManager.getInstance().reset();
-            RoiManager.getInstance().close();
-            double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-            if (soc.size() != 0) {
-               long startWriting = System.currentTimeMillis();
-               Boolean splitChannel = true;
-               mergedImg.getCalibration().frameInterval = timeInterval / 1000;
-               MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
-               if (IJ.isWindows()){
-                  pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
-               }
-               MAARS.analyzeMitosisDynamic(soc, parameters, splitChannel, pathToSegDir, true);
-               IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-                       + " sec for writing results");
             }
          }
       }
-      assert es_ != null;
-      es_.shutdownNow();
       System.setErr(curr_err);
       System.setOut(curr_out);
       IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");

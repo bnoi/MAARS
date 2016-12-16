@@ -6,6 +6,7 @@ import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import ij.IJ;
+import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 import org.apache.commons.math3.util.FastMath;
 import org.micromanager.internal.MMStudio;
@@ -15,8 +16,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * Class to create and display a dialog to get parameters of the whole analysis
@@ -49,8 +51,10 @@ public class MaarsMainDialog implements ActionListener {
    private JPanel stopAndVisualizerButtonPanel_;
    private SOCVisualizer socVisualizer_;
    private JButton stopButton_;
-//   private Thread MAARSMainth_;
-    private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+   private MAARS maars_;
+   private MAARSNoAcq maarsNoAcq_;
+   private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<Map<String, Future>>();
+   private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
    /**
     * Constructor
@@ -356,6 +360,29 @@ public class MaarsMainDialog implements ActionListener {
       return socVisualizer;
    }
 
+   public static void waitAllTaskToFinish(CopyOnWriteArrayList<Map<String, Future>> tasksSet){
+      for (Map<String, Future> aFutureSet : tasksSet) {
+         for (String channel : aFutureSet.keySet()) {
+            try {
+               aFutureSet.get(channel).get();
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            } catch (ExecutionException e) {
+               e.printStackTrace();
+            }
+         }
+      }
+   }
+
+   public void setSkipTheRest(Boolean skip){
+      if (maarsNoAcq_ != null){
+         maarsNoAcq_.skipAllRestFrames = skip;
+      }
+      if (maars_ != null){
+         maars_.skipAllRestFrames = skip;
+      }
+   }
+
    @Override
    public void actionPerformed(ActionEvent e) {
       if (e.getSource() == autofocusButton) {
@@ -368,11 +395,14 @@ public class MaarsMainDialog implements ActionListener {
             IJ.error("Session aborted, 0 field to analyse");
          } else {
             saveParameters();
+            setSkipTheRest(false);
             if (withOutAcqChk.isSelected()) {
-                es_.submit(new Thread(new MAARSNoAcq(parameters, socVisualizer_, es_)));
+               maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, es_, tasksSet_);
+                es_.submit(new Thread(maarsNoAcq_));
             } else {
+               maars_ = new MAARS(mm, mmc, parameters, socVisualizer_, es_, tasksSet_);
                if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                   es_.submit(new Thread(new MAARS(mm, mmc, parameters, socVisualizer_, es_)));
+                   es_.submit(new Thread(maars_));
                }
             }
          }
@@ -418,7 +448,13 @@ public class MaarsMainDialog implements ActionListener {
             socVisualizer_.showDialog();
          }
       }else if(e.getSource() == stopButton_){
-         es_.shutdownNow();
+         setSkipTheRest(true);
+         MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
+         RoiManager roiManager = RoiManager.getInstance();
+         roiManager.runCommand("Select All");
+         roiManager.runCommand("Delete");
+         roiManager.reset();
+         roiManager.close();
       } else {
          IJ.log("MAARS don't understand what you want, sorry");
       }

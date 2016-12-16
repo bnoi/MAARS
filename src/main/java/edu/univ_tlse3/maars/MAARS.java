@@ -8,6 +8,7 @@ import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
+import edu.univ_tlse3.gui.MaarsMainDialog;
 import edu.univ_tlse3.resultSaver.MAARSGeometrySaver;
 import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.resultSaver.MAARSSpotsSaver;
@@ -28,6 +29,7 @@ import org.micromanager.internal.utils.ReportingUtils;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -48,6 +50,8 @@ public class MAARS implements Runnable {
     private SetOfCells soc;
     private SOCVisualizer socVisualizer_;
     private ExecutorService es_;
+    public boolean skipAllRestFrames = false;
+    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
 
     /**
      * Constructor
@@ -58,11 +62,12 @@ public class MAARS implements Runnable {
      * @param socVisualizer set of cell visualizer
      * @param es executer service of MAARS
      */
-    public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer, ExecutorService es) {
+    public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer, ExecutorService es, CopyOnWriteArrayList<Map<String, Future>> tasksSet) {
         this.mmc = mmc;
         this.parameters = parameters;
         this.soc = new SetOfCells();
         this.mm = mm;
+        tasksSet_ = tasksSet;
         socVisualizer_ = socVisualizer;
         es_ = es;
     }
@@ -189,6 +194,9 @@ public class MAARS implements Runnable {
         double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
         //prepare executor for image analysis
         for (int i = 0; i < explo.length(); i++) {
+            if (skipAllRestFrames) {
+                break;
+            }
             try {
                 mm.core().setXYPosition(explo.getX(i), explo.getY(i));
                 mmc.waitForDevice(mmc.getXYStageDevice());
@@ -250,7 +258,7 @@ public class MAARS implements Runnable {
                 }
                 int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
-                ArrayList<Map<String, Future>> futureSet = new ArrayList<Map<String, Future>>();
+
                 if (parameters.useDynamic()) {
                     // being dynamic acquisition
                     double startTime = System.currentTimeMillis();
@@ -285,9 +293,12 @@ public class MAARS implements Runnable {
                                         Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
                                 channelsInFrame.put(channel, future);
                             }
-                            futureSet.add(channelsInFrame);
+                            tasksSet_.add(channelsInFrame);
                             for (Image img : imageList){
                                 mm.live().displayImage(img);
+                            }
+                            if (skipAllRestFrames){
+                                break;
                             }
                         }
                         frame++;
@@ -331,43 +342,35 @@ public class MAARS implements Runnable {
                                     Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
                             channelsInFrame.put(channel, future);
                         }
-                        futureSet.add(channelsInFrame);
-                    }
-                }
-                for (Map<String, Future> aFutureSet : futureSet) {
-                    for (String channel : aFutureSet.keySet()) {
-                        try {
-                            aFutureSet.get(channel).get();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
+                        tasksSet_.add(channelsInFrame);
+                        if (skipAllRestFrames){
+                            break;
                         }
                     }
                 }
-                RoiManager.getInstance().reset();
-                RoiManager.getInstance().close();
-                if (soc.size() != 0 && do_analysis) {
-                    long startWriting = System.currentTimeMillis();
-                    Boolean splitChannel = true;
-                    ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-                    mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-                    MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
-                    if (IJ.isWindows()){
-                        pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
+                if (!skipAllRestFrames) {
+                    MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
+                    RoiManager.getInstance().reset();
+                    RoiManager.getInstance().close();
+                    if (soc.size() != 0 && do_analysis) {
+                        long startWriting = System.currentTimeMillis();
+                        Boolean splitChannel = true;
+                        ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
+                        mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
+                        MAARS.saveAll(soc, mergedImg, pathToFluoDir, splitChannel);
+                        if (IJ.isWindows()) {
+                            pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
+                        }
+                        MAARS.analyzeMitosisDynamic(soc, parameters,
+                                splitChannel, pathToSegDir, true);
+                        ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+                                + " sec for writing results");
                     }
-                    MAARS.analyzeMitosisDynamic(soc, parameters,
-                            splitChannel, pathToSegDir, true);
-                    ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-                            + " sec for writing results");
-                }
 //                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");
+                }
             }
         }
         mmc.setAutoShutter(true);
-        for (Runnable r  : es_.shutdownNow()){
-            ReportingUtils.logMessage(r.toString());
-        }
         System.setErr(curr_err);
         System.setOut(curr_out);
         IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
