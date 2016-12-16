@@ -19,7 +19,7 @@
 		<scijava.jvm.version>1.8</scijava.jvm.version>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
 		<project.micromanager.dependencies>
-			/home/tong/Documents/code/ImageJ
+			/Applications/ImageJ
 		</project.micromanager.dependencies>
 		<project.micromanager.version>
 			ref_MM_dependency
@@ -118,6 +118,7 @@
 	</repositories>
 
 	<build>
+		<finalName>${project.name}_${project.version}</finalName>
 		<plugins>
 		<plugin>
 		<artifactId>maven-enforcer-plugin</artifactId>
