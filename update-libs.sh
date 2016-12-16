@@ -28,5 +28,5 @@ rm -f jars/MAARS_deps/kryo-*.jar
 rm -f jars/MAARS_deps/minlog-*.jar
 rm -f jars/MAARS_deps/objenesis-*.jar
 
-cp target/MAARS_-1.0-SNAPSHOT.jar jars/
+cp target/MAARS_1.0.0.jar jars/
 git checkout jars/MAARS_deps/Adjustable_Watershed.class
