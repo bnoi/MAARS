@@ -27,6 +27,7 @@ import java.util.List;
  * 
  * SEGMENTATION_PARAMETERS
  *    |
+ *    +-----> SKIP
  *    +-----> CHANNEL
  *    +-----> NEW_MAX_WIDTH_FOR_CHANGE_SCALE
  *    +-----> NEW_MAX_HEIGTH_FOR_CHANGE_SCALE
@@ -136,6 +137,7 @@ public class MaarsParameters {
    public static final String CUR_CHANNEL = "CHANNEL";
    public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
    public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
+   public static final String SKIP = "SKIP";
    private Document doc;
    private Element root;
    private String[] allColors = {"GREEN","CYAN","RED", "BLUE", "WHITE","GRAY"};
@@ -366,6 +368,14 @@ public class MaarsParameters {
         return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(USING);
     }
 
+   /**
+    *
+    * @return
+    */
+    public String getSkipSegmentation(){
+       return root.getChild(SEGMENTATION_PARAMETERS).getChildText(SKIP);
+    }
+
     /**
      *
      * @return the parameter minimum mitosis duration
@@ -505,6 +515,10 @@ public class MaarsParameters {
     */
    public void setSegChannel(String bfChannel){
       root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(bfChannel);
+   }
+
+   public void setSkipSegmentation(Boolean skip){
+      root.getChild(SEGMENTATION_PARAMETERS).getChild(SKIP).setText(String.valueOf(skip));
    }
 
    /**

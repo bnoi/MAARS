@@ -86,8 +86,10 @@ public class SOCVisualizer {
                     index = cellToDisplayList.getSelectedIndex()-1;
                 }else if(keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
                     index = cellToDisplayList.getSelectedIndex()+1;
+                }else if(keyEvent.getKeyCode() == KeyEvent.VK_ENTER){
+                    index = cellToDisplayList.getSelectedIndex();
                 }
-                if (index!=Integer.MIN_VALUE) {
+                if (index >=0 && index <= cellToDisplayList.getLastVisibleIndex()) {
                     contentPane.remove(lastChartPanel[0]);
                     Object item = alreadyShownList_.getElementAt(index);
                     Cell c = setOfCells_.getCell((Integer) item);

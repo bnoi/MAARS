@@ -8,6 +8,7 @@ import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.YesNoCancelDialog;
 import org.micromanager.acquisition.ChannelSpec;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
@@ -65,6 +66,30 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       this.setMinimumSize(new Dimension(400, 750));
       Color labelColor = Color.ORANGE;
 
+      //
+
+      JCheckBox skipSegChBox = new JCheckBox();
+      skipSegChBox.setSelected(Boolean.parseBoolean(parameters_.getSkipSegmentation()));
+      skipSegChBox.setText("Skip segmentation");
+      skipSegChBox.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            if (skipSegChBox.isSelected()){
+               YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(null,
+                       "Skip segmentation",
+                       "Do you have ROI.zip and BF_Results.csv in all your folders ?");
+               if (yesNoCancelDialog.yesPressed()){
+                  parameters_.setSkipSegmentation(true);
+               }else{
+                  skipSegChBox.setSelected(false);
+                  parameters_.setSkipSegmentation(false);
+               }
+            }else{
+               parameters_.setSkipSegmentation(false);
+            }
+         }
+      });
+      this.add(skipSegChBox);
       //
 
       Label segmMovieLabel = new Label("Movie parameters", Label.CENTER);

@@ -10,6 +10,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
+import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
 
 import java.io.File;
@@ -78,6 +79,7 @@ public class MAARSNoAcq implements Runnable {
          String pathToSegMovie = FileUtils.convertPath(pathToSegDir + "/_1/_1_MMStack_Pos0.ome.tif");
          //update saving path
          parameters.setSavingPath(pathToSegDir);
+         Boolean skipSegmentation = Boolean.parseBoolean(parameters.getSkipSegmentation());
          ImagePlus segImg = null;
          try {
             segImg = IJ.openImage(pathToSegMovie);
@@ -86,21 +88,31 @@ public class MAARSNoAcq implements Runnable {
             IJ.error("Invalid path");
          }
          // --------------------------segmentation-----------------------------//
-         MaarsSegmentation ms = new MaarsSegmentation(parameters,segImg);
-         Future future = es_.submit(ms);
-         try {
-            future.get();
-         } catch (InterruptedException e) {
-            e.printStackTrace();
-         } catch (ExecutionException e) {
-            e.printStackTrace();
+         MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
+         Future future;
+         if (!skipSegmentation) {
+            future = es_.submit(ms);
+            try {
+               future.get();
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            } catch (ExecutionException e) {
+               e.printStackTrace();
+            }
          }
-         if (ms.roiDetected()) {
+         if (ms.roiDetected() || skipSegmentation) {
             soc_.reset();
             // from Roi.zip initialize a set of cell
             soc_.loadCells(pathToSegDir);
-            // Get the focus slice of BF image
-            soc_.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
+            ResultsTable rt;
+            if (!skipSegmentation) {
+               rt = ms.getRoiMeasurements();
+            }else{
+               IJ.open(pathToSegDir + File.separator +"BF_Results.csv");
+               rt = ResultsTable.getResultsTable();
+               ResultsTable.getResultsWindow().close(false);
+            }
+            soc_.setRoiMeasurementIntoCells(rt);
 
             Calibration bfImgCal = null;
             if (segImg != null) {
@@ -161,7 +173,7 @@ public class MAARSNoAcq implements Runnable {
             if (!skipAllRestFrames) {
                assert segImg != null;
                ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
-               mergedImg.setCalibration(segImg.getCalibration());
+               mergedImg.setCalibration(bfImgCal);
                assert fluoStack != null;
                mergedImg.setT(fluoStack.getSize());
                RoiManager.getInstance().reset();
