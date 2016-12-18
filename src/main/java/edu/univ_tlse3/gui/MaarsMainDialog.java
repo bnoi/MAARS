@@ -7,7 +7,6 @@ import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import ij.IJ;
-import ij.gui.MessageDialog;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
@@ -45,7 +44,7 @@ public class MaarsMainDialog extends Frame implements ActionListener {
    private JFormattedTextField widthTf;
    private JFormattedTextField heightTf;
    private JFormattedTextField fluoAcqDurationTf;
-   private JCheckBox withOutAcqChk;
+   private JCheckBox postAnalysisChk_;
    private JRadioButton dynamicOpt;
    private JRadioButton staticOpt;
    private MaarsFluoAnalysisDialog fluoDialog_;
@@ -198,16 +197,16 @@ public class MaarsMainDialog extends Frame implements ActionListener {
       JPanel chkPanel = new JPanel(new GridLayout(1, 0));
       chkPanel.setBackground(bgColor);
       JCheckBox saveParametersChk = new JCheckBox("Save parameters", true);
-      withOutAcqChk = new JCheckBox("Don't do acquisition", false);
-      withOutAcqChk.addActionListener(this);
-      chkPanel.add(withOutAcqChk);
+      postAnalysisChk_ = new JCheckBox("Post analysis", false);
+      postAnalysisChk_.addActionListener(this);
+      chkPanel.add(postAnalysisChk_);
       chkPanel.add(saveParametersChk);
 
       // Saving path Panel
 
       JPanel savePathLabelPanel = new JPanel(new GridLayout(1, 0));
       savePathLabelPanel.setBackground(bgColor);
-      JLabel savePathLabel = new JLabel("Saving Path :");
+      JLabel savePathLabel = new JLabel("Acquisition root folder :");
       savePathLabelPanel.add(savePathLabel);
 
       // Saving Path textfield
@@ -401,7 +400,7 @@ public class MaarsMainDialog extends Frame implements ActionListener {
          } else {
             saveParameters();
             setSkipTheRest(false);
-            if (withOutAcqChk.isSelected()) {
+            if (postAnalysisChk_.isSelected()) {
                maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, es_, tasksSet_, soc_);
                 es_.submit(new Thread(maarsNoAcq_));
             } else {
@@ -432,8 +431,8 @@ public class MaarsMainDialog extends Frame implements ActionListener {
       } else if (e.getSource() == staticOpt) {
          setAnalysisStrategy();
          fluoAcqDurationTf.setEditable(false);
-      } else if (e.getSource() == withOutAcqChk) {
-         if (withOutAcqChk.isSelected()) {
+      } else if (e.getSource() == postAnalysisChk_) {
+         if (postAnalysisChk_.isSelected()) {
              widthTf.setEnabled(false);
              heightTf.setEnabled(false);
             widthTf.setEditable(false);

@@ -29,10 +29,37 @@ _**Important** :_ Don't forget to configure ImageJ's RAM allocation. In `Edit/Op
 [Download][download_maars] and unzip the latest `MAARS_1.0.0.zip` into your `plugins` folder under MM’s root folder. You will get a `MAARS_1.0.0.jar` and its dependencies in a folder called `MAARS_deps`.  
 ![][image4]
 
-## How to use MAARS
-You can find MAARS in `Plugins` of **MM toolbar** (not ImageJ toolbar!)
+## How to run MAARS
+### Lauching MAARS
+You can find MAARS in `Plugins` of **MM toolbar** (not ImageJ toolbar!). Then you will see this main dialog  
+![main_frame_clean][]  
+which is designed to change different parameters for the recording/analysing process, and the log dialog
+![log_dialog][]  
+which displays the logs.  
+![main_frame][]  
 
-### A quick start of MAARS
+1. Define width and height of the multi-position course
+2. Configure segmentation parameters
+3. Configure fluorescent analysis parameters for each timepoint
+4. Static / dynamic analysis :
+	- static : take a snapshot for each view field
+	- dynamic : perform a N minutes recording/analysing for each view field
+5. Perform post-analysis or on-the-fly analysis
+6. Save all the specify parameters for current analysis, so that the user can use the same parameters in next run
+7. The folder that contains previously acquired image (post-analysis) or the saving path for images and the analysing results (on-the-fly analysis)
+8. Run MAARS
+9. Show the visualizer of parameters
+10. Stop the analysing/recording
+
+MAARS is designed to perform two types of analysis, what we called the **static** analysis and the **dynamic** analysis. In the next section, we will run a very quick start for each.
+#### Static analysis :
+
+
+#### Dynamic analysis :
+
+### Main frame
+
+
 
 
 
@@ -58,3 +85,6 @@ You can find MAARS in `Plugins` of **MM toolbar** (not ImageJ toolbar!)
 [image2]: images/imagej_java8.png 
 [image3]: images/configure_ram_imagej.png
 [image4]: images/unzip.png
+[main_frame]: images/main_frame.png
+[main_frame_clean]: images/main_frame_clean.png
+[log_dialog]: images/log_dialog.png
