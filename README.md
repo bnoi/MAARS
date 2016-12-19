@@ -35,7 +35,7 @@ That's all !
 
 ## License
 
-[BSD License](LICENSE).
+[BSD compatible CeCILL-B License](LICENSE).
 
 ## Authors
 
