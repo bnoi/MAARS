@@ -375,7 +375,7 @@ public class MaarsMainDialog extends Frame implements ActionListener {
             IJ.showStatus("Terminating analysis...");
          }
       }
-      IJ.showMessage("Analysis finished", "Analysis finished!");
+      IJ.log("Spot detection finished! Proceed to saving and analysis...");
    }
 
    public void setSkipTheRest(Boolean skip){
