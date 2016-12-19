@@ -394,6 +394,9 @@ public class MaarsMainDialog extends Frame implements ActionListener {
       } else if (e.getSource() == okMainDialogButton) {
          if (socVisualizer_ == null){
             socVisualizer_ = createVisualizer();
+            if (parameters.useDynamic()){
+               socVisualizer_.showDialog(true);
+            }
          }
          if (Integer.valueOf(widthTf.getText()) * Integer.valueOf(heightTf.getText()) == 0) {
             IJ.error("Session aborted, 0 field to analyse");

@@ -2,6 +2,7 @@ package edu.univ_tlse3.segmentPombe;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.Roi;
 import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
@@ -16,6 +17,7 @@ import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import org.micromanager.internal.utils.ReportingUtils;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -190,8 +192,9 @@ public class SegPombe {
    /**
     * This method set a threshold with Ostu method on the correlation image and
     * convert it into Binary Image
+    * @param useDynamic
     */
-   public void convertCorrelationToBinaryImage() {
+   public void convertCorrelationToBinaryImage(Boolean useDynamic) {
 
       System.out.println("Convert correlation image to binary image");
 
@@ -214,12 +217,15 @@ public class SegPombe {
       if (imageToAnalyze.getCalibration().scaled()) {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
-      this.binImage.show();
-      IJ.run("Adjustable Watershed");
-      WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Segmentation done, Please click ok to proceed");
-      waitForUserDialog.setAlwaysOnTop(false);
-      waitForUserDialog.show();
-      this.binImage.hide();
+      if (useDynamic){
+         this.binImage.show();
+         IJ.run("Adjustable Watershed");
+         Window watershedWin =  WindowManager.getAllNonImageWindows()[0];
+         while (watershedWin.isActive()){
+            IJ.wait(500);
+         }
+         this.binImage.hide();
+      }
    }
 
    /**

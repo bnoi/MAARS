@@ -150,7 +150,6 @@ public class SOCVisualizer {
         //Display the window.
         frame_.setPreferredSize(new java.awt.Dimension(600, 570));
         frame_.pack();
-        frame_.setVisible(true);
     }
 
     public void cleanUp(){
