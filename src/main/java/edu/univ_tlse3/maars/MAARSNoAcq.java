@@ -15,6 +15,7 @@ import ij.plugin.frame.RoiManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -180,6 +181,9 @@ public class MAARSNoAcq implements Runnable {
                RoiManager.getInstance().close();
                double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
                if (soc_.size() != 0) {
+                  if (soc_.size() < 30){
+                     IJ.showMessage(pathToSegDir);
+                  }
                   long startWriting = System.currentTimeMillis();
                   Boolean splitChannel = true;
                   mergedImg.getCalibration().frameInterval = timeInterval / 1000;
@@ -192,6 +196,12 @@ public class MAARSNoAcq implements Runnable {
                   }
                   IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                           + " sec for writing results");
+               }else if (soc_.size() == 0){
+                  try {
+                     org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
+                  } catch (IOException e) {
+                     e.printStackTrace();
+                  }
                }
             }
          }

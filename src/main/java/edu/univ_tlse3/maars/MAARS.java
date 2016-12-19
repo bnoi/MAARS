@@ -368,6 +368,12 @@ public class MAARS implements Runnable {
                         }
                         ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                                 + " sec for writing results");
+                    }else if (soc_.size() == 0){
+                        try {
+                            org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
 //                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");
                 }
