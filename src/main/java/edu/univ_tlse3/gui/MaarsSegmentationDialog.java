@@ -14,7 +14,6 @@ import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -71,22 +70,19 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       JCheckBox skipSegChBox = new JCheckBox();
       skipSegChBox.setSelected(Boolean.parseBoolean(parameters_.getSkipSegmentation()));
       skipSegChBox.setText("Skip segmentation");
-      skipSegChBox.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent e) {
-            if (skipSegChBox.isSelected()){
-               YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(null,
-                       "Skip segmentation",
-                       "Do you have ROI.zip and BF_Results.csv in all your folders ?");
-               if (yesNoCancelDialog.yesPressed()){
-                  parameters_.setSkipSegmentation(true);
-               }else{
-                  skipSegChBox.setSelected(false);
-                  parameters_.setSkipSegmentation(false);
-               }
+      skipSegChBox.addActionListener(e -> {
+         if (skipSegChBox.isSelected()){
+            YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(null,
+                    "Skip segmentation",
+                    "Do you have ROI.zip and BF_Results.csv in all your folders ?");
+            if (yesNoCancelDialog.yesPressed()){
+               parameters_.setSkipSegmentation(true);
             }else{
+               skipSegChBox.setSelected(false);
                parameters_.setSkipSegmentation(false);
             }
+         }else{
+            parameters_.setSkipSegmentation(false);
          }
       });
       this.add(skipSegChBox);
@@ -223,16 +219,13 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       configurationGroupLabel.setBackground(Color.lightGray);
 
       configurationCombo_ = new JComboBox(mm_.getCore().getAvailableConfigGroups().toArray());
-      configurationCombo_.addActionListener(new ActionListener() {
-         @Override
-         public void actionPerformed(ActionEvent actionEvent) {
-            String selectedGroup= (String) configurationCombo_.getSelectedItem();
-            parameters_.setChannelGroup(selectedGroup);
-            bfChannelCombo_.removeAllItems();
-            String[] newConfigs = mm_.getCore().getAvailableConfigs(selectedGroup).toArray();
-            for (String s : newConfigs){
-               bfChannelCombo_.addItem(s);
-            }
+      configurationCombo_.addActionListener(actionEvent -> {
+         String selectedGroup= (String) configurationCombo_.getSelectedItem();
+         parameters_.setChannelGroup(selectedGroup);
+         bfChannelCombo_.removeAllItems();
+         String[] newConfigs = mm_.getCore().getAvailableConfigs(selectedGroup).toArray();
+         for (String s : newConfigs){
+            bfChannelCombo_.addItem(s);
          }
       });
       configurationCombo_.setSelectedItem(parameters_.getChannelGroup());
@@ -249,32 +242,29 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JButton testSegBut = new JButton("test segmentation");
-      testSegBut.addActionListener(new ActionListener(){
-         @Override
-         public void actionPerformed(ActionEvent actionEvent) {
-            updateMAARSParamters();
-            String segDir = parameters.getSavingPath() + File.separator + "X0_Y0";
-            String imgPath =  segDir + File.separator + "_1" + File.separator  + "_1_MMStack_Pos0.ome.tif";
-            MaarsParameters parameters_dup = parameters.duplicate();
-            parameters_dup.setSavingPath(segDir);
-            FileUtils.createFolder(segDir);
-            if (FileUtils.exists(imgPath)) {
-               ImagePlus segImg = IJ.openImage(imgPath);
-               MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
-               es_.submit(ms);
-            } else {
-               SegAcqSetting segAcq = new SegAcqSetting(parameters_dup);
-               ArrayList<ChannelSpec> channelSpecs = segAcq.configChannels();
-               SequenceSettings acqSettings = segAcq.configAcqSettings(channelSpecs);
-               acqSettings.save = false;
-               AcquisitionWrapperEngine acqEng = segAcq.buildSegAcqEngine(acqSettings, mm_);
-               java.util.List<Image> imageList = AcqLauncher.acquire(acqEng);
-               ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
+      testSegBut.addActionListener(actionEvent -> {
+         updateMAARSParamters();
+         String segDir = parameters.getSavingPath() + File.separator + "X0_Y0";
+         String imgPath =  segDir + File.separator + "_1" + File.separator  + "_1_MMStack_Pos0.ome.tif";
+         MaarsParameters parameters_dup = parameters.duplicate();
+         parameters_dup.setSavingPath(segDir);
+         FileUtils.createFolder(segDir);
+         if (FileUtils.exists(imgPath)) {
+            ImagePlus segImg = IJ.openImage(imgPath);
+            MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
+            es_.submit(ms);
+         } else {
+            SegAcqSetting segAcq = new SegAcqSetting(parameters_dup);
+            ArrayList<ChannelSpec> channelSpecs = segAcq.configChannels();
+            SequenceSettings acqSettings = segAcq.configAcqSettings(channelSpecs);
+            acqSettings.save = false;
+            AcquisitionWrapperEngine acqEng = segAcq.buildSegAcqEngine(acqSettings, mm_);
+            java.util.List<Image> imageList = AcqLauncher.acquire(acqEng);
+            ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
 
-               // --------------------------segmentation-----------------------------//
-               MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
-               es_.submit(ms);
-            }
+            // --------------------------segmentation-----------------------------//
+            MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
+            es_.submit(ms);
          }
       });
       this.add(testSegBut);
