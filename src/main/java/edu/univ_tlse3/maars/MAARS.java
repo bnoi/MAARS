@@ -359,11 +359,13 @@ public class MAARS implements Runnable {
                         ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
                         mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
                         MAARS.saveAll(soc_, mergedImg, pathToFluoDir, splitChannel);
-                        if (IJ.isWindows()) {
-                            pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
+                        if (parameters.useDynamic()) {
+                            if (IJ.isWindows()) {
+                                pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
+                            }
+                            MAARS.analyzeMitosisDynamic(soc_, parameters,
+                                    splitChannel, pathToSegDir, true);
                         }
-                        MAARS.analyzeMitosisDynamic(soc_, parameters,
-                                splitChannel, pathToSegDir, true);
                         ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                                 + " sec for writing results");
                     }
@@ -375,7 +377,7 @@ public class MAARS implements Runnable {
         System.setErr(curr_err);
         System.setOut(curr_out);
         if (!skipAllRestFrames) {
-            IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing");
+            IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
         }
     }
 }
