@@ -80,7 +80,10 @@ public class MAARS implements Runnable {
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
         HashMap<String, ImagePlus> croppedImgSet;
-        for (Cell cell : soc) {
+        //TODO only save the potential the mitotic cells
+        ArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
+        for (int i : cellIndex){
+            Cell cell = soc.getCell(i);
             geoSaver.save(cell);
             spotSaver.save(cell);
             croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
