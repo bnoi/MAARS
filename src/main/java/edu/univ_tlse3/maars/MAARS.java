@@ -126,6 +126,7 @@ public class MAARS implements Runnable {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+            assert listAcqNames != null;
             for (String acqName : listAcqNames) {
                 if (Pattern.matches(pattern, acqName)) {
                     String[] splitName = acqName.split("_", -1);
@@ -187,7 +188,7 @@ public class MAARS implements Runnable {
             e1.printStackTrace();
         }
 
-        ArrayList<String> arrayChannels = new ArrayList<String>();
+        ArrayList<String> arrayChannels = new ArrayList<>();
         Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
 
         // Acquisition path arrangement
@@ -231,9 +232,7 @@ public class MAARS implements Runnable {
             Future future = es_.submit(ms);
             try {
                 future.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
             parameters.setSavingPath(original_folder);
@@ -267,7 +266,7 @@ public class MAARS implements Runnable {
                             * 1000;
                     while (System.currentTimeMillis() - startTime <= timeLimit) {
                         double beginAcq = System.currentTimeMillis();
-                        Map<String, Future> channelsInFrame = new HashMap<String, Future>();
+                        Map<String, Future> channelsInFrame = new HashMap<>();
                         for (String channel : arrayChannels) {
                             if (mm.live().getIsLiveModeOn()){
                                 mm.live().setLiveMode(false);
@@ -320,7 +319,7 @@ public class MAARS implements Runnable {
                 } else {
                     // being static acquisition
                     for (String channel : arrayChannels) {
-                        Map<String, Future> channelsInFrame = new HashMap<String, Future>();
+                        Map<String, Future> channelsInFrame = new HashMap<>();
                         String focusDevice = mmc.getFocusDevice();
                         double currrentFocus = Double.MIN_VALUE;
                         try {

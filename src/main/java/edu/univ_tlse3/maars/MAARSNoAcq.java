@@ -34,7 +34,7 @@ public class MAARSNoAcq implements Runnable {
    private MaarsParameters parameters;
    private SetOfCells soc_;
    private String rootDir;
-   private ArrayList<String> arrayChannels = new ArrayList<String>();
+   private ArrayList<String> arrayChannels = new ArrayList<>();
    private SOCVisualizer socVisualizer_;
    private ExecutorService es_;
    public boolean skipAllRestFrames = false;
@@ -52,9 +52,10 @@ public class MAARSNoAcq implements Runnable {
    }
 
    private ArrayList<String[]> getAcqPositions() {
-      ArrayList<String[]> acqPos = new ArrayList<String[]>();
+      ArrayList<String[]> acqPos = new ArrayList<>();
       String[] listAcqNames = new File(rootDir).list();
       String pattern = "(X)(\\d+)(_)(Y)(\\d+)(_FLUO)";
+      assert listAcqNames != null;
       for (String acqName : listAcqNames) {
          if (Pattern.matches(pattern, acqName)) {
             acqPos.add(new String[]{acqName.split("_", -1)[0].substring(1),
@@ -95,13 +96,11 @@ public class MAARSNoAcq implements Runnable {
             future = es_.submit(ms);
             try {
                future.get();
-            } catch (InterruptedException e) {
-               e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                e.printStackTrace();
             }
          }
-         if (ms.roiDetected() || skipSegmentation) {
+         if (ms.roiDetected()) {
             soc_.reset();
             // from Roi.zip initialize a set of cell
             soc_.loadCells(pathToSegDir);
@@ -131,7 +130,8 @@ public class MAARSNoAcq implements Runnable {
             }
             String[] listAcqNames = new File(pathToFluoDir).list();
             String pattern = "(\\w+)(_)(\\d+)";
-            ArrayList<Integer> arrayImgFrames = new ArrayList<Integer>();
+            ArrayList<Integer> arrayImgFrames = new ArrayList<>();
+            assert listAcqNames != null;
             for (String acqName : listAcqNames) {
                if (Pattern.matches(pattern, acqName)) {
                   String current_channel = acqName.split("_", -1)[0];
@@ -145,10 +145,11 @@ public class MAARSNoAcq implements Runnable {
                }
             }
             Collections.sort(arrayImgFrames);
+            assert segImg != null;
             ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
 
             for (Integer arrayImgFrame : arrayImgFrames) {
-               Map<String, Future> channelsInFrame = new HashMap<String, Future>();
+               Map<String, Future> channelsInFrame = new HashMap<>();
                for (String channel : arrayChannels) {
                   int current_frame = arrayImgFrame;
                   IJ.log("Analysing channel " + channel + "_" + current_frame);
@@ -172,18 +173,13 @@ public class MAARSNoAcq implements Runnable {
             }
             MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
             if (!skipAllRestFrames) {
-               assert segImg != null;
                ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
                mergedImg.setCalibration(bfImgCal);
-               assert fluoStack != null;
                mergedImg.setT(fluoStack.getSize());
                RoiManager.getInstance().reset();
                RoiManager.getInstance().close();
                double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
                if (soc_.size() != 0) {
-                  if (soc_.size() < 30){
-                     IJ.showMessage(pathToSegDir);
-                  }
                   long startWriting = System.currentTimeMillis();
                   Boolean splitChannel = true;
                   mergedImg.getCalibration().frameInterval = timeInterval / 1000;
