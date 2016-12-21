@@ -23,6 +23,7 @@ public class Cell implements Serializable{
    private transient SpotsContainer spotContainer;
    private GeometryContainer geoContainer;
    private ArrayList<Integer> spotInBetweenFrames = new ArrayList<Integer>();
+   private ArrayList<Integer> frameWithUnalignedSpot_ = new ArrayList<Integer>();
    private int anaBOnsetFrame_;
 
    /**
@@ -106,5 +107,9 @@ public class Cell implements Serializable{
 
    public void setAnaBOnsetFrame(int anaBOnsetFrame) {
       anaBOnsetFrame_ = anaBOnsetFrame;
+   }
+
+   public void addFrameWithUnalignedSpot(int frame){
+      frameWithUnalignedSpot_.add(frame);
    }
 }

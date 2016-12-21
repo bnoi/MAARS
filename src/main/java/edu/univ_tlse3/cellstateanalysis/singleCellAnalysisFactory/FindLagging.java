@@ -34,6 +34,8 @@ public class FindLagging {
                      // lagging
                      cell.addSpotInBtwnFrame(frame);
                   }
+               }else{
+                  cell.addFrameWithUnalignedSpot(frame);
                }
             }
          }
