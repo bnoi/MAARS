@@ -162,7 +162,8 @@ public class MAARSNoAcq implements Runnable {
                   future = es_.submit(new FluoAnalyzer(zProjectedFluoImg, bfImgCal, soc_, channel,
                           Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                           Double.parseDouble(parameters.getChSpotRaius(channel)),
-                          Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_));
+                          Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_,
+                          parameters.useDynamic(), es_));
                   fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
                   channelsInFrame.put(channel, future);
                }

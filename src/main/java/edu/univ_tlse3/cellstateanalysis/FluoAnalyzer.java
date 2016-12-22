@@ -14,6 +14,7 @@ import ij.measure.Calibration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -34,6 +35,8 @@ public class FluoAnalyzer implements Runnable {
    private SpotCollection collection;
    private Model model;
    private SOCVisualizer socVisualizer_;
+   private Boolean useDynamic_;
+   private ExecutorService es_;
 
    /**
     * @param fluoImage     image to analyze zProjectedFluoImg
@@ -46,9 +49,12 @@ public class FluoAnalyzer implements Runnable {
     * @param frame         time point
     * @param quality       user predefined quality threshold for spot selection
     * @param socVisualizer a JFreeChart based display to show cell params
+    * @param useDynamic    perform dynamic analysis
+    * @param es            ExecutorService
     */
    public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-                       double radius, double quality, int frame, SOCVisualizer socVisualizer) {
+                       double radius, double quality, int frame, SOCVisualizer socVisualizer, Boolean useDynamic,
+                       ExecutorService es) {
       this.fluoImage = fluoImage;
       this.fluoImgCal = fluoImage.getCalibration();
       this.soc = soc;
@@ -59,6 +65,8 @@ public class FluoAnalyzer implements Runnable {
       this.quality = quality;
       this.frame = frame;
       socVisualizer_ = socVisualizer;
+      useDynamic_ = useDynamic;
+      es_ = es;
    }
 
    /**
@@ -86,31 +94,24 @@ public class FluoAnalyzer implements Runnable {
       double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
 
       int nThread = Runtime.getRuntime().availableProcessors();
-      ExecutorService es = Executors.newFixedThreadPool(nThread);
       final int[] nbOfCellEachThread = new int[2];
       nbOfCellEachThread[0] = nbCell / nThread;
       nbOfCellEachThread[1] = nbOfCellEachThread[0] + nbCell % nThread;
-      Future<?> future = null;
+      List<Future> jobs = new ArrayList<>();
       for (int i = 0; i < nThread; i++) {
          // analyze every subset of cell
-         future = es.submit(new AnalyseBlockCells(i, nbOfCellEachThread, factors));
+         jobs.add(es_.submit(new AnalyseBlockCells(i, nbOfCellEachThread, factors)));
       }
-      es.shutdown();
-      if (future != null) {
+      for (Future f : jobs) {
          try {
-            future.get();
-         } catch (InterruptedException e) {
-            e.printStackTrace();
-         } catch (ExecutionException e) {
+            f.get();
+         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
          }
       }
-      try {
-         es.awaitTermination(10, TimeUnit.MINUTES);
-      } catch (InterruptedException e) {
-         e.printStackTrace();
+      if (useDynamic_){
+         socVisualizer_.updateCellsDisplay(soc);
       }
-      socVisualizer_.updateCellsDisplay(soc);
    }
 
    //private class for analysing cells
@@ -159,7 +160,7 @@ public class FluoAnalyzer implements Runnable {
             }
             double calibratedXBase = tmpRoi.getXBase() * fluoImgCal.pixelWidth;
             double calibratedYBase = tmpRoi.getYBase() * fluoImgCal.pixelHeight;
-            ArrayList<Spot> spotsToDel = new ArrayList<Spot>();
+            ArrayList<Spot> spotsToDel = new ArrayList<>();
             for (Spot s : currentThreadSpots) {
                if (tmpRoi.contains((int) Math.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
                        (int) Math.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
@@ -184,7 +185,7 @@ public class FluoAnalyzer implements Runnable {
 
             Iterable<Spot> spotSet = cell.getSpotsInFrame(channel, frame);
             if (spotSet != null) {
-               HashMap<String, Object> geometry = new HashMap<String, Object>();
+               HashMap<String, Object> geometry = new HashMap<>();
                spotSetAnalyzor.compute(geometry, spotSet);
                ArrayList<Spot> poles = spotSetAnalyzor.getPoles();
                new FindLagging(cell, spotSet, fluoImgCal, poles, radius, frame);

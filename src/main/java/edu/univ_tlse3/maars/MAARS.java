@@ -82,13 +82,13 @@ public class MAARS implements Runnable {
         HashMap<String, ImagePlus> croppedImgSet;
         //TODO only save the potential the mitotic cells
         ArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
-        for (int i : cellIndex){
-            Cell cell = soc.getCell(i);
-            geoSaver.save(cell);
-            spotSaver.save(cell);
-            croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
-            imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
-        }
+         for (int i : cellIndex) {
+             Cell cell = soc.getCell(i);
+             geoSaver.save(cell);
+             spotSaver.save(cell);
+             croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
+             imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
+         }
         File f = new File(pathToFluoDir + "SetOfCell.serialize");
         ObjectOutputStream objOut = null;
 
@@ -293,7 +293,7 @@ public class MAARS implements Runnable {
                                 future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                         Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                        Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
+                                        Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic(), es_));
                                 channelsInFrame.put(channel, future);
                             }
                             tasksSet_.add(channelsInFrame);
@@ -342,7 +342,8 @@ public class MAARS implements Runnable {
                             future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                     Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_));
+                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic(),
+                                    es_));
                             channelsInFrame.put(channel, future);
                         }
                         tasksSet_.add(channelsInFrame);
