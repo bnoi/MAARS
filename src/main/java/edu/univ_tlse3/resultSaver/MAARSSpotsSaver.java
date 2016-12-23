@@ -6,9 +6,9 @@ import edu.univ_tlse3.utils.FileUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlWriter;
+import ij.IJ;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class MAARSSpotsSaver {
@@ -29,10 +29,8 @@ public class MAARSSpotsSaver {
       spotsWriter.appendModel(trackmateModel);
       try {
          spotsWriter.writeToFile();
-      } catch (FileNotFoundException e) {
-         IJ.error(e.toString());;
       } catch (IOException e) {
-         IJ.error(e.toString());;
+         IJ.error(e.toString());
       }
 
    }

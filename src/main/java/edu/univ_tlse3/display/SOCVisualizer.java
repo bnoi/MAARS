@@ -2,6 +2,7 @@ package edu.univ_tlse3.display;
 
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
+import ij.IJ;
 import org.jfree.chart.ChartPanel;
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -111,32 +112,23 @@ public class SOCVisualizer {
         pathToSoc_.setColumns(10);
         pathToSoc_.setText("Path to soc object");
         pathToSocTFPanel.add(pathToSoc_);
-        loadSocBut.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                try {
-                    FileInputStream f_in = new
-                            FileInputStream(pathToSoc_.getText() + File.separator +"SetOfCell.serialize");
-                    ObjectInputStream obj_in =
-                            new ObjectInputStream (f_in);
-                    Object obj = obj_in.readObject();
-                    if (obj instanceof SetOfCells)
-                    {
-                        // Cast object to a soc
-                        ReportingUtils.logMessage("updated");
-                        SetOfCells soc = (SetOfCells) obj;
-                        updateCellsDisplay(soc);
+        loadSocBut.addActionListener(actionEvent -> {
+            try {
+                FileInputStream f_in = new
+                        FileInputStream(pathToSoc_.getText() + File.separator +"SetOfCell.serialize");
+                ObjectInputStream obj_in =
+                        new ObjectInputStream (f_in);
+                Object obj = obj_in.readObject();
+                if (obj instanceof SetOfCells)
+                {
+                    // Cast object to a soc
+                    ReportingUtils.logMessage("updated");
+                    SetOfCells soc = (SetOfCells) obj;
+                    updateCellsDisplay(soc);
 
-                    }
-                } catch (FileNotFoundException e) {
-                    IJ.error(e.toString());;
-                } catch (IOException e) {
-                    IJ.error(e.toString());;
-                } catch (ClassNotFoundException e) {
-                    IJ.error(e.toString());;
                 }
-
-
+            } catch (IOException | ClassNotFoundException e) {
+                IJ.error(e.toString());
             }
         });
         loadSocPanel.add(pathToSocTFPanel, BorderLayout.CENTER);

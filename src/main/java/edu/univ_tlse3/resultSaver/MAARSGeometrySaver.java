@@ -2,6 +2,7 @@ package edu.univ_tlse3.resultSaver;
 
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.utils.FileUtils;
+import ij.IJ;
 import util.opencsv.CSVWriter;
 
 import java.io.File;
@@ -48,12 +49,7 @@ public class MAARSGeometrySaver {
             }
             outLines.add(geoOfFrame);
          }
-         Collections.sort(outLines, new Comparator<String[]>() {
-            @Override
-            public int compare(String[] o1, String[] o2) {
-               return Integer.valueOf(o1[0]).compareTo(Integer.valueOf(o2[0]));
-            }
-         });
+         Collections.sort(outLines, (o1, o2) -> Integer.valueOf(o1[0]).compareTo(Integer.valueOf(o2[0])));
          outLines.add(0, header);
          assert cellGeoWriter != null;
          CSVWriter writer = new CSVWriter(cellGeoWriter, ',', CSVWriter.NO_QUOTE_CHARACTER);

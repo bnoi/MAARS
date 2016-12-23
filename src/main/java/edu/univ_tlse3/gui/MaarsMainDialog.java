@@ -271,10 +271,11 @@ public class MaarsMainDialog extends Frame implements ActionListener {
    }
 
    /**
-    * Show dialog
+    *
+    * @param visible
     */
-   public void show() {
-      mainDialog.setVisible(true);
+   public void setVisible(Boolean visible) {
+      mainDialog.setVisible(visible);
    }
 
    /**
