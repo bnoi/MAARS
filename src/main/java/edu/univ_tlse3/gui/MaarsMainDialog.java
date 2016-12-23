@@ -27,13 +27,12 @@ import java.util.concurrent.*;
  * @author Tong LI
  */
 
-public class MaarsMainDialog extends Frame implements ActionListener {
+public class MaarsMainDialog extends JFrame implements ActionListener {
 
    private final Label numFieldLabel;
    private final MMStudio mm;
    private final CMMCore mmc;
    private final double calibration;
-   private JFrame mainDialog;
    private MaarsParameters parameters;
    private JButton autofocusButton;
    private JButton okMainDialogButton;
@@ -64,7 +63,7 @@ public class MaarsMainDialog extends Frame implements ActionListener {
     * @param parameters :MaarsParameters
     */
    public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
-
+      super("Mitosis Analysing And Recording System - MAARS");
       // ------------initialization of parameters---------------//
       Color labelColor = Color.ORANGE;
       Color bgColor = Color.WHITE;
@@ -76,16 +75,15 @@ public class MaarsMainDialog extends Frame implements ActionListener {
       // initialize mainFrame
 
       IJ.log("create main dialog ...");
-      mainDialog = new JFrame("Mitosis Analysing And Recording System - MAARS");
       JFrame.setDefaultLookAndFeelDecorated(true);
-      mainDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
       // set minimal dimension of mainDialog
 
       int maxDialogWidth = 350;
       int maxDialogHeight = 600;
       Dimension minimumSize = new Dimension(maxDialogWidth, maxDialogHeight);
-      mainDialog.setMinimumSize(minimumSize);
+      setMinimumSize(minimumSize);
 
       // Get number of field to explore
 
@@ -234,7 +232,7 @@ public class MaarsMainDialog extends Frame implements ActionListener {
       JPanel okPanel = new JPanel(new GridLayout(1, 0));
       okMainDialogButton = new JButton("OK");
       okMainDialogButton.addActionListener(this);
-      mainDialog.getRootPane().setDefaultButton(okMainDialogButton);
+      getRootPane().setDefaultButton(okMainDialogButton);
       okPanel.add(okMainDialogButton);
 
       // ------------set up and add components to Panel then to
@@ -257,9 +255,9 @@ public class MaarsMainDialog extends Frame implements ActionListener {
       mainPanel.add(savePathTfPanel);
       mainPanel.add(okPanel);
       mainPanel.add(stopAndVisualizerButtonPanel_);
-      mainDialog.add(mainPanel);
+      add(mainPanel);
       IJ.log("Done.");
-      mainDialog.pack();
+      pack();
    }
 
    /**
@@ -337,7 +335,7 @@ public class MaarsMainDialog extends Frame implements ActionListener {
    private int overWrite(String path) {
       int overWrite = 0;
       if (FileUtils.exists(path + File.separator + "X0_Y0" + File.separator + "MMStack.ome.tif")) {
-         overWrite = JOptionPane.showConfirmDialog(mainDialog, "Overwrite existing acquisitions?");
+         overWrite = JOptionPane.showConfirmDialog(this, "Overwrite existing acquisitions?");
       }
       return overWrite;
    }
