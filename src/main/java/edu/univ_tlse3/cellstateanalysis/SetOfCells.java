@@ -84,6 +84,8 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
    public void reset() {
       this.iteratorCount = 0;
       this.cellArray = null;
+      cellsWithMoreThan2Spots_ = null;
+      cellsWithMoreThan2Spots_ = new ArrayList<>();
    }
 
    void addPotentialMitosisCell(Integer cellNb) {

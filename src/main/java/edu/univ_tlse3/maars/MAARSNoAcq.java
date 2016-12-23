@@ -73,6 +73,7 @@ public class MAARSNoAcq implements Runnable {
          if (skipAllRestFrames) {
             break;
          }
+         soc_.reset();
          String xPos = pos[0];
          String yPos = pos[1];
          IJ.log("x : " + xPos + " y : " + yPos);

@@ -83,6 +83,7 @@ public class MAARS implements Runnable {
         //TODO only save the potential the mitotic cells
         ArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
          for (int i : cellIndex) {
+//             IJ.log("" + i);
              Cell cell = soc.getCell(i);
 //        for (Cell cell : soc){
              geoSaver.save(cell);
@@ -184,6 +185,7 @@ public class MAARS implements Runnable {
 
     @Override
     public void run() {
+        soc_.reset();
         // Start time
         long start = System.currentTimeMillis();
         // Set XY stage device
