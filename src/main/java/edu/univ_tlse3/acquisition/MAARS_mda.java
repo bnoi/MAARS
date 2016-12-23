@@ -8,9 +8,10 @@ import org.micromanager.internal.utils.MMException;
 
 /**
  * Created by Tong LI on 24/06/2016.
+ *
  */
-public class MAARS_mda {
-   MMStudio mm_;
+class MAARS_mda {
+   private MMStudio mm_;
 
    MAARS_mda(MMStudio mm) {
       mm_ = mm;

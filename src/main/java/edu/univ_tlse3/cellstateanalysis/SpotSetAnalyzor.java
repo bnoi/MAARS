@@ -134,7 +134,7 @@ public class SpotSetAnalyzor {
     * @return the SPBs
     */
    private ArrayList<Spot> findMostDistant2Spots(Iterable<Spot> spotSet) {
-      ArrayList<Spot> poles = new ArrayList<Spot>();
+      ArrayList<Spot> poles = new ArrayList<>();
       for (Spot s0 : spotSet) {
          if (poles.size() < 2) {
             poles.add(s0);

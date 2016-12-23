@@ -4,7 +4,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Roi;
-import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
@@ -15,7 +14,6 @@ import ij.process.AutoThresholder;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import java.awt.*;
 import java.io.File;
@@ -86,7 +84,7 @@ public class SegPombe {
          System.setOut(ps);
          System.setErr(ps);
       } catch (FileNotFoundException e) {
-         IJ.error(e.toString());;
+         IJ.error(e.toString());
       }
 
       this.sigma = parameters.getSigma();
@@ -152,7 +150,7 @@ public class SegPombe {
       ImagePlus subImg;
       long start = System.currentTimeMillis();
       ExecutorService executor = Executors.newFixedThreadPool(nbProcessor);
-      Map<Integer, Future<FloatProcessor>> map = new HashMap<Integer, Future<FloatProcessor>>();
+      Map<Integer, Future<FloatProcessor>> map = new HashMap<>();
       Future<FloatProcessor> task;
       int[] widths = splitter.getWidths();
       for (int i = 0; i < nbProcessor; i++) {
@@ -180,10 +178,8 @@ public class SegPombe {
                }
             }
          }
-      } catch (InterruptedException e) {
-         IJ.error(e.toString());;
-      } catch (ExecutionException e) {
-         IJ.error(e.toString());;
+      } catch (InterruptedException | ExecutionException e) {
+         IJ.error(e.toString());
       }
       executor.shutdown();
       IJ.log("Segmentation took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec");
@@ -269,7 +265,7 @@ public class SegPombe {
             if (filtrateWithMeanGrayValue) {
 
                System.out.println("Filtering with mean grey value...");
-               ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
+               ArrayList<Integer> rowTodelete = new ArrayList<>();
                int name = 1;
                System.out.println("- reset result table");
                resultTable.reset();
@@ -322,7 +318,7 @@ public class SegPombe {
                roiManager.runCommand("Select All");
                roiManager.runCommand("Delete");
 
-               ArrayList<Integer> rowTodelete = new ArrayList<Integer>();
+               ArrayList<Integer> rowTodelete = new ArrayList<>();
                int name = 1;
 
                System.out.println("- delete from result table roi unwanted");

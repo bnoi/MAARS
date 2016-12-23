@@ -53,7 +53,7 @@ public class SpotsContainer implements Serializable {
     */
    void addChannel(String channel) {
       if (this.spotsInCell == null) {
-         this.spotsInCell = new HashMap<String, SpotCollection>();
+         this.spotsInCell = new HashMap<>();
       }
       if (!this.spotsInCell.containsKey(channel)) {
          this.spotsInCell.put(channel, new SpotCollection());

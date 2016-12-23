@@ -107,7 +107,7 @@ public class MAARS implements Runnable {
                 try{
                     objOut.close();
                 } catch (IOException e) {
-                    IJ.error(e.toString());;
+                    IJ.error(e.toString());
                 }
             }
         }
@@ -128,7 +128,7 @@ public class MAARS implements Runnable {
             try {
                 out = new PrintWriter(pathToSegDir + "_MITOSIS" + File.separator + "laggingCells.txt");
             } catch (FileNotFoundException e) {
-                IJ.error(e.toString());;
+                IJ.error(e.toString());
             }
             assert listAcqNames != null;
             for (String acqName : listAcqNames) {
@@ -143,6 +143,7 @@ public class MAARS implements Runnable {
                     if (spotInBtwnFrames.size() > 0) {
                         Collections.sort(spotInBtwnFrames);
                         if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 1) {
+                            assert out != null;
                             out.println(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
                                     .format(Calendar.getInstance().getTime());
@@ -208,7 +209,8 @@ public class MAARS implements Runnable {
                 mmc.waitForDevice(mmc.getXYStageDevice());
             } catch (Exception e) {
                 IJ.error("Can't set XY stage devie");
-                IJ.error(e.toString());;
+                IJ.error(e.toString());
+
             }
             String xPos = String.valueOf(Math.round(explo.getX(i)));
             String yPos = String.valueOf(Math.round(explo.getY(i)));
@@ -237,7 +239,7 @@ public class MAARS implements Runnable {
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
-                IJ.error(e.toString());;
+                IJ.error(e.toString());
             }
             parameters.setSavingPath(original_folder);
             if (ms.roiDetected()) {
@@ -258,7 +260,7 @@ public class MAARS implements Runnable {
                     System.setOut(ps);
                     System.setErr(ps);
                 } catch (FileNotFoundException e) {
-                    IJ.error(e.toString());;
+                    IJ.error(e.toString());
                 }
                 int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
@@ -280,7 +282,7 @@ public class MAARS implements Runnable {
                             try {
                                 currrentFocus = mmc.getPosition(focusDevice);
                             } catch (Exception e) {
-                                IJ.error(e.toString());;
+                                IJ.error(e.toString());
                             }
                             SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                             if (currrentFocus != Double.MIN_VALUE) {
@@ -309,7 +311,7 @@ public class MAARS implements Runnable {
                             try {
                                 Thread.sleep((long) (fluoTimeInterval - acqTook));
                             } catch (InterruptedException e) {
-                                IJ.error(e.toString());;
+                                IJ.error(e.toString());
                             }
                         } else {
                             IJ.log("Attention : acquisition before took longer than " + fluoTimeInterval
@@ -329,7 +331,7 @@ public class MAARS implements Runnable {
                         try {
                             currrentFocus = mmc.getPosition(focusDevice);
                         } catch (Exception e) {
-                            IJ.error(e.toString());;
+                            IJ.error(e.toString());
                         }
                         SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                         if (currrentFocus != Double.MIN_VALUE) {
@@ -376,7 +378,7 @@ public class MAARS implements Runnable {
                         try {
                             org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
                         } catch (IOException e) {
-                            IJ.error(e.toString());;
+                            IJ.error(e.toString());
                         }
                     }
 //                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");

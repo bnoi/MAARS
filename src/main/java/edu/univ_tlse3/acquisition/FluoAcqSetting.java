@@ -29,7 +29,7 @@ public class FluoAcqSetting {
    }
 
    public ArrayList<ChannelSpec> configChannels(String channelName) {
-      ArrayList<ChannelSpec> channelSpecs = new ArrayList<ChannelSpec>();
+      ArrayList<ChannelSpec> channelSpecs = new ArrayList<>();
       Color chColor = MaarsParameters.getColor(parameters_.getChColor(channelName));
       double chExpose = Double.parseDouble(parameters_.getChExposure(channelName));
       ChannelSpec channel_spec = new ChannelSpec();

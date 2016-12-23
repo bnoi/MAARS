@@ -27,24 +27,24 @@ public class SegPombeMainDialog{
    // Component allowing to receive parameters from user
    // to get sigma : typical cell size
    private JFormattedTextField typicalSizeTf;
-   private JComboBox typicalSizeUnitCombo;
+   private JComboBox<String> typicalSizeUnitCombo;
 
    // to change image scale (number of pixels)
    private Checkbox changeScaleCkb;
    private JFormattedTextField maxWidthTf;
    private JFormattedTextField maxHeightTf;
-   private JComboBox maxWidthUnitCombo;
-   private JComboBox maxHeightUnitCombo;
+   private JComboBox<String> maxWidthUnitCombo;
+   private JComboBox<String> maxHeightUnitCombo;
 
    // to filter particles during the analysis and detect only cells
    private JFormattedTextField minParticleSizeTf;
    private JFormattedTextField maxParticleSizeTf;
-   private JComboBox minParticleSizeUnitCombo;
-   private JComboBox maxParticleSizeUnitCombo;
+   private JComboBox<String> minParticleSizeUnitCombo;
+   private JComboBox<String> maxParticleSizeUnitCombo;
 
    // to notify if the cells boundaries are white then black or black then
    // white
-   private JComboBox blackOrWhiteCombo;
+   private JComboBox<String> blackOrWhiteCombo;
 
    // to filter abnormal cell shape
    private Checkbox filterAbnormalShapeCkb;
@@ -101,7 +101,7 @@ public class SegPombeMainDialog{
       typicalSizeTf.setValue(defaultParameters.getSigma());
 
       // displays units of size
-      typicalSizeUnitCombo = new JComboBox(unitList);
+      typicalSizeUnitCombo = new JComboBox<>(unitList);
       typicalSizeUnitCombo.setSelectedIndex(SegPombeParameters.MICRONS);
 
       sizePanel.add(sizeLabel);
@@ -127,8 +127,8 @@ public class SegPombeMainDialog{
       maxHeightTf = new JFormattedTextField(int.class);
       maxHeightTf.setValue(defaultParameters.getMaxHeight());
 
-      maxWidthUnitCombo = new JComboBox(unitList);
-      maxHeightUnitCombo = new JComboBox(unitList);
+      maxWidthUnitCombo = new JComboBox<>(unitList);
+      maxHeightUnitCombo = new JComboBox<>(unitList);
 
       Panel maxValuesPanel = new Panel();
       Panel maxWidthPanel = new Panel();
@@ -202,7 +202,7 @@ public class SegPombeMainDialog{
       Label minSizeLabel = new Label("minimum ");
       minParticleSizeTf = new JFormattedTextField(Float.class);
       minParticleSizeTf.setValue(defaultParameters.getMinParticleSize());
-      minParticleSizeUnitCombo = new JComboBox(unitList);
+      minParticleSizeUnitCombo = new JComboBox<>(unitList);
       minSizePanel.add(minSizeLabel);
       minSizePanel.add(minParticleSizeTf);
       minSizePanel.add(minParticleSizeUnitCombo);
@@ -213,7 +213,7 @@ public class SegPombeMainDialog{
       Label maxSizeLabel = new Label("maximum");
       maxParticleSizeTf = new JFormattedTextField(Float.class);
       maxParticleSizeTf.setValue(defaultParameters.getMaxParticleSize());
-      maxParticleSizeUnitCombo = new JComboBox(unitList);
+      maxParticleSizeUnitCombo = new JComboBox<>(unitList);
       maxSizePanel.add(maxSizeLabel);
       maxSizePanel.add(maxParticleSizeTf);
       maxSizePanel.add(maxParticleSizeUnitCombo);
@@ -236,7 +236,7 @@ public class SegPombeMainDialog{
 
       String blackOrWhiteState[] = {"First slice black - Last slice white",
               "First slice white - Last slice black"};
-      blackOrWhiteCombo = new JComboBox(blackOrWhiteState);
+      blackOrWhiteCombo = new JComboBox<>(blackOrWhiteState);
 
       blackOrWhitePanel.add(blackOrWhiteLabel);
       blackOrWhitePanel.add(blackOrWhiteCombo);
@@ -514,7 +514,7 @@ public class SegPombeMainDialog{
       return typicalSizeTf;
    }
 
-   JComboBox getTypicalSizeUnitCombo() {
+   JComboBox<String> getTypicalSizeUnitCombo() {
       return typicalSizeUnitCombo;
    }
 
@@ -530,11 +530,11 @@ public class SegPombeMainDialog{
       return maxHeightTf;
    }
 
-   JComboBox getMaxWidthUnitCombo() {
+   JComboBox<String> getMaxWidthUnitCombo() {
       return maxWidthUnitCombo;
    }
 
-   JComboBox getMaxHeightUnitCombo() {
+   JComboBox<String> getMaxHeightUnitCombo() {
       return maxHeightUnitCombo;
    }
 
@@ -558,7 +558,7 @@ public class SegPombeMainDialog{
       return maxParticleSizeTf;
    }
 
-   JComboBox getMinParticleSizeUnitCombo() {
+   JComboBox<String> getMinParticleSizeUnitCombo() {
       return minParticleSizeUnitCombo;
    }
 
@@ -570,7 +570,7 @@ public class SegPombeMainDialog{
       return manualZFocusCkb;
    }
 
-   JComboBox getMaxParticleSizeUnitCombo() {
+   JComboBox<String> getMaxParticleSizeUnitCombo() {
       return maxParticleSizeUnitCombo;
    }
 

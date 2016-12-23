@@ -69,7 +69,7 @@ public class FileUtils {
       try {
          Files.write(Paths.get(path), scriptInArray, Charset.forName("UTF-8"));
       } catch (IOException e) {
-         IJ.error(e.toString());;
+         IJ.error(e.toString());
       }
    }
 
@@ -98,13 +98,13 @@ public class FileUtils {
     */
    public static void copyScriptDependency(String folderPath, String scriptName){
       BufferedReader bfr = getBufferReaderOfScript(scriptName);
-      ArrayList<String> script = new ArrayList<String>();
+      ArrayList<String> script = new ArrayList<>();
       try {
          while (bfr.ready()) {
             script.add(bfr.readLine());
          }
       } catch (IOException e) {
-         IJ.error(e.toString());;
+         IJ.error(e.toString());
       }
       FileUtils.writeScript(folderPath + scriptName, script);
    }

@@ -15,10 +15,10 @@ public class GeometryContainer implements Serializable{
     */
    void addChannel(String channel) {
       if (this.geosOfCells == null) {
-         this.geosOfCells = new HashMap<String, HashMap<Integer, HashMap<String, Object>>>();
+         this.geosOfCells = new HashMap<>();
       }
       if (!this.geosOfCells.containsKey(channel)) {
-         this.geosOfCells.put(channel, new HashMap<Integer, HashMap<String, Object>>());
+         this.geosOfCells.put(channel, new HashMap<>());
       }
    }
 
@@ -37,7 +37,7 @@ public class GeometryContainer implements Serializable{
     */
    void putGeometry(String channel, int frame, HashMap<String, Object> geometries) {
       if (!geoFrameExists(channel, frame)) {
-         getGeosInChannel(channel).put(frame, new HashMap<String, Object>());
+         getGeosInChannel(channel).put(frame, new HashMap<>());
       }
       getGeosInChannel(channel).put(frame, geometries);
    }

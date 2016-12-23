@@ -10,13 +10,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PythonPipeline {
-   public static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
-   public static final String TRACKMATE_NAME = "trackmate.py";
-   public static final String PATH2PYTHONSCRIPTS = IJ.getDirectory("plugins") + "MAARS_deps" + File.separator;
+   private static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
+   private static final String TRACKMATE_NAME = "trackmate.py";
+   private static final String PATH2PYTHONSCRIPTS = IJ.getDirectory("plugins") + "MAARS_deps" + File.separator;
 
    public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
       BufferedReader bfr = FileUtils.getBufferReaderOfScript(SCRIPT_NAME);
-      ArrayList<String> script = new ArrayList<String>();
+      ArrayList<String> script = new ArrayList<>();
       Boolean changeParam = false;
       String pattern = "if __name__ == '__main__':";
       String patternForDir = ".*baseDir=.*";
@@ -46,7 +46,7 @@ public class PythonPipeline {
             script.add(line);
          }
       } catch (IOException e) {
-         IJ.error(e.toString());;
+         IJ.error(e.toString());
       }
       return script;
    }
@@ -96,27 +96,31 @@ public class PythonPipeline {
       File condaDir;
       String condaDirPattern = "(\\w+)(conda)(\\w+)";
       String sep = File.separator;
-      if (osName.equals("Linux")) {
-         condaDir = new File(sep + "home" + sep + System.getProperty("user.name"));
-         for (String dir : condaDir.list()) {
-            if (dir.matches(condaDirPattern)) {
-               pythonPath = condaDir + sep + dir + sep + "bin" + sep + "python";
+      switch (osName) {
+         case "Linux":
+            condaDir = new File(sep + "home" + sep + System.getProperty("user.name"));
+            for (String dir : condaDir.list()) {
+               if (dir.matches(condaDirPattern)) {
+                  pythonPath = condaDir + sep + dir + sep + "bin" + sep + "python";
+               }
             }
-         }
-      } else if (osName.equals("Mac OS X")) {
-         condaDir = new File(sep + "Users" + sep + System.getProperty("user.name"));
-         for (String dir : condaDir.list()) {
-            if (dir.matches(condaDirPattern)) {
-               pythonPath = condaDir + sep + dir + sep + "bin" + sep + "python";
+            break;
+         case "Mac OS X":
+            condaDir = new File(sep + "Users" + sep + System.getProperty("user.name"));
+            for (String dir : condaDir.list()) {
+               if (dir.matches(condaDirPattern)) {
+                  pythonPath = condaDir + sep + dir + sep + "bin" + sep + "python";
+               }
             }
-         }
-      } else {
-         condaDir = new File(sep + "C:" + sep + "Users" + sep + System.getProperty("user.name"));
-         for (String dir : condaDir.list()) {
-            if (dir.matches(condaDirPattern)) {
-               pythonPath = condaDir + sep + dir + sep + "python";
+            break;
+         default:
+            condaDir = new File(sep + "C:" + sep + "Users" + sep + System.getProperty("user.name"));
+            for (String dir : condaDir.list()) {
+               if (dir.matches(condaDirPattern)) {
+                  pythonPath = condaDir + sep + dir + sep + "python";
+               }
             }
-         }
+            break;
       }
       System.out.println(pythonPath);
       return pythonPath;
@@ -129,7 +133,7 @@ public class PythonPipeline {
     * @param value   the string to be inserted
     * @return modified string
     */
-   public static String replaceSubString(String pattern, String line, String value){
+   private static String replaceSubString(String pattern, String line, String value){
       Pattern p = Pattern.compile(pattern);
       Matcher m = p.matcher(line);
       line = m.replaceFirst(value);

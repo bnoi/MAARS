@@ -102,43 +102,43 @@ public class MaarsParameters {
    public static final String DYNAMIC = "DYNAMIC";
    public static final String X_FIELD_NUMBER = "X_FIELD_NUMBER";
    public static final String Y_FIELD_NUMBER = "Y_FIELD_NUMBER";
-   public static final String CELL_SIZE = "CELL_SIZE";
+   static final String CELL_SIZE = "CELL_SIZE";
    public static final String MINIMUM_CELL_AREA = "MINIMUM_CELL_AREA";
    public static final String MAXIMUM_CELL_AREA = "MAXIMUM_CELL_AREA";
    public static final String FILTER_MEAN_GREY_VALUE = "FILTER_MEAN_GREY_VALUE";
    public static final String MEAN_GREY_VALUE = "MEAN_GREY_VALUE";
    public static final String FILTER_SOLIDITY = "FILTER_SOLIDITY";
    public static final String SOLIDITY = "SOLIDITY";
-   public static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
-   public static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
+   static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
+   static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
    public static final String TIME_INTERVAL = "TIME_INTERVAL";
    public static final String TIME_LIMIT = "TIME_LIMIT";
-   public static final String SAVING_PATH = "SAVING_PATH";
+   private static final String SAVING_PATH = "SAVING_PATH";
    public static final String DO_ANALYSIS = "DO_ANALYSIS";
    public static final String ANALYSIS_OPTIONS = "ANALYSIS_OPTIONS";
    public static final String DO_MITOSIS_RATIO = "DO_MITOSIS_RATIO";
    public static final String DO_INTERPHASE_RATIO = "DO_INTERPHASE_RATIO";
    public static final String DO_METAPHASE_RATIO = "DO_METAPHASE_RATIO";
    public static final String DO_FIND_MEROTELY = "DO_FIND_MEROTELY";
-   public static final String SHUTTER = "SHUTTER";
-   public static final String COLOR = "COLOR";
-   public static final String EXPOSURE = "EXPOSURE";
+   private static final String SHUTTER = "SHUTTER";
+   private static final String COLOR = "COLOR";
+   private static final String EXPOSURE = "EXPOSURE";
    public static final String CHANNEL = "CHANNEL";
-   public static final String USING = "USING";
+   private static final String USING = "USING";
    public static final String GFP = "GFP";
    public static final String CFP = "CFP";
    public static final String TXRED = "TXRED";
    public static final String DAPI = "DAPI";
-   public static final String GENERAL_ACQUISITION_PARAMETERS = "GENERAL_ACQUISITION_PARAMETERS";
-   public static final String DEFAULT_CHANNEL_PARAMATERS = "DEFAULT_CHANNEL_PARAMATERS";
-   public static final String CHANNEL_GROUP = "CHANNEL_GROUP";
+   private static final String GENERAL_ACQUISITION_PARAMETERS = "GENERAL_ACQUISITION_PARAMETERS";
+   private static final String DEFAULT_CHANNEL_PARAMATERS = "DEFAULT_CHANNEL_PARAMATERS";
+   private static final String CHANNEL_GROUP = "CHANNEL_GROUP";
    public static final String X_POS = "X_POS";
    public static final String Y_POS = "Y_POS";
    public static final String FRAME = "FRAME";
    public static final String CUR_CHANNEL = "CHANNEL";
    public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
    public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
-   public static final String SKIP = "SKIP";
+   private static final String SKIP = "SKIP";
    private Document doc;
    private Element root;
    private String[] allColors = {"GREEN","CYAN","RED", "BLUE", "WHITE","GRAY"};
@@ -158,7 +158,7 @@ public class MaarsParameters {
             IJ.error(e.toString());
          }
       } catch (JDOMException e) {
-         IJ.error(e.toString());;
+         IJ.error(e.toString());
       }
       root = (Element) doc.getContent(0);
    }
@@ -355,7 +355,7 @@ public class MaarsParameters {
     *@return list of all channels
     */
    public List<String> getAllChannels(){
-      ArrayList<String> channelNames = new ArrayList<String>();
+      ArrayList<String> channelNames = new ArrayList<>();
       for (Element e: root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren()){
          channelNames.add(e.getName());
       }
@@ -532,13 +532,13 @@ public class MaarsParameters {
    /**
     * @param root the dataset of this class
     */
-   public void setRoot(Element root) {
+   private void setRoot(Element root) {
       this.root = root;
    }
 
    public void addChannel(String newChannel){
       Element anotherChannel = root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren().get(2);
-      List<Element> attributes = new ArrayList<Element>();
+      List<Element> attributes = new ArrayList<>();
       for (Element e : anotherChannel.getChildren()){
          attributes.add(e.clone());
       }

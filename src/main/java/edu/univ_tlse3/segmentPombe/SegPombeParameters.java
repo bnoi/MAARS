@@ -7,11 +7,11 @@ import ij.ImagePlus;
  * @version Nov 4, 2015
  */
 public class SegPombeParameters {
-   public static final int WIDTH = 0;
-   public static final int HEIGHT = 1;
-   public static final int DEPTH = 2;
-   public static final int PIXELS = 0;
-   public static final int MICRONS = 1;
+   static final int WIDTH = 0;
+   static final int HEIGHT = 1;
+   static final int DEPTH = 2;
+   static final int PIXELS = 0;
+   static final int MICRONS = 1;
    /**
     * Class split from original CellsBoundaries to save all parameters.
     */
@@ -64,7 +64,7 @@ public class SegPombeParameters {
       this.imageToAnalyze = imageToAnalyze;
    }
 
-   public float getSigma() {
+   float getSigma() {
       return sigma;
    }
 
@@ -72,107 +72,107 @@ public class SegPombeParameters {
       this.sigma = sigma;
    }
 
-   public boolean changeScale() {
+   boolean changeScale() {
       return changeScale;
    }
 
-   public void setChangeScale(boolean changeScale) {
+   void setChangeScale(boolean changeScale) {
       this.changeScale = changeScale;
    }
 
-   public int getMaxWidth() {
+   int getMaxWidth() {
       return maxWidth;
    }
 
-   public void setMaxWidth(int maxWidth) {
+   void setMaxWidth(int maxWidth) {
       this.maxWidth = maxWidth;
    }
 
-   public int getMaxHeight() {
+   int getMaxHeight() {
       return maxHeight;
    }
 
-   public void setMaxHeight(int maxHeight) {
+   void setMaxHeight(int maxHeight) {
       this.maxHeight = maxHeight;
    }
 
-   public int getDirection() {
+   int getDirection() {
       return direction;
    }
 
-   public void setDirection(int direction) {
+   void setDirection(int direction) {
       this.direction = direction;
    }
 
-   public boolean showCorrelationImg() {
+   boolean showCorrelationImg() {
       return showCorrelationImg;
    }
 
-   public void setShowCorrelationImg(boolean showCorrelationImg) {
+   void setShowCorrelationImg(boolean showCorrelationImg) {
       this.showCorrelationImg = showCorrelationImg;
    }
 
-   public boolean showBinaryImg() {
+   boolean showBinaryImg() {
       return showBinaryImg;
    }
 
-   public void setShowBinaryImg(boolean showBinaryImg) {
+   void setShowBinaryImg(boolean showBinaryImg) {
       this.showBinaryImg = showBinaryImg;
    }
 
-   public boolean showDataFrame() {
+   boolean showDataFrame() {
       return showDataFrame;
    }
 
-   public void setShowDataFrame(boolean showDataFrame) {
+   void setShowDataFrame(boolean showDataFrame) {
       this.showDataFrame = showDataFrame;
    }
 
-   public boolean showFocusImage() {
+   boolean showFocusImage() {
       return showFocusImage;
    }
 
-   public void setShowFocusImage(boolean showFocusImage) {
+   void setShowFocusImage(boolean showFocusImage) {
       this.showFocusImage = showFocusImage;
    }
 
-   public boolean saveCorrelationImg() {
+   boolean saveCorrelationImg() {
       return saveCorrelationImg;
    }
 
-   public void setSaveCorrelationImg(boolean saveCorrelationImg) {
+   void setSaveCorrelationImg(boolean saveCorrelationImg) {
       this.saveCorrelationImg = saveCorrelationImg;
    }
 
-   public boolean saveBinaryImg() {
+   boolean saveBinaryImg() {
       return saveBinaryImg;
    }
 
-   public void setSaveBinaryImg(boolean saveBinaryImg) {
+   void setSaveBinaryImg(boolean saveBinaryImg) {
       this.saveBinaryImg = saveBinaryImg;
    }
 
-   public boolean saveDataFrame() {
+   boolean saveDataFrame() {
       return saveDataFrame;
    }
 
-   public void setSaveDataFrame(boolean saveDataFrame) {
+   void setSaveDataFrame(boolean saveDataFrame) {
       this.saveDataFrame = saveDataFrame;
    }
 
-   public boolean saveFocusImage() {
+   boolean saveFocusImage() {
       return saveFocusImage;
    }
 
-   public void setSaveFocusImage(boolean saveFocusImage) {
+   void setSaveFocusImage(boolean saveFocusImage) {
       this.saveFocusImage = saveFocusImage;
    }
 
-   public boolean saveRoi() {
+   boolean saveRoi() {
       return saveRoi;
    }
 
-   public void setSaveRoi(boolean saveRoi) {
+   void setSaveRoi(boolean saveRoi) {
       this.saveRoi = saveRoi;
    }
 
@@ -180,15 +180,15 @@ public class SegPombeParameters {
       return scales;
    }
 
-   public void setScale(double[] scales) {
+   void setScale(double[] scales) {
       this.scales = scales;
    }
 
-   public double getScale(final int INDEX) {
+   double getScale(final int INDEX) {
       return this.scales[INDEX];
    }
 
-   public double getMinParticleSize() {
+   double getMinParticleSize() {
       return minParticleSize;
    }
 
@@ -196,7 +196,7 @@ public class SegPombeParameters {
       this.minParticleSize = minParticleSize;
    }
 
-   public double getMaxParticleSize() {
+   double getMaxParticleSize() {
       return maxParticleSize;
    }
 
@@ -204,7 +204,7 @@ public class SegPombeParameters {
       this.maxParticleSize = maxParticleSize;
    }
 
-   public double getSolidityThreshold() {
+   double getSolidityThreshold() {
       return solidityThreshold;
    }
 
@@ -212,7 +212,7 @@ public class SegPombeParameters {
       this.solidityThreshold = solidityThreshold;
    }
 
-   public double getMeanGreyValueThreshold() {
+   double getMeanGreyValueThreshold() {
       return meanGreyValueThreshold;
    }
 
@@ -220,7 +220,7 @@ public class SegPombeParameters {
       this.meanGreyValueThreshold = meanGreyValueThreshold;
    }
 
-   public boolean filterAbnormalShape() {
+   boolean filterAbnormalShape() {
       return filterAbnormalShape;
    }
 
@@ -228,7 +228,7 @@ public class SegPombeParameters {
       this.filterAbnormalShape = filterAbnormalShape;
    }
 
-   public boolean filtrateWithMeanGrayValue() {
+   boolean filtrateWithMeanGrayValue() {
       return filtrateWithMeanGrayValue;
    }
 
@@ -236,11 +236,11 @@ public class SegPombeParameters {
       this.filtrateWithMeanGrayValue = filtrateWithMeanGrayValue;
    }
 
-   public int getFocusSlide() {
+   int getFocusSlide() {
       return focusSlide;
    }
 
-   public void setFocusSlide(int focusSlide) {
+   void setFocusSlide(int focusSlide) {
       this.focusSlide = focusSlide;
    }
 }

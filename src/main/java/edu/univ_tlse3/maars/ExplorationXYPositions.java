@@ -32,7 +32,7 @@ public class ExplorationXYPositions {
     * @param parameters MAARS parameters
     * @param mmc        MAARS Parameters object
     */
-   public ExplorationXYPositions(CMMCore mmc, MaarsParameters parameters) {
+   ExplorationXYPositions(CMMCore mmc, MaarsParameters parameters) {
       int xNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
       int yNumber = parameters.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
       double cal = mmc.getPixelSizeUm();
@@ -78,7 +78,7 @@ public class ExplorationXYPositions {
    /**
     * @return number of position
     */
-   public int length() {
+   int length() {
       return length;
    }
 

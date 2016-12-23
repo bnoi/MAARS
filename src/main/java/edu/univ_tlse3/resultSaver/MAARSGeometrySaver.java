@@ -24,7 +24,7 @@ public class MAARSGeometrySaver {
    private void saveGeometries(String channel, Cell cell) {
       HashMap<Integer, HashMap<String, Object>> geosInFrams = cell.getGeometryContainer().getGeosInChannel(channel);
       int cellNb = cell.getCellNumber();
-      ArrayList<String[]> outLines = new ArrayList<String[]>();
+      ArrayList<String[]> outLines = new ArrayList<>();
       if (geosInFrams.keySet().size() > 0) {
          int firstFrame = (Integer) geosInFrams.keySet().toArray()[0];
          ArrayList headerList = new ArrayList(geosInFrams.get(firstFrame).keySet());
@@ -39,7 +39,7 @@ public class MAARSGeometrySaver {
          try {
             cellGeoWriter = new FileWriter(geometryCSVDir + String.valueOf(cellNb) + "_" + channel + ".csv");
          } catch (IOException e) {
-            IJ.error(e.toString());;
+            IJ.error(e.toString());
          }
          for (int frame : geosInFrams.keySet()) {
             geoOfFrame = new String[headerList.size() + 1];
@@ -49,7 +49,7 @@ public class MAARSGeometrySaver {
             }
             outLines.add(geoOfFrame);
          }
-         Collections.sort(outLines, (o1, o2) -> Integer.valueOf(o1[0]).compareTo(Integer.valueOf(o2[0])));
+         outLines.sort(Comparator.comparing(o -> Integer.valueOf(o[0])));
          outLines.add(0, header);
          assert cellGeoWriter != null;
          CSVWriter writer = new CSVWriter(cellGeoWriter, ',', CSVWriter.NO_QUOTE_CHARACTER);
@@ -57,10 +57,9 @@ public class MAARSGeometrySaver {
          try {
             writer.close();
          } catch (IOException e) {
-            IJ.error(e.toString());;
+            IJ.error(e.toString());
          }
       }
-
    }
 
    public void save(Cell cell) {

@@ -11,20 +11,20 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * Created by tong on 25/10/16.
+ *
  */
-public class CellChartPanel extends JPanel {
+class CellChartPanel extends JPanel {
    /**
     *
     * @param s the string to be written on the label
     */
-   public CellChartPanel(String s) {
+   CellChartPanel(String s) {
       super(new BorderLayout());
       add(new JLabel(s), BorderLayout.CENTER);
    }
@@ -34,7 +34,7 @@ public class CellChartPanel extends JPanel {
     * @param cell cell to be investigated
     * @return  chartPanel of the cell
     */
-   public static ChartPanel updateCellContent(Cell cell) {
+   static ChartPanel updateCellContent(Cell cell) {
       CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis());
       for (String geoPara : SpotSetAnalyzor.GeoParamSet) {
          XYPlot subPlot = drawSubplot(cell, geoPara);
@@ -59,7 +59,7 @@ public class CellChartPanel extends JPanel {
       return chartPanel;
    }
 
-   public static XYPlot drawSubplot(Cell cell, String param) {
+   private static XYPlot drawSubplot(Cell cell, String param) {
       final NumberAxis rangeAxis = new NumberAxis(param);
       rangeAxis.setAutoRangeIncludesZero(true);
       XYSeries series;
@@ -90,17 +90,18 @@ public class CellChartPanel extends JPanel {
       return subplot;
    }
 
-   public static Color getColor(String channel){
-      if (channel.equals("CFP")) {
-         return Color.BLUE;
-      } else if (channel.equals("GFP")) {
-         return Color.GREEN;
-      } else if (channel.equals("TxRed")) {
-         return Color.RED;
-      } else if (channel.equals("DAPI")) {
-         return Color.CYAN;
-      } else{
-         return null;
+   private static Color getColor(String channel){
+      switch (channel) {
+         case "CFP":
+            return Color.BLUE;
+         case "GFP":
+            return Color.GREEN;
+         case "TxRed":
+            return Color.RED;
+         case "DAPI":
+            return Color.CYAN;
+         default:
+            return null;
       }
    }
 

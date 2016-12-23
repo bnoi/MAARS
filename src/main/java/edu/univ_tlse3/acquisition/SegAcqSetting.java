@@ -33,7 +33,7 @@ public class SegAcqSetting {
    }
 
    public ArrayList<ChannelSpec> configChannels() {
-      ArrayList<ChannelSpec> channelSetting = new ArrayList<ChannelSpec>();
+      ArrayList<ChannelSpec> channelSetting = new ArrayList<>();
       ChannelSpec bf_spec = new ChannelSpec();
       bf_spec.config = ch;
       bf_spec.color = chColor;

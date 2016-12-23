@@ -49,13 +49,12 @@ public class MaarsMainDialog extends Frame implements ActionListener {
    private JRadioButton staticOpt;
    private MaarsFluoAnalysisDialog fluoDialog_;
    private MaarsSegmentationDialog segDialog_;
-   private JPanel stopAndVisualizerButtonPanel_;
    private SetOfCells soc_ = new SetOfCells();
    private SOCVisualizer socVisualizer_;
    private JButton stopButton_;
    private MAARS maars_;
    private MAARSNoAcq maarsNoAcq_;
-   private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<Map<String, Future>>();
+   private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
    private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
    /**
@@ -218,7 +217,7 @@ public class MaarsMainDialog extends Frame implements ActionListener {
 
       // show visualiwer acquisitions button
 
-      stopAndVisualizerButtonPanel_ = new JPanel(new GridLayout(1, 0));
+      JPanel stopAndVisualizerButtonPanel_ = new JPanel(new GridLayout(1, 0));
       showDataVisualizer_ = new JButton("Show visualizer");
       showDataVisualizer_.addActionListener(this);
       stopAndVisualizerButtonPanel_.add(showDataVisualizer_);
@@ -268,14 +267,6 @@ public class MaarsMainDialog extends Frame implements ActionListener {
     */
    private MMStudio getMM() {
       return mm;
-   }
-
-   /**
-    *
-    * @param visible
-    */
-   public void setVisible(Boolean visible) {
-      mainDialog.setVisible(visible);
    }
 
    /**
@@ -353,13 +344,9 @@ public class MaarsMainDialog extends Frame implements ActionListener {
 
    private SOCVisualizer createVisualizer(){
       final SOCVisualizer socVisualizer = new SOCVisualizer();
-      SwingUtilities.invokeLater(new Runnable() {
-         public void run() {
-            //Turn off metal's use of bold fonts
+      //Turn off metal's use of bold fonts
 //            UIManager.put("swing.boldMetal", Boolean.FALSE);
-            socVisualizer.createAndShowGUI();
-         }
-      });
+      SwingUtilities.invokeLater(socVisualizer::createAndShowGUI);
       return socVisualizer;
    }
 
@@ -377,7 +364,7 @@ public class MaarsMainDialog extends Frame implements ActionListener {
       IJ.log("Spot detection finished! Proceed to saving and analysis...");
    }
 
-   public void setSkipTheRest(Boolean skip){
+   private void setSkipTheRest(Boolean skip){
       if (maarsNoAcq_ != null){
          maarsNoAcq_.skipAllRestFrames = skip;
       }

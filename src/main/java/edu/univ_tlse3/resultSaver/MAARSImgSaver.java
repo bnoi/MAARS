@@ -7,7 +7,6 @@ import ij.ImageStack;
 import loci.plugins.LociExporter;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 

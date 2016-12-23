@@ -19,7 +19,7 @@ import java.util.NoSuchElementException;
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable {
    private int iteratorCount = 0;
    private ArrayList<Cell> cellArray;
-   private ArrayList<Integer> cellsWithMoreThan2Spots_ = new ArrayList<Integer>();
+   private ArrayList<Integer> cellsWithMoreThan2Spots_ = new ArrayList<>();
 
    public SetOfCells() {
    }
@@ -30,7 +30,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
    public void loadCells(String pathToSegDir) {
       IJ.log("Loading Cells");
       Roi[] roiArray = getRoisAsArray(pathToSegDir + "/ROI.zip");
-      cellArray = new ArrayList<Cell>();
+      cellArray = new ArrayList<>();
       for (int i = 1; i <= roiArray.length; i++) {
          cellArray.add(i - 1, new Cell(roiArray[i - 1], i));
       }
@@ -86,7 +86,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
       this.cellArray = null;
    }
 
-   public void addPotentialMitosisCell(Integer cellNb) {
+   void addPotentialMitosisCell(Integer cellNb) {
       if (!cellsWithMoreThan2Spots_.contains(cellNb)) {
          cellsWithMoreThan2Spots_.add(cellNb);
       }

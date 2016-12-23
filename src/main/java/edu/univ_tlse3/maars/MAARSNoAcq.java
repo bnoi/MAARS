@@ -86,8 +86,7 @@ public class MAARSNoAcq implements Runnable {
          try {
             segImg = IJ.openImage(pathToSegMovie);
          } catch (Exception e) {
-            IJ.error(e.toString());;
-            IJ.error("Invalid path");
+            IJ.error(e.toString());
          }
          // --------------------------segmentation-----------------------------//
          MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
@@ -97,7 +96,7 @@ public class MAARSNoAcq implements Runnable {
             try {
                future.get();
             } catch (InterruptedException | ExecutionException e) {
-               IJ.error(e.toString());;
+               IJ.error(e.toString());
             }
          }
          if (ms.roiDetected()) {
@@ -126,7 +125,7 @@ public class MAARSNoAcq implements Runnable {
                System.setOut(ps);
                System.setErr(ps);
             } catch (FileNotFoundException e) {
-               IJ.error(e.toString());;
+               IJ.error(e.toString());
             }
             String[] listAcqNames = new File(pathToFluoDir).list();
             String pattern = "(\\w+)(_)(\\d+)";
@@ -197,7 +196,7 @@ public class MAARSNoAcq implements Runnable {
                   try {
                      org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
                   } catch (IOException e) {
-                     IJ.error(e.toString());;
+                     IJ.error(e.toString());
                   }
                }
             }

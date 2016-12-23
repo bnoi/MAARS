@@ -22,8 +22,8 @@ public class Cell implements Serializable{
    private String[] measurements;
    private transient SpotsContainer spotContainer;
    private GeometryContainer geoContainer;
-   private ArrayList<Integer> spotInBetweenFrames = new ArrayList<Integer>();
-   private ArrayList<Integer> frameWithUnalignedSpot_ = new ArrayList<Integer>();
+   private ArrayList<Integer> spotInBetweenFrames = new ArrayList<>();
+   private ArrayList<Integer> frameWithUnalignedSpot_ = new ArrayList<>();
    private int anaBOnsetFrame_;
 
    /**

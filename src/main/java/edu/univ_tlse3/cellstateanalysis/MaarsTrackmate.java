@@ -32,7 +32,7 @@ public class MaarsTrackmate {
       // Set up detection parameters.
 
       settings.detectorFactory = new LogDetectorFactory<FloatType>();
-      Map<String, Object> detectorSettings = new HashMap<String, Object>();
+      Map<String, Object> detectorSettings = new HashMap<>();
       detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
       detectorSettings.put(KEY_RADIUS, radius);
       detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);

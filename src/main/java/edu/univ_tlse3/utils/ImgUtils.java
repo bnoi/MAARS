@@ -61,7 +61,7 @@ public class ImgUtils {
     * @param roi region of interest to crop
     * @return cropped imagePLus
     */
-   public static ImagePlus cropImgWithRoi(ImagePlus img, Roi roi) {
+   private static ImagePlus cropImgWithRoi(ImagePlus img, Roi roi) {
       ImageStack stack = img.getStack().crop((int) roi.getXBase(), (int) roi.getYBase(), 0,
               roi.getBounds().width, roi.getBounds().height, img.getStack().getSize());
       ImagePlus croppedImg = new ImagePlus("cropped_" + img.getShortTitle(), stack);
@@ -77,7 +77,7 @@ public class ImgUtils {
     * @param roi roi to process
     * @return processed ROI
     */
-   public static Roi centerCroppedRoi(Roi roi) {
+   private static Roi centerCroppedRoi(Roi roi) {
       int[] newXs = roi.getPolygon().xpoints;
       int[] newYs = roi.getPolygon().ypoints;
       int nbPoints = roi.getPolygon().npoints;
@@ -136,12 +136,8 @@ public class ImgUtils {
       Calibration fluoImgCalib = null;
       String[] listAcqNames = new File(fluoDir).list();
       String pattern = "(\\w+)(_)(\\d+)";
-      Arrays.sort(listAcqNames, new Comparator<String>() {
-         @Override
-         public int compare(String o1, String o2) {
-            return Integer.valueOf(o1.split("_", -1)[1]).compareTo(Integer.valueOf(o2.split("_", -1)[1]));
-         }
-      });
+      assert listAcqNames != null;
+      Arrays.sort(listAcqNames, Comparator.comparing(o -> Integer.valueOf(o.split("_", -1)[1])));
       for (String acqName : listAcqNames) {
          if (Pattern.matches(pattern, acqName)) {
             fluoImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName + "_MMStack_Pos0.ome.tif");
@@ -170,10 +166,10 @@ public class ImgUtils {
     */
    public static HashMap<String, ImagePlus> cropMergedImpWithRois(Cell cell, ImagePlus mergedImg,
                                                                   Boolean splitChannel) {
-      HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<String, ImagePlus>();
+      HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<>();
       if (splitChannel) {
          ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
-         HashMap<String, ImageStack> channelStacks = new HashMap<String, ImageStack>();
+         HashMap<String, ImageStack> channelStacks = new HashMap<>();
          for (int j = 1; j <= croppedImg.getImageStack().getSize(); j++) {
             // TODO problem here
             String currentLabel = croppedImg.getImageStack().getSliceLabel(j);
@@ -231,7 +227,7 @@ public class ImgUtils {
     * @param image from micro-manager
     * @return ImageProcessor
     */
-   public static ImageProcessor image2imp(Image image) {
+   private static ImageProcessor image2imp(Image image) {
       MMStudio mm = MMStudio.getInstance();
       ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
       return imgProcessor.convertToFloatProcessor();

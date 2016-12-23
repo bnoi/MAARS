@@ -46,8 +46,8 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
    private JTextField maxCellArea;
    private Button okBut;
    private ExecutorService es_;
-   private JComboBox configurationCombo_;
-   private JComboBox bfChannelCombo_;
+   private JComboBox<String> configurationCombo_;
+   private JComboBox<String> bfChannelCombo_;
 
    /**
     * Constructor :
@@ -206,7 +206,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
       Label bfChannelLabel = new Label("Bright-field Channel ?", Label.CENTER);
       bfChannelLabel.setBackground(Color.lightGray);
-      bfChannelCombo_ = new JComboBox();
+      bfChannelCombo_ = new JComboBox<>();
       bfChannelPanel.add(bfChannelLabel, BorderLayout.NORTH);
       bfChannelPanel.add(bfChannelCombo_, BorderLayout.SOUTH);
 
@@ -218,7 +218,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       Label configurationGroupLabel = new Label("Configuration Group", Label.CENTER);
       configurationGroupLabel.setBackground(Color.lightGray);
 
-      configurationCombo_ = new JComboBox(mm_.getCore().getAvailableConfigGroups().toArray());
+      configurationCombo_ = new JComboBox<>(mm_.getCore().getAvailableConfigGroups().toArray());
       configurationCombo_.addActionListener(actionEvent -> {
          String selectedGroup= (String) configurationCombo_.getSelectedItem();
          parameters_.setChannelGroup(selectedGroup);
@@ -280,7 +280,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       this.setVisible(true);
    }
 
-   public void updateMAARSParamters(){
+   private void updateMAARSParamters(){
       parameters_.setSegmentationParameter(
               MaarsParameters.RANGE_SIZE_FOR_MOVIE, range.getText());
       parameters_.setSegmentationParameter(MaarsParameters.STEP,
