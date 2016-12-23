@@ -30,9 +30,9 @@ public class MAARSSpotsSaver {
       try {
          spotsWriter.writeToFile();
       } catch (FileNotFoundException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       } catch (IOException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
 
    }

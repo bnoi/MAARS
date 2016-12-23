@@ -69,7 +69,7 @@ public class FileUtils {
       try {
          Files.write(Paths.get(path), scriptInArray, Charset.forName("UTF-8"));
       } catch (IOException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
    }
 
@@ -104,7 +104,7 @@ public class FileUtils {
             script.add(bfr.readLine());
          }
       } catch (IOException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
       FileUtils.writeScript(folderPath + scriptName, script);
    }

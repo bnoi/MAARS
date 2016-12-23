@@ -86,7 +86,7 @@ public class SegPombe {
          System.setOut(ps);
          System.setErr(ps);
       } catch (FileNotFoundException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
 
       this.sigma = parameters.getSigma();
@@ -181,9 +181,9 @@ public class SegPombe {
             }
          }
       } catch (InterruptedException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       } catch (ExecutionException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
       executor.shutdown();
       IJ.log("Segmentation took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec");
@@ -226,6 +226,7 @@ public class SegPombe {
          }
          this.binImage.hide();
       }
+      IJ.run(this.binImage, "Adjustable Watershed", "tolerance=15");
    }
 
    /**

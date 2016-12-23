@@ -21,7 +21,7 @@ public class MAARS_mda {
       try {
          ds = mm_.getAcquisitionEngine().acquire();
       } catch (MMException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
       while (mm_.getAcquisitionEngine().isAcquisitionRunning()) {
          mm_.getCore().sleep(1000);

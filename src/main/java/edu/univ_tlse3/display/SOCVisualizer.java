@@ -129,11 +129,11 @@ public class SOCVisualizer {
 
                     }
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    IJ.error(e.toString());;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    IJ.error(e.toString());;
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    IJ.error(e.toString());;
                 }
 
 

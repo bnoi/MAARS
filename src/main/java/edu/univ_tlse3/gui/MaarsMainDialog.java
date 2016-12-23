@@ -367,10 +367,8 @@ public class MaarsMainDialog extends Frame implements ActionListener {
          for (String channel : aFutureSet.keySet()) {
             try {
                aFutureSet.get(channel).get();
-            } catch (InterruptedException e) {
-               e.printStackTrace();
-            } catch (ExecutionException e) {
-               e.printStackTrace();
+            } catch (InterruptedException | ExecutionException e) {
+               IJ.error(e.toString());
             }
             IJ.showStatus("Terminating analysis...");
          }

@@ -67,7 +67,7 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 			try {
 				inStream = new FileInputStream(configFileName);
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				IJ.error(e.toString());;
 			}
 
 		} else {

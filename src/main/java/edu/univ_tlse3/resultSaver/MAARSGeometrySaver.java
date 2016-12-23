@@ -38,7 +38,7 @@ public class MAARSGeometrySaver {
          try {
             cellGeoWriter = new FileWriter(geometryCSVDir + String.valueOf(cellNb) + "_" + channel + ".csv");
          } catch (IOException e) {
-            e.printStackTrace();
+            IJ.error(e.toString());;
          }
          for (int frame : geosInFrams.keySet()) {
             geoOfFrame = new String[headerList.size() + 1];
@@ -61,7 +61,7 @@ public class MAARSGeometrySaver {
          try {
             writer.close();
          } catch (IOException e) {
-            e.printStackTrace();
+            IJ.error(e.toString());;
          }
       }
 

@@ -126,7 +126,7 @@ class SigmaOptimization implements PlugIn {
          fw = new FileWriter(pathToSaveResult + "opti_sigma.csv");
       } catch (IOException e) {
          System.out.println("could not create writer");
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
       assert fw != null;
       BufferedWriter bw = new BufferedWriter(fw);
@@ -136,7 +136,7 @@ class SigmaOptimization implements PlugIn {
          bw.newLine();
       } catch (IOException e) {
          System.out.println("could not write in file");
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
       System.out.println("create roi manager");
       RoiManager manager = RoiManager.getInstance();
@@ -176,7 +176,7 @@ class SigmaOptimization implements PlugIn {
             bw.newLine();
          } catch (IOException e) {
             System.out.println("could not write in file");
-            e.printStackTrace();
+            IJ.error(e.toString());;
          }
 
       }
@@ -184,7 +184,7 @@ class SigmaOptimization implements PlugIn {
          bw.close();
       } catch (IOException e) {
          System.out.println("could not close writer");
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
    }
 }

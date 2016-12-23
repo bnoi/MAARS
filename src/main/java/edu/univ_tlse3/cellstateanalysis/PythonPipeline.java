@@ -46,7 +46,7 @@ public class PythonPipeline {
             script.add(line);
          }
       } catch (IOException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
       return script;
    }
@@ -163,7 +163,7 @@ public class PythonPipeline {
 //         python.eval("print sys.version_info");
 //
 //      } catch (ScriptException e) {
-//         e.printStackTrace();
+//         IJ.error(e.toString());;
 //      }
 //
 //      final PythonInterpreter interpreter = new PythonInterpreter();

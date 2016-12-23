@@ -8,6 +8,7 @@ import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
@@ -106,7 +107,7 @@ public class FluoAnalyzer implements Runnable {
          try {
             f.get();
          } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            IJ.error(e.toString());
          }
       }
       if (useDynamic_){

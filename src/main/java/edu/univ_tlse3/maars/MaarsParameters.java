@@ -154,10 +154,10 @@ public class MaarsParameters {
          try {
             doc = sb.build(defaultParametersStream);
          } catch (IOException e) {
-            e.printStackTrace();
+            IJ.error(e.toString());;
          }
       } catch (JDOMException e) {
-         e.printStackTrace();
+         IJ.error(e.toString());;
       }
       root = (Element) doc.getContent(0);
    }
