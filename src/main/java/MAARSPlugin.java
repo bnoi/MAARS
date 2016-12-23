@@ -74,7 +74,7 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 			inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
 		}
 		MaarsParameters parameters = new MaarsParameters(inStream);
-		new MaarsMainDialog(mmStudio, parameters).show();
+		new MaarsMainDialog(mmStudio, parameters).setVisible(true);
 		if (!FileUtils.exists(IJ.getDirectory("plugins")+"/MAARS_deps")){
 			FileUtils.createFolder(IJ.getDirectory("plugins")+"/MAARS_deps");
 		}
