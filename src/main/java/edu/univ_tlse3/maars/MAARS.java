@@ -74,44 +74,45 @@ public class MAARS implements Runnable {
     }
 
     static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
-                        Boolean splitChannel) {
+                        Boolean splitChannel, Boolean useDynamic) {
         IJ.log("Saving information of each cell");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
         HashMap<String, ImagePlus> croppedImgSet;
-        //TODO only save the potential the mitotic cells
-        ArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
-         for (int i : cellIndex) {
+//        TODO only save the potential the mitotic cells
+//        ArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
+//         for (int i : cellIndex) {
 //             IJ.log("" + i);
-             Cell cell = soc.getCell(i);
-//        for (Cell cell : soc){
+//             Cell cell = soc.getCell(i);
+        for (Cell cell : soc){
              geoSaver.save(cell);
              spotSaver.save(cell);
              croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
              imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
          }
-        File f = new File(pathToFluoDir + "SetOfCell.serialize");
-        ObjectOutputStream objOut = null;
+         if (useDynamic) {
+            File f = new File(pathToFluoDir + "SetOfCell.serialize");
+            ObjectOutputStream objOut = null;
+            try {
+               objOut = new ObjectOutputStream(new BufferedOutputStream(
+                       new FileOutputStream(f)));
+               objOut.writeObject(soc);
+               objOut.flush();
 
-        try {
-            objOut = new ObjectOutputStream(new BufferedOutputStream(
-                    new FileOutputStream(f)));
-            objOut.writeObject(soc);
-            objOut.flush();
-
-            IJ.log("Set of cel object is serialized.");
-        }catch(IOException i) {
-            ReportingUtils.logError(i.getMessage());
-        }finally {
-            if (objOut != null){
-                try{
-                    objOut.close();
-                } catch (IOException e) {
-                    IJ.error(e.toString());
-                }
+               IJ.log("Set of cel object is serialized.");
+            } catch (IOException i) {
+               ReportingUtils.logError(i.getMessage());
+            } finally {
+               if (objOut != null) {
+                  try {
+                     objOut.close();
+                  } catch (IOException e) {
+                     IJ.error(e.toString());
+                  }
+               }
             }
-        }
+         }
 //      if (croppedImgSet != null) {
 //         imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());
 //      }
@@ -185,7 +186,6 @@ public class MAARS implements Runnable {
 
     @Override
     public void run() {
-        soc_.reset();
         // Start time
         long start = System.currentTimeMillis();
         // Set XY stage device
@@ -203,6 +203,7 @@ public class MAARS implements Runnable {
         double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
         //prepare executor for image analysis
         for (int i = 0; i < explo.length(); i++) {
+            soc_.reset();
             if (skipAllRestFrames) {
                 break;
             }
@@ -366,7 +367,7 @@ public class MAARS implements Runnable {
                         Boolean splitChannel = true;
                         ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
                         mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, splitChannel);
+                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, splitChannel, parameters.useDynamic());
                         if (parameters.useDynamic()) {
                             if (IJ.isWindows()) {
                                 pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);

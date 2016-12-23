@@ -184,7 +184,7 @@ public class MAARSNoAcq implements Runnable {
                   long startWriting = System.currentTimeMillis();
                   Boolean splitChannel = true;
                   mergedImg.getCalibration().frameInterval = timeInterval / 1000;
-                  MAARS.saveAll(soc_, mergedImg, pathToFluoDir, splitChannel);
+                  MAARS.saveAll(soc_, mergedImg, pathToFluoDir, splitChannel,parameters.useDynamic());
                   if (parameters.useDynamic()) {
                      if (IJ.isWindows()) {
                         pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
