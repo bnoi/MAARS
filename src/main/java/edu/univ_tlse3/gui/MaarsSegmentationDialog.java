@@ -50,19 +50,22 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
    private JComboBox<String> bfChannelCombo_;
 
    /**
-    * Constructor :
     *
-    * @param parameters : default parameters (which are going to be displayed)
+    * @param maarsMainFrame
+    * @param parameters       default parameters (which are going to be displayed)
+    * @param mm_
+    * @param es
     */
-   MaarsSegmentationDialog(final MaarsParameters parameters, final MMStudio mm_, ExecutorService es) {
+   MaarsSegmentationDialog(JFrame maarsMainFrame, final MaarsParameters parameters, final MMStudio mm_, ExecutorService es) {
+      super(maarsMainFrame);
       es_ = es;
-      this.parameters_ = parameters;
-      this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-//      this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
-      this.setTitle("MAARS - Segmentation parameters");
-      this.setLayout(new GridLayout(0, 1));
-      this.setBackground(Color.WHITE);
-      this.setMinimumSize(new Dimension(400, 750));
+      parameters_ = parameters;
+      setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      setModalityType(ModalityType.APPLICATION_MODAL);
+      setTitle("MAARS - Segmentation parameters");
+      setLayout(new GridLayout(0, 1));
+      setBackground(Color.WHITE);
+      setMinimumSize(new Dimension(400, 750));
       Color labelColor = Color.ORANGE;
 
       //

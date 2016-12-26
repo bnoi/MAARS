@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  */
-class MaarsFluoAnalysisDialog extends Frame implements ActionListener {
+class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    /**
     *
@@ -74,23 +74,25 @@ class MaarsFluoAnalysisDialog extends Frame implements ActionListener {
    private String spindleChannel_ = null;
 
    /**
-    * Constructor :
     *
+    * @param maarsMainFrame
+    * @param mm
     * @param parameters : parameters_ displayed in dialog
     */
-   MaarsFluoAnalysisDialog(MMStudio mm, MaarsParameters parameters) {
-
+   MaarsFluoAnalysisDialog(JFrame maarsMainFrame, MMStudio mm, MaarsParameters parameters) {
+      super(maarsMainFrame);
       String channelsString = parameters.getUsingChannels();
       String[] arrayChannels = channelsString.split(",", -1);
       String originSpindleChannel = parameters.getDetectionChForMitosis();
       // set up this dialog
       this.mm = mm;
       parameters_ = parameters;
-//      this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-      this.setTitle("MAARS - Fluorescent Analysis Parameters");
-      this.setBackground(Color.WHITE);
-      this.setLayout(new GridLayout(0, 1));
-      this.setMinimumSize(new Dimension(250, 500));
+      setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+      setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      setTitle("MAARS - Fluorescent Analysis Parameters");
+      setBackground(Color.WHITE);
+      setLayout(new GridLayout(0, 1));
+      setMinimumSize(new Dimension(250, 500));
       Color labelColor = Color.ORANGE;
 
       // Movie parameters_ label
@@ -466,7 +468,7 @@ class MaarsFluoAnalysisDialog extends Frame implements ActionListener {
             JComboBox tmpChannelCombo = (JComboBox) p.getComponent(1);
             String tmpChannel = (String) tmpChannelCombo.getSelectedItem();
             if (!existingChannels.contains(tmpChannel)){
-               YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(this, "Channel not in config file", "add this channel " + tmpChannel + " into the config file?");
+               YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(null, "Channel not in config file", "add this channel " + tmpChannel + " into the config file?");
                if (yesNoCancelDialog.yesPressed()){
                   String shutterLabel = (String) JOptionPane.showInputDialog(this, "shutter for this channel ?","Shutter configuration", JOptionPane.QUESTION_MESSAGE, null,mm.getShutterManager().getShutterDevices().toArray() ,mm.getShutterManager().getShutterDevices().get(0));
                   String colorLabel = (String) JOptionPane.showInputDialog(this, "Color for this channel ?","Color configuration", JOptionPane.QUESTION_MESSAGE, null,parameters_.availiableColors(),parameters_.availiableColors()[0]);

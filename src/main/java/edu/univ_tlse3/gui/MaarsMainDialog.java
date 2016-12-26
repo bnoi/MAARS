@@ -72,11 +72,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       this.mmc = mm.core();
       this.parameters = parameters;
 
-      // initialize mainFrame
-
       IJ.log("create main dialog ...");
-      JFrame.setDefaultLookAndFeelDecorated(true);
-      setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      setDefaultLookAndFeelDecorated(true);
+      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
       // set minimal dimension of mainDialog
 
@@ -402,7 +400,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          if (segDialog_ != null){
             segDialog_.setVisible(true);
          }else{
-            segDialog_ = new MaarsSegmentationDialog(parameters, mm, es_);
+            segDialog_ = new MaarsSegmentationDialog(this, parameters, mm, es_);
          }
 
       } else if (e.getSource() == fluoAnalysisButton) {
@@ -410,7 +408,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          if (fluoDialog_ != null){
             fluoDialog_.setVisible(true);
          }else{
-            fluoDialog_ = new MaarsFluoAnalysisDialog(mm, parameters);
+            fluoDialog_ = new MaarsFluoAnalysisDialog(this,mm, parameters);
          }
       } else if (e.getSource() == dynamicOpt) {
          setAnalysisStrategy();
@@ -435,9 +433,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       } else if (e.getSource() == showDataVisualizer_) {
          if (socVisualizer_ == null){
             socVisualizer_ = createVisualizer();
-         }else{
-            socVisualizer_.showDialog(true);
          }
+         socVisualizer_.showDialog(true);
       }else if(e.getSource() == stopButton_){
          YesNoCancelDialog yesNoCancelDialog =  new YesNoCancelDialog(this, "Abandon current acquisition?",
                  "Stop current analysis ?");
