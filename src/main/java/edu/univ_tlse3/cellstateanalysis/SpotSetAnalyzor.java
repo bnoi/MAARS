@@ -73,7 +73,7 @@ public class SpotSetAnalyzor {
       if (setSize > 1) {
          poles = findMostDistant2Spots(spotSet);
          Vector3D polesVec = getSpAsVector(poles);
-         geometry.put(SpLength, polesVec.getNorm());
+         geometry.put(SpLength, distance(poles.get(0), poles.get(1)));
          Spot spCenter = getCenter(poles);
          geometry.put(SpCenterX, spCenter.getFeature(Spot.POSITION_X));
          geometry.put(SpCenterY, spCenter.getFeature(Spot.POSITION_Y));
