@@ -446,7 +446,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             roiManager.runCommand("Delete");
             roiManager.reset();
             roiManager.close();
-            soc_.cleanUp();
+            soc_.reset();
             socVisualizer_.cleanUp();
             socVisualizer_.showDialog(false);
             socVisualizer_.createAndShowGUI();

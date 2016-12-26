@@ -34,7 +34,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
       for (int i = 1; i <= roiArray.length; i++) {
          cellArray.add(i - 1, new Cell(roiArray[i - 1], i));
       }
-      IJ.log("Done.");
    }
 
    /**
@@ -82,8 +81,9 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
    }
 
    public void reset() {
-      this.iteratorCount = 0;
-      this.cellArray = null;
+      iteratorCount = 0;
+      cellArray = null;
+      cellArray = new ArrayList<>();
       cellsWithMoreThan2Spots_ = null;
       cellsWithMoreThan2Spots_ = new ArrayList<>();
    }
@@ -96,14 +96,6 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
 
    public ArrayList<Integer> getPotentialMitosisCell() {
       return cellsWithMoreThan2Spots_;
-   }
-
-   public void cleanUp(){
-      iteratorCount = 0;
-      cellArray = null;
-      cellArray = new ArrayList<>();
-      cellsWithMoreThan2Spots_ = null;
-      cellsWithMoreThan2Spots_ = new ArrayList<>();
    }
 
    // iterator related
