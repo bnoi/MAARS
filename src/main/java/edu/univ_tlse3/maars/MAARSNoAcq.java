@@ -5,6 +5,7 @@ import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.gui.MaarsMainDialog;
 import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -87,7 +88,7 @@ public class MAARSNoAcq implements Runnable {
          try {
             segImg = IJ.openImage(pathToSegMovie);
          } catch (Exception e) {
-            IJ.error(e.toString());
+            IOUtils.printErrorToIJLog(e);
          }
          // --------------------------segmentation-----------------------------//
          MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
@@ -97,7 +98,7 @@ public class MAARSNoAcq implements Runnable {
             try {
                future.get();
             } catch (InterruptedException | ExecutionException e) {
-               IJ.error(e.toString());
+               IOUtils.printErrorToIJLog(e);
             }
          }
          if (ms.roiDetected()) {
@@ -126,7 +127,7 @@ public class MAARSNoAcq implements Runnable {
                System.setOut(ps);
                System.setErr(ps);
             } catch (FileNotFoundException e) {
-               IJ.error(e.toString());
+               IOUtils.printErrorToIJLog(e);
             }
             String[] listAcqNames = new File(pathToFluoDir).list();
             String pattern = "(\\w+)(_)(\\d+)";
@@ -163,7 +164,7 @@ public class MAARSNoAcq implements Runnable {
                           Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                           Double.parseDouble(parameters.getChSpotRaius(channel)),
                           Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_,
-                          parameters.useDynamic(), es_));
+                          parameters.useDynamic()));
                   fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
                   channelsInFrame.put(channel, future);
                }
@@ -197,7 +198,7 @@ public class MAARSNoAcq implements Runnable {
                   try {
                      org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
                   } catch (IOException e) {
-                     IJ.error(e.toString());
+                     IOUtils.printErrorToIJLog(e);
                   }
                }
             }

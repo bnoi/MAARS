@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class SpotsContainer implements Serializable {
-   private HashMap<String, SpotCollection> spotsInCell;
+   private HashMap<String, SpotCollection> spotsInCell_;
    private Model trackmateModel;
 
    SpotsContainer() {
@@ -40,7 +40,7 @@ public class SpotsContainer implements Serializable {
          Spot s = it.next();
          newSet.add(s, 0);
          if (newSet.getNSpots(0, false) > setSize * maxNbSpot) {
-            newSet.remove(SpotsContainer.findLowestQualitySpot(newSet.iterable(0, false)), 0);
+            newSet.remove(findLowestQualitySpot(newSet.iterable(0, false)), 0);
          }
       }
       return newSet;
@@ -52,11 +52,11 @@ public class SpotsContainer implements Serializable {
     * @param channel channel name
     */
    void addChannel(String channel) {
-      if (this.spotsInCell == null) {
-         this.spotsInCell = new HashMap<>();
+      if (this.spotsInCell_ == null) {
+         this.spotsInCell_ = new HashMap<>();
       }
-      if (!this.spotsInCell.containsKey(channel)) {
-         this.spotsInCell.put(channel, new SpotCollection());
+      if (!this.spotsInCell_.containsKey(channel)) {
+         this.spotsInCell_.put(channel, new SpotCollection());
       }
    }
 
@@ -68,7 +68,8 @@ public class SpotsContainer implements Serializable {
     * @param spot    spot
     */
    void putSpot(String channel, int frame, Spot spot) {
-      this.spotsInCell.get(channel).add(spot, frame);
+      //TODO @SpotCollection do not provide a method to test whether it contains a spot, this may add two times the same spot
+      spotsInCell_.get(channel).add(spot, frame);
    }
 
    /**
@@ -78,7 +79,7 @@ public class SpotsContainer implements Serializable {
     * @return SpotCollection of Trackmate
     */
    public SpotCollection getSpots(String channel) {
-      return this.spotsInCell.get(channel);
+      return this.spotsInCell_.get(channel);
    }
 
    /**
@@ -100,7 +101,7 @@ public class SpotsContainer implements Serializable {
     * @param spToRemove the spot to be removed
     */
    void removeSpot(String channel, int frame, Spot spToRemove) {
-      this.spotsInCell.get(channel).remove(spToRemove, frame);
+      this.spotsInCell_.get(channel).remove(spToRemove, frame);
    }
 
    /**
@@ -129,6 +130,6 @@ public class SpotsContainer implements Serializable {
    }
 
    public Set<String> getUsingChannels() {
-      return this.spotsInCell.keySet();
+      return this.spotsInCell_.keySet();
    }
 }

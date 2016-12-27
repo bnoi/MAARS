@@ -1,6 +1,6 @@
 package edu.univ_tlse3.acquisition;
 
-import ij.IJ;
+import edu.univ_tlse3.utils.IOUtils;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Datastore;
 import org.micromanager.internal.MMStudio;
@@ -23,7 +23,7 @@ class MAARS_mda {
       try {
          ds = mm_.getAcquisitionEngine().acquire();
       } catch (MMException e) {
-         IJ.error(e.toString());
+         IOUtils.printErrorToIJLog(e);
       }
       while (mm_.getAcquisitionEngine().isAcquisitionRunning()) {
          mm_.getCore().sleep(1000);

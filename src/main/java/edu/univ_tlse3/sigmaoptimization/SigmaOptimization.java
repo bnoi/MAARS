@@ -1,6 +1,7 @@
 package edu.univ_tlse3.sigmaoptimization;
 
 import edu.univ_tlse3.segmentPombe.ComputeCorrelation;
+import edu.univ_tlse3.utils.IOUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -126,7 +127,7 @@ class SigmaOptimization implements PlugIn {
          fw = new FileWriter(pathToSaveResult + "opti_sigma.csv");
       } catch (IOException e) {
          System.out.println("could not create writer");
-         IJ.error(e.toString());
+         IOUtils.printErrorToIJLog(e);
       }
       assert fw != null;
       BufferedWriter bw = new BufferedWriter(fw);
@@ -136,7 +137,7 @@ class SigmaOptimization implements PlugIn {
          bw.newLine();
       } catch (IOException e) {
          System.out.println("could not write in file");
-         IJ.error(e.toString());
+         IOUtils.printErrorToIJLog(e);
       }
       System.out.println("create roi manager");
       RoiManager manager = RoiManager.getInstance();
@@ -176,7 +177,7 @@ class SigmaOptimization implements PlugIn {
             bw.newLine();
          } catch (IOException e) {
             System.out.println("could not write in file");
-            IJ.error(e.toString());
+            IOUtils.printErrorToIJLog(e);
          }
 
       }
@@ -184,7 +185,7 @@ class SigmaOptimization implements PlugIn {
          bw.close();
       } catch (IOException e) {
          System.out.println("could not close writer");
-         IJ.error(e.toString());
+         IOUtils.printErrorToIJLog(e);
       }
    }
 }

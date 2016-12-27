@@ -2,7 +2,7 @@ package edu.univ_tlse3.resultSaver;
 
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.utils.FileUtils;
-import ij.IJ;
+import edu.univ_tlse3.utils.IOUtils;
 import util.opencsv.CSVWriter;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public class MAARSGeometrySaver {
          try {
             cellGeoWriter = new FileWriter(geometryCSVDir + String.valueOf(cellNb) + "_" + channel + ".csv");
          } catch (IOException e) {
-            IJ.error(e.toString());
+            IOUtils.printErrorToIJLog(e);
          }
          for (int frame : geosInFrams.keySet()) {
             geoOfFrame = new String[headerList.size() + 1];
@@ -57,7 +57,7 @@ public class MAARSGeometrySaver {
          try {
             writer.close();
          } catch (IOException e) {
-            IJ.error(e.toString());
+            IOUtils.printErrorToIJLog(e);
          }
       }
    }

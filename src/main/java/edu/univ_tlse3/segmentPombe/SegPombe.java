@@ -1,5 +1,6 @@
 package edu.univ_tlse3.segmentPombe;
 
+import edu.univ_tlse3.utils.IOUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -84,7 +85,7 @@ public class SegPombe {
          System.setOut(ps);
          System.setErr(ps);
       } catch (FileNotFoundException e) {
-         IJ.error(e.toString());
+         IOUtils.printErrorToIJLog(e);
       }
 
       this.sigma = parameters.getSigma();
@@ -179,7 +180,7 @@ public class SegPombe {
             }
          }
       } catch (InterruptedException | ExecutionException e) {
-         IJ.error(e.toString());
+         IOUtils.printErrorToIJLog(e);
       }
       executor.shutdown();
       IJ.log("Segmentation took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec");
@@ -222,7 +223,7 @@ public class SegPombe {
          }
          this.binImage.hide();
       }
-      IJ.run(this.binImage, "Adjustable Watershed", "tolerance=15");
+//      IJ.run(this.binImage, "Adjustable Watershed", "tolerance=15");
    }
 
    /**

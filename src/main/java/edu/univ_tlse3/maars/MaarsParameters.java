@@ -6,7 +6,7 @@ package edu.univ_tlse3.maars;
  * @version Nov 10, 2015
  */
 
-import ij.IJ;
+import edu.univ_tlse3.utils.IOUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -155,10 +155,10 @@ public class MaarsParameters {
          try {
             doc = sb.build(defaultParametersStream);
          } catch (IOException e) {
-            IJ.error(e.toString());
+            IOUtils.printErrorToIJLog(e);
          }
       } catch (JDOMException e) {
-         IJ.error(e.toString());
+         IOUtils.printErrorToIJLog(e);
       }
       root = (Element) doc.getContent(0);
    }

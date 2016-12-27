@@ -1,14 +1,13 @@
 package edu.univ_tlse3.cellstateanalysis;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory.FindLagging;
 import edu.univ_tlse3.display.SOCVisualizer;
+import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
@@ -37,7 +36,6 @@ public class FluoAnalyzer implements Runnable {
    private Model model;
    private SOCVisualizer socVisualizer_;
    private Boolean useDynamic_;
-   private ExecutorService es_;
 
    /**
     * @param fluoImage     image to analyze zProjectedFluoImg
@@ -51,11 +49,9 @@ public class FluoAnalyzer implements Runnable {
     * @param quality       user predefined quality threshold for spot selection
     * @param socVisualizer a JFreeChart based display to show cell params
     * @param useDynamic    perform dynamic analysis
-    * @param es            ExecutorService
     */
    public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
-                       double radius, double quality, int frame, SOCVisualizer socVisualizer, Boolean useDynamic,
-                       ExecutorService es) {
+                       double radius, double quality, int frame, SOCVisualizer socVisualizer, Boolean useDynamic) {
       this.fluoImage = fluoImage;
       this.fluoImgCal = fluoImage.getCalibration();
       this.soc = soc;
@@ -67,7 +63,6 @@ public class FluoAnalyzer implements Runnable {
       this.frame = frame;
       socVisualizer_ = socVisualizer;
       useDynamic_ = useDynamic;
-      es_ = es;
    }
 
    /**
@@ -98,6 +93,7 @@ public class FluoAnalyzer implements Runnable {
       final int[] nbOfCellEachThread = new int[2];
       nbOfCellEachThread[0] = nbCell / nThread;
       nbOfCellEachThread[1] = nbOfCellEachThread[0] + nbCell % nThread;
+      ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
       List<Future> jobs = new ArrayList<>();
       for (int i = 0; i < nThread; i++) {
          // analyze every subset of cell
@@ -107,8 +103,14 @@ public class FluoAnalyzer implements Runnable {
          try {
             f.get();
          } catch (InterruptedException | ExecutionException e) {
-            IJ.error(e.toString());
+            IOUtils.printErrorToIJLog(e);
          }
+      }
+      es_.shutdown();
+      try {
+         es_.awaitTermination(5, TimeUnit.MINUTES);
+      } catch (InterruptedException e) {
+         e.printStackTrace();
       }
       if (useDynamic_){
          socVisualizer_.updateCellsDisplay(soc);
@@ -122,14 +124,14 @@ public class FluoAnalyzer implements Runnable {
     * analyzer of subset
     */
    private class AnalyseBlockCells implements Runnable {
-      private final int index;
-      private final int[] deltas;
-      private double[] factors;
+      private int index_;
+      private int[] deltas_;
+      private double[] factors_;
 
       AnalyseBlockCells(int index, final int[] deltas, double[] factors) {
-         this.index = index;
-         this.deltas = deltas;
-         this.factors = factors;
+         index_ = index;
+         deltas_ = deltas;
+         factors_ = factors;
       }
 
       @Override
@@ -137,15 +139,15 @@ public class FluoAnalyzer implements Runnable {
          // distribute number of cells for each thread
          int begin = 0;
          int end;
-         if (index == 0) {
-            if (deltas[0] != deltas[1]) {
-               end = deltas[1];
+         if (index_ == 0) {
+            if (deltas_[0] != deltas_[1]) {
+               end = deltas_[1];
             } else {
-               end = deltas[0];
+               end = deltas_[0];
             }
          } else {
-            begin = index * deltas[0] + (deltas[1] - deltas[0]);
-            end = begin + deltas[0];
+            begin = index_ * deltas_[0] + (deltas_[1] - deltas_[0]);
+            end = begin + deltas_[0];
          }
          // need to be false because all spots are not visible
          ArrayList<Spot> currentThreadSpots = Lists.newArrayList(collection.iterable(false));
@@ -154,8 +156,8 @@ public class FluoAnalyzer implements Runnable {
             cell.addChannel(channel);
             cell.setTrackmateModel(model);
             Roi tmpRoi;
-            if (factors[0] != 1 || factors[1] != 1) {
-               tmpRoi = cell.rescaleCellShapeRoi(factors);
+            if (factors_[0] != 1 || factors_[1] != 1) {
+               tmpRoi = cell.rescaleCellShapeRoi(factors_);
             } else {
                tmpRoi = cell.getCellShapeRoi();
             }
@@ -186,8 +188,7 @@ public class FluoAnalyzer implements Runnable {
 
             Iterable<Spot> spotSet = cell.getSpotsInFrame(channel, frame);
             if (spotSet != null) {
-               HashMap<String, Object> geometry = new HashMap<>();
-               spotSetAnalyzor.compute(geometry, spotSet);
+               HashMap<String, Object> geometry = spotSetAnalyzor.compute(spotSet);
                ArrayList<Spot> poles = spotSetAnalyzor.getPoles();
                new FindLagging(cell, spotSet, fluoImgCal, poles, radius, frame);
                cell.putGeometry(channel, frame, geometry);

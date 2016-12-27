@@ -3,10 +3,10 @@ package edu.univ_tlse3.resultSaver;
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.SpotsContainer;
 import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.IOUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlWriter;
-import ij.IJ;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class MAARSSpotsSaver {
       try {
          spotsWriter.writeToFile();
       } catch (IOException e) {
-         IJ.error(e.toString());
+         IOUtils.printErrorToIJLog(e);
       }
 
    }

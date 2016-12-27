@@ -13,6 +13,7 @@ import edu.univ_tlse3.resultSaver.MAARSGeometrySaver;
 import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.resultSaver.MAARSSpotsSaver;
 import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
@@ -81,11 +82,11 @@ public class MAARS implements Runnable {
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
         HashMap<String, ImagePlus> croppedImgSet;
 //        TODO only save the potential the mitotic cells
-//        ArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
-//         for (int i : cellIndex) {
+        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
+         for (int i : cellIndex) {
 //             IJ.log("" + i);
-//             Cell cell = soc.getCell(i);
-        for (Cell cell : soc){
+             Cell cell = soc.getCell(i);
+//        for (Cell cell : soc){
              geoSaver.save(cell);
              spotSaver.save(cell);
              croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
@@ -108,7 +109,7 @@ public class MAARS implements Runnable {
                   try {
                      objOut.close();
                   } catch (IOException e) {
-                     IJ.error(e.toString());
+                     IOUtils.printErrorToIJLog(e);
                   }
                }
             }
@@ -130,7 +131,7 @@ public class MAARS implements Runnable {
             try {
                 out = new PrintWriter(pathToSegDir + "_MITOSIS" + File.separator + "laggingCells.txt");
             } catch (FileNotFoundException e) {
-                IJ.error(e.toString());
+                IOUtils.printErrorToIJLog(e);
             }
             assert listAcqNames != null;
             for (String acqName : listAcqNames) {
@@ -212,7 +213,7 @@ public class MAARS implements Runnable {
                 mmc.waitForDevice(mmc.getXYStageDevice());
             } catch (Exception e) {
                 IJ.error("Can't set XY stage devie");
-                IJ.error(e.toString());
+                IOUtils.printErrorToIJLog(e);
 
             }
             String xPos = String.valueOf(Math.round(explo.getX(i)));
@@ -242,7 +243,7 @@ public class MAARS implements Runnable {
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
-                IJ.error(e.toString());
+                IOUtils.printErrorToIJLog(e);
             }
             parameters.setSavingPath(original_folder);
             if (ms.roiDetected()) {
@@ -263,7 +264,7 @@ public class MAARS implements Runnable {
                     System.setOut(ps);
                     System.setErr(ps);
                 } catch (FileNotFoundException e) {
-                    IJ.error(e.toString());
+                    IOUtils.printErrorToIJLog(e);
                 }
                 int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
@@ -285,7 +286,7 @@ public class MAARS implements Runnable {
                             try {
                                 currrentFocus = mmc.getPosition(focusDevice);
                             } catch (Exception e) {
-                                IJ.error(e.toString());
+                                IOUtils.printErrorToIJLog(e);
                             }
                             SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                             if (currrentFocus != Double.MIN_VALUE) {
@@ -299,7 +300,7 @@ public class MAARS implements Runnable {
                                 future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
                                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                         Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                        Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic(), es_));
+                                        Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
                                 channelsInFrame.put(channel, future);
                             }
                             tasksSet_.add(channelsInFrame);
@@ -314,7 +315,7 @@ public class MAARS implements Runnable {
                             try {
                                 Thread.sleep((long) (fluoTimeInterval - acqTook));
                             } catch (InterruptedException e) {
-                                IJ.error(e.toString());
+                                IOUtils.printErrorToIJLog(e);
                             }
                         } else {
                             IJ.log("Attention : acquisition before took longer than " + fluoTimeInterval
@@ -334,7 +335,7 @@ public class MAARS implements Runnable {
                         try {
                             currrentFocus = mmc.getPosition(focusDevice);
                         } catch (Exception e) {
-                            IJ.error(e.toString());
+                            IOUtils.printErrorToIJLog(e);
                         }
                         SequenceSettings fluoAcqSetting = fluoAcq.configAcqSettings(fluoAcq.configChannels(channel));
                         if (currrentFocus != Double.MIN_VALUE) {
@@ -348,8 +349,7 @@ public class MAARS implements Runnable {
                             future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
                                     Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                                     Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic(),
-                                    es_));
+                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
                             channelsInFrame.put(channel, future);
                         }
                         tasksSet_.add(channelsInFrame);
@@ -381,7 +381,7 @@ public class MAARS implements Runnable {
                         try {
                             org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
                         } catch (IOException e) {
-                            IJ.error(e.toString());
+                            IOUtils.printErrorToIJLog(e);
                         }
                     }
 //                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");

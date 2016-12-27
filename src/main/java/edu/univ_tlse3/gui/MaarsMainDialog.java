@@ -6,6 +6,7 @@ import edu.univ_tlse3.maars.MAARS;
 import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.IOUtils;
 import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
@@ -340,8 +341,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
    private SOCVisualizer createVisualizer(){
       final SOCVisualizer socVisualizer = new SOCVisualizer();
-      //Turn off metal's use of bold fonts
-//            UIManager.put("swing.boldMetal", Boolean.FALSE);
       SwingUtilities.invokeLater(socVisualizer::createAndShowGUI);
       return socVisualizer;
    }
@@ -352,7 +351,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             try {
                aFutureSet.get(channel).get();
             } catch (InterruptedException | ExecutionException e) {
-               IJ.error(e.toString());
+               IOUtils.printErrorToIJLog(e);
             }
             IJ.showStatus("Terminating analysis...");
          }
@@ -377,7 +376,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          if (socVisualizer_ == null){
             socVisualizer_ = createVisualizer();
             if (parameters.useDynamic()){
-               socVisualizer_.showDialog(true);
+               socVisualizer_.setVisible(true);
             }
          }
          if (Integer.valueOf(widthTf.getText()) * Integer.valueOf(heightTf.getText()) == 0) {
@@ -434,7 +433,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          if (socVisualizer_ == null){
             socVisualizer_ = createVisualizer();
          }
-         socVisualizer_.showDialog(true);
+         socVisualizer_.setVisible(true);
       }else if(e.getSource() == stopButton_){
          YesNoCancelDialog yesNoCancelDialog =  new YesNoCancelDialog(this, "Abandon current acquisition?",
                  "Stop current analysis ?");
@@ -448,7 +447,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             roiManager.close();
             soc_.reset();
             socVisualizer_.cleanUp();
-            socVisualizer_.showDialog(false);
+            socVisualizer_.setVisible(false);
             socVisualizer_.createAndShowGUI();
          }
       } else {
