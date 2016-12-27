@@ -2,13 +2,11 @@ package edu.univ_tlse3.cellstateanalysis;
 
 import com.google.common.collect.Iterables;
 import fiji.plugin.trackmate.Spot;
-import ij.IJ;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class SpotSetAnalyzor {
    // Names of parameters
@@ -26,7 +24,7 @@ public class SpotSetAnalyzor {
    // position.
    private double fakeSpotZ = 0;
    private double fakeSpotRadius = 0.25;
-   private double x, y, major, angle_, calibratedXBase, calibratedYBase;
+   private double x, y, major, angle, calibratedXBase, calibratedYBase;
    private ArrayList<Spot> poles;
 
    /**
@@ -42,7 +40,7 @@ public class SpotSetAnalyzor {
       this.x = x;
       this.y = y;
       this.major = major;
-      angle_ = angle;
+      this.angle = angle;
       this.calibratedXBase = calibratedXBase;
       this.calibratedYBase = calibratedYBase;
    }
@@ -66,45 +64,34 @@ public class SpotSetAnalyzor {
     *
     * @param spotSet set of spots to analyze
     */
-   HashMap<String, Object> compute(Iterable<Spot> spotSet) {
+   void compute(HashMap<String, Object> geometry, Iterable<Spot> spotSet) {
       // this functions modify directly coordinates of spot in
       // soc, because it's back-up
       // cptgeometry.centerSpots(spotSet);
-      HashMap<String, Object> geometry;
       int setSize = Iterables.size(spotSet);
+      geometry.put(NbOfSpotDetected, setSize);
       if (setSize > 1) {
          poles = findMostDistant2Spots(spotSet);
-         if(!overlap(poles.get(0), poles.get(1))) {
-            geometry = computeGeometry(setSize);
-         }else{
-            geometry = emptyGeometry();
-         }
+         Vector3D polesVec = getSpAsVector(poles);
+         geometry.put(SpLength, distance(poles.get(0), poles.get(1)));
+         Spot spCenter = getCenter(poles);
+         geometry.put(SpCenterX, spCenter.getFeature(Spot.POSITION_X));
+         geometry.put(SpCenterY, spCenter.getFeature(Spot.POSITION_Y));
+         geometry.put(SpCenterZ, spCenter.getFeature(Spot.POSITION_Z));
+         geometry.put(SpAngToMaj, getSpAngToMajAxis(polesVec));
+         Spot cellCenter = new Spot(x - calibratedXBase, y - calibratedYBase, fakeSpotZ, fakeSpotRadius,
+                 fakeSpotQuality);
+         geometry.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
+         geometry.put(CellCenterToSpCenterAng, Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I));
       } else {
-         geometry = emptyGeometry();
+         geometry.put(SpLength, "");
+         geometry.put(SpCenterX, "");
+         geometry.put(SpCenterY, "");
+         geometry.put(SpCenterZ, "");
+         geometry.put(SpAngToMaj, "");
+         geometry.put(CellCenterToSpCenterLen, "");
+         geometry.put(CellCenterToSpCenterAng, "");
       }
-      return geometry;
-   }
-
-   private HashMap<String, Object> computeGeometry(int setSize){
-      HashMap<String, Object> geometry = new HashMap<>();
-      geometry.put(NbOfSpotDetected, setSize);
-      Vector3D polesVec = getSpAsVector(poles);
-      if (polesVec.getNorm() == 0) {
-         IJ.log(setSize + "_" + angle_);
-         IJ.log(poles.get(0).getFeature(Spot.POSITION_X) + "_" + poles.get(0).getFeature(Spot.POSITION_Y));
-         IJ.log(poles.get(1).getFeature(Spot.POSITION_X) + "_" + poles.get(1).getFeature(Spot.POSITION_Y));
-      }
-      geometry.put(SpLength, polesVec.getNorm());
-      Spot spCenter = getCenter(poles);
-      geometry.put(SpCenterX, spCenter.getFeature(Spot.POSITION_X));
-      geometry.put(SpCenterY, spCenter.getFeature(Spot.POSITION_Y));
-      geometry.put(SpCenterZ, spCenter.getFeature(Spot.POSITION_Z));
-      geometry.put(SpAngToMaj, getSpAngToMajAxis(polesVec));
-      Spot cellCenter = new Spot(x - calibratedXBase, y - calibratedYBase, fakeSpotZ, fakeSpotRadius,
-              fakeSpotQuality);
-      geometry.put(CellCenterToSpCenterLen, distance(spCenter, cellCenter));
-      geometry.put(CellCenterToSpCenterAng, Vector3D.angle(spot2Vector3D(spCenter).subtract(spot2Vector3D(cellCenter)), Vector3D.PLUS_I));
-      return geometry;
    }
 
    ArrayList<Spot> getPoles() {
@@ -199,11 +186,10 @@ public class SpotSetAnalyzor {
     * @return the angle between polesVec and cell major axe
     */
    private double getSpAngToMajAxis(Vector3D polesVec) {
-      double ang = getLessThan90Ang(angle_);
-      Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(ang)),
-              major * FastMath.sin(FastMath.toRadians(ang)), fakeSpotZ);
+      Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(angle)),
+              major * FastMath.sin(FastMath.toRadians(angle)), fakeSpotZ);
       //TODO zero norm error but i do not know why
-      return getLessThan90Ang(FastMath.toDegrees(Vector3D.angle(cellMajAxisVec, polesVec)));
+      return rad2AngLessThan90(Vector3D.angle(cellMajAxisVec, polesVec));
    }
 
    /**
@@ -217,30 +203,11 @@ public class SpotSetAnalyzor {
               s.getFeature(Spot.POSITION_Z));
    }
 
-   private double getLessThan90Ang(double angle){
-      angle = FastMath.abs(angle);
-      while (angle >= 90) {
-         angle -= 180;
+   private double rad2AngLessThan90(double radiant) {
+      double ang = FastMath.toDegrees(radiant);
+      while (ang >= 90) {
+         ang -= 180;
       }
-      return FastMath.abs(angle);
-   }
-
-   private boolean overlap(Spot s1, Spot s2){
-      return Objects.equals(s1.getFeature(Spot.POSITION_X), s2.getFeature(Spot.POSITION_X)) &&
-              Objects.equals(s1.getFeature(Spot.POSITION_Y), s2.getFeature(Spot.POSITION_Y)) &&
-              Objects.equals(s1.getFeature(Spot.POSITION_Z), s2.getFeature(Spot.POSITION_Z));
-   }
-
-   private HashMap<String, Object> emptyGeometry(){
-      HashMap<String, Object> geometry = new HashMap<>();
-      geometry.put(NbOfSpotDetected, 1);
-      geometry.put(SpLength, "");
-      geometry.put(SpCenterX, "");
-      geometry.put(SpCenterY, "");
-      geometry.put(SpCenterZ, "");
-      geometry.put(SpAngToMaj, "");
-      geometry.put(CellCenterToSpCenterLen, "");
-      geometry.put(CellCenterToSpCenterAng, "");
-      return geometry;
+      return FastMath.abs(ang);
    }
 }

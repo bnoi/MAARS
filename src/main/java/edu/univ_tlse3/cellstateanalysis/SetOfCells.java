@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Main object of MAARS, you got information about each cell (ROI measurement,
@@ -20,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable {
    private int iteratorCount = 0;
    private ArrayList<Cell> cellArray;
-   private CopyOnWriteArrayList<Integer> cellsWithMoreThan2Spots_ = new CopyOnWriteArrayList<>();
+   private ArrayList<Integer> cellsWithMoreThan2Spots_ = new ArrayList<>();
 
    public SetOfCells() {
    }
@@ -86,7 +85,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
       cellArray = null;
       cellArray = new ArrayList<>();
       cellsWithMoreThan2Spots_ = null;
-      cellsWithMoreThan2Spots_ = new CopyOnWriteArrayList<>();
+      cellsWithMoreThan2Spots_ = new ArrayList<>();
    }
 
    void addPotentialMitosisCell(Integer cellNb) {
@@ -95,7 +94,7 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
       }
    }
 
-   public CopyOnWriteArrayList<Integer> getPotentialMitosisCell() {
+   public ArrayList<Integer> getPotentialMitosisCell() {
       return cellsWithMoreThan2Spots_;
    }
 

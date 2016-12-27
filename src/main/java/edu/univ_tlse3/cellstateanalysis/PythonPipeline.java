@@ -1,7 +1,6 @@
 package edu.univ_tlse3.cellstateanalysis;
 
 import edu.univ_tlse3.utils.FileUtils;
-import edu.univ_tlse3.utils.IOUtils;
 import ij.IJ;
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -47,7 +46,7 @@ public class PythonPipeline {
             script.add(line);
          }
       } catch (IOException e) {
-         IOUtils.printErrorToIJLog(e);
+         IJ.error(e.toString());
       }
       return script;
    }
@@ -168,7 +167,7 @@ public class PythonPipeline {
 //         python.eval("print sys.version_info");
 //
 //      } catch (ScriptException e) {
-//         IOUtils.printErrorToIJLog(e);;
+//         IJ.error(e.toString());;
 //      }
 //
 //      final PythonInterpreter interpreter = new PythonInterpreter();
