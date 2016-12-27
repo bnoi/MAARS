@@ -2,6 +2,7 @@ package edu.univ_tlse3.display;
 
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
+import edu.univ_tlse3.utils.IOUtils;
 import ij.IJ;
 import org.jfree.chart.ChartPanel;
 import org.micromanager.internal.utils.ReportingUtils;
@@ -15,13 +16,13 @@ import java.util.Arrays;
 /**
  * Created by tong on 25/10/16.
  */
-public class SOCVisualizer {
+public class SOCVisualizer extends JFrame{
     private DefaultListModel alreadyShownList_ = new DefaultListModel();
     private SetOfCells setOfCells_;
-    private JFrame frame_;
     private JTextField pathToSoc_;
 
     public SOCVisualizer() {
+        super("Display potential mitotic cells");
     }
 
     public void updateCellsDisplay(SetOfCells setOfCells) {
@@ -42,10 +43,6 @@ public class SOCVisualizer {
         alreadyShownList_.copyInto(contents);
     }
 
-    public void showDialog(Boolean show) {
-        frame_.setVisible(show);
-    }
-
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from
@@ -53,10 +50,9 @@ public class SOCVisualizer {
      */
     public void createAndShowGUI() {
         //Create and set up the window.
-        frame_ = new JFrame("Display potential mitotic cells");
-        frame_.setLayout(new BorderLayout(2, 1));
-        final Container contentPane = frame_.getContentPane();
-        frame_.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(2, 1));
+        final Container contentPane = getContentPane();
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         final JPanel[] lastChartPanel = {new CellChartPanel("Waiting for data...")};
         final JList cellToDisplayList = new JList(alreadyShownList_);
@@ -72,7 +68,7 @@ public class SOCVisualizer {
                         chartPanel.setVisible(true);
                         contentPane.add(chartPanel);
                         lastChartPanel[0] = chartPanel;
-                        frame_.revalidate();
+                        revalidate();
                     }
                 }
             }
@@ -97,7 +93,7 @@ public class SOCVisualizer {
                     chartPanel.setVisible(true);
                     contentPane.add(chartPanel);
                     lastChartPanel[0] = chartPanel;
-                    frame_.revalidate();
+                    revalidate();
                 }
             }
         });
@@ -127,7 +123,7 @@ public class SOCVisualizer {
 
                 }
             } catch (IOException | ClassNotFoundException e) {
-                IJ.error(e.toString());
+                IOUtils.printErrorToIJLog(e);
             }
         });
         loadSocPanel.add(pathToSocTFPanel, BorderLayout.CENTER);
@@ -137,10 +133,10 @@ public class SOCVisualizer {
         contentPane.add(lastChartPanel[0], BorderLayout.CENTER, 1);
         contentPane.add(loadSocPanel,BorderLayout.EAST,2);
 
-        frame_.validate();
+        validate();
         //Display the window.
-        frame_.setPreferredSize(new java.awt.Dimension(600, 570));
-        frame_.pack();
+        setPreferredSize(new java.awt.Dimension(600, 570));
+        pack();
     }
 
     public void cleanUp(){
