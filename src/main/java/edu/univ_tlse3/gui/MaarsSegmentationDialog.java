@@ -70,6 +70,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
       //
 
+      JPanel skipChkBoxPanel = new JPanel();
       JCheckBox skipSegChBox = new JCheckBox();
       skipSegChBox.setSelected(Boolean.parseBoolean(parameters_.getSkipSegmentation()));
       skipSegChBox.setText("Skip segmentation");
@@ -88,7 +89,8 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
             parameters_.setSkipSegmentation(false);
          }
       });
-      this.add(skipSegChBox);
+      skipChkBoxPanel.add(skipSegChBox, JPanel.CENTER_ALIGNMENT);
+      this.add(skipChkBoxPanel);
       //
 
       Label segmMovieLabel = new Label("Movie parameters", Label.CENTER);
