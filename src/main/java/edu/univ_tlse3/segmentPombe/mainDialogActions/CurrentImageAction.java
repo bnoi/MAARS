@@ -2,6 +2,7 @@ package edu.univ_tlse3.segmentPombe.mainDialogActions;
 
 import edu.univ_tlse3.segmentPombe.SegPombeMainDialog;
 import ij.IJ;
+;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

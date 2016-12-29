@@ -3,7 +3,6 @@ package edu.univ_tlse3.display;
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.utils.IOUtils;
-import ij.IJ;
 import org.jfree.chart.ChartPanel;
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -11,14 +10,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.Arrays;
 
 /**
  * Created by tong on 25/10/16.
+ *
  */
 public class SOCVisualizer extends JFrame{
-    private DefaultListModel alreadyShownList_ = new DefaultListModel();
-    private SetOfCells setOfCells_;
+    private DefaultListModel<Integer> alreadyShownList_ = new DefaultListModel<>();
     private JTextField pathToSoc_;
 
     public SOCVisualizer() {
@@ -27,9 +25,8 @@ public class SOCVisualizer extends JFrame{
 
     public void updateCellsDisplay(SetOfCells setOfCells) {
 //        ImageIcon icon = createImageIcon("images/middle.gif");
-        setOfCells_ = setOfCells;
-        for (Integer cellIndex : setOfCells_.getPotentialMitosisCell()) {
-            int cellNb = setOfCells_.getCell(cellIndex).getCellNumber();
+        for (Integer cellIndex : setOfCells.getPotentialMitosisCell()) {
+            int cellNb = setOfCells.getCell(cellIndex).getCellNumber();
             if (!alreadyShownList_.contains(cellNb)) {
                 alreadyShownList_.addElement(cellNb);
             }
@@ -37,25 +34,25 @@ public class SOCVisualizer extends JFrame{
 //      sort();
     }
 
-    public void sort() {
-        Integer[] contents = (Integer[]) alreadyShownList_.toArray();
-        Arrays.sort(contents);
-        alreadyShownList_.copyInto(contents);
-    }
+//    public void sort() {
+//        Integer[] contents = (Integer[]) alreadyShownList_.toArray();
+//        Arrays.sort(contents);
+//        alreadyShownList_.copyInto(contents);
+//    }
 
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from
      * the event dispatch thread.
      */
-    public void createAndShowGUI() {
+    public void createGUI(SetOfCells setOfCells) {
         //Create and set up the window.
         setLayout(new BorderLayout(2, 1));
         final Container contentPane = getContentPane();
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         final JPanel[] lastChartPanel = {new CellChartPanel("Waiting for data...")};
-        final JList cellToDisplayList = new JList(alreadyShownList_);
+        final JList<Integer> cellToDisplayList = new JList<>(alreadyShownList_);
         cellToDisplayList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
@@ -63,7 +60,7 @@ public class SOCVisualizer extends JFrame{
                     if (index != -1){
                         contentPane.remove(lastChartPanel[0]);
                         Object item = alreadyShownList_.getElementAt(index);
-                        Cell c = setOfCells_.getCell((Integer) item);
+                        Cell c = setOfCells.getCell((Integer) item);
                         ChartPanel chartPanel = CellChartPanel.updateCellContent(c);
                         chartPanel.setVisible(true);
                         contentPane.add(chartPanel);
@@ -88,7 +85,7 @@ public class SOCVisualizer extends JFrame{
                 if (index >=0 && index <= cellToDisplayList.getLastVisibleIndex()) {
                     contentPane.remove(lastChartPanel[0]);
                     Object item = alreadyShownList_.getElementAt(index);
-                    Cell c = setOfCells_.getCell((Integer) item);
+                    Cell c = setOfCells.getCell((Integer) item);
                     ChartPanel chartPanel = CellChartPanel.updateCellContent(c);
                     chartPanel.setVisible(true);
                     contentPane.add(chartPanel);
@@ -114,13 +111,11 @@ public class SOCVisualizer extends JFrame{
                 ObjectInputStream obj_in =
                         new ObjectInputStream (f_in);
                 Object obj = obj_in.readObject();
-                if (obj instanceof SetOfCells)
-                {
+                if (obj instanceof SetOfCells) {
                     // Cast object to a soc
                     ReportingUtils.logMessage("updated");
                     SetOfCells soc = (SetOfCells) obj;
                     updateCellsDisplay(soc);
-
                 }
             } catch (IOException | ClassNotFoundException e) {
                 IOUtils.printErrorToIJLog(e);

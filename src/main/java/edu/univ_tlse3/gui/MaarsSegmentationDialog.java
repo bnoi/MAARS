@@ -6,6 +6,7 @@ import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.maars.MaarsSegmentation;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.ImgUtils;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.YesNoCancelDialog;

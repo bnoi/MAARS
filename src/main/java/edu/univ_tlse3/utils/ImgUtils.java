@@ -1,6 +1,7 @@
 package edu.univ_tlse3.utils;
 
 import edu.univ_tlse3.cellstateanalysis.Cell;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

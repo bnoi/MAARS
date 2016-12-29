@@ -2,6 +2,7 @@ package edu.univ_tlse3.cellstateanalysis;
 
 import com.google.common.collect.Iterables;
 import fiji.plugin.trackmate.Spot;
+
 import ij.IJ;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;

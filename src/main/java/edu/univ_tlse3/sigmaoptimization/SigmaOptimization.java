@@ -2,6 +2,7 @@ package edu.univ_tlse3.sigmaoptimization;
 
 import edu.univ_tlse3.segmentPombe.ComputeCorrelation;
 import edu.univ_tlse3.utils.IOUtils;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;

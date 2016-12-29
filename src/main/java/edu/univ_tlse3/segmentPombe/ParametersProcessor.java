@@ -1,6 +1,7 @@
 package edu.univ_tlse3.segmentPombe;
 
 import edu.univ_tlse3.utils.FileUtils;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

@@ -7,6 +7,7 @@ import edu.univ_tlse3.gui.MaarsMainDialog;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

@@ -35,6 +35,7 @@ public class FindLagging {
                      cell.addSpotInBtwnFrame(frame);
                   }
                }else{
+                  //not on the line between the poles (maybe unattached)
                   cell.addFrameWithUnalignedSpot(frame);
                }
             }

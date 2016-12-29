@@ -9,6 +9,7 @@ import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
+
 import ij.IJ;
 import ij.ImagePlus;
 

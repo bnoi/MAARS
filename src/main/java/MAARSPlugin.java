@@ -3,6 +3,7 @@ import edu.univ_tlse3.gui.MaarsMainDialog;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
+
 import ij.IJ;
 import org.micromanager.MenuPlugin;
 import org.micromanager.Studio;

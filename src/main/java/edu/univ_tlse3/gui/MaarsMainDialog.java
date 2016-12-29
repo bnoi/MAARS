@@ -7,6 +7,7 @@ import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
+
 import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
@@ -341,7 +342,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
    private SOCVisualizer createVisualizer(){
       final SOCVisualizer socVisualizer = new SOCVisualizer();
-      SwingUtilities.invokeLater(socVisualizer::createAndShowGUI);
+      socVisualizer.createGUI(soc_);
       return socVisualizer;
    }
 
@@ -448,7 +449,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             soc_.reset();
             socVisualizer_.cleanUp();
             socVisualizer_.setVisible(false);
-            socVisualizer_.createAndShowGUI();
+            socVisualizer_.createGUI(soc_);
          }
       } else {
          IJ.log("MAARS don't understand what you want, sorry");

@@ -190,8 +190,8 @@ public class FluoAnalyzer implements Runnable {
             if (spotSet != null) {
                HashMap<String, Object> geometry = spotSetAnalyzor.compute(spotSet);
                ArrayList<Spot> poles = spotSetAnalyzor.getPoles();
-               new FindLagging(cell, spotSet, fluoImgCal, poles, radius, frame);
                cell.putGeometry(channel, frame, geometry);
+               new FindLagging(cell, spotSet, fluoImgCal, poles, radius, frame);
                if ((Integer)geometry.get(SpotSetAnalyzor.NbOfSpotDetected) > 1){
                   soc.addPotentialMitosisCell(cell.getCellNumber());
                }
