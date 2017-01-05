@@ -32,7 +32,7 @@ public class MAARSImgSaver {
          String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + s;
          ImagePlus imp = croppedImgSet.get(s);
          IJ.run(imp, "Enhance Contrast", "saturated=0.35");
-         IJ.run(imp, "16-bit", "");
+//         IJ.run(imp, "16-bit", "");
          IJ.saveAsTiff(imp, pathToCroppedImg);
       }
    }

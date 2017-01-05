@@ -224,7 +224,7 @@ public class SegPombe {
          }
          this.binImage.hide();
       }
-//      IJ.run(this.binImage, "Adjustable Watershed", "tolerance=15");
+      IJ.run(this.binImage, "Adjustable Watershed", "tolerance=15");
    }
 
    /**
