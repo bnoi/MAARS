@@ -76,8 +76,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    /**
     *
-    * @param maarsMainFrame
-    * @param mm
+    * @param maarsMainFrame MAARS main frame
+    * @param mm             mmstudio object
     * @param parameters : parameters_ displayed in dialog
     */
    MaarsFluoAnalysisDialog(JFrame maarsMainFrame, MMStudio mm, MaarsParameters parameters) {
@@ -88,7 +88,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       // set up this dialog
       this.mm = mm;
       parameters_ = parameters;
-      setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+      setModalityType(ModalityType.DOCUMENT_MODAL);
       setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       setTitle("MAARS - Fluorescent Analysis Parameters");
       setBackground(Color.WHITE);
