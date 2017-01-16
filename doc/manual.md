@@ -1,5 +1,5 @@
 # MAARS manual
-## Lauching MAARS
+## Launching MAARS
 You can find MAARS in `Plugins` of **Micro-Manager toolbar** (not ImageJ toolbar!). Then you will see this main dialog
 
 ![main_frame_clean][]  
@@ -27,12 +27,11 @@ which displays the logs.
 9. Show the visualizer of parameters
 10. Stop
 
-# Output of MAARS
-If MAARS has successfully finished the analysis, user should at least has these folders and one config file saved.  
+# Output of MAARS  
 
 ![output_folders][]  
 
-the **maars_config.xml** save the configuration used in this acquisition.  
+The **maars_config.xml** save the configuration of current acquisition.  
 The **X(number)_Y(number)** structure means the data of position X and position Y.  
 The folder **X(number)_Y(number)** contains bright-field images and result of segmentation.  
 
@@ -57,11 +56,11 @@ The unfiltered results of analysis are saved into three folder: **croppedImgs**,
 **features**: measurements such as spindle angle and spindle length for each cell (.csv).  
 **spots**:  all spots detected in each cell (.xml from Trackmate).  
 
-The **X(number)_Y(number)_MITOSIS** folder contains all information of cells detected as cells in mitosis:  
+The **X(number)_Y(number)_MITOSIS** folder contains all information of cells detected as mitotic cells:  
 
 ![mitosis_folder][]
 
-The folders croppedImgs, features and spots contains only data from cells in mitosis.
+The folders croppedImgs, features and spots contains same kind of data but only from mitotic cells.
 
 **figs** : three plots for each cell.
 
@@ -69,9 +68,9 @@ The folders croppedImgs, features and spots contains only data from cells in mit
 Spindle elongation curve (x labels are the frame numbers. To calculate time in minutes t : `t = frame_number * time interval / 60`)
 
 ![slopChangePoints][]  
-normalized (to current cell major axis length) spindle elongation with maximum slope change time point detected. In example image, MAARS detected two maximum slope changes time point : frame 15 and frame 69.  
+Normalized (to current cell major axis length) spindle elongation with maximum slope change time point detected. In the example, MAARS detected two maximum slope changes time points : frame 15 and frame 69.  
 
- _colors of slope change_: Blue squares and red triangles below spindle elongation is the slope change of each time point. Blue indicates `slope of time t+1` - `slope of current time point` <= 0; red means > 0
+ _colors of slope change_: Blue squares and red triangles under the spindle elongation are the slope change of each time point. Blue indicates `slope of time t+1` - `slope of current time point` <= 0; red means > 0
  _colors of fitted line overlapping with elongation curve_: red color indicates positive slope , blue indicated negative slope.
 
 ![SPBtracks][]  
@@ -94,6 +93,7 @@ SPB tracks in current film
 
 # Developing with Eclipse/Netbean/IntelliJ
 # TroubleShooting
+please use Github new issue to report: https://github.com/bnoi/MAARS/issues/new
 
 [main_frame_clean]: images/main_frame_clean.png
 [main_frame]: images/main_frame.png
