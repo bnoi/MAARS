@@ -1,4 +1,4 @@
-# MAARS Manual (v1.0.0)
+# MAARS Installation
 This manual should be applicable to all OSs (Ubuntu16.04/MacOS Sierra/Win7)
 
 ## Build the environment
@@ -29,45 +29,8 @@ _**Important** :_ Don't forget to configure ImageJ's RAM allocation. In `Edit/Op
 [Download][download_maars] and unzip the latest `MAARS_1.0.0.zip` into your `plugins` folder under MM’s root folder. You will get a `MAARS_1.0.0.jar` and its dependencies in a folder called `MAARS_deps`.  
 ![][image4]
 
-## How to run MAARS
-### Lauching MAARS
-You can find MAARS in `Plugins` of **MM toolbar** (not ImageJ toolbar!). Then you will see this main dialog  
-![main_frame_clean][]  
-which is designed to change different parameters for the recording/analyzing process, and the log dialog
-![log_dialog][]  
-which displays the logs.  
-### Quick start  
-#### Main frame
-![main_frame][]  
-1. Define width and height of the multi-position course
-2. Configure segmentation parameters
-3. Configure fluorescent analysis parameters for each time point
-4. Static / dynamic analysis :
-	- static : take a snapshot for each view field
-	- dynamic : perform a N minutes recording/analyzing for each view field
-5. Perform post-analysis or acquire new images
-6. Save all the specify parameters for current analysis, so that the user can use the same parameters in next run
-7. The folder that contains previously acquired image (post-analysis) or the saving path for images and the analyzing results (on-the-fly analysis)
-8. Run MAARS
-9. Show the visualizer of parameters
-10. Stop the analyzing/recording
-#### Segmentation
-#### Fluorescent analysis
-#### Visualizer
+You are now ready to run MAARS.
 
-
-
-
-## Developers section
- `build-mm.sh` : use this script to build Micro-Manager under Linux.
- `mavenized-mm.sh` : use this script to update local Maven repository inside `repo/`. MM jars used are `MMJ_`, `MMCoreJ` and `MMAcqEngine`.
-
-`update-libs.sh` : use Maven to build MAARS and copy all dependencies to `jars/`. It allows "basic users" to copy the required .jar file to a standard Micro-Manager installation.
-
-`install.sh` : Use to install MAARS plugin and its dependencies to Micro-Manager installation.
-
-## Developing with Eclipse/Netbean/IntelliJ
-## TroubleShooting
 
 [Anaconda]: https://www.continuum.io/downloads
 [Version 2.0 - Micro-Manager]: https://micro-manager.org/wiki/Version_2.0
@@ -75,11 +38,7 @@ which displays the logs.
 [tutorial]: https://micro-manager.org/wiki/Micro-Manager_Configuration_Guide
 [download this demo-config file]: https://raw.githubusercontent.com/micro-manager/micro-manager/master/bindist/any-platform/MMConfig_demo.cfg
 [download_maars]: https://github.com/bnoi/MAARS/releases/tag/v1.0.0
-
 [image1]: images/Micro-Manager_download_page.png "Micro-Manager version 2.0 download page"
 [image2]: images/imagej_java8.png
 [image3]: images/configure_ram_imagej.png
 [image4]: images/unzip.png
-[main_frame]: images/main_frame.png
-[main_frame_clean]: images/main_frame_clean.png
-[log_dialog]: images/log_dialog.png
