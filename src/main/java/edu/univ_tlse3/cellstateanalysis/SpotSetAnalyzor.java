@@ -203,7 +203,6 @@ public class SpotSetAnalyzor {
       double ang = getLessThan90Ang(angle_);
       Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(ang)),
               major * FastMath.sin(FastMath.toRadians(ang)), fakeSpotZ);
-      //TODO zero norm error but i do not know why
       return getLessThan90Ang(FastMath.toDegrees(Vector3D.angle(cellMajAxisVec, polesVec)));
    }
 

@@ -28,7 +28,6 @@ import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
@@ -81,7 +80,7 @@ public class MAARS implements Runnable {
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
-        HashMap<String, ImagePlus> croppedImgSet;
+        HashMap<String, ImagePlus> croppedImgSet = null;
 //        TODO only save the potential the mitotic cells
 //        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
 //         for (int i : cellIndex) {
@@ -115,9 +114,8 @@ public class MAARS implements Runnable {
                }
             }
          }
-//      if (croppedImgSet != null) {
-//         imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());
-//      }
+        assert croppedImgSet != null;
+        imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());
     }
 
     private static void showChromLaggingCells(String pathToSegDir,
@@ -144,15 +142,11 @@ public class MAARS implements Runnable {
                     Cell cell = soc.getCell(cellNb);
                     cell.setAnaBOnsetFrame(anaBOnsetFrame);
                     ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
-                    if (spotInBtwnFrames.size() > 0) {
+                    if (spotInBtwnFrames.size() > 0 || cell.unalignedSpotFrames().size() > 0) {
                         Collections.sort(spotInBtwnFrames);
                         if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 1) {
                             assert out != null;
                             out.println(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
-                            String timeStamp = new SimpleDateFormat("yyyyMMdd_HH:mm:ss")
-                                    .format(Calendar.getInstance().getTime());
-                            // IJ.log(timeStamp + " : cell " + cellNb + "_" +
-                            // abnormalStateTimes * this.fluotimeInterval / 1000 + " s.");
                             if (splitChannel) {
                                 merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
                                         + File.separator + cellNb + "_GFP.tif");
@@ -173,7 +167,7 @@ public class MAARS implements Runnable {
 
     static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters,
                                       Boolean splitChannel, String pathToSegDir, Boolean showChromLagging) {
-        // TODO need to find a place for there metadata maybe in images
+        // TODO need to find a place for the metadata, maybe in images
         IJ.log("Start python analysis");
         ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, parameters.getDetectionChForMitosis(),
                 "0.1075", parameters.getMinimumMitosisDuration(),

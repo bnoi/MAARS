@@ -218,13 +218,9 @@ public class SegPombe {
       if (useDynamic){
          this.binImage.show();
          IJ.run("Adjustable Watershed");
-         Window watershedWin =  WindowManager.getAllNonImageWindows()[0];
-         while (watershedWin.isActive()){
-            IJ.wait(500);
-         }
          this.binImage.hide();
       }
-      IJ.run(this.binImage, "Adjustable Watershed", "tolerance=15");
+//      IJ.run(this.binImage, "Adjustable Watershed", "tolerance=15");
    }
 
    /**

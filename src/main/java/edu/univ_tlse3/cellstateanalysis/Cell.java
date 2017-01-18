@@ -112,4 +112,8 @@ public class Cell implements Serializable{
    public void addFrameWithUnalignedSpot(int frame){
       frameWithUnalignedSpot_.add(frame);
    }
+
+   public ArrayList<Integer> unalignedSpotFrames(){
+      return frameWithUnalignedSpot_;
+   }
 }
