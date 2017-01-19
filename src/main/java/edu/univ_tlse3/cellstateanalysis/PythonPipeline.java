@@ -14,7 +14,8 @@ import java.util.regex.Pattern;
 public class PythonPipeline {
    private static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
    private static final String TRACKMATE_NAME = "trackmate.py";
-   private static final String PATH2PYTHONSCRIPTS = IJ.getDirectory("plugins") + "MAARS_deps" + File.separator;
+//   private static final String PATH2PYTHONSCRIPTS = IJ.getDirectory("plugins") + "MAARS_deps" + File.separator;
+   private static final String PATH2PYTHONSCRIPTS = "/home/tong/Documents/code/ImageJ/plugins/MAARS_deps" + File.separator;
 
    public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
       BufferedReader bfr = FileUtils.getBufferReaderOfScript(SCRIPT_NAME);
@@ -64,11 +65,11 @@ public class PythonPipeline {
     *
     */
    public static void runPythonScript() {
-      ProcessBuilder probuilder;
       String[] cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), PATH2PYTHONSCRIPTS + SCRIPT_NAME};
-//      File pythonOutput = new File(PATH2PYTHONSCRIPTS + "python_outputs");
-      probuilder = new ProcessBuilder(cmd).inheritIO().redirectErrorStream(true);
+      ProcessBuilder probuilder = new ProcessBuilder().inheritIO().redirectErrorStream(true).command(cmd);
+      File pythonLog = new File(PATH2PYTHONSCRIPTS + "pythonPipeline_log.txt");
       try {
+         probuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(pythonLog));
          probuilder.start();
       } catch (IOException e) {
          IJ.log(e.getMessage());
@@ -126,10 +127,10 @@ public class PythonPipeline {
    }
 
    public static void main(String[] args) {
-       String newPath = FileUtils.convertPathToLinuxType("/Volumes/Macintosh/curioData/MAARSdata/102/15-06-1/X0_Y0");
+       String newPath = FileUtils.convertPathToLinuxType("/media/tong/MAARSData/MAARSData/102/15-06-1/X0_Y0");
 //       ReportingUtils.logMessage(newPath);
        ArrayList<String> script = PythonPipeline.getPythonScript(newPath, "CFP", "0.1075", "200","20");
-//       PythonPipeline.savePythonScript(script);
+       PythonPipeline.savePythonScript(script);
        PythonPipeline.runPythonScript();
    //todo it will be cool if one day anaconda support jython. Though not possible for now. The codes below is tested with jython
 // /      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)

@@ -16,7 +16,7 @@ from argparse import ArgumentParser
 from re import match
 from collections import deque
 from scipy import stats
-get_ipython().magic('matplotlib inline')
+# get_ipython().magic('matplotlib inline')
 
 
 idx = pd.IndexSlice
