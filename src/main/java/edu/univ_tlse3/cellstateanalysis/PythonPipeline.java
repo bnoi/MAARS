@@ -65,28 +65,11 @@ public class PythonPipeline {
     */
    public static void runPythonScript() {
       ProcessBuilder probuilder;
-      Process process;
-      BufferedReader in;
-      BufferedReader stdError;
-      String[] cmd;
-      if (System.getProperty("os.name").matches("(Windows)(.+)")) {
-         cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), PATH2PYTHONSCRIPTS + SCRIPT_NAME};
-      } else {
-         cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(),PATH2PYTHONSCRIPTS + SCRIPT_NAME};
-      }
-
-      probuilder = new ProcessBuilder(cmd);
+      String[] cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), PATH2PYTHONSCRIPTS + SCRIPT_NAME};
+//      File pythonOutput = new File(PATH2PYTHONSCRIPTS + "python_outputs");
+      probuilder = new ProcessBuilder(cmd).inheritIO().redirectErrorStream(true);
       try {
-         process = probuilder.start();
-         in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-         stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-         String s;
-         while ((s = in.readLine()) != null) {
-            IJ.log(s);
-         }
-         while ((s = stdError.readLine()) != null) {
-            IJ.log(s);
-         }
+         probuilder.start();
       } catch (IOException e) {
          IJ.log(e.getMessage());
       }
@@ -143,11 +126,11 @@ public class PythonPipeline {
    }
 
    public static void main(String[] args) {
-//       String newPath = FileUtils.convertPathToLinuxType("/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/X0_Y0");
+       String newPath = FileUtils.convertPathToLinuxType("/Volumes/Macintosh/curioData/MAARSdata/102/15-06-1/X0_Y0");
 //       ReportingUtils.logMessage(newPath);
-//       ArrayList<String> script = PythonPipeline.getPythonScript(newPath, "CFP", "0.1075", "200","20");
+       ArrayList<String> script = PythonPipeline.getPythonScript(newPath, "CFP", "0.1075", "200","20");
 //       PythonPipeline.savePythonScript(script);
-//       PythonPipeline.runPythonScript();
+       PythonPipeline.runPythonScript();
    //todo it will be cool if one day anaconda support jython. Though not possible for now. The codes below is tested with jython
 // /      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
 //              + "AnalyzeMAARSOutput.py");

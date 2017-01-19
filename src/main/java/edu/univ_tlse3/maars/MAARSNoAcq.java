@@ -187,14 +187,14 @@ public class MAARSNoAcq implements Runnable {
                   Boolean splitChannel = true;
                   mergedImg.getCalibration().frameInterval = timeInterval / 1000;
                   MAARS.saveAll(soc_, mergedImg, pathToFluoDir, splitChannel,parameters.useDynamic());
+                  IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+                          + " sec for writing results");
                   if (parameters.useDynamic()) {
                      if (IJ.isWindows()) {
                         pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
                      }
                      MAARS.analyzeMitosisDynamic(soc_, parameters, splitChannel, pathToSegDir, true);
                   }
-                  IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-                          + " sec for writing results");
                }else if (soc_.size() == 0){
                   try {
                      org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
