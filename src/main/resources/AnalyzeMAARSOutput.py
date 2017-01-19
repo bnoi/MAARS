@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[262]:
+# In[ ]:
 
 #!/usr/bin/env python3
 import numpy as np
@@ -172,14 +172,18 @@ class getMitosisFiles(object):
             if path.lexists(csvPath): 
                 oneCell = pd.DataFrame.from_csv(csvPath)
                 spLens = oneCell['SpLength']
-                if len(spLens[spLens>0]) > minimumSegLength:
+                if len(spLens[spLens > 0]) > minimumSegLength:
                     minValue = pd.DataFrame.min(spLens)
                     maxValue = pd.DataFrame.max(spLens)
                     minIndex = spLens.idxmin()
                     maxIndex = spLens.idxmax()
                     if maxIndex < minIndex:
+                        if len(spLens[:maxIndex])==0:
+                            continue
                         minIndex = spLens[:maxIndex].idxmin()
                     mitoregion = spLens.loc[minIndex:maxIndex]
+                    if len(mitoregion) ==0 :
+                        continue
                     mitoregion = mitoregion.interpolate()
 #                     plt.axvline(minIndex)
 #                     plt.axvline(maxIndex, c = "red")
@@ -405,7 +409,7 @@ class getMitosisFiles(object):
                     copyfile(self._baseDir + self._fluo_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv", self._baseDir + self._mitosis_suffix + self._features + "/" + str(cellNb) + "_" + ch + ".csv");
 
 
-# In[263]:
+# In[ ]:
 
 if __name__ == '__main__':
     baseDir="/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/X0_Y0"
