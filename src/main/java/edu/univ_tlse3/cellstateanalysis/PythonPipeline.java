@@ -143,7 +143,7 @@ public class PythonPipeline {
    }
 
    public static void main(String[] args) {
-//       String newPath = FileUtils.convertPathToLinuxType("D:\\Data\\Tong\\Starv\\10-11-2\\X0_Y0");
+//       String newPath = FileUtils.convertPathToLinuxType("/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/X0_Y0");
 //       ReportingUtils.logMessage(newPath);
 //       ArrayList<String> script = PythonPipeline.getPythonScript(newPath, "CFP", "0.1075", "200","20");
 //       PythonPipeline.savePythonScript(script);
