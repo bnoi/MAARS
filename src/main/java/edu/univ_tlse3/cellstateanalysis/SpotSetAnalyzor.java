@@ -90,11 +90,6 @@ public class SpotSetAnalyzor {
       HashMap<String, Object> geometry = new HashMap<>();
       geometry.put(NbOfSpotDetected, setSize);
       Vector3D polesVec = getSpAsVector(poles);
-      if (polesVec.getNorm() == 0) {
-         IJ.log(setSize + "_" + angle_);
-         IJ.log(poles.get(0).getFeature(Spot.POSITION_X) + "_" + poles.get(0).getFeature(Spot.POSITION_Y));
-         IJ.log(poles.get(1).getFeature(Spot.POSITION_X) + "_" + poles.get(1).getFeature(Spot.POSITION_Y));
-      }
       geometry.put(SpLength, polesVec.getNorm());
       Spot spCenter = getCenter(poles);
       geometry.put(SpCenterX, spCenter.getFeature(Spot.POSITION_X));
@@ -200,9 +195,8 @@ public class SpotSetAnalyzor {
     * @return the angle between polesVec and cell major axe
     */
    private double getSpAngToMajAxis(Vector3D polesVec) {
-      double ang = getLessThan90Ang(angle_);
-      Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(ang)),
-              major * FastMath.sin(FastMath.toRadians(ang)), fakeSpotZ);
+      Vector3D cellMajAxisVec = new Vector3D(major * FastMath.cos(FastMath.toRadians(angle_)),
+              major * FastMath.sin(FastMath.toRadians(angle_)), fakeSpotZ);
       return getLessThan90Ang(FastMath.toDegrees(Vector3D.angle(cellMajAxisVec, polesVec)));
    }
 
