@@ -1,15 +1,14 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[ ]:
 
 #!/usr/bin/env python3
 import numpy as np
 import matplotlib.pyplot as plt
 from os import path, mkdir, listdir
 import pandas as pd
-from numpy import diff, genfromtxt, round
-from math import isnan, sqrt
+from math import sqrt
 from shutil import copyfile
 from trackmate import trackmate_peak_import
 from argparse import ArgumentParser
@@ -117,30 +116,29 @@ def find_slope_change_point(anaphase_elongations, timeInterval,majorAxieLen, fig
         plt.show()
     plt.close(fig)
     
-#     def set_attributes_from_cmd_line(self):
-#         parser = ArgumentParser(description="collect files \
-#             related to mitotic cell to root dir of acquisition ")
-#         parser.add_argument("baseDir",
-#                             help="path to acquisition folder",
-#                             type=str)
-#         parser.add_argument("channel",
-#                             help="channel used to detect SPBs",
-#                             type=str)
-#         parser.add_argument("-calibration",
-#                             help="calibration of image",
-#                             type=float, default=0.1075)
-#         parser.add_argument("-minimumPeriod",
-#                             help="minimum time segment to be analyzed",
-#                             type=int, default=200)
-#         parser.add_argument("-acq_interval",
-#                             help="interval of fluo acquisition",
-#                             type=int, default=20)
-#         args = parser.parse_args()
-#         self._baseDir = args.baseDir
-#         channel = args.channel
-#         calibration = args.calibration
-#         minimumPeriod = args.minimumPeriod
-#         acq_interval = args.acq_interval
+    def set_attributes_from_cmd_line(self):
+        parser = ArgumentParser(description="collect files             related to mitotic cell to root dir of acquisition ")
+        parser.add_argument("baseDir",
+                            help="path to acquisition folder",
+                            type=str)
+        parser.add_argument("channel",
+                            help="channel used to detect SPBs",
+                            type=str)
+        parser.add_argument("-calibration",
+                            help="calibration of image",
+                            type=float, default=0.1075)
+        parser.add_argument("-minimumPeriod",
+                            help="minimum time segment to be analyzed",
+                            type=int, default=200)
+        parser.add_argument("-acq_interval",
+                            help="interval of fluo acquisition",
+                            type=int, default=20)
+        args = parser.parse_args()
+        self._baseDir = args.baseDir
+        channel = args.channel
+        calibration = args.calibration
+        minimumPeriod = args.minimumPeriod
+        acq_interval = args.acq_interval
 
 def getAllCellNumbers(features_dir):
     all_cell_nbs=list()
@@ -150,60 +148,69 @@ def getAllCellNumbers(features_dir):
             all_cell_nbs.append(current_cell_nb)
     return all_cell_nbs
 
+def find_mitotic_region(featureOfOneCell, minSegLen, p, extended= True):
+    spLens = featureOfOneCell['SpLength']
+    if len(spLens[spLens > 0]) > minSegLen:
+        minValue = pd.DataFrame.min(spLens)
+        maxValue = pd.DataFrame.max(spLens)
+        minIndex = spLens.idxmin()
+        maxIndex = spLens.idxmax()
+        if maxIndex < minIndex:
+            if len(spLens[:maxIndex])==0:
+                return
+            minIndex = spLens[:maxIndex].idxmin()
+        mitoregion = spLens.loc[minIndex:maxIndex]
+        if len(mitoregion) ==0 :
+            return
+        mitoregion = mitoregion.interpolate()
+#                     plt.axvline(minIndex)
+#                     plt.axvline(maxIndex, c = "red")
+#                     plt.plot(mitoregion.index, mitoregion)
+#                     plt.xlim(-5,90)
+#                     plt.show()
+        slope, intercept, r_value, p_value, std_err = stats.linregress(mitoregion.index,mitoregion)
+        if np.log10(p_value) < p:
+            if extended:
+                nanlist = np.empty(maxIndex - minIndex + 2*minSegLen)
+                nanlist[:] = np.NAN
+                lowerNanlist = np.empty(minSegLen)
+                lowerNanlist[:] = minValue
+                upperNanlist = np.empty(minSegLen)
+                upperNanlist[:] = maxValue
+                lowerDataFrame = pd.DataFrame(data=lowerNanlist,index=np.arange(minIndex-minSegLen,minIndex,1), columns=['SpLength'])
+                upperDataFrame = pd.DataFrame(data=upperNanlist,index=np.arange(maxIndex,maxIndex + minSegLen,1), columns=['SpLength'])
+                extendedDataFrame = pd.DataFrame(data=nanlist,index=np.arange(minIndex-minSegLen,maxIndex+ minSegLen,1), columns=['SpLength'])
+                extendedDataFrame.update(mitoregion)
+                extendedDataFrame.update(lowerDataFrame)
+                extendedDataFrame.update(upperDataFrame)
+                return extendedDataFrame.interpolate()
+            else:
+                return mitoregion
+    return
+    
+
 def getMitoticCellNbs(features_dir, cellNbs, p, minSegLen, channel, mitosisFigDir, save_plot = True):
     anaphase_elongations = dict()
     for cellNb in cellNbs:
         csvPath = features_dir + "/" + str(cellNb) + '_' + channel+'.csv'
         if path.lexists(csvPath): 
             oneCell = pd.DataFrame.from_csv(csvPath)
-            spLens = oneCell['SpLength']
-            if len(spLens[spLens > 0]) > minSegLen:
-                minValue = pd.DataFrame.min(spLens)
-                maxValue = pd.DataFrame.max(spLens)
-                minIndex = spLens.idxmin()
-                maxIndex = spLens.idxmax()
-                if maxIndex < minIndex:
-                    if len(spLens[:maxIndex])==0:
-                        continue
-                    minIndex = spLens[:maxIndex].idxmin()
-                mitoregion = spLens.loc[minIndex:maxIndex]
-                if len(mitoregion) ==0 :
-                    continue
-                mitoregion = mitoregion.interpolate()
-#                     plt.axvline(minIndex)
-#                     plt.axvline(maxIndex, c = "red")
-#                     plt.plot(mitoregion.index, mitoregion)
-#                     plt.xlim(-5,90)
-#                     plt.show()
-                slope, intercept, r_value, p_value, std_err = stats.linregress(mitoregion.index,mitoregion)
-                if np.log10(p_value) < p:
-                    if cellNb not in anaphase_elongations.keys():
-                        nanlist = np.empty(maxIndex - minIndex + 2*minSegLen)
-                        nanlist[:] = np.NAN
-                        lowerNanlist = np.empty(minSegLen)
-                        lowerNanlist[:] = minValue
-                        upperNanlist = np.empty(minSegLen)
-                        upperNanlist[:] = maxValue
-                        lowerDataFrame = pd.DataFrame(data=lowerNanlist,index=np.arange(minIndex-minSegLen,minIndex,1), columns=['SpLength'])
-                        upperDataFrame = pd.DataFrame(data=upperNanlist,index=np.arange(maxIndex,maxIndex + minSegLen,1), columns=['SpLength'])
-                        extendedDataFrame = pd.DataFrame(data=nanlist,index=np.arange(minIndex-minSegLen,maxIndex+ minSegLen,1), columns=['SpLength'])
-                        extendedDataFrame.update(mitoregion)
-                        extendedDataFrame.update(lowerDataFrame)
-                        extendedDataFrame.update(upperDataFrame)
-                        extendedDataFrame = extendedDataFrame.interpolate()
-                        anaphase_elongations[str(cellNb)+"_"+channel] = extendedDataFrame
-                        if save_plot:
-                            current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
-                            fig, ax = plt.subplots(figsize=(15, 8))
-                            ax.axhline(current_major_length,  c= 'red', lw = 10)
-                            plt.ylabel("Spindle Length ($μm$)", fontsize=20)
-                            plt.tick_params(axis='both', which='major', labelsize=20)
-                            plt.xlabel("Timepoint // interval " + str(acq_interval), fontsize=20)
-                            plt.xlim(0, oneCell.index[-1])
-                            plt.ylim(0, current_major_length)
-                            plt.plot(extendedDataFrame.index, extendedDataFrame, "-o", c="black")
-                            plt.savefig(mitosisFigDir + str(cellNb) + "_elongation", transparent = True, bbox_inches='tight')
-                            plt.close(fig)
+            extendedDataFrame = find_mitotic_region(oneCell, minSegLen, p)
+            if extendedDataFrame is None:
+                continue
+            anaphase_elongations[str(cellNb)+"_"+channel] = extendedDataFrame
+            if save_plot:
+                current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
+                fig, ax = plt.subplots(figsize=(15, 8))
+                ax.axhline(current_major_length,  c= 'red', lw = 10)
+                plt.ylabel("Spindle Length ($μm$)", fontsize=20)
+                plt.tick_params(axis='both', which='major', labelsize=20)
+                plt.xlabel("Timepoint // interval " + str(acq_interval), fontsize=20)
+                plt.xlim(0, oneCell.index[-1])
+                plt.ylim(0, current_major_length)
+                plt.plot(extendedDataFrame.index, extendedDataFrame, "-o", c="black")
+                plt.savefig(mitosisFigDir + str(cellNb) + "_elongation", transparent = True, bbox_inches='tight')
+                plt.close(fig)
     return anaphase_elongations
 
 
@@ -375,7 +382,7 @@ def distance(x1,y1,z1,x2,y2,z2):
     return  sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)                
 
 
-# In[2]:
+# In[ ]:
 
 if __name__ == '__main__':
     baseDir="/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/X0_Y0"
