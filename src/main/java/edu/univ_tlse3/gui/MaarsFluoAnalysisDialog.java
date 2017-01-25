@@ -525,7 +525,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private void testTrackmate(JPanel jp) {
       String channelName = getSelectedChannel(jp);
       String imgPath = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator
-              + channelName + "_0" + File.separator + channelName + "_0_MMStack_Pos0.ome.tif";
+              + channelName + "_1" + File.separator + channelName + "_1_MMStack_Pos0.ome.tif";
       if (FileUtils.exists(imgPath)) {
          testTrackmate(jp, IJ.openImage(imgPath));
       } else {
