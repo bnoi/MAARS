@@ -4,6 +4,7 @@ import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 
 import ij.IJ;
+import ij.ImagePlus;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.*;
@@ -73,6 +74,10 @@ public class PythonPipeline {
          probuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(pythonLog));
          Process process = probuilder.start();
          process.waitFor();
+         process.destroyForcibly();
+         if (!process.isAlive()){
+            IJ.log("Python pipeline ended");
+         }
       } catch (IOException | InterruptedException e) {
          IJ.log(e.getMessage());
       }

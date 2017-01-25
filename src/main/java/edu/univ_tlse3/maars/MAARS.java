@@ -142,11 +142,14 @@ public class MAARS implements Runnable {
                     Cell cell = soc.getCell(cellNb);
                     cell.setAnaBOnsetFrame(anaBOnsetFrame);
                     ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
-                    if (spotInBtwnFrames.size() > 0 || cell.unalignedSpotFrames().size() > 0) {
+                    if (spotInBtwnFrames.size() > 0) {
+                        //TODO to show unaligned cell
+//                         || cell.unalignedSpotFrames().size() > 0
                         Collections.sort(spotInBtwnFrames);
                         if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 1) {
                             assert out != null;
                             out.println(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
+                            IJ.log(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             if (splitChannel) {
                                 merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
                                         + File.separator + cellNb + "_GFP.tif");
@@ -162,6 +165,7 @@ public class MAARS implements Runnable {
             }
             assert out != null;
             out.close();
+            IJ.log("lagging detection finished");
         }
     }
 
