@@ -45,7 +45,7 @@ User can also skip the segmentation by selecting the checkbox on the top the dia
 
 ![fluorescence_dialog][]  
 On the top of the dialog, user can specify how the acquisition will be performed as in other imaging systems.  
-When the __do analysis__ is unchecked, MAARS will only acquire images without fluorescence analysis. Note that when time interval is too short i.e. <10000s, this button with be automatically unchecked.  
+When the __do analysis__ is unchecked, MAARS will only acquire images without fluorescence analysis. Note that when time interval is too short i.e. <10000ms, this button with be automatically unchecked.  
 
 The configuration group combobox allows user to select Micro-Manager configuration which corresponds to channel configurations.  
 On the bottom of dialog, the checkbox at the head of each line indicates whether or not to use this channel. Then user can select the channel to use. For each channel there are some parameters need to be specified.  
@@ -109,8 +109,6 @@ Normalized (to current cell major axis length) spindle elongation with maximum s
 ![SPBtracks][]  
 SPB tracks in current film
 
-### Segmentation
-### Fluorescent analysis
 ### Visualizer
 
 
