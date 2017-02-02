@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[ ]:
+# In[45]:
 
 #!/usr/bin/env python3
 import numpy as np
@@ -15,7 +15,8 @@ from argparse import ArgumentParser
 from re import match
 from collections import deque
 from scipy import stats
-# get_ipython().magic('matplotlib inline')
+import multiprocessing as mp
+#get_ipython().magic('matplotlib inline')
 
 
 idx = pd.IndexSlice
@@ -168,6 +169,8 @@ def find_mitotic_region(featureOfOneCell, minSegLen, p, extended= True):
 #                     plt.plot(mitoregion.index, mitoregion)
 #                     plt.xlim(-5,90)
 #                     plt.show()
+        if mitoregion.shape[0]< minSegLen:
+            return
         slope, intercept, r_value, p_value, std_err = stats.linregress(mitoregion.index,mitoregion)
         if np.log10(p_value) < p:
             if extended:
@@ -189,29 +192,28 @@ def find_mitotic_region(featureOfOneCell, minSegLen, p, extended= True):
     return
     
 
-def getMitoticCellNbs(features_dir, cellNbs, p, minSegLen, channel, mitosisFigDir, save_plot = True):
-    anaphase_elongations = dict()
-    for cellNb in cellNbs:
-        csvPath = features_dir + "/" + str(cellNb) + '_' + channel+'.csv'
-        if path.lexists(csvPath): 
-            oneCell = pd.DataFrame.from_csv(csvPath)
-            extendedDataFrame = find_mitotic_region(oneCell, minSegLen, p)
-            if extendedDataFrame is None:
-                continue
-            anaphase_elongations[str(cellNb)+"_"+channel] = extendedDataFrame
-            if save_plot:
-                current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
-                fig, ax = plt.subplots(figsize=(15, 8))
-                ax.axhline(current_major_length,  c= 'red', lw = 10)
-                plt.ylabel("Spindle Length ($μm$)", fontsize=20)
-                plt.tick_params(axis='both', which='major', labelsize=20)
-                plt.xlabel("Timepoint // interval " + str(acq_interval), fontsize=20)
-                plt.xlim(0, oneCell.index[-1])
-                plt.ylim(0, current_major_length)
-                plt.plot(extendedDataFrame.index, extendedDataFrame, "-o", c="black")
-                plt.savefig(mitosisFigDir + str(cellNb) + "_elongation", transparent = True, bbox_inches='tight')
-                plt.close(fig)
-    return anaphase_elongations
+def getMitoticElongation(cellRois, features_dir, cellNb, p, minSegLen, channel, mitosisFigDir, save_plot = True):
+    csvPath = features_dir + "/" + str(cellNb) + '_' + channel+'.csv'
+    if path.lexists(csvPath): 
+        oneCell = pd.DataFrame.from_csv(csvPath)
+        extendedDataFrame = find_mitotic_region(oneCell, minSegLen, p)
+        if extendedDataFrame is None:
+            return
+        if save_plot:
+            current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
+            fig, ax = plt.subplots(figsize=(15, 8))
+            ax.axhline(current_major_length,  c= 'red', lw = 10)
+            plt.ylabel("Spindle Length ($μm$)", fontsize=20)
+            plt.tick_params(axis='both', which='major', labelsize=20)
+            plt.xlabel("Timepoint // interval " + str(acq_interval), fontsize=20)
+            plt.xlim(0, oneCell.index[-1])
+            plt.ylim(0, current_major_length)
+            plt.plot(extendedDataFrame.index, extendedDataFrame, "-o", c="black")
+            plt.savefig(mitosisFigDir + str(cellNb) + "_elongation", transparent = True, bbox_inches='tight')
+            plt.close(fig)
+        return str(cellNb)+"_"+channel, extendedDataFrame
+    else:
+        return
 
 
 
@@ -357,17 +359,24 @@ def getSPBTrack( cellNb, cell_major_length,figureDir, save):
     else:
         plt.show()
     plt.close(fig)
-    return concat_data
+    return cellNb, concat_data
 
-def analyse_each_cell(save, anaphase_elongations, figureDir, cellRois, mitosisDir):
+def analyse_each_cell(pool,save, anaphase_elongations, figureDir, cellRois, mitosisDir):
+    slope_change_tasks = list()
+    SPBtrack_tasks = list()
     for cellId in anaphase_elongations.keys():
         cellNb = cellId.split("_")[0]
         current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
-        find_slope_change_point(anaphase_elongations[cellId], acq_interval, current_major_length, figureDir, cellNb, save)
-
-        d = getSPBTrack(cellNb, current_major_length, figureDir, save)
-        d.to_csv(mitosisDir + tracks + path.sep + "d_" + str(cellNb) + ".csv", sep='\t')
-
+        slope_change_tasks.append((anaphase_elongations[cellId], acq_interval, current_major_length, figureDir, cellNb, save))
+        SPBtrack_tasks.append((cellNb, current_major_length, figureDir, save))
+    for t in slope_change_tasks:
+        pool.apply_async( find_slope_change_point, t )
+    results = [pool.apply_async( getSPBTrack, t ) for t in SPBtrack_tasks]
+    for result in results:
+        res = result.get()
+        res[1].to_csv(mitosisDir + tracks + path.sep + "d_" + str(res[0]) + ".csv", sep='\t')
+    pool.close()
+    pool.join()
 
 def copy_mitosis_files(anaphase_elongations, channels, fluoDir, mitosisDir, cropImgs, spots, features):
     for cellId in anaphase_elongations.keys():
@@ -382,10 +391,10 @@ def distance(x1,y1,z1,x2,y2,z2):
     return  sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)                
 
 
-# In[ ]:
+# In[46]:
 
 if __name__ == '__main__':
-    baseDir="/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/X0_Y0"
+    baseDir="/media/tong/74CDBC0B2251059E/Starvation/Yes/10-11-1/X0_Y0"
     mitosis_suffix = "_MITOSIS" + path.sep
     fluo_suffix = "_FLUO" + path.sep
     cropImgs = "croppedImgs"
@@ -410,12 +419,22 @@ if __name__ == '__main__':
 #     launcher.set_acq_interval(20)
 #     launcher.set_calibration(0.1075)
 #     launcher.set_minimumPeriod(200)
+    pool = mp.Pool(mp.cpu_count())
     cellRois = load_rois()
     createOutputDirs(mitosisDir, cropImgs, spots, tracks, features, figs)
     cellNbs = getAllCellNumbers(features_dir)
-    anaphase_elongations = getMitoticCellNbs(features_dir, cellNbs, -11, minSegLen, channel, mitosisFigDir)
+    tasks = []
+    for cellNb in cellNbs:
+        tasks.append( (cellRois,features_dir, cellNb, -11, minSegLen, channel, mitosisFigDir) )
+    results = [pool.apply_async( getMitoticElongation, t ) for t in tasks]
+    anaphase_elongations= dict()
+    for result in results:
+        res = result.get()
+        if res is None:
+            continue
+        anaphase_elongations[res[0]] =  res[1]
     copy_mitosis_files(anaphase_elongations, ["CFP", "GFP","TxRed","DAPI"], fluoDir, mitosisDir, cropImgs, spots, features)
-    analyse_each_cell(True, anaphase_elongations, mitosisFigDir, cellRois, mitosisDir)
+    analyse_each_cell(pool, True, anaphase_elongations, mitosisFigDir, cellRois, mitosisDir)
     print("Done")
 
 
