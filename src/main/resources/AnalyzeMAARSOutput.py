@@ -217,7 +217,7 @@ def getMitoticElongation(cellRois,calibration,acq_interval,features_dir, cellNb,
 
 
 
-def getSPBTrack(baseDir, cellNb, cell_major_length,figureDir, save):
+def getSPBTrack(baseDir, fluo_suffix,features, channel, spots, cellNb, cell_major_length,figureDir, save):
     featurePath = baseDir + fluo_suffix + features +'/'+str(cellNb)+'_' + channel +'.csv'
     spotsPath = baseDir + fluo_suffix+ spots + '/' + str(cellNb)+'_' + channel +'.xml'
     concat_data = list()
@@ -361,14 +361,14 @@ def getSPBTrack(baseDir, cellNb, cell_major_length,figureDir, save):
     plt.close(fig)
     return cellNb, concat_data
 
-def analyse_each_cell(pool,save, anaphase_elongations, figureDir, cellRois, mitosisDir):
+def analyse_each_cell(pool,save, anaphase_elongations, figureDir, cellRois, mitosisDirfeatures,fluo_suffix,features, channel,spots):
     slope_change_tasks = list()
     SPBtrack_tasks = list()
     for cellId in anaphase_elongations.keys():
         cellNb = cellId.split("_")[0]
         current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
         slope_change_tasks.append((anaphase_elongations[cellId], acq_interval, current_major_length, figureDir, cellNb, save))
-        SPBtrack_tasks.append((baseDir,cellNb, current_major_length, figureDir, save))
+        SPBtrack_tasks.append((baseDir,fluo_suffix, features, channel, spots, cellNb, current_major_length, figureDir, save))
     for t in slope_change_tasks:
         pool.apply_async( find_slope_change_point, t )
     results = [pool.apply_async( getSPBTrack, t ) for t in SPBtrack_tasks]
@@ -394,7 +394,6 @@ def distance(x1,y1,z1,x2,y2,z2):
 # In[46]:
 
 if __name__ == '__main__':
-    global baseDir, mitosis_suffix,fluo_suffix,cropImgs,spots,tracks,figs,features,channel,calibration,minimumPeriod, acq_interval, mitosisDir, mitosisFigDir, fluoDir, features_dir, cropImgs_dir, minSegLen
     baseDir="/media/tong/MAARSData/MAARSData/102/12-06-1/X0_Y0"
     mitosis_suffix = "_MITOSIS" + path.sep
     fluo_suffix = "_FLUO" + path.sep
@@ -435,7 +434,7 @@ if __name__ == '__main__':
             continue
         anaphase_elongations[res[0]] =  res[1]
     copy_mitosis_files(anaphase_elongations, ["CFP", "GFP","TxRed","DAPI"], fluoDir, mitosisDir, cropImgs, spots, features)
-    analyse_each_cell(pool, True, anaphase_elongations, mitosisFigDir, cellRois, mitosisDir)
+    analyse_each_cell(pool, True, anaphase_elongations, mitosisFigDir, cellRois, mitosisDir,fluo_suffix, features, channel, spots)
     print("Done")
 
 
