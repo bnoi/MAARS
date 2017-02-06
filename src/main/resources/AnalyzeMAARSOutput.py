@@ -217,7 +217,7 @@ def getMitoticElongation(cellRois,calibration,acq_interval,features_dir, cellNb,
 
 
 
-def getSPBTrack( cellNb, cell_major_length,figureDir, save):
+def getSPBTrack(baseDir, cellNb, cell_major_length,figureDir, save):
     featurePath = baseDir + fluo_suffix + features +'/'+str(cellNb)+'_' + channel +'.csv'
     spotsPath = baseDir + fluo_suffix+ spots + '/' + str(cellNb)+'_' + channel +'.xml'
     concat_data = list()
@@ -368,7 +368,7 @@ def analyse_each_cell(pool,save, anaphase_elongations, figureDir, cellRois, mito
         cellNb = cellId.split("_")[0]
         current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
         slope_change_tasks.append((anaphase_elongations[cellId], acq_interval, current_major_length, figureDir, cellNb, save))
-        SPBtrack_tasks.append((cellNb, current_major_length, figureDir, save))
+        SPBtrack_tasks.append((baseDir,cellNb, current_major_length, figureDir, save))
     for t in slope_change_tasks:
         pool.apply_async( find_slope_change_point, t )
     results = [pool.apply_async( getSPBTrack, t ) for t in SPBtrack_tasks]
@@ -394,24 +394,24 @@ def distance(x1,y1,z1,x2,y2,z2):
 # In[46]:
 
 if __name__ == '__main__':
-    baseDir="/media/tong/74CDBC0B2251059E/Starvation/Yes/10-11-1/X0_Y0"
-    mitosis_suffix = "_MITOSIS" + path.sep
-    fluo_suffix = "_FLUO" + path.sep
-    cropImgs = "croppedImgs"
-    spots = "spots"
-    tracks = "tracks"
-    figs = "figs"
-    features = "features"
-    channel ="CFP"
-    calibration = 0.1075
-    minimumPeriod = 180
-    acq_interval = 20
-    mitosisDir = baseDir+ mitosis_suffix
-    mitosisFigDir = mitosisDir + figs + path.sep
-    fluoDir = baseDir+ fluo_suffix
-    features_dir = baseDir + fluo_suffix + features
-    cropImgs_dir = baseDir + fluo_suffix + cropImgs
-    minSegLen = int(minimumPeriod / acq_interval)
+    global baseDir="/media/tong/MAARSData/MAARSData/102/12-06-1/X0_Y0"
+    global mitosis_suffix = "_MITOSIS" + path.sep
+    global fluo_suffix = "_FLUO" + path.sep
+    global cropImgs = "croppedImgs"
+    global spots = "spots"
+    global tracks = "tracks"
+    global figs = "figs"
+    global features = "features"
+    global channel ="CFP"
+    global calibration = 0.1075
+    global minimumPeriod = 180
+    global acq_interval = 20
+    global mitosisDir = baseDir+ mitosis_suffix
+    global mitosisFigDir = mitosisDir + figs + path.sep
+    global fluoDir = baseDir+ fluo_suffix
+    global features_dir = baseDir + fluo_suffix + features
+    global cropImgs_dir = baseDir + fluo_suffix + cropImgs
+    global minSegLen = int(minimumPeriod / acq_interval)
     
     # launcher.set_attributes_from_cmd_line()
     
