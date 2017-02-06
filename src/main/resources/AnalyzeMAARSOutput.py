@@ -394,24 +394,25 @@ def distance(x1,y1,z1,x2,y2,z2):
 # In[46]:
 
 if __name__ == '__main__':
-    global baseDir="/media/tong/MAARSData/MAARSData/102/12-06-1/X0_Y0"
-    global mitosis_suffix = "_MITOSIS" + path.sep
-    global fluo_suffix = "_FLUO" + path.sep
-    global cropImgs = "croppedImgs"
-    global spots = "spots"
-    global tracks = "tracks"
-    global figs = "figs"
-    global features = "features"
-    global channel ="CFP"
-    global calibration = 0.1075
-    global minimumPeriod = 180
-    global acq_interval = 20
-    global mitosisDir = baseDir+ mitosis_suffix
-    global mitosisFigDir = mitosisDir + figs + path.sep
-    global fluoDir = baseDir+ fluo_suffix
-    global features_dir = baseDir + fluo_suffix + features
-    global cropImgs_dir = baseDir + fluo_suffix + cropImgs
-    global minSegLen = int(minimumPeriod / acq_interval)
+    global baseDir, mitosis_suffix,fluo_suffix,cropImgs,spots,tracks,figs,features,channel,calibration,minimumPeriod, acq_interval, mitosisDir, mitosisFigDir, fluoDir, features_dir, cropImgs_dir, minSegLen
+    baseDir="/media/tong/MAARSData/MAARSData/102/12-06-1/X0_Y0"
+    mitosis_suffix = "_MITOSIS" + path.sep
+    fluo_suffix = "_FLUO" + path.sep
+    cropImgs = "croppedImgs"
+    spots = "spots"
+    tracks = "tracks"
+    figs = "figs"
+    features = "features"
+    channel ="CFP"
+    calibration = 0.1075
+    minimumPeriod = 180
+    acq_interval = 20
+    mitosisDir = baseDir+ mitosis_suffix
+    mitosisFigDir = mitosisDir + figs + path.sep
+    fluoDir = baseDir+ fluo_suffix
+    features_dir = baseDir + fluo_suffix + features
+    cropImgs_dir = baseDir + fluo_suffix + cropImgs
+    minSegLen = int(minimumPeriod / acq_interval)
     
     # launcher.set_attributes_from_cmd_line()
     
