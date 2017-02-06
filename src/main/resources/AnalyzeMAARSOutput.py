@@ -16,7 +16,7 @@ from re import match
 from collections import deque
 from scipy import stats
 import multiprocessing as mp
-#get_ipython().magic('matplotlib inline')
+#%matplotlib inline
 
 
 idx = pd.IndexSlice
@@ -192,7 +192,7 @@ def find_mitotic_region(featureOfOneCell, minSegLen, p, extended= True):
     return
     
 
-def getMitoticElongation(cellRois, features_dir, cellNb, p, minSegLen, channel, mitosisFigDir, save_plot = True):
+def getMitoticElongation(cellRois,calibration,features_dir, cellNb, p, minSegLen, channel, mitosisFigDir, save_plot = True):
     csvPath = features_dir + "/" + str(cellNb) + '_' + channel+'.csv'
     if path.lexists(csvPath): 
         oneCell = pd.DataFrame.from_csv(csvPath)
@@ -425,7 +425,7 @@ if __name__ == '__main__':
     cellNbs = getAllCellNumbers(features_dir)
     tasks = []
     for cellNb in cellNbs:
-        tasks.append( (cellRois,features_dir, cellNb, -11, minSegLen, channel, mitosisFigDir) )
+        tasks.append( (cellRois, calibration, features_dir, cellNb, -11, minSegLen, channel, mitosisFigDir) )
     results = [pool.apply_async( getMitoticElongation, t ) for t in tasks]
     anaphase_elongations= dict()
     for result in results:
