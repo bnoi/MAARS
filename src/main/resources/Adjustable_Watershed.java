@@ -51,15 +51,15 @@ public class Adjustable_Watershed implements ExtendedPlugInFilter, DialogListene
         height = imp.getHeight();
         xmax = width - 1;
         ymax = height - 1;
-        
         GenericDialog gd = new GenericDialog(command+"...");
-        gd.setAlwaysOnTop(false);
+        gd.hideCancelButton();
+        gd.setModalityType(Dialog.ModalityType.DOCUMENT_MODAL);
         gd.addNumericField("Tolerance", toleranceS, 1, 5, "(0.5 is ImageJ standard)");
-            gd.addPreviewCheckbox(pfr);     /* passing pfr makes the filter ready for preview */
-            gd.addDialogListener(this);     /* the DialogItemChanged method will be called on user input */
-            gd.showDialog();                /* display the dialog; preview runs in the  now */
-            if (gd.wasCanceled()) return DONE;
-            toleranceS = tolerance;
+        gd.addPreviewCheckbox(pfr);     /* passing pfr makes the filter ready for preview */
+        gd.addDialogListener(this);     /* the DialogItemChanged method will be called on user input */
+        gd.showDialog();                /* display the dialog; preview runs in the  now */
+        if (gd.wasCanceled()) return DONE;
+        toleranceS = tolerance;
         return IJ.setupDialog(imp, FLAGS);
     }
 
