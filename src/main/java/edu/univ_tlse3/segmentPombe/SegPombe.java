@@ -4,8 +4,8 @@ import edu.univ_tlse3.utils.IOUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.WindowManager;
 import ij.gui.Roi;
+import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
@@ -17,7 +17,6 @@ import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -200,11 +199,12 @@ public class SegPombe {
       byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, true, BinaryProcessor.BLACK_AND_WHITE_LUT);
 
       // image pre-processing
+      IJ.run("Options...", "iterations=1 count=1");
       byteImage.dilate();
       byteImage.erode();
       byteImage.applyLut();
       // if the thresholding and the making binary image produced a white
-      // background, change it
+       // background, change it
 //      if (byteImage.getStatistics().mode > 127) {
 //         System.out.println("Invert image");
 //         byteImage.invert();
@@ -215,12 +215,16 @@ public class SegPombe {
       if (imageToAnalyze.getCalibration().scaled()) {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
-      if (useDynamic){
-         this.binImage.show();
+      this.binImage.show();
+      IJ.run("Fill Holes");
+      try{
          IJ.run("Adjustable Watershed");
-         this.binImage.hide();
+      }catch (Exception e){
+         IJ.run("Compile and Run...");
+         new WaitForUserDialog("Please find the Adjustable_Watershed.java in MAARS_deps folder, and click on ok").show();
       }
-//      IJ.run(this.binImage, "Adjustable Watershed", "tolerance=15");
+      new WaitForUserDialog("Please test your threshold (even undo/redo), and click ok below.").show();
+      this.binImage.hide();
    }
 
    /**
