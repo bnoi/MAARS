@@ -216,12 +216,11 @@ public class SegPombe {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
       this.binImage.show();
-      IJ.run("Fill Holes");
       try{
          IJ.run("Adjustable Watershed");
       }catch (Exception e){
-         IJ.run("Compile and Run...");
-         new WaitForUserDialog("Please find the Adjustable_Watershed.java in MAARS_deps folder, and click on ok").show();
+          IJ.showMessage("Please select the Adjustable_Watershed.java in MAARS_deps folder");
+          IJ.run("Compile and Run...");
       }
       new WaitForUserDialog("Please test your threshold (even undo/redo), and click ok below.").show();
       this.binImage.hide();
