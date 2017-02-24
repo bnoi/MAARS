@@ -25,7 +25,8 @@ import java.util.List;
 /*
  * MaarsParameters reads a configuration file written as a XML,
  * then allows to access values thanks to all constants defined.
- * 
+ *
+ * CALIBRATION
  * SEGMENTATION_PARAMETERS
  *    |
  *    +-----> SKIP
@@ -139,6 +140,7 @@ public class MaarsParameters {
    public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
    public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
    private static final String SKIP = "SKIP";
+   private static final String CALIBRATION = "CALIBRATION";
    private Document doc;
    private Element root;
    private String[] allColors = {"GREEN","CYAN","RED", "BLUE", "WHITE","GRAY"};
@@ -393,6 +395,14 @@ public class MaarsParameters {
         return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(DETECTION_CHANNEL);
     }
 
+   /**
+    *
+    * @return
+    */
+   public String getCalibration() {
+       return CALIBRATION;
+    }
+
    //////////// Setters
 
     /**
@@ -520,6 +530,14 @@ public class MaarsParameters {
 
    public void setSkipSegmentation(Boolean skip){
       root.getChild(SEGMENTATION_PARAMETERS).getChild(SKIP).setText(String.valueOf(skip));
+   }
+
+   /**
+    *
+    * @return
+    */
+   public void setCalibration(String calib) {
+      root.getChild(CALIBRATION).setText(calib);
    }
 
    /**

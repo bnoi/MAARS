@@ -88,6 +88,7 @@ public class MAARSNoAcq implements Runnable {
          ImagePlus segImg = null;
          try {
             segImg = IJ.openImage(pathToSegMovie);
+            parameters.setCalibration(String.valueOf(segImg.getCalibration().pixelWidth));
          } catch (Exception e) {
             IOUtils.printErrorToIJLog(e);
          }
@@ -202,7 +203,9 @@ public class MAARSNoAcq implements Runnable {
                      IOUtils.printErrorToIJLog(e);
                   }
                }
+               mergedImg = null;
             }
+            fluoStack = null;
          }
       }
       System.setErr(curr_err);
@@ -210,5 +213,6 @@ public class MAARSNoAcq implements Runnable {
       if (!skipAllRestFrames){
          IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
       }
+      System.gc();
    }
 }

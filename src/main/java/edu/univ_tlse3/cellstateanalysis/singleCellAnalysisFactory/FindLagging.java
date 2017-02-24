@@ -14,7 +14,6 @@ public class FindLagging {
 
    public FindLagging(Cell cell, Iterable<Spot> spotSet, Calibration fluoImgCal,
                       ArrayList<Spot> poles, double radius, int frame) {
-      // TODO to specify in gui that GFP for Kt and cfp for
       // spbs for exemple
       double discardLaggingSpotRange = 1;
       int setSize = Iterables.size(spotSet);

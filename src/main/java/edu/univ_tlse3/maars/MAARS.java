@@ -127,7 +127,6 @@ public class MAARS implements Runnable {
             String[] listAcqNames = new File(pathToSegDir + "_MITOSIS" + File.separator + "figs" + File.separator)
                     .list();
             String pattern = "(\\d+)(_slopChangePoints_)(\\d+)(_)(\\d+)(.png)";
-            ImagePlus merotelyImp;
             PrintWriter out = null;
             try {
                 out = new PrintWriter(pathToSegDir + "_MITOSIS" + File.separator + "laggingCells.txt");
@@ -145,22 +144,28 @@ public class MAARS implements Runnable {
                     cell.setAnaBOnsetFrame(anaBOnsetFrame);
                     ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
                     if (spotInBtwnFrames.size() > 0) {
-                        //TODO to show unaligned cell
-//                         || cell.unalignedSpotFrames().size() > 0
                         Collections.sort(spotInBtwnFrames);
                         if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 1) {
                             assert out != null;
                             out.println(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             IJ.log(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             if (splitChannel) {
-                                merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-                                        + File.separator + cellNb + "_GFP.tif");
-                                merotelyImp.show();
+                                IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+                                        + File.separator + cellNb + "_GFP.tif").show();
                             } else {
-                                merotelyImp = IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-                                        + File.separator + cellNb + "_merged.tif");
-                                merotelyImp.show();
+                                IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+                                        + File.separator + cellNb + "_merged.tif").show();
                             }
+                        }
+                    }
+                    //TODO to show unaligned cell
+                    if (cell.unalignedSpotFrames().size() > 0) {
+                        if (splitChannel) {
+                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+                                    + File.separator + cellNb + "_GFP.tif").show();
+                        } else {
+                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+                                    + File.separator + cellNb + "_merged.tif").show();
                         }
                     }
                 }
@@ -176,7 +181,7 @@ public class MAARS implements Runnable {
         // TODO need to find a place for the metadata, maybe in images
         IJ.log("Start python analysis");
         ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, parameters.getDetectionChForMitosis(),
-                "0.1075", parameters.getMinimumMitosisDuration(),
+                parameters.getCalibration(), parameters.getMinimumMitosisDuration(),
                 String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))));
         PythonPipeline.savePythonScript(script);
         IJ.log("Script generated");
@@ -196,6 +201,7 @@ public class MAARS implements Runnable {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
+        parameters.setCalibration(String.valueOf(mm.getCachedPixelSizeUm()));
 
         ArrayList<String> arrayChannels = new ArrayList<>();
         Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
@@ -304,6 +310,7 @@ public class MAARS implements Runnable {
                                         Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
                                 channelsInFrame.put(channel, future);
                             }
+                            fluoImage = null;
                             tasksSet_.add(channelsInFrame);
                             for (Image img : imageList){
                                 mm.live().displayImage(img);
@@ -353,6 +360,7 @@ public class MAARS implements Runnable {
                                     Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
                             channelsInFrame.put(channel, future);
                         }
+                        fluoImage = null;
                         tasksSet_.add(channelsInFrame);
                         if (skipAllRestFrames){
                             break;
@@ -378,6 +386,7 @@ public class MAARS implements Runnable {
                         }
                         ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                                 + " sec for writing results");
+                        mergedImg = null;
                     }else if (soc_.size() == 0){
                         try {
                             org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
@@ -395,5 +404,6 @@ public class MAARS implements Runnable {
         if (!skipAllRestFrames) {
             IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
         }
+        System.gc();
     }
 }
