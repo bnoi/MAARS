@@ -8,6 +8,7 @@ import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
+import ij.plugin.Concatenator;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
 import ij.process.ImageProcessor;
@@ -17,10 +18,7 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -131,30 +129,30 @@ public class ImgUtils {
     * @return an ImagePlus with all channels stacked
     */
    public static ImagePlus loadFullFluoImgs(String fluoDir) {
-      ImagePlus fluoImg;
-      ImagePlus zprojectImg;
-      ImageStack fieldStack = null;
-      Calibration fluoImgCalib = null;
-      String[] listAcqNames = new File(fluoDir).list();
+      Concatenator concatenator = new Concatenator();
+      ArrayList<String> listAcqNames = new ArrayList<>();
       String pattern = "(\\w+)(_)(\\d+)";
       assert listAcqNames != null;
-      Arrays.sort(listAcqNames, Comparator.comparing(o -> Integer.valueOf(o.split("_", -1)[1])));
-      for (String acqName : listAcqNames) {
+      for (String acqName :  new File(fluoDir).list()) {
          if (Pattern.matches(pattern, acqName)) {
-            fluoImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName + "_MMStack_Pos0.ome.tif");
-            zprojectImg = ImgUtils.zProject(fluoImg);
-            if (fluoImgCalib == null) {
-               fluoImgCalib = fluoImg.getCalibration();
-            }
-            if (fieldStack == null) {
-               fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight());
-            }
-            fieldStack.addSlice(acqName.split("_", -1)[0], zprojectImg.getStack().getProcessor(1));
+            listAcqNames.add(acqName);
          }
       }
-      ImagePlus fieldImg = new ImagePlus("merged", fieldStack);
-      fieldImg.setCalibration(fluoImgCalib);
-      return fieldImg;
+      String[] listAcqNamesArray = listAcqNames.toArray(new String[listAcqNames.size()]);
+      Arrays.sort(listAcqNamesArray,
+              Comparator.comparing(o -> Integer.parseInt(o.split("_", -1)[1])));
+      concatenator.setIm5D(true);
+      ImagePlus concatenatedFluoImgs = null;
+      for (String acqName : listAcqNamesArray) {
+         System.out.println(acqName);
+         ImagePlus newImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName + "_MMStack_Pos0.ome.tif");
+         if (concatenatedFluoImgs==null){
+            concatenatedFluoImgs = newImg;
+         }else{
+            concatenatedFluoImgs = concatenator.concatenate(concatenatedFluoImgs, newImg,false);
+         }
+      }
+      return concatenatedFluoImgs;
    }
 
    /**

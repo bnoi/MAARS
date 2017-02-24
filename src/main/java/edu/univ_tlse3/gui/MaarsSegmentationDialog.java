@@ -125,7 +125,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
       //
 
-      Label segmParemLabel = new Label("Segementation parameters",
+      Label segmParemLabel = new Label("Segmentation parameters",
               Label.CENTER);
       segmParemLabel.setBackground(labelColor);
       this.add(segmParemLabel);
