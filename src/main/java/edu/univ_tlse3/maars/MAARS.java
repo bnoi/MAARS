@@ -115,9 +115,9 @@ public class MAARS implements Runnable {
             }
          }
         assert croppedImgSet != null;
-        if (!IJ.isWindows()) {
-            imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());
-        }
+//        if (!IJ.isWindows()) {
+//            imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());
+//        }
     }
 
     private static void showChromLaggingCells(String pathToSegDir,
