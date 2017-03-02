@@ -150,6 +150,7 @@ public class ImgUtils {
          }
       }
       ImagePlus fieldImg = new ImagePlus("merged", fieldStack);
+//      fieldImg.setDimensions();
       fieldImg.setCalibration(fluoImgCalib);
       return fieldImg;
    }
@@ -180,10 +181,10 @@ public class ImgUtils {
 
          for (String channel : channelStacks.keySet()) {
             ImagePlus croppedSingleChImg = new ImagePlus(channel, channelStacks.get(channel));
-            Calibration new_calib = mergedImg.getCalibration();
-            new_calib.pixelDepth = 0;
-            croppedSingleChImg.setCalibration(new_calib);
+            croppedSingleChImg.setCalibration(mergedImg.getCalibration());
             croppedSingleChImg.setRoi(croppedImg.getRoi());
+            //invert z/t dimension
+            croppedSingleChImg.setDimensions(1,mergedImg.getNFrames(),mergedImg.getNSlices()/channelStacks.size());
             croppedImgInChannel.put(channel, croppedSingleChImg);
          }
       } else {
