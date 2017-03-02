@@ -115,6 +115,8 @@ public class FluoAnalyzer implements Runnable {
       if (useDynamic_){
          socVisualizer_.updateCellsDisplay(soc);
       }
+      this.fluoImage = null;
+      System.gc();
    }
 
    //private class for analysing cells

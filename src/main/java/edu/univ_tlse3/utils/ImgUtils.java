@@ -16,6 +16,7 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -186,9 +187,8 @@ public class ImgUtils {
       ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
       return imgProcessor.convertToFloatProcessor();
    }
+
    public static void main(String[] args) {
-      ImagePlus img = loadFullFluoImgs("/media/tong/MAARSData/MAARSData/102/15-06-1/X0_Y0_FLUO");
-      img.show();
-      new HyperStackConverter();
+
    }
 }

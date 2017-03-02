@@ -74,6 +74,54 @@ public class MAARS implements Runnable {
         es_ = es;
     }
 
+    static void serializeSoc(String pathToFluoDir, SetOfCells soc){
+        File f = new File(pathToFluoDir + "SetOfCell.serialize");
+        ObjectOutputStream objOut = null;
+        try {
+            objOut = new ObjectOutputStream(new BufferedOutputStream(
+                    new FileOutputStream(f)));
+            objOut.writeObject(soc);
+            objOut.flush();
+
+            IJ.log("Set of cel object is serialized.");
+        } catch (IOException i) {
+            ReportingUtils.logError(i.getMessage());
+        } finally {
+            if (objOut != null) {
+                try {
+                    objOut.close();
+                } catch (IOException e) {
+                    IOUtils.printErrorToIJLog(e);
+                }
+            }
+        }
+    }
+
+    static void saveAll(SetOfCells soc, HashMap<String, HashMap<Integer,ImagePlus>> allCroppedImgs,
+                        String pathToFluoDir, Boolean useDynamic, int chNb, int frameNb) {
+        IJ.log("Saving information of each cell");
+        MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
+        MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
+        MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir);
+//        TODO only save the potential the mitotic cells
+//        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
+//         for (int i : cellIndex) {
+//             IJ.log("" + i);
+//             Cell cell = soc.getCell(i);
+        for (Cell cell : soc){
+            geoSaver.save(cell);
+            spotSaver.save(cell);
+            for (String s : allCroppedImgs.keySet()){
+                ImagePlus croppedImg = allCroppedImgs.get(s).get(cell.getCellNumber());
+                imgSaver.saveCroppedImgs(croppedImg, cell.getCellNumber(),chNb,frameNb);
+            }
+
+        }
+        if (useDynamic) {
+            serializeSoc(pathToFluoDir, soc);
+        }
+    }
+
     static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, int chNb, int frameNb) {
         IJ.log("Saving information of each cell");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
@@ -91,26 +139,7 @@ public class MAARS implements Runnable {
              imgSaver.saveCroppedImgs(croppedImg, cell.getCellNumber(),chNb,frameNb);
          }
          if (useDynamic) {
-            File f = new File(pathToFluoDir + "SetOfCell.serialize");
-            ObjectOutputStream objOut = null;
-            try {
-               objOut = new ObjectOutputStream(new BufferedOutputStream(
-                       new FileOutputStream(f)));
-               objOut.writeObject(soc);
-               objOut.flush();
-
-               IJ.log("Set of cel object is serialized.");
-            } catch (IOException i) {
-               ReportingUtils.logError(i.getMessage());
-            } finally {
-               if (objOut != null) {
-                  try {
-                     objOut.close();
-                  } catch (IOException e) {
-                     IOUtils.printErrorToIJLog(e);
-                  }
-               }
-            }
+             serializeSoc(pathToFluoDir, soc);
          }
     }
 

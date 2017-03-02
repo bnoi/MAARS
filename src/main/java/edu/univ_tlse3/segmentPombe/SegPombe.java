@@ -232,7 +232,7 @@ public class SegPombe {
       waitForUserDialog.setLayout(new BorderLayout());
       waitForUserDialog.add(adjWaterButton, BorderLayout.NORTH);
       waitForUserDialog.add(new JLabel("Please test your threshold (even undo/redo), and click ok."), BorderLayout.SOUTH);
-      waitForUserDialog.setMinimumSize(new Dimension(100,100));
+      waitForUserDialog.setMinimumSize(new Dimension(200,150));
       waitForUserDialog.show();
       this.binImage.hide();
    }

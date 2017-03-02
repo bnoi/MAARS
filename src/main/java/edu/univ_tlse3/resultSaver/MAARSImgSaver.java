@@ -26,7 +26,7 @@ public class MAARSImgSaver {
               croppedImg.getStack().size()/ chNb/frameNb,frameNb,"xyzct", "Grayscale");
       ImagePlus[] channels = ChannelSplitter.split(hyperImg);
       for (ImagePlus img : channels){
-         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + img.getStack().getSliceLabel(1).split("_",-1)[0] + ".tif";
+         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + img.getStack().getSliceLabel(1).split("_",-1)[0] + ".ome.tif";
          img.setRoi(croppedImg.getRoi());
          IJ.run(img, "Enhance Contrast", "saturated=0.35");
          IJ.saveAsTiff(img, pathToCroppedImg);
