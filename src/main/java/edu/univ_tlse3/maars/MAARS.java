@@ -79,7 +79,7 @@ public class MAARS implements Runnable {
         IJ.log("Saving information of each cell");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
-        MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir, mergedImg);
+        MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir);
         HashMap<String, ImagePlus> croppedImgSet = null;
 //        TODO only save the potential the mitotic cells
 //        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
