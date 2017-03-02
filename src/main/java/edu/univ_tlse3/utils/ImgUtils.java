@@ -1,17 +1,16 @@
 package edu.univ_tlse3.utils;
 
-import edu.univ_tlse3.cellstateanalysis.Cell;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
+import ij.plugin.Concatenator;
+import ij.plugin.HyperStackConverter;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
 import ij.process.ImageProcessor;
-import loci.plugins.LociImporter;
 import mmcorej.CMMCore;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
@@ -59,7 +58,7 @@ public class ImgUtils {
     * @param roi region of interest to crop
     * @return cropped imagePLus
     */
-   private static ImagePlus cropImgWithRoi(ImagePlus img, Roi roi) {
+   public static ImagePlus cropImgWithRoi(ImagePlus img, Roi roi) {
       ImageStack stack = img.getStack().crop((int) roi.getXBase(), (int) roi.getYBase(), 0,
               roi.getBounds().width, roi.getBounds().height, img.getStack().getSize());
       ImagePlus croppedImg = new ImagePlus("cropped_" + img.getShortTitle(), stack);
@@ -128,70 +127,32 @@ public class ImgUtils {
     * @return an ImagePlus with all channels stacked
     */
    public static ImagePlus loadFullFluoImgs(String fluoDir) {
-      ImagePlus fluoImg;
-      ImagePlus zprojectImg;
-      ImageStack fieldStack = null;
-      Calibration fluoImgCalib = null;
-      String[] listAcqNames = new File(fluoDir).list();
+      Concatenator concatenator = new Concatenator();
+      ArrayList<String> listAcqNames = new ArrayList<>();
       String pattern = "(\\w+)(_)(\\d+)";
-      assert listAcqNames != null;
-      Arrays.sort(listAcqNames, Comparator.comparing(o -> Integer.valueOf(o.split("_", -1)[1])));
-      for (String acqName : listAcqNames) {
+      for (String acqName :  new File(fluoDir).list()) {
          if (Pattern.matches(pattern, acqName)) {
-            fluoImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName + "_MMStack_Pos0.ome.tif");
-            zprojectImg = ImgUtils.zProject(fluoImg);
-            if (fluoImgCalib == null) {
-               fluoImgCalib = fluoImg.getCalibration();
-            }
-            if (fieldStack == null) {
-               fieldStack = new ImageStack(zprojectImg.getWidth(), zprojectImg.getHeight());
-            }
-            fieldStack.addSlice(acqName.split("_", -1)[0], zprojectImg.getStack().getProcessor(1));
+            listAcqNames.add(acqName);
          }
       }
-      ImagePlus fieldImg = new ImagePlus("merged", fieldStack);
-//      fieldImg.setDimensions();
-      fieldImg.setCalibration(fluoImgCalib);
-      return fieldImg;
-   }
-
-   /**
-    * crop ROIs from merged field-wide image
-    *
-    * @param cell         Cell object from MAARS
-    * @param splitChannel return data in splitChannels or not
-    * @param mergedImg    merged full field fluo image
-    * @return HashMap of cellNB,corresponding cropped img
-    */
-   public static HashMap<String, ImagePlus> cropMergedImpWithRois(Cell cell, ImagePlus mergedImg,
-                                                                  Boolean splitChannel) {
-      HashMap<String, ImagePlus> croppedImgInChannel = new HashMap<>();
-      if (splitChannel) {
-         ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
-         HashMap<String, ImageStack> channelStacks = new HashMap<>();
-         for (int j = 1; j <= croppedImg.getImageStack().getSize(); j++) {
-            // TODO problem here
-            String currentLabel = croppedImg.getImageStack().getSliceLabel(j);
-            if (!channelStacks.containsKey(currentLabel)) {
-               channelStacks.put(currentLabel, new ImageStack(croppedImg.getWidth(), croppedImg.getHeight()));
-            }
-            channelStacks.get(currentLabel)
-                    .addSlice(croppedImg.getStack().getProcessor(j).convertToFloatProcessor());
+      String[] listAcqNamesArray = listAcqNames.toArray(new String[listAcqNames.size()]);
+      Arrays.sort(listAcqNamesArray,
+              Comparator.comparing(o -> Integer.parseInt(o.split("_", -1)[1])));
+      concatenator.setIm5D(true);
+      ImagePlus concatenatedFluoImgs = null;
+      for (String acqName : listAcqNamesArray) {
+         ImagePlus newImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName + "_MMStack_Pos0.ome.tif");
+         ImageStack stack = newImg.getStack();
+         for (int i =1; i <= stack.size();i++){
+            stack.setSliceLabel(acqName, i);
          }
-
-         for (String channel : channelStacks.keySet()) {
-            ImagePlus croppedSingleChImg = new ImagePlus(channel, channelStacks.get(channel));
-            croppedSingleChImg.setCalibration(mergedImg.getCalibration());
-            croppedSingleChImg.setRoi(croppedImg.getRoi());
-            //invert z/t dimension
-            croppedSingleChImg.setDimensions(1,mergedImg.getNFrames(),mergedImg.getNSlices()/channelStacks.size());
-            croppedImgInChannel.put(channel, croppedSingleChImg);
+         if (concatenatedFluoImgs==null){
+            concatenatedFluoImgs = newImg;
+         }else{
+            concatenatedFluoImgs = concatenator.concatenate(concatenatedFluoImgs, newImg,false);
          }
-      } else {
-         ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
-         croppedImgInChannel.put("merged", croppedImg);
       }
-      return croppedImgInChannel;
+      return concatenatedFluoImgs;
    }
 
    /**
@@ -217,14 +178,6 @@ public class ImgUtils {
    }
 
    /**
-    * @param pathToImage saving path of big tiff file
-    */
-   public static void loadBigTiff(String pathToImage) {
-      LociImporter importer = new LociImporter();
-      importer.run(pathToImage);
-   }
-
-   /**
     * @param image from micro-manager
     * @return ImageProcessor
     */
@@ -232,5 +185,10 @@ public class ImgUtils {
       MMStudio mm = MMStudio.getInstance();
       ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
       return imgProcessor.convertToFloatProcessor();
+   }
+   public static void main(String[] args) {
+      ImagePlus img = loadFullFluoImgs("/media/tong/MAARSData/MAARSData/102/15-06-1/X0_Y0_FLUO");
+      img.show();
+      new HyperStackConverter();
    }
 }

@@ -13,6 +13,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
+import ij.plugin.Concatenator;
 import ij.plugin.frame.RoiManager;
 
 import java.io.File;
@@ -149,8 +150,10 @@ public class MAARSNoAcq implements Runnable {
             }
             Collections.sort(arrayImgFrames);
             assert segImg != null;
-            ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
-
+//            ImageStack fluoStack = new ImageStack(segImg.getWidth(), segImg.getHeight());
+            Concatenator concatenator = new Concatenator();
+            concatenator.setIm5D(true);
+            ImagePlus concatenatedFluoImgs = null;
             for (Integer arrayImgFrame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<>();
                for (String channel : arrayChannels) {
@@ -167,7 +170,17 @@ public class MAARSNoAcq implements Runnable {
                           Double.parseDouble(parameters.getChSpotRaius(channel)),
                           Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_,
                           parameters.useDynamic()));
-                  fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
+                  ImageStack stack = fluoImage.getStack();
+                  for (int i =1; i <= stack.size();i++){
+                     stack.setSliceLabel(channel + "_" + current_frame, i);
+                  }
+
+                  if (concatenatedFluoImgs==null){
+                     concatenatedFluoImgs = fluoImage;
+                  }else{
+                     concatenatedFluoImgs = concatenator.concatenate(concatenatedFluoImgs, fluoImage,false);
+                  }
+//                  fluoStack.addSlice(channel, zProjectedFluoImg.getProcessor().convertToFloatProcessor());
                   channelsInFrame.put(channel, future);
                }
                tasksSet_.add(channelsInFrame);
@@ -177,24 +190,24 @@ public class MAARSNoAcq implements Runnable {
             }
             MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
             if (!skipAllRestFrames) {
-               ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
-               mergedImg.setCalibration(bfImgCal);
-               mergedImg.setT(fluoStack.getSize());
+//               ImagePlus mergedImg = new ImagePlus("merged", fluoStack);
+//               mergedImg.setCalibration(bfImgCal);
+//               mergedImg.setT(fluoStack.getSize());
                RoiManager.getInstance().reset();
                RoiManager.getInstance().close();
                double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
                if (soc_.size() != 0) {
                   long startWriting = System.currentTimeMillis();
-                  Boolean splitChannel = true;
-                  mergedImg.getCalibration().frameInterval = timeInterval / 1000;
-                  MAARS.saveAll(soc_, mergedImg, pathToFluoDir, splitChannel,parameters.useDynamic());
+                  concatenatedFluoImgs.getCalibration().frameInterval = timeInterval / 1000;
+                  MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir,parameters.useDynamic(),
+                          arrayChannels.size(), arrayImgFrames.size());
                   IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                           + " sec for writing results");
                   if (parameters.useDynamic()) {
                      if (IJ.isWindows()) {
                         pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
                      }
-                     MAARS.analyzeMitosisDynamic(soc_, parameters, splitChannel, pathToSegDir, true);
+                     MAARS.analyzeMitosisDynamic(soc_, parameters, pathToSegDir, true);
                   }
                }else if (soc_.size() == 0){
                   try {
@@ -203,9 +216,10 @@ public class MAARSNoAcq implements Runnable {
                      IOUtils.printErrorToIJLog(e);
                   }
                }
-               mergedImg = null;
+//               mergedImg = null;
             }
-            fluoStack = null;
+//            fluoStack = null;
+            concatenatedFluoImgs = null;
          }
       }
       System.setErr(curr_err);

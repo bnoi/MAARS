@@ -74,13 +74,11 @@ public class MAARS implements Runnable {
         es_ = es;
     }
 
-    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
-                        Boolean splitChannel, Boolean useDynamic) {
+    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, int chNb, int frameNb) {
         IJ.log("Saving information of each cell");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir);
-        HashMap<String, ImagePlus> croppedImgSet = null;
 //        TODO only save the potential the mitotic cells
 //        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
 //         for (int i : cellIndex) {
@@ -89,8 +87,8 @@ public class MAARS implements Runnable {
         for (Cell cell : soc){
              geoSaver.save(cell);
              spotSaver.save(cell);
-             croppedImgSet = ImgUtils.cropMergedImpWithRois(cell, mergedImg, splitChannel);
-             imgSaver.saveCroppedImgs(croppedImgSet, cell.getCellNumber());
+             ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
+             imgSaver.saveCroppedImgs(croppedImg, cell.getCellNumber(),chNb,frameNb);
          }
          if (useDynamic) {
             File f = new File(pathToFluoDir + "SetOfCell.serialize");
@@ -114,15 +112,10 @@ public class MAARS implements Runnable {
                }
             }
          }
-        assert croppedImgSet != null;
-//        if (!IJ.isWindows()) {
-//            imgSaver.exportChannelBtf(splitChannel, croppedImgSet.keySet());
-//        }
     }
 
     private static void showChromLaggingCells(String pathToSegDir,
-                                              SetOfCells soc,
-                                              Boolean splitChannel) {
+                                              SetOfCells soc) {
         if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
             String[] listAcqNames = new File(pathToSegDir + "_MITOSIS" + File.separator + "figs" + File.separator)
                     .list();
@@ -149,13 +142,8 @@ public class MAARS implements Runnable {
                             assert out != null;
                             out.println("Lagging :" + cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             IJ.log("Lagging :" + cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
-                            if (splitChannel) {
-                                IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-                                        + File.separator + cellNb + "_GFP.tif").show();
-                            } else {
-                                IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-                                        + File.separator + cellNb + "_merged.tif").show();
-                            }
+                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+                                    + File.separator + cellNb + "_GFP.tif").show();
                         }
                     }
                     //TODO to show unaligned cell
@@ -179,8 +167,7 @@ public class MAARS implements Runnable {
         }
     }
 
-    static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters,
-                                      Boolean splitChannel, String pathToSegDir, Boolean showChromLagging) {
+    static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir, Boolean showChromLagging) {
         // TODO need to find a place for the metadata, maybe in images
         IJ.log("Start python analysis");
         ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, parameters.getDetectionChForMitosis(),
@@ -190,7 +177,7 @@ public class MAARS implements Runnable {
         IJ.log("Script generated");
         PythonPipeline.runPythonScript();
         if (showChromLagging) {
-            MAARS.showChromLaggingCells(pathToSegDir, soc, splitChannel);
+            MAARS.showChromLaggingCells(pathToSegDir, soc);
         }
     }
 
@@ -376,16 +363,14 @@ public class MAARS implements Runnable {
                     RoiManager.getInstance().close();
                     if (soc_.size() != 0 && do_analysis) {
                         long startWriting = System.currentTimeMillis();
-                        Boolean splitChannel = true;
                         ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
                         mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, splitChannel, parameters.useDynamic());
+                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels.size(), frame);
                         if (parameters.useDynamic()) {
                             if (IJ.isWindows()) {
                                 pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
                             }
-                            MAARS.analyzeMitosisDynamic(soc_, parameters,
-                                    splitChannel, pathToSegDir, true);
+                            MAARS.analyzeMitosisDynamic(soc_, parameters, pathToSegDir, true);
                         }
                         ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                                 + " sec for writing results");

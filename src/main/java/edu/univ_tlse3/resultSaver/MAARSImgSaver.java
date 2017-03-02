@@ -4,40 +4,32 @@ import edu.univ_tlse3.utils.FileUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
-import loci.plugins.LociExporter;
+import ij.plugin.ChannelSplitter;
+import ij.plugin.HyperStackConverter;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Set;
 
 public class MAARSImgSaver {
    private String croppedImgDir;
-//   private String pathToFluoDir;
-//   private ImagePlus mergedFullFieldImg;
-//   private LociExporter lociExporter = new LociExporter();
 
    public MAARSImgSaver(String pathToFluoDir) {
-//      this.pathToFluoDir = pathToFluoDir;
       this.croppedImgDir = pathToFluoDir + "croppedImgs" + File.separator;
-//      this.mergedFullFieldImg = mergedFullFieldImg;
       FileUtils.createFolder(croppedImgDir);
    }
 
    /**
-    * @param croppedImgSet set of image
+    * @param croppedImg set of image
     * @param cellNb        number of current cell
     */
-   public void saveCroppedImgs(HashMap<String, ImagePlus> croppedImgSet, int cellNb) {
-      for (String s : croppedImgSet.keySet()) {
-         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + s + ".tif";
-         ImagePlus imp = croppedImgSet.get(s);
-         IJ.run(imp, "Enhance Contrast", "saturated=0.35");
-         IJ.saveAsTiff(imp, pathToCroppedImg);
-//         final String macroOpts = "outfile=[" + pathToCroppedImg
-//                 + "] splitz=[0] splitc=[0] splitt=[0] compression=[Uncompressed]";
-//         lociExporter.setup(macroOpts, imp);
-//         lociExporter.run(null);
+   public void saveCroppedImgs(ImagePlus croppedImg, int cellNb, int chNb, int frameNb) {
+      ImagePlus hyperImg = HyperStackConverter.toHyperStack(croppedImg, chNb,
+              croppedImg.getStack().size()/ chNb/frameNb,frameNb,"xyzct", "Grayscale");
+      ImagePlus[] channels = ChannelSplitter.split(hyperImg);
+      for (ImagePlus img : channels){
+         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + img.getStack().getSliceLabel(1).split("_",-1)[0] + ".tif";
+         img.setRoi(croppedImg.getRoi());
+         IJ.run(img, "Enhance Contrast", "saturated=0.35");
+         IJ.saveAsTiff(img, pathToCroppedImg);
       }
    }
 

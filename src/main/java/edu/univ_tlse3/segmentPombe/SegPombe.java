@@ -17,6 +17,10 @@ import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -189,9 +193,8 @@ public class SegPombe {
    /**
     * This method set a threshold with Ostu method on the correlation image and
     * convert it into Binary Image
-    * @param useDynamic
     */
-   public void convertCorrelationToBinaryImage(Boolean useDynamic) {
+   public void convertCorrelationToBinaryImage() {
 
       System.out.println("Convert correlation image to binary image");
 
@@ -205,10 +208,10 @@ public class SegPombe {
       byteImage.applyLut();
       // if the thresholding and the making binary image produced a white
        // background, change it
-//      if (byteImage.getStatistics().mode > 127) {
-//         System.out.println("Invert image");
-//         byteImage.invert();
-//      }
+      if (byteImage.getStatistics().mode > 127) {
+         System.out.println("Invert image");
+         byteImage.invert();
+      }
       BinaryProcessor binImage = new BinaryProcessor(byteImage);
       this.binImage = new ImagePlus("binary Image", binImage);
 
@@ -216,13 +219,21 @@ public class SegPombe {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
       this.binImage.show();
-      try{
-         IJ.run("Adjustable Watershed");
-      }catch (Exception e){
-          IJ.showMessage("Please select the Adjustable_Watershed.java in MAARS_deps folder");
-          IJ.run("Compile and Run...");
-      }
-      new WaitForUserDialog("Please test your threshold (even undo/redo), and click ok below.").show();
+      WaitForUserDialog waitForUserDialog = new WaitForUserDialog("");
+      JButton adjWaterButton = new JButton("Adjustable Watershed");
+      adjWaterButton.addActionListener(actionEvent -> {
+         try{
+            IJ.run("Adjustable Watershed");
+         }catch (Exception e){
+            IJ.showMessage("Please select the Adjustable_Watershed.java in MAARS_deps folder");
+            IJ.run("Compile and Run...");
+         }
+      });
+      waitForUserDialog.setLayout(new BorderLayout());
+      waitForUserDialog.add(adjWaterButton, BorderLayout.NORTH);
+      waitForUserDialog.add(new JLabel("Please test your threshold (even undo/redo), and click ok."), BorderLayout.SOUTH);
+      waitForUserDialog.setMinimumSize(new Dimension(100,100));
+      waitForUserDialog.show();
       this.binImage.hide();
    }
 
