@@ -180,7 +180,9 @@ public class ImgUtils {
 
          for (String channel : channelStacks.keySet()) {
             ImagePlus croppedSingleChImg = new ImagePlus(channel, channelStacks.get(channel));
-            croppedSingleChImg.setCalibration(mergedImg.getCalibration());
+            Calibration new_calib = mergedImg.getCalibration();
+            new_calib.pixelDepth = 0;
+            croppedSingleChImg.setCalibration(new_calib);
             croppedSingleChImg.setRoi(croppedImg.getRoi());
             croppedImgInChannel.put(channel, croppedSingleChImg);
          }

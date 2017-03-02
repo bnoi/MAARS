@@ -400,7 +400,7 @@ public class MaarsParameters {
     * @return
     */
    public String getCalibration() {
-       return CALIBRATION;
+       return root.getChildText(CALIBRATION);
     }
 
    //////////// Setters

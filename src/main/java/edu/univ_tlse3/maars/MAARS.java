@@ -129,7 +129,7 @@ public class MAARS implements Runnable {
             String pattern = "(\\d+)(_slopChangePoints_)(\\d+)(_)(\\d+)(.png)";
             PrintWriter out = null;
             try {
-                out = new PrintWriter(pathToSegDir + "_MITOSIS" + File.separator + "laggingCells.txt");
+                out = new PrintWriter(pathToSegDir + "_MITOSIS" + File.separator + "abnormalCells.txt");
             } catch (FileNotFoundException e) {
                 IOUtils.printErrorToIJLog(e);
             }
@@ -147,8 +147,8 @@ public class MAARS implements Runnable {
                         Collections.sort(spotInBtwnFrames);
                         if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 1) {
                             assert out != null;
-                            out.println(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
-                            IJ.log(cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
+                            out.println("Lagging :" + cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
+                            IJ.log("Lagging :" + cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             if (splitChannel) {
                                 IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
                                         + File.separator + cellNb + "_GFP.tif").show();
@@ -160,13 +160,16 @@ public class MAARS implements Runnable {
                     }
                     //TODO to show unaligned cell
                     if (cell.unalignedSpotFrames().size() > 0) {
-                        if (splitChannel) {
-                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-                                    + File.separator + cellNb + "_GFP.tif").show();
-                        } else {
-                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-                                    + File.separator + cellNb + "_merged.tif").show();
-                        }
+                        IJ.log("Unaligned : Cell " + cellNb + " detected with unaligned kinetochore(s)");
+                        out.println("Unaligned : Cell " + cellNb + " detected with unaligned kinetochore(s)");
+
+//                        if (splitChannel) {
+//                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+//                                    + File.separator + cellNb + "_GFP.tif").show();
+//                        } else {
+//                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+//                                    + File.separator + cellNb + "_merged.tif").show();
+//                        }
                     }
                 }
             }
