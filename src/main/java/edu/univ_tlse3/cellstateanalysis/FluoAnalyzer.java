@@ -113,7 +113,7 @@ public class FluoAnalyzer implements Runnable {
          e.printStackTrace();
       }
       if (useDynamic_){
-         socVisualizer_.updateCellsDisplay(soc);
+         socVisualizer_.updateParameters(soc);
       }
       this.fluoImage = null;
       System.gc();
@@ -194,7 +194,7 @@ public class FluoAnalyzer implements Runnable {
                ArrayList<Spot> poles = spotSetAnalyzor.getPoles();
                cell.putGeometry(channel, frame, geometry);
                new FindLagging(cell, spotSet, fluoImgCal, poles, radius, frame);
-               if ((Integer)geometry.get(SpotSetAnalyzor.NbOfSpotDetected) > 1){
+               if ((Integer)geometry.get(SpotSetAnalyzor.NbOfSpotDetected) >= 1){
                   soc.addPotentialMitosisCell(cell.getCellNumber());
                }
             }
