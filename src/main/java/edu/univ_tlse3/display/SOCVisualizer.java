@@ -18,27 +18,14 @@ import java.io.*;
 public class SOCVisualizer extends JFrame{
     private DefaultListModel<Integer> alreadyShownList_ = new DefaultListModel<>();
     private JTextField pathToSoc_;
+    private JList<Integer> cellToDisplayList_;
 
     public SOCVisualizer() {
-        super("Display potential mitotic cells");
+        super("Display cells with at least 1 spot detected");
+        cellToDisplayList_ = new JList<>(alreadyShownList_);
+        cellToDisplayList_.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        cellToDisplayList_.setLayoutOrientation(JList.VERTICAL);
     }
-
-    public void updateCellsDisplay(SetOfCells setOfCells) {
-//        ImageIcon icon = createImageIcon("images/middle.gif");
-        for (Integer cellIndex : setOfCells.getPotentialMitosisCell()) {
-            int cellNb = setOfCells.getCell(cellIndex).getCellNumber();
-            if (!alreadyShownList_.contains(cellNb)) {
-                alreadyShownList_.addElement(cellNb);
-            }
-        }
-//      sort();
-    }
-
-//    public void sort() {
-//        Integer[] contents = (Integer[]) alreadyShownList_.toArray();
-//        Arrays.sort(contents);
-//        alreadyShownList_.copyInto(contents);
-//    }
 
     /**
      * Create the GUI and show it.  For thread safety,
@@ -47,67 +34,68 @@ public class SOCVisualizer extends JFrame{
      */
     public void createGUI(SetOfCells setOfCells) {
         //Create and set up the window.
-        setLayout(new BorderLayout(2, 1));
-        final Container contentPane = getContentPane();
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        final JPanel[] lastChartPanel = {new CellChartPanel("Waiting for data...")};
-        final JList<Integer> cellToDisplayList = new JList<>(alreadyShownList_);
-        cellToDisplayList.addMouseListener(new MouseAdapter() {
+        JScrollPane scrollPane = new JScrollPane(cellToDisplayList_);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Cell Numbers"));
+        scrollPane.setToolTipText("number of cells with > 1 spot");
+
+        JPanel chartPanel = new CellChartPanel("Waiting for data...");
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                scrollPane, chartPanel);
+        chartPanel.setBorder(BorderFactory.createTitledBorder("Parameters"));
+        chartPanel.setToolTipText("parameters of selected cell");
+
+        cellToDisplayList_.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    int index = cellToDisplayList.locationToIndex(e.getPoint());
+                    int index = cellToDisplayList_.locationToIndex(e.getPoint());
                     if (index != -1){
-                        contentPane.remove(lastChartPanel[0]);
                         Object item = alreadyShownList_.getElementAt(index);
-                        Cell c = setOfCells.getCell((Integer) item);
-                        ChartPanel chartPanel = CellChartPanel.updateCellContent(c);
-                        chartPanel.setVisible(true);
-                        contentPane.add(chartPanel);
-                        lastChartPanel[0] = chartPanel;
-                        revalidate();
+                        updateSplitPane(splitPane, setOfCells, (Integer) item);
                     }
                 }
             }
         });
-        cellToDisplayList.addKeyListener(new KeyAdapter() {
+        cellToDisplayList_.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent keyEvent) {
                 super.keyPressed(keyEvent);
                 int index = Integer.MIN_VALUE;
                 if (keyEvent.getKeyCode() == KeyEvent.VK_UP) {
-                    index = cellToDisplayList.getSelectedIndex()-1;
+                    index = cellToDisplayList_.getSelectedIndex()-1;
                 }else if(keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
-                    index = cellToDisplayList.getSelectedIndex()+1;
+                    index = cellToDisplayList_.getSelectedIndex()+1;
                 }else if(keyEvent.getKeyCode() == KeyEvent.VK_ENTER){
-                    index = cellToDisplayList.getSelectedIndex();
+                    index = cellToDisplayList_.getSelectedIndex();
                 }
-                if (index >=0 && index <= cellToDisplayList.getLastVisibleIndex()) {
-                    contentPane.remove(lastChartPanel[0]);
+                if (index >=0 && index <= cellToDisplayList_.getLastVisibleIndex()) {
                     Object item = alreadyShownList_.getElementAt(index);
-                    Cell c = setOfCells.getCell((Integer) item);
-                    ChartPanel chartPanel = CellChartPanel.updateCellContent(c);
-                    chartPanel.setVisible(true);
-                    contentPane.add(chartPanel);
-                    lastChartPanel[0] = chartPanel;
-                    revalidate();
+                    updateSplitPane(splitPane, setOfCells, (Integer) item);
                 }
             }
         });
-        //Add content to the window.
-        JScrollPane scrollPane = new JScrollPane(cellToDisplayList);
-        scrollPane.setMinimumSize(new Dimension(100, 200));
-        JPanel loadSocPanel = new JPanel(new BorderLayout(2,1));
+
+        JPanel loadSocPanel = new JPanel(new BorderLayout());
+        loadSocPanel.setBorder(BorderFactory.createTitledBorder("Serialize Soc"));
+        loadSocPanel.setToolTipText("Load existing soc object");
         JButton loadSocBut = new JButton("Load");
         JPanel pathToSocTFPanel = new JPanel();
         pathToSoc_ = new JFormattedTextField(String.class);
         pathToSoc_.setColumns(10);
-        pathToSoc_.setText("Path to soc object");
+        pathToSoc_.setText("");
         pathToSocTFPanel.add(pathToSoc_);
         loadSocBut.addActionListener(actionEvent -> {
             try {
-                FileInputStream f_in = new
-                        FileInputStream(pathToSoc_.getText() + File.separator +"SetOfCell.serialize");
+                FileInputStream f_in;
+                if (pathToSoc_.getText().endsWith("SetOfCell.serialize")){
+                    f_in = new FileInputStream(pathToSoc_.getText());
+                }else{
+                    f_in = new FileInputStream(pathToSoc_.getText() + File.separator +"SetOfCell.serialize");
+                }
+
                 ObjectInputStream obj_in =
                         new ObjectInputStream (f_in);
                 Object obj = obj_in.readObject();
@@ -115,26 +103,54 @@ public class SOCVisualizer extends JFrame{
                     // Cast object to a soc
                     ReportingUtils.logMessage("updated");
                     SetOfCells soc = (SetOfCells) obj;
-                    updateCellsDisplay(soc);
+                    updateParameters(soc);
                 }
             } catch (IOException | ClassNotFoundException e) {
                 IOUtils.printErrorToIJLog(e);
             }
         });
+        loadSocPanel.add(new JLabel("Path to soc object"), BorderLayout.NORTH);
         loadSocPanel.add(pathToSocTFPanel, BorderLayout.CENTER);
         loadSocPanel.add(loadSocBut, BorderLayout.SOUTH);
 
-        contentPane.add(scrollPane, BorderLayout.WEST, 0);
-        contentPane.add(lastChartPanel[0], BorderLayout.CENTER, 1);
-        contentPane.add(loadSocPanel,BorderLayout.EAST,2);
+
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setDividerLocation(120);
+        mainPanel.add(splitPane, BorderLayout.CENTER);
+        mainPanel.add(loadSocPanel, BorderLayout.EAST);
+        add(mainPanel);
 
         validate();
         //Display the window.
-        setPreferredSize(new java.awt.Dimension(600, 570));
+        setPreferredSize(new Dimension(600, 570));
+        setSize(600, 570);
         pack();
+    }
+
+    public void updateParameters(SetOfCells setOfCells) {
+        for (Integer cellIndex : setOfCells.getPotentialMitosisCell()) {
+            int cellNb = setOfCells.getCell(cellIndex).getCellNumber();
+            synchronized(alreadyShownList_){
+                if (!alreadyShownList_.contains(cellNb)) {
+                    alreadyShownList_.addElement(cellNb);
+                }
+            }
+        }
+    }
+
+    private void updateSplitPane(JSplitPane splitPane, SetOfCells soc, int cellNb){
+        splitPane.remove(1);
+        Cell c = soc.getCell(cellNb);
+        ChartPanel chartPanel = CellChartPanel.updateCellContent(c);
+        chartPanel.setVisible(true);
+        splitPane.add(chartPanel,1);
+        splitPane.updateUI();
+        splitPane.revalidate();
     }
 
     public void cleanUp(){
         alreadyShownList_.clear();
     }
+//    public static void main(String[] args) {
+//    }
 }

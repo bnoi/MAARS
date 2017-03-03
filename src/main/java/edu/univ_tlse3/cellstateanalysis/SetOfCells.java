@@ -20,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable {
    private int iteratorCount = 0;
    private ArrayList<Cell> cellArray;
-   private CopyOnWriteArrayList<Integer> cellsWithMoreThan2Spots_ = new CopyOnWriteArrayList<>();
+   private CopyOnWriteArrayList<Integer> cellsWithAtLeast1Spot_ = new CopyOnWriteArrayList<>();
 
    public SetOfCells() {
    }
@@ -85,18 +85,18 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
       iteratorCount = 0;
       cellArray = null;
       cellArray = new ArrayList<>();
-      cellsWithMoreThan2Spots_ = null;
-      cellsWithMoreThan2Spots_ = new CopyOnWriteArrayList<>();
+      cellsWithAtLeast1Spot_ = null;
+      cellsWithAtLeast1Spot_ = new CopyOnWriteArrayList<>();
    }
 
    void addPotentialMitosisCell(Integer cellNb) {
-      if (!cellsWithMoreThan2Spots_.contains(cellNb)) {
-         cellsWithMoreThan2Spots_.add(cellNb);
+      if (!cellsWithAtLeast1Spot_.contains(cellNb)) {
+         cellsWithAtLeast1Spot_.add(cellNb);
       }
    }
 
    public CopyOnWriteArrayList<Integer> getPotentialMitosisCell() {
-      return cellsWithMoreThan2Spots_;
+      return cellsWithAtLeast1Spot_;
    }
 
    // iterator related

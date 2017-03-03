@@ -5,19 +5,18 @@ import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.gui.MaarsMainDialog;
+import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.Concatenator;
 import ij.plugin.frame.RoiManager;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -156,17 +155,16 @@ public class MAARSNoAcq implements Runnable {
             ImagePlus concatenatedFluoImgs = null;
             //TODO
             Boolean saveRam = null;
-            HashMap<String, HashMap<Integer,ImagePlus>> allCroppedImgs = null;
-            if (Runtime.getRuntime().maxMemory()/1024/1024/1024>16){
+            double memoryLimit = 25.0;
+            if (Runtime.getRuntime().maxMemory()/1024/1024/1024>memoryLimit){
                saveRam = false;
             }else{
                saveRam = true;
-               allCroppedImgs = new HashMap<>();
             }
             for (Integer current_frame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<>();
                for (String channel : arrayChannels) {
-                  IJ.log("Analysing channel " + channel + "_" + current_frame);
+                  IJ.log("Processing channel " + channel + "_" + current_frame);
                   String pathToFluoMovie = pathToFluoDir + channel + "_" + current_frame + "/" + channel + "_" + current_frame + "_MMStack_Pos0.ome.tif";
                   ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
                   ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
@@ -188,20 +186,24 @@ public class MAARSNoAcq implements Runnable {
                         concatenatedFluoImgs = concatenator.concatenate(concatenatedFluoImgs, fluoImage, false);
                      }
                   }else{
-                     if (!allCroppedImgs.keySet().contains(channel)){
-                        allCroppedImgs.put(channel, new HashMap<>());
-                        for (Cell c : soc_){
-                           int cellNb = c.getCellNumber();
-                           if (!allCroppedImgs.get(channel).keySet().contains(cellNb)){
-                              allCroppedImgs.get(channel).put(cellNb,
-                                      ImgUtils.cropImgWithRoi(fluoImage, c.getCellShapeRoi()));
-                           }
-                        }
-                     }else{
-                        for (Cell c : soc_){
-                           int cellNb = c.getCellNumber();
-                           allCroppedImgs.get(channel).put(cellNb, concatenator.concatenate(allCroppedImgs.get(channel).get(cellNb),
-                                   ImgUtils.cropImgWithRoi(fluoImage, c.getCellShapeRoi()), false));
+                     IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
+                     //TODO
+                     CopyOnWriteArrayList<Integer> cellIndex = soc_.getPotentialMitosisCell();
+                     for (int i : cellIndex) {
+                        Cell c = soc_.getCell(i);
+//                     for (Cell c : soc_){
+                        int cellNb = c.getCellNumber();
+                        String croppedImgsDir = pathToFluoDir + MAARSImgSaver.croppedImgs + File.separator;
+                        FileUtils.createFolder(croppedImgsDir);
+                        String pathToImg = croppedImgsDir + cellNb + "_" + channel + ".tif";
+                        ImagePlus croppedImg = ImgUtils.cropImgWithRoi(fluoImage, c.getCellShapeRoi());
+                        if (!FileUtils.exists(pathToImg)){
+                           IJ.saveAsTiff(croppedImg, pathToImg);
+                        }else{
+                           ImagePlus new_croppedImg = concatenator.concatenate(IJ.openImage(pathToImg), croppedImg, false);
+                           new_croppedImg.setRoi(croppedImg.getRoi());
+                           IJ.run(new_croppedImg, "Enhance Contrast", "saturated=0.35");
+                           IJ.saveAsTiff(new_croppedImg, pathToImg);
                         }
                      }
                   }
@@ -224,9 +226,8 @@ public class MAARSNoAcq implements Runnable {
                   if (!saveRam) {
                      MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
                              arrayChannels.size(), arrayImgFrames.size());
-                  }else{
-                     MAARS.saveAll(soc_, allCroppedImgs, pathToFluoDir, parameters.useDynamic(),
-                             arrayChannels.size(), arrayImgFrames.size());
+                  } else{
+                     MAARS.saveAll(soc_, pathToFluoDir, parameters.useDynamic());
                   }
                   IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                           + " sec for writing results");

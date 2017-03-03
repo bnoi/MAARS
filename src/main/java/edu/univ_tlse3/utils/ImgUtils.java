@@ -187,8 +187,4 @@ public class ImgUtils {
       ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
       return imgProcessor.convertToFloatProcessor();
    }
-
-   public static void main(String[] args) {
-
-   }
 }

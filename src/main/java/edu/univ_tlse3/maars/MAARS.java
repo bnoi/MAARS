@@ -97,25 +97,16 @@ public class MAARS implements Runnable {
         }
     }
 
-    static void saveAll(SetOfCells soc, HashMap<String, HashMap<Integer,ImagePlus>> allCroppedImgs,
-                        String pathToFluoDir, Boolean useDynamic, int chNb, int frameNb) {
+    static void saveAll(SetOfCells soc, String pathToFluoDir, Boolean useDynamic) {
         IJ.log("Saving information of each cell");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
-        MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir);
-//        TODO only save the potential the mitotic cells
-//        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
-//         for (int i : cellIndex) {
-//             IJ.log("" + i);
-//             Cell cell = soc.getCell(i);
-        for (Cell cell : soc){
-            geoSaver.save(cell);
-            spotSaver.save(cell);
-            for (String s : allCroppedImgs.keySet()){
-                ImagePlus croppedImg = allCroppedImgs.get(s).get(cell.getCellNumber());
-                imgSaver.saveCroppedImgs(croppedImg, cell.getCellNumber(),chNb,frameNb);
-            }
-
+        //TODO
+        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
+        for (int i : cellIndex) {
+            Cell c = soc.getCell(i);
+            geoSaver.save(c);
+            spotSaver.save(c);
         }
         if (useDynamic) {
             serializeSoc(pathToFluoDir, soc);
@@ -127,16 +118,15 @@ public class MAARS implements Runnable {
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir);
-//        TODO only save the potential the mitotic cells
-//        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
-//         for (int i : cellIndex) {
-//             IJ.log("" + i);
-//             Cell cell = soc.getCell(i);
-        for (Cell cell : soc){
+//        TODO
+        CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
+         for (int i : cellIndex) {
+             Cell cell = soc.getCell(i);
+//        for (Cell cell : soc){
              geoSaver.save(cell);
              spotSaver.save(cell);
              ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
-             imgSaver.saveCroppedImgs(croppedImg, cell.getCellNumber(),chNb,frameNb);
+             imgSaver.saveSplitImgs(croppedImg, cell.getCellNumber(),chNb,frameNb);
          }
          if (useDynamic) {
              serializeSoc(pathToFluoDir, soc);

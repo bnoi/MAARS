@@ -219,7 +219,7 @@ public class SegPombe {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
       this.binImage.show();
-      WaitForUserDialog waitForUserDialog = new WaitForUserDialog("");
+      WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Please test your threshold (even undo/redo), and click ok.");
       JButton adjWaterButton = new JButton("Adjustable Watershed");
       adjWaterButton.addActionListener(actionEvent -> {
          try{
@@ -230,9 +230,8 @@ public class SegPombe {
          }
       });
       waitForUserDialog.setLayout(new BorderLayout());
-      waitForUserDialog.add(adjWaterButton, BorderLayout.NORTH);
-      waitForUserDialog.add(new JLabel("Please test your threshold (even undo/redo), and click ok."), BorderLayout.SOUTH);
-      waitForUserDialog.setMinimumSize(new Dimension(200,150));
+      waitForUserDialog.add(adjWaterButton, BorderLayout.SOUTH);
+      waitForUserDialog.setMinimumSize(new Dimension(300,150));
       waitForUserDialog.show();
       this.binImage.hide();
    }

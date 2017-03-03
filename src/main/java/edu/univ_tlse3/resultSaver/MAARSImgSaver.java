@@ -7,13 +7,15 @@ import ij.ImagePlus;
 import ij.plugin.ChannelSplitter;
 import ij.plugin.HyperStackConverter;
 
+import java.awt.*;
 import java.io.File;
 
 public class MAARSImgSaver {
+   public static final String croppedImgs = "croppedImgs";
    private String croppedImgDir;
 
    public MAARSImgSaver(String pathToFluoDir) {
-      this.croppedImgDir = pathToFluoDir + "croppedImgs" + File.separator;
+      this.croppedImgDir = pathToFluoDir + croppedImgs + File.separator;
       FileUtils.createFolder(croppedImgDir);
    }
 
@@ -21,16 +23,27 @@ public class MAARSImgSaver {
     * @param croppedImg set of image
     * @param cellNb        number of current cell
     */
-   public void saveCroppedImgs(ImagePlus croppedImg, int cellNb, int chNb, int frameNb) {
-      ImagePlus hyperImg = HyperStackConverter.toHyperStack(croppedImg, chNb,
-              croppedImg.getStack().size()/ chNb/frameNb,frameNb,"xyzct", "Grayscale");
+   public void saveSplitImgs(ImagePlus croppedImg, int cellNb, int chNb, int frameNb) {
+      ImagePlus hyperImg = this.reshapeStack(croppedImg, chNb, frameNb);
       ImagePlus[] channels = ChannelSplitter.split(hyperImg);
       for (ImagePlus img : channels){
-         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + img.getStack().getSliceLabel(1).split("_",-1)[0] + ".ome.tif";
+         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + img.getStack().getSliceLabel(1).split("_",-1)[0] + ".tif";
          img.setRoi(croppedImg.getRoi());
          IJ.run(img, "Enhance Contrast", "saturated=0.35");
          IJ.saveAsTiff(img, pathToCroppedImg);
       }
+   }
+
+   /**
+    *
+    * @param croppedImgStack
+    * @param totalChNb
+    * @param totalFrameNb
+    * @return
+    */
+   private ImagePlus reshapeStack(ImagePlus croppedImgStack, int totalChNb, int totalFrameNb){
+      return HyperStackConverter.toHyperStack(croppedImgStack, totalChNb,
+              croppedImgStack.getStack().size()/totalChNb/totalFrameNb,totalFrameNb,"xyzct", "Grayscale");
    }
 
 //   public void exportChannelBtf(Boolean splitChannel, Set<String> arrayChannels) {
