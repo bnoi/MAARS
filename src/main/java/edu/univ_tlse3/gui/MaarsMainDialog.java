@@ -31,7 +31,7 @@ import java.util.concurrent.*;
 
 public class MaarsMainDialog extends JFrame implements ActionListener {
 
-   private final Label numFieldLabel;
+   private final JLabel numFieldLabel;
    private final MMStudio mm;
    private final CMMCore mmc;
    private final double calibration;
@@ -67,7 +67,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
    public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
       super("Mitosis Analysing And Recording System - MAARS");
       // ------------initialization of parameters---------------//
-      Color labelColor = Color.ORANGE;
+//      Color panelColor = Color.LIGHT_GRAY;
 
       this.mm = mm;
       this.mmc = mm.core();
@@ -97,14 +97,14 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
       // Exploration Label
 
-      JPanel explorationPanel = new JPanel(new GridLayout(3,1));
+      JPanel explorationPanel = new JPanel(new GridLayout(2,1));
       explorationPanel.setBorder(BorderFactory.createTitledBorder("Area to explore"));
       explorationPanel.setToolTipText("Define width and height of acquisition area");
-      explorationPanel.setForeground(labelColor);
       // field width Panel (Label + textfield)
 
       JPanel widthPanel = new JPanel(new GridLayout(1, 0));
-      JLabel widthLabel = new JLabel("Width :", SwingConstants.CENTER);
+      widthPanel.setBorder(BorderFactory.createTitledBorder("Width of field : "));
+      widthPanel.setToolTipText("Width of acquisition area");
       widthTf = new JFormattedTextField(Integer.class);
       widthTf.setValue((int)FastMath.round(fieldWidth * defaultXFieldNumber));
       widthTf.addKeyListener(new KeyAdapter() {
@@ -114,14 +114,13 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             refreshNumField();
          }
       });
-      widthPanel.add(widthLabel);
       widthPanel.add(widthTf);
-      explorationPanel.add(widthPanel);
 
       // field Height Panel (Label + textfield)
 
       JPanel heightPanel = new JPanel(new GridLayout(1, 0));
-      JLabel heightLabel = new JLabel("Height :", SwingConstants.CENTER);
+      heightPanel.setBorder(BorderFactory.createTitledBorder("Height of field : "));
+      heightPanel.setToolTipText("Height of acquisition area");
       heightTf = new JFormattedTextField(Integer.class);
       heightTf.setValue((int)FastMath.round(fieldHeight * defaultYFieldNumber));
       heightTf.addKeyListener(new KeyAdapter() {
@@ -131,13 +130,17 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             refreshNumField();
          }
       });
-      heightPanel.add(heightLabel);
       heightPanel.add(heightTf);
-      explorationPanel.add(heightPanel);
+
+      JPanel widHeiJPanel = new JPanel(new GridLayout(1,2));
+      widHeiJPanel.add(widthPanel);
+      widHeiJPanel.add(heightPanel);
+
+      explorationPanel.add(widHeiJPanel);
 
       // number of field label
 
-      numFieldLabel = new Label("Number of field : " + defaultXFieldNumber * defaultYFieldNumber,  Label.CENTER);
+      numFieldLabel = new JLabel("Number of field : " + defaultXFieldNumber * defaultYFieldNumber, JLabel.CENTER);
       explorationPanel.add(numFieldLabel);
 
       // analysis parameters label
@@ -145,7 +148,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       JPanel analysisParamPanel = new JPanel(new GridLayout(2,1));
       analysisParamPanel.setBorder(BorderFactory.createTitledBorder("Analysis parameters"));
       analysisParamPanel.setToolTipText("Set parameters");
-      analysisParamPanel.setForeground(labelColor);
+//      analysisParamPanel.setBackground(panelColor);
 
       // autofocus button
 
@@ -176,7 +179,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       JPanel strategyPanel = new JPanel(new GridLayout(1, 0));
       strategyPanel.setBorder(BorderFactory.createTitledBorder("Strategy"));
       strategyPanel.setToolTipText("Which strategy to use");
-      strategyPanel.setForeground(labelColor);
+//      strategyPanel.setBackground(panelColor);
       dynamicOpt = new JRadioButton("Dynamic");
       dynamicOpt.setSelected(parameters.useDynamic());
       staticOpt = new JRadioButton("Static");
@@ -209,21 +212,20 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
       // Saving path Panel
 
-      JPanel savePathLabelPanel = new JPanel(new GridLayout(1, 0));
-      savePathLabelPanel.setBorder(BorderFactory.createTitledBorder("Acquisition root folder :"));
-      savePathLabelPanel.setToolTipText("Path to saving folder");
-      //TODO
+      JPanel savePathPanel = new JPanel(new GridLayout(1, 0));
+      savePathPanel.setBorder(BorderFactory.createTitledBorder("Acquisition root folder :"));
+      savePathPanel.setToolTipText("Path to saving folder");
 
       // Saving Path textfield
 
-      JPanel savePathTfPanel = new JPanel(new GridLayout(1, 0));
       savePathTf = new JFormattedTextField(parameters.getSavingPath());
       savePathTf.setMaximumSize(new Dimension(maxDialogWidth, 1));
-      savePathTfPanel.add(savePathTf);
+      savePathPanel.add(savePathTf);
 
       // show visualiwer acquisitions button
 
       JPanel stopAndVisualizerButtonPanel_ = new JPanel(new GridLayout(1, 0));
+      stopAndVisualizerButtonPanel_.setBorder(BorderFactory.createTitledBorder("Visualizer and stop"));
       showDataVisualizer_ = new JButton("Show visualizer");
       showDataVisualizer_.addActionListener(this);
       stopAndVisualizerButtonPanel_.add(showDataVisualizer_);
@@ -238,7 +240,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // Ok button to run
 
       JPanel okPanel = new JPanel(new GridLayout(1, 0));
-      okMainDialogButton = new JButton("OK");
+      okMainDialogButton = new JButton("Go !");
       okMainDialogButton.addActionListener(this);
       getRootPane().setDefaultButton(okMainDialogButton);
       okPanel.add(okMainDialogButton);
@@ -251,15 +253,15 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       mainPanel.add(explorationPanel);
 //      mainPanel.add(widthPanel);
 //      mainPanel.add(heightPanel);
-      mainPanel.add(numFieldLabel);
+//      mainPanel.add(numFieldLabel);
       mainPanel.add(analysisParamPanel);
 //      mainPanel.add(autoFocusPanel);
 //      mainPanel.add(segPanel);
 //      mainPanel.add(fluoAnalysisPanel);
       mainPanel.add(strategyPanel);
       mainPanel.add(chkPanel);
-      mainPanel.add(savePathLabelPanel);
-      mainPanel.add(savePathTfPanel);
+      mainPanel.add(savePathPanel);
+//      mainPanel.add(savePathTfPanel);
       mainPanel.add(okPanel);
       mainPanel.add(stopAndVisualizerButtonPanel_);
       add(mainPanel);

@@ -65,164 +65,121 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       setModalityType(ModalityType.DOCUMENT_MODAL);
       setTitle("MAARS - Segmentation parameters");
       setLayout(new GridLayout(0, 1));
-      setBackground(Color.WHITE);
-      setMinimumSize(new Dimension(400, 750));
-      Color labelColor = Color.ORANGE;
+      setMinimumSize(new Dimension(320, 500));
+//      Color labelColor = Color.ORANGE;
 
       //
 
-      JPanel skipChkBoxPanel = new JPanel();
-      JCheckBox skipSegChBox = new JCheckBox();
-      skipSegChBox.setSelected(Boolean.parseBoolean(parameters_.getSkipSegmentation()));
-      skipSegChBox.setText("Skip segmentation");
-      skipSegChBox.addActionListener(e -> {
-         if (skipSegChBox.isSelected()){
-            YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(null,
-                    "Skip segmentation",
-                    "Do you have ROI.zip and BF_Results.csv in all your folders ?");
-            if (yesNoCancelDialog.yesPressed()){
-               parameters_.setSkipSegmentation(true);
-            }else{
-               skipSegChBox.setSelected(false);
-               parameters_.setSkipSegmentation(false);
-            }
-         }else{
-            parameters_.setSkipSegmentation(false);
-         }
-      });
-      skipChkBoxPanel.add(skipSegChBox, JPanel.CENTER_ALIGNMENT);
-      this.add(skipChkBoxPanel);
-      //
-
-      Label segmMovieLabel = new Label("Movie parameters", Label.CENTER);
-      segmMovieLabel.setBackground(labelColor);
-      this.add(segmMovieLabel);
+      JPanel segmMoviePanel = new JPanel(new GridLayout(1,2));
+      segmMoviePanel.setBorder(BorderFactory.createTitledBorder("Movie parameters"));
+      add(segmMoviePanel);
 
       //
 
-      JPanel segRangePanel = new JPanel(new GridLayout(1, 2));
-      JLabel rangeTitle = new JLabel("Range (micron) : ",
-              SwingConstants.CENTER);
+      JPanel segRangePanel = new JPanel(new GridLayout(1,1));
+      segRangePanel.setBorder(BorderFactory.createTitledBorder("Z Range (micron) : "));
       int filedLength = 8;
       range = new JTextField(
               parameters
                       .getSegmentationParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE),
               filedLength);
-      segRangePanel.add(rangeTitle);
       segRangePanel.add(range);
-      this.add(segRangePanel);
+      segmMoviePanel.add(segRangePanel);
 
       //
 
-      JPanel segStepPanel = new JPanel(new GridLayout(1, 2));
-      JLabel stepTitle = new JLabel("Step (micron) : ", SwingConstants.CENTER);
+      JPanel segStepPanel = new JPanel(new GridLayout(1,1));
+      segStepPanel.setBorder(BorderFactory.createTitledBorder("Z Step (micron) : "));
       step = new JTextField(
               parameters.getSegmentationParameter(MaarsParameters.STEP),
               filedLength);
-      segStepPanel.add(stepTitle);
       segStepPanel.add(step);
-      this.add(segStepPanel);
+      segmMoviePanel.add(segStepPanel);
 
       //
 
-      Label segmParemLabel = new Label("Segmentation parameters",
-              Label.CENTER);
-      segmParemLabel.setBackground(labelColor);
-      this.add(segmParemLabel);
+      JPanel segmParemPanel = new JPanel(new GridLayout(1,2));
+      segmParemPanel.setBorder(BorderFactory.createTitledBorder("Segmentation parameters"));
+      add(segmParemPanel);
 
       //
 
-      JPanel minCellAreaPanel = new JPanel(new GridLayout(1, 2));
-      JLabel minCellAreaTitle = new JLabel("Min cell Area (micron) : ",
-              SwingConstants.CENTER);
+      JPanel minCellAreaPanel = new JPanel(new GridLayout(1, 1));
+      minCellAreaPanel.setBorder(BorderFactory.createTitledBorder("Min cell Area (micron) : "));
       minCellArea = new JTextField(
               parameters
                       .getSegmentationParameter(MaarsParameters.MINIMUM_CELL_AREA),
               filedLength);
-      minCellAreaPanel.add(minCellAreaTitle);
       minCellAreaPanel.add(minCellArea);
-      this.add(minCellAreaPanel);
+      segmParemPanel.add(minCellAreaPanel);
 
       //
 
-      JPanel maxCellAreaPanel = new JPanel(new GridLayout(1, 2));
-      JLabel maxCellAreaTitle = new JLabel("Max cell Area (micron) : ",
-              SwingConstants.CENTER);
-
+      JPanel maxCellAreaPanel = new JPanel(new GridLayout(1, 1));
+      maxCellAreaPanel.setBorder(BorderFactory.createTitledBorder("Max cell Area (micron) : "));
       maxCellArea = new JTextField(
               parameters
                       .getSegmentationParameter(MaarsParameters.MAXIMUM_CELL_AREA),
               filedLength);
-      maxCellAreaPanel.add(maxCellAreaTitle);
       maxCellAreaPanel.add(maxCellArea);
-      this.add(maxCellAreaPanel);
+      segmParemPanel.add(maxCellAreaPanel);
 
       //
 
-      JPanel greyValueFilterCheckPanel = new JPanel();
+      JPanel greyValueFilterCheckPanel = new JPanel(new GridLayout(1,2));
+      greyValueFilterCheckPanel.setBorder(BorderFactory.createTitledBorder("Mean grey value background filter"));
+      add(greyValueFilterCheckPanel);
+
       greyValueFilter = new JCheckBox(
-              "Mean grey value background filter",
+              "",
               Boolean.parseBoolean(parameters
                       .getSegmentationParameter(MaarsParameters.FILTER_MEAN_GREY_VALUE)));
       greyValueFilter.addActionListener(this);
       greyValueFilterCheckPanel.add(greyValueFilter);
-      this.add(greyValueFilterCheckPanel);
 
       //
 
-      JPanel greyValueFilterPanel = new JPanel(new GridLayout(1, 2));
-      JLabel greyValueFilterTitle = new JLabel("Mean grey value : ",
-              SwingConstants.CENTER);
       greyValue = new JTextField(
               parameters
                       .getSegmentationParameter(MaarsParameters.MEAN_GREY_VALUE),
               filedLength);
       greyValue.setEditable(greyValueFilter.isSelected());
-      greyValueFilterPanel.add(greyValueFilterTitle);
-      greyValueFilterPanel.add(greyValue);
-      this.add(greyValueFilterPanel);
+      greyValueFilterCheckPanel.add(greyValue);
 
       //
 
-      JPanel shapeCheckPanel = new JPanel();
+      JPanel shapeCheckPanel = new JPanel(new GridLayout(1,2));
+      shapeCheckPanel.setBorder(BorderFactory.createTitledBorder("Filter unusual shape using solidity"));
+      add(shapeCheckPanel);
+
       shapeFilter = new JCheckBox(
-              "Filter unusual shape using solidity",
+              "",
               Boolean.parseBoolean(parameters
                       .getSegmentationParameter(MaarsParameters.FILTER_SOLIDITY)));
       shapeFilter.addActionListener(this);
       shapeCheckPanel.add(shapeFilter);
-      this.add(shapeCheckPanel);
 
       //
 
-      JPanel shapePanel = new JPanel(new GridLayout(1, 2));
-      JLabel solidityTitle = new JLabel("Solidity: ", SwingConstants.CENTER);
       solidity = new JTextField(
               parameters.getSegmentationParameter(MaarsParameters.SOLIDITY),
               filedLength);
       solidity.setEditable(shapeFilter.isSelected());
-      shapePanel.add(solidityTitle);
-      shapePanel.add(solidity);
-      this.add(shapePanel);
+      shapeCheckPanel.add(solidity);
+
 
       //
 
-      JPanel bfChannelPanel = new JPanel();
-      bfChannelPanel.setLayout(new BorderLayout(1,2));
+      JPanel bfChannelPanel = new JPanel(new GridLayout(1,1));
+      bfChannelPanel.setBorder(BorderFactory.createTitledBorder("Bright-field Channel ?"));
 
-      Label bfChannelLabel = new Label("Bright-field Channel ?", Label.CENTER);
-      bfChannelLabel.setBackground(Color.lightGray);
       bfChannelCombo_ = new JComboBox<>();
-      bfChannelPanel.add(bfChannelLabel, BorderLayout.NORTH);
-      bfChannelPanel.add(bfChannelCombo_, BorderLayout.SOUTH);
+      bfChannelPanel.add(bfChannelCombo_);
 
       //
 
-      JPanel configurationGroupPanel = new JPanel();
-      configurationGroupPanel.setLayout(new BorderLayout(1,2));
-
-      Label configurationGroupLabel = new Label("Configuration Group", Label.CENTER);
-      configurationGroupLabel.setBackground(Color.lightGray);
+      JPanel configurationGroupPanel = new JPanel(new GridLayout(1,1));
+      configurationGroupPanel.setBorder(BorderFactory.createTitledBorder("Configuration Group"));
 
       configurationCombo_ = new JComboBox<>(mm_.getCore().getAvailableConfigGroups().toArray());
       configurationCombo_.addActionListener(actionEvent -> {
@@ -235,19 +192,23 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
          }
       });
       configurationCombo_.setSelectedItem(parameters_.getChannelGroup());
-      configurationGroupPanel.add(configurationGroupLabel, BorderLayout.NORTH);
-      configurationGroupPanel.add(configurationCombo_, BorderLayout.SOUTH);
+      configurationGroupPanel.add(configurationCombo_);
 
 
       //
 
-      JPanel bfPanel = new JPanel();
+      JPanel bfPanel = new JPanel(new GridLayout(1,2));
       bfPanel.add(configurationGroupPanel);
       bfPanel.add(bfChannelPanel);
-      this.add(bfPanel);
+      add(bfPanel);
+
       //
 
-      JButton testSegBut = new JButton("test segmentation");
+      JPanel skipTestPanel = new JPanel(new GridLayout(1,2));
+      skipTestPanel.setBorder(BorderFactory.createTitledBorder("Options : "));
+      add(skipTestPanel);
+
+      JButton testSegBut = new JButton("Test segmentation");
       testSegBut.addActionListener(actionEvent -> {
          updateMAARSParamters();
          String segDir = parameters.getSavingPath() + File.separator + "X0_Y0";
@@ -273,17 +234,39 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
             es_.submit(ms);
          }
       });
-      this.add(testSegBut);
+      skipTestPanel.add(testSegBut);
+
+      //
+
+      JCheckBox skipSegChBox = new JCheckBox();
+      skipSegChBox.setSelected(Boolean.parseBoolean(parameters_.getSkipSegmentation()));
+      skipSegChBox.setText("Skip segmentation");
+      skipSegChBox.addActionListener(e -> {
+         if (skipSegChBox.isSelected()){
+            YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(null,
+                    "Skip segmentation",
+                    "Do you have ROI.zip and BF_Results.csv in all your folders ?");
+            if (yesNoCancelDialog.yesPressed()){
+               parameters_.setSkipSegmentation(true);
+            }else{
+               skipSegChBox.setSelected(false);
+               parameters_.setSkipSegmentation(false);
+            }
+         }else{
+            parameters_.setSkipSegmentation(false);
+         }
+      });
+      skipTestPanel.add(skipSegChBox);
 
       //
 
       okBut = new Button("OK");
       okBut.addActionListener(this);
-      this.add(okBut);
+      add(okBut);
 
 
       // this.pack();
-      this.setVisible(true);
+      setVisible(true);
    }
 
    private void updateMAARSParamters(){

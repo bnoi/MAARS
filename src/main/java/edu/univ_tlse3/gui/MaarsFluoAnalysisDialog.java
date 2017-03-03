@@ -91,40 +91,38 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       setModalityType(ModalityType.DOCUMENT_MODAL);
       setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       setTitle("MAARS - Fluorescent Analysis Parameters");
-      setBackground(Color.WHITE);
-      setLayout(new GridLayout(0, 1));
-      setMinimumSize(new Dimension(250, 500));
-      Color labelColor = Color.ORANGE;
+      setLayout(new BorderLayout());
+      setMinimumSize(new Dimension(600, 500));
+      setSize(600,500);
 
       // Movie parameters_ label
 
-      Label fluoMovieLabel = new Label("Movie parameters", Label.CENTER);
-      fluoMovieLabel.setBackground(labelColor);
+      JPanel movieParaPanel = new JPanel(new GridLayout(3,1));
+      movieParaPanel.setBorder(BorderFactory.createTitledBorder("Movie parameters"));
+      add(movieParaPanel, BorderLayout.PAGE_START);
 
       //
 
-      JPanel fluoRangePanel = new JPanel(new GridLayout(1, 2));
-      JLabel rangeTitle = new JLabel("Range (micron) : ", SwingConstants.CENTER);
-
+      JPanel fluoRangePanel = new JPanel(new GridLayout(1, 1));
+      fluoRangePanel.setBorder(BorderFactory.createTitledBorder("Z Range (micron) : "));
       int fieldLength = 8;
       range = new JTextField(parameters_.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE), fieldLength);
-      fluoRangePanel.add(rangeTitle);
       fluoRangePanel.add(range);
+      movieParaPanel.add(fluoRangePanel);
 
       //
 
-      JPanel fluoStepPanel = new JPanel(new GridLayout(1, 2));
-      JLabel stepTitle = new JLabel("Step (micron) : ", SwingConstants.CENTER);
+      JPanel fluoStepPanel = new JPanel(new GridLayout(1, 1));
+      fluoStepPanel.setBorder(BorderFactory.createTitledBorder("Z Step (micron) : "));
       step = new JTextField(parameters_.getFluoParameter(MaarsParameters.STEP), fieldLength);
-      fluoStepPanel.add(stepTitle);
       fluoStepPanel.add(step);
+      movieParaPanel.add(fluoStepPanel);
 
       //
 
-      JPanel timeIntervalPanel = new JPanel(new GridLayout(1, 2));
-      JLabel timeIntervalTitle = new JLabel("Time Interval (ms) : ", SwingConstants.CENTER);
+      JPanel timeIntervalPanel = new JPanel(new GridLayout(1, 1));
+      timeIntervalPanel.setBorder(BorderFactory.createTitledBorder("Time Interval (ms) : "));
       timeInterval = new JTextField(parameters_.getFluoParameter(MaarsParameters.TIME_INTERVAL), fieldLength);
-      timeIntervalPanel.add(timeIntervalTitle);
       timeIntervalPanel.add(timeInterval);
       timeInterval.addKeyListener(new KeyAdapter() {
          @Override
@@ -132,21 +130,13 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             updateDoAnalysisButton();
          }
       });
+      movieParaPanel.add(timeIntervalPanel);
 
       //
 
-      JPanel checkBoxPanel = new JPanel(new GridLayout(1, 0));
-      saveFlims = new JCheckBox("Save Movies",
-              Boolean.parseBoolean(parameters_.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
-      doAnalysis = new JCheckBox("Do Analysis", true);
-      updateDoAnalysisButton();
-      checkBoxPanel.add(saveFlims);
-      checkBoxPanel.add(doAnalysis);
-
-      //
-
-      Label fluoAnaParamLabel = new Label("Fluo-acquisition parameters", Label.CENTER);
-      fluoAnaParamLabel.setBackground(labelColor);
+      JPanel fluoAnaParamLabel = new JPanel(new GridLayout(5,1));
+      fluoAnaParamLabel.setBorder(BorderFactory.createTitledBorder("Fluo-acquisition parameters"));
+      add(fluoAnaParamLabel,BorderLayout.CENTER);
 
       //
 
@@ -216,6 +206,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       channel1Panel.add(test1);
        channel1Panel.add(ch1Button);
       chPanels.add(channel1Panel);
+
       //
 
       channel2Panel = new JPanel(new GridLayout(1, 0));
@@ -290,41 +281,46 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       //
 
-      okFluoAnaParamButton = new JButton("OK");
-      okFluoAnaParamButton.addActionListener(this);
-
-      //
-
-
-      JPanel configurationGroupPanel = new JPanel();
-      configurationGroupPanel.setLayout(new BorderLayout(1,2));
-
-      Label configurationGroupLabel = new Label("Configuration Group", Label.CENTER);
-      configurationGroupLabel.setBackground(Color.lightGray);
-
+      JPanel configurationGroupPanel = new JPanel(new GridLayout(1,1));
+      configurationGroupPanel.setBorder(BorderFactory.createTitledBorder("Configuration Group"));
       configurationCombo_ = new JComboBox<>(mm.getCore().getAvailableConfigGroups().toArray());
       configurationCombo_.addActionListener(this);
       configurationCombo_.setSelectedItem(parameters_.getChannelGroup());
-      configurationGroupPanel.add(configurationGroupLabel, BorderLayout.NORTH);
-      configurationGroupPanel.add(configurationCombo_, BorderLayout.SOUTH);
+      configurationGroupPanel.add(configurationCombo_);
 
       //
 
-      JPanel mitosisDurationPanel = new JPanel();
-      mitosisDurationPanel.setLayout(new BorderLayout(1,2));
-
-      Label mitosisDurationLabel = new Label("Minimum mitosis duration (s)", Label.CENTER);
-      mitosisDurationLabel.setBackground(Color.lightGray);
-
+      JPanel mitosisDurationPanel = new JPanel(new GridLayout(1,1));
+      mitosisDurationPanel.setBorder(BorderFactory.createTitledBorder("Minimum mitosis duration (s)"));
       mitosisDurationTf_ = new JFormattedTextField(Integer.class);
-      mitosisDurationPanel.add(mitosisDurationLabel, BorderLayout.NORTH);
-      mitosisDurationPanel.add(mitosisDurationTf_, BorderLayout.SOUTH);
       mitosisDurationTf_.setText(parameters.getMinimumMitosisDuration());
+      mitosisDurationPanel.add(mitosisDurationTf_);
 
+      //
 
-      JPanel durationAndConfigPanel = new JPanel(new BorderLayout(1,2));
-      durationAndConfigPanel.add(configurationGroupPanel, BorderLayout.WEST);
-      durationAndConfigPanel.add(mitosisDurationPanel, BorderLayout.EAST);
+      saveFlims = new JCheckBox("Save Movies",
+              Boolean.parseBoolean(parameters_.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
+      doAnalysis = new JCheckBox("Do Analysis", true);
+      updateDoAnalysisButton();
+      JPanel optionPanel = new JPanel(new GridLayout(1,4));
+      optionPanel.add(saveFlims);
+      optionPanel.add(doAnalysis);
+      optionPanel.add(configurationGroupPanel);
+      optionPanel.add(mitosisDurationPanel);
+
+      //
+
+      fluoAnaParamLabel.add(optionPanel);
+      fluoAnaParamLabel.add(channelTitlePanel);
+      fluoAnaParamLabel.add(channel1Panel);
+      fluoAnaParamLabel.add(channel2Panel);
+      fluoAnaParamLabel.add(channel3Panel);
+
+      //
+
+      okFluoAnaParamButton = new JButton("OK");
+      okFluoAnaParamButton.addActionListener(this);
+      add(okFluoAnaParamButton,BorderLayout.SOUTH);
 
       //
 
@@ -351,26 +347,6 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       ch1Button.setActionCommand((String) channel1Combo.getSelectedItem());
       ch2Button.setActionCommand((String) channel2Combo.getSelectedItem());
       ch3Button.setActionCommand((String) channel3Combo.getSelectedItem());
-
-      //
-
-      JPanel mainPanel = new JPanel();
-      mainPanel.setBackground(Color.WHITE);
-      mainPanel.setLayout(new GridLayout(0, 1));
-      mainPanel.setMinimumSize(new Dimension(250, 500));
-      mainPanel.add(fluoMovieLabel);
-      mainPanel.add(fluoRangePanel);
-      mainPanel.add(fluoStepPanel);
-      mainPanel.add(timeIntervalPanel);
-      mainPanel.add(checkBoxPanel);
-      mainPanel.add(fluoAnaParamLabel);
-      mainPanel.add(durationAndConfigPanel);
-      mainPanel.add(channelTitlePanel);
-      mainPanel.add(channel1Panel);
-      mainPanel.add(channel2Panel);
-      mainPanel.add(channel3Panel);
-      mainPanel.add(okFluoAnaParamButton);
-      this.add(mainPanel);
 
       //
 
