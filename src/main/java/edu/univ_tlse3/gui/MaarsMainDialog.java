@@ -6,6 +6,7 @@ import edu.univ_tlse3.maars.MAARS;
 import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.GuiUtils;
 import edu.univ_tlse3.utils.IOUtils;
 
 import ij.IJ;
@@ -16,6 +17,7 @@ import org.apache.commons.math3.util.FastMath;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -67,7 +69,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
    public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
       super("Mitosis Analysing And Recording System - MAARS");
       // ------------initialization of parameters---------------//
-//      Color panelColor = Color.LIGHT_GRAY;
+      Color sectitleColor = Color.BLACK;
 
       this.mm = mm;
       this.mmc = mm.core();
@@ -98,13 +100,14 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // Exploration Label
 
       JPanel explorationPanel = new JPanel(new GridLayout(2,1));
-      explorationPanel.setBorder(BorderFactory.createTitledBorder("Area to explore"));
+      explorationPanel.setBorder(GuiUtils.addPanelTitle(explorationPanel,"Area to explore"));
       explorationPanel.setToolTipText("Define width and height of acquisition area");
       // field width Panel (Label + textfield)
 
       JPanel widthPanel = new JPanel(new GridLayout(1, 0));
-      widthPanel.setBorder(BorderFactory.createTitledBorder("Width of field : "));
+      widthPanel.setBorder(GuiUtils.addSecondaryTitle(widthPanel,"Width of field : "));
       widthPanel.setToolTipText("Width of acquisition area");
+
       widthTf = new JFormattedTextField(Integer.class);
       widthTf.setValue((int)FastMath.round(fieldWidth * defaultXFieldNumber));
       widthTf.addKeyListener(new KeyAdapter() {
@@ -119,8 +122,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // field Height Panel (Label + textfield)
 
       JPanel heightPanel = new JPanel(new GridLayout(1, 0));
-      heightPanel.setBorder(BorderFactory.createTitledBorder("Height of field : "));
+      heightPanel.setBorder(GuiUtils.addSecondaryTitle(heightPanel,"Height of field : "));
       heightPanel.setToolTipText("Height of acquisition area");
+
       heightTf = new JFormattedTextField(Integer.class);
       heightTf.setValue((int)FastMath.round(fieldHeight * defaultYFieldNumber));
       heightTf.addKeyListener(new KeyAdapter() {
@@ -146,7 +150,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // analysis parameters label
 
       JPanel analysisParamPanel = new JPanel(new GridLayout(2,1));
-      analysisParamPanel.setBorder(BorderFactory.createTitledBorder("Analysis parameters"));
+      analysisParamPanel.setBorder(GuiUtils.addPanelTitle(analysisParamPanel,"Analysis parameters"));
       analysisParamPanel.setToolTipText("Set parameters");
 //      analysisParamPanel.setBackground(panelColor);
 
@@ -177,8 +181,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // strategy panel (2 radio button + 1 textfield + 1 label)
 
       JPanel strategyPanel = new JPanel(new GridLayout(1, 0));
-      strategyPanel.setBorder(BorderFactory.createTitledBorder("Strategy"));
+      strategyPanel.setBorder(GuiUtils.addPanelTitle(strategyPanel,"Strategy"));
       strategyPanel.setToolTipText("Which strategy to use");
+
 //      strategyPanel.setBackground(panelColor);
       dynamicOpt = new JRadioButton("Dynamic");
       dynamicOpt.setSelected(parameters.useDynamic());
@@ -202,8 +207,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // checkbox : update or not MAARS parameters
 
       JPanel chkPanel = new JPanel(new GridLayout(1, 0));
-      chkPanel.setBorder(BorderFactory.createTitledBorder("Options"));
+      chkPanel.setBorder(GuiUtils.addPanelTitle(chkPanel,"Options"));
       chkPanel.setToolTipText("check post analysis if without microscope, check parameter if don't want to replace last parameters");
+
       JCheckBox saveParametersChk = new JCheckBox("Save parameters", true);
       postAnalysisChk_ = new JCheckBox("Post analysis", false);
       postAnalysisChk_.addActionListener(this);
@@ -213,7 +219,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // Saving path Panel
 
       JPanel savePathPanel = new JPanel(new GridLayout(1, 0));
-      savePathPanel.setBorder(BorderFactory.createTitledBorder("Acquisition root folder :"));
+      savePathPanel.setBorder(GuiUtils.addPanelTitle(savePathPanel,"Acquisition root folder :"));
       savePathPanel.setToolTipText("Path to saving folder");
 
       // Saving Path textfield
@@ -225,7 +231,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // show visualiwer acquisitions button
 
       JPanel stopAndVisualizerButtonPanel_ = new JPanel(new GridLayout(1, 0));
-      stopAndVisualizerButtonPanel_.setBorder(BorderFactory.createTitledBorder("Visualizer and stop"));
+      stopAndVisualizerButtonPanel_.setBorder(GuiUtils.addPanelTitle(stopAndVisualizerButtonPanel_,"Visualizer and stop"));
       showDataVisualizer_ = new JButton("Show visualizer");
       showDataVisualizer_.addActionListener(this);
       stopAndVisualizerButtonPanel_.add(showDataVisualizer_);

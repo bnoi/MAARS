@@ -5,6 +5,7 @@ import edu.univ_tlse3.acquisition.SegAcqSetting;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.maars.MaarsSegmentation;
 import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.GuiUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 
 import ij.IJ;
@@ -17,6 +18,7 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -65,19 +67,18 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       setModalityType(ModalityType.DOCUMENT_MODAL);
       setTitle("MAARS - Segmentation parameters");
       setLayout(new GridLayout(0, 1));
-      setMinimumSize(new Dimension(320, 500));
-//      Color labelColor = Color.ORANGE;
+      setMinimumSize(new Dimension(380, 500));
 
       //
 
       JPanel segmMoviePanel = new JPanel(new GridLayout(1,2));
-      segmMoviePanel.setBorder(BorderFactory.createTitledBorder("Movie parameters"));
+      segmMoviePanel.setBorder(GuiUtils.addPanelTitle(segmMoviePanel,"Movie parameters"));
       add(segmMoviePanel);
 
       //
 
       JPanel segRangePanel = new JPanel(new GridLayout(1,1));
-      segRangePanel.setBorder(BorderFactory.createTitledBorder("Z Range (micron) : "));
+      segRangePanel.setBorder(GuiUtils.addSecondaryTitle(segRangePanel,"Z Range (micron) : "));
       int filedLength = 8;
       range = new JTextField(
               parameters
@@ -89,7 +90,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JPanel segStepPanel = new JPanel(new GridLayout(1,1));
-      segStepPanel.setBorder(BorderFactory.createTitledBorder("Z Step (micron) : "));
+      segStepPanel.setBorder(GuiUtils.addSecondaryTitle(segStepPanel,"Z Step (micron) : "));
       step = new JTextField(
               parameters.getSegmentationParameter(MaarsParameters.STEP),
               filedLength);
@@ -99,13 +100,13 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JPanel segmParemPanel = new JPanel(new GridLayout(1,2));
-      segmParemPanel.setBorder(BorderFactory.createTitledBorder("Segmentation parameters"));
+      segmParemPanel.setBorder(GuiUtils.addPanelTitle(segmParemPanel,"Segmentation parameters"));
       add(segmParemPanel);
 
       //
 
       JPanel minCellAreaPanel = new JPanel(new GridLayout(1, 1));
-      minCellAreaPanel.setBorder(BorderFactory.createTitledBorder("Min cell Area (micron) : "));
+      minCellAreaPanel.setBorder(GuiUtils.addSecondaryTitle(minCellAreaPanel,"Min cell Area (micron) : "));
       minCellArea = new JTextField(
               parameters
                       .getSegmentationParameter(MaarsParameters.MINIMUM_CELL_AREA),
@@ -116,7 +117,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JPanel maxCellAreaPanel = new JPanel(new GridLayout(1, 1));
-      maxCellAreaPanel.setBorder(BorderFactory.createTitledBorder("Max cell Area (micron) : "));
+      maxCellAreaPanel.setBorder(GuiUtils.addSecondaryTitle(maxCellAreaPanel,"Max cell Area (micron) : "));
       maxCellArea = new JTextField(
               parameters
                       .getSegmentationParameter(MaarsParameters.MAXIMUM_CELL_AREA),
@@ -127,7 +128,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JPanel greyValueFilterCheckPanel = new JPanel(new GridLayout(1,2));
-      greyValueFilterCheckPanel.setBorder(BorderFactory.createTitledBorder("Mean grey value background filter"));
+      greyValueFilterCheckPanel.setBorder(GuiUtils.addPanelTitle(greyValueFilterCheckPanel,"Mean grey value background filter"));
       add(greyValueFilterCheckPanel);
 
       greyValueFilter = new JCheckBox(
@@ -149,7 +150,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JPanel shapeCheckPanel = new JPanel(new GridLayout(1,2));
-      shapeCheckPanel.setBorder(BorderFactory.createTitledBorder("Filter unusual shape using solidity"));
+      shapeCheckPanel.setBorder(GuiUtils.addPanelTitle(shapeCheckPanel,"Filter unusual shape using solidity"));
       add(shapeCheckPanel);
 
       shapeFilter = new JCheckBox(
@@ -171,7 +172,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JPanel bfChannelPanel = new JPanel(new GridLayout(1,1));
-      bfChannelPanel.setBorder(BorderFactory.createTitledBorder("Bright-field Channel ?"));
+      bfChannelPanel.setBorder(GuiUtils.addSecondaryTitle(bfChannelPanel,"Bright-field Channel ?"));
 
       bfChannelCombo_ = new JComboBox<>();
       bfChannelPanel.add(bfChannelCombo_);
@@ -179,7 +180,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JPanel configurationGroupPanel = new JPanel(new GridLayout(1,1));
-      configurationGroupPanel.setBorder(BorderFactory.createTitledBorder("Configuration Group"));
+      configurationGroupPanel.setBorder(GuiUtils.addSecondaryTitle(configurationGroupPanel,"Configuration Group"));
 
       configurationCombo_ = new JComboBox<>(mm_.getCore().getAvailableConfigGroups().toArray());
       configurationCombo_.addActionListener(actionEvent -> {
@@ -205,7 +206,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       //
 
       JPanel skipTestPanel = new JPanel(new GridLayout(1,2));
-      skipTestPanel.setBorder(BorderFactory.createTitledBorder("Options : "));
+      skipTestPanel.setBorder(GuiUtils.addPanelTitle(skipTestPanel,"Options : "));
       add(skipTestPanel);
 
       JButton testSegBut = new JButton("Test segmentation");

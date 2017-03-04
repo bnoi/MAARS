@@ -5,6 +5,7 @@ import edu.univ_tlse3.acquisition.FluoAcqSetting;
 import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
+import edu.univ_tlse3.utils.GuiUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -20,6 +21,7 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -98,13 +100,13 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       // Movie parameters_ label
 
       JPanel movieParaPanel = new JPanel(new GridLayout(3,1));
-      movieParaPanel.setBorder(BorderFactory.createTitledBorder("Movie parameters"));
+      movieParaPanel.setBorder(GuiUtils.addPanelTitle(movieParaPanel,"Movie parameters"));
       add(movieParaPanel, BorderLayout.PAGE_START);
 
       //
 
       JPanel fluoRangePanel = new JPanel(new GridLayout(1, 1));
-      fluoRangePanel.setBorder(BorderFactory.createTitledBorder("Z Range (micron) : "));
+      fluoRangePanel.setBorder(GuiUtils.addSecondaryTitle(fluoRangePanel,"Z Range (micron) : "));
       int fieldLength = 8;
       range = new JTextField(parameters_.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE), fieldLength);
       fluoRangePanel.add(range);
@@ -113,7 +115,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       //
 
       JPanel fluoStepPanel = new JPanel(new GridLayout(1, 1));
-      fluoStepPanel.setBorder(BorderFactory.createTitledBorder("Z Step (micron) : "));
+      fluoStepPanel.setBorder(GuiUtils.addSecondaryTitle(fluoRangePanel,"Z Step (micron) : "));
       step = new JTextField(parameters_.getFluoParameter(MaarsParameters.STEP), fieldLength);
       fluoStepPanel.add(step);
       movieParaPanel.add(fluoStepPanel);
@@ -121,7 +123,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       //
 
       JPanel timeIntervalPanel = new JPanel(new GridLayout(1, 1));
-      timeIntervalPanel.setBorder(BorderFactory.createTitledBorder("Time Interval (ms) : "));
+      timeIntervalPanel.setBorder(GuiUtils.addSecondaryTitle(fluoRangePanel,"Time Interval (ms) : "));
       timeInterval = new JTextField(parameters_.getFluoParameter(MaarsParameters.TIME_INTERVAL), fieldLength);
       timeIntervalPanel.add(timeInterval);
       timeInterval.addKeyListener(new KeyAdapter() {
@@ -135,7 +137,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       //
 
       JPanel fluoAnaParamLabel = new JPanel(new GridLayout(5,1));
-      fluoAnaParamLabel.setBorder(BorderFactory.createTitledBorder("Fluo-acquisition parameters"));
+      fluoAnaParamLabel.setBorder(GuiUtils.addPanelTitle(fluoAnaParamLabel,"Fluo-acquisition parameters"));
       add(fluoAnaParamLabel, BorderLayout.CENTER);
 
       //
@@ -282,7 +284,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       //
 
       JPanel configurationGroupPanel = new JPanel(new GridLayout(1,1));
-      configurationGroupPanel.setBorder(BorderFactory.createTitledBorder("Configuration Group"));
+      configurationGroupPanel.setBorder(GuiUtils.addSecondaryTitle(configurationGroupPanel,"Configuration Group"));
       configurationCombo_ = new JComboBox<>(mm.getCore().getAvailableConfigGroups().toArray());
       configurationCombo_.addActionListener(this);
       configurationCombo_.setSelectedItem(parameters_.getChannelGroup());
@@ -291,7 +293,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       //
 
       JPanel mitosisDurationPanel = new JPanel(new GridLayout(1,1));
-      mitosisDurationPanel.setBorder(BorderFactory.createTitledBorder("Minimum mitosis duration (s)"));
+      mitosisDurationPanel.setBorder(GuiUtils.addSecondaryTitle(mitosisDurationPanel,"Minimum mitosis duration (s)"));
       mitosisDurationTf_ = new JFormattedTextField(Integer.class);
       mitosisDurationTf_.setText(parameters.getMinimumMitosisDuration());
       mitosisDurationPanel.add(mitosisDurationTf_);
