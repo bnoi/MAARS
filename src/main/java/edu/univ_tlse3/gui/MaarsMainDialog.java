@@ -245,23 +245,15 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       getRootPane().setDefaultButton(okMainDialogButton);
       okPanel.add(okMainDialogButton);
 
-      // ------------set up and add components to Panel then to
-      // Frame---------------//
+      // ------------set up and add components to Panel then to Frame---------------//
 
       JPanel mainPanel = new JPanel();
       mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
       mainPanel.add(explorationPanel);
-//      mainPanel.add(widthPanel);
-//      mainPanel.add(heightPanel);
-//      mainPanel.add(numFieldLabel);
       mainPanel.add(analysisParamPanel);
-//      mainPanel.add(autoFocusPanel);
-//      mainPanel.add(segPanel);
-//      mainPanel.add(fluoAnalysisPanel);
       mainPanel.add(strategyPanel);
       mainPanel.add(chkPanel);
       mainPanel.add(savePathPanel);
-//      mainPanel.add(savePathTfPanel);
       mainPanel.add(okPanel);
       mainPanel.add(stopAndVisualizerButtonPanel_);
       add(mainPanel);

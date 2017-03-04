@@ -92,8 +92,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       setTitle("MAARS - Fluorescent Analysis Parameters");
       setLayout(new BorderLayout());
-      setMinimumSize(new Dimension(600, 500));
-      setSize(600,500);
+      setMinimumSize(new Dimension(750, 500));
+      setSize(750,500);
 
       // Movie parameters_ label
 
@@ -136,7 +136,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       JPanel fluoAnaParamLabel = new JPanel(new GridLayout(5,1));
       fluoAnaParamLabel.setBorder(BorderFactory.createTitledBorder("Fluo-acquisition parameters"));
-      add(fluoAnaParamLabel,BorderLayout.CENTER);
+      add(fluoAnaParamLabel, BorderLayout.CENTER);
 
       //
 
@@ -320,7 +320,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       okFluoAnaParamButton = new JButton("OK");
       okFluoAnaParamButton.addActionListener(this);
-      add(okFluoAnaParamButton,BorderLayout.SOUTH);
+      add(okFluoAnaParamButton, BorderLayout.PAGE_END);
 
       //
 

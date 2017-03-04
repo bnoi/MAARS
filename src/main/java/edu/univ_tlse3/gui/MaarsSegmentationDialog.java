@@ -234,7 +234,6 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
             es_.submit(ms);
          }
       });
-      skipTestPanel.add(testSegBut);
 
       //
 
@@ -257,6 +256,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
          }
       });
       skipTestPanel.add(skipSegChBox);
+      skipTestPanel.add(testSegBut);
 
       //
 
@@ -265,7 +265,7 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
       add(okBut);
 
 
-      // this.pack();
+      pack();
       setVisible(true);
    }
 
