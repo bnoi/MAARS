@@ -21,7 +21,6 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -46,35 +45,33 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JTextField range;
    private JTextField step;
    private JTextField timeInterval;
-   private JPanel channel1Panel;
-   private JPanel channel2Panel;
-   private JPanel channel3Panel;
-   private JFormattedTextField maxNumberSpotCh1Tf;
-   private JFormattedTextField spotRadiusCh1Tf;
-   private JFormattedTextField qualityCh1Tf;
-   private JFormattedTextField maxNumberSpotCh2Tf;
-   private JFormattedTextField spotRadiusCh2Tf;
-   private JFormattedTextField qualityCh2Tf;
-   private JFormattedTextField maxNumberSpotCh3Tf;
-   private JFormattedTextField spotRadiusCh3Tf;
-   private JFormattedTextField qualityCh3Tf;
    private JFormattedTextField mitosisDurationTf_;
    private JCheckBox saveFlims;
    private JCheckBox doAnalysis;
-   private JButton test1;
-   private JButton test2;
-   private JButton test3;
    private JButton okFluoAnaParamButton;
-   private JComboBox<String> channel1Combo;
-   private JComboBox<String> channel2Combo;
-   private JComboBox<String> channel3Combo;
    private JComboBox<String> configurationCombo_;
-   private JCheckBox useChannel1_;
-   private JCheckBox useChannel2_;
-   private JCheckBox useChannel3_;
-   private static Integer TOTAL_PARAMETERS = 5;
-   private ArrayList<JPanel> chPanels = new ArrayList<>();
+   private ArrayList<HashMap<String, Component>> listChCompos_ = new ArrayList<>();
    private String spindleChannel_ = null;
+   private String USING = "Using";
+   private String CHANNELS = "Channels";
+   private String MAXNBSPOT = "Max # of spot";
+   private String SPOTRADIUS = "Spot Radius";
+   private String QUALITY = "Quality";
+   private String CHEXPOSURE = "Channel Exposure";
+   private String PREVIEW = "Preview";
+   private String SPINDLE = "Spindle ?";
+   private JComboBox<String> ch1Combo_;
+   private JComboBox<String> ch2Combo_;
+   private JComboBox<String> ch3Combo_;
+   private JFormattedTextField maxNbSpotCh1Tf_;
+   private JFormattedTextField maxNbSpotCh2Tf_;
+   private JFormattedTextField maxNbSpotCh3Tf_;
+   private JFormattedTextField spotRadiusCh1Tf_;
+   private JFormattedTextField spotRadiusCh2Tf_;
+   private JFormattedTextField spotRadiusCh3Tf_;
+   private JFormattedTextField qualityCh1Tf_;
+   private JFormattedTextField qualityCh2Tf_;
+   private JFormattedTextField qualityCh3Tf_;
 
    /**
     *
@@ -141,148 +138,141 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       //
 
-      JPanel fluoAnaParamLabel = new JPanel(new GridLayout(5,1));
+      JPanel fluoAnaParamLabel = new JPanel(new BorderLayout());
       fluoAnaParamLabel.setBackground(GuiUtils.bgColor);
       fluoAnaParamLabel.setBorder(GuiUtils.addPanelTitle("Fluo-acquisition parameters"));
       add(fluoAnaParamLabel, BorderLayout.CENTER);
 
       //
 
-      JPanel channelTitlePanel = new JPanel(new GridLayout(1, 0));
-      channelTitlePanel.setBackground(GuiUtils.bgColor);
-      JPanel tmpPanel = new JPanel(new GridLayout(1, 0));
-      tmpPanel.add(new JLabel());
-      channelTitlePanel.add(tmpPanel);
-      JLabel channelCheckTitle = new JLabel("Using", SwingConstants.CENTER);
-      tmpPanel.add(channelCheckTitle);
-      channelTitlePanel.add(tmpPanel);
-      tmpPanel = new JPanel(new GridLayout(1, 0));
-      JLabel fluoChannelsTitle = new JLabel("Channels", SwingConstants.CENTER);
-      tmpPanel.add(fluoChannelsTitle);
-      channelTitlePanel.add(tmpPanel);
-      tmpPanel = new JPanel(new GridLayout(1, 0));
-      JLabel maxNbSpotTitle = new JLabel("Max # of spot", SwingConstants.CENTER);
-      tmpPanel.add(maxNbSpotTitle);
-      channelTitlePanel.add(tmpPanel);
-      tmpPanel = new JPanel(new GridLayout(1, 0));
-      JLabel spotRaiusTitle = new JLabel("Spot Radius", SwingConstants.CENTER);
-      tmpPanel.add(spotRaiusTitle);
-      channelTitlePanel.add(tmpPanel);
-      tmpPanel = new JPanel(new GridLayout(1, 0));
-      JLabel qualityTitle = new JLabel("Quality", SwingConstants.CENTER);
-      tmpPanel.add(qualityTitle);
-      channelTitlePanel.add(tmpPanel);
-      tmpPanel = new JPanel(new GridLayout(1, 0));
-      JLabel exposureTitle = new JLabel("Exposure", SwingConstants.CENTER);
-      tmpPanel.add(exposureTitle);
-      channelTitlePanel.add(tmpPanel);
-      tmpPanel = new JPanel(new GridLayout(1, 0));
-      JLabel testButTitle = new JLabel("test detection", SwingConstants.CENTER);
-      tmpPanel.add(testButTitle);
-      channelTitlePanel.add(tmpPanel);
-      tmpPanel = new JPanel(new GridLayout(1, 0));
-      JLabel spindleChannel = new JLabel("Spindle ?", SwingConstants.CENTER);
-      tmpPanel.add(spindleChannel);
-      channelTitlePanel.add(tmpPanel);
+      HashMap<String, Component> ch1 = new HashMap<>();
+      HashMap<String, Component> ch2 = new HashMap<>();
+      HashMap<String, Component> ch3 = new HashMap<>();
 
-      //
+      JPanel channelCheckPanel = new JPanel(new GridLayout(3, 0));
+      channelCheckPanel.setBorder(GuiUtils.addSecondaryTitle(USING));
+      JCheckBox useChannel1 = new JCheckBox("",true);
+      useChannel1.addItemListener(itemEvent -> enableChannelPanel(ch1, useChannel1.isSelected()));
+      JCheckBox useChannel2 = new JCheckBox("",true);
+      useChannel2.addItemListener(itemEvent -> enableChannelPanel(ch2, useChannel2.isSelected()));
+      JCheckBox useChannel3 = new JCheckBox("",true);
+      useChannel3.addItemListener(itemEvent -> enableChannelPanel(ch3, useChannel3.isSelected()));
+      channelCheckPanel.add(useChannel1);
+      channelCheckPanel.add(useChannel2);
+      channelCheckPanel.add(useChannel3);
+      ch1.put(USING, useChannel1);
+      ch2.put(USING, useChannel2);
+      ch3.put(USING, useChannel3);
 
-      channel1Panel = new JPanel(new GridLayout(1, 0));
-      channel1Combo = new JComboBox<>();
-      channel1Combo.addActionListener(actionEvent -> updateChSetting(channel1Panel));
-      maxNumberSpotCh1Tf = new JFormattedTextField(Integer.class);
-      spotRadiusCh1Tf = new JFormattedTextField(Double.class);
-      qualityCh1Tf = new JFormattedTextField(Double.class);
-      JFormattedTextField exposureCh1Tf_ = new JFormattedTextField(Integer.class);
-      test1 = new JButton("test");
-      test1.setEnabled(false);
-      test1.addActionListener(this);
-      useChannel1_ = new JCheckBox("",true);
-      useChannel1_.addItemListener(itemEvent -> {
-         if (useChannel1_.isSelected()){
-            enableChannelPanel(channel1Panel, true);
-         }else{
-            enableChannelPanel(channel1Panel, false);
-         }
+      JPanel chComboPanel = new JPanel(new GridLayout(3, 0));
+      chComboPanel.setBorder(GuiUtils.addSecondaryTitle(CHANNELS));
+      ch1Combo_ = new JComboBox<>();
+      ch1Combo_.addActionListener(actionEvent -> updateChSetting(ch1));
+      ch2Combo_ = new JComboBox<>();
+      ch2Combo_.addActionListener(actionEvent -> updateChSetting(ch2));
+      ch3Combo_ = new JComboBox<>();
+      ch3Combo_.addActionListener(actionEvent -> updateChSetting(ch3));
+      chComboPanel.add(ch1Combo_);
+      chComboPanel.add(ch2Combo_);
+      chComboPanel.add(ch3Combo_);
+      ch1.put(CHANNELS, ch1Combo_);
+      ch2.put(CHANNELS, ch2Combo_);
+      ch3.put(CHANNELS, ch3Combo_);
+
+      JPanel maxNbSpotPanel = new JPanel(new GridLayout(3, 0));
+      maxNbSpotPanel.setBorder(GuiUtils.addSecondaryTitle(MAXNBSPOT));
+      maxNbSpotCh1Tf_ = new JFormattedTextField(Integer.class);
+      maxNbSpotCh2Tf_ = new JFormattedTextField(Integer.class);
+      maxNbSpotCh3Tf_ = new JFormattedTextField(Integer.class);
+      maxNbSpotPanel.add(maxNbSpotCh1Tf_);
+      maxNbSpotPanel.add(maxNbSpotCh2Tf_);
+      maxNbSpotPanel.add(maxNbSpotCh3Tf_);
+      ch1.put(MAXNBSPOT, maxNbSpotCh1Tf_);
+      ch2.put(MAXNBSPOT, maxNbSpotCh2Tf_);
+      ch3.put(MAXNBSPOT, maxNbSpotCh3Tf_);
+
+      JPanel spotRadiusPanel = new JPanel(new GridLayout(3, 0));
+      spotRadiusPanel.setBorder(GuiUtils.addSecondaryTitle(SPOTRADIUS));
+      spotRadiusCh1Tf_ = new JFormattedTextField(Double.class);
+      spotRadiusCh2Tf_ = new JFormattedTextField(Double.class);
+      spotRadiusCh3Tf_ = new JFormattedTextField(Double.class);
+      spotRadiusPanel.add(spotRadiusCh1Tf_);
+      spotRadiusPanel.add(spotRadiusCh2Tf_);
+      spotRadiusPanel.add(spotRadiusCh3Tf_);
+      ch1.put(SPOTRADIUS, spotRadiusCh1Tf_);
+      ch2.put(SPOTRADIUS, spotRadiusCh2Tf_);
+      ch3.put(SPOTRADIUS, spotRadiusCh3Tf_);
+
+      JPanel qualityPanel = new JPanel(new GridLayout(3, 0));
+      qualityPanel.setBorder(GuiUtils.addSecondaryTitle(QUALITY));
+      qualityCh1Tf_ = new JFormattedTextField(Double.class);
+      qualityCh2Tf_ = new JFormattedTextField(Double.class);
+      qualityCh3Tf_ = new JFormattedTextField(Double.class);
+      qualityPanel.add(qualityCh1Tf_);
+      qualityPanel.add(qualityCh2Tf_);
+      qualityPanel.add(qualityCh3Tf_);
+      ch1.put(QUALITY, qualityCh1Tf_);
+      ch2.put(QUALITY, qualityCh2Tf_);
+      ch3.put(QUALITY, qualityCh3Tf_);
+
+      JPanel exposurePanel = new JPanel(new GridLayout(3, 0));
+      exposurePanel.setBorder(GuiUtils.addSecondaryTitle(CHEXPOSURE));
+      JFormattedTextField exposureCh1Tf = new JFormattedTextField(Integer.class);
+      JFormattedTextField exposureCh2Tf = new JFormattedTextField(Integer.class);
+      JFormattedTextField exposureCh3Tf = new JFormattedTextField(Integer.class);
+      exposurePanel.add(exposureCh1Tf);
+      exposurePanel.add(exposureCh2Tf);
+      exposurePanel.add(exposureCh3Tf);
+      ch1.put(CHEXPOSURE, exposureCh1Tf);
+      ch2.put(CHEXPOSURE, exposureCh2Tf);
+      ch3.put(CHEXPOSURE, exposureCh3Tf);
+
+
+      JPanel previewPanel = new JPanel(new GridLayout(3, 0));
+      previewPanel.setBorder(GuiUtils.addSecondaryTitle(PREVIEW));
+      JButton preview1But = new JButton(PREVIEW);
+      preview1But.setEnabled(false);
+      JButton preview2But = new JButton(PREVIEW);
+      JButton preview3But = new JButton(PREVIEW);
+      previewPanel.add(preview1But);
+      previewPanel.add(preview2But);
+      previewPanel.add(preview3But);
+      ch1.put(PREVIEW, preview1But);
+      ch2.put(PREVIEW, preview2But);
+      ch3.put(PREVIEW, preview3But);
+
+      JPanel radioPanel = new JPanel(new GridLayout(3, 0));
+      radioPanel.setBorder(GuiUtils.addSecondaryTitle(SPINDLE));
+      JRadioButton ch1Button = new JRadioButton("");
+      ch1Button.setActionCommand((String) ch1Combo_.getSelectedItem());
+      JRadioButton ch2Button = new JRadioButton("");
+      ch2Button.setActionCommand((String) ch2Combo_.getSelectedItem());
+      JRadioButton ch3Button = new JRadioButton("");
+      ch3Button.setActionCommand((String) ch3Combo_.getSelectedItem());
+      radioPanel.add(ch1Button);
+      radioPanel.add(ch2Button);
+      radioPanel.add(ch3Button);
+      ch1.put(SPINDLE, ch1Button);
+      ch2.put(SPINDLE, ch2Button);
+      ch3.put(SPINDLE, ch3Button);
+
+      listChCompos_.add(ch1);
+      listChCompos_.add(ch2);
+      listChCompos_.add(ch3);
+
+      preview1But.addActionListener(e -> {
+         updateMAARSFluoChParameters();
+         testTrackmate(ch1);
       });
-       final JRadioButton ch1Button = new JRadioButton("");
-      channel1Panel.add(useChannel1_,0);
-      channel1Panel.add(channel1Combo);
-      channel1Panel.add(maxNumberSpotCh1Tf);
-      channel1Panel.add(spotRadiusCh1Tf);
-      channel1Panel.add(qualityCh1Tf);
-      channel1Panel.add(exposureCh1Tf_);
-      channel1Panel.add(test1);
-       channel1Panel.add(ch1Button);
-      chPanels.add(channel1Panel);
-      channel1Panel.setBackground(GuiUtils.bgColor);
-
-      //
-
-      channel2Panel = new JPanel(new GridLayout(1, 0));
-
-      channel2Combo = new JComboBox<>();
-      channel2Combo.addActionListener(actionEvent -> updateChSetting(channel2Panel));
-      maxNumberSpotCh2Tf = new JFormattedTextField(Integer.class);
-      spotRadiusCh2Tf = new JFormattedTextField(Double.class);
-      qualityCh2Tf = new JFormattedTextField(Double.class);
-      JFormattedTextField exposureCh2Tf_ = new JFormattedTextField(Integer.class);
-      test2 = new JButton("test");
-      test2.addActionListener(this);
-      useChannel2_ = new JCheckBox("", true);
-      useChannel2_.addItemListener(itemEvent -> {
-         if (useChannel2_.isSelected()){
-            enableChannelPanel(channel2Panel, true);
-         }else{
-            enableChannelPanel(channel2Panel, false);
-         }
+      preview2But.addActionListener(e -> {
+         updateMAARSFluoChParameters();
+         testTrackmate(ch1);
       });
-       final JRadioButton ch2Button = new JRadioButton("");
-      ch2Button.setActionCommand((String) channel2Combo.getSelectedItem());
-      channel2Panel.add(useChannel2_,0);
-      channel2Panel.add(channel2Combo);
-      channel2Panel.add(maxNumberSpotCh2Tf);
-      channel2Panel.add(spotRadiusCh2Tf);
-      channel2Panel.add(qualityCh2Tf);
-      channel2Panel.add(exposureCh2Tf_);
-      channel2Panel.add(test2);
-       channel2Panel.add(ch2Button);
-      chPanels.add(channel2Panel);
-      channel2Panel.setBackground(GuiUtils.bgColor);
-
-      //
-
-      channel3Panel = new JPanel(new GridLayout(1, 0));
-      channel3Combo = new JComboBox<>();
-      channel3Combo.addActionListener(actionEvent -> updateChSetting(channel3Panel));
-      maxNumberSpotCh3Tf = new JFormattedTextField(Integer.class);
-      spotRadiusCh3Tf = new JFormattedTextField(Double.class);
-      qualityCh3Tf = new JFormattedTextField(Double.class);
-      JFormattedTextField exposureCh3Tf_ = new JFormattedTextField(Integer.class);
-      test3 = new JButton("test");
-      test3.addActionListener(this);
-      maxNumberSpotCh3Tf.setText("");
-      spotRadiusCh3Tf.setText("");
-      qualityCh3Tf.setText("");
-      useChannel3_ = new JCheckBox("", true);
-      useChannel3_.addItemListener(itemEvent -> {
-         if (useChannel3_.isSelected()){
-            enableChannelPanel(channel3Panel, true);
-         }else{
-            enableChannelPanel(channel3Panel, false);
-         }
+      preview3But.addActionListener(e -> {
+         updateMAARSFluoChParameters();
+         testTrackmate(ch1);
       });
-       final JRadioButton ch3Button = new JRadioButton("");
-      channel3Panel.add(useChannel3_,0);
-      channel3Panel.add(channel3Combo);
-      channel3Panel.add(maxNumberSpotCh3Tf);
-      channel3Panel.add(spotRadiusCh3Tf);
-      channel3Panel.add(qualityCh3Tf);
-      channel3Panel.add(exposureCh3Tf_);
-      channel3Panel.add(test3);
-      channel3Panel.add(ch3Button);
-      chPanels.add(channel3Panel);
-      channel3Panel.setBackground(GuiUtils.bgColor);
+
 
        //
 
@@ -325,11 +315,19 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       //
 
-      fluoAnaParamLabel.add(optionPanel);
-      fluoAnaParamLabel.add(channelTitlePanel);
-      fluoAnaParamLabel.add(channel1Panel);
-      fluoAnaParamLabel.add(channel2Panel);
-      fluoAnaParamLabel.add(channel3Panel);
+      fluoAnaParamLabel.add(optionPanel, BorderLayout.NORTH);
+
+      JPanel configPanel = new JPanel(new GridLayout(1,8));
+      configPanel.add(channelCheckPanel);
+      configPanel.add(chComboPanel);
+      configPanel.add(maxNbSpotPanel);
+      configPanel.add(spotRadiusPanel);
+      configPanel.add(qualityPanel);
+      configPanel.add(exposurePanel);
+      configPanel.add(previewPanel);
+      configPanel.add(radioPanel);
+
+      fluoAnaParamLabel.add(configPanel, BorderLayout.CENTER);
 
       //
 
@@ -340,14 +338,14 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       //
 
       int j = 0;
-      for (JPanel chPanel : chPanels) {
-         JCheckBox tmpChkbox = (JCheckBox) chPanel.getComponent(0);
+      for (HashMap chConfigHashMap : listChCompos_) {
+         JCheckBox tmpChkbox = (JCheckBox) chConfigHashMap.get(USING);
          if (j < arrayChannels.length) {
-            JComboBox tmpChannelCombo = (JComboBox) chPanel.getComponent(1);
+            JComboBox tmpChannelCombo = (JComboBox) chConfigHashMap.get(CHANNELS);
             tmpChannelCombo.setSelectedItem(arrayChannels[j]);
             tmpChkbox.setSelected(true);
             if (originSpindleChannel.equals(arrayChannels[j])) {
-               JRadioButton tmpRadio = (JRadioButton) chPanel.getComponent(7);
+               JRadioButton tmpRadio = (JRadioButton) chConfigHashMap.get(SPINDLE);
                tmpRadio.setSelected(true);
             }
             j += 1;
@@ -356,12 +354,12 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
          }
       }
 
-      ch1Button.addActionListener(e -> ch1Button.setActionCommand((String) channel1Combo.getSelectedItem()));
-      ch2Button.addActionListener(e -> ch2Button.setActionCommand((String) channel2Combo.getSelectedItem()));
-      ch3Button.addActionListener(e -> ch3Button.setActionCommand((String) channel3Combo.getSelectedItem()));
-      ch1Button.setActionCommand((String) channel1Combo.getSelectedItem());
-      ch2Button.setActionCommand((String) channel2Combo.getSelectedItem());
-      ch3Button.setActionCommand((String) channel3Combo.getSelectedItem());
+      ch1Button.addActionListener(e -> ch1Button.setActionCommand((String) ch1Combo_.getSelectedItem()));
+      ch2Button.addActionListener(e -> ch2Button.setActionCommand((String) ch2Combo_.getSelectedItem()));
+      ch3Button.addActionListener(e -> ch3Button.setActionCommand((String) ch3Combo_.getSelectedItem()));
+      ch1Button.setActionCommand((String) ch1Combo_.getSelectedItem());
+      ch2Button.setActionCommand((String) ch2Combo_.getSelectedItem());
+      ch3Button.setActionCommand((String) ch3Combo_.getSelectedItem());
 
       //
 
@@ -371,26 +369,25 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    /**
     *
-    * @param jp   the panel which contains informations about corresponding panel
     * @param ch   channel name
     */
-   private void setChPanelValue(JPanel jp, String ch) {
+   private void setChPanelValue(HashMap<String, Component> channelHashMap, String ch) {
       for (String channel : parameters_.getAllChannels()){
          if (ch != null && ch.equals(channel)){
-             JCheckBox tmpChk = (JCheckBox) jp.getComponent(0);
+             JCheckBox tmpChk = (JCheckBox) channelHashMap.get(USING);
              if (tmpChk.isSelected()){
-                 JButton tmpButton = (JButton) jp.getComponent(TOTAL_PARAMETERS+1);
+                 JButton tmpButton = (JButton) channelHashMap.get(PREVIEW);
                  tmpButton.setEnabled(true);
              }
-            JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(2);
+            JFormattedTextField tmpTf = (JFormattedTextField) channelHashMap.get(MAXNBSPOT);
             tmpTf.setValue(parameters_.getChMaxNbSpot(ch));
-            tmpTf = (JFormattedTextField) jp.getComponent(3);
+            tmpTf = (JFormattedTextField) channelHashMap.get(SPOTRADIUS);
             tmpTf.setValue(parameters_.getChSpotRaius(ch));
-            tmpTf = (JFormattedTextField) jp.getComponent(4);
+            tmpTf = (JFormattedTextField) channelHashMap.get(QUALITY);
             tmpTf.setValue(parameters_.getChQuality(ch));
-            tmpTf = (JFormattedTextField) jp.getComponent(5);
+            tmpTf = (JFormattedTextField) channelHashMap.get(CHEXPOSURE);
             tmpTf.setValue(parameters_.getChExposure(ch));
-            JComboBox tmpCombo = (JComboBox)jp.getComponent(1);
+            JComboBox tmpCombo = (JComboBox) channelHashMap.get(CHANNELS);
             String tmpCh = (String) tmpCombo.getSelectedItem();
             if (tmpCh!=null && !tmpCh.equals(ch)){
                tmpCombo.setSelectedItem(ch);
@@ -414,30 +411,23 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    /**
     *
-    * @param jp   the panel which contains informations about corresponding panel
     * @param enable  enable or not
     */
-   private void enableChannelPanel(JPanel jp, Boolean enable){
-      if (enable) {
-         for (int i = 1; i <= TOTAL_PARAMETERS+2; i++){
-            jp.getComponent(i).setEnabled(true);
-         }
-      }else{
-         for (int i = 1; i <= TOTAL_PARAMETERS+2; i++){
-            jp.getComponent(i).setEnabled(false);
+   private void enableChannelPanel(HashMap<String, Component> channelHashMap, Boolean enable){
+      for (String param : channelHashMap.keySet()){
+         if (param != USING){
+            channelHashMap.get(param).setEnabled(enable);
          }
       }
-
    }
 
    /**
     *
-    * @param jp   the panel which contains informations about corresponding panel
     */
-   private void updateChSetting(JPanel jp){
-      JComboBox tmpCombo = (JComboBox) jp.getComponent(1);
+   private void updateChSetting(HashMap<String, Component> channelHashMap){
+      JComboBox tmpCombo = (JComboBox) channelHashMap.get(CHANNELS);
       String selectedChannel = (String) tmpCombo.getSelectedItem();
-      setChPanelValue(jp, selectedChannel);
+      setChPanelValue(channelHashMap, selectedChannel);
    }
 
    /**
@@ -454,10 +444,10 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       parameters_.setMinimumMitosisDuration(String.valueOf(mitosisDurationTf_.getText()));
       List<String> existingChannels = parameters_.getAllChannels();
       ArrayList<String> channels = new ArrayList<>();
-      for (JPanel p : chPanels){
-         JCheckBox tmpChkBox = (JCheckBox) p.getComponent(0);
+      for (HashMap chConfigHashMap : listChCompos_){
+         JCheckBox tmpChkBox = (JCheckBox) chConfigHashMap.get(USING);
          if (tmpChkBox.isSelected()){
-            JComboBox tmpChannelCombo = (JComboBox) p.getComponent(1);
+            JComboBox tmpChannelCombo = (JComboBox) chConfigHashMap.get(CHANNELS);
             String tmpChannel = (String) tmpChannelCombo.getSelectedItem();
             if (!existingChannels.contains(tmpChannel)){
                YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(null, "Channel not in config file", "add this channel " + tmpChannel + " into the config file?");
@@ -472,13 +462,13 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
                   continue;
                }
             }
-            JFormattedTextField tmpTf = (JFormattedTextField) p.getComponent(2);
+            JFormattedTextField tmpTf = (JFormattedTextField) chConfigHashMap.get(MAXNBSPOT);
             parameters_.setChMaxNbSpot(tmpChannel, tmpTf.getText());
-            tmpTf = (JFormattedTextField) p.getComponent(3);
+            tmpTf = (JFormattedTextField) chConfigHashMap.get(SPOTRADIUS);
             parameters_.setChSpotRaius(tmpChannel, tmpTf.getText());
-            tmpTf = (JFormattedTextField) p.getComponent(4);
+            tmpTf = (JFormattedTextField) chConfigHashMap.get(QUALITY);
             parameters_.setChQuality(tmpChannel, tmpTf.getText());
-            tmpTf = (JFormattedTextField) p.getComponent(5);
+            tmpTf = (JFormattedTextField) chConfigHashMap.get(CHEXPOSURE);
             parameters_.setChExposure(tmpChannel, tmpTf.getText());
             channels.add(tmpChannel);
          }
@@ -489,13 +479,12 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    /**
     *
-    * @param jp the panel which contains informations about corresponding panel
     * @param img image to detect spots on
     */
-   private void testTrackmate(JPanel jp, ImagePlus img) {
-      JFormattedTextField tmpTf = (JFormattedTextField) jp.getComponent(3);
+   private void testTrackmate(HashMap<String, Component> componentHashMap, ImagePlus img) {
+      JFormattedTextField tmpTf = (JFormattedTextField) componentHashMap.get(SPOTRADIUS);
       double spotRadius = Double.parseDouble((String) tmpTf.getValue());
-      tmpTf = (JFormattedTextField) jp.getComponent(4);
+      tmpTf = (JFormattedTextField) componentHashMap.get(QUALITY);
       double quality = Double.parseDouble((String) tmpTf.getValue());
       ImagePlus zProjectedFluoImg = ImgUtils.zProject(img);
       zProjectedFluoImg.setCalibration(img.getCalibration());
@@ -511,30 +500,28 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    /**
     *
-    * @param jp the panel which contains informations about corresponding panel
     */
-   private void testTrackmate(JPanel jp) {
-      String channelName = getSelectedChannel(jp);
+   private void testTrackmate(HashMap<String, Component> componentHashMap) {
+      String channelName = getSelectedChannel(componentHashMap);
       String imgPath = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator
               + channelName + "_1" + File.separator + channelName + "_1_MMStack_Pos0.ome.tif";
       if (FileUtils.exists(imgPath)) {
-         testTrackmate(jp, IJ.openImage(imgPath));
+         testTrackmate(componentHashMap, IJ.openImage(imgPath));
       } else {
-         testTrackmate(jp, acquireTestImg(jp));
+         testTrackmate(componentHashMap, acquireTestImg(componentHashMap));
       }
    }
 
    /**
     *
-    * @param jp the panel which contains informations about corresponding panel
     * @return get the image
     */
-   private ImagePlus acquireTestImg(JPanel jp) {
+   private ImagePlus acquireTestImg(HashMap<String, Component> componentHashMap) {
       double zRange = Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE));
       double zStep = Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.STEP));
 
       MaarsParameters testParam = parameters_.duplicate();
-      String channelName = getSelectedChannel(jp);
+      String channelName = getSelectedChannel(componentHashMap);
       testParam.setUsingChannels(channelName);
       testParam.setFluoParameter(MaarsParameters.TIME_LIMIT, "0");
       testParam.setFluoParameter(MaarsParameters.TIME_INTERVAL, this.timeInterval.getText());
@@ -555,32 +542,32 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       return ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
    }
 
-   private String getSelectedChannel(JPanel jp) {
-      JComboBox tmpCombo = (JComboBox) jp.getComponent(1);
+   private String getSelectedChannel(HashMap<String, Component> componentHashMap) {
+      JComboBox tmpCombo = (JComboBox) componentHashMap.get(CHANNELS);
       return (String) tmpCombo.getSelectedItem();
    }
 
    private void clearChannelSettings(){
-      channel1Combo.removeAllItems();
-      channel2Combo.removeAllItems();
-      channel3Combo.removeAllItems();
-      maxNumberSpotCh1Tf.setText("");
-      spotRadiusCh1Tf.setText("");
-      qualityCh1Tf.setText("");
-      maxNumberSpotCh2Tf.setText("");
-      spotRadiusCh2Tf.setText("");
-      qualityCh2Tf.setText("");
-      maxNumberSpotCh3Tf.setText("");
-      spotRadiusCh3Tf.setText("");
-      qualityCh3Tf.setText("");
+      ch1Combo_.removeAllItems();
+      ch2Combo_.removeAllItems();
+      ch3Combo_.removeAllItems();
+      maxNbSpotCh1Tf_.setText("");
+      maxNbSpotCh2Tf_.setText("");
+      maxNbSpotCh3Tf_.setText("");
+      spotRadiusCh1Tf_.setText("");
+      spotRadiusCh2Tf_.setText("");
+      spotRadiusCh3Tf_.setText("");
+      qualityCh1Tf_.setText("");
+      qualityCh2Tf_.setText("");
+      qualityCh3Tf_.setText("");
    }
 
    @Override
    public void actionPerformed(ActionEvent e) {
       Object src = e.getSource();
       if (src == okFluoAnaParamButton) {
-         for (JPanel jp : chPanels){
-            JRadioButton tmpBut = (JRadioButton) jp.getComponent(TOTAL_PARAMETERS + 2);
+         for (HashMap chConfigHashMap : listChCompos_){
+            JRadioButton tmpBut = (JRadioButton) chConfigHashMap.get(SPINDLE);
             if (tmpBut.isSelected()){
                spindleChannel_ = tmpBut.getActionCommand();
             }
@@ -593,24 +580,15 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             e1.printStackTrace();
          }
          this.setVisible(false);
-      } else if (src == test1) {
-         updateMAARSFluoChParameters();
-         testTrackmate(channel1Panel);
-      } else if (src == test2) {
-         updateMAARSFluoChParameters();
-         testTrackmate(channel2Panel);
-      } else if (src == test3) {
-         updateMAARSFluoChParameters();
-         testTrackmate(channel3Panel);
       } else if (src == configurationCombo_) {
          String selectedGroup= (String) configurationCombo_.getSelectedItem();
          parameters_.setChannelGroup(selectedGroup);
          clearChannelSettings();
          String[] newConfigs = mm.getCore().getAvailableConfigs(selectedGroup).toArray();
          for (String s : newConfigs){
-            channel3Combo.addItem(s);
-            channel1Combo.addItem(s);
-            channel2Combo.addItem(s);
+            ch1Combo_.addItem(s);
+            ch2Combo_.addItem(s);
+            ch3Combo_.addItem(s);
          }
       }
    }
