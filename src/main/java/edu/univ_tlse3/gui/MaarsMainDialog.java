@@ -58,6 +58,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
    private MAARSNoAcq maarsNoAcq_;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
    private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+   private JCheckBox saveParametersChk_;
 
    /**
     * Constructor
@@ -213,11 +214,11 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       chkPanel.setBorder(GuiUtils.addPanelTitle("Options"));
       chkPanel.setToolTipText("check post analysis if without microscope, check parameter if don't want to replace last parameters");
 
-      JCheckBox saveParametersChk = new JCheckBox("Save parameters", true);
+      saveParametersChk_ = new JCheckBox("Save parameters", true);
       postAnalysisChk_ = new JCheckBox("Post analysis", false);
       postAnalysisChk_.addActionListener(this);
       chkPanel.add(postAnalysisChk_);
-      chkPanel.add(saveParametersChk);
+      chkPanel.add(saveParametersChk_);
 
       // Saving path Panel
 
@@ -324,7 +325,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
       }
       try {
-         parameters.save();
+          if (saveParametersChk_.isSelected()) {
+              parameters.save();
+          }
          if (FileUtils.exists(parameters.getSavingPath())) {
             parameters.save(parameters.getSavingPath());
          }

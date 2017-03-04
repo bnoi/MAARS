@@ -363,8 +363,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       //
 
-      this.pack();
-      this.setVisible(true);
+      pack();
+      setVisible(true);
    }
 
    /**
@@ -505,11 +505,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       String channelName = getSelectedChannel(componentHashMap);
       String imgPath = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator
               + channelName + "_1" + File.separator + channelName + "_1_MMStack_Pos0.ome.tif";
-      if (FileUtils.exists(imgPath)) {
-         testTrackmate(componentHashMap, IJ.openImage(imgPath));
-      } else {
-         testTrackmate(componentHashMap, acquireTestImg(componentHashMap));
-      }
+      testTrackmate(componentHashMap, FileUtils.exists(imgPath)?
+              IJ.openImage(imgPath):acquireTestImg(componentHashMap));
    }
 
    /**
