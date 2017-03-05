@@ -110,12 +110,12 @@ public class MAARSNoAcq implements Runnable {
             // from Roi.zip initialize a set of cell
             soc_.loadCells(pathToSegDir);
             ResultsTable rt;
-            if (!skipSegmentation) {
-               rt = ms.getRoiMeasurements();
-            }else{
+            if (skipSegmentation) {
                IJ.open(pathToSegDir + File.separator +"BF_Results.csv");
                rt = ResultsTable.getResultsTable();
                ResultsTable.getResultsWindow().close(false);
+            }else{
+               rt = ms.getRoiMeasurements();
             }
             soc_.setRoiMeasurementIntoCells(rt);
 
@@ -154,13 +154,9 @@ public class MAARSNoAcq implements Runnable {
             concatenator.setIm5D(true);
             ImagePlus concatenatedFluoImgs = null;
             //TODO
-            Boolean saveRam = null;
-            double memoryLimit = 25.0;
-            if (Runtime.getRuntime().maxMemory()/1024/1024/1024>memoryLimit){
-               saveRam = false;
-            }else{
-               saveRam = true;
-            }
+            Boolean saveProjectedImg = true;
+            double minMemoryRequired = 0.0;
+            Boolean saveRam = Runtime.getRuntime().maxMemory() / 1024 / 1024 / 1024 < minMemoryRequired;
             for (Integer current_frame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<>();
                for (String channel : arrayChannels) {
@@ -168,7 +164,6 @@ public class MAARSNoAcq implements Runnable {
                   String pathToFluoMovie = pathToFluoDir + channel + "_" + current_frame + "/" + channel + "_" + current_frame + "_MMStack_Pos0.ome.tif";
                   ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
                   ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
-                  zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
                   zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
                   future = es_.submit(new FluoAnalyzer(zProjectedFluoImg.duplicate(), bfImgCal, soc_, channel,
                           Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -176,27 +171,18 @@ public class MAARSNoAcq implements Runnable {
                           Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_,
                           parameters.useDynamic()));
                   channelsInFrame.put(channel, future);
-                  if (!saveRam) {
-                     for (int i = 1; i <= fluoImage.getStack().size(); i++) {
-                        fluoImage.getStack().setSliceLabel(channel + "_" + current_frame, i);
-                     }
-                     if (concatenatedFluoImgs == null) {
-                        concatenatedFluoImgs = fluoImage;
-                     } else {
-                        concatenatedFluoImgs = concatenator.concatenate(concatenatedFluoImgs, fluoImage, false);
-                     }
-                  }else{
+                  ImagePlus imgToSave = saveProjectedImg?zProjectedFluoImg:fluoImage;
+                  if (saveRam) {
                      IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
+                     String croppedImgsDir = pathToFluoDir + MAARSImgSaver.croppedImgs + File.separator;
+                     FileUtils.createFolder(croppedImgsDir);
                      //TODO
                      CopyOnWriteArrayList<Integer> cellIndex = soc_.getPotentialMitosisCell();
                      for (int i : cellIndex) {
                         Cell c = soc_.getCell(i);
 //                     for (Cell c : soc_){
-                        int cellNb = c.getCellNumber();
-                        String croppedImgsDir = pathToFluoDir + MAARSImgSaver.croppedImgs + File.separator;
-                        FileUtils.createFolder(croppedImgsDir);
-                        String pathToImg = croppedImgsDir + cellNb + "_" + channel + ".tif";
-                        ImagePlus croppedImg = ImgUtils.cropImgWithRoi(fluoImage, c.getCellShapeRoi());
+                        String pathToImg = croppedImgsDir + i + "_" + channel + ".tif";
+                        ImagePlus croppedImg = ImgUtils.cropImgWithRoi(imgToSave, c.getCellShapeRoi());
                         if (!FileUtils.exists(pathToImg)){
                            IJ.saveAsTiff(croppedImg, pathToImg);
                         }else{
@@ -206,28 +192,32 @@ public class MAARSNoAcq implements Runnable {
                            IJ.saveAsTiff(new_croppedImg, pathToImg);
                         }
                      }
+                  }else{
+                     concatenatedFluoImgs = concatenatedFluoImgs == null?
+                             imgToSave:concatenator.concatenate(concatenatedFluoImgs, imgToSave, false);
                   }
                   fluoImage = null;
                   zProjectedFluoImg = null;
+                  imgToSave = null;
                }
                tasksSet_.add(channelsInFrame);
                if (skipAllRestFrames){
                   break;
                }
             }
+            concatenatedFluoImgs.getCalibration().frameInterval =
+                    Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
             MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
             if (!skipAllRestFrames) {
                RoiManager.getInstance().reset();
                RoiManager.getInstance().close();
-               double timeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
                if (soc_.size() != 0) {
                   long startWriting = System.currentTimeMillis();
-                  concatenatedFluoImgs.getCalibration().frameInterval = timeInterval / 1000;
-                  if (!saveRam) {
-                     MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
-                             arrayChannels.size(), arrayImgFrames.size());
-                  } else{
+                  if (saveRam) {
                      MAARS.saveAll(soc_, pathToFluoDir, parameters.useDynamic());
+                  } else{
+                     MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
+                             arrayChannels, arrayImgFrames.size());
                   }
                   IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                           + " sec for writing results");

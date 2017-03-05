@@ -9,6 +9,7 @@ import ij.plugin.HyperStackConverter;
 
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
 
 public class MAARSImgSaver {
    public static final String croppedImgs = "croppedImgs";
@@ -23,11 +24,12 @@ public class MAARSImgSaver {
     * @param croppedImg set of image
     * @param cellNb        number of current cell
     */
-   public void saveSplitImgs(ImagePlus croppedImg, int cellNb, int chNb, int frameNb) {
-      ImagePlus hyperImg = this.reshapeStack(croppedImg, chNb, frameNb);
+   public void saveSplitImgs(ImagePlus croppedImg, int cellNb, ArrayList<String> arrayChannels, int frameNb) {
+      ImagePlus hyperImg = reshapeStack(croppedImg, arrayChannels.size(), frameNb);
       ImagePlus[] channels = ChannelSplitter.split(hyperImg);
-      for (ImagePlus img : channels){
-         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + img.getStack().getSliceLabel(1).split("_",-1)[0] + ".tif";
+      for (int i =0; i<arrayChannels.size();i++){
+         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + arrayChannels.get(i) + ".tif";
+         ImagePlus img = channels[i];
          img.setRoi(croppedImg.getRoi());
          IJ.run(img, "Enhance Contrast", "saturated=0.35");
          IJ.saveAsTiff(img, pathToCroppedImg);

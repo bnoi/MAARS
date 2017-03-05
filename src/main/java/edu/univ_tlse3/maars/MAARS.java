@@ -113,8 +113,8 @@ public class MAARS implements Runnable {
         }
     }
 
-    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, int chNb, int frameNb) {
-        IJ.log("Saving information of each cell");
+    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, ArrayList<String> arrayChannels, int frameNb) {
+        IJ.log("Saving information of each cell on disk");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
         MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir);
@@ -126,7 +126,7 @@ public class MAARS implements Runnable {
              geoSaver.save(cell);
              spotSaver.save(cell);
              ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
-             imgSaver.saveSplitImgs(croppedImg, cell.getCellNumber(),chNb,frameNb);
+             imgSaver.saveSplitImgs(croppedImg, i, arrayChannels, frameNb);
          }
          if (useDynamic) {
              serializeSoc(pathToFluoDir, soc);
@@ -384,7 +384,7 @@ public class MAARS implements Runnable {
                         long startWriting = System.currentTimeMillis();
                         ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
                         mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels.size(), frame);
+                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels, frame);
                         if (parameters.useDynamic()) {
                             if (IJ.isWindows()) {
                                 pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);

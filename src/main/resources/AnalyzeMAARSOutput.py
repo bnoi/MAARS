@@ -403,7 +403,7 @@ if __name__ == '__main__':
     figs = "figs"
     features = "features"
     channel ="CFP"
-    calibration = 0.1075
+    calibration = 0.1065
     minimumPeriod = 180
     acq_interval = 20
     mitosisDir = baseDir+ mitosis_suffix
