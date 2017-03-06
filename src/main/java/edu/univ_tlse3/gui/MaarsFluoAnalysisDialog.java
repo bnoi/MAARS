@@ -6,6 +6,7 @@ import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.GuiUtils;
+import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -15,16 +16,22 @@ import ij.IJ;
 import ij.ImagePlus;
 
 import ij.gui.YesNoCancelDialog;
+import ij.io.FileInfo;
+import ij.io.TiffDecoder;
 import org.micromanager.acquisition.SequenceSettings;
 import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -36,7 +43,7 @@ import java.util.List;
  *
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  */
-class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
+public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
    /**
     *
@@ -74,7 +81,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JFormattedTextField qualityCh1Tf_;
    private JFormattedTextField qualityCh2Tf_;
    private JFormattedTextField qualityCh3Tf_;
-   public JLabel summaryLabel_;
+   private JLabel summaryLabel_;
+   public static Boolean saveRam_;
 
    /**
     *
@@ -110,6 +118,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       JPanel paramInputPanel = new JPanel(new GridLayout(3,1));
       JPanel summaryPanel = new JPanel();
       summaryLabel_ = new JLabel();
+      summaryLabel_.setVerticalTextPosition(JLabel.CENTER);
       summaryPanel.add(summaryLabel_);
       movieParaPanel.add(paramInputPanel);
       movieParaPanel.add(summaryPanel);
@@ -188,17 +197,17 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       JPanel channelCheckPanel = new JPanel(new GridLayout(3, 0));
       channelCheckPanel.setBorder(GuiUtils.addSecondaryTitle(USING));
-      JCheckBox useChannel1 = new JCheckBox("",true);
+      JCheckBox useChannel1 = new JCheckBox("",false);
       useChannel1.addActionListener(actionEvent -> {
          enableChannelPanel(ch1, useChannel1.isSelected());
          updateSummary();
       });
-      JCheckBox useChannel2 = new JCheckBox("",true);
+      JCheckBox useChannel2 = new JCheckBox("",false);
       useChannel2.addActionListener(actionEvent -> {
          enableChannelPanel(ch2, useChannel2.isSelected());
          updateSummary();
       });
-      JCheckBox useChannel3 = new JCheckBox("",true);
+      JCheckBox useChannel3 = new JCheckBox("",false);
       useChannel3.addActionListener(actionEvent -> {
          enableChannelPanel(ch3, useChannel3.isSelected());
          updateSummary();
@@ -386,6 +395,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       int j = 0;
       for (HashMap chConfigHashMap : listChCompos_) {
          JCheckBox tmpChkbox = (JCheckBox) chConfigHashMap.get(USING);
+         System.out.println(arrayChannels.length);
          if (j < arrayChannels.length) {
             JComboBox tmpChannelCombo = (JComboBox) chConfigHashMap.get(CHANNELS);
             tmpChannelCombo.setSelectedItem(arrayChannels[j]);
@@ -398,6 +408,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
          } else {
             tmpChkbox.setSelected(false);
          }
+         enableChannelPanel(chConfigHashMap,tmpChkbox.isSelected());
       }
 
       ch1Button.addActionListener(e -> ch1Button.setActionCommand((String) ch1Combo_.getSelectedItem()));
@@ -496,14 +507,39 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
          }
       }
       int totalNbImages = timePointsNb * slicePerFrame * nbChannel;
-      long totalMemory = mm.core().getImageWidth() * mm.core().getImageHeight() * 2  * totalNbImages / 1048576;
+
+      String segDir = parameters_.getSavingPath() + File.separator + "X0_Y0" + File.separator + "_1" + File.separator;
+      String imgName = "_1_MMStack_Pos0.ome.tif";
+      int imageLen= 0;
+      TiffDecoder td = new TiffDecoder(segDir, imgName);
+      FileInfo[] info=null;
+      try {
+         info = td.getTiffInfo();
+      } catch (IOException e) {
+         IOUtils.printErrorToIJLog(e);
+      }
+      if (info!=null) {
+         imageLen = info[0].width * info[0].height;
+      }
+      assert  imageLen != 0;
+      double requiredMemory = imageLen / (double) 1048576 * 2  * totalNbImages;
+      double availiableMemory = Runtime.getRuntime().maxMemory() / 1048576;
       String lineSep = "<br>";
-      summaryLabel_.setText(
-              "<html><body>Nb of time points: " + String.valueOf(timePointsNb) + lineSep +
-              "Nb of slices: " + String.valueOf(slicePerFrame) + lineSep +
-              "Nb of channels: " + String.valueOf(nbChannel) + lineSep +
-              "Total memory: " + String.valueOf(totalMemory) + "Mb</body></html>");
-      summaryLabel_.setVerticalTextPosition(JLabel.CENTER);
+      if (requiredMemory > availiableMemory){
+         saveRam_ = true;
+         summaryLabel_.setText(
+                 "<html><body>Nb of time points: " + String.valueOf(timePointsNb) + lineSep +
+                         "Nb of slices: " + String.valueOf(slicePerFrame) + lineSep +
+                         "Nb of channels: " + String.valueOf(nbChannel) + lineSep +
+                         "Total memory: <font color=#e74c3c>" + String.valueOf(requiredMemory) + "</font>Mb</body></html>");
+      }else{
+         saveRam_ = false;
+         summaryLabel_.setText(
+                 "<html><body>Nb of time points: " + String.valueOf(timePointsNb) + lineSep +
+                         "Nb of slices: " + String.valueOf(slicePerFrame) + lineSep +
+                         "Nb of channels: " + String.valueOf(nbChannel) + lineSep +
+                         "Total memory: " + String.valueOf(requiredMemory) + "Mb</body></html>");
+      }
    }
 
    /**

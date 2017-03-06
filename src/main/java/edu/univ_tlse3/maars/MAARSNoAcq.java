@@ -4,6 +4,7 @@ import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
+import edu.univ_tlse3.gui.MaarsFluoAnalysisDialog;
 import edu.univ_tlse3.gui.MaarsMainDialog;
 import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.utils.FileUtils;
@@ -43,6 +44,7 @@ public class MAARSNoAcq implements Runnable {
    private ExecutorService es_;
    public boolean skipAllRestFrames = false;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
+   public Boolean saveRam_;
 
    public MAARSNoAcq(MaarsParameters parameters, SOCVisualizer socVisualizer,
                      ExecutorService es, CopyOnWriteArrayList<Map<String, Future>> tasksSet,
@@ -155,8 +157,7 @@ public class MAARSNoAcq implements Runnable {
             ImagePlus concatenatedFluoImgs = null;
             //TODO
             Boolean saveProjectedImg = true;
-            double minMemoryRequired = 25.0;
-            Boolean saveRam = !(Runtime.getRuntime().maxMemory() / 1024 / 1024 / 1024 > minMemoryRequired);
+            saveRam_ = MaarsFluoAnalysisDialog.saveRam_;
             for (Integer current_frame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<>();
                for (String channel : arrayChannels) {
@@ -172,7 +173,7 @@ public class MAARSNoAcq implements Runnable {
                           parameters.useDynamic()));
                   channelsInFrame.put(channel, future);
                   ImagePlus imgToSave = saveProjectedImg?zProjectedFluoImg:fluoImage;
-                  if (saveRam) {
+                  if (saveRam_) {
                      IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
                      String croppedImgsDir = pathToFluoDir + MAARSImgSaver.croppedImgs + File.separator;
                      FileUtils.createFolder(croppedImgsDir);
@@ -213,7 +214,7 @@ public class MAARSNoAcq implements Runnable {
                RoiManager.getInstance().close();
                if (soc_.size() != 0) {
                   long startWriting = System.currentTimeMillis();
-                  if (saveRam) {
+                  if (saveRam_) {
                      MAARS.saveAll(soc_, pathToFluoDir, parameters.useDynamic());
                   } else{
                      MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
