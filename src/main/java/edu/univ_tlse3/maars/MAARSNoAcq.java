@@ -155,8 +155,8 @@ public class MAARSNoAcq implements Runnable {
             ImagePlus concatenatedFluoImgs = null;
             //TODO
             Boolean saveProjectedImg = true;
-            double minMemoryRequired = 0.0;
-            Boolean saveRam = Runtime.getRuntime().maxMemory() / 1024 / 1024 / 1024 < minMemoryRequired;
+            double minMemoryRequired = 25.0;
+            Boolean saveRam = !(Runtime.getRuntime().maxMemory() / 1024 / 1024 / 1024 > minMemoryRequired);
             for (Integer current_frame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<>();
                for (String channel : arrayChannels) {

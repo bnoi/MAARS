@@ -4,7 +4,6 @@ import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 
 import ij.IJ;
-import ij.ImagePlus;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.*;

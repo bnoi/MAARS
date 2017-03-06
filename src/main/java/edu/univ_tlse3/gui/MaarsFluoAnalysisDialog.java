@@ -21,6 +21,8 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -72,6 +74,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JFormattedTextField qualityCh1Tf_;
    private JFormattedTextField qualityCh2Tf_;
    private JFormattedTextField qualityCh3Tf_;
+   public JLabel summaryLabel_;
 
    /**
     *
@@ -97,10 +100,41 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       // Movie parameters_ label
 
-      JPanel movieParaPanel = new JPanel(new GridLayout(3,1));
+      JPanel movieParaPanel = new JPanel(new GridLayout(1,2));
       movieParaPanel.setBorder(GuiUtils.addPanelTitle("Movie parameters"));
       movieParaPanel.setBackground(GuiUtils.bgColor);
       add(movieParaPanel, BorderLayout.PAGE_START);
+
+      //
+
+      JPanel paramInputPanel = new JPanel(new GridLayout(3,1));
+      JPanel summaryPanel = new JPanel();
+      summaryLabel_ = new JLabel();
+      summaryPanel.add(summaryLabel_);
+      movieParaPanel.add(paramInputPanel);
+      movieParaPanel.add(summaryPanel);
+
+      //
+
+      DocumentListener myListener = new DocumentListener() {
+         @Override
+         public void insertUpdate(DocumentEvent documentEvent) {
+            updateMAARSFluoChParameters();
+            updateSummary();
+         }
+
+         @Override
+         public void removeUpdate(DocumentEvent documentEvent) {
+            updateMAARSFluoChParameters();
+            updateSummary();
+         }
+
+         @Override
+         public void changedUpdate(DocumentEvent documentEvent) {
+            updateMAARSFluoChParameters();
+            updateSummary();
+         }
+      };
 
       //
 
@@ -109,8 +143,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       fluoRangePanel.setBorder(GuiUtils.addSecondaryTitle("Z Range (micron) : "));
       int fieldLength = 8;
       range = new JTextField(parameters_.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE), fieldLength);
+      range.getDocument().addDocumentListener(myListener);
       fluoRangePanel.add(range);
-      movieParaPanel.add(fluoRangePanel);
+      paramInputPanel.add(fluoRangePanel);
 
       //
 
@@ -118,8 +153,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       fluoStepPanel.setBackground(GuiUtils.bgColor);
       fluoStepPanel.setBorder(GuiUtils.addSecondaryTitle("Z Step (micron) : "));
       step = new JTextField(parameters_.getFluoParameter(MaarsParameters.STEP), fieldLength);
+      step.getDocument().addDocumentListener(myListener);
       fluoStepPanel.add(step);
-      movieParaPanel.add(fluoStepPanel);
+      paramInputPanel.add(fluoStepPanel);
 
       //
 
@@ -127,6 +163,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       timeIntervalPanel.setBackground(GuiUtils.bgColor);
       timeIntervalPanel.setBorder(GuiUtils.addSecondaryTitle("Time Interval (ms) : "));
       timeInterval = new JTextField(parameters_.getFluoParameter(MaarsParameters.TIME_INTERVAL), fieldLength);
+      timeInterval.getDocument().addDocumentListener(myListener);;
       timeIntervalPanel.add(timeInterval);
       timeInterval.addKeyListener(new KeyAdapter() {
          @Override
@@ -134,7 +171,7 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
             updateDoAnalysisButton();
          }
       });
-      movieParaPanel.add(timeIntervalPanel);
+      paramInputPanel.add(timeIntervalPanel);
 
       //
 
@@ -152,11 +189,20 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       JPanel channelCheckPanel = new JPanel(new GridLayout(3, 0));
       channelCheckPanel.setBorder(GuiUtils.addSecondaryTitle(USING));
       JCheckBox useChannel1 = new JCheckBox("",true);
-      useChannel1.addItemListener(itemEvent -> enableChannelPanel(ch1, useChannel1.isSelected()));
+      useChannel1.addActionListener(actionEvent -> {
+         enableChannelPanel(ch1, useChannel1.isSelected());
+         updateSummary();
+      });
       JCheckBox useChannel2 = new JCheckBox("",true);
-      useChannel2.addItemListener(itemEvent -> enableChannelPanel(ch2, useChannel2.isSelected()));
+      useChannel2.addActionListener(actionEvent -> {
+         enableChannelPanel(ch2, useChannel2.isSelected());
+         updateSummary();
+      });
       JCheckBox useChannel3 = new JCheckBox("",true);
-      useChannel3.addItemListener(itemEvent -> enableChannelPanel(ch3, useChannel3.isSelected()));
+      useChannel3.addActionListener(actionEvent -> {
+         enableChannelPanel(ch3, useChannel3.isSelected());
+         updateSummary();
+      });
       channelCheckPanel.add(useChannel1);
       channelCheckPanel.add(useChannel2);
       channelCheckPanel.add(useChannel3);
@@ -256,9 +302,9 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       ch2.put(SPINDLE, ch2Button);
       ch3.put(SPINDLE, ch3Button);
 
-      listChCompos_.add(ch1);
-      listChCompos_.add(ch2);
-      listChCompos_.add(ch3);
+      listChCompos_.add(0,ch1);
+      listChCompos_.add(1,ch2);
+      listChCompos_.add(2,ch3);
 
       preview1But.addActionListener(e -> {
          updateMAARSFluoChParameters();
@@ -266,11 +312,11 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       });
       preview2But.addActionListener(e -> {
          updateMAARSFluoChParameters();
-         testTrackmate(ch1);
+         testTrackmate(ch2);
       });
       preview3But.addActionListener(e -> {
          updateMAARSFluoChParameters();
-         testTrackmate(ch1);
+         testTrackmate(ch3);
       });
 
 
@@ -363,6 +409,8 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       //
 
+      updateSummary();
+
       pack();
       setVisible(true);
    }
@@ -428,6 +476,33 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       JComboBox tmpCombo = (JComboBox) channelHashMap.get(CHANNELS);
       String selectedChannel = (String) tmpCombo.getSelectedItem();
       setChPanelValue(channelHashMap, selectedChannel);
+   }
+
+   /**
+    *
+    */
+   public void updateSummary(){
+      double timeLimit = Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
+              * 1000;
+      double fluoTimeInterval = Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+      int timePointsNb  = (int) (timeLimit / fluoTimeInterval);
+      double rangeValue = Double.parseDouble(range.getText());
+      double stepValue = Double.parseDouble(step.getText());
+      int slicePerFrame = (int) (rangeValue/stepValue +1 );
+      int totalNbImages = timePointsNb * slicePerFrame;
+      int nbChannel = 0;
+      for (HashMap h : listChCompos_){
+         if (((JCheckBox) h.get(USING)).isSelected()){
+            nbChannel++;
+         }
+      }
+      String lineSep = "<br>";
+      summaryLabel_.setText(
+              "<html><body>Nb of time points: " + String.valueOf(timePointsNb) + lineSep +
+              "Nb of slices: " + String.valueOf(slicePerFrame) + lineSep +
+              "Nb of channels: " + String.valueOf(nbChannel) + lineSep +
+              "Total memory: " + String.valueOf(mm.core().getImageWidth() * mm.core().getImageHeight() * 2 /1024/1024 * totalNbImages) + "Mb</body></html>");
+      summaryLabel_.setVerticalTextPosition(JLabel.CENTER);
    }
 
    /**
