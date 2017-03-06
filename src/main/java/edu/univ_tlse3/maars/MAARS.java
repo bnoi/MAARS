@@ -408,6 +408,8 @@ public class MAARS implements Runnable {
         mmc.setAutoShutter(true);
         System.setErr(curr_err);
         System.setOut(curr_out);
+        soc_.reset();
+        soc_ = null;
         if (!skipAllRestFrames) {
             IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
         }

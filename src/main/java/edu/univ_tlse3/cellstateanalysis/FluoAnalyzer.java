@@ -115,7 +115,8 @@ public class FluoAnalyzer implements Runnable {
       if (useDynamic_){
          socVisualizer_.updateParameters(soc);
       }
-      this.fluoImage = null;
+      fluoImage = null;
+      model = null;
       System.gc();
    }
 
