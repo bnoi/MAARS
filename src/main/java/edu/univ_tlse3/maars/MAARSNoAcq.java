@@ -44,7 +44,7 @@ public class MAARSNoAcq implements Runnable {
    private ExecutorService es_;
    public boolean skipAllRestFrames = false;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
-   public Boolean saveRam_;
+   private Boolean saveRam_;
 
    public MAARSNoAcq(MaarsParameters parameters, SOCVisualizer socVisualizer,
                      ExecutorService es, CopyOnWriteArrayList<Map<String, Future>> tasksSet,
@@ -121,10 +121,9 @@ public class MAARSNoAcq implements Runnable {
             }
             soc_.setRoiMeasurementIntoCells(rt);
 
-            Calibration bfImgCal = null;
+            Calibration bfImgCal;
             assert segImg != null;
             bfImgCal = segImg.getCalibration();
-            segImg = null;
             // ----------------start acquisition and analysis --------//
             try {
                PrintStream ps = new PrintStream(pathToSegDir + "/CellStateAnalysis.LOG");
@@ -155,8 +154,6 @@ public class MAARSNoAcq implements Runnable {
             Concatenator concatenator = new Concatenator();
             concatenator.setIm5D(true);
             ImagePlus concatenatedFluoImgs = null;
-            //TODO
-            Boolean saveProjectedImg = true;
             saveRam_ = MaarsFluoAnalysisDialog.saveRam_;
             for (Integer current_frame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<>();
@@ -172,7 +169,7 @@ public class MAARSNoAcq implements Runnable {
                           Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer_,
                           parameters.useDynamic()));
                   channelsInFrame.put(channel, future);
-                  ImagePlus imgToSave = saveProjectedImg?zProjectedFluoImg:fluoImage;
+                  ImagePlus imgToSave = Boolean.parseBoolean(parameters.getProjected())?zProjectedFluoImg:fluoImage;
                   if (saveRam_) {
                      IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
                      String croppedImgsDir = pathToFluoDir + MAARSImgSaver.croppedImgs + File.separator;
@@ -197,9 +194,6 @@ public class MAARSNoAcq implements Runnable {
                      concatenatedFluoImgs = concatenatedFluoImgs == null?
                              imgToSave:concatenator.concatenate(concatenatedFluoImgs, imgToSave, false);
                   }
-                  fluoImage = null;
-                  zProjectedFluoImg = null;
-                  imgToSave = null;
                }
                tasksSet_.add(channelsInFrame);
                if (skipAllRestFrames){
@@ -236,7 +230,6 @@ public class MAARSNoAcq implements Runnable {
                   }
                }
             }
-            concatenatedFluoImgs = null;
          }
       }
       System.setErr(curr_err);

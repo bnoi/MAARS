@@ -23,9 +23,6 @@ import org.micromanager.acquisition.internal.AcquisitionWrapperEngine;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -83,6 +80,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
    private JFormattedTextField qualityCh3Tf_;
    private JLabel summaryLabel_;
    public static Boolean saveRam_;
+   private JCheckBox projected_;
 
    /**
     *
@@ -360,11 +358,14 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       saveFlims = new JCheckBox("Save Movies",
               Boolean.parseBoolean(parameters_.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
       doAnalysis = new JCheckBox("Do Analysis", true);
+      projected_ = new JCheckBox("Save projected images crops?",
+              Boolean.parseBoolean(parameters_.getFluoParameter(MaarsParameters.PROJECTED)));
       updateDoAnalysisButton();
       JPanel optionPanel = new JPanel(new GridLayout(1,4));
       optionPanel.setBackground(GuiUtils.bgColor);
       optionPanel.add(saveFlims);
       optionPanel.add(doAnalysis);
+      optionPanel.add(projected_);
       optionPanel.add(configurationGroupPanel);
       optionPanel.add(mitosisDurationPanel);
 
@@ -510,13 +511,13 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       String segDir = parameters_.getSavingPath() + File.separator + "X0_Y0" + File.separator + "_1" + File.separator;
       String imgName = "_1_MMStack_Pos0.ome.tif";
-      int imageLen= 0;
+      long imageLen= 0;
       TiffDecoder td = new TiffDecoder(segDir, imgName);
       FileInfo[] info=null;
       try {
          info = td.getTiffInfo();
       } catch (IOException e) {
-         IOUtils.printErrorToIJLog(e);
+         imageLen = mm.core().getImageWidth() * mm.core().getImageHeight();
       }
       if (info!=null) {
          imageLen = info[0].width * info[0].height;
@@ -554,6 +555,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       parameters_.setFluoParameter(MaarsParameters.TIME_INTERVAL, timeInterval.getText());
       parameters_.setDetectionChForMitosis(spindleChannel_);
       parameters_.setMinimumMitosisDuration(String.valueOf(mitosisDurationTf_.getText()));
+      parameters_.setProjected(String.valueOf(projected_.isSelected()));
       List<String> existingChannels = parameters_.getAllChannels();
       ArrayList<String> channels = new ArrayList<>();
       for (HashMap chConfigHashMap : listChCompos_){

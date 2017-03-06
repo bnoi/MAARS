@@ -60,6 +60,7 @@ import java.util.List;
  *    +-----> TIME_LIMIT
  *    +-----> TIME_INTERVAL
  *    +-----> DO_ANALYSIS
+ *    +-----> PROJECTED
  *    +-----> ANALYSIS_OPTIONS
  *    		|
  *    		+-----> DO_MITOSIS_RATIO
@@ -141,6 +142,7 @@ public class MaarsParameters {
    public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
    private static final String SKIP = "SKIP";
    private static final String CALIBRATION = "CALIBRATION";
+   public static final String PROJECTED = "PROJECTED";
    private Document doc;
    private Element root;
    private String[] allColors = {"GREEN","CYAN","RED", "BLUE", "WHITE","GRAY"};
@@ -403,6 +405,15 @@ public class MaarsParameters {
        return root.getChildText(CALIBRATION);
     }
 
+
+   /**
+    *
+    * @return
+    */
+   public String getProjected() {
+      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(PROJECTED);
+   }
+
    //////////// Setters
 
     /**
@@ -538,6 +549,14 @@ public class MaarsParameters {
     */
    public void setCalibration(String calib) {
       root.getChild(CALIBRATION).setText(calib);
+   }
+
+   /**
+    *
+    * @return
+    */
+   public void setProjected(String projected) {
+      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(PROJECTED).setText(projected);
    }
 
    /**
