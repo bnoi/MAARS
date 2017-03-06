@@ -489,19 +489,20 @@ class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       double rangeValue = Double.parseDouble(range.getText());
       double stepValue = Double.parseDouble(step.getText());
       int slicePerFrame = (int) (rangeValue/stepValue +1 );
-      int totalNbImages = timePointsNb * slicePerFrame;
       int nbChannel = 0;
       for (HashMap h : listChCompos_){
          if (((JCheckBox) h.get(USING)).isSelected()){
             nbChannel++;
          }
       }
+      int totalNbImages = timePointsNb * slicePerFrame * nbChannel;
+      long totalMemory = mm.core().getImageWidth() * mm.core().getImageHeight() * 2  * totalNbImages / 1048576;
       String lineSep = "<br>";
       summaryLabel_.setText(
               "<html><body>Nb of time points: " + String.valueOf(timePointsNb) + lineSep +
               "Nb of slices: " + String.valueOf(slicePerFrame) + lineSep +
               "Nb of channels: " + String.valueOf(nbChannel) + lineSep +
-              "Total memory: " + String.valueOf(mm.core().getImageWidth() * mm.core().getImageHeight() * 2 /1024/1024 * totalNbImages) + "Mb</body></html>");
+              "Total memory: " + String.valueOf(totalMemory) + "Mb</body></html>");
       summaryLabel_.setVerticalTextPosition(JLabel.CENTER);
    }
 
