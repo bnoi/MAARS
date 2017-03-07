@@ -98,7 +98,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       parameters_ = parameters;
       setModalityType(ModalityType.DOCUMENT_MODAL);
       setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-      setTitle("MAARS - Fluorescent Analysis Parameters");
+      setTitle("MAARS - Fluorescence Analysis Parameters");
       setLayout(new BorderLayout());
       setMinimumSize(new Dimension(750, 500));
       setSize(750,500);

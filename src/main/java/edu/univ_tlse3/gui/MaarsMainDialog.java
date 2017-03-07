@@ -175,7 +175,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       // fluo analysis button
 
       JPanel fluoAnalysisPanel = new JPanel(new GridLayout(1, 0));
-      fluoAnalysisButton = new JButton("Fluorescent analysis");
+      fluoAnalysisButton = new JButton("Fluorescence analysis");
       fluoAnalysisButton.addActionListener(this);
       fluoAnalysisPanel.add(fluoAnalysisButton);
       analysisParamPanel.add(fluoAnalysisPanel);
