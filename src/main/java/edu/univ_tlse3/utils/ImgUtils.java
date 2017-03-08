@@ -144,14 +144,11 @@ public class ImgUtils {
       for (String acqName : listAcqNamesArray) {
          ImagePlus newImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName + "_MMStack_Pos0.ome.tif");
          ImageStack stack = newImg.getStack();
-         for (int i =1; i <= stack.size();i++){
+         for (int i =1; i <= stack.getSize();i++){
             stack.setSliceLabel(acqName, i);
          }
-         if (concatenatedFluoImgs==null){
-            concatenatedFluoImgs = newImg;
-         }else{
-            concatenatedFluoImgs = concatenator.concatenate(concatenatedFluoImgs, newImg,false);
-         }
+         concatenatedFluoImgs = concatenatedFluoImgs == null?
+                 newImg:concatenator.concatenate(concatenatedFluoImgs, newImg, false);
       }
       return concatenatedFluoImgs;
    }

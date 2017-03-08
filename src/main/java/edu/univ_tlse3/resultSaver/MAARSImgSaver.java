@@ -45,7 +45,7 @@ public class MAARSImgSaver {
     */
    private ImagePlus reshapeStack(ImagePlus croppedImgStack, int totalChNb, int totalFrameNb){
       return HyperStackConverter.toHyperStack(croppedImgStack, totalChNb,
-              croppedImgStack.getStack().size()/totalChNb/totalFrameNb,totalFrameNb,"xyzct", "Grayscale");
+              croppedImgStack.getStack().getSize()/totalChNb/totalFrameNb,totalFrameNb,"xyzct", "Grayscale");
    }
 
 //   public void exportChannelBtf(Boolean splitChannel, Set<String> arrayChannels) {
