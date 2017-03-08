@@ -42,7 +42,7 @@ public class SOCVisualizer extends JFrame{
         scrollPane.setBorder(BorderFactory.createTitledBorder("Cell Numbers"));
         scrollPane.setToolTipText("number of cells with > 1 spot");
 
-        JPanel chartPanel = new CellChartPanel("Waiting for data...");
+        JPanel chartPanel = new CellChartPanel();
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 scrollPane, chartPanel);
         chartPanel.setBorder(BorderFactory.createTitledBorder("Parameters"));
@@ -130,10 +130,8 @@ public class SOCVisualizer extends JFrame{
     public void updateParameters(SetOfCells setOfCells) {
         for (Integer cellIndex : setOfCells.getPotentialMitosisCell()) {
             int cellNb = setOfCells.getCell(cellIndex).getCellNumber();
-            synchronized(alreadyShownList_){
-                if (!alreadyShownList_.contains(cellNb)) {
-                    alreadyShownList_.addElement(cellNb);
-                }
+            if (!alreadyShownList_.contains(cellNb)) {
+                alreadyShownList_.addElement(cellNb);
             }
         }
     }

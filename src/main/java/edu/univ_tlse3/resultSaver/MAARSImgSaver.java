@@ -7,7 +7,6 @@ import ij.ImagePlus;
 import ij.plugin.ChannelSplitter;
 import ij.plugin.HyperStackConverter;
 
-import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 
