@@ -394,7 +394,6 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       int j = 0;
       for (HashMap chConfigHashMap : listChCompos_) {
          JCheckBox tmpChkbox = (JCheckBox) chConfigHashMap.get(USING);
-         System.out.println(arrayChannels.length);
          if (j < arrayChannels.length) {
             JComboBox tmpChannelCombo = (JComboBox) chConfigHashMap.get(CHANNELS);
             tmpChannelCombo.setSelectedItem(arrayChannels[j]);
