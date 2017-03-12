@@ -6,7 +6,6 @@ import edu.univ_tlse3.cellstateanalysis.MaarsTrackmate;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.GuiUtils;
-import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SelectionModel;
@@ -28,7 +27,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -396,7 +394,6 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       int j = 0;
       for (HashMap chConfigHashMap : listChCompos_) {
          JCheckBox tmpChkbox = (JCheckBox) chConfigHashMap.get(USING);
-         System.out.println(arrayChannels.length);
          if (j < arrayChannels.length) {
             JComboBox tmpChannelCombo = (JComboBox) chConfigHashMap.get(CHANNELS);
             tmpChannelCombo.setSelectedItem(arrayChannels[j]);
@@ -475,7 +472,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     */
    private void enableChannelPanel(HashMap<String, Component> channelHashMap, Boolean enable){
       for (String param : channelHashMap.keySet()){
-         if (param != USING){
+         if (param.equals(USING)){
             channelHashMap.get(param).setEnabled(enable);
          }
       }

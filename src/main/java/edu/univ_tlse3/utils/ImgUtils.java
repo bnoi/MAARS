@@ -7,7 +7,6 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.Concatenator;
-import ij.plugin.HyperStackConverter;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
 import ij.process.ImageProcessor;
@@ -16,7 +15,6 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -144,14 +142,11 @@ public class ImgUtils {
       for (String acqName : listAcqNamesArray) {
          ImagePlus newImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName + "_MMStack_Pos0.ome.tif");
          ImageStack stack = newImg.getStack();
-         for (int i =1; i <= stack.size();i++){
+         for (int i =1; i <= stack.getSize();i++){
             stack.setSliceLabel(acqName, i);
          }
-         if (concatenatedFluoImgs==null){
-            concatenatedFluoImgs = newImg;
-         }else{
-            concatenatedFluoImgs = concatenator.concatenate(concatenatedFluoImgs, newImg,false);
-         }
+         concatenatedFluoImgs = concatenatedFluoImgs == null?
+                 newImg:concatenator.concatenate(concatenatedFluoImgs, newImg, false);
       }
       return concatenatedFluoImgs;
    }

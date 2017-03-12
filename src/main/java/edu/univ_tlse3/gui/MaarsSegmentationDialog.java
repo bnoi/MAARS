@@ -18,7 +18,6 @@ import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

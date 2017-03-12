@@ -44,7 +44,6 @@ public class MAARSNoAcq implements Runnable {
    private ExecutorService es_;
    public boolean skipAllRestFrames = false;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
-   private Boolean saveRam_;
 
    public MAARSNoAcq(MaarsParameters parameters, SOCVisualizer socVisualizer,
                      ExecutorService es, CopyOnWriteArrayList<Map<String, Future>> tasksSet,
@@ -154,13 +153,14 @@ public class MAARSNoAcq implements Runnable {
             Concatenator concatenator = new Concatenator();
             concatenator.setIm5D(true);
             ImagePlus concatenatedFluoImgs = null;
-            saveRam_ = MaarsFluoAnalysisDialog.saveRam_;
+            Boolean saveRam_ = MaarsFluoAnalysisDialog.saveRam_;
             for (Integer current_frame : arrayImgFrames) {
                Map<String, Future> channelsInFrame = new HashMap<>();
                for (String channel : arrayChannels) {
                   IJ.log("Processing channel " + channel + "_" + current_frame);
                   String pathToFluoMovie = pathToFluoDir + channel + "_" + current_frame + "/" + channel + "_" + current_frame + "_MMStack_Pos0.ome.tif";
                   ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
+//                  fluoImage.getCalibration().setUnit("micron");
                   ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
                   zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
                   future = es_.submit(new FluoAnalyzer(zProjectedFluoImg.duplicate(), bfImgCal, soc_, channel,

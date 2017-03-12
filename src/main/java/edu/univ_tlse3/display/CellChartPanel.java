@@ -22,11 +22,10 @@ import java.awt.*;
 class CellChartPanel extends JPanel {
    /**
     *
-    * @param s the string to be written on the label
     */
-   CellChartPanel(String s) {
+   CellChartPanel() {
       super(new BorderLayout());
-      add(new JLabel(s), BorderLayout.CENTER);
+      add(new JLabel("Waiting for data..."), BorderLayout.CENTER);
    }
 
    /**
