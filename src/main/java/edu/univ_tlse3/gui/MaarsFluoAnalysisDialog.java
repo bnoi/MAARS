@@ -193,17 +193,17 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
 
       JPanel channelCheckPanel = new JPanel(new GridLayout(3, 0));
       channelCheckPanel.setBorder(GuiUtils.addSecondaryTitle(USING));
-      JCheckBox useChannel1 = new JCheckBox("",false);
+      JCheckBox useChannel1 = new JCheckBox("",true);
       useChannel1.addActionListener(actionEvent -> {
          enableChannelPanel(ch1, useChannel1.isSelected());
          updateSummary();
       });
-      JCheckBox useChannel2 = new JCheckBox("",false);
+      JCheckBox useChannel2 = new JCheckBox("",true);
       useChannel2.addActionListener(actionEvent -> {
          enableChannelPanel(ch2, useChannel2.isSelected());
          updateSummary();
       });
-      JCheckBox useChannel3 = new JCheckBox("",false);
+      JCheckBox useChannel3 = new JCheckBox("",true);
       useChannel3.addActionListener(actionEvent -> {
          enableChannelPanel(ch3, useChannel3.isSelected());
          updateSummary();
@@ -472,7 +472,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     */
    private void enableChannelPanel(HashMap<String, Component> channelHashMap, Boolean enable){
       for (String param : channelHashMap.keySet()){
-         if (param.equals(USING)){
+         if (!param.equals(USING)){
             channelHashMap.get(param).setEnabled(enable);
          }
       }
