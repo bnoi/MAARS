@@ -356,7 +356,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       saveFlims = new JCheckBox("Save Movies",
               Boolean.parseBoolean(parameters_.getFluoParameter(MaarsParameters.SAVE_FLUORESCENT_MOVIES)));
       doAnalysis = new JCheckBox("Do Analysis", true);
-      projected_ = new JCheckBox("Save projected images crops?",
+      projected_ = new JCheckBox("Project cropped images?",
               Boolean.parseBoolean(parameters_.getFluoParameter(MaarsParameters.PROJECTED)));
       updateDoAnalysisButton();
       JPanel optionPanel = new JPanel(new GridLayout(1,4));
