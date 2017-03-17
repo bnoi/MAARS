@@ -414,5 +414,6 @@ public class MAARS implements Runnable {
             IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
         }
         System.gc();
+        IJ.showMessage("MAARS: Done!");
     }
 }
