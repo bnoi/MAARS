@@ -113,7 +113,7 @@ public class MAARS implements Runnable {
         }
     }
 
-    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, ArrayList<String> arrayChannels, int frameNb) {
+    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, ArrayList<String> arrayChannels, int frameSize) {
         IJ.log("Saving information of each cell on disk");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
@@ -126,7 +126,8 @@ public class MAARS implements Runnable {
              geoSaver.save(cell);
              spotSaver.save(cell);
              ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
-             imgSaver.saveSplitImgs(croppedImg, i, arrayChannels, frameNb);
+            ImagePlus hyperImg = ImgUtils.reshapeStack(croppedImg, arrayChannels.size(), frameSize);
+            imgSaver.saveSplitImgs(hyperImg, i, arrayChannels);
          }
          if (useDynamic) {
              serializeSoc(pathToFluoDir, soc);

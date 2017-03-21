@@ -39,7 +39,6 @@ public class MAARSNoAcq implements Runnable {
    private MaarsParameters parameters;
    private SetOfCells soc_;
    private String rootDir;
-   private ArrayList<String> arrayChannels = new ArrayList<>();
    private SOCVisualizer socVisualizer_;
    private ExecutorService es_;
    public boolean skipAllRestFrames = false;
@@ -133,17 +132,17 @@ public class MAARSNoAcq implements Runnable {
             } catch (FileNotFoundException e) {
                IOUtils.printErrorToIJLog(e);
             }
+
+            ArrayList<String> arrayChannels = new ArrayList<>();
+            Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
+
             String[] listAcqNames = new File(pathToFluoDir).list();
             String pattern = "(\\w+)(_)(\\d+)";
             ArrayList<Integer> arrayImgFrames = new ArrayList<>();
             assert listAcqNames != null;
             for (String acqName : listAcqNames) {
                if (Pattern.matches(pattern, acqName)) {
-                  String current_channel = acqName.split("_", -1)[0];
                   String current_frame = acqName.split("_", -1)[1];
-                  if (!arrayChannels.contains(current_channel)) {
-                     arrayChannels.add(current_channel);
-                  }
                   if (!arrayImgFrames.contains(Integer.parseInt(current_frame))) {
                      arrayImgFrames.add(Integer.parseInt(current_frame));
                   }
@@ -160,7 +159,6 @@ public class MAARSNoAcq implements Runnable {
                   IJ.log("Processing channel " + channel + "_" + current_frame);
                   String pathToFluoMovie = pathToFluoDir + channel + "_" + current_frame + "/" + channel + "_" + current_frame + "_MMStack_Pos0.ome.tif";
                   ImagePlus fluoImage = IJ.openImage(pathToFluoMovie);
-//                  fluoImage.getCalibration().setUnit("micron");
                   ImagePlus zProjectedFluoImg = ImgUtils.zProject(fluoImage);
                   zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
                   future = es_.submit(new FluoAnalyzer(zProjectedFluoImg.duplicate(), bfImgCal, soc_, channel,
@@ -170,6 +168,9 @@ public class MAARSNoAcq implements Runnable {
                           parameters.useDynamic()));
                   channelsInFrame.put(channel, future);
                   ImagePlus imgToSave = Boolean.parseBoolean(parameters.getProjected())?zProjectedFluoImg:fluoImage;
+                  for (int i =1; i <= imgToSave.getStack().getSize();i++){
+                     imgToSave.getStack().setSliceLabel(channel+"_" + current_frame, i);
+                  }
                   if (saveRam_) {
                      IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
                      String croppedImgsDir = pathToFluoDir + MAARSImgSaver.croppedImgs + File.separator;

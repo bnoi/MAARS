@@ -7,6 +7,7 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.Concatenator;
+import ij.plugin.HyperStackConverter;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
 import ij.process.ImageProcessor;
@@ -181,5 +182,17 @@ public class ImgUtils {
       MMStudio mm = MMStudio.getInstance();
       ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
       return imgProcessor.convertToFloatProcessor();
+   }
+
+   /**
+    *
+    * @param croppedImgStack
+    * @param totalChNb
+    * @param totalFrameNb
+    * @return
+    */
+   public static ImagePlus reshapeStack(ImagePlus croppedImgStack, int totalChNb, int totalFrameNb){
+      return HyperStackConverter.toHyperStack(croppedImgStack, totalChNb,
+              croppedImgStack.getStack().getSize()/totalChNb/totalFrameNb,totalFrameNb,"xyzct", "Grayscale");
    }
 }

@@ -5,7 +5,6 @@ import edu.univ_tlse3.utils.FileUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.ChannelSplitter;
-import ij.plugin.HyperStackConverter;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,9 +22,8 @@ public class MAARSImgSaver {
     * @param croppedImg set of image
     * @param cellNb        number of current cell
     */
-   public void saveSplitImgs(ImagePlus croppedImg, int cellNb, ArrayList<String> arrayChannels, int frameNb) {
-      ImagePlus hyperImg = reshapeStack(croppedImg, arrayChannels.size(), frameNb);
-      ImagePlus[] channels = ChannelSplitter.split(hyperImg);
+   public void saveSplitImgs(ImagePlus croppedImg, int cellNb, ArrayList<String> arrayChannels) {
+      ImagePlus[] channels = ChannelSplitter.split(croppedImg);
       for (int i =0; i<arrayChannels.size();i++){
          String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + arrayChannels.get(i) + ".tif";
          ImagePlus img = channels[i];
@@ -35,17 +33,6 @@ public class MAARSImgSaver {
       }
    }
 
-   /**
-    *
-    * @param croppedImgStack
-    * @param totalChNb
-    * @param totalFrameNb
-    * @return
-    */
-   private ImagePlus reshapeStack(ImagePlus croppedImgStack, int totalChNb, int totalFrameNb){
-      return HyperStackConverter.toHyperStack(croppedImgStack, totalChNb,
-              croppedImgStack.getStack().getSize()/totalChNb/totalFrameNb,totalFrameNb,"xyzct", "Grayscale");
-   }
 
 //   public void exportChannelBtf(Boolean splitChannel, Set<String> arrayChannels) {
 //      if (splitChannel) {
