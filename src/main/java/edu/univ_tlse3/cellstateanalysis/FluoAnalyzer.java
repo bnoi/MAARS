@@ -79,9 +79,8 @@ public class FluoAnalyzer implements Runnable {
       if (fluoImage.getImageStackSize() == 1) {
          zProjectedFluoImg = fluoImage;
       } else {
-         zProjectedFluoImg = ImgUtils.zProject(fluoImage);
+         zProjectedFluoImg = ImgUtils.zProject(fluoImage, fluoImage.getCalibration());
          zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
-         zProjectedFluoImg.setCalibration(fluoImage.getCalibration());
       }
       MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
       this.model = trackmate.doDetection(true);

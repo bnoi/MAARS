@@ -30,12 +30,14 @@ public class ImgUtils {
     * @param img image to be projected
     * @return projected image
     */
-   public static ImagePlus zProject(ImagePlus img) {
+   public static ImagePlus zProject(ImagePlus img, Calibration cal) {
       ZProjector projector = new ZProjector();
       projector.setMethod(ZProjector.MAX_METHOD);
       projector.setImage(img);
       projector.doProjection();
-      return projector.getProjection();
+      ImagePlus projected = projector.getProjection();
+      projected.setCalibration(cal);
+      return projected;
    }
 
    /**

@@ -597,8 +597,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
       double spotRadius = Double.parseDouble((String) tmpTf.getValue());
       tmpTf = (JFormattedTextField) componentHashMap.get(QUALITY);
       double quality = Double.parseDouble((String) tmpTf.getValue());
-      ImagePlus zProjectedFluoImg = ImgUtils.zProject(img);
-      zProjectedFluoImg.setCalibration(img.getCalibration());
+      ImagePlus zProjectedFluoImg = ImgUtils.zProject(img, img.getCalibration());
       MaarsTrackmate tmTest = new MaarsTrackmate(zProjectedFluoImg, spotRadius, quality);
       Model model = tmTest.doDetection(false);
       model.getSpots().setVisible(true);
