@@ -54,23 +54,6 @@ public class ImgUtils {
    }
 
    /**
-    * Crop the ROI on the given image
-    *
-    * @param img ImagePlus
-    * @param roi region of interest to crop
-    * @return cropped imagePLus
-    */
-   public static ImagePlus cropImgWithRoi(ImagePlus img, Roi roi) {
-      ImageStack stack = img.getStack().crop((int) roi.getXBase(), (int) roi.getYBase(), 0,
-              roi.getBounds().width, roi.getBounds().height, img.getStack().getSize());
-      ImagePlus croppedImg = new ImagePlus("cropped_" + img.getShortTitle(), stack);
-      croppedImg.setCalibration(img.getCalibration());
-      Roi centeredRoi = centerCroppedRoi(roi);
-      croppedImg.setRoi(centeredRoi);
-      return croppedImg;
-   }
-
-   /**
     * re-calculate the position of ROI. make it adapt to the cropped image
     *
     * @param roi roi to process
@@ -184,17 +167,5 @@ public class ImgUtils {
       MMStudio mm = MMStudio.getInstance();
       ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
       return imgProcessor.convertToFloatProcessor();
-   }
-
-   /**
-    *
-    * @param croppedImgStack
-    * @param totalChNb
-    * @param totalFrameNb
-    * @return
-    */
-   public static ImagePlus reshapeStack(ImagePlus croppedImgStack, int totalChNb, int totalFrameNb){
-      return HyperStackConverter.toHyperStack(croppedImgStack, totalChNb,
-              croppedImgStack.getStack().getSize()/totalChNb/totalFrameNb,totalFrameNb,"xyzct", "Grayscale");
    }
 }

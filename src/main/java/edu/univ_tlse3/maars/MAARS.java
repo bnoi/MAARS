@@ -18,6 +18,7 @@ import edu.univ_tlse3.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.plugin.Duplicator;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 import org.micromanager.acquisition.ChannelSpec;
@@ -113,7 +114,7 @@ public class MAARS implements Runnable {
         }
     }
 
-    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, ArrayList<String> arrayChannels, int frameSize) {
+    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, ArrayList<String> arrayChannels) {
         IJ.log("Saving information of each cell on disk");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
@@ -125,9 +126,12 @@ public class MAARS implements Runnable {
 //        for (Cell cell : soc){
              geoSaver.save(cell);
              spotSaver.save(cell);
-             ImagePlus croppedImg = ImgUtils.cropImgWithRoi(mergedImg, cell.getCellShapeRoi());
-            ImagePlus hyperImg = ImgUtils.reshapeStack(croppedImg, arrayChannels.size(), frameSize);
-            imgSaver.saveSplitImgs(hyperImg, i, arrayChannels);
+             mergedImg.setRoi(cell.getCellShapeRoi());
+             for (int j = 1; j<= mergedImg.getNChannels(); j++){
+                 ImagePlus croppedImg = new Duplicator().run(mergedImg, j, j, 1, mergedImg.getNSlices(),
+                         1, mergedImg.getNFrames());
+                 imgSaver.saveImgs(croppedImg, i, arrayChannels.get(j),false);
+             }
          }
          if (useDynamic) {
              serializeSoc(pathToFluoDir, soc);
@@ -385,7 +389,7 @@ public class MAARS implements Runnable {
                         long startWriting = System.currentTimeMillis();
                         ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
                         mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels, frame);
+                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels);
                         if (parameters.useDynamic()) {
                             if (IJ.isWindows()) {
                                 pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);

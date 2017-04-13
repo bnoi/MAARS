@@ -4,14 +4,13 @@ import edu.univ_tlse3.utils.FileUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.plugin.ChannelSplitter;
+import ij.plugin.Concatenator;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class MAARSImgSaver {
    public static final String croppedImgs = "croppedImgs";
-   private String croppedImgDir;
+   public String croppedImgDir;
 
    public MAARSImgSaver(String pathToFluoDir) {
       this.croppedImgDir = pathToFluoDir + croppedImgs + File.separator;
@@ -22,14 +21,17 @@ public class MAARSImgSaver {
     * @param croppedImg set of image
     * @param cellNb        number of current cell
     */
-   public void saveSplitImgs(ImagePlus croppedImg, int cellNb, ArrayList<String> arrayChannels) {
-      ImagePlus[] channels = ChannelSplitter.split(croppedImg);
-      for (int i =0; i<arrayChannels.size();i++){
-         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + arrayChannels.get(i) + ".tif";
-         ImagePlus img = channels[i];
-         img.setRoi(croppedImg.getRoi());
-         IJ.run(img, "Enhance Contrast", "saturated=0.35");
-         IJ.saveAsTiff(img, pathToCroppedImg);
+   public void saveImgs(ImagePlus croppedImg, int cellNb, String channelName, boolean append) {
+      String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + channelName + ".tif";
+      IJ.run(croppedImg, "Enhance Contrast", "saturated=0.35");
+      Concatenator concatenator = new Concatenator();
+      concatenator.setIm5D(true);
+      if (FileUtils.exists(pathToCroppedImg) && append) {
+         ImagePlus new_croppedImg = concatenator.concatenate(IJ.openImage(pathToCroppedImg), croppedImg, false);
+         new_croppedImg.setRoi(croppedImg.getRoi());
+         IJ.saveAsTiff(new_croppedImg, pathToCroppedImg);
+      } else {
+         IJ.saveAsTiff(croppedImg, pathToCroppedImg);
       }
    }
 

@@ -15,7 +15,6 @@ import edu.univ_tlse3.utils.ImgUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
@@ -182,8 +181,8 @@ public class MAARSNoAcq implements Runnable {
             if (fluoTiffName != null){
                ImagePlus im = IJ.openImage(pathToFluoDir + File.separator + fluoTiffName);
                Map<String,Object> map = new Gson().fromJson(im.getInfoProperty(), new TypeToken<HashMap<String, Object>>() {}.getType());
-               ArrayList<String> channelNames = (ArrayList) map.get("ChNames");
-               int totalChannel = channelNames.size();
+               arrayChannels = (ArrayList) map.get("ChNames");
+               int totalChannel = arrayChannels.size();
                int totalSlice = ((Double) ((Map)map.get("IntendedDimensions")).get("z")).intValue();
 //               totalPosition = (int) ((Map)map.get("IntendedDimensions")).get("position");
                String tifNameBase = fluoTiffName.split("\\.",-1)[0];
@@ -191,9 +190,9 @@ public class MAARSNoAcq implements Runnable {
                ImagePlus im2 = IJ.getImage();
                concatenatedFluoImgs = concatenator.concatenate(im, im2, false);
                totalFrame = (int) concatenatedFluoImgs.getNSlices()/totalChannel/totalSlice;
-               ImagePlus imp2 = HyperStackConverter.toHyperStack(concatenatedFluoImgs, totalChannel, totalSlice,totalFrame
+               concatenatedFluoImgs = HyperStackConverter.toHyperStack(concatenatedFluoImgs, totalChannel, totalSlice,totalFrame
                        , "xyzct", "Grayscale");
-               imp2.show();
+               concatenatedFluoImgs.show();
                for (int i=1;i<=totalFrame; i++) {
                   Map<String, Future> analysisTasks = new HashMap<>();
                   for (int j = 1; j <= totalChannel; j++) {
@@ -225,22 +224,17 @@ public class MAARSNoAcq implements Runnable {
                      ImagePlus imgToSave = prepareImgToSave(zProjectedFluoImg, currentFluoImage, channel, current_frame);
                      if (saveRam_) {
                         IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
-                        String croppedImgsDir = pathToFluoDir + MAARSImgSaver.croppedImgs + File.separator;
-                        FileUtils.createFolder(croppedImgsDir);
+                        MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir);
                         //TODO
                         CopyOnWriteArrayList<Integer> cellIndex = soc_.getPotentialMitosisCell();
                         for (int i : cellIndex) {
                            Cell c = soc_.getCell(i);
 //                     for (Cell c : soc_){
-                           String pathToImg = croppedImgsDir + i + "_" + channel + ".tif";
-                           ImagePlus croppedImg = ImgUtils.cropImgWithRoi(imgToSave, c.getCellShapeRoi());
-                           if (!FileUtils.exists(pathToImg)) {
-                              IJ.saveAsTiff(croppedImg, pathToImg);
-                           } else {
-                              ImagePlus new_croppedImg = concatenator.concatenate(IJ.openImage(pathToImg), croppedImg, false);
-                              new_croppedImg.setRoi(croppedImg.getRoi());
-                              IJ.run(new_croppedImg, "Enhance Contrast", "saturated=0.35");
-                              IJ.saveAsTiff(new_croppedImg, pathToImg);
+                           imgToSave.setRoi(c.getCellShapeRoi());
+                           for (int j = 1; j<= imgToSave.getNChannels(); j++){
+                              ImagePlus croppedImg = new Duplicator().run(imgToSave, j, j, 1, imgToSave.getNSlices(),
+                                      1, imgToSave.getNFrames());
+                              imgSaver.saveImgs(croppedImg, i, arrayChannels.get(j),true);
                            }
                         }
                      } else {
@@ -248,13 +242,14 @@ public class MAARSNoAcq implements Runnable {
                                 imgToSave : concatenator.concatenate(concatenatedFluoImgs, imgToSave, false);
                      }
                   }
-
-
                   tasksSet_.add(analysisTasks);
                   if (skipAllRestFrames) {
                      break;
                   }
                }
+               concatenatedFluoImgs = HyperStackConverter.toHyperStack(concatenatedFluoImgs, arrayChannels.size(),
+                       concatenatedFluoImgs.getStack().getSize()/arrayChannels.size()/totalFrame,totalFrame,
+                       "xyzct", "Grayscale");
             }
             concatenatedFluoImgs.getCalibration().frameInterval =
                     Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
@@ -268,7 +263,7 @@ public class MAARSNoAcq implements Runnable {
                      MAARS.saveAll(soc_, pathToFluoDir, parameters.useDynamic());
                   } else{
                      MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
-                             arrayChannels, totalFrame);
+                             arrayChannels);
                   }
                   IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                           + " sec for writing results");
