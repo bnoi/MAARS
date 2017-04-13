@@ -109,17 +109,22 @@ public class FileUtils {
       FileUtils.writeScript(folderPath + scriptName, script);
    }
 
-   public static String getOnlyTiffName(String path2Folder){
+   public static String getShortestTiffName(String path2Folder){
       File folder = new File(path2Folder);
       File[] listOfFiles = folder.listFiles();
-
+      String shortestTifName = null;
+      int minTifNameLength = Integer.MAX_VALUE;
       for (int i = 0; i < listOfFiles.length; i++) {
          if (listOfFiles[i].isFile()) {
-            if (listOfFiles[i].getName().endsWith("tif") || listOfFiles[i].getName().endsWith("tiff")){
-               return listOfFiles[i].getName();
+            String currentTifName = listOfFiles[i].getName();
+            if (currentTifName.endsWith("tif") || currentTifName.endsWith("tiff")){
+               if (currentTifName.length() < minTifNameLength){
+                  shortestTifName = currentTifName;
+                  minTifNameLength = currentTifName.length();
+               }
             }
          }
       }
-      return null;
+      return shortestTifName;
    }
 }
