@@ -108,4 +108,18 @@ public class FileUtils {
       }
       FileUtils.writeScript(folderPath + scriptName, script);
    }
+
+   public static String getOnlyTiffName(String path2Folder){
+      File folder = new File(path2Folder);
+      File[] listOfFiles = folder.listFiles();
+
+      for (int i = 0; i < listOfFiles.length; i++) {
+         if (listOfFiles[i].isFile()) {
+            if (listOfFiles[i].getName().endsWith("tif") || listOfFiles[i].getName().endsWith("tiff")){
+               return listOfFiles[i].getName();
+            }
+         }
+      }
+      return null;
+   }
 }
