@@ -30,6 +30,7 @@ import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -114,7 +115,8 @@ public class MAARS implements Runnable {
         }
     }
 
-    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir, Boolean useDynamic, ArrayList<String> arrayChannels) {
+    static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
+                        Boolean useDynamic, ArrayList<String> arrayChannels) {
         IJ.log("Saving information of each cell on disk");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
@@ -130,7 +132,8 @@ public class MAARS implements Runnable {
              for (int j = 1; j<= mergedImg.getNChannels(); j++){
                  ImagePlus croppedImg = new Duplicator().run(mergedImg, j, j, 1, mergedImg.getNSlices(),
                          1, mergedImg.getNFrames());
-                 imgSaver.saveImgs(croppedImg, i, arrayChannels.get(j),false);
+                 IJ.run(croppedImg, "Grays", "");
+                 imgSaver.saveImgs(croppedImg, i, arrayChannels.get(j-1),false);
              }
          }
          if (useDynamic) {

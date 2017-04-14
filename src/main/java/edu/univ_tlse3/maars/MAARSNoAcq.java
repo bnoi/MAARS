@@ -192,7 +192,6 @@ public class MAARSNoAcq implements Runnable {
                totalFrame = (int) concatenatedFluoImgs.getNSlices()/totalChannel/totalSlice;
                concatenatedFluoImgs = HyperStackConverter.toHyperStack(concatenatedFluoImgs, totalChannel, totalSlice,totalFrame
                        , "xyzct", "Grayscale");
-               concatenatedFluoImgs.show();
                for (int i=1;i<=totalFrame; i++) {
                   Map<String, Future> analysisTasks = new HashMap<>();
                   for (int j = 1; j <= totalChannel; j++) {
@@ -207,6 +206,10 @@ public class MAARSNoAcq implements Runnable {
                   if (skipAllRestFrames) {
                      break;
                   }
+               }
+               if (Boolean.parseBoolean(parameters.getProjected())) {
+                  IJ.run(concatenatedFluoImgs, "Z Project...", "projection=[Max Intensity] all");
+                  concatenatedFluoImgs = IJ.getImage();
                }
             }else{
                ArrayList<Integer> arrayImgFrames = getFluoAcqStructure(pathToFluoDir);
@@ -234,7 +237,7 @@ public class MAARSNoAcq implements Runnable {
                            for (int j = 1; j<= imgToSave.getNChannels(); j++){
                               ImagePlus croppedImg = new Duplicator().run(imgToSave, j, j, 1, imgToSave.getNSlices(),
                                       1, imgToSave.getNFrames());
-                              imgSaver.saveImgs(croppedImg, i, arrayChannels.get(j),true);
+                              imgSaver.saveImgs(croppedImg, i, channel,true);
                            }
                         }
                      } else {
@@ -262,6 +265,7 @@ public class MAARSNoAcq implements Runnable {
                   if (saveRam_) {
                      MAARS.saveAll(soc_, pathToFluoDir, parameters.useDynamic());
                   } else{
+                     concatenatedFluoImgs.show();
                      MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
                              arrayChannels);
                   }
