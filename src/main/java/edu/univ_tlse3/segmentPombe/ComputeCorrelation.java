@@ -5,6 +5,7 @@ public class ComputeCorrelation {
    private float zf;
    private float sigma;
    private int direction;
+   private int N = 100; // precision parameter
 
    // it is -1 for image with cell boundaries be black then white
    // it is 1 for image with cell boundaries be white then black
@@ -38,24 +39,23 @@ public class ComputeCorrelation {
     * @return double integrate number
     **********************************************************************/
    public double integrate(double a, double b) {
-      int N = 100; // precision parameter
       double h = (b - a) / (N - 1); // step size
 
       // 1/3 terms
-      double sum = 1.0 / 3.0 * (f(a) + f(b));
+      double sum = f(a) + f(b);
 
       // 4/3 terms
       for (int i = 1; i < N - 1; i += 2) {
          double x = a + h * i;
-         sum += 4.0 / 3.0 * f(x);
+         sum += 4.0 * f(x);
       }
 
       // 2/3 terms
       for (int i = 2; i < N - 1; i += 2) {
          double x = a + h * i;
-         sum += 2.0 / 3.0 * f(x);
+         sum += 2.0 * f(x);
       }
 
-      return sum * h;
+      return sum * h / 3.0;
    }
 }
