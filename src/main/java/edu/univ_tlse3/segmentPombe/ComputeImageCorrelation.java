@@ -12,14 +12,14 @@ import java.util.concurrent.Callable;
 class ComputeImageCorrelation implements Callable<FloatProcessor> {
    private ImagePlus img;
    private float zFocus;
-   private float sigma;
-   private int direction;
+   private ComputeCorrelation computeCorrelationImage_;
 
    ComputeImageCorrelation(ImagePlus img, float zFocus, float sigma, int direction) {
       this.img = img;
       this.zFocus = zFocus;
-      this.sigma = sigma;
-      this.direction = direction;
+      // compute correlation value
+      computeCorrelationImage_ = new ComputeCorrelation(zFocus, sigma, direction);
+      computeCorrelationImage_.preCalculateParameters(0,img.getNSlices()-1);
    }
 
    /**
@@ -40,10 +40,7 @@ class ComputeImageCorrelation implements Callable<FloatProcessor> {
                // the first element returned by the getPixel function is
                // the grayscale values
             }
-            // compute correlation value
-            ComputeCorrelation computeCorrelationImage = new ComputeCorrelation(iz, zf, sigma, direction);
-
-            double correlationPixelValue = computeCorrelationImage.integrate(0, img.getNSlices() - 1);
+            double correlationPixelValue = computeCorrelationImage_.integrate(iz);
             correlationImage.putPixelValue(x, y, correlationPixelValue);
          }
       }

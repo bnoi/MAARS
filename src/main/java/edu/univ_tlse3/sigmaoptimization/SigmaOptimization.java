@@ -163,13 +163,12 @@ class SigmaOptimization implements PlugIn {
                image.setZ(z);
                iz[z] = image.getPixel((int) x, (int) y)[0];
             }
-            ComputeCorrelation computeCorrelationImage = new ComputeCorrelation(
-                    iz, zf, sigma
+            ComputeCorrelation computeCorrelationImage = new ComputeCorrelation(zf, sigma
                     / (float) image.getCalibration().pixelDepth,
                     direction);
+            computeCorrelationImage.preCalculateParameters(0,image.getNSlices()-1);
             mean = mean
-                    + computeCorrelationImage.integrate(0,
-                    image.getNSlices() - 1);
+                    + computeCorrelationImage.integrate(iz);
          }
          mean = mean / rois.length;
          System.out.println("mean = " + mean);
