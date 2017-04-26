@@ -21,10 +21,7 @@ import ij.plugin.Duplicator;
 import ij.plugin.HyperStackConverter;
 import ij.plugin.frame.RoiManager;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -181,6 +178,11 @@ public class MAARSNoAcq implements Runnable {
             if (fluoTiffName != null){
                ImagePlus im = IJ.openImage(pathToFluoDir + File.separator + fluoTiffName);
                Map<String,Object> map = new Gson().fromJson(im.getInfoProperty(), new TypeToken<HashMap<String, Object>>() {}.getType());
+               try(  PrintWriter out = new PrintWriter( pathToFluoDir + File.separator + "metadata.txt" )  ){
+                  out.println( im.getInfoProperty() );
+               } catch (FileNotFoundException e) {
+                  IOUtils.printErrorToIJLog(e);
+               }
                arrayChannels = (ArrayList) map.get("ChNames");
                int totalChannel = arrayChannels.size();
                int totalSlice = ((Double) ((Map)map.get("IntendedDimensions")).get("z")).intValue();
