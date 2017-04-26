@@ -613,9 +613,19 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
     */
    private void testTrackmate(HashMap<String, Component> componentHashMap) {
       String channelName = getSelectedChannel(componentHashMap);
-      String imgPath = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO" + File.separator
-              + channelName + "_1" + File.separator + channelName + "_1_MMStack_Pos0.ome.tif";
-      testTrackmate(componentHashMap,FileUtils.exists(imgPath)? IJ.openImage(imgPath):IJ.getImage());
+      String pathToFluoDir = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO";
+      String imgPath = pathToFluoDir + File.separator + channelName + "_1" + File.separator +
+              channelName + "_1_MMStack_Pos0.ome.tif";
+      ImagePlus img;
+      if (FileUtils.exists(imgPath)){
+         img = IJ.openImage(imgPath);
+      }else if(FileUtils.getShortestTiffName(
+              parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO") != null){
+         img = IJ.getImage();
+      }else{
+         img = acquireTestImg(componentHashMap);
+      }
+      testTrackmate(componentHashMap, img);
    }
 
    /**
