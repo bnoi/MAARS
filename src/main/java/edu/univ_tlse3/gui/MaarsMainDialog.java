@@ -8,7 +8,6 @@ import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.GuiUtils;
 import edu.univ_tlse3.utils.IOUtils;
-
 import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
@@ -18,7 +17,10 @@ import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -32,131 +34,131 @@ import java.util.concurrent.*;
 
 public class MaarsMainDialog extends JFrame implements ActionListener {
 
-   private final JLabel numFieldLabel;
-   private final MMStudio mm;
-   private final CMMCore mmc;
-   private final double calibration;
-   private MaarsParameters parameters;
-   private JButton autofocusButton;
-   private JButton okMainDialogButton;
-   private JButton showDataVisualizer_;
-   private JButton segmButton;
-   private JButton fluoAnalysisButton;
-   private JFormattedTextField savePathTf;
-   private JFormattedTextField widthTf;
-   private JFormattedTextField heightTf;
-   private JFormattedTextField fluoAcqDurationTf;
-   private JCheckBox postAnalysisChk_;
-   private JRadioButton dynamicOpt;
-   private JRadioButton staticOpt;
-   private MaarsFluoAnalysisDialog fluoDialog_;
-   private MaarsSegmentationDialog segDialog_;
-   private SetOfCells soc_ = new SetOfCells();
-   private SOCVisualizer socVisualizer_;
-   private JButton stopButton_;
-   private MAARS maars_;
-   private MAARSNoAcq maarsNoAcq_;
-   private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
-   private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-   private JCheckBox saveParametersChk_;
+    private final JLabel numFieldLabel;
+    private final MMStudio mm;
+    private final CMMCore mmc;
+    private final double calibration;
+    private MaarsParameters parameters;
+    private JButton autofocusButton;
+    private JButton okMainDialogButton;
+    private JButton showDataVisualizer_;
+    private JButton segmButton;
+    private JButton fluoAnalysisButton;
+    private JFormattedTextField savePathTf;
+    private JFormattedTextField widthTf;
+    private JFormattedTextField heightTf;
+    private JFormattedTextField fluoAcqDurationTf;
+    private JCheckBox postAnalysisChk_;
+    private JRadioButton dynamicOpt;
+    private JRadioButton staticOpt;
+    private MaarsFluoAnalysisDialog fluoDialog_;
+    private MaarsSegmentationDialog segDialog_;
+    private SetOfCells soc_ = new SetOfCells();
+    private SOCVisualizer socVisualizer_;
+    private JButton stopButton_;
+    private MAARS maars_;
+    private MAARSNoAcq maarsNoAcq_;
+    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
+    private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private JCheckBox saveParametersChk_;
 
-   /**
-    * Constructor
-    *
-    * @param mm         : graphical user interface of Micro-Manager
-    * @param parameters :MaarsParameters
-    */
-   public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
-      super("Mitosis Analysing And Recording System - MAARS");
-      // ------------initialization of parameters---------------//
+    /**
+     * Constructor
+     *
+     * @param mm         : graphical user interface of Micro-Manager
+     * @param parameters :MaarsParameters
+     */
+    public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
+        super("Mitosis Analysing And Recording System - MAARS");
+        // ------------initialization of parameters---------------//
 
-      this.mm = mm;
-      this.mmc = mm.core();
-      this.parameters = parameters;
+        this.mm = mm;
+        this.mmc = mm.core();
+        this.parameters = parameters;
 
-      IJ.log("create main dialog ...");
-      setDefaultLookAndFeelDecorated(true);
-      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        IJ.log("create main dialog ...");
+        setDefaultLookAndFeelDecorated(true);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-      // set minimal dimension of mainDialog
+        // set minimal dimension of mainDialog
 
-      int maxDialogWidth = 350;
-      int maxDialogHeight = 600;
-      Dimension minimumSize = new Dimension(maxDialogWidth, maxDialogHeight);
-      setMinimumSize(minimumSize);
+        int maxDialogWidth = 350;
+        int maxDialogHeight = 600;
+        Dimension minimumSize = new Dimension(maxDialogWidth, maxDialogHeight);
+        setMinimumSize(minimumSize);
 
-      // Get number of field to explore
+        // Get number of field to explore
 
-      int defaultXFieldNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
-      int defaultYFieldNumber = parameters.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
+        int defaultXFieldNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
+        int defaultYFieldNumber = parameters.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
 
-      // Calculate width and height for each field
+        // Calculate width and height for each field
 
-      calibration = mm.getCMMCore().getPixelSizeUm();
-      double fieldWidth = mmc.getImageWidth() * calibration;
-      double fieldHeight = mmc.getImageHeight() * calibration;
+        calibration = mm.getCMMCore().getPixelSizeUm();
+        double fieldWidth = mmc.getImageWidth() * calibration;
+        double fieldHeight = mmc.getImageHeight() * calibration;
 
-      // Exploration Label
+        // Exploration Label
 
-      JPanel explorationPanel = new JPanel(new GridLayout(2,1));
-       explorationPanel.setBackground(GuiUtils.bgColor);
-      explorationPanel.setBorder(GuiUtils.addPanelTitle("Area to explore"));
-      explorationPanel.setToolTipText("Define width and height of acquisition area");
-      // field width Panel (Label + textfield)
+        JPanel explorationPanel = new JPanel(new GridLayout(2, 1));
+        explorationPanel.setBackground(GuiUtils.bgColor);
+        explorationPanel.setBorder(GuiUtils.addPanelTitle("Area to explore"));
+        explorationPanel.setToolTipText("Define width and height of acquisition area");
+        // field width Panel (Label + textfield)
 
-      JPanel widthPanel = new JPanel(new GridLayout(1, 0));
-       widthPanel.setBackground(GuiUtils.bgColor);
-      widthPanel.setBorder(GuiUtils.addSecondaryTitle("Width of field : "));
-      widthPanel.setToolTipText("Width of acquisition area");
+        JPanel widthPanel = new JPanel(new GridLayout(1, 0));
+        widthPanel.setBackground(GuiUtils.bgColor);
+        widthPanel.setBorder(GuiUtils.addSecondaryTitle("Width of field : "));
+        widthPanel.setToolTipText("Width of acquisition area");
 
-      widthTf = new JFormattedTextField(Integer.class);
-      widthTf.setValue((int)FastMath.round(fieldWidth * defaultXFieldNumber));
-      widthTf.addKeyListener(new KeyAdapter() {
-         @Override
-         public void keyReleased(KeyEvent keyEvent) {
-            super.keyReleased(keyEvent);
-            refreshNumField();
-         }
-      });
-      widthPanel.add(widthTf);
+        widthTf = new JFormattedTextField(Integer.class);
+        widthTf.setValue((int) FastMath.round(fieldWidth * defaultXFieldNumber));
+        widthTf.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent keyEvent) {
+                super.keyReleased(keyEvent);
+                refreshNumField();
+            }
+        });
+        widthPanel.add(widthTf);
 
-      // field Height Panel (Label + textfield)
+        // field Height Panel (Label + textfield)
 
-      JPanel heightPanel = new JPanel(new GridLayout(1, 0));
-       heightPanel.setBackground(GuiUtils.bgColor);
-      heightPanel.setBorder(GuiUtils.addSecondaryTitle("Height of field : "));
-      heightPanel.setToolTipText("Height of acquisition area");
+        JPanel heightPanel = new JPanel(new GridLayout(1, 0));
+        heightPanel.setBackground(GuiUtils.bgColor);
+        heightPanel.setBorder(GuiUtils.addSecondaryTitle("Height of field : "));
+        heightPanel.setToolTipText("Height of acquisition area");
 
-      heightTf = new JFormattedTextField(Integer.class);
-      heightTf.setValue((int)FastMath.round(fieldHeight * defaultYFieldNumber));
-      heightTf.addKeyListener(new KeyAdapter() {
-         @Override
-         public void keyReleased(KeyEvent keyEvent) {
-            super.keyReleased(keyEvent);
-            refreshNumField();
-         }
-      });
-      heightPanel.add(heightTf);
+        heightTf = new JFormattedTextField(Integer.class);
+        heightTf.setValue((int) FastMath.round(fieldHeight * defaultYFieldNumber));
+        heightTf.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent keyEvent) {
+                super.keyReleased(keyEvent);
+                refreshNumField();
+            }
+        });
+        heightPanel.add(heightTf);
 
-      JPanel widHeiJPanel = new JPanel(new GridLayout(1,2));
-      widHeiJPanel.add(widthPanel);
-      widHeiJPanel.add(heightPanel);
+        JPanel widHeiJPanel = new JPanel(new GridLayout(1, 2));
+        widHeiJPanel.add(widthPanel);
+        widHeiJPanel.add(heightPanel);
 
-      explorationPanel.add(widHeiJPanel);
+        explorationPanel.add(widHeiJPanel);
 
-      // number of field label
+        // number of field label
 
-      numFieldLabel = new JLabel("Number of field : " + defaultXFieldNumber * defaultYFieldNumber, JLabel.CENTER);
-      explorationPanel.add(numFieldLabel);
+        numFieldLabel = new JLabel("Number of field : " + defaultXFieldNumber * defaultYFieldNumber, JLabel.CENTER);
+        explorationPanel.add(numFieldLabel);
 
-      // analysis parameters label
+        // analysis parameters label
 
-      JPanel analysisParamPanel = new JPanel(new GridLayout(2,1));
-       analysisParamPanel.setBackground(GuiUtils.bgColor);
-      analysisParamPanel.setBorder(GuiUtils.addPanelTitle("Analysis parameters"));
-      analysisParamPanel.setToolTipText("Set parameters");
+        JPanel analysisParamPanel = new JPanel(new GridLayout(2, 1));
+        analysisParamPanel.setBackground(GuiUtils.bgColor);
+        analysisParamPanel.setBorder(GuiUtils.addPanelTitle("Analysis parameters"));
+        analysisParamPanel.setToolTipText("Set parameters");
 
-      // autofocus button
+        // autofocus button
 
 //      JPanel autoFocusPanel = new JPanel(new GridLayout(1, 0));
 //      autofocusButton = new JButton("Autofocus");
@@ -164,311 +166,311 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 //      autofocusButton.setEnabled(false);
 //      autoFocusPanel.add(autofocusButton);
 
-      // segmentation button
+        // segmentation button
 
-      JPanel segPanel = new JPanel(new GridLayout(1, 0));
-      segmButton = new JButton("Segmentation");
-      segmButton.addActionListener(this);
-      segPanel.add(segmButton);
-      analysisParamPanel.add(segPanel);
+        JPanel segPanel = new JPanel(new GridLayout(1, 0));
+        segmButton = new JButton("Segmentation");
+        segmButton.addActionListener(this);
+        segPanel.add(segmButton);
+        analysisParamPanel.add(segPanel);
 
-      // fluo analysis button
+        // fluo analysis button
 
-      JPanel fluoAnalysisPanel = new JPanel(new GridLayout(1, 0));
-      fluoAnalysisButton = new JButton("Fluorescence analysis");
-      fluoAnalysisButton.addActionListener(this);
-      fluoAnalysisPanel.add(fluoAnalysisButton);
-      analysisParamPanel.add(fluoAnalysisPanel);
+        JPanel fluoAnalysisPanel = new JPanel(new GridLayout(1, 0));
+        fluoAnalysisButton = new JButton("Fluorescence analysis");
+        fluoAnalysisButton.addActionListener(this);
+        fluoAnalysisPanel.add(fluoAnalysisButton);
+        analysisParamPanel.add(fluoAnalysisPanel);
 
-      // strategy panel (2 radio button + 1 textfield + 1 label)
+        // strategy panel (2 radio button + 1 textfield + 1 label)
 
-      JPanel strategyPanel = new JPanel(new GridLayout(1, 0));
-      strategyPanel.setBorder(GuiUtils.addPanelTitle("Strategy"));
-      strategyPanel.setToolTipText("Which strategy to use");
+        JPanel strategyPanel = new JPanel(new GridLayout(1, 0));
+        strategyPanel.setBorder(GuiUtils.addPanelTitle("Strategy"));
+        strategyPanel.setToolTipText("Which strategy to use");
 
 //      strategyPanel.setBackground(panelColor);
-      dynamicOpt = new JRadioButton("Dynamic");
-      dynamicOpt.setSelected(parameters.useDynamic());
-      staticOpt = new JRadioButton("Static");
-      staticOpt.setSelected(!parameters.useDynamic());
+        dynamicOpt = new JRadioButton("Dynamic");
+        dynamicOpt.setSelected(parameters.useDynamic());
+        staticOpt = new JRadioButton("Static");
+        staticOpt.setSelected(!parameters.useDynamic());
 
-      dynamicOpt.addActionListener(this);
-      staticOpt.addActionListener(this);
+        dynamicOpt.addActionListener(this);
+        staticOpt.addActionListener(this);
 
-      ButtonGroup group = new ButtonGroup();
-      group.add(dynamicOpt);
-      group.add(staticOpt);
+        ButtonGroup group = new ButtonGroup();
+        group.add(dynamicOpt);
+        group.add(staticOpt);
 
-      strategyPanel.add(staticOpt);
-      strategyPanel.add(dynamicOpt);
-      fluoAcqDurationTf = new JFormattedTextField(Double.class);
-      fluoAcqDurationTf.setValue(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT));
-      strategyPanel.add(fluoAcqDurationTf);
-      strategyPanel.add(new JLabel("min", SwingConstants.CENTER));
-      strategyPanel.setBackground(GuiUtils.bgColor);
+        strategyPanel.add(staticOpt);
+        strategyPanel.add(dynamicOpt);
+        fluoAcqDurationTf = new JFormattedTextField(Double.class);
+        fluoAcqDurationTf.setValue(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT));
+        strategyPanel.add(fluoAcqDurationTf);
+        strategyPanel.add(new JLabel("min", SwingConstants.CENTER));
+        strategyPanel.setBackground(GuiUtils.bgColor);
 
-      // checkbox : update or not MAARS parameters
+        // checkbox : update or not MAARS parameters
 
-      JPanel chkPanel = new JPanel(new GridLayout(1, 0));
-       chkPanel.setBackground(GuiUtils.bgColor);
-      chkPanel.setBorder(GuiUtils.addPanelTitle("Options"));
-      chkPanel.setToolTipText("check post analysis if without microscope, check parameter if don't want to replace last parameters");
+        JPanel chkPanel = new JPanel(new GridLayout(1, 0));
+        chkPanel.setBackground(GuiUtils.bgColor);
+        chkPanel.setBorder(GuiUtils.addPanelTitle("Options"));
+        chkPanel.setToolTipText("check post analysis if without microscope, check parameter if don't want to replace last parameters");
 
-      saveParametersChk_ = new JCheckBox("Save parameters", true);
-      postAnalysisChk_ = new JCheckBox("Post analysis", false);
-      postAnalysisChk_.addActionListener(this);
-      chkPanel.add(postAnalysisChk_);
-      chkPanel.add(saveParametersChk_);
+        saveParametersChk_ = new JCheckBox("Save parameters", true);
+        postAnalysisChk_ = new JCheckBox("Post analysis", false);
+        postAnalysisChk_.addActionListener(this);
+        chkPanel.add(postAnalysisChk_);
+        chkPanel.add(saveParametersChk_);
 
-      // Saving path Panel
+        // Saving path Panel
 
-      JPanel savePathPanel = new JPanel(new GridLayout(1, 0));
-      savePathPanel.setBackground(GuiUtils.bgColor);
-      savePathPanel.setBorder(GuiUtils.addPanelTitle("Acquisition root folder :"));
-      savePathPanel.setToolTipText("Path to saving folder");
+        JPanel savePathPanel = new JPanel(new GridLayout(1, 0));
+        savePathPanel.setBackground(GuiUtils.bgColor);
+        savePathPanel.setBorder(GuiUtils.addPanelTitle("Acquisition root folder :"));
+        savePathPanel.setToolTipText("Path to saving folder");
 
-      // Saving Path textfield
+        // Saving Path textfield
 
-      savePathTf = new JFormattedTextField(parameters.getSavingPath());
-      savePathTf.setMaximumSize(new Dimension(maxDialogWidth, 1));
-      savePathPanel.add(savePathTf);
+        savePathTf = new JFormattedTextField(parameters.getSavingPath());
+        savePathTf.setMaximumSize(new Dimension(maxDialogWidth, 1));
+        savePathPanel.add(savePathTf);
 
-      // show visualiwer acquisitions button
+        // show visualiwer acquisitions button
 
-      JPanel stopAndVisualizerButtonPanel_ = new JPanel(new GridLayout(1, 0));
-       stopAndVisualizerButtonPanel_.setBackground(GuiUtils.bgColor);
-      stopAndVisualizerButtonPanel_.setBorder(GuiUtils.addPanelTitle("Visualizer and stop"));
-      showDataVisualizer_ = new JButton("Show visualizer");
-      showDataVisualizer_.addActionListener(this);
-      stopAndVisualizerButtonPanel_.add(showDataVisualizer_);
+        JPanel stopAndVisualizerButtonPanel_ = new JPanel(new GridLayout(1, 0));
+        stopAndVisualizerButtonPanel_.setBackground(GuiUtils.bgColor);
+        stopAndVisualizerButtonPanel_.setBorder(GuiUtils.addPanelTitle("Visualizer and stop"));
+        showDataVisualizer_ = new JButton("Show visualizer");
+        showDataVisualizer_.addActionListener(this);
+        stopAndVisualizerButtonPanel_.add(showDataVisualizer_);
 
-      //
+        //
 
-      stopButton_ = new JButton("Stop");
-      stopButton_.addActionListener(this);
-      stopAndVisualizerButtonPanel_.add(stopButton_);
+        stopButton_ = new JButton("Stop");
+        stopButton_.addActionListener(this);
+        stopAndVisualizerButtonPanel_.add(stopButton_);
 
 
-      // Ok button to run
+        // Ok button to run
 
-      JPanel okPanel = new JPanel(new GridLayout(1, 0));
-      okMainDialogButton = new JButton("Go !");
-       okMainDialogButton.setBackground(GuiUtils.butColor);
-      okMainDialogButton.addActionListener(this);
-      getRootPane().setDefaultButton(okMainDialogButton);
-      okPanel.add(okMainDialogButton);
+        JPanel okPanel = new JPanel(new GridLayout(1, 0));
+        okMainDialogButton = new JButton("Go !");
+        okMainDialogButton.setBackground(GuiUtils.butColor);
+        okMainDialogButton.addActionListener(this);
+        getRootPane().setDefaultButton(okMainDialogButton);
+        okPanel.add(okMainDialogButton);
 
-      // ------------set up and add components to Panel then to Frame---------------//
+        // ------------set up and add components to Panel then to Frame---------------//
 
-      JPanel mainPanel = new JPanel();
-      mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-      mainPanel.add(explorationPanel);
-      mainPanel.add(analysisParamPanel);
-      mainPanel.add(strategyPanel);
-      mainPanel.add(chkPanel);
-      mainPanel.add(savePathPanel);
-      mainPanel.add(okPanel);
-      mainPanel.add(stopAndVisualizerButtonPanel_);
-      add(mainPanel);
-      IJ.log("Done.");
-      pack();
-   }
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.add(explorationPanel);
+        mainPanel.add(analysisParamPanel);
+        mainPanel.add(strategyPanel);
+        mainPanel.add(chkPanel);
+        mainPanel.add(savePathPanel);
+        mainPanel.add(okPanel);
+        mainPanel.add(stopAndVisualizerButtonPanel_);
+        add(mainPanel);
+        IJ.log("Done.");
+        pack();
+    }
 
-   /**
-    * @return graphical user interface of Micro-Manager
-    */
-   private MMStudio getMM() {
-      return mm;
-   }
-
-   /**
-    * Method to display number of field the program has to scan
-    */
-   private void refreshNumField() {
-      int newWidth;
-      int newHeigth;
-
-      String widthComp = widthTf.getText();
-      String heightComp = heightTf.getText();
-      if (!widthComp.equals("") && !heightComp.equals("")) {
-         newWidth = Integer.valueOf(widthComp);
-         newHeigth = Integer.valueOf(heightComp);
-         double tmpNewWidth = (newWidth+1) / (calibration * mmc.getImageWidth());
-         double tmpNewHeight = (newHeigth+1) / (calibration * mmc.getImageHeight());
-         double fractionalPartNewWidth = tmpNewWidth % 1;
-         double fractionalPartNewHeight = tmpNewHeight % 1;
-
-         int newXFieldNumber = (int) FastMath.round(tmpNewWidth - fractionalPartNewWidth);
-         int newYFieldNumber = (int) FastMath.round(tmpNewHeight - fractionalPartNewHeight);
-         int totoalNbField = newXFieldNumber * newYFieldNumber;
-         if (totoalNbField == 0) {
-            numFieldLabel.setForeground(Color.red);
-            numFieldLabel.setText("Number of field : " + totoalNbField);
-         } else {
-            numFieldLabel.setForeground(Color.black);
-            numFieldLabel.setText("Number of field : " + totoalNbField);
-         }
-
-         parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, "" + newXFieldNumber);
-         parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, "" + newYFieldNumber);
-      }
-   }
-
-   /**
-    * method to save the parameters entered
-    */
-   private void saveParameters() {
-      if (!savePathTf.getText().equals(parameters.getSavingPath())) {
-         parameters.setSavingPath(savePathTf.getText());
-      }
-      if (!fluoAcqDurationTf.getText().equals(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
-         parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
-      }
-      try {
-          if (saveParametersChk_.isSelected()) {
-              parameters.save();
-          }
-         if (FileUtils.exists(parameters.getSavingPath())) {
-            parameters.save(parameters.getSavingPath());
-         }
-      } catch (IOException e) {
-         IJ.error("Could not save parameters");
-      }
-   }
-
-   /**
-    * method to set the strategy selected
-    */
-   private void setAnalysisStrategy() {
-
-      if (dynamicOpt.isSelected()) {
-         parameters.setFluoParameter(MaarsParameters.DYNAMIC, "" + true);
-      } else if (staticOpt.isSelected()) {
-         parameters.setFluoParameter(MaarsParameters.DYNAMIC, "" + false);
-      }
-   }
-
-   private int overWrite(String path) {
-      int overWrite = 0;
-      if (FileUtils.exists(path + File.separator + "X0_Y0" + File.separator + "MMStack.ome.tif")) {
-         overWrite = JOptionPane.showConfirmDialog(this, "Overwrite existing acquisitions?");
-      }
-      return overWrite;
-   }
-
-   private SOCVisualizer createVisualizer(){
-      final SOCVisualizer socVisualizer = new SOCVisualizer();
-      socVisualizer.createGUI(soc_);
-      return socVisualizer;
-   }
-
-   public static void waitAllTaskToFinish(CopyOnWriteArrayList<Map<String, Future>> tasksSet){
-      for (Map<String, Future> aFutureSet : tasksSet) {
-         for (String channel : aFutureSet.keySet()) {
-            try {
-               aFutureSet.get(channel).get();
-            } catch (InterruptedException | ExecutionException e) {
-               IOUtils.printErrorToIJLog(e);
+    public static void waitAllTaskToFinish(CopyOnWriteArrayList<Map<String, Future>> tasksSet) {
+        for (Map<String, Future> aFutureSet : tasksSet) {
+            for (String channel : aFutureSet.keySet()) {
+                try {
+                    aFutureSet.get(channel).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    IOUtils.printErrorToIJLog(e);
+                }
+                IJ.showStatus("Terminating analysis...");
             }
-            IJ.showStatus("Terminating analysis...");
-         }
-      }
-      IJ.log("Spot detection finished! Proceed to saving and analysis...");
-   }
+        }
+        IJ.log("Spot detection finished! Proceed to saving and analysis...");
+    }
 
-   private void setSkipTheRest(Boolean skip){
-      if (maarsNoAcq_ != null){
-         maarsNoAcq_.skipAllRestFrames = skip;
-      }
-      if (maars_ != null){
-         maars_.skipAllRestFrames = skip;
-      }
-   }
+    /**
+     * @return graphical user interface of Micro-Manager
+     */
+    private MMStudio getMM() {
+        return mm;
+    }
 
-   @Override
-   public void actionPerformed(ActionEvent e) {
-      if (e.getSource() == autofocusButton) {
-         getMM().showAutofocusDialog();
-      } else if (e.getSource() == okMainDialogButton) {
-         if (socVisualizer_ == null){
-            socVisualizer_ = createVisualizer();
-            if (parameters.useDynamic()){
-               socVisualizer_.setVisible(true);
-            }
-         }
-         if (Integer.valueOf(widthTf.getText()) * Integer.valueOf(heightTf.getText()) == 0) {
-            IJ.error("Session aborted, 0 field to analyse");
-         } else {
-            saveParameters();
-            setSkipTheRest(false);
-            if (postAnalysisChk_.isSelected()) {
-               maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, es_, tasksSet_, soc_);
-                es_.submit(new Thread(maarsNoAcq_));
+    /**
+     * Method to display number of field the program has to scan
+     */
+    private void refreshNumField() {
+        int newWidth;
+        int newHeigth;
+
+        String widthComp = widthTf.getText();
+        String heightComp = heightTf.getText();
+        if (!widthComp.equals("") && !heightComp.equals("")) {
+            newWidth = Integer.valueOf(widthComp);
+            newHeigth = Integer.valueOf(heightComp);
+            double tmpNewWidth = (newWidth + 1) / (calibration * mmc.getImageWidth());
+            double tmpNewHeight = (newHeigth + 1) / (calibration * mmc.getImageHeight());
+            double fractionalPartNewWidth = tmpNewWidth % 1;
+            double fractionalPartNewHeight = tmpNewHeight % 1;
+
+            int newXFieldNumber = (int) FastMath.round(tmpNewWidth - fractionalPartNewWidth);
+            int newYFieldNumber = (int) FastMath.round(tmpNewHeight - fractionalPartNewHeight);
+            int totoalNbField = newXFieldNumber * newYFieldNumber;
+            if (totoalNbField == 0) {
+                numFieldLabel.setForeground(Color.red);
+                numFieldLabel.setText("Number of field : " + totoalNbField);
             } else {
-               maars_ = new MAARS(mm, mmc, parameters, socVisualizer_, es_, tasksSet_, soc_);
-               if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                   es_.submit(new Thread(maars_));
-               }
+                numFieldLabel.setForeground(Color.black);
+                numFieldLabel.setText("Number of field : " + totoalNbField);
             }
-         }
-      } else if (e.getSource() == segmButton) {
-         saveParameters();
-         if (segDialog_ != null){
-            segDialog_.setVisible(true);
-         }else{
-            segDialog_ = new MaarsSegmentationDialog(this, parameters, mm, es_);
-         }
 
-      } else if (e.getSource() == fluoAnalysisButton) {
-         saveParameters();
-         if (fluoDialog_ != null){
-            fluoDialog_.setVisible(true);
-         }else{
-            fluoDialog_ = new MaarsFluoAnalysisDialog(this,mm, parameters);
-         }
-      } else if (e.getSource() == dynamicOpt) {
-         setAnalysisStrategy();
-         fluoAcqDurationTf.setEditable(true);
-      } else if (e.getSource() == staticOpt) {
-         setAnalysisStrategy();
-         fluoAcqDurationTf.setEditable(false);
-      } else if (e.getSource() == postAnalysisChk_) {
-         if (postAnalysisChk_.isSelected()) {
-             widthTf.setEnabled(false);
-             heightTf.setEnabled(false);
-            widthTf.setEditable(false);
-            heightTf.setEditable(false);
-            numFieldLabel.setText("Don't worry about this");
-         } else {
-             widthTf.setEnabled(true);
-             heightTf.setEnabled(true);
-            widthTf.setEditable(true);
-            heightTf.setEditable(true);
-            refreshNumField();
-         }
-      } else if (e.getSource() == showDataVisualizer_) {
-         if (socVisualizer_ == null){
-            socVisualizer_ = createVisualizer();
-         }
-         socVisualizer_.setVisible(true);
-      }else if(e.getSource() == stopButton_){
-         YesNoCancelDialog yesNoCancelDialog =  new YesNoCancelDialog(this, "Abandon current acquisition?",
-                 "Stop current analysis ?");
-         yesNoCancelDialog.setAlwaysOnTop(true);
-         if (yesNoCancelDialog.yesPressed()) {
-            setSkipTheRest(true);
-            RoiManager roiManager = RoiManager.getInstance();
-            roiManager.runCommand("Select All");
-            roiManager.runCommand("Delete");
-            roiManager.reset();
-            roiManager.close();
-            soc_.reset();
-            socVisualizer_.cleanUp();
-            socVisualizer_.setVisible(false);
-            socVisualizer_.createGUI(soc_);
-         }
-      } else {
-         IJ.log("MAARS don't understand what you want, sorry");
-      }
-   }
+            parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, "" + newXFieldNumber);
+            parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, "" + newYFieldNumber);
+        }
+    }
+
+    /**
+     * method to save the parameters entered
+     */
+    private void saveParameters() {
+        if (!savePathTf.getText().equals(parameters.getSavingPath())) {
+            parameters.setSavingPath(savePathTf.getText());
+        }
+        if (!fluoAcqDurationTf.getText().equals(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
+            parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
+        }
+        try {
+            if (saveParametersChk_.isSelected()) {
+                parameters.save();
+            }
+            if (FileUtils.exists(parameters.getSavingPath())) {
+                parameters.save(parameters.getSavingPath());
+            }
+        } catch (IOException e) {
+            IJ.error("Could not save parameters");
+        }
+    }
+
+    /**
+     * method to set the strategy selected
+     */
+    private void setAnalysisStrategy() {
+
+        if (dynamicOpt.isSelected()) {
+            parameters.setFluoParameter(MaarsParameters.DYNAMIC, "" + true);
+        } else if (staticOpt.isSelected()) {
+            parameters.setFluoParameter(MaarsParameters.DYNAMIC, "" + false);
+        }
+    }
+
+    private int overWrite(String path) {
+        int overWrite = 0;
+        if (FileUtils.exists(path + File.separator + "X0_Y0" + File.separator + "MMStack.ome.tif")) {
+            overWrite = JOptionPane.showConfirmDialog(this, "Overwrite existing acquisitions?");
+        }
+        return overWrite;
+    }
+
+    private SOCVisualizer createVisualizer() {
+        final SOCVisualizer socVisualizer = new SOCVisualizer();
+        socVisualizer.createGUI(soc_);
+        return socVisualizer;
+    }
+
+    private void setSkipTheRest(Boolean skip) {
+        if (maarsNoAcq_ != null) {
+            maarsNoAcq_.skipAllRestFrames = skip;
+        }
+        if (maars_ != null) {
+            maars_.skipAllRestFrames = skip;
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == autofocusButton) {
+            getMM().showAutofocusDialog();
+        } else if (e.getSource() == okMainDialogButton) {
+            if (socVisualizer_ == null) {
+                socVisualizer_ = createVisualizer();
+                if (parameters.useDynamic()) {
+                    socVisualizer_.setVisible(true);
+                }
+            }
+            if (Integer.valueOf(widthTf.getText()) * Integer.valueOf(heightTf.getText()) == 0) {
+                IJ.error("Session aborted, 0 field to analyse");
+            } else {
+                saveParameters();
+                setSkipTheRest(false);
+                if (postAnalysisChk_.isSelected()) {
+                    maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, es_, tasksSet_, soc_);
+                    es_.submit(new Thread(maarsNoAcq_));
+                } else {
+                    maars_ = new MAARS(mm, mmc, parameters, socVisualizer_, es_, tasksSet_, soc_);
+                    if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
+                        es_.submit(new Thread(maars_));
+                    }
+                }
+            }
+        } else if (e.getSource() == segmButton) {
+            saveParameters();
+            if (segDialog_ != null) {
+                segDialog_.setVisible(true);
+            } else {
+                segDialog_ = new MaarsSegmentationDialog(this, parameters, mm, es_);
+            }
+
+        } else if (e.getSource() == fluoAnalysisButton) {
+            saveParameters();
+            if (fluoDialog_ != null) {
+                fluoDialog_.setVisible(true);
+            } else {
+                fluoDialog_ = new MaarsFluoAnalysisDialog(this, mm, parameters);
+            }
+        } else if (e.getSource() == dynamicOpt) {
+            setAnalysisStrategy();
+            fluoAcqDurationTf.setEditable(true);
+        } else if (e.getSource() == staticOpt) {
+            setAnalysisStrategy();
+            fluoAcqDurationTf.setEditable(false);
+        } else if (e.getSource() == postAnalysisChk_) {
+            if (postAnalysisChk_.isSelected()) {
+                widthTf.setEnabled(false);
+                heightTf.setEnabled(false);
+                widthTf.setEditable(false);
+                heightTf.setEditable(false);
+                numFieldLabel.setText("Don't worry about this");
+            } else {
+                widthTf.setEnabled(true);
+                heightTf.setEnabled(true);
+                widthTf.setEditable(true);
+                heightTf.setEditable(true);
+                refreshNumField();
+            }
+        } else if (e.getSource() == showDataVisualizer_) {
+            if (socVisualizer_ == null) {
+                socVisualizer_ = createVisualizer();
+            }
+            socVisualizer_.setVisible(true);
+        } else if (e.getSource() == stopButton_) {
+            YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(this, "Abandon current acquisition?",
+                    "Stop current analysis ?");
+            yesNoCancelDialog.setAlwaysOnTop(true);
+            if (yesNoCancelDialog.yesPressed()) {
+                setSkipTheRest(true);
+                RoiManager roiManager = RoiManager.getInstance();
+                roiManager.runCommand("Select All");
+                roiManager.runCommand("Delete");
+                roiManager.reset();
+                roiManager.close();
+                soc_.reset();
+                socVisualizer_.cleanUp();
+                socVisualizer_.setVisible(false);
+                socVisualizer_.createGUI(soc_);
+            }
+        } else {
+            IJ.log("MAARS don't understand what you want, sorry");
+        }
+    }
 }

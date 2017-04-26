@@ -22,88 +22,88 @@ import mmcorej.CMMCore;
  */
 public class ExplorationXYPositions {
 
-   private double[][] xyPositions;
-   private int length;
+    private double[][] xyPositions;
+    private int length;
 
-   /**
-    * Constructor of ExplorationXYPositions, fieldWidth and fieldHeigth must be
-    * in microns
-    *
-    * @param parameters MAARS parameters
-    * @param mmc        MAARS Parameters object
-    */
-   ExplorationXYPositions(CMMCore mmc, MaarsParameters parameters) {
-      int xNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
-      int yNumber = parameters.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
-      double cal = mmc.getPixelSizeUm();
-      double fieldWidth = mmc.getImageWidth() * cal;
-      double fieldHeight = mmc.getImageHeight() * cal;
-      length = xNumber * yNumber;
-      xyPositions = new double[length][2];
-      int n = 0;
+    /**
+     * Constructor of ExplorationXYPositions, fieldWidth and fieldHeigth must be
+     * in microns
+     *
+     * @param parameters MAARS parameters
+     * @param mmc        MAARS Parameters object
+     */
+    ExplorationXYPositions(CMMCore mmc, MaarsParameters parameters) {
+        int xNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
+        int yNumber = parameters.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
+        double cal = mmc.getPixelSizeUm();
+        double fieldWidth = mmc.getImageWidth() * cal;
+        double fieldHeight = mmc.getImageHeight() * cal;
+        length = xNumber * yNumber;
+        xyPositions = new double[length][2];
+        int n = 0;
       /*
-		 * For each field following x axis :
+         * For each field following x axis :
 		 */
-      for (int x = 0; x < xNumber; x++) {
-         int y;
-         int limit;
-         int direction;
+        for (int x = 0; x < xNumber; x++) {
+            int y;
+            int limit;
+            int direction;
 			/*
 			 * if x is an even number direction is 1 meaning y is increasing
 			 */
-         if (x % 2 == 0) {
-            y = 0;
-            limit = yNumber;
-            direction = 1;
-         }
+            if (x % 2 == 0) {
+                y = 0;
+                limit = yNumber;
+                direction = 1;
+            }
 			/*
 			 * if x is an odd number direction is -1 meaning y is decreasing
 			 */
-         else {
-            y = yNumber - 1;
-            limit = -1;
-            direction = -1;
-         }
-         while (y - limit != 0) {
+            else {
+                y = yNumber - 1;
+                limit = -1;
+                direction = -1;
+            }
+            while (y - limit != 0) {
 
-            xyPositions[n][0] = x * fieldWidth;
-            xyPositions[n][1] = y * fieldHeight;
+                xyPositions[n][0] = x * fieldWidth;
+                xyPositions[n][1] = y * fieldHeight;
 
-            y = y + direction;
-            n++;
-         }
-      }
-   }
+                y = y + direction;
+                n++;
+            }
+        }
+    }
 
-   /**
-    * @return number of position
-    */
-   int length() {
-      return length;
-   }
+    /**
+     * @return number of position
+     */
+    int length() {
+        return length;
+    }
 
-   /**
-    * @param index index of xy positions
-    * @return double where first one is x coordinates and the second one is y
-    * coordinates
-    */
-   public double[] get(int index) {
-      return xyPositions[index];
-   }
+    /**
+     * @param index index of xy positions
+     * @return double where first one is x coordinates and the second one is y
+     * coordinates
+     */
+    public double[] get(int index) {
+        return xyPositions[index];
+    }
 
-   /**
-    * @param index index of xy positions
-    * @return x coordinates of position corresponding to index
-    */
-   double getX(int index) {
-      return get(index)[0];
-   }
+    /**
+     * @param index index of xy positions
+     * @return x coordinates of position corresponding to index
+     */
+    double getX(int index) {
+        return get(index)[0];
+    }
 
-   /**
-    * @param index index of xy positions
-    * @return y coordinates of position corresponding to index
-    */
-   double getY(int index) {
-      return get(index)[1];
-   }
+    /**
+     * @param index index of xy positions
+     * @return y coordinates of position corresponding to index
+     */
+    double getY(int index) {
+        return get(index)[1];
+    }
 }

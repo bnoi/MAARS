@@ -7,14 +7,14 @@ import java.awt.event.ActionListener;
 
 public class CancelAction implements ActionListener {
 
-   private SegPombeMainDialog mainDialog;
+    private SegPombeMainDialog mainDialog;
 
-   public CancelAction(SegPombeMainDialog mainDialog) {
-      this.mainDialog = mainDialog;
-   }
+    public CancelAction(SegPombeMainDialog mainDialog) {
+        this.mainDialog = mainDialog;
+    }
 
-   public void actionPerformed(ActionEvent e) {
-      mainDialog.hideMainWindow();
-   }
+    public void actionPerformed(ActionEvent e) {
+        mainDialog.hideMainWindow();
+    }
 
 }

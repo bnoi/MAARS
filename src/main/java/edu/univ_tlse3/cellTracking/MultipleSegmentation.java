@@ -19,25 +19,25 @@ import java.util.concurrent.Future;
  * Created by tong on 14/04/17.
  */
 public class MultipleSegmentation {
-   public static void main(String[] args) {
-      ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-      String configFileName = "/home/tong/Desktop/test_pr_tong/test_01_3/maars_config.xml";
-      InputStream inStream = null;
-      try {
-         inStream = new FileInputStream(configFileName);
-      } catch (FileNotFoundException e) {
-         IOUtils.printErrorToIJLog(e);
-      }
-      MaarsParameters parameters = new MaarsParameters(inStream);
-      ImagePlus segImg = IJ.openImage(parameters.getSavingPath() + File.separator +"1.tif");
-      segImg.show();
-      MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
-      Future future;
-      future = es_.submit(ms);
-      try {
-         future.get();
-      } catch (InterruptedException | ExecutionException e) {
-         IOUtils.printErrorToIJLog(e);
-      }
-   }
+    public static void main(String[] args) {
+        ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        String configFileName = "/home/tong/Desktop/test_pr_tong/test_01_3/maars_config.xml";
+        InputStream inStream = null;
+        try {
+            inStream = new FileInputStream(configFileName);
+        } catch (FileNotFoundException e) {
+            IOUtils.printErrorToIJLog(e);
+        }
+        MaarsParameters parameters = new MaarsParameters(inStream);
+        ImagePlus segImg = IJ.openImage(parameters.getSavingPath() + File.separator + "1.tif");
+        segImg.show();
+        MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
+        Future future;
+        future = es_.submit(ms);
+        try {
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            IOUtils.printErrorToIJLog(e);
+        }
+    }
 }

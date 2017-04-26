@@ -8,14 +8,19 @@ import org.micromanager.internal.utils.ReportingUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 /**
  * Created by tong on 25/10/16.
- *
  */
-public class SOCVisualizer extends JFrame{
+public class SOCVisualizer extends JFrame {
     private DefaultListModel<Integer> alreadyShownList_ = new DefaultListModel<>();
     private JTextField pathToSoc_;
     private JList<Integer> cellToDisplayList_;
@@ -52,7 +57,7 @@ public class SOCVisualizer extends JFrame{
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int index = cellToDisplayList_.locationToIndex(e.getPoint());
-                    if (index != -1){
+                    if (index != -1) {
                         Object item = alreadyShownList_.getElementAt(index);
                         updateSplitPane(splitPane, setOfCells, (Integer) item);
                     }
@@ -65,13 +70,13 @@ public class SOCVisualizer extends JFrame{
                 super.keyPressed(keyEvent);
                 int index = Integer.MIN_VALUE;
                 if (keyEvent.getKeyCode() == KeyEvent.VK_UP) {
-                    index = cellToDisplayList_.getSelectedIndex()-1;
-                }else if(keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
-                    index = cellToDisplayList_.getSelectedIndex()+1;
-                }else if(keyEvent.getKeyCode() == KeyEvent.VK_ENTER){
+                    index = cellToDisplayList_.getSelectedIndex() - 1;
+                } else if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
+                    index = cellToDisplayList_.getSelectedIndex() + 1;
+                } else if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {
                     index = cellToDisplayList_.getSelectedIndex();
                 }
-                if (index >=0 && index <= cellToDisplayList_.getLastVisibleIndex()) {
+                if (index >= 0 && index <= cellToDisplayList_.getLastVisibleIndex()) {
                     Object item = alreadyShownList_.getElementAt(index);
                     updateSplitPane(splitPane, setOfCells, (Integer) item);
                 }
@@ -90,14 +95,14 @@ public class SOCVisualizer extends JFrame{
         loadSocBut.addActionListener(actionEvent -> {
             try {
                 FileInputStream f_in;
-                if (pathToSoc_.getText().endsWith("SetOfCell.serialize")){
+                if (pathToSoc_.getText().endsWith("SetOfCell.serialize")) {
                     f_in = new FileInputStream(pathToSoc_.getText());
-                }else{
-                    f_in = new FileInputStream(pathToSoc_.getText() + File.separator +"SetOfCell.serialize");
+                } else {
+                    f_in = new FileInputStream(pathToSoc_.getText() + File.separator + "SetOfCell.serialize");
                 }
 
                 ObjectInputStream obj_in =
-                        new ObjectInputStream (f_in);
+                        new ObjectInputStream(f_in);
                 Object obj = obj_in.readObject();
                 if (obj instanceof SetOfCells) {
                     // Cast object to a soc
@@ -136,17 +141,17 @@ public class SOCVisualizer extends JFrame{
         }
     }
 
-    private void updateSplitPane(JSplitPane splitPane, SetOfCells soc, int cellNb){
+    private void updateSplitPane(JSplitPane splitPane, SetOfCells soc, int cellNb) {
         splitPane.remove(1);
         Cell c = soc.getCell(cellNb);
         ChartPanel chartPanel = CellChartPanel.updateCellContent(c);
         chartPanel.setVisible(true);
-        splitPane.add(chartPanel,1);
+        splitPane.add(chartPanel, 1);
         splitPane.updateUI();
         splitPane.revalidate();
     }
 
-    public void cleanUp(){
+    public void cleanUp() {
         alreadyShownList_.clear();
     }
 //    public static void main(String[] args) {

@@ -1,9 +1,8 @@
 import itertools
-import xml.etree.cElementTree as et
-
 import networkx as nx
-import pandas as pd
 import numpy as np
+import pandas as pd
+import xml.etree.cElementTree as et
 
 
 def trackmate_peak_import(trackmate_xml_path, get_tracks=False):
@@ -56,17 +55,17 @@ def trackmate_peak_import(trackmate_xml_path, get_tracks=False):
     trajs = trajs.astype(np.float)
 
     # Apply initial filtering
-    #initial_filter = root.find("Settings").find("InitialSpotFilter")
+    # initial_filter = root.find("Settings").find("InitialSpotFilter")
 
-    #trajs = filter_spots(trajs,
+    # trajs = filter_spots(trajs,
     #                     name=initial_filter.get('feature'),
     #                     value=float(initial_filter.get('value')),
     #                     isabove=True if initial_filter.get('isabove') == 'true' else False)
 
     # Apply filters
-    #spot_filters = root.find("Settings").find("SpotFilterCollection")
+    # spot_filters = root.find("Settings").find("SpotFilterCollection")
 
-    #for spot_filter in spot_filters.findall('Filter'):
+    # for spot_filter in spot_filters.findall('Filter'):
 
     #    trajs = filter_spots(trajs,
     #                         name=spot_filter.get('feature'),
@@ -79,7 +78,8 @@ def trackmate_peak_import(trackmate_xml_path, get_tracks=False):
 
     # Get tracks
     if get_tracks:
-        filtered_track_ids = [int(track.get('TRACK_ID')) for track in root.find('Model').find('FilteredTracks').findall('TrackID')]
+        filtered_track_ids = [int(track.get('TRACK_ID')) for track in
+                              root.find('Model').find('FilteredTracks').findall('TrackID')]
 
         new_trajs = pd.DataFrame()
         label_id = 0
@@ -91,7 +91,8 @@ def trackmate_peak_import(trackmate_xml_path, get_tracks=False):
             track_id = int(track.get("TRACK_ID"))
             if track_id in filtered_track_ids:
 
-                spot_ids = [(edge.get('SPOT_SOURCE_ID'), edge.get('SPOT_TARGET_ID'), edge.get('EDGE_TIME')) for edge in track.findall('Edge')]
+                spot_ids = [(edge.get('SPOT_SOURCE_ID'), edge.get('SPOT_TARGET_ID'), edge.get('EDGE_TIME')) for edge in
+                            track.findall('Edge')]
                 spot_ids = np.array(spot_ids).astype('float')
                 spot_ids = pd.DataFrame(spot_ids, columns=['source', 'target', 'time'])
                 spot_ids = spot_ids.sort_values(by='time')
@@ -118,7 +119,7 @@ def trackmate_peak_import(trackmate_xml_path, get_tracks=False):
                         # Build times vector according to path
                         t = []
                         for i, node_srce in enumerate(path[:-1]):
-                            node_trgt = path[i+1]
+                            node_trgt = path[i + 1]
                             t.append(graph.edge[node_srce][node_trgt]['t'])
 
                         # Will be equal to 1 if going to one time direction

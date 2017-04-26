@@ -10,7 +10,7 @@ import java.io.StringWriter;
  * Created by tongli on 27/12/2016.
  */
 public class IOUtils {
-    public static void printErrorToIJLog(Exception exception){
+    public static void printErrorToIJLog(Exception exception) {
         StringWriter sw = new StringWriter();
         PrintWriter ps = new PrintWriter(sw);
         exception.printStackTrace(ps);
