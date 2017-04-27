@@ -266,93 +266,17 @@ public class SegPombe {
         particleAnalyzer.analyze(binImage);
         System.out.println("Done");
         Integer nbRoi = roiManager.getCount();
+        //todo
+        ArrayList<CellFilter> filters = new ArrayList<>();
+        CellFilter solidityFilter = new CellFilter(ResultsTable.SOLIDITY, solidityThreshold, Double.MAX_VALUE);
+        CellFilter greyValueFilter = new CellFilter(ResultsTable.MEAN, meanGreyValueThreshold, Double.MAX_VALUE);
+        filters.add(solidityFilter);
+        filters.add(greyValueFilter);
         if (!nbRoi.equals(0)) {
-            if (filterAbnormalShape || filtrateWithMeanGrayValue) {
-
-                Roi[] roiArray;
-                if (filtrateWithMeanGrayValue) {
-
-                    System.out.println("Filtering with mean grey value...");
-                    ArrayList<Integer> rowTodelete = new ArrayList<>();
-                    int name = 1;
-                    System.out.println("- reset result table");
-                    resultTable.reset();
-
-                    System.out.println("- get roi as array");
-
-                    roiArray = roiManager.getRoisAsArray();
-                    System.out.println("- select and delete all roi from roi manager");
-
-                    roiManager.runCommand("Select All");
-                    roiManager.runCommand("Delete");
-
-                    System.out.println("- initialize analyser");
-
-                    Analyzer analyzer = new Analyzer(imgCorrTemp,
-                            Measurements.AREA + Measurements.STD_DEV + Measurements.MIN_MAX
-                                    + Measurements.SHAPE_DESCRIPTORS + Measurements.MEAN + Measurements.CENTROID
-                                    + Measurements.PERIMETER + Measurements.ELLIPSE,
-                            resultTable);
-
-                    System.out.println("- analyze each roi and add it to manager if it is wanted");
-                    for (Roi roi : roiArray) {
-                        roi.setImage(imgCorrTemp);
-                        imgCorrTemp.setRoi(roi);
-                        analyzer.measure();
-                    }
-                    imgCorrTemp.deleteRoi();
-
-                    System.out.println("- delete from result table roi unwanted");
-                    for (int i = 0; i < resultTable.getColumn(ResultsTable.MEAN).length; i++) {
-
-                        if (resultTable.getValue("Mean", i) <= meanGreyValueThreshold) {
-                            rowTodelete.add(i);
-                        } else {
-                            roiArray[i].setName("" + name);
-                            roiManager.addRoi(roiArray[i]);
-                            name++;
-                        }
-                    }
-                    deleteRowOfResultTable(rowTodelete);
-                    System.out.println("Filter done.");
-                }
-
-                if (filterAbnormalShape) {
-
-                    System.out.println("Filtering with solidity...");
-                    System.out.println("- get roi as array");
-                    roiArray = roiManager.getRoisAsArray();
-                    System.out.println("- select and delete all roi from roi manager");
-                    roiManager.runCommand("Select All");
-                    roiManager.runCommand("Delete");
-
-                    ArrayList<Integer> rowTodelete = new ArrayList<>();
-                    int name = 1;
-
-                    System.out.println("- delete from result table roi unwanted");
-                    for (int i = 0; i < resultTable.getColumn(ResultsTable.SOLIDITY).length; i++) {
-                        if (resultTable.getValue("Solidity", i) <= solidityThreshold) {
-                            rowTodelete.add(i);
-                        } else {
-                            roiArray[i].setName("" + name);
-                            roiManager.addRoi(roiArray[i]);
-                            name++;
-                        }
-                    }
-
-                    deleteRowOfResultTable(rowTodelete);
-                    System.out.println("Filter done.");
-                }
-            }
+            Classifiers classifiers = new Classifiers(resultTable,imgCorrTemp);
+            classifiers.filterAll(filters);
         } else {
             setRoiDetectedFalse();
-        }
-    }
-
-    private void deleteRowOfResultTable(ArrayList<Integer> rowToDelete) {
-        for (int i = 0; i < rowToDelete.size(); i++) {
-            int row = rowToDelete.get(i) - i;
-            resultTable.deleteRow(row);
         }
     }
 
