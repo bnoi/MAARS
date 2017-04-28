@@ -59,7 +59,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
     private MAARS maars_;
     private MAARSNoAcq maarsNoAcq_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
-    private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private JCheckBox saveParametersChk_;
 
     /**
@@ -404,12 +403,12 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                 saveParameters();
                 setSkipTheRest(false);
                 if (postAnalysisChk_.isSelected()) {
-                    maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, es_, tasksSet_, soc_);
-                    es_.submit(new Thread(maarsNoAcq_));
+                    maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, tasksSet_, soc_);
+                    Executors.callable(new Thread(maarsNoAcq_));
                 } else {
-                    maars_ = new MAARS(mm, mmc, parameters, socVisualizer_, es_, tasksSet_, soc_);
+                    maars_ = new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_);
                     if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                        es_.submit(new Thread(maars_));
+                        Executors.callable(new Thread(maars_));
                     }
                 }
             }
@@ -418,7 +417,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             if (segDialog_ != null) {
                 segDialog_.setVisible(true);
             } else {
-                segDialog_ = new MaarsSegmentationDialog(this, parameters, mm, es_);
+                segDialog_ = new MaarsSegmentationDialog(this, parameters, mm);
             }
 
         } else if (e.getSource() == fluoAnalysisButton) {
