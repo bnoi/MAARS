@@ -377,12 +377,12 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         return socVisualizer;
     }
 
-    private void setSkipTheRest(Boolean skip) {
+    private void setSkipTheRest(Boolean stop) {
         if (maarsNoAcq_ != null) {
-            maarsNoAcq_.skipAllRestFrames = skip;
+            maarsNoAcq_.stop_.set(stop);
         }
         if (maars_ != null) {
-            maars_.skipAllRestFrames = skip;
+            maars_.skipAllRestFrames = stop;
         }
     }
 
@@ -403,12 +403,14 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                 saveParameters();
                 setSkipTheRest(false);
                 if (postAnalysisChk_.isSelected()) {
-                    maarsNoAcq_ = new MAARSNoAcq(parameters, socVisualizer_, tasksSet_, soc_);
-                    Executors.callable(new Thread(maarsNoAcq_));
+                    ExecutorService es = Executors.newSingleThreadExecutor();
+                    es.execute(new MAARSNoAcq(parameters, socVisualizer_, soc_));
+                    es.shutdown();
                 } else {
-                    maars_ = new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_);
                     if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                        Executors.callable(new Thread(maars_));
+                        ExecutorService es = Executors.newSingleThreadExecutor();
+                        es.execute(new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_));
+                        es.shutdown();
                     }
                 }
             }

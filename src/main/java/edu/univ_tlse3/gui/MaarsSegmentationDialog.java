@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Class to create and display a dialog to get parameters for the image
@@ -39,7 +40,6 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
     private JTextField minCellArea;
     private JTextField maxCellArea;
     private Button okBut;
-    private ExecutorService es_;
     private JComboBox<String> configurationCombo_;
     private JComboBox<String> bfChannelCombo_;
 
@@ -47,11 +47,9 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
      * @param maarsMainFrame
      * @param parameters     default parameters (which are going to be displayed)
      * @param mm_
-     * @param es
      */
-    MaarsSegmentationDialog(JFrame maarsMainFrame, final MaarsParameters parameters, final MMStudio mm_, ExecutorService es) {
+    MaarsSegmentationDialog(JFrame maarsMainFrame, final MaarsParameters parameters, final MMStudio mm_) {
         super(maarsMainFrame);
-        es_ = es;
         parameters_ = parameters;
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setModalityType(ModalityType.DOCUMENT_MODAL);
@@ -218,19 +216,19 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
             MaarsParameters parameters_dup = parameters.duplicate();
             parameters_dup.setSavingPath(segDir);
             FileUtils.createFolder(segDir);
+            ImagePlus segImg;
+            ExecutorService es = Executors.newSingleThreadExecutor();
             if (FileUtils.exists(imgPath)) {
-                ImagePlus segImg = IJ.openImage(imgPath);
-                MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
-                es_.submit(ms);
+                segImg = IJ.openImage(imgPath);
             } else {
-                ImagePlus segImg = MAARS_mda.acquireImagePlus(mm_,
+                segImg = MAARS_mda.acquireImagePlus(mm_,
                         "/Users/tongli/Desktop/untitled folder/AcqSettings.txt",
                         segDir, "FLUO");
-
-                // --------------------------segmentation-----------------------------//
-                MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
-                es_.submit(ms);
             }
+            // --------------------------segmentation-----------------------------//
+            MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);
+            es.execute(ms);
+            es.shutdown();
         });
 
         //
