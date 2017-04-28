@@ -38,7 +38,7 @@ public class FluoAnalyzer implements Runnable {
     private Boolean useDynamic_;
 
     /**
-     * @param fluoImage     image to analyze zProjectedFluoImg
+     * @param fluoImage     image zProjected or not
      * @param bfImgCal      bright field image calibration, need it to decide whether or
      *                      not rescale ROI
      * @param soc           the set of cell to analyze

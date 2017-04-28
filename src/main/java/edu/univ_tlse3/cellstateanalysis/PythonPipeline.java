@@ -24,7 +24,7 @@ public class PythonPipeline {
         ArrayList<String> script = new ArrayList<>();
         Boolean changeParam = false;
         String pattern = "if __name__ == '__main__':";
-        String patternForDir = ".*baseDir=.*";
+        String patternForDir = ".*baseDir =.*";
         String patternForChannel = ".*channel =.*";
         String patternForAcqInt = ".*acq_interval =.*";
         String patternForCal = ".*calibration =.*";
