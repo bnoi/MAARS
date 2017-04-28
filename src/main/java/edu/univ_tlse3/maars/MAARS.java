@@ -25,10 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.regex.Pattern;
 
 /**
@@ -46,7 +43,6 @@ public class MAARS implements Runnable {
     private MaarsParameters parameters;
     private SetOfCells soc_;
     private SOCVisualizer socVisualizer_;
-    private ExecutorService es_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
 
     /**
@@ -56,10 +52,9 @@ public class MAARS implements Runnable {
      * @param mmc           CMMCore object (core)
      * @param parameters    MAARS parameters object
      * @param socVisualizer set of cell visualizer
-     * @param es            executer service of MAARS
      */
     public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer,
-                 ExecutorService es, CopyOnWriteArrayList<Map<String, Future>> tasksSet,
+                 CopyOnWriteArrayList<Map<String, Future>> tasksSet,
                  SetOfCells soc) {
         this.mmc = mmc;
         this.parameters = parameters;
@@ -67,7 +62,6 @@ public class MAARS implements Runnable {
         this.mm = mm;
         tasksSet_ = tasksSet;
         socVisualizer_ = socVisualizer;
-        es_ = es;
     }
 
     static void serializeSoc(String pathToFluoDir, SetOfCells soc) {
@@ -202,6 +196,7 @@ public class MAARS implements Runnable {
         }
     }
 
+
     @Override
     public void run() {
         // Start time
@@ -261,12 +256,9 @@ public class MAARS implements Runnable {
 
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
-            Future future = es_.submit(ms);
-            try {
-                future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                IOUtils.printErrorToIJLog(e);
-            }
+            ExecutorService es = Executors.newSingleThreadExecutor();
+            es.execute(ms);
+            es.shutdown();
             parameters.setSavingPath(original_folder);
             if (ms.roiDetected()) {
                 String pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
