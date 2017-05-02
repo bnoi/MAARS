@@ -1,3 +1,5 @@
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.maars.MAARSNoAcq;
@@ -17,11 +19,13 @@ import fiji.plugin.trackmate.tracking.sparselap.SparseLAPTrackerFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
+import org.micromanager.PositionList;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +36,7 @@ import java.util.concurrent.Executors;
  */
 public class GuiFreeRun {
     public static void main(String[] args) {
-        String configFileName = "/Volumes/Macintosh/curioData/102/60x/26-10-1/maars_config.xml";
+        String configFileName = "/home/tong/Desktop/28C_102/maars_config.xml";
         InputStream inStream = null;
         try {
             inStream = new FileInputStream(configFileName);
@@ -40,12 +44,33 @@ public class GuiFreeRun {
             IOUtils.printErrorToIJLog(e);
         }
         MaarsParameters parameters = new MaarsParameters(inStream);
-        SetOfCells soc = new SetOfCells();
-        SOCVisualizer socVisualizer = new SOCVisualizer();
-        socVisualizer.createGUI(soc);
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
-        es.shutdown();
+        byte[] encoded = new byte[0];
+        try {
+            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, Object> map = new Gson().fromJson(new String(encoded, StandardCharsets.UTF_8),
+                new TypeToken<HashMap<String, Object>>() {}.getType());
+
+        System.out.println(((Map)((ArrayList) map.get("channels")).get(0)).get("config"));
+
+
+        PositionList pl = new PositionList();
+        try {
+            pl.load("/home/tong/Desktop/new_mda/PositionList.pos");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(pl.getPosition(0).getX());
+
+//        SetOfCells soc = new SetOfCells();
+//        SOCVisualizer socVisualizer = new SOCVisualizer();
+//        socVisualizer.createGUI(soc);
+//        ExecutorService es = Executors.newSingleThreadExecutor();
+//        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
+//        es.shutdown();
 
 
 //        TmXmlReader reader = new TmXmlReader(new File(
