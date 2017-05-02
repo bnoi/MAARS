@@ -17,7 +17,6 @@
 
     <properties>
         <scijava.jvm.version>1.8</scijava.jvm.version>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
         <project.micromanager.dependencies>
             /Applications/ImageJ
         </project.micromanager.dependencies>
@@ -139,6 +138,22 @@
                         </banClasses>
                     </rules>
                 </configuration>
+            </plugin>
+            <!--TODO : to added parameters' explanation-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration> <!-- add this to disable checking -->
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
