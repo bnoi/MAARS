@@ -614,12 +614,10 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
         ImagePlus img = null;
         if (FileUtils.exists(imgPath)) {
             img = IJ.openImage(imgPath);
-        }
-//      else if(FileUtils.getShortestTiffName(
-//              parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO") != null){
-//         img = IJ.getImage();
-//      }
-        else {
+        } else if(FileUtils.getShortestTiffName(
+                  parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO") != null){
+             img = IJ.getImage();
+        } else {
             img = MAARS_mda.acquireImagePlus(mm,
                     "/Users/tongli/Desktop/untitled folder/AcqSettings_bf.txt",
                     pathToFluoDir, "FLUO");

@@ -103,7 +103,7 @@ public class MAARSNoAcq implements Runnable {
         IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + "_ sort");
         ImagePlus im2 = IJ.getImage();
         ImagePlus concatenatedImg = concatenator.concatenate(im, im2, false);
-        concatenatedImg.setProperty("Info", im.getProperties());
+        concatenatedImg.setProperty("Info", im.getInfoProperty());
         return concatenatedImg;
     }
 
@@ -181,7 +181,8 @@ public class MAARSNoAcq implements Runnable {
         int totalFrame = extractFromOMEmetadata(map, "time").intValue();
 //               totalPosition = (int) ((Map)map.get("IntendedDimensions")).get("position");
 
-        HyperStackConverter.toHyperStack(concatenatedFluoImgs, totalChannel, totalSlice, totalFrame
+        IJ.log("Re-stack image : channel " + totalChannel +", slice " + totalSlice + ", frame " + totalFrame);
+        concatenatedFluoImgs = HyperStackConverter.toHyperStack(concatenatedFluoImgs, totalChannel, totalSlice, totalFrame
                 , "xyzct", "Grayscale");
         ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         for (int i = 1; i <= totalFrame; i++) {
