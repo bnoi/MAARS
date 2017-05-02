@@ -42,7 +42,7 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
      *
      */
     private static final long serialVersionUID = 1L;
-    public static Boolean saveRam_;
+    public static Boolean saveRam_ = false;
     private MMStudio mm;
     private MaarsParameters parameters_;
     private JTextField range;

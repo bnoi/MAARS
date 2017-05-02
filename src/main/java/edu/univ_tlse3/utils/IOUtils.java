@@ -2,9 +2,8 @@ package edu.univ_tlse3.utils;
 
 import ij.IJ;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
+import java.util.Properties;
 
 /**
  * Created by tongli on 27/12/2016.
@@ -21,5 +20,13 @@ public class IOUtils {
             e1.printStackTrace();
         }
         ps.close();
+    }
+
+    public static void writeToFile(String filePath, Properties properties){
+        try (PrintWriter out = new PrintWriter(filePath)) {
+            properties.list(out);
+        } catch (FileNotFoundException e) {
+            IOUtils.printErrorToIJLog(e);
+        }
     }
 }
