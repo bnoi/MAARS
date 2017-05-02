@@ -17,6 +17,8 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
+import org.micromanager.MultiStagePosition;
+import org.micromanager.PositionList;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -213,24 +215,38 @@ public class MAARS implements Runnable {
         Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
 
         // Acquisition path arrangement
-        ExplorationXYPositions explo = new ExplorationXYPositions(mmc, parameters);
+        PositionList pl = new PositionList();
+        try {
+            if (FileUtils.exists(parameters.getPathToPositionList())) {
+                pl.load(parameters.getPathToPositionList());
+            }else{
+                String xyStage = mmc.getXYStageDevice();
+                String zStage = mmc.getFocusDevice();
+                MultiStagePosition currentPos = new MultiStagePosition(xyStage,mm.getCachedXPosition(),mm.getCachedYPosition(),
+                        zStage,mm.getCachedZPosition());
+//                mmc.getXPosition()
+                pl.addPosition(currentPos);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
         //prepare executor for image analysis
-        for (int i = 0; i < explo.length(); i++) {
+        for (int i = 0; i < pl.getNumberOfPositions(); i++) {
             soc_.reset();
             if (skipAllRestFrames) {
                 break;
             }
             try {
-                mm.core().setXYPosition(explo.getX(i), explo.getY(i));
+                mm.core().setXYPosition(pl.getPosition(i).getX(),pl.getPosition(i).getY());
                 mmc.waitForDevice(mmc.getXYStageDevice());
             } catch (Exception e) {
                 IJ.error("Can't set XY stage devie");
                 IOUtils.printErrorToIJLog(e);
 
             }
-            String xPos = String.valueOf(Math.round(explo.getX(i)));
-            String yPos = String.valueOf(Math.round(explo.getY(i)));
+            String xPos = String.valueOf(Math.round(pl.getPosition(i).getX()));
+            String yPos = String.valueOf(Math.round(pl.getPosition(i).getY()));
             IJ.log("Current position : X_" + xPos + " Y_" + yPos);
             String original_folder = FileUtils.convertPath(parameters.getSavingPath());
             String pathToSegDir = FileUtils.convertPath(

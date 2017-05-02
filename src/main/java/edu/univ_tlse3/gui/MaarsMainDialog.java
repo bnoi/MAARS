@@ -34,19 +34,14 @@ import java.util.concurrent.*;
 
 public class MaarsMainDialog extends JFrame implements ActionListener {
 
-    private final JLabel numFieldLabel;
     private final MMStudio mm;
     private final CMMCore mmc;
-    private final double calibration;
     private MaarsParameters parameters;
-    private JButton autofocusButton;
     private JButton okMainDialogButton;
     private JButton showDataVisualizer_;
     private JButton segmButton;
     private JButton fluoAnalysisButton;
     private JFormattedTextField savePathTf;
-    private JFormattedTextField widthTf;
-    private JFormattedTextField heightTf;
     private JFormattedTextField fluoAcqDurationTf;
     private JCheckBox postAnalysisChk_;
     private JRadioButton dynamicOpt;
@@ -86,84 +81,28 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         Dimension minimumSize = new Dimension(maxDialogWidth, maxDialogHeight);
         setMinimumSize(minimumSize);
 
-        // Get number of field to explore
-
-        int defaultXFieldNumber = parameters.getFieldNb(MaarsParameters.X_FIELD_NUMBER);
-        int defaultYFieldNumber = parameters.getFieldNb(MaarsParameters.Y_FIELD_NUMBER);
-
-        // Calculate width and height for each field
-
-        calibration = mm.getCMMCore().getPixelSizeUm();
-        double fieldWidth = mmc.getImageWidth() * calibration;
-        double fieldHeight = mmc.getImageHeight() * calibration;
-
         // Exploration Label
 
-        JPanel explorationPanel = new JPanel(new GridLayout(2, 1));
-        explorationPanel.setBackground(GuiUtils.bgColor);
-        explorationPanel.setBorder(GuiUtils.addPanelTitle("Area to explore"));
-        explorationPanel.setToolTipText("Define width and height of acquisition area");
-        // field width Panel (Label + textfield)
+        JPanel multiPositionPanel = new JPanel(new GridLayout(2, 1));
+        multiPositionPanel.setBackground(GuiUtils.bgColor);
+        multiPositionPanel.setBorder(GuiUtils.addPanelTitle("Path to position list (.pos)"));
 
-        JPanel widthPanel = new JPanel(new GridLayout(1, 0));
-        widthPanel.setBackground(GuiUtils.bgColor);
-        widthPanel.setBorder(GuiUtils.addSecondaryTitle("Width of field : "));
-        widthPanel.setToolTipText("Width of acquisition area");
+        JFormattedTextField posListTf = new JFormattedTextField(String.class);
+        posListTf.setText(parameters.getPathToPositionList());
+        multiPositionPanel.add(posListTf);
 
-        widthTf = new JFormattedTextField(Integer.class);
-        widthTf.setValue((int) FastMath.round(fieldWidth * defaultXFieldNumber));
-        widthTf.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent keyEvent) {
-                super.keyReleased(keyEvent);
-                refreshNumField();
-            }
-        });
-        widthPanel.add(widthTf);
+        JPanel posListActionPanel = new JPanel(new GridLayout(1, 0));
+        final JButton editPositionListButton = new JButton("Generate...");
+        editPositionListButton.addActionListener(e -> mm.showPositionList());
+        posListActionPanel.add(editPositionListButton);
 
-        // field Height Panel (Label + textfield)
-
-        JPanel heightPanel = new JPanel(new GridLayout(1, 0));
-        heightPanel.setBackground(GuiUtils.bgColor);
-        heightPanel.setBorder(GuiUtils.addSecondaryTitle("Height of field : "));
-        heightPanel.setToolTipText("Height of acquisition area");
-
-        heightTf = new JFormattedTextField(Integer.class);
-        heightTf.setValue((int) FastMath.round(fieldHeight * defaultYFieldNumber));
-        heightTf.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent keyEvent) {
-                super.keyReleased(keyEvent);
-                refreshNumField();
-            }
-        });
-        heightPanel.add(heightTf);
-
-        JPanel widHeiJPanel = new JPanel(new GridLayout(1, 2));
-        widHeiJPanel.add(widthPanel);
-        widHeiJPanel.add(heightPanel);
-
-        explorationPanel.add(widHeiJPanel);
-
-        // number of field label
-
-        numFieldLabel = new JLabel("Number of field : " + defaultXFieldNumber * defaultYFieldNumber, JLabel.CENTER);
-        explorationPanel.add(numFieldLabel);
-
+        multiPositionPanel.add(posListActionPanel);
         // analysis parameters label
 
         JPanel analysisParamPanel = new JPanel(new GridLayout(2, 1));
         analysisParamPanel.setBackground(GuiUtils.bgColor);
         analysisParamPanel.setBorder(GuiUtils.addPanelTitle("Analysis parameters"));
         analysisParamPanel.setToolTipText("Set parameters");
-
-        // autofocus button
-
-//      JPanel autoFocusPanel = new JPanel(new GridLayout(1, 0));
-//      autofocusButton = new JButton("Autofocus");
-//      autofocusButton.addActionListener(this);
-//      autofocusButton.setEnabled(false);
-//      autoFocusPanel.add(autofocusButton);
 
         // segmentation button
 
@@ -263,7 +202,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.add(explorationPanel);
+        mainPanel.add(multiPositionPanel);
         mainPanel.add(analysisParamPanel);
         mainPanel.add(strategyPanel);
         mainPanel.add(chkPanel);
@@ -294,39 +233,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
      */
     private MMStudio getMM() {
         return mm;
-    }
-
-    /**
-     * Method to display number of field the program has to scan
-     */
-    private void refreshNumField() {
-        int newWidth;
-        int newHeigth;
-
-        String widthComp = widthTf.getText();
-        String heightComp = heightTf.getText();
-        if (!widthComp.equals("") && !heightComp.equals("")) {
-            newWidth = Integer.valueOf(widthComp);
-            newHeigth = Integer.valueOf(heightComp);
-            double tmpNewWidth = (newWidth + 1) / (calibration * mmc.getImageWidth());
-            double tmpNewHeight = (newHeigth + 1) / (calibration * mmc.getImageHeight());
-            double fractionalPartNewWidth = tmpNewWidth % 1;
-            double fractionalPartNewHeight = tmpNewHeight % 1;
-
-            int newXFieldNumber = (int) FastMath.round(tmpNewWidth - fractionalPartNewWidth);
-            int newYFieldNumber = (int) FastMath.round(tmpNewHeight - fractionalPartNewHeight);
-            int totoalNbField = newXFieldNumber * newYFieldNumber;
-            if (totoalNbField == 0) {
-                numFieldLabel.setForeground(Color.red);
-                numFieldLabel.setText("Number of field : " + totoalNbField);
-            } else {
-                numFieldLabel.setForeground(Color.black);
-                numFieldLabel.setText("Number of field : " + totoalNbField);
-            }
-
-            parameters.setFieldNb(MaarsParameters.X_FIELD_NUMBER, "" + newXFieldNumber);
-            parameters.setFieldNb(MaarsParameters.Y_FIELD_NUMBER, "" + newYFieldNumber);
-        }
     }
 
     /**
@@ -388,30 +294,24 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == autofocusButton) {
-            getMM().showAutofocusDialog();
-        } else if (e.getSource() == okMainDialogButton) {
+        if (e.getSource() == okMainDialogButton) {
             if (socVisualizer_ == null) {
                 socVisualizer_ = createVisualizer();
                 if (parameters.useDynamic()) {
                     socVisualizer_.setVisible(true);
                 }
             }
-            if (Integer.valueOf(widthTf.getText()) * Integer.valueOf(heightTf.getText()) == 0) {
-                IJ.error("Session aborted, 0 field to analyse");
+            saveParameters();
+            setSkipTheRest(false);
+            if (postAnalysisChk_.isSelected()) {
+                ExecutorService es = Executors.newSingleThreadExecutor();
+                es.execute(new MAARSNoAcq(parameters, socVisualizer_, soc_));
+                es.shutdown();
             } else {
-                saveParameters();
-                setSkipTheRest(false);
-                if (postAnalysisChk_.isSelected()) {
+                if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
                     ExecutorService es = Executors.newSingleThreadExecutor();
-                    es.execute(new MAARSNoAcq(parameters, socVisualizer_, soc_));
+                    es.execute(new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_));
                     es.shutdown();
-                } else {
-                    if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                        ExecutorService es = Executors.newSingleThreadExecutor();
-                        es.execute(new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_));
-                        es.shutdown();
-                    }
                 }
             }
         } else if (e.getSource() == segmButton) {
@@ -435,20 +335,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         } else if (e.getSource() == staticOpt) {
             setAnalysisStrategy();
             fluoAcqDurationTf.setEditable(false);
-        } else if (e.getSource() == postAnalysisChk_) {
-            if (postAnalysisChk_.isSelected()) {
-                widthTf.setEnabled(false);
-                heightTf.setEnabled(false);
-                widthTf.setEditable(false);
-                heightTf.setEditable(false);
-                numFieldLabel.setText("Don't worry about this");
-            } else {
-                widthTf.setEnabled(true);
-                heightTf.setEnabled(true);
-                widthTf.setEditable(true);
-                heightTf.setEditable(true);
-                refreshNumField();
-            }
         } else if (e.getSource() == showDataVisualizer_) {
             if (socVisualizer_ == null) {
                 socVisualizer_ = createVisualizer();

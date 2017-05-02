@@ -44,11 +44,8 @@ import java.util.List;
  *    +-----> FILTER_MEAN_GREY_VALUE
  *    +-----> FILTER_SOLIDITY
  *    +-----> MAXIMUM_CELL_AREA
- *    
- * EXPLORATION_PARAMETERS
- *    |
- *    +-----> X_FIELD_NUMBER
- *    +-----> Y_FIELD_NUMBER
+ *
+ * PATH_TO_POSITION_LIST
  *   
  * FLUO_ANALYSIS_PARAMETERS
  *    |
@@ -94,8 +91,7 @@ public class MaarsParameters {
     public static final String STEP = "STEP";
     public static final String SAVE_FLUORESCENT_MOVIES = "SAVE_FLUORESCENT_MOVIES";
     public static final String DYNAMIC = "DYNAMIC";
-    public static final String X_FIELD_NUMBER = "X_FIELD_NUMBER";
-    public static final String Y_FIELD_NUMBER = "Y_FIELD_NUMBER";
+    public static final String PATH_TO_POSITION_LIST = "PATH_TO_POSITION_LIST";
     public static final String MINIMUM_CELL_AREA = "MINIMUM_CELL_AREA";
     public static final String MAXIMUM_CELL_AREA = "MAXIMUM_CELL_AREA";
     public static final String FILTER_MEAN_GREY_VALUE = "FILTER_MEAN_GREY_VALUE";
@@ -127,7 +123,6 @@ public class MaarsParameters {
     static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
     private static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
     private static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
-    private static final String EXPLORATION_PARAMETERS = "EXPLORATION_PARAMETERS";
     private static final String MITOSIS_DETECTION_PARAMETERS = "MITOSIS_DETECTION_PARAMETERS";
     private static final String MINIMUM_DURATION = "MINIMUM_DURATION";
     private static final String DETECTION_CHANNEL = "DETECTION_CHANNEL";
@@ -232,11 +227,10 @@ public class MaarsParameters {
     // Getter
 
     /**
-     * @param xOrY : is a final static string in MaarsParameters
-     * @return : the value of X or Y field
+     * @return
      */
-    public int getFieldNb(final String xOrY) {
-        return Integer.parseInt(root.getChild(EXPLORATION_PARAMETERS).getChildText(xOrY));
+    public String getPathToPositionList() {
+        return root.getChildText(PATH_TO_POSITION_LIST);
     }
 
     /**
@@ -495,13 +489,11 @@ public class MaarsParameters {
     }
 
     /**
-     * update value of x or y field number of exloration
      *
-     * @param xOrY  dimension to be updated
-     * @param value new value
+     * @param path to position list file
      */
-    public void setFieldNb(final String xOrY, String value) {
-        root.getChild(EXPLORATION_PARAMETERS).getChild(xOrY).setText(value);
+    public void setFieldNb(String path) {
+        root.getChild(PATH_TO_POSITION_LIST).setText(path);
     }
 
     /**
