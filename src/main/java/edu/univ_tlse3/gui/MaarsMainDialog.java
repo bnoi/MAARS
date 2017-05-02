@@ -12,15 +12,12 @@ import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
-import org.apache.commons.math3.util.FastMath;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;

@@ -6,7 +6,7 @@ import edu.univ_tlse3.cellstateanalysis.SpotSetAnalyzor;
 import fiji.plugin.trackmate.Spot;
 import ij.gui.Line;
 import ij.measure.Calibration;
-import org.apache.commons.math3.util.FastMath;
+import org.apache.commons.math4.util.FastMath;
 
 import java.util.ArrayList;
 

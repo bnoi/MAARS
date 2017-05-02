@@ -17,11 +17,8 @@
 
     <properties>
         <scijava.jvm.version>1.8</scijava.jvm.version>
-        <project.micromanager.dependencies>
-            /Applications/ImageJ
-        </project.micromanager.dependencies>
         <project.micromanager.version>
-            ref_MM_dependency
+            2.0.0.2
         </project.micromanager.version>
     </properties>
 
@@ -56,35 +53,27 @@
             <groupId>org.micromanager</groupId>
             <artifactId>MMJ_</artifactId>
             <version>${project.micromanager.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.micromanager.dependencies}/plugins/Micro-Manager/MMJ_.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>org.micromanager</groupId>
             <artifactId>MMCoreJ</artifactId>
             <version>${project.micromanager.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.micromanager.dependencies}/plugins/Micro-Manager/MMCoreJ.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>org.micromanager</groupId>
             <artifactId>MMAcqEngine</artifactId>
             <version>${project.micromanager.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.micromanager.dependencies}/plugins/Micro-Manager/MMAcqEngine.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache</groupId>
-            <artifactId>commons</artifactId>
-            <version>${project.micromanager.version}</version>
-            <scope>system</scope>
-            <systemPath>${project.micromanager.dependencies}/plugins/Micro-Manager/commons-math3-3.4.1.jar</systemPath>
         </dependency>
 
         <!--MAARS specific dependencies -->
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math4</artifactId>
+            <version>4.0-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.mail</groupId>
@@ -113,6 +102,11 @@
         <repository>
             <id>imagej.public</id>
             <url>http://maven.imagej.net/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>in-project</id>
+            <name>In Project Repo</name>
+            <url>file://${project.basedir}/repo</url>
         </repository>
     </repositories>
 
