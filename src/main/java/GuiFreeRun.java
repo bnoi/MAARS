@@ -1,5 +1,3 @@
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.maars.MAARSNoAcq;
@@ -19,11 +17,17 @@ import fiji.plugin.trackmate.tracking.sparselap.SparseLAPTrackerFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
+import jdk.nashorn.internal.parser.JSONParser;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
 import org.micromanager.PositionList;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,34 +40,79 @@ import java.util.concurrent.Executors;
  */
 public class GuiFreeRun {
     public static void main(String[] args) {
-        String configFileName = "/home/tong/Desktop/28C_102/maars_config.xml";
-        InputStream inStream = null;
+        JSONObject jsonObject = null;
         try {
-            inStream = new FileInputStream(configFileName);
-        } catch (FileNotFoundException e) {
-            IOUtils.printErrorToIJLog(e);
-        }
-        MaarsParameters parameters = new MaarsParameters(inStream);
-        byte[] encoded = new byte[0];
-        try {
-            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
-        } catch (IOException e) {
+            jsonObject = new JSONObject(IJ.openImage("/Volumes/Macintosh/curioData/new_format/27C_3_MMStack_102_1.ome.tif",1).getInfoProperty());
+        } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        Map<String, Object> map = new Gson().fromJson(new String(encoded, StandardCharsets.UTF_8),
-                new TypeToken<HashMap<String, Object>>() {}.getType());
-
-        System.out.println(((Map)((ArrayList) map.get("channels")).get(0)).get("config"));
-
-
-        PositionList pl = new PositionList();
+        ArrayList<String> arrayChannels = new ArrayList<>();
         try {
-            pl.load("/home/tong/Desktop/new_mda/PositionList.pos");
-        } catch (Exception e) {
+
+            for (int i=0; i<jsonObject.getJSONArray("ChNames").length(); i++){
+                arrayChannels.add(jsonObject.getJSONArray("ChNames").getString(i));
+            }
+        } catch (JSONException e) {
             e.printStackTrace();
         }
-        System.out.println(pl.getPosition(0).getX());
+        System.out.println(arrayChannels);
+//        ArrayList<String> arrayChannels = (ArrayList) map.get("ChNames");
+        int totalChannel = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "channel");
+        int totalSlice = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "z");
+        int totalFrame = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "time");
+//               totalPosition = (int) ((Map)map.get("IntendedDimensions")).get("position");
+
+        IJ.log("Re-stack image : channel " + totalChannel +", slice " + totalSlice + ", frame " + totalFrame);
+
+//        String jsonTxt = null;
+//        try {
+//            InputStream is = new FileInputStream("/Volumes/Macintosh/cloudDrives/Dropbox/AcqSettings_fluo.txt");
+//            jsonTxt = org.apache.commons.io.IOUtils.toString(is);
+//            System.out.println(jsonTxt);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        JSONObject jsonObject = null;
+//        try {
+//            jsonObject = new JSONObject(jsonTxt);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            System.out.println(((JSONObject)((JSONArray)jsonObject.get("channels")).get(0)).get("config"));
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+
+//        String configFileName = "/home/tong/Desktop/28C_102/maars_config.xml";
+//        InputStream inStream = null;
+//        try {
+//            inStream = new FileInputStream(configFileName);
+//        } catch (FileNotFoundException e) {
+//            IOUtils.printErrorToIJLog(e);
+//        }
+//        MaarsParameters parameters = new MaarsParameters(inStream);
+//        byte[] encoded = new byte[0];
+//        try {
+//            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        Map<String, Object> map = new Gson().fromJson(new String(encoded, StandardCharsets.UTF_8),
+//                new TypeToken<HashMap<String, Object>>() {}.getType());
+//
+//        System.out.println(((Map)((ArrayList) map.get("channels")).get(0)).get("config"));
+//
+//
+//        PositionList pl = new PositionList();
+//        try {
+//            pl.load("/home/tong/Desktop/new_mda/PositionList.pos");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println(pl.getPosition(0).getX());
 
 //        SetOfCells soc = new SetOfCells();
 //        SOCVisualizer socVisualizer = new SOCVisualizer();

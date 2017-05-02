@@ -1,7 +1,5 @@
 package edu.univ_tlse3.maars;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
@@ -19,6 +17,8 @@ import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.plugin.HyperStackConverter;
 import ij.plugin.frame.RoiManager;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -90,8 +90,13 @@ public class MAARSNoAcq implements Runnable {
         return imgToSave;
     }
 
-    public static Double extractFromOMEmetadata(Map<String, Object> omeData, String parameter){
-        return (Double) ((Map) omeData.get("IntendedDimensions")).get(parameter);
+    public static int extractFromOMEmetadata(JSONObject omeData, String parameter){
+        try {
+            return ((JSONObject)omeData.get("IntendedDimensions")).getInt(parameter);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private static ImagePlus loadImg(String pathToFluoImgsDir, String fluoTiffName){
@@ -172,13 +177,29 @@ public class MAARSNoAcq implements Runnable {
                                                CopyOnWriteArrayList<Map<String, Future>> tasksSet, AtomicBoolean stop){
         ImagePlus concatenatedFluoImgs = loadImg(pathToFluoImgsDir, fluoTiffName);
 
-        Map<String, Object> map = new Gson().fromJson(concatenatedFluoImgs.getInfoProperty(),
-                new TypeToken<HashMap<String, Object>>() {}.getType());
+//        Map<String, Object> map = new Gson().fromJson(concatenatedFluoImgs.getInfoProperty(),
+//                new TypeToken<HashMap<String, Object>>() {}.getType());
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(concatenatedFluoImgs.getInfoProperty());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        ArrayList<String> arrayChannels = (ArrayList) map.get("ChNames");
-        int totalChannel = extractFromOMEmetadata(map, "channel").intValue();
-        int totalSlice = extractFromOMEmetadata(map, "z").intValue();
-        int totalFrame = extractFromOMEmetadata(map, "time").intValue();
+        ArrayList<String> arrayChannels = new ArrayList<>();
+        try {
+
+            for (int i=0; i<jsonObject.getJSONArray("ChNames").length(); i++){
+                arrayChannels.add(jsonObject.getJSONArray("ChNames").getString(i));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+//        ArrayList<String> arrayChannels = (ArrayList) map.get("ChNames");
+        int totalChannel = extractFromOMEmetadata(jsonObject, "channel");
+        int totalSlice = extractFromOMEmetadata(jsonObject, "z");
+        int totalFrame = extractFromOMEmetadata(jsonObject, "time");
 //               totalPosition = (int) ((Map)map.get("IntendedDimensions")).get("position");
 
         IJ.log("Re-stack image : channel " + totalChannel +", slice " + totalSlice + ", frame " + totalFrame);
