@@ -1,3 +1,5 @@
+TravisCI [![Build Status](https://travis-ci.org/bnoi/MAARS.svg?branch=master)](https://travis-ci.org/bnoi/MAARS)
+
 # Mitotic Analysing And Recording System
 
 MAARS (Mitotic Analysing And Recording System) is a Micro-Manager plugin designed to automatically record and analyze fission yeast cells in mitosis, either with an on-the-fly manner or an off-line manner.
