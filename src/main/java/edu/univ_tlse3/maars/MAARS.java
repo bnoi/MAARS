@@ -2,6 +2,7 @@ package edu.univ_tlse3.maars;
 
 import edu.univ_tlse3.acquisition.MAARS_mda;
 import edu.univ_tlse3.cellstateanalysis.Cell;
+import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
@@ -46,6 +47,8 @@ public class MAARS implements Runnable {
     private SetOfCells soc_;
     private SOCVisualizer socVisualizer_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
+    private static String BF = "BF";
+    private static String FLUO = "FLUO";
 
     /**
      * Constructor
@@ -224,7 +227,6 @@ public class MAARS implements Runnable {
                 String zStage = mmc.getFocusDevice();
                 MultiStagePosition currentPos = new MultiStagePosition(xyStage,mm.getCachedXPosition(),mm.getCachedYPosition(),
                         zStage,mm.getCachedZPosition());
-//                mmc.getXPosition()
                 pl.addPosition(currentPos);
             }
         } catch (Exception e) {
@@ -247,48 +249,40 @@ public class MAARS implements Runnable {
             }
             String xPos = String.valueOf(Math.round(pl.getPosition(i).getX()));
             String yPos = String.valueOf(Math.round(pl.getPosition(i).getY()));
-            IJ.log("Current position : X_" + xPos + " Y_" + yPos);
-            String original_folder = FileUtils.convertPath(parameters.getSavingPath());
-            String pathToSegDir = FileUtils.convertPath(
-                    original_folder + File.separator + "X" + xPos + "_Y" + yPos);
-            //update saving path
-            parameters.setSavingPath(pathToSegDir);
-//            autofocus(mm, mmc);
+            IJ.log("Current position : X : " + xPos + " Y : " + yPos);
 
+            String savingPath = FileUtils.convertPath(parameters.getSavingPath());
+            //update saving path
+            parameters.setSavingPath(savingPath + File.separator +BF + "_1");
             //acquisition
             ImagePlus segImg = MAARS_mda.acquireImagePlus(mm,
-                    "/Volumes/Macintosh/curioData/AcqSettings_bf.txt",
-                    pathToSegDir, "BF");
-//
-//            SegAcqSetting segAcq = new SegAcqSetting(parameters);
-//            ArrayList<ChannelSpec> channelSpecs = segAcq.configChannels();
-//            SequenceSettings acqSettings = segAcq.configAcqSettings(channelSpecs);
-//            FileUtils.createFolder(acqSettings.root);
-//
-//            IJ.log("Acquire bright field image...");
-//            AcquisitionWrapperEngine acqEng = segAcq.buildSegAcqEngine(acqSettings, mm);
-//            List<Image>  imageList = AcqLauncher.acquire(acqEng);
-//            ImagePlus segImg = ImgUtils.convertImages2Imp(imageList, acqEng.getChannels().get(0).config);
+                    parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
+                    savingPath, BF);
 
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
             ExecutorService es = Executors.newSingleThreadExecutor();
             es.execute(ms);
             es.shutdown();
-            parameters.setSavingPath(original_folder);
-            if (ms.roiDetected()) {
-                String pathToFluoDir = pathToSegDir + "_FLUO" + File.separator;
+            try {
+                es.awaitTermination(60,TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            parameters.setSavingPath(savingPath);
+//            if (ms.roiDetected()) {
+            if (true) {
+                String pathToFluoDir = savingPath + File.separator +FLUO + "_1";
                 parameters.setSavingPath(pathToFluoDir);
-                FileUtils.createFolder(pathToFluoDir);
                 // from Roi initialize a set of cell
                 soc_.reset();
-                soc_.loadCells(pathToSegDir);
+                soc_.loadCells(savingPath + File.separator +BF + "_1");
                 soc_.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 
                 // ----------------start acquisition and analysis --------//
 //                FluoAcqSetting fluoAcq = new FluoAcqSetting(parameters);
                 try {
-                    PrintStream ps = new PrintStream(pathToSegDir + File.separator + "CellStateAnalysis.LOG");
+                    PrintStream ps = new PrintStream(savingPath + File.separator +BF + "_1" + File.separator + "CellStateAnalysis.LOG");
                     curr_err = System.err;
                     curr_out = System.err;
                     System.setOut(ps);
@@ -299,6 +293,7 @@ public class MAARS implements Runnable {
                 int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
 
+                ExecutorService es1 = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                 if (parameters.useDynamic()) {
                     // being dynamic acquisition
                     double startTime = System.currentTimeMillis();
@@ -307,11 +302,28 @@ public class MAARS implements Runnable {
                     while (System.currentTimeMillis() - startTime <= timeLimit) {
                         double beginAcq = System.currentTimeMillis();
                         Map<String, Future> channelsInFrame = new HashMap<>();
+                        if (frame != 0){
+                            MAARS_mda.acquireImagePlus(mm,
+                                    parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
+                                    savingPath, BF);
+                            parameters.setSavingPath(savingPath + File.separator + BF+"_"+String.valueOf(frame+1));
+                            ms = new MaarsSegmentation(parameters, segImg);
+                            ExecutorService es2 = Executors.newSingleThreadExecutor();
+                            es2.execute(ms);
+                            es2.shutdown();
+                            try {
+                                es2.awaitTermination(60,TimeUnit.SECONDS);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
                         ImagePlus fluoImage = MAARS_mda.acquireImagePlus(mm,
-                                "/Volumes/Macintosh/curioData/AcqSettings_fluo.txt",
-                                pathToSegDir, "FLUO");
+                                parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
+                                savingPath, FLUO);
+                        //TODO
 //                        if (do_analysis) {
-//                            future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
+//                            Future future = es1.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
 //                                    Integer.parseInt(parameters.getChMaxNbSpot(channel)),
 //                                    Double.parseDouble(parameters.getChSpotRaius(channel)),
 //                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
@@ -341,8 +353,8 @@ public class MAARS implements Runnable {
                     for (String channel : arrayChannels) {
                         Map<String, Future> channelsInFrame = new HashMap<>();
                         ImagePlus fluoImage = MAARS_mda.acquireImagePlus(mm,
-                                "/Volumes/Macintosh/curioData/AcqSettings_fluo.txt",
-                                pathToSegDir, "FLUO");
+                                parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
+                                savingPath, FLUO);
 //                        if (do_analysis) {
 //                            future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
 //                                    Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -357,6 +369,12 @@ public class MAARS implements Runnable {
                         }
                     }
                 }
+                es1.shutdown();
+                try {
+                    es1.awaitTermination(60,TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
                 if (!skipAllRestFrames) {
                     RoiManager.getInstance().reset();
@@ -368,16 +386,16 @@ public class MAARS implements Runnable {
                         MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels);
                         if (parameters.useDynamic()) {
                             if (IJ.isWindows()) {
-                                pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
+                                savingPath = FileUtils.convertPathToLinuxType(savingPath + File.separator +BF + "_1");
                             }
-                            MAARS.analyzeMitosisDynamic(soc_, parameters, pathToSegDir, true);
+                            MAARS.analyzeMitosisDynamic(soc_, parameters, savingPath, true);
                         }
                         ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                                 + " sec for writing results");
                         mergedImg = null;
                     } else if (soc_.size() == 0) {
                         try {
-                            org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
+                            org.apache.commons.io.FileUtils.deleteDirectory(new File(savingPath + File.separator +BF + "_1"));
                         } catch (IOException e) {
                             IOUtils.printErrorToIJLog(e);
                         }

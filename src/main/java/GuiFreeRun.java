@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.micromanager.PositionList;
 
+import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

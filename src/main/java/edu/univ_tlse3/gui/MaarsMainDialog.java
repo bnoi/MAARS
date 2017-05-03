@@ -15,6 +15,7 @@ import mmcorej.CMMCore;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,7 +41,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
     private JButton fluoAnalysisButton;
     private JFormattedTextField savePathTf;
     private JFormattedTextField fluoAcqDurationTf;
-    private JCheckBox postAnalysisChk_;
     private JRadioButton dynamicOpt;
     private JRadioButton staticOpt;
     private MaarsFluoAnalysisDialog fluoDialog_;
@@ -51,7 +51,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
     private MAARS maars_;
     private MAARSNoAcq maarsNoAcq_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
-    private JCheckBox saveParametersChk_;
 
     /**
      * Constructor
@@ -82,7 +81,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
         JPanel multiPositionPanel = new JPanel(new GridLayout(2, 1));
         multiPositionPanel.setBackground(GuiUtils.bgColor);
-        multiPositionPanel.setBorder(GuiUtils.addPanelTitle("Path to position list (.pos)"));
+        multiPositionPanel.setBorder(GuiUtils.addPanelTitle("Path to position list (.pos) or empty"));
 
         JFormattedTextField posListTf = new JFormattedTextField(String.class);
         posListTf.setText(parameters.getPathToPositionList());
@@ -93,29 +92,114 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         editPositionListButton.addActionListener(e -> mm.showPositionList());
         posListActionPanel.add(editPositionListButton);
 
-        multiPositionPanel.add(posListActionPanel);
-        // analysis parameters label
+        final JButton chosePositionListButton = new JButton("Find...");
+        chosePositionListButton.addActionListener(actionEvent -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new File("."));
+            chooser.setDialogTitle("choosertitle");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            FileNameExtensionFilter posListFilter = new FileNameExtensionFilter(
+                    "MM position list files (.pos) ", "pos");
+            chooser.setFileFilter(posListFilter);
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                posListTf.setText(String.valueOf(chooser.getSelectedFile()));
+                parameters.setPathToPositionList(posListTf.getText());
+                saveParameters();
+            } else {
+                System.out.println("No Selection ");
+            }
+        });
+        posListActionPanel.add(chosePositionListButton);
 
-        JPanel analysisParamPanel = new JPanel(new GridLayout(2, 1));
-        analysisParamPanel.setBackground(GuiUtils.bgColor);
-        analysisParamPanel.setBorder(GuiUtils.addPanelTitle("Analysis parameters"));
-        analysisParamPanel.setToolTipText("Set parameters");
+        multiPositionPanel.add(posListActionPanel);
+
+        // segmentation acq/analysis parameters Panel
+
+        JPanel segAcqAnaParamPanel = new JPanel(new GridLayout(2, 1));
+        segAcqAnaParamPanel.setBackground(GuiUtils.bgColor);
+        segAcqAnaParamPanel.setBorder(GuiUtils.addPanelTitle("Segmentation Acq / Analysis"));
+
+        JFormattedTextField pathToBfAcqSettingTf = new JFormattedTextField(String.class);
+        pathToBfAcqSettingTf.setText(parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING));
+        segAcqAnaParamPanel.add(pathToBfAcqSettingTf);
 
         // segmentation button
 
-        JPanel segPanel = new JPanel(new GridLayout(1, 0));
-        segmButton = new JButton("Segmentation");
+        JPanel segPanel = new JPanel(new GridLayout(0, 3));
+
+        final JButton editBFAcqSettingButton = new JButton("Generate...");
+        editBFAcqSettingButton.addActionListener(e -> mm.openAcqControlDialog());
+        segPanel.add(editBFAcqSettingButton);
+
+        segmButton = new JButton("Parameters");
         segmButton.addActionListener(this);
         segPanel.add(segmButton);
-        analysisParamPanel.add(segPanel);
+
+        final JButton choseBFAcqSettingButton = new JButton("Find...");
+        choseBFAcqSettingButton.addActionListener(actionEvent -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new File("."));
+            chooser.setDialogTitle("choosertitle");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            FileNameExtensionFilter posListFilter = new FileNameExtensionFilter(
+                    "MM acquisition setting file ", "txt");
+            chooser.setFileFilter(posListFilter);
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                pathToBfAcqSettingTf.setText(String.valueOf(chooser.getSelectedFile()));
+                parameters.setSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING, pathToBfAcqSettingTf.getText());
+                saveParameters();
+            } else {
+                System.out.println("No Selection ");
+            }
+        });
+        segPanel.add(choseBFAcqSettingButton);
+        segAcqAnaParamPanel.add(segPanel);
+
+        // fluo acq/analysis parameters Panel
+
+        JPanel fluoAcqAnaParamPanel = new JPanel(new GridLayout(2, 1));
+        fluoAcqAnaParamPanel.setBackground(GuiUtils.bgColor);
+        fluoAcqAnaParamPanel.setBorder(GuiUtils.addPanelTitle("Fluo Acq / Analysis"));
+
+        JFormattedTextField pathToFluoAcqSettingTf = new JFormattedTextField(String.class);
+        pathToFluoAcqSettingTf.setText(parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING));
+        fluoAcqAnaParamPanel.add(pathToFluoAcqSettingTf);
 
         // fluo analysis button
 
-        JPanel fluoAnalysisPanel = new JPanel(new GridLayout(1, 0));
-        fluoAnalysisButton = new JButton("Fluorescence analysis");
+        JPanel fluoPanel = new JPanel(new GridLayout(0, 3));
+
+        final JButton editFluoAcqSettingButton = new JButton("Generate...");
+        editFluoAcqSettingButton.addActionListener(e -> mm.openAcqControlDialog());
+        fluoPanel.add(editFluoAcqSettingButton);
+
+        fluoAnalysisButton = new JButton("Parameters");
         fluoAnalysisButton.addActionListener(this);
-        fluoAnalysisPanel.add(fluoAnalysisButton);
-        analysisParamPanel.add(fluoAnalysisPanel);
+        fluoPanel.add(fluoAnalysisButton);
+
+        final JButton choseFluoAcqSettingButton = new JButton("Find...");
+        choseFluoAcqSettingButton.addActionListener(actionEvent -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new File("."));
+            chooser.setDialogTitle("choosertitle");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setAcceptAllFileFilterUsed(false);
+            FileNameExtensionFilter posListFilter = new FileNameExtensionFilter(
+                    "MM acquisition setting file ", "txt");
+            chooser.setFileFilter(posListFilter);
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                pathToFluoAcqSettingTf.setText(String.valueOf(chooser.getSelectedFile()));
+                parameters.setFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING, pathToFluoAcqSettingTf.getText());
+                saveParameters();
+            } else {
+                System.out.println("No Selection ");
+            }
+        });
+        fluoPanel.add(choseFluoAcqSettingButton);
+
+        fluoAcqAnaParamPanel.add(fluoPanel);
 
         // strategy panel (2 radio button + 1 textfield + 1 label)
 
@@ -143,19 +227,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         strategyPanel.add(fluoAcqDurationTf);
         strategyPanel.add(new JLabel("min", SwingConstants.CENTER));
         strategyPanel.setBackground(GuiUtils.bgColor);
-
-        // checkbox : update or not MAARS parameters
-
-        JPanel chkPanel = new JPanel(new GridLayout(1, 0));
-        chkPanel.setBackground(GuiUtils.bgColor);
-        chkPanel.setBorder(GuiUtils.addPanelTitle("Options"));
-        chkPanel.setToolTipText("check post analysis if without microscope, check parameter if don't want to replace last parameters");
-
-        saveParametersChk_ = new JCheckBox("Save parameters", true);
-        postAnalysisChk_ = new JCheckBox("Post analysis", false);
-        postAnalysisChk_.addActionListener(this);
-        chkPanel.add(postAnalysisChk_);
-        chkPanel.add(saveParametersChk_);
 
         // Saving path Panel
 
@@ -200,9 +271,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.add(multiPositionPanel);
-        mainPanel.add(analysisParamPanel);
+        mainPanel.add(segAcqAnaParamPanel);
+        mainPanel.add(fluoAcqAnaParamPanel);
         mainPanel.add(strategyPanel);
-        mainPanel.add(chkPanel);
         mainPanel.add(savePathPanel);
         mainPanel.add(okPanel);
         mainPanel.add(stopAndVisualizerButtonPanel_);
@@ -243,9 +314,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
         }
         try {
-            if (saveParametersChk_.isSelected()) {
-                parameters.save();
-            }
             if (FileUtils.exists(parameters.getSavingPath())) {
                 parameters.save(parameters.getSavingPath());
             }
@@ -300,16 +368,10 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             }
             saveParameters();
             setSkipTheRest(false);
-            if (postAnalysisChk_.isSelected()) {
+            if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
                 ExecutorService es = Executors.newSingleThreadExecutor();
-                es.execute(new MAARSNoAcq(parameters, socVisualizer_, soc_));
+                es.execute(new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_));
                 es.shutdown();
-            } else {
-                if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                    ExecutorService es = Executors.newSingleThreadExecutor();
-                    es.execute(new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_));
-                    es.shutdown();
-                }
             }
         } else if (e.getSource() == segmButton) {
             saveParameters();

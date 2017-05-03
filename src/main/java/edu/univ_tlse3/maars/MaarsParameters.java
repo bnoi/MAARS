@@ -30,6 +30,7 @@ import java.util.List;
  * CALIBRATION
  * SEGMENTATION_PARAMETERS
  *    |
+ *    +-----> PATH_TO_BF_ACQ_SETTING
  *    +-----> SKIP
  *    +-----> CHANNEL
  *    +-----> NEW_MAX_WIDTH_FOR_CHANGE_SCALE
@@ -49,6 +50,7 @@ import java.util.List;
  *   
  * FLUO_ANALYSIS_PARAMETERS
  *    |
+ *    +-----> PATH_TO_FLUO_ACQ_SETTING
  *    +-----> FRAME_NUMBER
  *    +-----> RANGE_SIZE_FOR_MOVIE
  *    +-----> STEP
@@ -118,6 +120,8 @@ public class MaarsParameters {
     public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
     public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
     public static final String PROJECTED = "PROJECTED";
+    public static final String PATH_TO_BF_ACQ_SETTING = "PATH_TO_BF_ACQ_SETTING";
+    public static final String PATH_TO_FLUO_ACQ_SETTING = "PATH_TO_FLUO_ACQ_SETTING";
     static final String CELL_SIZE = "CELL_SIZE";
     static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
     static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
@@ -139,6 +143,7 @@ public class MaarsParameters {
     private static final String CHANNEL_GROUP = "CHANNEL_GROUP";
     private static final String SKIP = "SKIP";
     private static final String CALIBRATION = "CALIBRATION";
+
     private Document doc;
     private Element root;
     private String[] allColors = {"GREEN", "CYAN", "RED", "BLUE", "WHITE", "GRAY"};
@@ -404,6 +409,13 @@ public class MaarsParameters {
     }
 
     //////////// Setters
+
+    /**
+     * @return
+     */
+    public void setPathToPositionList(String pathToPositionList) {
+        root.getChild(PATH_TO_POSITION_LIST).setText(pathToPositionList);
+    }
 
     /**
      *
