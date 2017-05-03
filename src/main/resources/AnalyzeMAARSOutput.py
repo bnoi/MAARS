@@ -449,7 +449,7 @@ if __name__ == '__main__':
     tasks = []
     for cellNb in cellNbs:
         tasks.append(
-            (cellRois, calibration, acq_interval, features_dir, cellNb, -11, minSegLen, channel, mitosisFigDir))
+            (cellRois, calibration, acq_interval, features_dir, cellNb, -4, minSegLen, channel, mitosisFigDir))
     results = [pool.apply_async(getMitoticElongation, t) for t in tasks]
     anaphase_elongations = dict()
     for result in results:
