@@ -17,6 +17,7 @@ import fiji.plugin.trackmate.tracking.sparselap.SparseLAPTrackerFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.plugin.Concatenator;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,29 +41,32 @@ import java.util.concurrent.Executors;
  */
 public class GuiFreeRun {
     public static void main(String[] args) {
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(IJ.openImage("/Volumes/Macintosh/curioData/new_format/27C_3_MMStack_102_1.ome.tif",1).getInfoProperty());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        ArrayList<String> arrayChannels = new ArrayList<>();
-        try {
 
-            for (int i=0; i<jsonObject.getJSONArray("ChNames").length(); i++){
-                arrayChannels.add(jsonObject.getJSONArray("ChNames").getString(i));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        System.out.println(arrayChannels);
-//        ArrayList<String> arrayChannels = (ArrayList) map.get("ChNames");
-        int totalChannel = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "channel");
-        int totalSlice = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "z");
-        int totalFrame = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "time");
-//               totalPosition = (int) ((Map)map.get("IntendedDimensions")).get("position");
+//        concatenatedImg.setProperty("Info", im.getInfoProperty());
 
-        IJ.log("Re-stack image : channel " + totalChannel +", slice " + totalSlice + ", frame " + totalFrame);
+//        JSONObject jsonObject = null;
+//        try {
+//            jsonObject = new JSONObject(IJ.openImage("/Volumes/Macintosh/curioData/new_format/27C_3_MMStack_102_1.ome.tif",1).getInfoProperty());
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        ArrayList<String> arrayChannels = new ArrayList<>();
+//        try {
+//
+//            for (int i=0; i<jsonObject.getJSONArray("ChNames").length(); i++){
+//                arrayChannels.add(jsonObject.getJSONArray("ChNames").getString(i));
+//            }
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println(arrayChannels);
+////        ArrayList<String> arrayChannels = (ArrayList) map.get("ChNames");
+//        int totalChannel = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "channel");
+//        int totalSlice = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "z");
+//        int totalFrame = MAARSNoAcq.extractFromOMEmetadata(jsonObject, "time");
+////               totalPosition = (int) ((Map)map.get("IntendedDimensions")).get("position");
+//
+//        IJ.log("Re-stack image : channel " + totalChannel +", slice " + totalSlice + ", frame " + totalFrame);
 
 //        String jsonTxt = null;
 //        try {

@@ -24,9 +24,11 @@ public class IOUtils {
 
     public static void writeToFile(String filePath, Properties properties){
         try (PrintWriter out = new PrintWriter(filePath)) {
-            properties.list(out);
+            properties.store(out,"");
         } catch (FileNotFoundException e) {
             IOUtils.printErrorToIJLog(e);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

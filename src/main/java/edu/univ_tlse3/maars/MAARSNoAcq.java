@@ -100,16 +100,17 @@ public class MAARSNoAcq implements Runnable {
     }
 
     private static ImagePlus loadImg(String pathToFluoImgsDir, String fluoTiffName){
-        Concatenator concatenator = new Concatenator();
-        concatenator.setIm5D(true);
-        ImagePlus im = IJ.openImage(pathToFluoImgsDir + File.separator + fluoTiffName);
+        IJ.run("TIFF Virtual Stack...","open="+pathToFluoImgsDir + File.separator + fluoTiffName);
+        ImagePlus im = IJ.getImage();
+        String infoProperties = im.getInfoProperty();
         IOUtils.writeToFile(pathToFluoImgsDir + File.separator + "metadata.txt", im.getProperties());
+        im.close();
         String tifNameBase = fluoTiffName.split("\\.", -1)[0];
-        IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + "_ sort");
+        IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + " sort");
         ImagePlus im2 = IJ.getImage();
-        ImagePlus concatenatedImg = concatenator.concatenate(im, im2, false);
-        concatenatedImg.setProperty("Info", im.getInfoProperty());
-        return concatenatedImg;
+        im2.hide();
+        im2.setProperty("Info", infoProperties);
+        return im2;
     }
 
     private static ImagePlus processSplitImgs(String pathToFluoImgsDir, MaarsParameters parameters, SetOfCells soc,
