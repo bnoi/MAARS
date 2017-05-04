@@ -87,8 +87,6 @@ do
                              -DlocalRepositoryPath=repo
 done
 
-mvn install:install-file -Dfile=$MM_FOLDER/plugins/Micro-Manager/commons-math3-3.4.1.jar -DgroupId=org.apache.commons -DartifactId=commons-math3 -Dpackaging=jar -DlocalRepositoryPath=repo
-
 echo
 echo "**************************************"
 echo "* Don't forget to update the MM jars *"
