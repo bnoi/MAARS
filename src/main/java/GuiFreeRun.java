@@ -54,8 +54,12 @@ public class GuiFreeRun implements PlugIn{
     public void run(String s) {
         String configFileName = "maars_config.xml";
         MaarsParameters parameters = loadMaarsParameters(configFileName);
+        if (!Boolean.parseBoolean(parameters.getSkipSegmentation())){
+            runSegmentation(parameters);
+            parameters.setSkipSegmentation(!Boolean.parseBoolean(parameters.getSkipSegmentation()));
+        }
         MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
-        executeAnalysis(parameters);
+        executeAnalysis(fluoAnalysisDialog.getParameters());
 //        byte[] encoded = new byte[0];
 //        try {
 //            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
@@ -73,7 +77,7 @@ public class GuiFreeRun implements PlugIn{
     }
 
     private static MaarsParameters loadMaarsParameters(String configFileName, String rootDir){
-        if (rootDir.equals("")) {
+        if (rootDir == null) {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
             chooser.setDialogTitle("Directory of MAARS folder");
@@ -89,6 +93,7 @@ public class GuiFreeRun implements PlugIn{
         if (Arrays.asList(listNames).contains(configFileName)){
             InputStream inStream = null;
             try {
+                IJ.log(rootDir + File.separator + configFileName);
                 inStream = new FileInputStream(rootDir + File.separator + configFileName);
             } catch (FileNotFoundException e) {
                 IOUtils.printErrorToIJLog(e);
@@ -99,7 +104,7 @@ public class GuiFreeRun implements PlugIn{
         return parameters;
     }
     private static MaarsParameters loadMaarsParameters(String configFileName) {
-        return loadMaarsParameters(configFileName, "");
+        return loadMaarsParameters(configFileName, null);
     }
 
     private static void executeAnalysis(MaarsParameters parameters) {
@@ -137,7 +142,8 @@ public class GuiFreeRun implements PlugIn{
     public static void main(String[] args) {
         new ImageJ();
         String configFileName = "maars_config.xml";
-        MaarsParameters parameters = loadMaarsParameters(configFileName, "/media/tong/MAARSData/MAARSData/102/12-06-1");
+//        "/Volumes/Macintosh/curioData/102/60x/26-10-1"
+        MaarsParameters parameters = loadMaarsParameters(configFileName);
         if (!Boolean.parseBoolean(parameters.getSkipSegmentation())){
             runSegmentation(parameters);
             parameters.setSkipSegmentation(!Boolean.parseBoolean(parameters.getSkipSegmentation()));
