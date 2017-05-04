@@ -67,24 +67,18 @@
             <version>${project.micromanager.version}</version>
         </dependency>
 
-        <!--MAARS specific dependencies -->
-
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math4</artifactId>
-            <version>4.0-SNAPSHOT</version>
+            <artifactId>commons-math3</artifactId>
+            <version>3.4.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>1.4</version>
-        </dependency>
+        <!--MAARS specific dependencies -->
 
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>bio-formats_plugins</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>ome</groupId>-->
+            <!--<artifactId>bio-formats_plugins</artifactId>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>sc.fiji</groupId>

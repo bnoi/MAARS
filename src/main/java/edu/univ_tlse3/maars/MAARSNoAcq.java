@@ -335,12 +335,6 @@ public class MAARSNoAcq implements Runnable {
                         }
                         MAARS.analyzeMitosisDynamic(soc_, parameters, pathToSegDir, true);
                     }
-                } else if (soc_.size() == 0) {
-                    try {
-                        org.apache.commons.io.FileUtils.deleteDirectory(new File(pathToSegDir));
-                    } catch (IOException e) {
-                        IOUtils.printErrorToIJLog(e);
-                    }
                 }
             }
         }

@@ -24,6 +24,7 @@ import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -393,12 +394,6 @@ public class MAARS implements Runnable {
                         ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                                 + " sec for writing results");
                         mergedImg = null;
-                    } else if (soc_.size() == 0) {
-                        try {
-                            org.apache.commons.io.FileUtils.deleteDirectory(new File(savingPath + File.separator +BF + "_1"));
-                        } catch (IOException e) {
-                            IOUtils.printErrorToIJLog(e);
-                        }
                     }
 //                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");
                 }

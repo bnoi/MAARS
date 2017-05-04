@@ -85,14 +85,9 @@ do
                              -Dversion=$VERSION \
                              -Dpackaging=jar \
                              -DlocalRepositoryPath=repo
-
-mvn install:install-file -Dfile=/Users/tongli/.m2/repository/org/apache/commons-math3/3.4.1/commons-math3-3.4.1.jar \
-                             -DgroupId=org.apache \
-                             -DartifactId=commons-math3 \
-                             -Dversion=3.4.1 \
-                             -Dpackaging=jar \
-                             -DlocalRepositoryPath=repo
 done
+
+mvn install:install-file -Dfile=$MM_FOLDER/plugins/Micro-Manager/commons-math3-3.4.1.jar -DgroupId=org.apache.commons -DartifactId=commons-math3 -Dpackaging=jar -DlocalRepositoryPath=repo
 
 echo
 echo "**************************************"

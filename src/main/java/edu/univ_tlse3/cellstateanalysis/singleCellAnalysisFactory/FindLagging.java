@@ -1,12 +1,12 @@
 package edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory;
 
-import com.google.common.collect.Iterables;
 import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.SpotSetAnalyzor;
+import edu.univ_tlse3.utils.CollectionUtils;
 import fiji.plugin.trackmate.Spot;
 import ij.gui.Line;
 import ij.measure.Calibration;
-import org.apache.commons.math4.util.FastMath;
+import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 
@@ -16,7 +16,7 @@ public class FindLagging {
                        ArrayList<Spot> poles, double radius, int frame) {
         // spbs for exemple
         double discardLaggingSpotRange = 1;
-        int setSize = Iterables.size(spotSet);
+        int setSize = CollectionUtils.size(spotSet);
         if (setSize > 2) {
             Line spLine = new Line(
                     (int) FastMath.round(poles.get(0).getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),

@@ -1,9 +1,9 @@
 package edu.univ_tlse3.cellstateanalysis;
 
-import com.google.common.collect.Iterables;
+import edu.univ_tlse3.utils.CollectionUtils;
 import fiji.plugin.trackmate.Spot;
-import org.apache.commons.math4.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math4.util.FastMath;
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +70,7 @@ public class SpotSetAnalyzor {
         // soc, because it's back-up
         // cptgeometry.centerSpots(spotSet);
         HashMap<String, Object> geometry;
-        int setSize = Iterables.size(spotSet);
+        int setSize = CollectionUtils.size(spotSet);
         if (setSize > 1) {
             poles = findMostDistant2Spots(spotSet);
             if (!overlap(poles.get(0), poles.get(1))) {

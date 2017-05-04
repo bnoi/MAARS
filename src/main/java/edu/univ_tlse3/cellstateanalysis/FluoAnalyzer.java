@@ -1,8 +1,8 @@
 package edu.univ_tlse3.cellstateanalysis;
 
-import com.google.common.collect.Lists;
 import edu.univ_tlse3.cellstateanalysis.singleCellAnalysisFactory.FindLagging;
 import edu.univ_tlse3.display.SOCVisualizer;
+import edu.univ_tlse3.utils.CollectionUtils;
 import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
@@ -152,7 +152,7 @@ public class FluoAnalyzer implements Runnable {
                 end = begin + deltas_[0];
             }
             // need to be false because all spots are not visible
-            ArrayList<Spot> currentThreadSpots = Lists.newArrayList(collection.iterable(false));
+            ArrayList<Spot> currentThreadSpots = CollectionUtils.toArrayList(collection.iterable(false));
             for (int j = begin + 1; j <= end; j++) {
                 Cell cell = soc.getCell(j);
                 cell.addChannel(channel);
@@ -180,9 +180,7 @@ public class FluoAnalyzer implements Runnable {
                 }
                 // remove spots found in current cell in order to accelerate
                 // iteration
-                for (Spot s2del : spotsToDel) {
-                    currentThreadSpots.remove(s2del);
-                }
+                currentThreadSpots.removeAll(spotsToDel);
                 SpotSetAnalyzor spotSetAnalyzor = new SpotSetAnalyzor(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
                         cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight,
                         cell.get(Cell.MAJOR) * fluoImgCal.pixelWidth, cell.get(Cell.ANGLE), calibratedXBase,
