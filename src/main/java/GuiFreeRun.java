@@ -93,7 +93,6 @@ public class GuiFreeRun implements PlugIn{
         if (Arrays.asList(listNames).contains(configFileName)){
             InputStream inStream = null;
             try {
-                IJ.log(rootDir + File.separator + configFileName);
                 inStream = new FileInputStream(rootDir + File.separator + configFileName);
             } catch (FileNotFoundException e) {
                 IOUtils.printErrorToIJLog(e);
@@ -142,8 +141,7 @@ public class GuiFreeRun implements PlugIn{
     public static void main(String[] args) {
         new ImageJ();
         String configFileName = "maars_config.xml";
-//        "/Volumes/Macintosh/curioData/102/60x/26-10-1"
-        MaarsParameters parameters = loadMaarsParameters(configFileName);
+        MaarsParameters parameters = loadMaarsParameters(configFileName, "/media/tong/MAARSData/MAARSData/102/12-06-1");
         if (!Boolean.parseBoolean(parameters.getSkipSegmentation())){
             runSegmentation(parameters);
             parameters.setSkipSegmentation(!Boolean.parseBoolean(parameters.getSkipSegmentation()));

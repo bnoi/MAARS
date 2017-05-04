@@ -202,6 +202,11 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
         JFormattedTextField qualityTf = new JFormattedTextField(Double.class);
         qualityTf.setText(parameters.getChQuality(ch));
         JButton previewBut = new JButton("Preview");
+        previewBut.addActionListener(actionEvent -> {
+            double radius = Double.valueOf(radiusTf.getText());
+            double quality = Double.valueOf(qualityTf.getText());
+            executeTrackmate(IJ.getImage(),radius, quality);
+        });
         JRadioButton radioBut = new JRadioButton();
         radioBut.setSelected(parameters.getDetectionChForMitosis().equals(ch));
         components.add(chLabel);
@@ -795,6 +800,10 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
         double spotRadius = Double.parseDouble((String) tmpTf.getValue());
         tmpTf = (JFormattedTextField) componentHashMap.get(QUALITY);
         double quality = Double.parseDouble((String) tmpTf.getValue());
+        executeTrackmate(img, spotRadius, quality);
+    }
+
+    private void executeTrackmate(ImagePlus img, double spotRadius, double quality) {
         ImagePlus zProjectedFluoImg = ImgUtils.zProject(img, img.getCalibration());
         MaarsTrackmate tmTest = new MaarsTrackmate(zProjectedFluoImg, spotRadius, quality);
         Model model = tmTest.doDetection(false);
