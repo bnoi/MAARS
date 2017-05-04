@@ -3,7 +3,6 @@ package edu.univ_tlse3.gui;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.maars.MAARS;
-import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.GuiUtils;
@@ -48,8 +47,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
     private SetOfCells soc_ = new SetOfCells();
     private SOCVisualizer socVisualizer_;
     private JButton stopButton_;
-    private MAARS maars_;
-    private MAARSNoAcq maarsNoAcq_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
 
     /**
@@ -282,6 +279,10 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         pack();
     }
 
+    /**
+     *
+     * @param tasksSet  tasks to be terminated
+     */
     public static void waitAllTaskToFinish(CopyOnWriteArrayList<Map<String, Future>> tasksSet) {
         for (Map<String, Future> aFutureSet : tasksSet) {
             for (String channel : aFutureSet.keySet()) {
@@ -294,13 +295,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             }
         }
         IJ.log("Spot detection finished! Proceed to saving and analysis...");
-    }
-
-    /**
-     * @return graphical user interface of Micro-Manager
-     */
-    private MMStudio getMM() {
-        return mm;
     }
 
     /**
@@ -334,27 +328,10 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         }
     }
 
-    private int overWrite(String path) {
-        int overWrite = 0;
-        if (FileUtils.exists(path + File.separator + "X0_Y0" + File.separator + "MMStack.ome.tif")) {
-            overWrite = JOptionPane.showConfirmDialog(this, "Overwrite existing acquisitions?");
-        }
-        return overWrite;
-    }
-
     private SOCVisualizer createVisualizer() {
         final SOCVisualizer socVisualizer = new SOCVisualizer();
         socVisualizer.createGUI(soc_);
         return socVisualizer;
-    }
-
-    private void setSkipTheRest(Boolean stop) {
-        if (maarsNoAcq_ != null) {
-            maarsNoAcq_.stop_.set(stop);
-        }
-        if (maars_ != null) {
-            maars_.skipAllRestFrames = stop;
-        }
     }
 
     @Override
@@ -367,12 +344,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                 }
             }
             saveParameters();
-            setSkipTheRest(false);
-            if (overWrite(parameters.getSavingPath()) == JOptionPane.YES_OPTION) {
-                ExecutorService es = Executors.newSingleThreadExecutor();
-                es.execute(new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_));
-                es.shutdown();
-            }
+            ExecutorService es = Executors.newSingleThreadExecutor();
+            es.execute(new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_));
+            es.shutdown();
         } else if (e.getSource() == segmButton) {
             saveParameters();
             if (segDialog_ != null) {
@@ -404,7 +378,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                     "Stop current analysis ?");
             yesNoCancelDialog.setAlwaysOnTop(true);
             if (yesNoCancelDialog.yesPressed()) {
-                setSkipTheRest(true);
                 RoiManager roiManager = RoiManager.getInstance();
                 roiManager.runCommand("Select All");
                 roiManager.runCommand("Delete");

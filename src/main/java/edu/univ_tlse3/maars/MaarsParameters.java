@@ -218,9 +218,9 @@ public class MaarsParameters {
     }
 
     /**
-     * Write the parameters into the configuration file
+     * * Write the parameters into the configuration file
      *
-     * @throws IOException error than can not write xml file
+     * @param path  path to save
      */
     public void save(String path) throws IOException {
         doc.setContent(root);
@@ -232,7 +232,7 @@ public class MaarsParameters {
     // Getter
 
     /**
-     * @return
+     * @return  path to position list file
      */
     public String getPathToPositionList() {
         return root.getChildText(PATH_TO_POSITION_LIST);
@@ -390,7 +390,7 @@ public class MaarsParameters {
 
     /**
      *
-     * @return
+     * @return  whether or not skip the segmentation
      */
     public String getSkipSegmentation() {
         return root.getChild(SEGMENTATION_PARAMETERS).getChildText(SKIP);
@@ -411,7 +411,8 @@ public class MaarsParameters {
     //////////// Setters
 
     /**
-     * @return
+     *
+     * @param pathToPositionList    path to positionlist file
      */
     public void setPathToPositionList(String pathToPositionList) {
         root.getChild(PATH_TO_POSITION_LIST).setText(pathToPositionList);
@@ -443,7 +444,7 @@ public class MaarsParameters {
 
     /**
      *
-     * @return
+     * @return  calibration object
      */
     public String getCalibration() {
         return root.getChildText(CALIBRATION);
@@ -451,7 +452,7 @@ public class MaarsParameters {
 
     /**
      *
-     * @return
+     * @param calib calibration object
      */
     public void setCalibration(String calib) {
         root.getChild(CALIBRATION).setText(calib);
@@ -459,7 +460,7 @@ public class MaarsParameters {
 
     /**
      *
-     * @return
+     * @return  whether or not project z stack
      */
     public String getProjected() {
         return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(PROJECTED);
@@ -467,7 +468,7 @@ public class MaarsParameters {
 
     /**
      *
-     * @return
+     * @param projected whether or not project z stack
      */
     public void setProjected(String projected) {
         root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(PROJECTED).setText(projected);
@@ -484,7 +485,7 @@ public class MaarsParameters {
 
     /**
      * @param ch : GFP, CFP, DAPI, TXRED
-     * @param color
+     * @param color Color
      */
     public void setChColor(String ch, String color) {
         root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
@@ -493,7 +494,7 @@ public class MaarsParameters {
 
     /**
      * @param ch : GFP, CFP, DAPI, TXRED
-     * @param shutter
+     * @param shutter   shutter label
      */
     public void setChShutter(String ch, String shutter) {
         root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
@@ -556,7 +557,7 @@ public class MaarsParameters {
 
     /**
      *
-     * @param bfChannel
+     * @param bfChannel bright field channel name
      */
     public void setSegChannel(String bfChannel) {
         root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(bfChannel);

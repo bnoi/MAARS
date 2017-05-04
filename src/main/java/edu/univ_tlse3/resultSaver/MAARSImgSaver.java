@@ -17,8 +17,11 @@ public class MAARSImgSaver {
     }
 
     /**
-     * @param croppedImg set of image
-     * @param cellNb     number of current cell
+     *
+     * @param croppedImg    set of image
+     * @param cellNb        number of current cell
+     * @param channelName   channel name
+     * @param append        append to existing image or not
      */
     public void saveImgs(ImagePlus croppedImg, int cellNb, String channelName, boolean append) {
         String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + channelName + ".tif";

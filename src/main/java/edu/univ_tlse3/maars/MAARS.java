@@ -52,12 +52,14 @@ public class MAARS implements Runnable {
     private static String FLUO = "FLUO";
 
     /**
-     * Constructor
+     * * Constructor
      *
      * @param mm            MMStudio object (gui)
      * @param mmc           CMMCore object (core)
      * @param parameters    MAARS parameters object
      * @param socVisualizer set of cell visualizer
+     * @param tasksSet      tasks to be terminated
+     * @param soc           soc object
      */
     public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer,
                  CopyOnWriteArrayList<Map<String, Future>> tasksSet,

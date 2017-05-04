@@ -13,9 +13,18 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
+ * Only called with On-the-Fly analysis of MAARS.
  * Created by Tong LI on 24/06/2016.
  */
 public class MAARS_mda {
+    /**
+     * run a MDA acquisition with setting
+     * @param mm                MMStudio object
+     * @param pathToAcqSetting  path to acq setting txt
+     * @param savingPath        saving path of images
+     * @param channelName       name of acquisition
+     * @return  imageplus convected from datastore object of mm2
+     */
     public static ImagePlus acquireImagePlus(MMStudio mm, String pathToAcqSetting, String savingPath, String channelName) {
         Datastore ds = null;
         try {

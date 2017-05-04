@@ -19,9 +19,10 @@ public class MaarsSegmentation implements Runnable {
     private ImagePlus img_;
 
     /**
-     * Constructor :
+     * * Constructor :
      *
      * @param parameters : MAARS parameters (see class MaarsParameters)
+     * @param img           image to segment
      */
     public MaarsSegmentation(MaarsParameters parameters, ImagePlus img) {
         img_ = img;

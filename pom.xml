@@ -47,7 +47,7 @@
 
     <dependencies>
 
-        <!--MAARS compilation need these dependencies-->
+        <!--dependencies already present in Micro Manager-->
 
         <dependency>
             <groupId>org.micromanager</groupId>
@@ -73,12 +73,7 @@
             <version>3.4.1</version>
         </dependency>
 
-        <!--MAARS specific dependencies -->
-
-        <!--<dependency>-->
-            <!--<groupId>ome</groupId>-->
-            <!--<artifactId>bio-formats_plugins</artifactId>-->
-        <!--</dependency>-->
+        <!-- MAARS specific dependencies-->
 
         <dependency>
             <groupId>sc.fiji</groupId>
@@ -126,22 +121,6 @@
                         </banClasses>
                     </rules>
                 </configuration>
-            </plugin>
-            <!--TODO : to added parameters' explanation-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration> <!-- add this to disable checking -->
-                            <additionalparam>-Xdoclint:none</additionalparam>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

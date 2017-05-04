@@ -73,8 +73,8 @@ public class FileUtils {
     }
 
     /**
-     * @param scriptName
-     * @return
+     * @param scriptName    path to script
+     * @return              its bufferedReader
      */
     public static BufferedReader getBufferReaderOfScript(String scriptName) {
         InputStream pythonScript = getInputStreamOfScript(scriptName);
@@ -82,8 +82,8 @@ public class FileUtils {
     }
 
     /**
-     * @param scriptName
-     * @return
+     * @param scriptName    path to script
+     * @return              its inputstream
      */
     public static InputStream getInputStreamOfScript(String scriptName) {
         ClassLoader classLoader = PythonPipeline.class.getClassLoader();
@@ -92,6 +92,8 @@ public class FileUtils {
 
     /**
      *
+     * @param folderPath    folder to copy scripts
+     * @param scriptName    name of script
      */
     public static void copyScriptDependency(String folderPath, String scriptName) {
         BufferedReader bfr = getBufferReaderOfScript(scriptName);

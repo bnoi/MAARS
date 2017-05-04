@@ -27,10 +27,11 @@ import java.util.regex.Pattern;
  */
 public class ImgUtils {
     /**
-     * Do projection by using Max method to create a projection
      *
-     * @param img image to be projected
-     * @return projected image
+     * Do projection by using Max method to create a projection
+     * @param cal   calibration
+     * @param img   image to be projected
+     * @return      projected image
      */
     public static ImagePlus zProject(ImagePlus img, Calibration cal) {
         ZProjector projector = new ZProjector();

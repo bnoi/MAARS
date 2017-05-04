@@ -12,6 +12,15 @@ import java.util.ArrayList;
 
 public class FindLagging {
 
+    /**
+     * lable cells with lagging or aligned Kts in SOC object
+     * @param cell          Cell object
+     * @param spotSet       spotset in current cell
+     * @param fluoImgCal    calibration of fluo img
+     * @param poles         the SPB (spots)
+     * @param radius        raidus of spot
+     * @param frame         current frame number
+     */
     public FindLagging(Cell cell, Iterable<Spot> spotSet, Calibration fluoImgCal,
                        ArrayList<Spot> poles, double radius, int frame) {
         // spbs for exemple

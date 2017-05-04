@@ -19,6 +19,9 @@ public class ComputeCorrelation {
      * f is the function which is going to be integrated on z : Iz[z] * (z - zf)
      * * np.exp(-(zf - z) ** 2 / (2 * sigma ** 2)) CorrelationPixVal f = new
      * CorrelationPixVal(iz, zf, sigma);
+     * @param zf        focus plan
+     * @param sigma     typical cell size
+     * @param direction -1 or 1
      */
     public ComputeCorrelation(float zf, float sigma, int direction) {
         this.zf = zf;
@@ -56,8 +59,10 @@ public class ComputeCorrelation {
     /**********************************************************************
      * Integrate f from a to b using Simpson's rule. Increase N for more
      * precision.
-     * @return double integrate number
-     **********************************************************************/
+     * @param iz    z dimension pixel values of a 2d x y plan
+     * @return      double integrate number
+     **********************************************************************
+     */
     public double integrate(float[] iz) {
         iz_ = iz;
         // 1/3 terms

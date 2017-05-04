@@ -15,9 +15,6 @@ import java.util.regex.Pattern;
 public class PythonPipeline {
     private static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
     private static final String TRACKMATE_NAME = "trackmate.py";
-//    private static final String PATH2PYTHONSCRIPTS = IJ.getDirectory("plugins") + File.separator + "MAARS_deps" + File.separator;
-//   private static final String PATH2PYTHONSCRIPTS = "/home/tong/Documents/code/ImageJ/plugins/MAARS_deps" + File.separator;
-//private static final String PATH2PYTHONSCRIPTS = "/Applications/ImageJ/plugins/MAARS_deps" + File.separator;
 
     public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
         BufferedReader bfr = FileUtils.getBufferReaderOfScript(SCRIPT_NAME);
@@ -63,6 +60,7 @@ public class PythonPipeline {
 
     /**
      *
+     * @param pathToSegDir  segmentation dir
      */
     public static void runPythonScript(String pathToSegDir) {
         String[] cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), pathToSegDir + SCRIPT_NAME};

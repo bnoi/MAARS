@@ -36,6 +36,7 @@ public class SOCVisualizer extends JFrame {
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from
      * the event dispatch thread.
+     * @param setOfCells    soc object
      */
     public void createGUI(SetOfCells setOfCells) {
         //Create and set up the window.
