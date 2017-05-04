@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class PythonPipeline {
     private static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
     private static final String TRACKMATE_NAME = "trackmate.py";
-    private static final String PATH2PYTHONSCRIPTS = IJ.getDirectory("plugins") + "MAARS_deps" + File.separator;
+//    private static final String PATH2PYTHONSCRIPTS = IJ.getDirectory("plugins") + File.separator + "MAARS_deps" + File.separator;
 //   private static final String PATH2PYTHONSCRIPTS = "/home/tong/Documents/code/ImageJ/plugins/MAARS_deps" + File.separator;
 //private static final String PATH2PYTHONSCRIPTS = "/Applications/ImageJ/plugins/MAARS_deps" + File.separator;
 
@@ -56,27 +56,25 @@ public class PythonPipeline {
         return script;
     }
 
-    public static void savePythonScript(ArrayList<String> script) {
-        FileUtils.createFolder(PATH2PYTHONSCRIPTS);
-        FileUtils.copyScriptDependency(PATH2PYTHONSCRIPTS, TRACKMATE_NAME);
-        ReportingUtils.logMessage(PATH2PYTHONSCRIPTS + SCRIPT_NAME);
-        FileUtils.writeScript(PATH2PYTHONSCRIPTS + SCRIPT_NAME, script);
+    public static void savePythonScript(String pathToSegDir, ArrayList<String> script) {
+        FileUtils.copyScriptDependency(pathToSegDir, TRACKMATE_NAME);
+        FileUtils.writeScript(pathToSegDir + SCRIPT_NAME, script);
     }
 
     /**
      *
      */
-    public static void runPythonScript() {
-        String[] cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), PATH2PYTHONSCRIPTS + SCRIPT_NAME};
+    public static void runPythonScript(String pathToSegDir) {
+        String[] cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), pathToSegDir + SCRIPT_NAME};
         ProcessBuilder probuilder = new ProcessBuilder().inheritIO().redirectErrorStream(true).command(cmd);
-        File pythonLog = new File(PATH2PYTHONSCRIPTS + "pythonPipeline_log.txt");
+        File pythonLog = new File(pathToSegDir + "pythonPipeline_log.txt");
         try {
             probuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(pythonLog));
             Process process = probuilder.start();
             process.waitFor();
             process.destroyForcibly();
             if (!process.isAlive()) {
-                IJ.log("Python pipeline ended");
+                IJ.log("Python pipeline ended (please check the log file, if the result is not correct)");
             }
         } catch (IOException | InterruptedException e) {
             IJ.log(e.getMessage());

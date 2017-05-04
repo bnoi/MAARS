@@ -15,7 +15,6 @@ import ij.measure.ResultsTable;
  */
 public class MaarsSegmentation implements Runnable {
     private MaarsParameters parameters;
-    private boolean roiDetected = false;
     private ResultsTable rt;
     private ImagePlus img_;
 
@@ -27,13 +26,6 @@ public class MaarsSegmentation implements Runnable {
     public MaarsSegmentation(MaarsParameters parameters, ImagePlus img) {
         img_ = img;
         this.parameters = parameters;
-    }
-
-    /**
-     * @return if no Roi detected
-     */
-    boolean roiDetected() {
-        return this.roiDetected;
     }
 
     ResultsTable getRoiMeasurements() {
@@ -94,10 +86,5 @@ public class MaarsSegmentation implements Runnable {
         segPombe.showAndSaveResultsAndCleanUp();
         IJ.log("Segmentation done");
         this.rt = segPombe.getRoiMeasurements();
-        if (segPombe.roiDetected()) {
-            this.roiDetected = true;
-        } else {
-            IJ.log("No ROI detected!! Stop here!");
-        }
     }
 }

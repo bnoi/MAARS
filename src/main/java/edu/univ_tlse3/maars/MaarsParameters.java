@@ -599,4 +599,28 @@ public class MaarsParameters {
         newParams.setRoot(newRoot);
         return newParams;
     }
+
+
+    public static int getTimePointsNb(MaarsParameters parameters) {
+        double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
+                * 1000;
+        double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+        return (int) (timeLimit / fluoTimeInterval);
+    }
+
+    public static int getSliceNb(MaarsParameters parameters){
+        return (int) (Double.valueOf(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE)) /
+                Double.valueOf(parameters.getFluoParameter(MaarsParameters.STEP)) +1 );
+    }
+
+    public static int getChNb(MaarsParameters parameters){
+        String channelsString = parameters.getUsingChannels();
+        String[] arrayChannels = channelsString.split(",", -1);
+        return arrayChannels.length;
+    }
+
+    public static String[] getChArray(MaarsParameters parameters){
+        String channelsString = parameters.getUsingChannels();
+        return channelsString.split(",", -1);
+    }
 }

@@ -385,8 +385,8 @@ def analyse_each_cell(pool, save, anaphase_elongations, figureDir, cellRois, mit
         current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
         slope_change_tasks.append(
             (anaphase_elongations[cellId], acq_interval, current_major_length, figureDir, cellNb, save))
-        SPBtrack_tasks.append(
-            (baseDir, fluo_suffix, features, channel, spots, cellNb, current_major_length, figureDir, save))
+#        SPBtrack_tasks.append(
+#            (baseDir, fluo_suffix, features, channel, spots, cellNb, current_major_length, figureDir, save))
     for t in slope_change_tasks:
         pool.apply_async(find_slope_change_point, t)
     results = [pool.apply_async(getSPBTrack, t) for t in SPBtrack_tasks]
@@ -419,7 +419,7 @@ def distance(x1, y1, z1, x2, y2, z2):
 if __name__ == '__main__':
     baseDir = "/media/tong/MAARSData/MAARSData/102/12-06-1/X0_Y0"
     mitosis_suffix = "_MITOSIS" + path.sep
-    fluo_suffix = "_FLUO" + path.sep
+    fluo_suffix = "FLUO_1" + path.sep
     cropImgs = "croppedImgs"
     spots = "spots"
     tracks = "tracks"
@@ -431,9 +431,9 @@ if __name__ == '__main__':
     acq_interval = 20
     mitosisDir = baseDir + mitosis_suffix
     mitosisFigDir = mitosisDir + figs + path.sep
-    fluoDir = baseDir + fluo_suffix
-    features_dir = baseDir + fluo_suffix + features
-    cropImgs_dir = baseDir + fluo_suffix + cropImgs
+    fluoDir = path.sep.join(baseDir.split(path.sep)[:-1]) + path.sep + fluo_suffix
+    features_dir = fluoDir + features
+    cropImgs_dir = fluoDir + cropImgs
     minSegLen = int(minimumPeriod / acq_interval)
 
     # launcher.set_attributes_from_cmd_line()

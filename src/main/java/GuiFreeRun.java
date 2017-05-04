@@ -1,7 +1,9 @@
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
+import edu.univ_tlse3.gui.MaarsFluoAnalysisDialog;
 import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
+import edu.univ_tlse3.maars.MaarsSegmentation;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 import fiji.plugin.trackmate.*;
@@ -19,6 +21,7 @@ import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import ij.measure.ResultsTable;
 import ij.plugin.Concatenator;
 import ij.plugin.PlugIn;
 import jdk.nashorn.internal.parser.JSONParser;
@@ -49,43 +52,10 @@ import java.util.concurrent.TimeUnit;
 public class GuiFreeRun implements PlugIn{
     @Override
     public void run(String s) {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new File("."));
-        chooser.setDialogTitle("Directory of MAARS folder");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        String rootDir = null;
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            rootDir = String.valueOf(chooser.getSelectedFile());
-        } else {
-            IJ.error("No folder Selected");
-        }
-        String[] listNames = new File(rootDir).list();
         String configFileName = "maars_config.xml";
-        MaarsParameters parameters = null;
-        if (Arrays.asList(listNames).contains(configFileName)){
-            InputStream inStream = null;
-            try {
-                inStream = new FileInputStream(rootDir + File.separator + configFileName);
-            } catch (FileNotFoundException e) {
-                IOUtils.printErrorToIJLog(e);
-            }
-            parameters = new MaarsParameters(inStream);
-            parameters.setSavingPath(rootDir);
-        }else{
-            chooser.setDialogTitle("Location of maars_config.xml ?");
-        }
-
-        SetOfCells soc = new SetOfCells();
-        SOCVisualizer socVisualizer = new SOCVisualizer();
-        socVisualizer.createGUI(soc);
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
-        es.shutdown();
-        try {
-            es.awaitTermination(10, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        MaarsParameters parameters = loadMaarsParameters(configFileName);
+        MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
+        executeAnalysis(parameters);
 //        byte[] encoded = new byte[0];
 //        try {
 //            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
@@ -100,30 +70,21 @@ public class GuiFreeRun implements PlugIn{
 //            e.printStackTrace();
 //        }
 //        System.out.println(pl.getPosition(0).getX());
-//
-//        SetOfCells soc = new SetOfCells();
-//        SOCVisualizer socVisualizer = new SOCVisualizer();
-//        socVisualizer.createGUI(soc);
-//        ExecutorService es = Executors.newSingleThreadExecutor();
-//        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
-//        es.shutdown();
     }
 
-    public static void main(String[] args) {
-//        new ImageJ();
-
-        JFileChooser chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new File("."));
-        chooser.setDialogTitle("Directory of MAARS folder");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        String rootDir = null;
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            rootDir = String.valueOf(chooser.getSelectedFile());
-        } else {
-            IJ.error("No folder Selected");
+    private static MaarsParameters loadMaarsParameters(String configFileName, String rootDir){
+        if (rootDir.equals("")) {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setCurrentDirectory(new File("."));
+            chooser.setDialogTitle("Directory of MAARS folder");
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                rootDir = String.valueOf(chooser.getSelectedFile());
+            } else {
+                IJ.error("No folder Selected");
+            }
         }
         String[] listNames = new File(rootDir).list();
-        String configFileName = "maars_config.xml";
         MaarsParameters parameters = null;
         if (Arrays.asList(listNames).contains(configFileName)){
             InputStream inStream = null;
@@ -134,10 +95,14 @@ public class GuiFreeRun implements PlugIn{
             }
             parameters = new MaarsParameters(inStream);
             parameters.setSavingPath(rootDir);
-        }else{
-            chooser.setDialogTitle("Location of maars_config.xml ?");
         }
+        return parameters;
+    }
+    private static MaarsParameters loadMaarsParameters(String configFileName) {
+        return loadMaarsParameters(configFileName, "");
+    }
 
+    private static void executeAnalysis(MaarsParameters parameters) {
         SetOfCells soc = new SetOfCells();
         SOCVisualizer socVisualizer = new SOCVisualizer();
         socVisualizer.createGUI(soc);
@@ -149,6 +114,36 @@ public class GuiFreeRun implements PlugIn{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void runSegmentation(MaarsParameters parameters){
+        String defaultBfFolderName = "BF_1";
+        String originalFolder = parameters.getSavingPath();
+        String segDir = parameters.getSavingPath() + File.separator + defaultBfFolderName + File.separator;
+        parameters.setSavingPath(segDir);
+        String path2img = segDir + defaultBfFolderName + "_MMStack_Pos0.ome.tif";
+        MaarsSegmentation ms = new MaarsSegmentation(parameters, IJ.openImage(path2img));
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        es.execute(ms);
+        es.shutdown();
+        try {
+            es.awaitTermination(30,TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        parameters.setSavingPath(originalFolder);
+    }
+
+    public static void main(String[] args) {
+        new ImageJ();
+        String configFileName = "maars_config.xml";
+        MaarsParameters parameters = loadMaarsParameters(configFileName, "/media/tong/MAARSData/MAARSData/102/12-06-1");
+        if (!Boolean.parseBoolean(parameters.getSkipSegmentation())){
+            runSegmentation(parameters);
+            parameters.setSkipSegmentation(!Boolean.parseBoolean(parameters.getSkipSegmentation()));
+        }
+        MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
+        executeAnalysis(fluoAnalysisDialog.getParameters());
 
 
 //        //        chooser.setAcceptAllFileFilterUsed(false);

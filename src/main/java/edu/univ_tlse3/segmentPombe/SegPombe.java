@@ -65,7 +65,6 @@ public class SegPombe {
     private boolean saveFocusImage;
     private boolean saveRoi;
     private int direction;
-    private boolean roiDetected = true;
     private PrintStream ps;
     private PrintStream curr_err;
     private PrintStream curr_out;
@@ -275,8 +274,6 @@ public class SegPombe {
         if (!nbRoi.equals(0)) {
             Classifiers classifiers = new Classifiers(resultTable,imgCorrTemp);
             classifiers.filterAll(filters);
-        } else {
-            setRoiDetectedFalse();
         }
     }
 
@@ -290,10 +287,10 @@ public class SegPombe {
     public void showAndSaveResultsAndCleanUp() {
         Integer nbRoi = roiManager.getCount();
         if (nbRoi.equals(0)) {
-            setRoiDetectedFalse();
+            IJ.log("No ROI detected!! Stop here!");
         }
 
-        if (saveDataFrame && roiDetected) {
+        if (saveDataFrame && !nbRoi.equals(0)) {
             System.out.println("saving data frame...");
             try {
                 resultTable.saveAs(savingPath + File.separator + bf + "_Results.csv");
@@ -308,7 +305,7 @@ public class SegPombe {
             System.out.println("done.");
         }
 
-        if (saveRoi && roiDetected) {
+        if (saveRoi && !nbRoi.equals(0)) {
             System.out.println("saving roi...");
             roiManager.runCommand("Select All");
             roiManager.runCommand("Save", savingPath + File.separator + "ROI.zip");
@@ -356,18 +353,4 @@ public class SegPombe {
         System.setOut(curr_out);
         System.setErr(curr_err);
     }
-
-    /**
-     * Return if any roi detected
-     *
-     * @return if MAARS got cells detected
-     */
-    public boolean roiDetected() {
-        return this.roiDetected;
-    }
-
-    private void setRoiDetectedFalse() {
-        this.roiDetected = false;
-    }
-
 }

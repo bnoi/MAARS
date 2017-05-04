@@ -108,6 +108,7 @@ public class FileUtils {
 
     public static String getShortestTiffName(String path2Folder) {
         File folder = new File(path2Folder);
+        IJ.log(path2Folder);
         File[] listOfFiles = folder.listFiles();
         String shortestTifName = null;
         int minTifNameLength = Integer.MAX_VALUE;

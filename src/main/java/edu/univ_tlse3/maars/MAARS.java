@@ -193,11 +193,11 @@ public class MAARS implements Runnable {
         ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, parameters.getDetectionChForMitosis(),
                 parameters.getCalibration(), parameters.getMinimumMitosisDuration(),
                 String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))));
-        PythonPipeline.savePythonScript(script);
+        PythonPipeline.savePythonScript(pathToSegDir + File.separator, script);
         IJ.log("Script generated");
-        PythonPipeline.runPythonScript();
+        PythonPipeline.runPythonScript(pathToSegDir+ File.separator);
         if (showChromLagging) {
-            MAARS.showChromLaggingCells(pathToSegDir, soc);
+            MAARS.showChromLaggingCells(pathToSegDir+ File.separator, soc);
         }
     }
 
