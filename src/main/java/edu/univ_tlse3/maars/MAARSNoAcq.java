@@ -288,7 +288,7 @@ public class MAARSNoAcq implements Runnable {
 
                 // ----------------start acquisition and analysis --------//
                 try {
-                    PrintStream ps = new PrintStream(pathToSegDir + "/CellStateAnalysis.LOG");
+                    PrintStream ps = new PrintStream(pathToSegDir + "/FluoAnalysis.LOG");
                     curr_err = System.err;
                     curr_out = System.err;
                     System.setOut(ps);

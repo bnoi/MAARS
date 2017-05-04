@@ -282,7 +282,7 @@ public class MAARS implements Runnable {
                 // ----------------start acquisition and analysis --------//
 //                FluoAcqSetting fluoAcq = new FluoAcqSetting(parameters);
                 try {
-                    PrintStream ps = new PrintStream(savingPath + File.separator +BF + "_1" + File.separator + "CellStateAnalysis.LOG");
+                    PrintStream ps = new PrintStream(savingPath + File.separator +BF + "_1" + File.separator + "FluoAnalysis.LOG");
                     curr_err = System.err;
                     curr_out = System.err;
                     System.setOut(ps);

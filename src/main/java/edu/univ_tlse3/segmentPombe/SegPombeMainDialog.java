@@ -5,6 +5,7 @@ import edu.univ_tlse3.segmentPombe.mainDialogActions.CurrentImageAction;
 import edu.univ_tlse3.segmentPombe.mainDialogActions.RunAction;
 import ij.IJ;
 import ij.gui.NonBlockingGenericDialog;
+import ij.plugin.PlugIn;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +18,7 @@ import java.awt.*;
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 4, 2015
  */
-public class SegPombeMainDialog {
+public class SegPombeMainDialog implements PlugIn{
 
     // Main window
     private NonBlockingGenericDialog mainWindow;
@@ -604,11 +605,11 @@ public class SegPombeMainDialog {
         mainWindow.setVisible(false);
     }
 
-//   @Override
-//   public void run(String arg0) {
-//      setMainWindow();
-//      mainWindow.showDialog();
-//
+   @Override
+   public void run(String arg0) {
+      setMainWindow();
+      mainWindow.showDialog();
+
 //      /**
 //       * IN CASE YOU JUST WANT TO RUN WITH A MACRO (you open the image then
 //       * run this plugin) UN-COMMENT THIS and COMMENT mainWindow.showDialog();
@@ -629,7 +630,7 @@ public class SegPombeMainDialog {
     // CellsBoundariesIdentification(this, 13, 200, 900000, -1, (int)
     // Math.round(imageToAnalyze.getSlice()/2),0.84 ,-177660);
     // cBI.identifyCellesBoundaries();
-//   }
+   }
 //	public static void main(String[] args) {
 //        SegPombeMainDialog md = new SegPombeMainDialog();
 //        md.setMainWindow();

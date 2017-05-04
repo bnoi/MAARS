@@ -2,6 +2,7 @@ import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
+import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 import fiji.plugin.trackmate.*;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
@@ -16,8 +17,10 @@ import fiji.plugin.trackmate.tracking.LAPUtils;
 import fiji.plugin.trackmate.tracking.sparselap.SparseLAPTrackerFactory;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.Concatenator;
+import ij.plugin.PlugIn;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,22 +29,132 @@ import org.json.JSONStringer;
 import org.micromanager.PositionList;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by tongli on 28/04/2017.
  */
-public class GuiFreeRun {
+public class GuiFreeRun implements PlugIn{
+    @Override
+    public void run(String s) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new File("."));
+        chooser.setDialogTitle("Directory of MAARS folder");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        String rootDir = null;
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            rootDir = String.valueOf(chooser.getSelectedFile());
+        } else {
+            IJ.error("No folder Selected");
+        }
+        String[] listNames = new File(rootDir).list();
+        String configFileName = "maars_config.xml";
+        MaarsParameters parameters = null;
+        if (Arrays.asList(listNames).contains(configFileName)){
+            InputStream inStream = null;
+            try {
+                inStream = new FileInputStream(rootDir + File.separator + configFileName);
+            } catch (FileNotFoundException e) {
+                IOUtils.printErrorToIJLog(e);
+            }
+            parameters = new MaarsParameters(inStream);
+            parameters.setSavingPath(rootDir);
+        }else{
+            chooser.setDialogTitle("Location of maars_config.xml ?");
+        }
+
+        SetOfCells soc = new SetOfCells();
+        SOCVisualizer socVisualizer = new SOCVisualizer();
+        socVisualizer.createGUI(soc);
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
+        es.shutdown();
+        try {
+            es.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+//        byte[] encoded = new byte[0];
+//        try {
+//            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        PositionList pl = new PositionList();
+//        try {
+//            pl.load("/home/tong/Desktop/new_mda/PositionList.pos");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println(pl.getPosition(0).getX());
+//
+//        SetOfCells soc = new SetOfCells();
+//        SOCVisualizer socVisualizer = new SOCVisualizer();
+//        socVisualizer.createGUI(soc);
+//        ExecutorService es = Executors.newSingleThreadExecutor();
+//        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
+//        es.shutdown();
+    }
+
     public static void main(String[] args) {
+//        new ImageJ();
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new File("."));
+        chooser.setDialogTitle("Directory of MAARS folder");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        String rootDir = null;
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            rootDir = String.valueOf(chooser.getSelectedFile());
+        } else {
+            IJ.error("No folder Selected");
+        }
+        String[] listNames = new File(rootDir).list();
+        String configFileName = "maars_config.xml";
+        MaarsParameters parameters = null;
+        if (Arrays.asList(listNames).contains(configFileName)){
+            InputStream inStream = null;
+            try {
+                inStream = new FileInputStream(rootDir + File.separator + configFileName);
+            } catch (FileNotFoundException e) {
+                IOUtils.printErrorToIJLog(e);
+            }
+            parameters = new MaarsParameters(inStream);
+            parameters.setSavingPath(rootDir);
+        }else{
+            chooser.setDialogTitle("Location of maars_config.xml ?");
+        }
+
+        SetOfCells soc = new SetOfCells();
+        SOCVisualizer socVisualizer = new SOCVisualizer();
+        socVisualizer.createGUI(soc);
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
+        es.shutdown();
+        try {
+            es.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+//        //        chooser.setAcceptAllFileFilterUsed(false);
+//        FileNameExtensionFilter posListFilter = new FileNameExtensionFilter(
+//                "MM acquisition setting file ", "txt");
+//        chooser.setFileFilter(posListFilter);
 
 //        concatenatedImg.setProperty("Info", im.getInfoProperty());
 
@@ -89,42 +202,6 @@ public class GuiFreeRun {
 //        } catch (JSONException e) {
 //            e.printStackTrace();
 //        }
-
-//        String configFileName = "/home/tong/Desktop/28C_102/maars_config.xml";
-//        InputStream inStream = null;
-//        try {
-//            inStream = new FileInputStream(configFileName);
-//        } catch (FileNotFoundException e) {
-//            IOUtils.printErrorToIJLog(e);
-//        }
-//        MaarsParameters parameters = new MaarsParameters(inStream);
-//        byte[] encoded = new byte[0];
-//        try {
-//            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        Map<String, Object> map = new Gson().fromJson(new String(encoded, StandardCharsets.UTF_8),
-//                new TypeToken<HashMap<String, Object>>() {}.getType());
-//
-//        System.out.println(((Map)((ArrayList) map.get("channels")).get(0)).get("config"));
-//
-//
-//        PositionList pl = new PositionList();
-//        try {
-//            pl.load("/home/tong/Desktop/new_mda/PositionList.pos");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println(pl.getPosition(0).getX());
-
-//        SetOfCells soc = new SetOfCells();
-//        SOCVisualizer socVisualizer = new SOCVisualizer();
-//        socVisualizer.createGUI(soc);
-//        ExecutorService es = Executors.newSingleThreadExecutor();
-//        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
-//        es.shutdown();
 
 
 //        TmXmlReader reader = new TmXmlReader(new File(
