@@ -6,12 +6,9 @@ import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.plugin.Concatenator;
-import ij.plugin.RoiScaler;
-import ij.plugin.ZProjector;
+import ij.plugin.*;
 import ij.process.ImageProcessor;
-import mmcorej.CMMCore;
-import org.micromanager.data.Image;
+import org.micromanager.data.*;
 import org.micromanager.internal.MMStudio;
 
 import java.io.File;
@@ -143,23 +140,40 @@ public class ImgUtils {
     /**
      * convert a list of Image to an ImagePlus
      *
-     * @param listImg     list of Images
-     * @param channelName name of the channel
+     * @param listImg           list of Images
+     * @param summaryMetadata   metadata from datastore of mm2
+     * @param pixelSizeUm       image calib
      * @return imageplus
      */
-    public static ImagePlus convertImages2Imp(List<Image> listImg, String channelName) {
-        CMMCore mmc = MMStudio.getInstance().getCore();
-        ImageStack imageStack = new ImageStack((int) mmc.getImageWidth(), (int) mmc.getImageHeight());
+    public static ImagePlus[] convertImages2Imp(List<Image> listImg, SummaryMetadata summaryMetadata,
+                                              double pixelSizeUm) {
+//         String[] axisOrder = summaryMetadata.getAxisOrder();
+
+        ImageStack imageStack = new ImageStack(Integer.valueOf(summaryMetadata.getUserData().getString("Width")),
+                Integer.valueOf(summaryMetadata.getUserData().getString("Height")));
         for (Image img : listImg) {
-            imageStack.addSlice(ImgUtils.image2imp(img));
+            imageStack.addSlice(img.getMetadata().getReceivedTime(), image2imp(img));
         }
-        ImagePlus imagePlus = new ImagePlus(channelName, imageStack);
+        ImagePlus imagePlus = new ImagePlus("",imageStack);
         Calibration cal = new Calibration();
         cal.setUnit("micron");
-        cal.pixelWidth = mmc.getPixelSizeUm();
-        cal.pixelHeight = mmc.getPixelSizeUm();
+        cal.pixelWidth = pixelSizeUm;
+        cal.pixelHeight = pixelSizeUm;
+        cal.pixelDepth = summaryMetadata.getZStepUm();
         imagePlus.setCalibration(cal);
-        return imagePlus;
+       imagePlus = HyperStackConverter.toHyperStack(imagePlus, summaryMetadata.getIntendedDimensions().getChannel(),
+                summaryMetadata.getIntendedDimensions().getZ(), summaryMetadata.getIntendedDimensions().getTime(),
+                "xytzc", "Grayscale");
+       ImagePlus[] channels;
+        if (summaryMetadata.getChannelNames().length>1){
+           channels =  ChannelSplitter.split(imagePlus);
+           for (int i =0 ; i< channels.length;i++){
+              channels[i].setTitle(summaryMetadata.getChannelNames()[i]);
+           }
+        }else{
+           channels = new ImagePlus[]{imagePlus};
+        }
+       return channels;
     }
 
     /**
@@ -168,7 +182,34 @@ public class ImgUtils {
      */
     private static ImageProcessor image2imp(Image image) {
         MMStudio mm = MMStudio.getInstance();
-        ImageProcessor imgProcessor = mm.getDataManager().getImageJConverter().createProcessor(image);
-        return imgProcessor.convertToFloatProcessor();
+        return mm.getDataManager().getImageJConverter().createProcessor(image);
+    }
+
+    public static  ArrayList<Coords> getSortedCoords(Datastore ds){
+       ArrayList<Coords> coordsList = new ArrayList<>();
+       for (Coords coords : ds.getUnorderedImageCoords()) {
+          coordsList.add(coords);
+       }
+       java.util.Collections.sort(coordsList, (a, b) -> {
+          int p1 = a.getStagePosition();
+          int p2 = b.getStagePosition();
+          if (p1 != p2) {
+             return p1 < p2 ? -1 : 1;
+          }
+          int t1 = a.getTime();
+          int t2 = b.getTime();
+          if (t1 != t2) {
+             return t1 < t2 ? -1 : 1;
+          }
+          int z1 = a.getZ();
+          int z2 = b.getZ();
+          if (z1 != z2) {
+             return z1 < z2 ? -1 : 1;
+          }
+          int c1 = a.getChannel();
+          int c2 = b.getChannel();
+          return c1 < c2 ? -1 : 1;
+       });
+       return coordsList;
     }
 }

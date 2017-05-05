@@ -25,7 +25,7 @@ public class MAARS_mda {
      * @param channelName       name of acquisition
      * @return  imageplus convected from datastore object of mm2
      */
-    public static ImagePlus acquireImagePlus(MMStudio mm, String pathToAcqSetting, String savingPath, String channelName) {
+    public static ImagePlus[] acquireImagePlus(MMStudio mm, String pathToAcqSetting, String savingPath, String channelName) {
         Datastore ds = null;
         try {
             mm.acquisitions().loadAcquisition(pathToAcqSetting);
@@ -33,11 +33,33 @@ public class MAARS_mda {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        List<Image> imageList = new ArrayList<>();
-        for (Coords coords : ds.getUnorderedImageCoords()) {
-            imageList.add(ds.getImage(coords));
-        }
-        imageList.sort(Comparator.comparingInt(o -> o.getCoords().getZ()));
-        return ImgUtils.convertImages2Imp(imageList, channelName);
+        ArrayList<Coords> sortedCoords = ImgUtils.getSortedCoords(ds);
+        ArrayList<Image> imageList = new ArrayList<>();
+        for (Coords coords : sortedCoords) {
+          imageList.add(ds.getImage(coords));
+       }
+        return ImgUtils.convertImages2Imp(imageList, ds.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
     }
+
+   /**
+    * run a MDA acquisition with setting
+    * @param mm                MMStudio object
+    * @param pathToAcqSetting  path to acq setting txt
+    * @return  imageplus convected from datastore object of mm2
+    */
+   public static ImagePlus[] acquireImagePlus(MMStudio mm, String pathToAcqSetting) {
+      Datastore ds = null;
+      try {
+         mm.acquisitions().loadAcquisition(pathToAcqSetting);
+         ds = mm.acquisitions().runAcquisition();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      ArrayList<Coords> sortedCoords = ImgUtils.getSortedCoords(ds);
+      ArrayList<Image> imageList = new ArrayList<>();
+      for (Coords coords : sortedCoords) {
+         imageList.add(ds.getImage(coords));
+      }
+      return ImgUtils.convertImages2Imp(imageList, ds.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
+   }
 }

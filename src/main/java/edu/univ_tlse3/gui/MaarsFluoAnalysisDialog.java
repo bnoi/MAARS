@@ -820,22 +820,20 @@ public class MaarsFluoAnalysisDialog extends JDialog implements ActionListener {
      */
     private void testTrackmate(HashMap<String, Component> componentHashMap) {
         String channelName = getSelectedChannel(componentHashMap);
-        String pathToFluoDir = parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO";
-        String imgPath = pathToFluoDir + File.separator + channelName + "_1" + File.separator +
-                channelName + "_1_MMStack_Pos0.ome.tif";
-        ImagePlus img = null;
-        if (FileUtils.exists(imgPath)) {
-            img = IJ.openImage(imgPath);
-        } else if(FileUtils.getShortestTiffName(
-                  parameters_.getSavingPath() + File.separator + "X0_Y0_FLUO") != null){
-             img = IJ.getImage();
-        } else {
-            img = MAARS_mda.acquireImagePlus(mm,
-                    "/Users/tongli/Desktop/untitled folder/AcqSettings_bf.txt",
-                    pathToFluoDir, "FLUO");
-//         img = acquireTestImg(componentHashMap);
+        ImagePlus fluoImg = null;
+        try {
+            fluoImg = IJ.getImage();
+        }catch (Exception e){}
+        if (fluoImg ==null){
+            ImagePlus[] imgs = MAARS_mda.acquireImagePlus(mm,
+                    parameters_.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING));
+            for (ImagePlus img:imgs){
+                if (img.getTitle().equals(channelName)){
+                    fluoImg = img;
+                }
+            }
         }
-        testTrackmate(componentHashMap, img);
+        testTrackmate(componentHashMap, fluoImg);
     }
 
     /**

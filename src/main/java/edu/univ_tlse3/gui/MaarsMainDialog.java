@@ -29,7 +29,7 @@ import java.util.concurrent.*;
  * @author Tong LI
  */
 
-public class MaarsMainDialog extends JFrame implements ActionListener {
+public class MaarsMainDialog extends JFrame implements ActionListener, Runnable {
 
     private final MMStudio mm_;
     private final CMMCore mmc_;
@@ -406,5 +406,10 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         } else {
             IJ.log("MAARS don't understand what you want, sorry");
         }
+    }
+
+    @Override
+    public void run() {
+        setVisible(true);
     }
 }

@@ -211,19 +211,16 @@ class MaarsSegmentationDialog extends JDialog implements ActionListener {
         JButton testSegBut = new JButton("Test segmentation");
         testSegBut.addActionListener(actionEvent -> {
             updateMAARSParamters();
-            String segDir = parameters.getSavingPath() + File.separator + "X0_Y0";
-            String imgPath = segDir + File.separator + "_1" + File.separator + "_1_MMStack_Pos0.ome.tif";
             MaarsParameters parameters_dup = parameters.duplicate();
-            parameters_dup.setSavingPath(segDir);
-            FileUtils.createFolder(segDir);
-            ImagePlus segImg;
+            ImagePlus segImg = null;
+            try {
+                segImg = IJ.getImage();
+            }catch (Exception e){}
             ExecutorService es = Executors.newSingleThreadExecutor();
-            if (FileUtils.exists(imgPath)) {
-                segImg = IJ.openImage(imgPath);
-            } else {
-                segImg = MAARS_mda.acquireImagePlus(mm_,
-                        "/Users/tongli/Desktop/untitled folder/AcqSettings.txt",
-                        segDir, "FLUO");
+            if (segImg == null) {
+                ImagePlus[] segImgs = MAARS_mda.acquireImagePlus(mm_,
+                        parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING));
+                segImg = segImgs[0];
             }
             // --------------------------segmentation-----------------------------//
             MaarsSegmentation ms = new MaarsSegmentation(parameters_dup, segImg);

@@ -232,12 +232,11 @@ public class MAARS implements Runnable {
             //update saving path
             parameters.setSavingPath(savingPath + File.separator + BF + "_1");
             //acquisition
-            ImagePlus segImg = MAARS_mda.acquireImagePlus(mm,
+            ImagePlus[] segImg = MAARS_mda.acquireImagePlus(mm,
                     parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
                     savingPath, BF);
-
             // --------------------------segmentation-----------------------------//
-            MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
+            MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg[0]);
             ExecutorService es = Executors.newSingleThreadExecutor();
             es.execute(ms);
             es.shutdown();
@@ -247,8 +246,9 @@ public class MAARS implements Runnable {
                 e.printStackTrace();
             }
             parameters.setSavingPath(savingPath);
-            if (FileUtils.exists(savingPath + File.separator + BF + "_1" + File.separator + "ROI.zip")) {
-//            if (true) {
+            //TODO
+//            if (FileUtils.exists(savingPath + File.separator + BF + "_1" + File.separator + "ROI.zip")) {
+            if (true) {
                 String pathToFluoDir = savingPath + File.separator + FLUO + "_1";
                 parameters.setSavingPath(pathToFluoDir);
                 // from Roi initialize a set of cell
@@ -284,7 +284,7 @@ public class MAARS implements Runnable {
                                     parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
                                     savingPath, BF);
                             parameters.setSavingPath(savingPath + File.separator + BF +"_"+String.valueOf(frame+1));
-                            ms = new MaarsSegmentation(parameters, segImg);
+                            ms = new MaarsSegmentation(parameters, segImg[0]);
                             ExecutorService es2 = Executors.newSingleThreadExecutor();
                             es2.execute(ms);
                             es2.shutdown();
@@ -296,17 +296,21 @@ public class MAARS implements Runnable {
                         }
 
                         Map<String, Future> channelsInFrame = new HashMap<>();
-                        ImagePlus fluoImage = MAARS_mda.acquireImagePlus(mm,
+                        ImagePlus[] fluoChs = MAARS_mda.acquireImagePlus(mm,
                                 parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
                                 savingPath, FLUO);
-                        //TODO
-//                        if (do_analysis) {
-//                            Future future = es1.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
-//                                    Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-//                                    Double.parseDouble(parameters.getChSpotRaius(channel)),
-//                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
-//                            channelsInFrame.put(channel, future);
-//                        }
+                        for (ImagePlus fluoimg:fluoChs){
+                           //TODO
+                           if (do_analysis) {
+                              String channel = fluoimg.getTitle();
+                               Future future = es1.submit(new FluoAnalyzer(fluoimg, segImg[0].getCalibration(), soc_, channel,
+                                       Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+                                       Double.parseDouble(parameters.getChSpotRaius(channel)),
+                                       Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
+                               channelsInFrame.put(channel, future);
+                           }
+                        }
+
                         tasksSet_.add(channelsInFrame);
                         frame++;
                         double acqTook = System.currentTimeMillis() - beginAcq;
@@ -327,17 +331,19 @@ public class MAARS implements Runnable {
                     // being static acquisition
                     for (String channel : arrayChannels) {
                         Map<String, Future> channelsInFrame = new HashMap<>();
-                        ImagePlus fluoImage = MAARS_mda.acquireImagePlus(mm,
+                       ImagePlus[] fluoChs = MAARS_mda.acquireImagePlus(mm,
                                 parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
                                 savingPath, FLUO);
-//                        if (do_analysis) {
-//                            future = es_.submit(new FluoAnalyzer(fluoImage, segImg.getCalibration(), soc_, channel,
-//                                    Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-//                                    Double.parseDouble(parameters.getChSpotRaius(channel)),
-//                                    Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
-//                            channelsInFrame.put(channel, future);
-//                        }
-                        fluoImage = null;
+                       for (ImagePlus fluoimg:fluoChs){
+                              channel = fluoimg.getTitle();
+                           if (do_analysis) {
+                              Future future = es1.submit(new FluoAnalyzer(fluoimg, segImg[0].getCalibration(), soc_, channel,
+                                       Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+                                       Double.parseDouble(parameters.getChSpotRaius(channel)),
+                                       Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
+                            channelsInFrame.put(channel, future);
+                        }
+                       }
                         tasksSet_.add(channelsInFrame);
                     }
                 }
