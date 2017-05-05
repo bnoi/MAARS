@@ -247,8 +247,8 @@ public class MAARSNoAcq implements Runnable {
         soc_.reset();
         String pathToSegDir = FileUtils.convertPath(rootDir + File.separator + "BF_1");
         String pathToFluoDir = rootDir + File.separator + "FLUO_1"+ File.separator;
-        ArrayList<String> names = FileUtils.getTiffWithPattern(pathToSegDir,".*_1_MMStack_.*");
-        String pathToSegMovie = FileUtils.convertPath(names.get(0));
+        ArrayList<String> names = FileUtils.getTiffWithPattern(pathToSegDir,".*_MMStack_.*");
+        String pathToSegMovie = FileUtils.convertPath(pathToSegDir + File.separator + names.get(0));
         //update saving path
         parameters.setSavingPath(pathToSegDir);
         Boolean skipSegmentation = Boolean.parseBoolean(parameters.getSkipSegmentation());

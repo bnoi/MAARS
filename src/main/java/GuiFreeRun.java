@@ -125,8 +125,9 @@ public class GuiFreeRun implements PlugIn{
         String originalFolder = parameters.getSavingPath();
         String segDir = parameters.getSavingPath() + File.separator + defaultBfFolderName + File.separator;
         parameters.setSavingPath(segDir);
-        String path2img = segDir + defaultBfFolderName + "_MMStack_Pos0.ome.tif";
-        MaarsSegmentation ms = new MaarsSegmentation(parameters, IJ.openImage(path2img));
+        ArrayList<String> names = FileUtils.getTiffWithPattern(segDir,".*_MMStack_.*");
+        String pathToSegMovie = FileUtils.convertPath(segDir + File.separator + names.get(0));
+        MaarsSegmentation ms = new MaarsSegmentation(parameters, IJ.openImage(pathToSegMovie));
         ExecutorService es = Executors.newSingleThreadExecutor();
         es.execute(ms);
         es.shutdown();
