@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
@@ -126,6 +127,23 @@ public class FileUtils {
             }
         }
         return shortestTifName;
+    }
+
+    public static ArrayList<String> getTiffWithPattern(String path, String pattern){
+        ArrayList<String> names = new ArrayList<>();
+        File folder = new File(path);
+        File[] listOfFiles = folder.listFiles();
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                String currentTifName = listOfFiles[i].getName();
+                if (currentTifName.endsWith("tif") || currentTifName.endsWith("tiff")) {
+                    if (Pattern.matches(pattern, currentTifName)) {
+                        names.add(currentTifName);
+                    }
+                }
+            }
+        }
+        return names;
     }
 
     public static void recursiveRemove(String folderPath){
