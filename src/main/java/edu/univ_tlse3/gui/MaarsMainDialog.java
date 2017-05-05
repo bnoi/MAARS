@@ -31,9 +31,9 @@ import java.util.concurrent.*;
 
 public class MaarsMainDialog extends JFrame implements ActionListener {
 
-    private final MMStudio mm;
-    private final CMMCore mmc;
-    private MaarsParameters parameters;
+    private final MMStudio mm_;
+    private final CMMCore mmc_;
+    private MaarsParameters parameters_;
     private JButton okMainDialogButton;
     private JButton showDataVisualizer_;
     private JButton segmButton;
@@ -48,6 +48,10 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
     private SOCVisualizer socVisualizer_;
     private JButton stopButton_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
+    private JFormattedTextField posListTf_;
+    private JFormattedTextField pathToBfAcqSettingTf_;
+    private JFormattedTextField pathToFluoAcqSettingTf_;
+
 
     /**
      * Constructor
@@ -59,9 +63,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         super("Mitosis Analysing And Recording System - MAARS");
         // ------------initialization of parameters---------------//
 
-        this.mm = mm;
-        this.mmc = mm.core();
-        this.parameters = parameters;
+        mm_ = mm;
+        mmc_ = mm.core();
+        parameters_ = parameters;
 
         IJ.log("create main dialog ...");
         setDefaultLookAndFeelDecorated(true);
@@ -80,9 +84,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         multiPositionPanel.setBackground(GuiUtils.bgColor);
         multiPositionPanel.setBorder(GuiUtils.addPanelTitle("Path to position list (.pos) or empty"));
 
-        JFormattedTextField posListTf = new JFormattedTextField(String.class);
-        posListTf.setText(parameters.getPathToPositionList());
-        multiPositionPanel.add(posListTf);
+        posListTf_ = new JFormattedTextField(String.class);
+        posListTf_.setText(parameters.getPathToPositionList());
+        multiPositionPanel.add(posListTf_);
 
         JPanel posListActionPanel = new JPanel(new GridLayout(1, 0));
         final JButton editPositionListButton = new JButton("Generate...");
@@ -100,8 +104,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                     "MM position list files (.pos) ", "pos");
             chooser.setFileFilter(posListFilter);
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                posListTf.setText(String.valueOf(chooser.getSelectedFile()));
-                parameters.setPathToPositionList(posListTf.getText());
+                posListTf_.setText(String.valueOf(chooser.getSelectedFile()));
+                parameters_.setPathToPositionList(posListTf_.getText());
                 saveParameters();
             } else {
                 System.out.println("No Selection ");
@@ -117,9 +121,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         segAcqAnaParamPanel.setBackground(GuiUtils.bgColor);
         segAcqAnaParamPanel.setBorder(GuiUtils.addPanelTitle("Segmentation Acq / Analysis"));
 
-        JFormattedTextField pathToBfAcqSettingTf = new JFormattedTextField(String.class);
-        pathToBfAcqSettingTf.setText(parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING));
-        segAcqAnaParamPanel.add(pathToBfAcqSettingTf);
+        pathToBfAcqSettingTf_ = new JFormattedTextField(String.class);
+        pathToBfAcqSettingTf_.setText(parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING));
+        segAcqAnaParamPanel.add(pathToBfAcqSettingTf_);
 
         // segmentation button
 
@@ -144,8 +148,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                     "MM acquisition setting file ", "txt");
             chooser.setFileFilter(posListFilter);
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                pathToBfAcqSettingTf.setText(String.valueOf(chooser.getSelectedFile()));
-                parameters.setSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING, pathToBfAcqSettingTf.getText());
+                pathToBfAcqSettingTf_.setText(String.valueOf(chooser.getSelectedFile()));
+                parameters_.setSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING, pathToBfAcqSettingTf_.getText());
                 saveParameters();
             } else {
                 System.out.println("No Selection ");
@@ -160,9 +164,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
         fluoAcqAnaParamPanel.setBackground(GuiUtils.bgColor);
         fluoAcqAnaParamPanel.setBorder(GuiUtils.addPanelTitle("Fluo Acq / Analysis"));
 
-        JFormattedTextField pathToFluoAcqSettingTf = new JFormattedTextField(String.class);
-        pathToFluoAcqSettingTf.setText(parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING));
-        fluoAcqAnaParamPanel.add(pathToFluoAcqSettingTf);
+        pathToFluoAcqSettingTf_ = new JFormattedTextField(String.class);
+        pathToFluoAcqSettingTf_.setText(parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING));
+        fluoAcqAnaParamPanel.add(pathToFluoAcqSettingTf_);
 
         // fluo analysis button
 
@@ -187,8 +191,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                     "MM acquisition setting file ", "txt");
             chooser.setFileFilter(posListFilter);
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                pathToFluoAcqSettingTf.setText(String.valueOf(chooser.getSelectedFile()));
-                parameters.setFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING, pathToFluoAcqSettingTf.getText());
+                pathToFluoAcqSettingTf_.setText(String.valueOf(chooser.getSelectedFile()));
+                parameters_.setFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING, pathToFluoAcqSettingTf_.getText());
                 saveParameters();
             } else {
                 System.out.println("No Selection ");
@@ -301,15 +305,19 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
      * method to save the parameters entered
      */
     private void saveParameters() {
-        if (!savePathTf.getText().equals(parameters.getSavingPath())) {
-            parameters.setSavingPath(savePathTf.getText());
+        if (!savePathTf.getText().equals(parameters_.getSavingPath())) {
+            parameters_.setSavingPath(savePathTf.getText());
         }
-        if (!fluoAcqDurationTf.getText().equals(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
-            parameters.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
+        if (!fluoAcqDurationTf.getText().equals(parameters_.getFluoParameter(MaarsParameters.TIME_LIMIT))) {
+            parameters_.setFluoParameter(MaarsParameters.TIME_LIMIT, fluoAcqDurationTf.getText());
         }
+
+        parameters_.setPathToPositionList(posListTf_.getText());
+        parameters_.setSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING, pathToBfAcqSettingTf_.getText());
+        parameters_.setFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING, pathToFluoAcqSettingTf_.getText());
         try {
-            if (FileUtils.exists(parameters.getSavingPath())) {
-                parameters.save(parameters.getSavingPath());
+            if (FileUtils.exists(parameters_.getSavingPath())) {
+                parameters_.save(parameters_.getSavingPath());
             }
         } catch (IOException e) {
             IJ.error("Could not save parameters");
@@ -322,9 +330,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
     private void setAnalysisStrategy() {
 
         if (dynamicOpt.isSelected()) {
-            parameters.setFluoParameter(MaarsParameters.DYNAMIC, "" + true);
+            parameters_.setFluoParameter(MaarsParameters.DYNAMIC, "" + true);
         } else if (staticOpt.isSelected()) {
-            parameters.setFluoParameter(MaarsParameters.DYNAMIC, "" + false);
+            parameters_.setFluoParameter(MaarsParameters.DYNAMIC, "" + false);
         }
     }
 
@@ -336,23 +344,29 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        ExecutorService es = Executors.newSingleThreadExecutor();
         if (e.getSource() == okMainDialogButton) {
             if (socVisualizer_ == null) {
                 socVisualizer_ = createVisualizer();
-                if (parameters.useDynamic()) {
+                if (parameters_.useDynamic()) {
                     socVisualizer_.setVisible(true);
                 }
             }
             saveParameters();
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            es.execute(new MAARS(mm, mmc, parameters, socVisualizer_, tasksSet_, soc_));
+            try {
+                parameters_.save();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+            es.execute(new MAARS(mm_, mmc_, parameters_, socVisualizer_, tasksSet_, soc_));
             es.shutdown();
         } else if (e.getSource() == segmButton) {
             saveParameters();
             if (segDialog_ != null) {
                 segDialog_.setVisible(true);
             } else {
-                segDialog_ = new MaarsSegmentationDialog(this, parameters, mm);
+                segDialog_ = new MaarsSegmentationDialog(this, parameters_, mm_);
             }
 
         } else if (e.getSource() == fluoAnalysisButton) {
@@ -360,7 +374,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             if (fluoDialog_ != null) {
                 fluoDialog_.setVisible(true);
             } else {
-                fluoDialog_ = new MaarsFluoAnalysisDialog(this, mm, parameters);
+                fluoDialog_ = new MaarsFluoAnalysisDialog(this, mm_, parameters_);
             }
         } else if (e.getSource() == dynamicOpt) {
             setAnalysisStrategy();
@@ -378,6 +392,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                     "Stop current analysis ?");
             yesNoCancelDialog.setAlwaysOnTop(true);
             if (yesNoCancelDialog.yesPressed()) {
+                es.shutdownNow();
                 RoiManager roiManager = RoiManager.getInstance();
                 roiManager.runCommand("Select All");
                 roiManager.runCommand("Delete");

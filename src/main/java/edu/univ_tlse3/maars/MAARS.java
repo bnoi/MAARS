@@ -24,7 +24,6 @@ import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,7 +38,6 @@ import java.util.regex.Pattern;
  * @version Nov 21, 2015
  */
 public class MAARS implements Runnable {
-    public boolean skipAllRestFrames = false;
     private PrintStream curr_err;
     private PrintStream curr_out;
     private MMStudio mm;
@@ -48,8 +46,6 @@ public class MAARS implements Runnable {
     private SetOfCells soc_;
     private SOCVisualizer socVisualizer_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
-    private static String BF = "BF";
-    private static String FLUO = "FLUO";
 
     /**
      * * Constructor
@@ -59,7 +55,7 @@ public class MAARS implements Runnable {
      * @param parameters    MAARS parameters object
      * @param socVisualizer set of cell visualizer
      * @param tasksSet      tasks to be terminated
-     * @param soc           soc object
+     * @param soc           Set of cell object
      */
     public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer,
                  CopyOnWriteArrayList<Map<String, Future>> tasksSet,
@@ -72,34 +68,13 @@ public class MAARS implements Runnable {
         socVisualizer_ = socVisualizer;
     }
 
-    static void serializeSoc(String pathToFluoDir, SetOfCells soc) {
-        File f = new File(pathToFluoDir + "SetOfCell.serialize");
-        ObjectOutputStream objOut = null;
-        try {
-            objOut = new ObjectOutputStream(new BufferedOutputStream(
-                    new FileOutputStream(f)));
-            objOut.writeObject(soc);
-            objOut.flush();
 
-            IJ.log("Set of cel object is serialized.");
-        } catch (IOException i) {
-            ReportingUtils.logError(i.getMessage());
-        } finally {
-            if (objOut != null) {
-                try {
-                    objOut.close();
-                } catch (IOException e) {
-                    IOUtils.printErrorToIJLog(e);
-                }
-            }
-        }
-    }
 
     static void saveAll(SetOfCells soc, String pathToFluoDir, Boolean useDynamic) {
         IJ.log("Saving information of each cell");
         MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
         MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
-        //TODO
+        // TODO
         CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
         for (int i : cellIndex) {
             Cell c = soc.getCell(i);
@@ -107,7 +82,7 @@ public class MAARS implements Runnable {
             spotSaver.save(c);
         }
         if (useDynamic) {
-            serializeSoc(pathToFluoDir, soc);
+            IOUtils.serializeSoc(pathToFluoDir, soc);
         }
     }
 
@@ -133,7 +108,7 @@ public class MAARS implements Runnable {
             }
         }
         if (useDynamic) {
-            serializeSoc(pathToFluoDir, soc);
+            IOUtils.serializeSoc(pathToFluoDir, soc);
         }
     }
 
@@ -159,10 +134,10 @@ public class MAARS implements Runnable {
                     Cell cell = soc.getCell(cellNb);
                     cell.setAnaBOnsetFrame(anaBOnsetFrame);
                     ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
+                    assert out != null;
                     if (spotInBtwnFrames.size() > 0) {
                         Collections.sort(spotInBtwnFrames);
                         if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 1) {
-                            assert out != null;
                             out.println("Lagging :" + cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             IJ.log("Lagging :" + cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
                             IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
@@ -207,6 +182,8 @@ public class MAARS implements Runnable {
 
     @Override
     public void run() {
+        String BF = "BF";
+        String FLUO = "FLUO";
         // Start time
         long start = System.currentTimeMillis();
         // Set XY stage device
@@ -239,9 +216,6 @@ public class MAARS implements Runnable {
         //prepare executor for image analysis
         for (int i = 0; i < pl.getNumberOfPositions(); i++) {
             soc_.reset();
-            if (skipAllRestFrames) {
-                break;
-            }
             try {
                 mm.core().setXYPosition(pl.getPosition(i).getX(),pl.getPosition(i).getY());
                 mmc.waitForDevice(mmc.getXYStageDevice());
@@ -256,7 +230,7 @@ public class MAARS implements Runnable {
 
             String savingPath = FileUtils.convertPath(parameters.getSavingPath());
             //update saving path
-            parameters.setSavingPath(savingPath + File.separator +BF + "_1");
+            parameters.setSavingPath(savingPath + File.separator + BF + "_1");
             //acquisition
             ImagePlus segImg = MAARS_mda.acquireImagePlus(mm,
                     parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
@@ -273,19 +247,19 @@ public class MAARS implements Runnable {
                 e.printStackTrace();
             }
             parameters.setSavingPath(savingPath);
-//            if (ms.roiDetected()) {
-            if (true) {
-                String pathToFluoDir = savingPath + File.separator +FLUO + "_1";
+            if (FileUtils.exists(savingPath + File.separator + BF + "_1" + File.separator + "ROI.zip")) {
+//            if (true) {
+                String pathToFluoDir = savingPath + File.separator + FLUO + "_1";
                 parameters.setSavingPath(pathToFluoDir);
                 // from Roi initialize a set of cell
                 soc_.reset();
-                soc_.loadCells(savingPath + File.separator +BF + "_1");
+                soc_.loadCells(savingPath + File.separator + BF + "_1");
                 soc_.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 
                 // ----------------start acquisition and analysis --------//
 //                FluoAcqSetting fluoAcq = new FluoAcqSetting(parameters);
                 try {
-                    PrintStream ps = new PrintStream(savingPath + File.separator +BF + "_1" + File.separator + "FluoAnalysis.LOG");
+                    PrintStream ps = new PrintStream(savingPath + File.separator + BF + "_1" + File.separator + "FluoAnalysis.LOG");
                     curr_err = System.err;
                     curr_out = System.err;
                     System.setOut(ps);
@@ -304,12 +278,12 @@ public class MAARS implements Runnable {
                             * 1000;
                     while (System.currentTimeMillis() - startTime <= timeLimit) {
                         double beginAcq = System.currentTimeMillis();
-                        Map<String, Future> channelsInFrame = new HashMap<>();
+                        // Section to acquire bf images between fluos, can be skipped
                         if (frame != 0){
                             MAARS_mda.acquireImagePlus(mm,
                                     parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
                                     savingPath, BF);
-                            parameters.setSavingPath(savingPath + File.separator + BF+"_"+String.valueOf(frame+1));
+                            parameters.setSavingPath(savingPath + File.separator + BF +"_"+String.valueOf(frame+1));
                             ms = new MaarsSegmentation(parameters, segImg);
                             ExecutorService es2 = Executors.newSingleThreadExecutor();
                             es2.execute(ms);
@@ -321,6 +295,7 @@ public class MAARS implements Runnable {
                             }
                         }
 
+                        Map<String, Future> channelsInFrame = new HashMap<>();
                         ImagePlus fluoImage = MAARS_mda.acquireImagePlus(mm,
                                 parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
                                 savingPath, FLUO);
@@ -346,9 +321,6 @@ public class MAARS implements Runnable {
                             IJ.log("Attention : acquisition before took longer than " + fluoTimeInterval
                                     / 1000 + " s : " + acqTook);
                         }
-                        if (skipAllRestFrames) {
-                            break;
-                        }
                     }
                     IJ.log("Acquisition Done, proceeding to post-analysis");
                 } else {
@@ -367,9 +339,6 @@ public class MAARS implements Runnable {
 //                        }
                         fluoImage = null;
                         tasksSet_.add(channelsInFrame);
-                        if (skipAllRestFrames) {
-                            break;
-                        }
                     }
                 }
                 es1.shutdown();
@@ -379,26 +348,24 @@ public class MAARS implements Runnable {
                     e.printStackTrace();
                 }
                 MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
-                if (!skipAllRestFrames) {
-                    RoiManager.getInstance().reset();
-                    RoiManager.getInstance().close();
-                    if (soc_.size() != 0 && do_analysis) {
-                        long startWriting = System.currentTimeMillis();
-                        ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-                        mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-                        MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels);
-                        if (parameters.useDynamic()) {
-                            if (IJ.isWindows()) {
-                                savingPath = FileUtils.convertPathToLinuxType(savingPath + File.separator +BF + "_1");
-                            }
-                            MAARS.analyzeMitosisDynamic(soc_, parameters, savingPath, true);
+                RoiManager.getInstance().reset();
+                RoiManager.getInstance().close();
+                if (soc_.size() != 0 && do_analysis) {
+                    long startWriting = System.currentTimeMillis();
+                    ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
+                    mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
+                    MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels);
+                    if (parameters.useDynamic()) {
+                        if (IJ.isWindows()) {
+                            savingPath = FileUtils.convertPathToLinuxType(savingPath + File.separator + BF + "_1");
                         }
-                        ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-                                + " sec for writing results");
-                        mergedImg = null;
+                        MAARS.analyzeMitosisDynamic(soc_, parameters, savingPath, true);
                     }
-//                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");
+                    ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+                            + " sec for writing results");
+                    mergedImg = null;
                 }
+//                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");
             }
         }
         mmc.setAutoShutter(true);
@@ -406,9 +373,7 @@ public class MAARS implements Runnable {
         System.setOut(curr_out);
         soc_.reset();
         soc_ = null;
-        if (!skipAllRestFrames) {
-            IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
-        }
+        IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
         System.gc();
         IJ.showMessage("MAARS: Done!");
     }
