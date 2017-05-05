@@ -431,7 +431,7 @@ if __name__ == '__main__':
     acq_interval = 20
     mitosisDir = baseDir + mitosis_suffix
     mitosisFigDir = mitosisDir + figs + path.sep
-    fluoDir = path.sep.join(baseDir.split(path.sep)[:-1]) + path.sep + fluo_suffix
+    fluoDir = "/".join(baseDir.split("/")[:-1]) + path.sep + fluo_suffix
     features_dir = fluoDir + features
     cropImgs_dir = fluoDir + cropImgs
     minSegLen = int(minimumPeriod / acq_interval)
