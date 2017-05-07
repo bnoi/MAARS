@@ -222,11 +222,15 @@ public class MaarsParameters {
      *
      * @param path  path to save
      */
-    public void save(String path) throws IOException {
+    public void save(String path){
         doc.setContent(root);
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
-        xmlOutput.output(doc, new FileWriter(path + File.separator + "maars_config.xml"));
+        try {
+            xmlOutput.output(doc, new FileWriter(path + File.separator + "maars_config.xml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Getter

@@ -49,23 +49,23 @@
 
         <!--dependencies already present in Micro Manager-->
 
-        <!--<dependency>-->
-            <!--<groupId>org.micromanager</groupId>-->
-            <!--<artifactId>MMJ_</artifactId>-->
-            <!--<version>${project.micromanager.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMJ_</artifactId>
+            <version>${project.micromanager.version}</version>
+        </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.micromanager</groupId>-->
-            <!--<artifactId>MMCoreJ</artifactId>-->
-            <!--<version>${project.micromanager.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMCoreJ</artifactId>
+            <version>${project.micromanager.version}</version>
+        </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.micromanager</groupId>-->
-            <!--<artifactId>MMAcqEngine</artifactId>-->
-            <!--<version>${project.micromanager.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMAcqEngine</artifactId>
+            <version>${project.micromanager.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>

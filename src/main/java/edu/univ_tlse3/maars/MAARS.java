@@ -57,6 +57,7 @@ public class MAARS implements Runnable {
      * @param parameters    MAARS parameters object
      * @param socVisualizer set of cell visualizer
      * @param tasksSet      tasks to be terminated
+     * @param soc           set of cell
      */
     public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer,
                  CopyOnWriteArrayList<Map<String, Future>> tasksSet,
