@@ -67,12 +67,9 @@ public class MaarsFluoAnalysisDialog extends JDialog {
             int overWrite = JOptionPane.showConfirmDialog(this,
                     "This will overwrite loaded configuration, still proceed?");
             if (JOptionPane.YES_OPTION == overWrite){
-                try {
-                    updateParameters(parameters);
-                    parameters.save(parameters.getSavingPath());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                updateParameters(parameters);
+                parameters.save(parameters.getSavingPath());
+
             }
         });
         JButton saveBut = new JButton("Save");
@@ -83,11 +80,7 @@ public class MaarsFluoAnalysisDialog extends JDialog {
             chooser.setDialogTitle("Directory to save config file");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                try {
-                    parameters.save(String.valueOf(chooser.getSelectedFile()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                parameters.save(String.valueOf(chooser.getSelectedFile()));
             } else {
                 IJ.log("No folder Selected");
             }

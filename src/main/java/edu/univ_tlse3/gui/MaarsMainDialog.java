@@ -315,12 +315,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener{
         parameters_.setPathToPositionList(posListTf_.getText());
         parameters_.setSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING, pathToBfAcqSettingTf_.getText());
         parameters_.setFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING, pathToFluoAcqSettingTf_.getText());
-        try {
-            if (FileUtils.exists(parameters_.getSavingPath())) {
-                parameters_.save(parameters_.getSavingPath());
-            }
-        } catch (IOException e) {
-            IJ.error("Could not save parameters");
+        if (FileUtils.exists(parameters_.getSavingPath())) {
+            parameters_.save(parameters_.getSavingPath());
         }
     }
 
