@@ -14,7 +14,7 @@ import ij.measure.ResultsTable;
  * @author Tong LI
  */
 public class MaarsSegmentation implements Runnable {
-    private MaarsParameters parameters;
+    private MaarsParameters parameters_;
     private ResultsTable rt;
     private ImagePlus img_;
 
@@ -26,7 +26,7 @@ public class MaarsSegmentation implements Runnable {
      */
     public MaarsSegmentation(MaarsParameters parameters, ImagePlus img) {
         img_ = img;
-        this.parameters = parameters;
+        parameters_ = parameters;
     }
 
     ResultsTable getRoiMeasurements() {
@@ -35,6 +35,19 @@ public class MaarsSegmentation implements Runnable {
 
     @Override
     public void run() {
+        SegPombeParameters segPombeParam = segParameterWrapper(parameters_);
+        // Main segmentation process
+        IJ.log("Begin segmentation...");
+        SegPombe segPombe = new SegPombe(segPombeParam);
+        segPombe.createCorrelationImage();
+        segPombe.convertCorrelationToBinaryImage();
+        segPombe.analyseAndFilterParticles();
+        segPombe.showAndSaveResultsAndCleanUp();
+        IJ.log("Segmentation done");
+        this.rt = segPombe.getRoiMeasurements();
+    }
+
+    private SegPombeParameters segParameterWrapper(MaarsParameters parameters) {
         IJ.log("Prepare parameters for segmentation...");
         SegPombeParameters segPombeParam = new SegPombeParameters();
 
@@ -78,14 +91,6 @@ public class MaarsSegmentation implements Runnable {
         segPombeParam.setMeanGreyValueThreshold(
                 Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.MEAN_GREY_VALUE)));
         IJ.log("Done.");
-        // Main segmentation process
-        IJ.log("Begin segmentation...");
-        SegPombe segPombe = new SegPombe(segPombeParam);
-        segPombe.createCorrelationImage();
-        segPombe.convertCorrelationToBinaryImage();
-        segPombe.analyseAndFilterParticles();
-        segPombe.showAndSaveResultsAndCleanUp();
-        IJ.log("Segmentation done");
-        this.rt = segPombe.getRoiMeasurements();
+        return segPombeParam;
     }
 }

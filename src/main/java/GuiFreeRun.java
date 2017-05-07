@@ -1,6 +1,8 @@
+import edu.univ_tlse3.acquisition.MAARS_mda;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.gui.MaarsFluoAnalysisDialog;
+import edu.univ_tlse3.gui.MaarsSegmentationDialog;
 import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.maars.MaarsSegmentation;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -142,14 +145,11 @@ public class GuiFreeRun implements PlugIn{
     public static void main(String[] args) {
         new ImageJ();
         String configFileName = "maars_config.xml";
-//        , "/media/tong/MAARSData/MAARSData/102/12-06-1"
-        MaarsParameters parameters = loadMaarsParameters(configFileName);
-        if (!Boolean.parseBoolean(parameters.getSkipSegmentation())){
-            runSegmentation(parameters);
-//            parameters.setSkipSegmentation(!Boolean.parseBoolean(parameters.getSkipSegmentation()));
-        }
-        MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
-        executeAnalysis(fluoAnalysisDialog.getParameters());
+        MaarsParameters parameters = loadMaarsParameters(configFileName, "/Volumes/Macintosh/curioData/102/60x/26-10-1");
+//        new MaarsSegmentationDialog(parameters, null);
+//            runSegmentation(parameters);
+//        MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
+//        executeAnalysis(fluoAnalysisDialog.getParameters());
 
 
 //        //        chooser.setAcceptAllFileFilterUsed(false);

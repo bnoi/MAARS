@@ -17,39 +17,22 @@
     <GENERAL_ACQUISITION_PARAMETERS>
         <CHANNEL_GROUP>Illumination</CHANNEL_GROUP>
         <DEFAULT_CHANNEL_PARAMATERS>
-            <BF>
-                <COLOR>WHITE</COLOR>
-                <EXPOSURE>34</EXPOSURE>
-                <SHUTTER>TIDiaLamp</SHUTTER>
-            </BF>
             <CFP>
-                <COLOR>BLUE</COLOR>
-                <EXPOSURE>120</EXPOSURE>
-                <SHUTTER>Spectra</SHUTTER>
                 <MAXIMUM_NUMBER_OF_SPOT>2</MAXIMUM_NUMBER_OF_SPOT>
                 <SPOT_RADIUS>0.25</SPOT_RADIUS>
                 <QUALITY>12</QUALITY>
             </CFP>
             <DAPI>
-                <COLOR>CYAN</COLOR>
-                <EXPOSURE>100</EXPOSURE>
-                <SHUTTER>Spectra</SHUTTER>
                 <MAXIMUM_NUMBER_OF_SPOT>2</MAXIMUM_NUMBER_OF_SPOT>
                 <SPOT_RADIUS>0.25</SPOT_RADIUS>
                 <QUALITY>2</QUALITY>
             </DAPI>
             <GFP>
-                <COLOR>GREEN</COLOR>
-                <EXPOSURE>90</EXPOSURE>
-                <SHUTTER>Spectra</SHUTTER>
                 <MAXIMUM_NUMBER_OF_SPOT>6</MAXIMUM_NUMBER_OF_SPOT>
                 <SPOT_RADIUS>0.2</SPOT_RADIUS>
                 <QUALITY>10</QUALITY>
             </GFP>
             <TxRed>
-                <COLOR>RED</COLOR>
-                <EXPOSURE>200</EXPOSURE>
-                <SHUTTER>Spectra</SHUTTER>
                 <MAXIMUM_NUMBER_OF_SPOT>2</MAXIMUM_NUMBER_OF_SPOT>
                 <SPOT_RADIUS>0.25</SPOT_RADIUS>
                 <QUALITY>2</QUALITY>

@@ -29,12 +29,12 @@ import java.util.concurrent.*;
  * @author Tong LI
  */
 
-public class MaarsMainDialog extends JFrame implements ActionListener, Runnable {
+public class MaarsMainDialog extends JFrame implements ActionListener{
 
     private final MMStudio mm_;
     private final CMMCore mmc_;
     private MaarsParameters parameters_;
-    private JButton okMainDialogButton;
+    public static JButton okMainDialogButton;
     private JButton showDataVisualizer_;
     private JButton segmButton;
     private JButton fluoAnalysisButton;
@@ -93,7 +93,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
         editPositionListButton.addActionListener(e -> mm.showPositionList());
         posListActionPanel.add(editPositionListButton);
 
-        final JButton chosePositionListButton = new JButton("Find...");
+        final JButton chosePositionListButton = new JButton("Browse...");
         chosePositionListButton.addActionListener(actionEvent -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -137,7 +137,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
         segmButton.addActionListener(this);
         segPanel.add(segmButton);
 
-        final JButton choseBFAcqSettingButton = new JButton("Find...");
+        final JButton choseBFAcqSettingButton = new JButton("Browse...");
         choseBFAcqSettingButton.addActionListener(actionEvent -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -180,7 +180,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
         fluoAnalysisButton.addActionListener(this);
         fluoPanel.add(fluoAnalysisButton);
 
-        final JButton choseFluoAcqSettingButton = new JButton("Find...");
+        final JButton choseFluoAcqSettingButton = new JButton("Browse...");
         choseFluoAcqSettingButton.addActionListener(actionEvent -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setCurrentDirectory(new File("."));
@@ -279,8 +279,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
         mainPanel.add(okPanel);
         mainPanel.add(stopAndVisualizerButtonPanel_);
         add(mainPanel);
-        IJ.log("Done.");
         pack();
+        setVisible(true);
     }
 
     /**
@@ -344,7 +344,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ExecutorService es = Executors.newSingleThreadExecutor();
+        MAARS maars = new MAARS(mm_, mmc_, parameters_, socVisualizer_, tasksSet_, soc_);
         if (e.getSource() == okMainDialogButton) {
             if (socVisualizer_ == null) {
                 socVisualizer_ = createVisualizer();
@@ -358,15 +358,14 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
-
-            es.execute(new MAARS(mm_, mmc_, parameters_, socVisualizer_, tasksSet_, soc_));
-            es.shutdown();
+            new Thread(maars).start();
+            okMainDialogButton.setEnabled(false);
         } else if (e.getSource() == segmButton) {
             saveParameters();
             if (segDialog_ != null) {
                 segDialog_.setVisible(true);
             } else {
-                segDialog_ = new MaarsSegmentationDialog(this, parameters_, mm_);
+                segDialog_ = new MaarsSegmentationDialog(parameters_,this);
             }
 
         } else if (e.getSource() == fluoAnalysisButton) {
@@ -374,7 +373,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
             if (fluoDialog_ != null) {
                 fluoDialog_.setVisible(true);
             } else {
-                fluoDialog_ = new MaarsFluoAnalysisDialog(this, mm_, parameters_);
+                fluoDialog_ = new MaarsFluoAnalysisDialog(parameters_,this);
             }
         } else if (e.getSource() == dynamicOpt) {
             setAnalysisStrategy();
@@ -392,12 +391,12 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
                     "Stop current analysis ?");
             yesNoCancelDialog.setAlwaysOnTop(true);
             if (yesNoCancelDialog.yesPressed()) {
-                es.shutdownNow();
+                maars.interrupt();
                 RoiManager roiManager = RoiManager.getInstance();
-                roiManager.runCommand("Select All");
-                roiManager.runCommand("Delete");
-                roiManager.reset();
-                roiManager.close();
+                if (roiManager!=null) {
+                    roiManager.reset();
+                    roiManager.close();
+                }
                 soc_.reset();
                 socVisualizer_.cleanUp();
                 socVisualizer_.setVisible(false);
@@ -406,10 +405,5 @@ public class MaarsMainDialog extends JFrame implements ActionListener, Runnable 
         } else {
             IJ.log("MAARS don't understand what you want, sorry");
         }
-    }
-
-    @Override
-    public void run() {
-        setVisible(true);
     }
 }
