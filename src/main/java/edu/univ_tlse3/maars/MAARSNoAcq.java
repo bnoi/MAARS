@@ -254,6 +254,7 @@ public class MAARSNoAcq implements Runnable {
         Boolean skipSegmentation = Boolean.parseBoolean(parameters.getSkipSegmentation());
         // --------------------------segmentation-----------------------------//
         MaarsSegmentation ms = null;
+        ExecutorService es = Executors.newSingleThreadExecutor();
         if (!skipSegmentation) {
             ImagePlus segImg = null;
             try {
@@ -263,14 +264,12 @@ public class MAARSNoAcq implements Runnable {
                 IOUtils.printErrorToIJLog(e);
             }
             ms = new MaarsSegmentation(parameters, segImg);
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            es.execute(ms);
-            es.shutdown();
             try {
-                es.awaitTermination(30,TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
+                es.submit(ms).get();
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
+            es.shutdown();
         }
 
         if (FileUtils.exists(pathToSegDir + File.separator + "ROI.zip")) {
@@ -347,5 +346,10 @@ public class MAARSNoAcq implements Runnable {
         IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
     }
     System.gc();
+    try {
+        es.awaitTermination(30,TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
     }
 }

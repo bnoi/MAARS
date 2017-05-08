@@ -145,11 +145,11 @@ public class GuiFreeRun implements PlugIn{
     public static void main(String[] args) {
         new ImageJ();
         String configFileName = "maars_config.xml";
-        MaarsParameters parameters = loadMaarsParameters(configFileName, "/Volumes/Macintosh/curioData/102/60x/26-10-1");
-//        new MaarsSegmentationDialog(parameters, null);
+        MaarsParameters parameters = loadMaarsParameters(configFileName, "/Volumes/data_claire/20C/102/20C_102_1");
+        new MaarsSegmentationDialog(parameters, null);
 //            runSegmentation(parameters);
-//        MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
-//        executeAnalysis(fluoAnalysisDialog.getParameters());
+        MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
+        executeAnalysis(fluoAnalysisDialog.getParameters());
 
 
 //        //        chooser.setAcceptAllFileFilterUsed(false);
