@@ -179,7 +179,7 @@ public class MAARS implements Runnable {
         IJ.log("Script generated");
         PythonPipeline.runPythonScript(pathToSegDir+ File.separator);
         if (showChromLagging) {
-            MAARS.showChromLaggingCells(pathToSegDir+ File.separator, soc);
+            MAARS.showChromLaggingCells(pathToSegDir, soc);
         }
     }
 
