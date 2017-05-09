@@ -221,10 +221,10 @@ public class SegPombe {
             try {
                 IJ.run("Adjustable Watershed");
             } catch (Exception e) {
-                IJ.showMessage("Please select the Adjustable_Watershed.java in MAARS_deps folder");
-                IJ.run("Compile and Run...");
+                IJ.run("Compile and Run...", "compile=Adjustable_Watershed.java");
             }
         });
+        waitForUserDialog.setAlwaysOnTop(false);
         waitForUserDialog.setLayout(new BorderLayout());
         waitForUserDialog.add(adjWaterButton, BorderLayout.SOUTH);
         waitForUserDialog.setMinimumSize(new Dimension(300, 150));

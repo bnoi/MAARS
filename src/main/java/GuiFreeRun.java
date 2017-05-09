@@ -145,12 +145,14 @@ public class GuiFreeRun implements PlugIn{
     public static void main(String[] args) {
         new ImageJ();
         String configFileName = "maars_config.xml";
-        MaarsParameters parameters = loadMaarsParameters(configFileName, "/Volumes/data_claire/20C/102/20C_102_1");
+        MaarsParameters parameters = loadMaarsParameters(configFileName, "/media/tong/DATACLAIRE/Tempombe/30C/102/30C_102_2");
         new MaarsSegmentationDialog(parameters, null);
 //            runSegmentation(parameters);
         MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
         executeAnalysis(fluoAnalysisDialog.getParameters());
-
+//        for (String s : new File(".").list()){
+//            System.out.println(s);
+//        }
 
 //        //        chooser.setAcceptAllFileFilterUsed(false);
 //        FileNameExtensionFilter posListFilter = new FileNameExtensionFilter(

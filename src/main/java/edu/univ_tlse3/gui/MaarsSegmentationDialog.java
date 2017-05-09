@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 /**
  * Class to create and display a dialog to get parameters for the image
@@ -136,6 +137,7 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
         testSegBut.addActionListener(actionEvent -> {
             updateMAARSParamters();
             MaarsParameters parameters_dup = parameters.duplicate();
+            parameters_dup.setSavingPath(parameters.getSavingPath()+ File.separator + "BF_1");
             // --------------------------segmentation-----------------------------//
             new Thread(new MaarsSegmentation(parameters_dup, IJ.getImage())).start();
         });
