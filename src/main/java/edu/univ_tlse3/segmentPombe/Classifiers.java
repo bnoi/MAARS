@@ -31,7 +31,7 @@ class Classifiers {
         Analyzer analyzer = new Analyzer(targetImg_,
                 Measurements.AREA + Measurements.STD_DEV + Measurements.MIN_MAX
                         + Measurements.SHAPE_DESCRIPTORS + Measurements.MEAN + Measurements.CENTROID
-                        + Measurements.PERIMETER + Measurements.ELLIPSE,
+                        + Measurements.PERIMETER + Measurements.ELLIPSE + Measurements.RECT,
                 rt_);
         System.out.println("- analyze each roi and add it to manager if it is wanted");
         for (Roi roi : roiArray) {
