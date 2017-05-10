@@ -218,16 +218,12 @@ public class SegPombe {
         WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Please test your threshold (even undo/redo), and click ok.");
         JButton adjWaterButton = new JButton("Adjustable Watershed");
         adjWaterButton.addActionListener(actionEvent -> {
-            try {
-                IJ.run("Adjustable Watershed");
-            } catch (Exception e) {
-                IJ.run("Compile and Run...", "compile=Adjustable_Watershed.java");
-            }
+            IJ.run("Compile and Run...", "compile=Adjustable_Watershed.java");
         });
         waitForUserDialog.setAlwaysOnTop(false);
         waitForUserDialog.setLayout(new BorderLayout());
         waitForUserDialog.add(adjWaterButton, BorderLayout.SOUTH);
-        waitForUserDialog.setMinimumSize(new Dimension(300, 150));
+        waitForUserDialog.setMinimumSize(new Dimension(200, 100));
         waitForUserDialog.show();
         this.binImage.hide();
     }
