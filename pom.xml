@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>sc.fiji</groupId>
-        <artifactId>pom-fiji</artifactId>
-        <version>27.0.0</version>
+        <groupId>org.scijava</groupId>
+        <artifactId>pom-scijava</artifactId>
+        <version>14.0.0</version>
     </parent>
 
     <artifactId>MAARS_</artifactId>
@@ -38,11 +38,34 @@
 
     </developers>
 
+    <contributors>
+        <contributor>
+            <name>Tong Li</name>
+            <email>tongli.bioinfo@gmail.com</email>
+        </contributor>
+
+        <contributor>
+            <name>Marie Grosjean</name>
+            <email>marie.grosjean.31@gmail.com</email>
+        </contributor>
+
+        <contributor>
+            <name>Hadrien Mary</name>
+            <email>hadrien.mary@gmail.com</email>
+        </contributor>
+
+    </contributors>
+
+
+    <url>https://github.com/bnoi/MAARS</url>
+
+    <inceptionYear>2015</inceptionYear>
+
     <scm>
         <connection>scm:git:git://github.com/bnoi/MAARS</connection>
         <developerConnection>scm:git:git@github.com:bnoi/MAARS</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/bnoi/MAARS</url>
+
     </scm>
 
     <dependencies>
@@ -84,7 +107,6 @@
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
         </dependency>
-
     </dependencies>
 
     <repositories>
@@ -106,19 +128,23 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <configuration>
                     <rules>
-                        <banClasses
-                                implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
-                            <dependencies>
-                                <!-- org.json clashes -->
-                                <dependency>
-                                    <artifactId>MMJ_</artifactId>
-                                    <ignoreClasses>
-                                        <ignoreClass>org/json/*</ignoreClass>
-                                    </ignoreClasses>
-                                </dependency>
-                            </dependencies>
-                            <findAllDuplicates>true</findAllDuplicates>
-                        </banClasses>
+                        <rule>
+                            <banDuplicateClasses>
+                                <!--<dependencies>-->
+                                    <!-- org.json clashes -->
+                                    <dependency>
+                                        <artifactId>MMJ_</artifactId>
+                                        <ignoreClasses>
+                                            <ignoreClass>org/json/*</ignoreClass>
+                                        </ignoreClasses>
+                                    </dependency>
+                                <!--</dependencies>-->
+                                <findAllDuplicates>true</findAllDuplicates>
+                                <!--<ignoreClasses>-->
+                                <!--<ignoreClass>org.json.*</ignoreClass>-->
+                                <!--</ignoreClasses>-->
+                            </banDuplicateClasses>
+                        </rule>
                     </rules>
                 </configuration>
             </plugin>
