@@ -5,6 +5,7 @@
     <FLUO_ANALYSIS_PARAMETERS>
         <PATH_TO_FLUO_ACQ_SETTING>AcqSettings_fluo.txt</PATH_TO_FLUO_ACQ_SETTING>
         <DYNAMIC>true</DYNAMIC>
+        <!-- the order is important !!!! -->
         <USING>CFP,GFP</USING>
         <RANGE_SIZE_FOR_MOVIE>1.2</RANGE_SIZE_FOR_MOVIE>
         <SAVE_FLUORESCENT_MOVIES>true</SAVE_FLUORESCENT_MOVIES>
@@ -39,9 +40,11 @@
             </TxRed>
         </DEFAULT_CHANNEL_PARAMATERS>
         <SAVING_PATH>/home/tong/Desktop/new_mda</SAVING_PATH>
+        <!-- not editable with GUI -->
         <BATCH_MODE>false</BATCH_MODE>
     </GENERAL_ACQUISITION_PARAMETERS>
     <SEGMENTATION_PARAMETERS>
+        <!-- only useful in batch mode -->
         <TOLERANCE>10</TOLERANCE>
         <PATH_TO_BF_ACQ_SETTING>AcqSettings_bf.txt</PATH_TO_BF_ACQ_SETTING>
         <SKIP>false</SKIP>
