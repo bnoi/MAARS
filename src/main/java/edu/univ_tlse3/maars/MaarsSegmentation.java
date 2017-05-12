@@ -40,7 +40,8 @@ public class MaarsSegmentation implements Runnable {
         IJ.log("Begin segmentation...");
         SegPombe segPombe = new SegPombe(segPombeParam);
         segPombe.createCorrelationImage();
-        segPombe.convertCorrelationToBinaryImage();
+        segPombe.convertCorrelationToBinaryImage(Boolean.valueOf(parameters_.getBatchMode()),
+                Integer.valueOf(parameters_.getSegTolerance()));
         segPombe.analyseAndFilterParticles();
         segPombe.showAndSaveResultsAndCleanUp();
         IJ.log("Segmentation done");

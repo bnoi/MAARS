@@ -39,8 +39,10 @@
             </TxRed>
         </DEFAULT_CHANNEL_PARAMATERS>
         <SAVING_PATH>/home/tong/Desktop/new_mda</SAVING_PATH>
+        <BATCH_MODE>false</BATCH_MODE>
     </GENERAL_ACQUISITION_PARAMETERS>
     <SEGMENTATION_PARAMETERS>
+        <TOLERANCE>10</TOLERANCE>
         <PATH_TO_BF_ACQ_SETTING>AcqSettings_bf.txt</PATH_TO_BF_ACQ_SETTING>
         <SKIP>false</SKIP>
         <CELL_SIZE>3.0</CELL_SIZE>

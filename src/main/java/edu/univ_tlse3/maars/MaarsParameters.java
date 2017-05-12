@@ -30,6 +30,7 @@ import java.util.List;
  * CALIBRATION
  * SEGMENTATION_PARAMETERS
  *    |
+ *    +-----> TOLERANCE
  *    +-----> PATH_TO_BF_ACQ_SETTING
  *    +-----> SKIP
  *    +-----> CHANNEL
@@ -68,6 +69,7 @@ import java.util.List;
  *    
  * GENERAL_ACQUISITION_PARAMETERS
  *    |
+ *    +-----> BATCH_MODE
  *    +-----> SAVING_PATH
  *    +-----> CHANNEL_GROUP
  *    +-----> DEFAULT_CHANNEL_PARAMATERS
@@ -143,6 +145,9 @@ public class MaarsParameters {
     private static final String CHANNEL_GROUP = "CHANNEL_GROUP";
     private static final String SKIP = "SKIP";
     private static final String CALIBRATION = "CALIBRATION";
+    private static final String BATCH_MODE = "BATCH_MODE";
+    private static final String TOLERANCE = "TOLERANCE";
+
 
     private Document doc;
     private Element root;
@@ -478,6 +483,13 @@ public class MaarsParameters {
         root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(PROJECTED).setText(projected);
     }
 
+    String getBatchMode(){
+        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(BATCH_MODE);
+    }
+
+    String getSegTolerance(){
+        return root.getChild(SEGMENTATION_PARAMETERS).getChildText(TOLERANCE);
+    }
     /**
      * @param ch : GFP, CFP, DAPI, TXRED
      * @param exposure exposure of the corresonding channel

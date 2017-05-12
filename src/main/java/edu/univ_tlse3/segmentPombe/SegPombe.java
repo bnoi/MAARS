@@ -189,8 +189,9 @@ public class SegPombe {
     /**
      * This method set a threshold with Ostu method on the correlation image and
      * convert it into Binary Image
+     * @param batchMode batch mode for optimization of segmentation
      */
-    public void convertCorrelationToBinaryImage() {
+    public void convertCorrelationToBinaryImage(Boolean batchMode, int tolerance) {
 
         System.out.println("Convert correlation image to binary image");
 
@@ -214,19 +215,24 @@ public class SegPombe {
         if (imageToAnalyze.getCalibration().scaled()) {
             this.binImage.setCalibration(imageToAnalyze.getCalibration());
         }
-        this.binImage.show();
-        WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Please test your threshold (even undo/redo), and click ok.");
-        JButton adjWaterButton = new JButton("Adjustable Watershed");
-        adjWaterButton.addActionListener(actionEvent -> {
-            //IJ.run(this.binImage, "Adjustable_Watershed.java","");
-            IJ.run(this.binImage,"Compile and Run...", "compile=Adjustable_Watershed.java");
-        });
-        waitForUserDialog.setAlwaysOnTop(false);
-        waitForUserDialog.setLayout(new BorderLayout());
-        waitForUserDialog.add(adjWaterButton, BorderLayout.SOUTH);
-        waitForUserDialog.setMinimumSize(new Dimension(200, 100));
-        waitForUserDialog.show();
-        this.binImage.hide();
+
+        if (!batchMode || tolerance == Integer.MAX_VALUE) {
+            this.binImage.show();
+            WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Please test your threshold (even undo/redo), and click ok.");
+            JButton adjWaterButton = new JButton("Adjustable Watershed");
+            adjWaterButton.addActionListener(actionEvent -> {
+                //IJ.run(this.binImage, "Adjustable_Watershed.java","");
+                IJ.run(this.binImage, "Compile and Run...", "compile=Adjustable_Watershed.java");
+            });
+            waitForUserDialog.setAlwaysOnTop(false);
+            waitForUserDialog.setLayout(new BorderLayout());
+            waitForUserDialog.add(adjWaterButton, BorderLayout.SOUTH);
+            waitForUserDialog.setMinimumSize(new Dimension(200, 130));
+            waitForUserDialog.show();
+            this.binImage.hide();
+        }else{
+            IJ.run(this.binImage, "Adjustable Watershed","tolerance=" + tolerance);
+        }
     }
 
     /**

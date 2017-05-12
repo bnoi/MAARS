@@ -95,15 +95,25 @@ public class GuiFreeRun implements PlugIn{
         MaarsParameters parameters = null;
         if (Arrays.asList(listNames).contains(configFileName)){
             InputStream inStream = null;
-            try {
-                inStream = new FileInputStream(rootDir + File.separator + configFileName);
-            } catch (FileNotFoundException e) {
-                IOUtils.printErrorToIJLog(e);
+            if (FileUtils.exists(configFileName)) {
+                try {
+                    inStream = new FileInputStream(rootDir + File.separator + configFileName);
+                    parameters = new MaarsParameters(inStream);
+                    return parameters;
+                } catch (FileNotFoundException e) {
+                    IOUtils.printErrorToIJLog(e);
+                }
+
+            } else {
+                inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
+                parameters = new MaarsParameters(inStream);
+                new MaarsSegmentationDialog(parameters, null);
+                runSegmentation(parameters);
+                MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
+                return fluoAnalysisDialog.getParameters();
             }
-            parameters = new MaarsParameters(inStream);
-            parameters.setSavingPath(rootDir);
         }
-        return parameters;
+        return null;
     }
     private static MaarsParameters loadMaarsParameters(String configFileName) {
         return loadMaarsParameters(configFileName, null);
@@ -145,12 +155,9 @@ public class GuiFreeRun implements PlugIn{
     public static void main(String[] args) {
         new ImageJ();
         String configFileName = "maars_config.xml";
-        String dir = "/media/tong/data_claire/24C/102/24C_102_5";
+        String dir = "/Volumes/Macintosh/curioData/102/60x/26-10-1";
         MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
         parameters.setSavingPath(dir);
-        //new MaarsSegmentationDialog(parameters, null);
-//            runSegmentation(parameters);
-        //MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
         //executeAnalysis(fluoAnalysisDialog.getParameters());
         executeAnalysis(parameters);
 
