@@ -175,7 +175,7 @@ public class MAARS implements Runnable {
         ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, parameters.getDetectionChForMitosis(),
                 parameters.getCalibration(), parameters.getMinimumMitosisDuration(),
                 String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))));
-        PythonPipeline.savePythonScript(pathToSegDir + File.separator, script);
+        PythonPipeline.savePythonScript(pathToSegDir + File.separator + "_MITOSIS", script);
         IJ.log("Script generated");
         PythonPipeline.runPythonScript(pathToSegDir+ File.separator);
         if (showChromLagging) {

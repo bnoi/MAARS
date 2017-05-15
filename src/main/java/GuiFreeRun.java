@@ -1,4 +1,3 @@
-import edu.univ_tlse3.acquisition.MAARS_mda;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.gui.MaarsFluoAnalysisDialog;
@@ -50,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
+ * The main of MAARS without GUI configuration of MAARSparameters
  * Created by tongli on 28/04/2017.
  */
 public class GuiFreeRun implements PlugIn{
@@ -93,25 +93,24 @@ public class GuiFreeRun implements PlugIn{
         }
         String[] listNames = new File(rootDir).list();
         MaarsParameters parameters = null;
-        if (Arrays.asList(listNames).contains(configFileName)){
-            InputStream inStream = null;
-            if (FileUtils.exists(configFileName)) {
-                try {
-                    inStream = new FileInputStream(rootDir + File.separator + configFileName);
-                    parameters = new MaarsParameters(inStream);
-                    return parameters;
-                } catch (FileNotFoundException e) {
-                    IOUtils.printErrorToIJLog(e);
-                }
-
-            } else {
-                inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
+        InputStream inStream = null;
+        if (FileUtils.exists(configFileName)) {
+            try {
+                inStream = new FileInputStream(rootDir + File.separator + configFileName);
                 parameters = new MaarsParameters(inStream);
-                new MaarsSegmentationDialog(parameters, null);
-                runSegmentation(parameters);
-                MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
-                return fluoAnalysisDialog.getParameters();
+                return parameters;
+            } catch (FileNotFoundException e) {
+                IOUtils.printErrorToIJLog(e);
             }
+
+        } else {
+            inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
+            parameters = new MaarsParameters(inStream);
+            parameters.setSavingPath(rootDir);
+            new MaarsSegmentationDialog(parameters, null);
+            runSegmentation(parameters);
+            MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
+            return fluoAnalysisDialog.getParameters();
         }
         return null;
     }
@@ -127,7 +126,7 @@ public class GuiFreeRun implements PlugIn{
         es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
         es.shutdown();
         try {
-            es.awaitTermination(10, TimeUnit.MINUTES);
+            es.awaitTermination(20, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -155,7 +154,7 @@ public class GuiFreeRun implements PlugIn{
     public static void main(String[] args) {
         new ImageJ();
         String configFileName = "maars_config.xml";
-        String dir = "/Volumes/Macintosh/curioData/102/60x/26-10-1";
+        String dir = "/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1";
         MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
         parameters.setSavingPath(dir);
         //executeAnalysis(fluoAnalysisDialog.getParameters());
