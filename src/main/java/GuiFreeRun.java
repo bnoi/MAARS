@@ -91,10 +91,9 @@ public class GuiFreeRun implements PlugIn{
                 IJ.error("No folder Selected");
             }
         }
-        String[] listNames = new File(rootDir).list();
-        MaarsParameters parameters = null;
-        InputStream inStream = null;
-        if (FileUtils.exists(configFileName)) {
+        MaarsParameters parameters;
+        InputStream inStream;
+        if (FileUtils.exists(rootDir + File.separator +configFileName)) {
             try {
                 inStream = new FileInputStream(rootDir + File.separator + configFileName);
                 parameters = new MaarsParameters(inStream);
@@ -102,6 +101,7 @@ public class GuiFreeRun implements PlugIn{
             } catch (FileNotFoundException e) {
                 IOUtils.printErrorToIJLog(e);
             }
+            return null;
 
         } else {
             inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
@@ -112,7 +112,6 @@ public class GuiFreeRun implements PlugIn{
             MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
             return fluoAnalysisDialog.getParameters();
         }
-        return null;
     }
     private static MaarsParameters loadMaarsParameters(String configFileName) {
         return loadMaarsParameters(configFileName, null);
@@ -154,7 +153,7 @@ public class GuiFreeRun implements PlugIn{
     public static void main(String[] args) {
         new ImageJ();
         String configFileName = "maars_config.xml";
-        String dir = "/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1";
+        String dir = "/media/tong/MAARSData/MAARSData/mod20/12-06-1";
         MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
         parameters.setSavingPath(dir);
         //executeAnalysis(fluoAnalysisDialog.getParameters());

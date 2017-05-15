@@ -53,9 +53,10 @@ public class PythonPipeline {
         return script;
     }
 
-    public static void savePythonScript(String pathToSegDir, ArrayList<String> script) {
-        FileUtils.copyScriptDependency(pathToSegDir, TRACKMATE_NAME);
-        FileUtils.writeScript(pathToSegDir + SCRIPT_NAME, script);
+    public static void savePythonScript(String pathToMitosisDir, ArrayList<String> script) {
+        FileUtils.createFolder(pathToMitosisDir);
+        FileUtils.copyScriptDependency(pathToMitosisDir, TRACKMATE_NAME);
+        FileUtils.writeScript(pathToMitosisDir + SCRIPT_NAME, script);
     }
 
     /**

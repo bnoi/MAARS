@@ -53,12 +53,15 @@ public class FileUtils {
     /**
      * if current path do not exists, create a new one
      *
-     * @param pathToFluoDir folder to create
+     * @param pathToDir folder to create
      * @return succeed to create de dir or not
      */
-    public static Boolean createFolder(String pathToFluoDir) {
-        File fluoDir = new File(pathToFluoDir);
-        return fluoDir.mkdirs();
+    public static Boolean createFolder(String pathToDir) {
+        if (!exists(pathToDir)){
+            File fluoDir = new File(pathToDir);
+            return fluoDir.mkdirs();
+        }
+        return false;
     }
 
     /**
