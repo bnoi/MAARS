@@ -264,7 +264,7 @@ public class MAARS implements Runnable {
 //            if (FileUtils.exists(savingPath + File.separator + BF + "_1" + File.separator + "ROI.zip")) {
             if (true) {
                 String pathToFluoDir = savingPath + File.separator + FLUO + "_1";
-                parameters.setSavingPath(pathToFluoDir);
+//                parameters.setSavingPath(pathToFluoDir);
                 // from Roi initialize a set of cell
                 soc_.reset();
                 soc_.loadCells(savingPath + File.separator + BF + "_1");
@@ -345,7 +345,6 @@ public class MAARS implements Runnable {
                     IJ.log("Acquisition Done, proceeding to post-analysis");
                 } else {
                     // being static acquisition
-                    for (String channel : arrayChannels) {
                         Map<String, Future> channelsInFrame = new HashMap<>();
                         ImagePlus[] fluoChs = null;
                         try {
@@ -356,7 +355,7 @@ public class MAARS implements Runnable {
                             IOUtils.printErrorToIJLog(e);
                         }
                        for (ImagePlus fluoimg:fluoChs){
-                          channel = fluoimg.getTitle();
+                          String channel = fluoimg.getTitle();
                            if (do_analysis) {
                               Future future2 = es1.submit(new FluoAnalyzer(fluoimg, fluoimg.getCalibration(), soc_, channel,
                                        Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -366,8 +365,8 @@ public class MAARS implements Runnable {
                         }
                        }
                         tasksSet_.add(channelsInFrame);
-                    }
                 }
+                parameters.setSavingPath(savingPath);
                 es1.shutdown();
                 try {
                     es1.awaitTermination(60,TimeUnit.MINUTES);
