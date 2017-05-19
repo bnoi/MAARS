@@ -8,6 +8,8 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -168,5 +170,22 @@ public class FileUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static HashMap<String,String[]> readTable(String path){
+        HashMap<String,String[]> table= new HashMap<>();
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(path));
+            String str;
+            String[] splited;
+            while ((str = in.readLine()) != null) {
+                splited = str.split("\t");
+                table.put(splited[0], Arrays.copyOfRange(splited, 1, splited.length-1));
+            }
+            in.close();
+        } catch (IOException e) {
+            IOUtils.printErrorToIJLog(e);
+        }
+        return table;
     }
 }

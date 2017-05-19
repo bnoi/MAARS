@@ -3,7 +3,6 @@ package edu.univ_tlse3.cellstateanalysis;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 import ij.IJ;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,8 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PythonPipeline {
-    private static final String SCRIPT_NAME = "AnalyzeMAARSOutput.py";
-    private static final String TRACKMATE_NAME = "trackmate.py";
+    private static final String SCRIPT_NAME = "processMitosis.py";
+//    private static final String TRACKMATE_NAME = "trackmate.py";
 
     public static ArrayList<String> getPythonScript(String acqDir, String channel, String calibration, String minimumPeriod, String interval) {
         BufferedReader bfr = FileUtils.getBufferReaderOfScript(SCRIPT_NAME);
@@ -55,7 +54,7 @@ public class PythonPipeline {
 
     public static void savePythonScript(String pathToMitosisDir, ArrayList<String> script) {
         FileUtils.createFolder(pathToMitosisDir);
-        FileUtils.copyScriptDependency(pathToMitosisDir, TRACKMATE_NAME);
+//        FileUtils.copyScriptDependency(pathToMitosisDir, TRACKMATE_NAME);
         FileUtils.writeScript(pathToMitosisDir + SCRIPT_NAME, script);
     }
 
@@ -137,7 +136,7 @@ public class PythonPipeline {
 //       PythonPipeline.runPythonScript();
         //todo it will be cool if one day anaconda support jython. Though not possible for now. The codes below is tested with jython
 // /      ReportingUtils.logMessage(PythonPipeline.class.getProtectionDomain().getCodeSource().getLocation().getPath().substring(1)
-//              + "AnalyzeMAARSOutput.py");
+//              + "processMitosis.py");
 // ScriptEngineManager manager = new ScriptEngineManager();
 //      java.util.List<ScriptEngineFactory> factories = manager.getEngineFactories();
 //      for (ScriptEngineFactory f : factories) {
@@ -165,7 +164,7 @@ public class PythonPipeline {
 //      PyObject result = interpreter.eval("2 + 3");
 //      System.out.println(result.toString());
 //      ClassLoader loader = java.lang.ClassLoader.getSystemClassLoader();
-//      InputStream stream = loader.getResourceAsStream("AnalyzeMAARSOutput.py");
+//      InputStream stream = loader.getResourceAsStream("processMitosis.py");
 //      BufferedReader reader = BufferedReader(InputStreamReader(stream));
 //
 //      String script = "";

@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 /**
@@ -108,6 +107,7 @@ public class MAARS implements Runnable {
                 ImagePlus croppedImg = new Duplicator().run(mergedImg, j, j, 1, mergedImg.getNSlices(),
                         1, mergedImg.getNFrames());
                 IJ.run(croppedImg, "Grays", "");
+                croppedImg.setRoi(ImgUtils.centerCroppedRoi(cell.getCellShapeRoi()));
                 imgSaver.saveImgs(croppedImg, i, arrayChannels.get(j - 1), false);
             }
         }
@@ -116,51 +116,39 @@ public class MAARS implements Runnable {
         }
     }
 
-    private static void showChromLaggingCells(String pathToSegDir,
-                                              SetOfCells soc) {
-        if (FileUtils.exists(pathToSegDir + "_MITOSIS")) {
-            String[] listAcqNames = new File(pathToSegDir + "_MITOSIS" + File.separator + "figs" + File.separator)
-                    .list();
-            String pattern = "(\\d+)(_slopChangePoints_)(\\d+)(_)(\\d+)(.png)";
+    private static void findAbnormalCells(String pathToSegDir,
+                                          SetOfCells soc) {
+        String mitoDir = pathToSegDir + "_MITOSIS";
+        if (FileUtils.exists(mitoDir)) {
             PrintWriter out = null;
             try {
-                out = new PrintWriter(pathToSegDir + "_MITOSIS" + File.separator + "abnormalCells.txt");
+                out = new PrintWriter(mitoDir + File.separator + "abnormalCells.txt");
             } catch (FileNotFoundException e) {
                 IOUtils.printErrorToIJLog(e);
             }
-            assert listAcqNames != null;
-            for (String acqName : listAcqNames) {
-                if (Pattern.matches(pattern, acqName)) {
-                    String[] splitName = acqName.split("_", -1);
-                    int cellNb = Integer.parseInt(splitName[0]);
-                    int anaBOnsetFrame = Integer.parseInt(
-                            splitName[splitName.length - 1].substring(0, splitName[splitName.length - 1].length() - 4));
-                    Cell cell = soc.getCell(cellNb);
-                    cell.setAnaBOnsetFrame(anaBOnsetFrame);
-                    ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
-                    assert out != null;
-                    if (spotInBtwnFrames.size() > 0) {
-                        Collections.sort(spotInBtwnFrames);
-                        if (spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) - anaBOnsetFrame > 1) {
-                            out.println("Lagging :" + cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
-                            IJ.log("Lagging :" + cellNb + "_last_" + spotInBtwnFrames.get(spotInBtwnFrames.size() - 1) + "_onset_" + anaBOnsetFrame);
-                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-                                    + File.separator + cellNb + "_GFP.tif").show();
-                        }
+            HashMap map = FileUtils.readTable(mitoDir+File.separator+"mitosis_time_board.txt");
+            for (Object cellNb : map.keySet()) {
+                int cellNbInt = Integer.parseInt(String.valueOf(cellNb));
+                int anaBOnsetFrame = Integer.valueOf(((String[]) map.get(cellNb))[2]);
+                int lastAnaphaseFrame = Integer.valueOf(((String[]) map.get(cellNb))[3]);
+                Cell cell = soc.getCell(cellNbInt);
+                cell.setAnaBOnsetFrame(anaBOnsetFrame);
+                ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
+                assert out != null;
+                if (spotInBtwnFrames.size() > 0) {
+                    Collections.sort(spotInBtwnFrames);
+                    int laggingTimePoint = spotInBtwnFrames.get(spotInBtwnFrames.size() - 1);
+                    if (laggingTimePoint > anaBOnsetFrame && laggingTimePoint<lastAnaphaseFrame) {
+                        out.println("Lagging :" + cellNb + "_laggingTimePoint_" + laggingTimePoint + "_anaBonset_" + anaBOnsetFrame);
+                        IJ.log("Lagging :" + cellNb + "_laggingTimePoint_" + laggingTimePoint + "_anaBonset_" + anaBOnsetFrame);
+                        IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+                                + File.separator + cellNb + "_GFP.tif").show();
                     }
-                    //TODO to show unaligned cell
-                    if (cell.unalignedSpotFrames().size() > 0) {
-                        IJ.log("Unaligned : Cell " + cellNb + " detected with unaligned kinetochore(s)");
-                        out.println("Unaligned : Cell " + cellNb + " detected with unaligned kinetochore(s)");
-
-//                        if (splitChannel) {
-//                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-//                                    + File.separator + cellNb + "_GFP.tif").show();
-//                        } else {
-//                            IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
-//                                    + File.separator + cellNb + "_merged.tif").show();
-//                        }
-                    }
+                }
+                //TODO to show unaligned cell
+                if (cell.unalignedSpotFrames().size() > 0) {
+                    IJ.log("Unaligned : Cell " + cellNb + " detected with unaligned kinetochore(s)");
+                    out.println("Unaligned : Cell " + cellNb + " detected with unaligned kinetochore(s)");
                 }
             }
             assert out != null;
@@ -179,7 +167,7 @@ public class MAARS implements Runnable {
         IJ.log("Script generated");
         PythonPipeline.runPythonScript(pathToSegDir+ "_MITOSIS" + File.separator);
         if (showChromLagging) {
-            MAARS.showChromLaggingCells(pathToSegDir, soc);
+            MAARS.findAbnormalCells(pathToSegDir, soc);
         }
     }
 

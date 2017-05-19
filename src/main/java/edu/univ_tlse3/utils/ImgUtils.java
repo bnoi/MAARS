@@ -59,7 +59,7 @@ public class ImgUtils {
      * @param roi roi to process
      * @return processed ROI
      */
-    private static Roi centerCroppedRoi(Roi roi) {
+    public static Roi centerCroppedRoi(Roi roi) {
         int[] newXs = roi.getPolygon().xpoints;
         int[] newYs = roi.getPolygon().ypoints;
         int nbPoints = roi.getPolygon().npoints;

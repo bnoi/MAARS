@@ -39,7 +39,7 @@ public class FindLagging {
                     if (spLine.contains((int) FastMath.round(s.getFeature(Spot.POSITION_X) / fluoImgCal.pixelWidth),
                             (int) FastMath.round(s.getFeature(Spot.POSITION_Y) / fluoImgCal.pixelHeight))) {
                         if (SpotSetAnalyzor.distance(s, poles.get(0)) > discardLaggingSpotRange * spotDiameter || SpotSetAnalyzor.distance(s, poles.get(0)) > discardLaggingSpotRange * spotDiameter) {
-                            // lagging
+                            // potential lagging, this lagging will be confirmed only if it's later than anaB onset
                             cell.addSpotInBtwnFrame(frame);
                         }
                     } else {
