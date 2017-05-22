@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.regex.Pattern;
 
 /**
  * Main MAARS program
@@ -116,9 +115,9 @@ public class MAARS implements Runnable {
         }
     }
 
-    private static void findAbnormalCells(String pathToSegDir,
-                                          SetOfCells soc) {
-        String mitoDir = pathToSegDir + "_MITOSIS";
+    private static void findAbnormalCells(String mitoDir,
+                                          SetOfCells soc,
+                                          HashMap map) {
         if (FileUtils.exists(mitoDir)) {
             PrintWriter out = null;
             try {
@@ -126,7 +125,7 @@ public class MAARS implements Runnable {
             } catch (FileNotFoundException e) {
                 IOUtils.printErrorToIJLog(e);
             }
-            HashMap map = FileUtils.readTable(mitoDir+File.separator+"mitosis_time_board.txt");
+
             for (Object cellNb : map.keySet()) {
                 int cellNbInt = Integer.parseInt(String.valueOf(cellNb));
                 int anaBOnsetFrame = Integer.valueOf(((String[]) map.get(cellNb))[2]);
@@ -141,7 +140,7 @@ public class MAARS implements Runnable {
                     if (laggingTimePoint > anaBOnsetFrame && laggingTimePoint<lastAnaphaseFrame) {
                         out.println("Lagging :" + cellNb + "_laggingTimePoint_" + laggingTimePoint + "_anaBonset_" + anaBOnsetFrame);
                         IJ.log("Lagging :" + cellNb + "_laggingTimePoint_" + laggingTimePoint + "_anaBonset_" + anaBOnsetFrame);
-                        IJ.openImage(pathToSegDir + "_MITOSIS" + File.separator + "croppedImgs"
+                        IJ.openImage(mitoDir + File.separator + "croppedImgs"
                                 + File.separator + cellNb + "_GFP.tif").show();
                     }
                 }
@@ -157,18 +156,22 @@ public class MAARS implements Runnable {
         }
     }
 
-    static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir, Boolean showChromLagging) {
+    static HashMap getMitoticCellNbs(String mitoDir){
+        return FileUtils.readTable(mitoDir+File.separator+"mitosis_time_board.txt");
+    }
+
+    static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir) {
         // TODO need to find a place for the metadata, maybe in images
         IJ.log("Start python analysis");
+        String mitoDir = pathToSegDir+ "_MITOSIS";
         ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, parameters.getDetectionChForMitosis(),
                 parameters.getCalibration(), parameters.getMinimumMitosisDuration(),
                 String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))));
-        PythonPipeline.savePythonScript(pathToSegDir + "_MITOSIS" + File.separator, script);
+        PythonPipeline.savePythonScript(mitoDir + File.separator, script);
         IJ.log("Script generated");
-        PythonPipeline.runPythonScript(pathToSegDir+ "_MITOSIS" + File.separator);
-        if (showChromLagging) {
-            MAARS.findAbnormalCells(pathToSegDir, soc);
-        }
+        PythonPipeline.runPythonScript(mitoDir + File.separator);
+        HashMap map = MAARS.getMitoticCellNbs(mitoDir);
+        MAARS.findAbnormalCells(mitoDir, soc, map);
     }
 
 
@@ -252,14 +255,12 @@ public class MAARS implements Runnable {
 //            if (FileUtils.exists(savingPath + File.separator + BF + "_1" + File.separator + "ROI.zip")) {
             if (true) {
                 String pathToFluoDir = savingPath + File.separator + FLUO + "_1";
-//                parameters.setSavingPath(pathToFluoDir);
                 // from Roi initialize a set of cell
                 soc_.reset();
                 soc_.loadCells(savingPath + File.separator + BF + "_1");
                 soc_.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
 
                 // ----------------start acquisition and analysis --------//
-//                FluoAcqSetting fluoAcq = new FluoAcqSetting(parameters);
                 redirectLog(savingPath);
                 int frame = 0;
                 Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
@@ -373,11 +374,10 @@ public class MAARS implements Runnable {
                         if (IJ.isWindows()) {
                             savingPath = FileUtils.convertPathToLinuxType(savingPath + File.separator + BF + "_1");
                         }
-                        MAARS.analyzeMitosisDynamic(soc_, parameters, savingPath, true);
+                        MAARS.analyzeMitosisDynamic(soc_, parameters, savingPath);
                     }
                     ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                             + " sec for writing results");
-                    mergedImg = null;
                 }
 //                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");
             }

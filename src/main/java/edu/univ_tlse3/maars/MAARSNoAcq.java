@@ -333,7 +333,7 @@ public class MAARSNoAcq implements Runnable {
                         if (IJ.isWindows()) {
                             pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
                         }
-                        MAARS.analyzeMitosisDynamic(soc_, parameters, pathToSegDir, true);
+                        MAARS.analyzeMitosisDynamic(soc_, parameters, pathToSegDir);
                     }
                 }
             }

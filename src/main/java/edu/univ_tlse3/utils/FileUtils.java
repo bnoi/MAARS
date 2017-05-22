@@ -180,7 +180,7 @@ public class FileUtils {
             String[] splited;
             while ((str = in.readLine()) != null) {
                 splited = str.split("\t");
-                table.put(splited[0], Arrays.copyOfRange(splited, 1, splited.length-1));
+                table.put(splited[0], Arrays.copyOfRange(splited, 1, splited.length));
             }
             in.close();
         } catch (IOException e) {
