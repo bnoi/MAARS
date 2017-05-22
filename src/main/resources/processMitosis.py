@@ -52,7 +52,7 @@ def find_slope_change_point(elongation, minSegLen, timeInterval, majorAxieLen, c
         slope_changes.loc[i] = current_slope_change[1]
     slope_changes = slope_changes.sort_index()
     first_max_slope_change_index = int(slope_changes.idxmax()) if int(slope_changes.idxmax()) >= 0 else \
-    normed_anaphase.index[minSegLen]
+        normed_anaphase.index[minSegLen]
 
     range_to_null = 480 / timeInterval
     # try not to find the second max slope change close to the first one

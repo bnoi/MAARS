@@ -15,50 +15,50 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.*;
 
 public class MaarsTrackmate {
 
-    private Settings settings;
+   private Settings settings;
 
-    public MaarsTrackmate(ImagePlus img, double radius, double quality) {
-        settings = new Settings();
-        settings.setFrom(img);
+   public MaarsTrackmate(ImagePlus img, double radius, double quality) {
+      settings = new Settings();
+      settings.setFrom(img);
 
-        // Computer different features (in order)
+      // Computer different features (in order)
 
-        settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<FloatType>());
-        settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
-        settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
-        settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory<FloatType>());
-        settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory<FloatType>());
+      settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<FloatType>());
+      settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
+      settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
+      settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory<FloatType>());
+      settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory<FloatType>());
 
-        // Set up detection parameters.
+      // Set up detection parameters.
 
-        settings.detectorFactory = new LogDetectorFactory<FloatType>();
-        Map<String, Object> detectorSettings = new HashMap<>();
-        detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
-        detectorSettings.put(KEY_RADIUS, radius);
-        detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
-        detectorSettings.put(KEY_THRESHOLD, quality);
-        detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
-        settings.detectorSettings = detectorSettings;
-    }
+      settings.detectorFactory = new LogDetectorFactory<FloatType>();
+      Map<String, Object> detectorSettings = new HashMap<>();
+      detectorSettings.put(KEY_DO_SUBPIXEL_LOCALIZATION, true);
+      detectorSettings.put(KEY_RADIUS, radius);
+      detectorSettings.put(KEY_TARGET_CHANNEL, DEFAULT_TARGET_CHANNEL);
+      detectorSettings.put(KEY_THRESHOLD, quality);
+      detectorSettings.put(KEY_DO_MEDIAN_FILTERING, true);
+      settings.detectorSettings = detectorSettings;
+   }
 
-    /**
-     * Take parameters in the constructor then initalize trakemate object to get
-     * unfiltered spots.
-     *
-     * @param computeFeatures to compute or not features of spots
-     * @return Model a Trackmate style data structure
-     */
-    public Model doDetection(boolean computeFeatures) {
-        TrackMate trackmate = new TrackMate(settings);
+   /**
+    * Take parameters in the constructor then initalize trakemate object to get
+    * unfiltered spots.
+    *
+    * @param computeFeatures to compute or not features of spots
+    * @return Model a Trackmate style data structure
+    */
+   public Model doDetection(boolean computeFeatures) {
+      TrackMate trackmate = new TrackMate(settings);
 
-        trackmate.execDetection();
+      trackmate.execDetection();
 
-        trackmate.execInitialSpotFiltering();
+      trackmate.execInitialSpotFiltering();
 
-        if (computeFeatures) {
-            trackmate.computeSpotFeatures(false);
-        }
+      if (computeFeatures) {
+         trackmate.computeSpotFeatures(false);
+      }
 
-        return trackmate.getModel();
-    }
+      return trackmate.getModel();
+   }
 }

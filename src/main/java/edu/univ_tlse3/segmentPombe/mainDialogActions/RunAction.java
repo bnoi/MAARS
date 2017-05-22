@@ -10,26 +10,26 @@ import java.awt.event.ActionListener;
 
 public class RunAction implements ActionListener {
 
-    private SegPombeMainDialog mainDialog;
+   private SegPombeMainDialog mainDialog;
 
-    public RunAction(SegPombeMainDialog mainDialog) {
-        this.mainDialog = mainDialog;
-    }
+   public RunAction(SegPombeMainDialog mainDialog) {
+      this.mainDialog = mainDialog;
+   }
 
-    /**
-     * Action performed when run Button is triggered. It checks all parameters
-     * then run Algorithm.
-     */
-    public void actionPerformed(ActionEvent e) {
-        ParametersProcessor process = new ParametersProcessor(mainDialog);
-        if (process.checkParameters()) {
-            process.updateParameters();
-            SegPombeParameters parameters = process.getParameters();
-            SegPombe segPombe = new SegPombe(parameters, 0);
-            segPombe.createCorrelationImage();
-            segPombe.convertCorrelationToBinaryImage(false, Integer.MAX_VALUE);
-            segPombe.analyseAndFilterParticles();
-            segPombe.showAndSaveResultsAndCleanUp();
-        }
-    }
+   /**
+    * Action performed when run Button is triggered. It checks all parameters
+    * then run Algorithm.
+    */
+   public void actionPerformed(ActionEvent e) {
+      ParametersProcessor process = new ParametersProcessor(mainDialog);
+      if (process.checkParameters()) {
+         process.updateParameters();
+         SegPombeParameters parameters = process.getParameters();
+         SegPombe segPombe = new SegPombe(parameters, 0);
+         segPombe.createCorrelationImage();
+         segPombe.convertCorrelationToBinaryImage(false, Integer.MAX_VALUE);
+         segPombe.analyseAndFilterParticles();
+         segPombe.showAndSaveResultsAndCleanUp();
+      }
+   }
 }

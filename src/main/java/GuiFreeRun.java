@@ -7,150 +7,97 @@ import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.maars.MaarsSegmentation;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
-import fiji.plugin.trackmate.*;
-import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.features.FeatureFilter;
-import fiji.plugin.trackmate.features.edges.EdgeTargetAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeTimeLocationAnalyzer;
-import fiji.plugin.trackmate.features.edges.EdgeVelocityAnalyzer;
-import fiji.plugin.trackmate.features.track.*;
-import fiji.plugin.trackmate.io.TmXmlReader;
-import fiji.plugin.trackmate.io.TmXmlWriter;
-import fiji.plugin.trackmate.tracking.LAPUtils;
-import fiji.plugin.trackmate.tracking.sparselap.SparseLAPTrackerFactory;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
-import ij.ImageJ;
-import ij.ImagePlus;
-import ij.measure.ResultsTable;
-import ij.plugin.Concatenator;
 import ij.plugin.PlugIn;
-import jdk.nashorn.internal.parser.JSONParser;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONStringer;
-import org.micromanager.PositionList;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 /**
  * The main of MAARS without GUI configuration of MAARSparameters
  * Created by tongli on 28/04/2017.
  */
-public class GuiFreeRun implements PlugIn{
-    @Override
-    public void run(String s) {
-        String configFileName = "maars_config.xml";
-        MaarsParameters parameters = loadMaarsParameters(configFileName);
-        if (!Boolean.parseBoolean(parameters.getSkipSegmentation())){
-            runSegmentation(parameters);
-            parameters.setSkipSegmentation(!Boolean.parseBoolean(parameters.getSkipSegmentation()));
-        }
-        MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
-        executeAnalysis(fluoAnalysisDialog.getParameters());
-//        byte[] encoded = new byte[0];
-//        try {
-//            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        PositionList pl = new PositionList();
-//        try {
-//            pl.load("/home/tong/Desktop/new_mda/PositionList.pos");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println(pl.getPosition(0).getX());
-    }
-
-    private static MaarsParameters loadMaarsParameters(String configFileName, String rootDir){
-        if (rootDir == null) {
-            JFileChooser chooser = new JFileChooser();
-            chooser.setCurrentDirectory(new File("."));
-            chooser.setDialogTitle("Directory of MAARS folder");
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                rootDir = String.valueOf(chooser.getSelectedFile());
-            } else {
-                IJ.error("No folder Selected");
-            }
-        }
-        MaarsParameters parameters;
-        InputStream inStream;
-        if (FileUtils.exists(rootDir + File.separator +configFileName)) {
-            try {
-                inStream = new FileInputStream(rootDir + File.separator + configFileName);
-                parameters = new MaarsParameters(inStream);
-                return parameters;
-            } catch (FileNotFoundException e) {
-                IOUtils.printErrorToIJLog(e);
-            }
-            return null;
-
-        } else {
-            inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
+public class GuiFreeRun implements PlugIn {
+   private static MaarsParameters loadMaarsParameters(String configFileName, String rootDir) {
+      if (rootDir == null) {
+         JFileChooser chooser = new JFileChooser();
+         chooser.setCurrentDirectory(new File("."));
+         chooser.setDialogTitle("Directory of MAARS folder");
+         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            rootDir = String.valueOf(chooser.getSelectedFile());
+         } else {
+            IJ.error("No folder Selected");
+         }
+      }
+      MaarsParameters parameters;
+      InputStream inStream;
+      if (FileUtils.exists(rootDir + File.separator + configFileName)) {
+         try {
+            inStream = new FileInputStream(rootDir + File.separator + configFileName);
             parameters = new MaarsParameters(inStream);
-            parameters.setSavingPath(rootDir);
-            new MaarsSegmentationDialog(parameters, null);
-            runSegmentation(parameters);
-            MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
-            return fluoAnalysisDialog.getParameters();
-        }
-    }
-    private static MaarsParameters loadMaarsParameters(String configFileName) {
-        return loadMaarsParameters(configFileName, null);
-    }
+            return parameters;
+         } catch (FileNotFoundException e) {
+            IOUtils.printErrorToIJLog(e);
+         }
+         return null;
 
-    private static void executeAnalysis(MaarsParameters parameters) {
-        SetOfCells soc = new SetOfCells();
-        SOCVisualizer socVisualizer = new SOCVisualizer();
-        socVisualizer.createGUI(soc);
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
-        es.shutdown();
-        try {
-            es.awaitTermination(20, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+      } else {
+         inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
+         parameters = new MaarsParameters(inStream);
+         parameters.setSavingPath(rootDir);
+         new MaarsSegmentationDialog(parameters, null);
+         runSegmentation(parameters);
+         MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
+         return fluoAnalysisDialog.getParameters();
+      }
+   }
 
-    public static void runSegmentation(MaarsParameters parameters){
-        String defaultBfFolderName = "BF_1";
-        String originalFolder = parameters.getSavingPath();
-        String segDir = parameters.getSavingPath() + File.separator + defaultBfFolderName + File.separator;
-        parameters.setSavingPath(segDir);
-        ArrayList<String> names = FileUtils.getTiffWithPattern(segDir,".*_MMStack_.*");
-        String pathToSegMovie = FileUtils.convertPath(segDir + File.separator + names.get(0));
-        MaarsSegmentation ms = new MaarsSegmentation(parameters, IJ.openImage(pathToSegMovie),0);
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        es.execute(ms);
-        es.shutdown();
-        try {
-            es.awaitTermination(30,TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        parameters.setSavingPath(originalFolder);
-    }
+   private static MaarsParameters loadMaarsParameters(String configFileName) {
+      return loadMaarsParameters(configFileName, null);
+   }
 
-    public static void main(String[] args) {
+   private static void executeAnalysis(MaarsParameters parameters) {
+      SetOfCells soc = new SetOfCells(0);
+      SOCVisualizer socVisualizer = new SOCVisualizer();
+      socVisualizer.createGUI(soc);
+      ExecutorService es = Executors.newSingleThreadExecutor();
+      es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
+      es.shutdown();
+      try {
+         es.awaitTermination(20, TimeUnit.MINUTES);
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      }
+   }
+
+   public static void runSegmentation(MaarsParameters parameters) {
+      String defaultBfFolderName = "BF_1";
+      String originalFolder = parameters.getSavingPath();
+      String segDir = parameters.getSavingPath() + File.separator + defaultBfFolderName + File.separator;
+      parameters.setSavingPath(segDir);
+      ArrayList<String> names = FileUtils.getTiffWithPattern(segDir, ".*_MMStack_.*");
+      String pathToSegMovie = FileUtils.convertPath(segDir + File.separator + names.get(0));
+      MaarsSegmentation ms = new MaarsSegmentation(parameters, IJ.openImage(pathToSegMovie), 0);
+      ExecutorService es = Executors.newSingleThreadExecutor();
+      es.execute(ms);
+      es.shutdown();
+      try {
+         es.awaitTermination(30, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      }
+      parameters.setSavingPath(originalFolder);
+   }
+
+   public static void main(String[] args) {
 //        new ImageJ();
 //        String configFileName = "maars_config.xml";
 //        String dir = "/media/tong/MAARSData/MAARSData/rad21/16-06-2";
@@ -223,9 +170,6 @@ public class GuiFreeRun implements PlugIn{
 //        System.out.println(reader.getModel().set);
 
 
-
-
-
 //        ImagePlus imp = IJ.openImage("/Volumes/Macintosh/curioData/MAARSdata/102/16-06-1/X0_Y0_FLUO/CFP_2/CFP_2_MMStack_Pos0.ome.tif");
 //        imp.show();
 //        Model model = new Model();
@@ -270,5 +214,31 @@ public class GuiFreeRun implements PlugIn{
 //        displayer.render();
 //        displayer.refresh();
 
-    }
+   }
+
+   @Override
+   public void run(String s) {
+      String configFileName = "maars_config.xml";
+      MaarsParameters parameters = loadMaarsParameters(configFileName);
+      if (!Boolean.parseBoolean(parameters.getSkipSegmentation())) {
+         runSegmentation(parameters);
+         parameters.setSkipSegmentation(!Boolean.parseBoolean(parameters.getSkipSegmentation()));
+      }
+      MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
+      executeAnalysis(fluoAnalysisDialog.getParameters());
+//        byte[] encoded = new byte[0];
+//        try {
+//            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        PositionList pl = new PositionList();
+//        try {
+//            pl.load("/home/tong/Desktop/new_mda/PositionList.pos");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println(pl.getPosition(0).getX());
+   }
 }

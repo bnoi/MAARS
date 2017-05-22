@@ -8,34 +8,33 @@ import ij.plugin.Concatenator;
 import java.io.File;
 
 public class MAARSImgSaver {
-    public static final String croppedImgs = "croppedImgs";
-    public String croppedImgDir;
+   public static final String croppedImgs = "croppedImgs";
+   public String croppedImgDir;
 
-    public MAARSImgSaver(String pathToFluoDir) {
-        this.croppedImgDir = pathToFluoDir + croppedImgs + File.separator;
-        FileUtils.createFolder(croppedImgDir);
-    }
+   public MAARSImgSaver(String pathToFluoDir) {
+      this.croppedImgDir = pathToFluoDir + croppedImgs + File.separator;
+      FileUtils.createFolder(croppedImgDir);
+   }
 
-    /**
-     *
-     * @param croppedImg    set of image
-     * @param cellNb        number of current cell
-     * @param channelName   channel name
-     * @param append        append to existing image or not
-     */
-    public void saveImgs(ImagePlus croppedImg, int cellNb, String channelName, boolean append) {
-        String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + channelName + ".tif";
-        IJ.run(croppedImg, "Enhance Contrast", "saturated=0.35");
-        if (FileUtils.exists(pathToCroppedImg) && append) {
-            Concatenator concatenator = new Concatenator();
-            concatenator.setIm5D(true);
-            ImagePlus new_croppedImg = concatenator.concatenate(IJ.openImage(pathToCroppedImg), croppedImg, false);
-            new_croppedImg.setRoi(croppedImg.getRoi());
-            IJ.saveAsTiff(new_croppedImg, pathToCroppedImg);
-        } else {
-            IJ.saveAsTiff(croppedImg, pathToCroppedImg);
-        }
-    }
+   /**
+    * @param croppedImg  set of image
+    * @param cellNb      number of current cell
+    * @param channelName channel name
+    * @param append      append to existing image or not
+    */
+   public void saveImgs(ImagePlus croppedImg, int cellNb, String channelName, boolean append) {
+      String pathToCroppedImg = croppedImgDir + String.valueOf(cellNb) + "_" + channelName + ".tif";
+      IJ.run(croppedImg, "Enhance Contrast", "saturated=0.35");
+      if (FileUtils.exists(pathToCroppedImg) && append) {
+         Concatenator concatenator = new Concatenator();
+         concatenator.setIm5D(true);
+         ImagePlus new_croppedImg = concatenator.concatenate(IJ.openImage(pathToCroppedImg), croppedImg, false);
+         new_croppedImg.setRoi(croppedImg.getRoi());
+         IJ.saveAsTiff(new_croppedImg, pathToCroppedImg);
+      } else {
+         IJ.saveAsTiff(croppedImg, pathToCroppedImg);
+      }
+   }
 
 
 //   public void exportChannelBtf(Boolean splitChannel, Set<String> arrayChannels) {

@@ -131,13 +131,13 @@
                         <rule>
                             <banDuplicateClasses>
                                 <!--<dependencies>-->
-                                    <!-- org.json clashes -->
-                                    <dependency>
-                                        <artifactId>MMJ_</artifactId>
-                                        <ignoreClasses>
-                                            <ignoreClass>org/json/*</ignoreClass>
-                                        </ignoreClasses>
-                                    </dependency>
+                                <!-- org.json clashes -->
+                                <dependency>
+                                    <artifactId>MMJ_</artifactId>
+                                    <ignoreClasses>
+                                        <ignoreClass>org/json/*</ignoreClass>
+                                    </ignoreClasses>
+                                </dependency>
                                 <!--</dependencies>-->
                                 <findAllDuplicates>true</findAllDuplicates>
                                 <!--<ignoreClasses>-->

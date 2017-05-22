@@ -91,232 +91,222 @@ import java.util.List;
  */
 public class MaarsParameters {
 
-    public static final String RANGE_SIZE_FOR_MOVIE = "RANGE_SIZE_FOR_MOVIE";
-    public static final String STEP = "STEP";
-    public static final String SAVE_FLUORESCENT_MOVIES = "SAVE_FLUORESCENT_MOVIES";
-    public static final String DYNAMIC = "DYNAMIC";
-    public static final String PATH_TO_POSITION_LIST = "PATH_TO_POSITION_LIST";
-    public static final String MINIMUM_CELL_AREA = "MINIMUM_CELL_AREA";
-    public static final String MAXIMUM_CELL_AREA = "MAXIMUM_CELL_AREA";
-    public static final String FILTER_MEAN_GREY_VALUE = "FILTER_MEAN_GREY_VALUE";
-    public static final String MEAN_GREY_VALUE = "MEAN_GREY_VALUE";
-    public static final String FILTER_SOLIDITY = "FILTER_SOLIDITY";
-    public static final String SOLIDITY = "SOLIDITY";
-    public static final String TIME_INTERVAL = "TIME_INTERVAL";
-    public static final String TIME_LIMIT = "TIME_LIMIT";
-    public static final String DO_ANALYSIS = "DO_ANALYSIS";
-    public static final String ANALYSIS_OPTIONS = "ANALYSIS_OPTIONS";
-    public static final String DO_MITOSIS_RATIO = "DO_MITOSIS_RATIO";
-    public static final String DO_INTERPHASE_RATIO = "DO_INTERPHASE_RATIO";
-    public static final String DO_METAPHASE_RATIO = "DO_METAPHASE_RATIO";
-    public static final String DO_FIND_MEROTELY = "DO_FIND_MEROTELY";
-    public static final String CHANNEL = "CHANNEL";
-    public static final String GFP = "GFP";
-    public static final String CFP = "CFP";
-    public static final String TXRED = "TXRED";
-    public static final String DAPI = "DAPI";
-    public static final String X_POS = "X_POS";
-    public static final String Y_POS = "Y_POS";
-    public static final String FRAME = "FRAME";
-    public static final String CUR_CHANNEL = "CHANNEL";
-    public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
-    public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
-    public static final String PROJECTED = "PROJECTED";
-    public static final String PATH_TO_BF_ACQ_SETTING = "PATH_TO_BF_ACQ_SETTING";
-    public static final String PATH_TO_FLUO_ACQ_SETTING = "PATH_TO_FLUO_ACQ_SETTING";
-    static final String CELL_SIZE = "CELL_SIZE";
-    static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
-    static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
-    private static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
-    private static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
-    private static final String MITOSIS_DETECTION_PARAMETERS = "MITOSIS_DETECTION_PARAMETERS";
-    private static final String MINIMUM_DURATION = "MINIMUM_DURATION";
-    private static final String DETECTION_CHANNEL = "DETECTION_CHANNEL";
-    private static final String SPOT_RADIUS = "SPOT_RADIUS";
-    private static final String MAXIMUM_NUMBER_OF_SPOT = "MAXIMUM_NUMBER_OF_SPOT";
-    private static final String QUALITY = "QUALITY";
-    private static final String SAVING_PATH = "SAVING_PATH";
-    private static final String SHUTTER = "SHUTTER";
-    private static final String COLOR = "COLOR";
-    private static final String EXPOSURE = "EXPOSURE";
-    private static final String USING = "USING";
-    private static final String GENERAL_ACQUISITION_PARAMETERS = "GENERAL_ACQUISITION_PARAMETERS";
-    private static final String DEFAULT_CHANNEL_PARAMATERS = "DEFAULT_CHANNEL_PARAMATERS";
-    private static final String CHANNEL_GROUP = "CHANNEL_GROUP";
-    private static final String SKIP = "SKIP";
-    private static final String CALIBRATION = "CALIBRATION";
-    private static final String BATCH_MODE = "BATCH_MODE";
-    private static final String TOLERANCE = "TOLERANCE";
+   public static final String RANGE_SIZE_FOR_MOVIE = "RANGE_SIZE_FOR_MOVIE";
+   public static final String STEP = "STEP";
+   public static final String SAVE_FLUORESCENT_MOVIES = "SAVE_FLUORESCENT_MOVIES";
+   public static final String DYNAMIC = "DYNAMIC";
+   public static final String PATH_TO_POSITION_LIST = "PATH_TO_POSITION_LIST";
+   public static final String MINIMUM_CELL_AREA = "MINIMUM_CELL_AREA";
+   public static final String MAXIMUM_CELL_AREA = "MAXIMUM_CELL_AREA";
+   public static final String FILTER_MEAN_GREY_VALUE = "FILTER_MEAN_GREY_VALUE";
+   public static final String MEAN_GREY_VALUE = "MEAN_GREY_VALUE";
+   public static final String FILTER_SOLIDITY = "FILTER_SOLIDITY";
+   public static final String SOLIDITY = "SOLIDITY";
+   public static final String TIME_INTERVAL = "TIME_INTERVAL";
+   public static final String TIME_LIMIT = "TIME_LIMIT";
+   public static final String DO_ANALYSIS = "DO_ANALYSIS";
+   public static final String ANALYSIS_OPTIONS = "ANALYSIS_OPTIONS";
+   public static final String DO_MITOSIS_RATIO = "DO_MITOSIS_RATIO";
+   public static final String DO_INTERPHASE_RATIO = "DO_INTERPHASE_RATIO";
+   public static final String DO_METAPHASE_RATIO = "DO_METAPHASE_RATIO";
+   public static final String DO_FIND_MEROTELY = "DO_FIND_MEROTELY";
+   public static final String CHANNEL = "CHANNEL";
+   public static final String GFP = "GFP";
+   public static final String CFP = "CFP";
+   public static final String TXRED = "TXRED";
+   public static final String DAPI = "DAPI";
+   public static final String X_POS = "X_POS";
+   public static final String Y_POS = "Y_POS";
+   public static final String FRAME = "FRAME";
+   public static final String CUR_CHANNEL = "CHANNEL";
+   public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
+   public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
+   public static final String PROJECTED = "PROJECTED";
+   public static final String PATH_TO_BF_ACQ_SETTING = "PATH_TO_BF_ACQ_SETTING";
+   public static final String PATH_TO_FLUO_ACQ_SETTING = "PATH_TO_FLUO_ACQ_SETTING";
+   static final String CELL_SIZE = "CELL_SIZE";
+   static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
+   static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
+   private static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
+   private static final String FLUO_ANALYSIS_PARAMETERS = "FLUO_ANALYSIS_PARAMETERS";
+   private static final String MITOSIS_DETECTION_PARAMETERS = "MITOSIS_DETECTION_PARAMETERS";
+   private static final String MINIMUM_DURATION = "MINIMUM_DURATION";
+   private static final String DETECTION_CHANNEL = "DETECTION_CHANNEL";
+   private static final String SPOT_RADIUS = "SPOT_RADIUS";
+   private static final String MAXIMUM_NUMBER_OF_SPOT = "MAXIMUM_NUMBER_OF_SPOT";
+   private static final String QUALITY = "QUALITY";
+   private static final String SAVING_PATH = "SAVING_PATH";
+   private static final String SHUTTER = "SHUTTER";
+   private static final String COLOR = "COLOR";
+   private static final String EXPOSURE = "EXPOSURE";
+   private static final String USING = "USING";
+   private static final String GENERAL_ACQUISITION_PARAMETERS = "GENERAL_ACQUISITION_PARAMETERS";
+   private static final String DEFAULT_CHANNEL_PARAMATERS = "DEFAULT_CHANNEL_PARAMATERS";
+   private static final String CHANNEL_GROUP = "CHANNEL_GROUP";
+   private static final String SKIP = "SKIP";
+   private static final String CALIBRATION = "CALIBRATION";
+   private static final String BATCH_MODE = "BATCH_MODE";
+   private static final String TOLERANCE = "TOLERANCE";
 
 
-    private Document doc;
-    private Element root;
-    private String[] allColors = {"GREEN", "CYAN", "RED", "BLUE", "WHITE", "GRAY"};
+   private Document doc;
+   private Element root;
+   private String[] allColors = {"GREEN", "CYAN", "RED", "BLUE", "WHITE", "GRAY"};
 
-    /**
-     * Constructor of Element need path to configuration file
-     *
-     * @param defaultParametersStream input stream conaining xml file information
-     */
-    public MaarsParameters(InputStream defaultParametersStream) {
+   /**
+    * Constructor of Element need path to configuration file
+    *
+    * @param defaultParametersStream input stream conaining xml file information
+    */
+   public MaarsParameters(InputStream defaultParametersStream) {
 
-        final SAXBuilder sb = new SAXBuilder();
-        try {
-            try {
-                doc = sb.build(defaultParametersStream);
-            } catch (IOException e) {
-                IOUtils.printErrorToIJLog(e);
-            }
-        } catch (JDOMException e) {
+      final SAXBuilder sb = new SAXBuilder();
+      try {
+         try {
+            doc = sb.build(defaultParametersStream);
+         } catch (IOException e) {
             IOUtils.printErrorToIJLog(e);
-        }
-        root = (Element) doc.getContent(0);
-    }
+         }
+      } catch (JDOMException e) {
+         IOUtils.printErrorToIJLog(e);
+      }
+      root = (Element) doc.getContent(0);
+   }
 
-    /**
-     * empty
-     */
-    public MaarsParameters() {
-    }
+   /**
+    * empty
+    */
+   public MaarsParameters() {
+   }
 
-    /**
-     * The few following colors are return as Color object : GREEN, CYAN, RED,
-     * BLUE, WHITE NB : return GRAY if unknown color
-     *
-     * @param colorName name of the color
-     * @return Color
-     */
-    public static Color getColor(String colorName) {
-        if (colorName.equals("GREEN")) {
-            return Color.GREEN;
-        } else {
-            if (colorName.equals("CYAN")) {
-                return Color.CYAN;
+   /**
+    * The few following colors are return as Color object : GREEN, CYAN, RED,
+    * BLUE, WHITE NB : return GRAY if unknown color
+    *
+    * @param colorName name of the color
+    * @return Color
+    */
+   public static Color getColor(String colorName) {
+      if (colorName.equals("GREEN")) {
+         return Color.GREEN;
+      } else {
+         if (colorName.equals("CYAN")) {
+            return Color.CYAN;
+         } else {
+            if (colorName.equals("RED")) {
+               return Color.RED;
             } else {
-                if (colorName.equals("RED")) {
-                    return Color.RED;
-                } else {
-                    if (colorName.equals("BLUE")) {
-                        return Color.BLUE;
-                    } else {
-                        if (colorName.equals("WHITE")) {
-                            return Color.WHITE;
-                        } else {
-                            return Color.GRAY;
-                        }
-                    }
-                }
+               if (colorName.equals("BLUE")) {
+                  return Color.BLUE;
+               } else {
+                  if (colorName.equals("WHITE")) {
+                     return Color.WHITE;
+                  } else {
+                     return Color.GRAY;
+                  }
+               }
             }
-        }
-    }
+         }
+      }
+   }
 
-    /**
-     * Write the parameters into the configuration file
-     *
-     * @throws IOException error than can not write xml file
-     */
-    public void save() throws IOException {
-        doc.setContent(root);
-        XMLOutputter xmlOutput = new XMLOutputter();
-        xmlOutput.setFormat(Format.getPrettyFormat());
-        xmlOutput.output(doc, new FileWriter("maars_config.xml"));
-    }
+   public static int getTimePointsNb(MaarsParameters parameters) {
+      double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
+            * 1000;
+      double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+      return (int) (timeLimit / fluoTimeInterval);
+   }
 
-    /**
-     * * Write the parameters into the configuration file
-     *
-     * @param path  path to save
-     */
-    public void save(String path){
-        doc.setContent(root);
-        XMLOutputter xmlOutput = new XMLOutputter();
-        xmlOutput.setFormat(Format.getPrettyFormat());
-        try {
-            xmlOutput.output(doc, new FileWriter(path + File.separator + "maars_config.xml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+   public static int getSliceNb(MaarsParameters parameters) {
+      return (int) (Double.valueOf(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE)) /
+            Double.valueOf(parameters.getFluoParameter(MaarsParameters.STEP)) + 1);
+   }
 
-    // Getter
+   // Getter
 
-    /**
-     * @return  path to position list file
-     */
-    public String getPathToPositionList() {
-        return root.getChildText(PATH_TO_POSITION_LIST);
-    }
+   public static int getChNb(MaarsParameters parameters) {
+      String channelsString = parameters.getUsingChannels();
+      String[] arrayChannels = channelsString.split(",", -1);
+      return arrayChannels.length;
+   }
 
-    /**
-     * @return analysis with dynamic or not
-     */
-    public boolean useDynamic() {
-        return Boolean.parseBoolean(root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(DYNAMIC));
-    }
+   public static String[] getChArray(MaarsParameters parameters) {
+      String channelsString = parameters.getUsingChannels();
+      return channelsString.split(",", -1);
+   }
 
-    /**
-     * @return saving folder of MAARS output
-     */
-    public String getSavingPath() {
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(SAVING_PATH);
-    }
+   /**
+    * Write the parameters into the configuration file
+    *
+    * @throws IOException error than can not write xml file
+    */
+   public void save() throws IOException {
+      doc.setContent(root);
+      XMLOutputter xmlOutput = new XMLOutputter();
+      xmlOutput.setFormat(Format.getPrettyFormat());
+      xmlOutput.output(doc, new FileWriter("maars_config.xml"));
+   }
 
-    /**
-     * set saving path
-     *
-     * @param path : corresponding value of parameter
-     */
-    public void setSavingPath(String path) {
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(SAVING_PATH).setText(path);
-    }
+   /**
+    * * Write the parameters into the configuration file
+    *
+    * @param path path to save
+    */
+   public void save(String path) {
+      doc.setContent(root);
+      XMLOutputter xmlOutput = new XMLOutputter();
+      xmlOutput.setFormat(Format.getPrettyFormat());
+      try {
+         xmlOutput.output(doc, new FileWriter(path + File.separator + "maars_config.xml"));
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
 
-    /**
-     * @param parameter name of fluo parameter
-     * @return time limit of fluorescence acquisition for one acquisition
-     */
-    public String getFluoParameter(final String parameter) {
-        return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(parameter);
-    }
+   /**
+    * @return path to position list file
+    */
+   public String getPathToPositionList() {
+      return root.getChildText(PATH_TO_POSITION_LIST);
+   }
 
-    /**
-     * @param parameter name of fluo parameter
-     * @return time limit of fluorescence acquisition for one acquisition
-     */
-    public String getSegmentationParameter(final String parameter) {
-        return root.getChild(SEGMENTATION_PARAMETERS).getChildText(parameter);
-    }
+   /**
+    * @param pathToPositionList path to positionlist file
+    */
+   public void setPathToPositionList(String pathToPositionList) {
+      root.getChild(PATH_TO_POSITION_LIST).setText(pathToPositionList);
+   }
 
-    /**
-     * @return the name of channel group set in micromanager
-     */
-    public String getChannelGroup() {
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(CHANNEL_GROUP);
-    }
+   /**
+    * @return analysis with dynamic or not
+    */
+   public boolean useDynamic() {
+      return Boolean.parseBoolean(root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(DYNAMIC));
+   }
 
-    /**
-     * @param channelGroup channel group name
-     */
-    public void setChannelGroup(String channelGroup) {
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(CHANNEL_GROUP).setText(channelGroup);
-    }
+   /**
+    * @return saving folder of MAARS output
+    */
+   public String getSavingPath() {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(SAVING_PATH);
+   }
 
-    /**
-     * @param ch : GFP, CFP, DAPI, TXRED
-     * @return corresponding channel shutter
-     */
-    public String getChShutter(String ch) {
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-                .getChildText(SHUTTER);
-    }
+   /**
+    * set saving path
+    *
+    * @param path : corresponding value of parameter
+    */
+   public void setSavingPath(String path) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(SAVING_PATH).setText(path);
+   }
 
-    /**
-     * @param ch : GFP, CFP, DAPI, TXRED
-     * @return corresponding channel color
-     */
-    public String getChColor(String ch) {
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-                .getChildText(COLOR);
-    }
+   /**
+    * @param parameter name of fluo parameter
+    * @return time limit of fluorescence acquisition for one acquisition
+    */
+   public String getFluoParameter(final String parameter) {
+      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(parameter);
+   }
 
 //   /**
 //    * @param ch : GFP, CFP, DAPI, TXRED
@@ -336,308 +326,305 @@ public class MaarsParameters {
 //              .getChildText(SHUTTER);
 //   }
 
-    /**
-     * @param ch : GFP, CFP, DAPI, TXRED
-     * @return corresponding channel color
-     */
-    public String getChExposure(String ch) {
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-                .getChildText(EXPOSURE);
-    }
+   /**
+    * @param parameter name of fluo parameter
+    * @return time limit of fluorescence acquisition for one acquisition
+    */
+   public String getSegmentationParameter(final String parameter) {
+      return root.getChild(SEGMENTATION_PARAMETERS).getChildText(parameter);
+   }
 
-    /**
-     * @param ch: GFP, CFP, DAPI, TXRED
-     * @return MAXIMUM_NUMBER_OF_SPOT of corresponding channel
-     */
-    public String getChMaxNbSpot(String ch) {
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-                .getChildText(MAXIMUM_NUMBER_OF_SPOT);
-    }
+   /**
+    * @return the name of channel group set in micromanager
+    */
+   public String getChannelGroup() {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(CHANNEL_GROUP);
+   }
 
-    /**
-     * @param ch: GFP, CFP, DAPI, TXRED
-     * @return SPOT_RADIUS of corresponding channel
-     */
-    public String getChSpotRaius(String ch) {
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChildText(SPOT_RADIUS);
-    }
+   /**
+    * @param channelGroup channel group name
+    */
+   public void setChannelGroup(String channelGroup) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(CHANNEL_GROUP).setText(channelGroup);
+   }
 
-    /**
-     * @param ch: GFP, CFP, DAPI, TXRED
-     * @return SPOT_RADIUS of corresponding channel
-     */
-    public String getChQuality(String ch) {
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChildText(QUALITY);
-    }
+   /**
+    * @param ch : GFP, CFP, DAPI, TXRED
+    * @return corresponding channel shutter
+    */
+   public String getChShutter(String ch) {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+            .getChildText(SHUTTER);
+   }
 
-    /**
-     *@return list of all channels
-     */
-    public List<String> getAllChannels() {
-        ArrayList<String> channelNames = new ArrayList<>();
-        for (Element e : root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren()) {
-            channelNames.add(e.getName());
-        }
-        return channelNames;
-    }
+   /**
+    * @param ch : GFP, CFP, DAPI, TXRED
+    * @return corresponding channel color
+    */
+   public String getChColor(String ch) {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+            .getChildText(COLOR);
+   }
 
-    /**
-     * @return get channels used for fluo analysis
-     */
-    public String getUsingChannels() {
-        return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(USING);
-    }
+   /**
+    * @param ch : GFP, CFP, DAPI, TXRED
+    * @return corresponding channel color
+    */
+   public String getChExposure(String ch) {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+            .getChildText(EXPOSURE);
+   }
 
-    /**
-     * set channels to USING channel
-     *
-     * @param channels channels that are being using for acquisitions
-     */
-    public void setUsingChannels(String channels) {
-        root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(USING).setText(channels);
-    }
+   /**
+    * @param ch: GFP, CFP, DAPI, TXRED
+    * @return MAXIMUM_NUMBER_OF_SPOT of corresponding channel
+    */
+   public String getChMaxNbSpot(String ch) {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+            .getChildText(MAXIMUM_NUMBER_OF_SPOT);
+   }
 
-    /**
-     *
-     * @return  whether or not skip the segmentation
-     */
-    public String getSkipSegmentation() {
-        return root.getChild(SEGMENTATION_PARAMETERS).getChildText(SKIP);
-    }
+   /**
+    * @param ch: GFP, CFP, DAPI, TXRED
+    * @return SPOT_RADIUS of corresponding channel
+    */
+   public String getChSpotRaius(String ch) {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChildText(SPOT_RADIUS);
+   }
 
-    public void setSkipSegmentation(Boolean skip) {
-        root.getChild(SEGMENTATION_PARAMETERS).getChild(SKIP).setText(String.valueOf(skip));
-    }
+   /**
+    * @param ch: GFP, CFP, DAPI, TXRED
+    * @return SPOT_RADIUS of corresponding channel
+    */
+   public String getChQuality(String ch) {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChildText(QUALITY);
+   }
 
-    /**
-     *
-     * @return the parameter minimum mitosis duration
-     */
-    public String getMinimumMitosisDuration() {
-        return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(MINIMUM_DURATION);
-    }
+   /**
+    * @return list of all channels
+    */
+   public List<String> getAllChannels() {
+      ArrayList<String> channelNames = new ArrayList<>();
+      for (Element e : root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren()) {
+         channelNames.add(e.getName());
+      }
+      return channelNames;
+   }
 
-    //////////// Setters
+   //////////// Setters
 
-    /**
-     *
-     * @param pathToPositionList    path to positionlist file
-     */
-    public void setPathToPositionList(String pathToPositionList) {
-        root.getChild(PATH_TO_POSITION_LIST).setText(pathToPositionList);
-    }
+   /**
+    * @return get channels used for fluo analysis
+    */
+   public String getUsingChannels() {
+      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(USING);
+   }
 
-    /**
-     *
-     * @param duration minimum mitosis duration (sec)
-     */
-    public void setMinimumMitosisDuration(String duration) {
-        root.getChild(MITOSIS_DETECTION_PARAMETERS).getChild(MINIMUM_DURATION).setText(duration);
-    }
+   /**
+    * set channels to USING channel
+    *
+    * @param channels channels that are being using for acquisitions
+    */
+   public void setUsingChannels(String channels) {
+      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(USING).setText(channels);
+   }
 
-    /**
-     *
-     * @return the channel to use for mitosis detection
-     */
-    public String getDetectionChForMitosis() {
-        return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(DETECTION_CHANNEL);
-    }
+   /**
+    * @return whether or not skip the segmentation
+    */
+   public String getSkipSegmentation() {
+      return root.getChild(SEGMENTATION_PARAMETERS).getChildText(SKIP);
+   }
 
-    /**
-     *
-     * @param chForMitosis the channel to detection mitosis
-     */
-    public void setDetectionChForMitosis(String chForMitosis) {
-        root.getChild(MITOSIS_DETECTION_PARAMETERS).getChild(DETECTION_CHANNEL).setText(chForMitosis);
-    }
+   public void setSkipSegmentation(Boolean skip) {
+      root.getChild(SEGMENTATION_PARAMETERS).getChild(SKIP).setText(String.valueOf(skip));
+   }
 
-    /**
-     *
-     * @return  calibration object
-     */
-    public String getCalibration() {
-        return root.getChildText(CALIBRATION);
-    }
+   /**
+    * @return the parameter minimum mitosis duration
+    */
+   public String getMinimumMitosisDuration() {
+      return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(MINIMUM_DURATION);
+   }
 
-    /**
-     *
-     * @param calib calibration object
-     */
-    public void setCalibration(String calib) {
-        root.getChild(CALIBRATION).setText(calib);
-    }
+   /**
+    * @param duration minimum mitosis duration (sec)
+    */
+   public void setMinimumMitosisDuration(String duration) {
+      root.getChild(MITOSIS_DETECTION_PARAMETERS).getChild(MINIMUM_DURATION).setText(duration);
+   }
 
-    /**
-     *
-     * @return  whether or not project z stack
-     */
-    public String getProjected() {
-        return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(PROJECTED);
-    }
+   /**
+    * @return the channel to use for mitosis detection
+    */
+   public String getDetectionChForMitosis() {
+      return root.getChild(MITOSIS_DETECTION_PARAMETERS).getChildText(DETECTION_CHANNEL);
+   }
 
-    /**
-     *
-     * @param projected whether or not project z stack
-     */
-    public void setProjected(String projected) {
-        root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(PROJECTED).setText(projected);
-    }
+   /**
+    * @param chForMitosis the channel to detection mitosis
+    */
+   public void setDetectionChForMitosis(String chForMitosis) {
+      root.getChild(MITOSIS_DETECTION_PARAMETERS).getChild(DETECTION_CHANNEL).setText(chForMitosis);
+   }
 
-    String getBatchMode(){
-        return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(BATCH_MODE);
-    }
+   /**
+    * @return calibration object
+    */
+   public String getCalibration() {
+      return root.getChildText(CALIBRATION);
+   }
 
-    String getSegTolerance(){
-        return root.getChild(SEGMENTATION_PARAMETERS).getChildText(TOLERANCE);
-    }
-    /**
-     * @param ch : GFP, CFP, DAPI, TXRED
-     * @param exposure exposure of the corresonding channel
-     */
-    public void setChExposure(String ch, String exposure) {
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-                .getChild(EXPOSURE).setText(exposure);
-    }
+   /**
+    * @param calib calibration object
+    */
+   public void setCalibration(String calib) {
+      root.getChild(CALIBRATION).setText(calib);
+   }
 
-    /**
-     * @param ch : GFP, CFP, DAPI, TXRED
-     * @param color Color
-     */
-    public void setChColor(String ch, String color) {
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-                .getChild(COLOR).setText(color);
-    }
+   /**
+    * @return whether or not project z stack
+    */
+   public String getProjected() {
+      return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(PROJECTED);
+   }
 
-    /**
-     * @param ch : GFP, CFP, DAPI, TXRED
-     * @param shutter   shutter label
-     */
-    public void setChShutter(String ch, String shutter) {
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-                .getChild(SHUTTER).setText(shutter);
-    }
+   /**
+    * @param projected whether or not project z stack
+    */
+   public void setProjected(String projected) {
+      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(PROJECTED).setText(projected);
+   }
 
-    /**
-     *
-     * @param path to position list file
-     */
-    public void setFieldNb(String path) {
-        root.getChild(PATH_TO_POSITION_LIST).setText(path);
-    }
+   String getBatchMode() {
+      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(BATCH_MODE);
+   }
 
-    /**
-     * set segmentation parameter
-     *
-     * @param parameter : static final String of MaarsParameters
-     * @param value     : corresponding value of parameter
-     */
-    public void setSegmentationParameter(String parameter, String value) {
-        root.getChild(SEGMENTATION_PARAMETERS).getChild(parameter).setText(value);
-    }
+   String getSegTolerance() {
+      return root.getChild(SEGMENTATION_PARAMETERS).getChildText(TOLERANCE);
+   }
 
-    /**
-     * set fluo analysis parameter
-     *
-     * @param parameter : static final String of MaarsParameters
-     * @param value     : corresponding value of parameter
-     */
-    public void setFluoParameter(String parameter, String value) {
-        root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(parameter).setText(value);
-    }
+   /**
+    * @param ch       : GFP, CFP, DAPI, TXRED
+    * @param exposure exposure of the corresonding channel
+    */
+   public void setChExposure(String ch, String exposure) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+            .getChild(EXPOSURE).setText(exposure);
+   }
 
-    /**
-     * @param ch        GFP, CFP, DAPI, TXRED
-     * @param maxNbSpot maximum number of spot for corresponding channel
-     */
-    public void setChMaxNbSpot(String ch, String maxNbSpot) {
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(MAXIMUM_NUMBER_OF_SPOT)
-                .setText(maxNbSpot);
-    }
+   /**
+    * @param ch    : GFP, CFP, DAPI, TXRED
+    * @param color Color
+    */
+   public void setChColor(String ch, String color) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+            .getChild(COLOR).setText(color);
+   }
 
-    /**
-     * @param ch         GFP, CFP, DAPI, TXRED
-     * @param spotRaidus spotRaidus for corresponding channel
-     */
-    public void setChSpotRaius(String ch, String spotRaidus) {
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(SPOT_RADIUS)
-                .setText(spotRaidus);
-    }
+   /**
+    * @param ch      : GFP, CFP, DAPI, TXRED
+    * @param shutter shutter label
+    */
+   public void setChShutter(String ch, String shutter) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
+            .getChild(SHUTTER).setText(shutter);
+   }
 
-    /**
-     * @param ch      GFP, CFP, DAPI, TXRED
-     * @param quality quality of spots for corresponding channel
-     */
-    public void setChQuality(String ch, String quality) {
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(QUALITY).setText(quality);
-    }
+   /**
+    * @param path to position list file
+    */
+   public void setFieldNb(String path) {
+      root.getChild(PATH_TO_POSITION_LIST).setText(path);
+   }
 
-    /**
-     *
-     * @param bfChannel bright field channel name
-     */
-    public void setSegChannel(String bfChannel) {
-        root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(bfChannel);
-    }
+   /**
+    * set segmentation parameter
+    *
+    * @param parameter : static final String of MaarsParameters
+    * @param value     : corresponding value of parameter
+    */
+   public void setSegmentationParameter(String parameter, String value) {
+      root.getChild(SEGMENTATION_PARAMETERS).getChild(parameter).setText(value);
+   }
 
-    /**
-     *
-     * @return availiableColors
-     */
-    public String[] availiableColors() {
-        return allColors;
-    }
+   /**
+    * set fluo analysis parameter
+    *
+    * @param parameter : static final String of MaarsParameters
+    * @param value     : corresponding value of parameter
+    */
+   public void setFluoParameter(String parameter, String value) {
+      root.getChild(FLUO_ANALYSIS_PARAMETERS).getChild(parameter).setText(value);
+   }
 
-    /**
-     * @param root the dataset of this class
-     */
-    private void setRoot(Element root) {
-        this.root = root;
-    }
+   /**
+    * @param ch        GFP, CFP, DAPI, TXRED
+    * @param maxNbSpot maximum number of spot for corresponding channel
+    */
+   public void setChMaxNbSpot(String ch, String maxNbSpot) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(MAXIMUM_NUMBER_OF_SPOT)
+            .setText(maxNbSpot);
+   }
 
-    public void addChannel(String newChannel) {
-        Element anotherChannel = root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren().get(2);
-        List<Element> attributes = new ArrayList<>();
-        for (Element e : anotherChannel.getChildren()) {
-            attributes.add(e.clone());
-        }
-        Element newChannelElement = new Element(newChannel);
-        newChannelElement.addContent(attributes);
-        root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).addContent(newChannelElement);
-    }
+   /**
+    * @param ch         GFP, CFP, DAPI, TXRED
+    * @param spotRaidus spotRaidus for corresponding channel
+    */
+   public void setChSpotRaius(String ch, String spotRaidus) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(SPOT_RADIUS)
+            .setText(spotRaidus);
+   }
 
-    /**
-     * duplicate this object
-     *
-     * @return the a duplicate version of this class
-     */
-    public MaarsParameters duplicate() {
-        Element newRoot = root.clone();
-        MaarsParameters newParams = new MaarsParameters();
-        newParams.setRoot(newRoot);
-        return newParams;
-    }
+   /**
+    * @param ch      GFP, CFP, DAPI, TXRED
+    * @param quality quality of spots for corresponding channel
+    */
+   public void setChQuality(String ch, String quality) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChild(QUALITY).setText(quality);
+   }
 
+   /**
+    * @param bfChannel bright field channel name
+    */
+   public void setSegChannel(String bfChannel) {
+      root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(bfChannel);
+   }
 
-    public static int getTimePointsNb(MaarsParameters parameters) {
-        double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
-                * 1000;
-        double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-        return (int) (timeLimit / fluoTimeInterval);
-    }
+   /**
+    * @return availiableColors
+    */
+   public String[] availiableColors() {
+      return allColors;
+   }
 
-    public static int getSliceNb(MaarsParameters parameters){
-        return (int) (Double.valueOf(parameters.getFluoParameter(MaarsParameters.RANGE_SIZE_FOR_MOVIE)) /
-                Double.valueOf(parameters.getFluoParameter(MaarsParameters.STEP)) +1 );
-    }
+   /**
+    * @param root the dataset of this class
+    */
+   private void setRoot(Element root) {
+      this.root = root;
+   }
 
-    public static int getChNb(MaarsParameters parameters){
-        String channelsString = parameters.getUsingChannels();
-        String[] arrayChannels = channelsString.split(",", -1);
-        return arrayChannels.length;
-    }
+   public void addChannel(String newChannel) {
+      Element anotherChannel = root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren().get(2);
+      List<Element> attributes = new ArrayList<>();
+      for (Element e : anotherChannel.getChildren()) {
+         attributes.add(e.clone());
+      }
+      Element newChannelElement = new Element(newChannel);
+      newChannelElement.addContent(attributes);
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).addContent(newChannelElement);
+   }
 
-    public static String[] getChArray(MaarsParameters parameters){
-        String channelsString = parameters.getUsingChannels();
-        return channelsString.split(",", -1);
-    }
+   /**
+    * duplicate this object
+    *
+    * @return the a duplicate version of this class
+    */
+   public MaarsParameters duplicate() {
+      Element newRoot = root.clone();
+      MaarsParameters newParams = new MaarsParameters();
+      newParams.setRoot(newRoot);
+      return newParams;
+   }
 }
