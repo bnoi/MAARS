@@ -17,16 +17,19 @@ public class MaarsSegmentation implements Runnable {
     private MaarsParameters parameters_;
     private ResultsTable rt;
     private ImagePlus img_;
+    private int posNb_;
 
     /**
      * * Constructor :
      *
      * @param parameters : MAARS parameters (see class MaarsParameters)
      * @param img           image to segment
+     * @param posNb        position id
      */
-    public MaarsSegmentation(MaarsParameters parameters, ImagePlus img) {
+    public MaarsSegmentation(MaarsParameters parameters, ImagePlus img, int posNb) {
         img_ = img;
         parameters_ = parameters;
+       posNb_ = posNb;
     }
 
     ResultsTable getRoiMeasurements() {
@@ -38,7 +41,7 @@ public class MaarsSegmentation implements Runnable {
         SegPombeParameters segPombeParam = segParameterWrapper(parameters_);
         // Main segmentation process
         IJ.log("Begin segmentation...");
-        SegPombe segPombe = new SegPombe(segPombeParam);
+        SegPombe segPombe = new SegPombe(segPombeParam, posNb_);
         segPombe.createCorrelationImage();
         segPombe.convertCorrelationToBinaryImage(Boolean.valueOf(parameters_.getBatchMode()),
                 Integer.valueOf(parameters_.getSegTolerance()));

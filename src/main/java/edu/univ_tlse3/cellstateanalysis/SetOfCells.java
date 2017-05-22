@@ -5,6 +5,7 @@ import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.frame.RoiManager;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,16 +22,22 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
     private int iteratorCount = 0;
     private ArrayList<Cell> cellArray;
     private CopyOnWriteArrayList<Integer> cellsWithAtLeast1Spot_ = new CopyOnWriteArrayList<>();
+    private int positionNb_;
 
-    public SetOfCells() {
+    public SetOfCells(int positionNb) {
+        positionNb_ = positionNb;
+    }
+
+    public int getPosNb(){
+        return positionNb_;
     }
 
     /**
      * @param pathToSegDir path to segmentation directory
      */
-    public void loadCells(String pathToSegDir) {
-        IJ.log("Loading Cells");
-        Roi[] roiArray = getRoisAsArray(pathToSegDir + "/ROI.zip");
+    public void loadCells(String pathToSegDir, int posNb) {
+        IJ.log("Loading Cells of Pos " + posNb);
+        Roi[] roiArray = getRoisAsArray(pathToSegDir + File.separator + "BF_Pos"+posNb+"_ROI.zip");
         cellArray = new ArrayList<>();
         for (int i = 1; i <= roiArray.length; i++) {
             cellArray.add(i - 1, new Cell(roiArray[i - 1], i));

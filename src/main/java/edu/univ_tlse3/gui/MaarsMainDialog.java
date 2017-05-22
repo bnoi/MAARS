@@ -11,6 +11,8 @@ import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
+import org.micromanager.MultiStagePosition;
+import org.micromanager.PositionList;
 import org.micromanager.internal.MMStudio;
 
 import javax.swing.*;
@@ -20,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -44,8 +47,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener{
     private JRadioButton staticOpt;
     private MaarsFluoAnalysisDialog fluoDialog_;
     private MaarsSegmentationDialog segDialog_;
-    private SetOfCells soc_ = new SetOfCells();
-    private SOCVisualizer socVisualizer_;
+    private ArrayList<SetOfCells> socList_ = new ArrayList<>();
+    private ArrayList<SOCVisualizer> socVisualizerList_ = new ArrayList<>();
     private JButton stopButton_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
     private JFormattedTextField posListTf_;
@@ -249,6 +252,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener{
         stopAndVisualizerButtonPanel_.setBorder(GuiUtils.addPanelTitle("Visualizer and stop"));
         showDataVisualizer_ = new JButton("Show visualizer");
         showDataVisualizer_.addActionListener(this);
+       showDataVisualizer_.setEnabled(false);
         stopAndVisualizerButtonPanel_.add(showDataVisualizer_);
 
         //
@@ -283,7 +287,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener{
         setVisible(true);
     }
 
-    /**
+   /**
      *
      * @param tasksSet  tasks to be terminated
      */
@@ -332,30 +336,56 @@ public class MaarsMainDialog extends JFrame implements ActionListener{
         }
     }
 
-    private SOCVisualizer createVisualizer() {
+    private SOCVisualizer createVisualizer(SetOfCells soc) {
         final SOCVisualizer socVisualizer = new SOCVisualizer();
-        socVisualizer.createGUI(soc_);
+        socVisualizer.createGUI(soc);
         return socVisualizer;
     }
 
+   private int loadPositions() {
+      PositionList pl = new PositionList();
+      try {
+         if (FileUtils.exists(parameters_.getPathToPositionList())) {
+            pl.load(parameters_.getPathToPositionList());
+            IJ.log(pl.getNumberOfPositions()+"-position file loaded");
+         }else{
+            String xyStage = mmc_.getXYStageDevice();
+            String zStage = mmc_.getFocusDevice();
+            MultiStagePosition currentPos = new MultiStagePosition(xyStage,mm_.getCachedXPosition(),mm_.getCachedYPosition(),
+                    zStage,mm_.getCachedZPosition());
+            pl.addPosition(currentPos);
+         }
+         mm_.positions().setPositionList(pl);
+      } catch (Exception e1) {
+         IOUtils.printErrorToIJLog(e1);
+      }
+      return pl.getNumberOfPositions();
+   }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        MAARS maars = new MAARS(mm_, mmc_, parameters_, socVisualizer_, tasksSet_, soc_);
+        MAARS maars=null;
         if (e.getSource() == okMainDialogButton) {
-            if (socVisualizer_ == null) {
-                socVisualizer_ = createVisualizer();
-                if (parameters_.useDynamic()) {
-                    socVisualizer_.setVisible(true);
-                }
+           saveParameters();
+           int nbOfPos = loadPositions();
+            for (int i =0; i< nbOfPos;i++) {
+               SetOfCells soc = new SetOfCells(i);
+               socList_.add(soc);
+               SOCVisualizer socVisualizer = createVisualizer(soc);
+               socVisualizerList_.add(socVisualizer);
+              if (parameters_.useDynamic()) {
+                  socVisualizer.setVisible(true);
+              }
             }
-            saveParameters();
             try {
                 parameters_.save();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+           maars = new MAARS(mm_, mmc_, parameters_, socVisualizerList_, tasksSet_, socList_);
             new Thread(maars).start();
             okMainDialogButton.setEnabled(false);
+            showDataVisualizer_.setEnabled(true);
         } else if (e.getSource() == segmButton) {
             saveParameters();
             if (segDialog_ != null) {
@@ -378,10 +408,9 @@ public class MaarsMainDialog extends JFrame implements ActionListener{
             setAnalysisStrategy();
             fluoAcqDurationTf.setEditable(false);
         } else if (e.getSource() == showDataVisualizer_) {
-            if (socVisualizer_ == null) {
-                socVisualizer_ = createVisualizer();
-            }
-            socVisualizer_.setVisible(true);
+           for (SOCVisualizer socVisualizer : socVisualizerList_) {
+              socVisualizer.setVisible(true);
+           }
         } else if (e.getSource() == stopButton_) {
             YesNoCancelDialog yesNoCancelDialog = new YesNoCancelDialog(this, "Abandon current acquisition?",
                     "Stop current analysis ?");
@@ -393,10 +422,12 @@ public class MaarsMainDialog extends JFrame implements ActionListener{
                     roiManager.reset();
                     roiManager.close();
                 }
-                soc_.reset();
-                socVisualizer_.cleanUp();
-                socVisualizer_.setVisible(false);
-                socVisualizer_.createGUI(soc_);
+                for (int i=0; i<socList_.size();i++){
+                    socList_.get(i).reset();
+                    socVisualizerList_.get(i).cleanUp();
+                    socVisualizerList_.get(i).setVisible(false);
+                    socVisualizerList_.get(i).createGUI(socList_.get(i));
+                }
             }
         } else {
             IJ.log("MAARS don't understand what you want, sorry");

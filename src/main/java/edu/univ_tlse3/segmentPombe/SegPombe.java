@@ -3,12 +3,10 @@ package edu.univ_tlse3.segmentPombe;
 import edu.univ_tlse3.utils.IOUtils;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.Roi;
 import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
-import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.frame.RoiManager;
 import ij.process.AutoThresholder;
@@ -36,7 +34,7 @@ import java.util.concurrent.Future;
  */
 public class SegPombe {
 
-    private static String bf = "BF";
+    private static String id;
     private String savingPath;
     private ImagePlus imageToAnalyze;
     private ImagePlus focusImg;
@@ -73,13 +71,14 @@ public class SegPombe {
      * Constructor
      *
      * @param parameters parameters for segmentation
+     * @param posNb        position nb
      */
-    public SegPombe(SegPombeParameters parameters) {
+    public SegPombe(SegPombeParameters parameters,int posNb) {
         this.imageToAnalyze = parameters.getImageToAnalyze();
         this.savingPath = parameters.getSavingPath();
-
+       this.id = "BF_Pos"+String.valueOf(posNb);
         try {
-            ps = new PrintStream(savingPath + File.separator + bf + "_Segmentation.LOG");
+            ps = new PrintStream(savingPath + File.separator + id + "_Segmentation.LOG");
             curr_err = System.err;
             curr_out = System.out;
             System.setOut(ps);
@@ -120,7 +119,7 @@ public class SegPombe {
 
         imageToAnalyze.setZ(Math.round(zFocus));
 
-        focusImg = new ImagePlus(bf + "_FocusImage", imageToAnalyze.getProcessor().duplicate());
+        focusImg = new ImagePlus(id + "_FocusImage", imageToAnalyze.getProcessor().duplicate());
 
         if (imageToAnalyze.getCalibration().scaled()) {
             focusImg.setCalibration(imageToAnalyze.getCalibration());
@@ -129,7 +128,7 @@ public class SegPombe {
         if (saveFocusImage) {
             IJ.run(focusImg, "Enhance Contrast", "saturated=0.35");
             FileSaver fileSaver = new FileSaver(focusImg);
-            fileSaver.saveAsTiff(savingPath + File.separator + bf + "_FocusImage.tif");
+            fileSaver.saveAsTiff(savingPath + File.separator + id + "_FocusImage.tif");
         }
         imageToAnalyze.flatten();
         System.out.println("FocusImage saved.");
@@ -253,7 +252,7 @@ public class SegPombe {
             roiManager = new RoiManager();
         }
 
-        imgCorrTemp = new ImagePlus("Correlation Image of " + bf, imgCorrTempProcessor);
+        imgCorrTemp = new ImagePlus("Correlation Image of " + id, imgCorrTempProcessor);
 
         ParticleAnalyzer.setRoiManager(roiManager);
         ParticleAnalyzer particleAnalyzer = new ParticleAnalyzer(
@@ -296,7 +295,7 @@ public class SegPombe {
         if (saveDataFrame && !nbRoi.equals(0)) {
             System.out.println("saving data frame...");
             try {
-                resultTable.saveAs(savingPath + File.separator + bf + "_Results.csv");
+                resultTable.saveAs(savingPath + File.separator + id + "_Results.csv");
             } catch (IOException io) {
                 IJ.error("Error", "Could not save DataFrame");
             }
@@ -311,7 +310,7 @@ public class SegPombe {
         if (saveRoi && !nbRoi.equals(0)) {
             System.out.println("saving roi...");
             roiManager.runCommand("Select All");
-            roiManager.runCommand("Save", savingPath + File.separator + "ROI.zip");
+            roiManager.runCommand("Save", savingPath + File.separator + id + "ROI.zip");
             roiManager.runCommand("Select All");
             roiManager.runCommand("Delete");
         }
@@ -326,9 +325,9 @@ public class SegPombe {
 
         if (saveBinaryImg) {
             System.out.println("save binary image");
-            binImage.setTitle(bf + "_BinaryImage");
+            binImage.setTitle(id + "_BinaryImage");
             FileSaver fileSaver = new FileSaver(binImage);
-            fileSaver.saveAsTiff(savingPath + File.separator + bf + "_BinaryImage.tif");
+            fileSaver.saveAsTiff(savingPath + File.separator + id + "_BinaryImage.tif");
         }
         if (showBinaryImg) {
             System.out.println("show binary image");
@@ -340,10 +339,10 @@ public class SegPombe {
 
         if (saveCorrelationImg) {
             System.out.println("save correlation image");
-            imgCorrTemp.setTitle(bf + "_CorrelationImage");
+            imgCorrTemp.setTitle(id + "_CorrelationImage");
             IJ.run(imgCorrTemp, "Enhance Contrast", "saturated=0.35");
             FileSaver fileSaver = new FileSaver(imgCorrTemp);
-            fileSaver.saveAsTiff(savingPath + File.separator + bf + "_CorrelationImage.tif");
+            fileSaver.saveAsTiff(savingPath + File.separator + id + "_CorrelationImage.tif");
         }
         if (showCorrelationImg) {
             System.out.println("show correlation image");

@@ -42,8 +42,8 @@ public class MAARS implements Runnable {
     private MMStudio mm;
     private CMMCore mmc;
     private MaarsParameters parameters;
-    private SetOfCells soc_;
-    private SOCVisualizer socVisualizer_;
+    private ArrayList<SetOfCells> socList_;
+    private ArrayList<SOCVisualizer> socVisualizerList_;
     private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
     private static boolean stop_ = false;
 
@@ -53,19 +53,19 @@ public class MAARS implements Runnable {
      * @param mm            MMStudio object (gui)
      * @param mmc           CMMCore object (core)
      * @param parameters    MAARS parameters object
-     * @param socVisualizer set of cell visualizer
+     * @param socVisualizerList list of set of cell visualizer
      * @param tasksSet      tasks to be terminated
-     * @param soc           set of cell
+     * @param socList           list of set of cell
      */
-    public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, SOCVisualizer socVisualizer,
+    public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, ArrayList<SOCVisualizer> socVisualizerList,
                  CopyOnWriteArrayList<Map<String, Future>> tasksSet,
-                 SetOfCells soc) {
+                 ArrayList<SetOfCells> socList) {
         this.mmc = mmc;
         this.parameters = parameters;
-        soc_ = soc;
+       socList_ = socList;
         this.mm = mm;
         tasksSet_ = tasksSet;
-        socVisualizer_ = socVisualizer;
+       socVisualizerList_ = socVisualizerList;
     }
 
     public void interrupt(){
@@ -181,212 +181,186 @@ public class MAARS implements Runnable {
         String FLUO = "FLUO";
         // Start time
         long start = System.currentTimeMillis();
-        // Set XY stage device
-        try {
-            mmc.setOriginXY(mmc.getXYStageDevice());
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
         parameters.setCalibration(String.valueOf(mm.getCachedPixelSizeUm()));
-
         ArrayList<String> arrayChannels = new ArrayList<>();
         Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
+        for (SetOfCells soc : socList_){
+           soc.reset();
+        }
+        String savingPath = FileUtils.convertPath(parameters.getSavingPath());
+        //acquisition
 
-        // Acquisition path arrangement
-        PositionList pl = new PositionList();
+        ExecutorService es = Executors.newSingleThreadExecutor();
+       HashMap<Integer, ImagePlus[]> segImgs = null;
         try {
-            if (FileUtils.exists(parameters.getPathToPositionList())) {
-                pl.load(parameters.getPathToPositionList());
-            }else{
-                String xyStage = mmc.getXYStageDevice();
-                String zStage = mmc.getFocusDevice();
-                MultiStagePosition currentPos = new MultiStagePosition(xyStage,mm.getCachedXPosition(),mm.getCachedYPosition(),
-                        zStage,mm.getCachedZPosition());
-                pl.addPosition(currentPos);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            segImgs = es.submit(new MAARS_mda(
+                    parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
+                    savingPath, BF)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            IOUtils.printErrorToIJLog(e);
         }
-        double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
-        //
-        for (int i = 0; i < pl.getNumberOfPositions(); i++) {
-            soc_.reset();
-            try {
-                mm.core().setXYPosition(pl.getPosition(i).getX(),pl.getPosition(i).getY());
-                mmc.waitForDevice(mmc.getXYStageDevice());
-            } catch (Exception e) {
-                IJ.error("Can't set XY stage devie");
-                IOUtils.printErrorToIJLog(e);
-
-            }
-            IJ.log("Current position : X : " + String.valueOf(pl.getPosition(i).getX())
-                    + " Y : " + String.valueOf(pl.getPosition(i).getY()));
-
-            String savingPath = FileUtils.convertPath(parameters.getSavingPath());
-            //update saving path
-            parameters.setSavingPath(savingPath + File.separator + BF + "_1");
-            //acquisition
-
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            ImagePlus[] segImgs = null;
-            try {
-                segImgs = es.submit(new MAARS_mda(
-                        parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
-                        savingPath, BF)).get();
-            } catch (InterruptedException | ExecutionException e) {
-                IOUtils.printErrorToIJLog(e);
-            }
-            if (segImgs ==null){
-                IJ.log("No images acquired");
-                break;
-            }
-            ImagePlus segImg = segImgs[0];
-            // --------------------------segmentation-----------------------------//
-            MaarsSegmentation ms = new MaarsSegmentation(parameters, segImg);
-            try {
-                es.submit(ms).get();
-                es.shutdown();
-                es.awaitTermination(1,TimeUnit.MINUTES);
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            parameters.setSavingPath(savingPath);
-            //TODO
-//            if (FileUtils.exists(savingPath + File.separator + BF + "_1" + File.separator + "ROI.zip")) {
-            if (true) {
-                String pathToFluoDir = savingPath + File.separator + FLUO + "_1";
-                // from Roi initialize a set of cell
-                soc_.reset();
-                soc_.loadCells(savingPath + File.separator + BF + "_1");
-                soc_.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
-
-                // ----------------start acquisition and analysis --------//
-                redirectLog(savingPath);
-                int frame = 0;
-                Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
-
-                ExecutorService es1 = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-                if (parameters.useDynamic()) {
-                    // being dynamic acquisition
-                    double startTime = System.currentTimeMillis();
-                    double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
-                            * 1000;
-                    while (System.currentTimeMillis() - startTime <= timeLimit) {
-                        double beginAcq = System.currentTimeMillis();
-                        if (stop_){
-                            es1.shutdownNow();
-                            break;
-                        }
-                        // Section to acquire bf images between fluos, can be skipped
-                        if (frame != 0){
-                            try {
-                                segImgs = es1.submit(new MAARS_mda(parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
-                                        savingPath, BF)).get();
-                            } catch (InterruptedException | ExecutionException e) {
-                                IOUtils.printErrorToIJLog(e);
-                            }
-                            parameters.setSavingPath(savingPath + File.separator + BF +"_"+String.valueOf(frame+1));
-                            ms = new MaarsSegmentation(parameters, segImgs[0]);
-                            try {
-                                es1.submit(ms).get();
-                            } catch (InterruptedException | ExecutionException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-
-                        Map<String, Future> channelsInFrame = new HashMap<>();
-                        ImagePlus[] fluoChs= null;
-                        try {
-                            fluoChs = es1.submit(new MAARS_mda(
-                                    parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
-                                    savingPath, FLUO)).get();
-                        } catch (InterruptedException | ExecutionException e) {
-                            IOUtils.printErrorToIJLog(e);
-                        }
-                        for (ImagePlus fluoimg:fluoChs){
-                           //TODO
-                           if (do_analysis) {
-                              String channel = fluoimg.getTitle();
-                               Future future2 = es1.submit(new FluoAnalyzer(fluoimg, fluoimg.getCalibration(), soc_, channel,
-                                       Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-                                       Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                       Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
-                               channelsInFrame.put(channel, future2);
-                           }
-                        }
-
-                        tasksSet_.add(channelsInFrame);
-                        frame++;
-                        double acqTook = System.currentTimeMillis() - beginAcq;
-                        System.out.println(String.valueOf(acqTook));
-                        if (fluoTimeInterval > acqTook) {
-                            try {
-                                Thread.sleep((long) (fluoTimeInterval - acqTook));
-                            } catch (InterruptedException e) {
-                                IOUtils.printErrorToIJLog(e);
-                            }
-                        } else {
-                            IJ.log("Attention : acquisition before took longer than " + fluoTimeInterval
-                                    / 1000 + " s : " + acqTook);
-                        }
-                    }
-                    IJ.log("Acquisition Done, proceeding to post-analysis");
-                } else {
-                    // being static acquisition
-                        Map<String, Future> channelsInFrame = new HashMap<>();
-                        ImagePlus[] fluoChs = null;
-                        try {
-                            fluoChs = es1.submit(new MAARS_mda(
-                                    parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
-                                    savingPath, FLUO)).get();
-                        } catch (InterruptedException | ExecutionException e) {
-                            IOUtils.printErrorToIJLog(e);
-                        }
-                       for (ImagePlus fluoimg:fluoChs){
-                          String channel = fluoimg.getTitle();
-                           if (do_analysis) {
-                              Future future2 = es1.submit(new FluoAnalyzer(fluoimg, fluoimg.getCalibration(), soc_, channel,
-                                       Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-                                       Double.parseDouble(parameters.getChSpotRaius(channel)),
-                                       Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizer_, parameters.useDynamic()));
-                            channelsInFrame.put(channel, future2);
-                        }
+        if (segImgs ==null){
+            IJ.log("No images acquired");
+            return;
+        }
+       //update saving path
+       parameters.setSavingPath(savingPath + File.separator + BF + "_1");
+       MaarsSegmentation ms=null;
+        for (Integer posNb:segImgs.keySet()){
+           ImagePlus segImg = segImgs.get(posNb)[0];
+           // --------------------------segmentation-----------------------------//
+           ms = new MaarsSegmentation(parameters, segImg, posNb);
+           try {
+              es.submit(ms).get();
+              es.shutdown();
+              es.awaitTermination(1,TimeUnit.MINUTES);
+           } catch (InterruptedException | ExecutionException e) {
+              e.printStackTrace();
+           }
+        }
+        parameters.setSavingPath(savingPath);
+         // from Roi initialize a set of cell
+       for (Integer posNb:segImgs.keySet()){
+          SetOfCells soc = socList_.get(posNb);
+          soc.reset();
+          soc.loadCells(savingPath + File.separator + BF + "_1", posNb);
+          soc.setRoiMeasurementIntoCells(ms.getRoiMeasurements());
+       }
+         // ----------------start acquisition and analysis --------//
+         redirectLog(savingPath);
+         int frame = 0;
+         Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
+         double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
+         ExecutorService es1 = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+         if (parameters.useDynamic()) {
+             // being dynamic acquisition
+             double startTime = System.currentTimeMillis();
+             double timeLimit = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_LIMIT)) * 60
+                     * 1000;
+             while (System.currentTimeMillis() - startTime <= timeLimit) {
+                 double beginAcq = System.currentTimeMillis();
+                 if (stop_){
+                     es1.shutdownNow();
+                     break;
+                 }
+                 // Section to acquire bf images between fluos, can be skipped
+                 if (frame != 0&&false){
+                     try {
+                         segImgs = es1.submit(new MAARS_mda(parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
+                                 savingPath, BF)).get();
+                     } catch (InterruptedException | ExecutionException e) {
+                         IOUtils.printErrorToIJLog(e);
+                     }
+                     parameters.setSavingPath(savingPath + File.separator + BF +"_"+String.valueOf(frame+1));
+                    for (Integer posNb:segImgs.keySet()){
+                       ImagePlus segImg = segImgs.get(posNb)[0];
+                       //update saving path
+//                          parameters.setSavingPath(savingPath + File.separator + BF + "_"+posNb);
+                       // --------------------------segmentation-----------------------------//
+                       ms = new MaarsSegmentation(parameters, segImg, posNb);
+                       try {
+                          es1.submit(ms).get();
+                       } catch (InterruptedException | ExecutionException e) {
+                          e.printStackTrace();
                        }
-                        tasksSet_.add(channelsInFrame);
-                }
-                parameters.setSavingPath(savingPath);
-                es1.shutdown();
-                try {
-                    es1.awaitTermination(60,TimeUnit.MINUTES);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
-                RoiManager.getInstance().reset();
-                RoiManager.getInstance().close();
-                if (soc_.size() != 0 && do_analysis) {
-                    long startWriting = System.currentTimeMillis();
-                    ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
-                    mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-                    MAARS.saveAll(soc_, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels);
-                    if (parameters.useDynamic()) {
-                        if (IJ.isWindows()) {
-                            savingPath = FileUtils.convertPathToLinuxType(savingPath + File.separator + BF + "_1");
-                        }
-                        MAARS.analyzeMitosisDynamic(soc_, parameters, savingPath);
                     }
-                    ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-                            + " sec for writing results");
+                 }
+
+                 Map<String, Future> channelsInFrame = new HashMap<>();
+                HashMap<Integer, ImagePlus[]> fluos= null;
+                 try {
+                    fluos = es1.submit(new MAARS_mda(
+                             parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
+                             savingPath, FLUO)).get();
+                 } catch (InterruptedException | ExecutionException e) {
+                     IOUtils.printErrorToIJLog(e);
+                 }
+                for (Integer posNb:fluos.keySet()){
+                   ImagePlus fluoimg = fluos.get(posNb)[0];
+                    //TODO
+                    if (do_analysis) {
+                       String channel = fluoimg.getTitle();
+                        Future future2 = es1.submit(new FluoAnalyzer(fluoimg, fluoimg.getCalibration(), socList_.get(posNb), channel,
+                                Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+                                Double.parseDouble(parameters.getChSpotRaius(channel)),
+                                Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizerList_.get(posNb), parameters.useDynamic()));
+                        channelsInFrame.put(channel, future2);
+                    }
+                 }
+
+                 tasksSet_.add(channelsInFrame);
+                 frame++;
+                 double acqTook = System.currentTimeMillis() - beginAcq;
+                 System.out.println(String.valueOf(acqTook));
+                 if (fluoTimeInterval > acqTook) {
+                     try {
+                         Thread.sleep((long) (fluoTimeInterval - acqTook));
+                     } catch (InterruptedException e) {
+                         IOUtils.printErrorToIJLog(e);
+                     }
+                 } else {
+                     IJ.log("Attention : acquisition before took longer than " + fluoTimeInterval
+                             / 1000 + " s : " + acqTook);
+                 }
+             }
+             IJ.log("Acquisition Done, proceeding to post-analysis");
+         } else {
+             // being static acquisition
+                 Map<String, Future> channelsInFrame = new HashMap<>();
+                  HashMap<Integer, ImagePlus[]> fluos = null;
+                 try {
+                     fluos = es1.submit(new MAARS_mda(
+                             parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
+                             savingPath, FLUO)).get();
+                 } catch (InterruptedException | ExecutionException e) {
+                     IOUtils.printErrorToIJLog(e);
+                 }
+            for (Integer posNb:fluos.keySet()){
+               ImagePlus fluoimg = fluos.get(posNb)[0];
+                   String channel = fluoimg.getTitle();
+                    if (do_analysis) {
+                       Future future2 = es1.submit(new FluoAnalyzer(fluoimg, fluoimg.getCalibration(), socList_.get(posNb), channel,
+                                Integer.parseInt(parameters.getChMaxNbSpot(channel)),
+                                Double.parseDouble(parameters.getChSpotRaius(channel)),
+                                Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizerList_.get(posNb), parameters.useDynamic()));
+                     channelsInFrame.put(channel, future2);
+                 }
                 }
+                 tasksSet_.add(channelsInFrame);
+         }
+         parameters.setSavingPath(savingPath);
+         es1.shutdown();
+         try {
+             es1.awaitTermination(60,TimeUnit.MINUTES);
+         } catch (InterruptedException e) {
+             e.printStackTrace();
+         }
+         MaarsMainDialog.waitAllTaskToFinish(tasksSet_);
+         RoiManager.getInstance().reset();
+         RoiManager.getInstance().close();
+       for (Integer posNb:segImgs.keySet()) {
+          SetOfCells soc = socList_.get(posNb);
+          if (do_analysis) {
+             long startWriting = System.currentTimeMillis();
+             String pathToFluoDir = savingPath + File.separator + FLUO + "_1";
+             ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
+             mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
+             MAARS.saveAll(soc, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels);
+             if (parameters.useDynamic()) {
+                if (IJ.isWindows()) {
+                   savingPath = FileUtils.convertPathToLinuxType(savingPath + File.separator + BF + "_1");
+                }
+                MAARS.analyzeMitosisDynamic(soc, parameters, savingPath);
+             }
+             ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+                     + " sec for writing results");
+          }
 //                RemoteNotification.mailNotify("tongli.bioinfo@gmail.com");
-            }
-        }
-        mmc.setAutoShutter(true);
-        System.setErr(curr_err);
-        System.setOut(curr_out);
-        soc_.reset();
-        soc_ = null;
+          mmc.setAutoShutter(true);
+          System.setErr(curr_err);
+          System.setOut(curr_out);
+          soc.reset();
+       }
         IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
         System.gc();
         IJ.showMessage("MAARS: Done!");

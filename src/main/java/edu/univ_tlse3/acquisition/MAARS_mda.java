@@ -9,13 +9,14 @@ import org.micromanager.internal.MMStudio;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 /**
  * Only called with On-the-Fly analysis of MAARS.
  * Created by Tong LI on 24/06/2016.
  */
-public class MAARS_mda implements Callable<ImagePlus[]>{
+public class MAARS_mda implements Callable<HashMap<Integer, ImagePlus[]>>{
     private String pathToAcqSetting_;
     private String savingPath_;
     private String channelName_;
@@ -32,7 +33,7 @@ public class MAARS_mda implements Callable<ImagePlus[]>{
     }
 
     @Override
-    public ImagePlus[] call() throws Exception {
+    public HashMap<Integer, ImagePlus[]> call() throws Exception {
         Datastore ds;
         MMStudio mm = MMStudio.getInstance();
         try {

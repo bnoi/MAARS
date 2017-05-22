@@ -12,10 +12,7 @@ import org.micromanager.data.*;
 import org.micromanager.internal.MMStudio;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -145,10 +142,8 @@ public class ImgUtils {
      * @param pixelSizeUm       image calib
      * @return imageplus
      */
-    public static ImagePlus[] convertImages2Imp(List<Image> listImg, SummaryMetadata summaryMetadata,
-                                              double pixelSizeUm) {
-//         String[] axisOrder = summaryMetadata.getAxisOrder();
-
+    public static HashMap<Integer, ImagePlus[]> convertImages2Imp(List<Image> listImg, SummaryMetadata summaryMetadata,
+                                                        double pixelSizeUm) {
         ImageStack imageStack = new ImageStack(Integer.valueOf(summaryMetadata.getUserData().getString("Width")),
                 Integer.valueOf(summaryMetadata.getUserData().getString("Height")));
         for (Image img : listImg) {
@@ -161,19 +156,30 @@ public class ImgUtils {
         cal.pixelHeight = pixelSizeUm;
         cal.pixelDepth = summaryMetadata.getZStepUm();
         imagePlus.setCalibration(cal);
-       imagePlus = HyperStackConverter.toHyperStack(imagePlus, summaryMetadata.getIntendedDimensions().getChannel(),
-                summaryMetadata.getIntendedDimensions().getZ(), summaryMetadata.getIntendedDimensions().getTime(),
-                "xytzc", "Grayscale");
-       ImagePlus[] channels;
-        if (summaryMetadata.getChannelNames().length>1){
-           channels =  ChannelSplitter.split(imagePlus);
-           for (int i =0 ; i< channels.length;i++){
-              channels[i].setTitle(summaryMetadata.getChannelNames()[i]);
-           }
-        }else{
-           channels = new ImagePlus[]{imagePlus};
-        }
-       return channels;
+
+//       String[] axisOrder = summaryMetadata.getAxisOrder();
+//       System.out.println(""+ axisOrder);
+       int positionNb = summaryMetadata.getIntendedDimensions().getStagePosition();
+       int onePosStackSize = imagePlus.getStackSize() /positionNb;
+       HashMap<Integer, ImagePlus[]> reorderedImps = new HashMap<>();
+       ImagePlus reorderedOnePos;
+       for (int i =0; i < positionNb; i++){
+          ImagePlus onePos = new Duplicator().run(imagePlus,i*onePosStackSize+1, (i+1) * onePosStackSize);
+          reorderedOnePos = HyperStackConverter.toHyperStack(onePos, summaryMetadata.getIntendedDimensions().getChannel(),
+                  summaryMetadata.getIntendedDimensions().getZ(), summaryMetadata.getIntendedDimensions().getTime(),
+                  "xytzc", "Grayscale");
+          ImagePlus[] channels;
+          if (summaryMetadata.getChannelNames().length>1){
+             channels =  ChannelSplitter.split(reorderedOnePos);
+             for (int j =0 ; j< channels.length;j++){
+                channels[j].setTitle(summaryMetadata.getChannelNames()[j]);
+             }
+          }else{
+             channels = new ImagePlus[]{reorderedOnePos};
+          }
+          reorderedImps.put(i, channels);
+       }
+       return reorderedImps;
     }
 
     /**

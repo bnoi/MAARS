@@ -139,7 +139,7 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
             MaarsParameters parameters_dup = parameters.duplicate();
             parameters_dup.setSavingPath(parameters.getSavingPath()+ File.separator + "BF_1");
             // --------------------------segmentation-----------------------------//
-            new Thread(new MaarsSegmentation(parameters_dup, IJ.getImage())).start();
+            new Thread(new MaarsSegmentation(parameters_dup, IJ.getImage(),0)).start();
         });
 
         //

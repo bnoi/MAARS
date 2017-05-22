@@ -263,7 +263,7 @@ public class MAARSNoAcq implements Runnable {
             } catch (Exception e) {
                 IOUtils.printErrorToIJLog(e);
             }
-            ms = new MaarsSegmentation(parameters, segImg);
+            ms = new MaarsSegmentation(parameters, segImg, 0);
             try {
                 es.submit(ms).get();
             } catch (InterruptedException | ExecutionException e) {
@@ -272,10 +272,10 @@ public class MAARSNoAcq implements Runnable {
             es.shutdown();
         }
 
-        if (FileUtils.exists(pathToSegDir + File.separator + "ROI.zip")) {
+        if (FileUtils.exists(pathToSegDir + File.separator + "BF_Pos0_ROI.zip")) {
             soc_.reset();
             // from Roi.zip initialize a set of cell
-            soc_.loadCells(pathToSegDir);
+            soc_.loadCells(pathToSegDir,0);
             ResultsTable rt;
             if (skipSegmentation) {
                 IJ.open(pathToSegDir + File.separator + "BF_Results.csv");

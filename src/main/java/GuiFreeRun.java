@@ -138,7 +138,7 @@ public class GuiFreeRun implements PlugIn{
         parameters.setSavingPath(segDir);
         ArrayList<String> names = FileUtils.getTiffWithPattern(segDir,".*_MMStack_.*");
         String pathToSegMovie = FileUtils.convertPath(segDir + File.separator + names.get(0));
-        MaarsSegmentation ms = new MaarsSegmentation(parameters, IJ.openImage(pathToSegMovie));
+        MaarsSegmentation ms = new MaarsSegmentation(parameters, IJ.openImage(pathToSegMovie),0);
         ExecutorService es = Executors.newSingleThreadExecutor();
         es.execute(ms);
         es.shutdown();
@@ -151,13 +151,14 @@ public class GuiFreeRun implements PlugIn{
     }
 
     public static void main(String[] args) {
-        new ImageJ();
-        String configFileName = "maars_config.xml";
-        String dir = "/media/tong/MAARSData/MAARSData/rad21/16-06-2";
-        MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
-        parameters.setSavingPath(dir);
-        //executeAnalysis(fluoAnalysisDialog.getParameters());
-        executeAnalysis(parameters);
+//        new ImageJ();
+//        String configFileName = "maars_config.xml";
+//        String dir = "/media/tong/MAARSData/MAARSData/rad21/16-06-2";
+//        MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
+//        parameters.setSavingPath(dir);
+//        //executeAnalysis(fluoAnalysisDialog.getParameters());
+//        executeAnalysis(parameters);
+
 
 //        for (String s : new File(".").list()){
 //            System.out.println(s);

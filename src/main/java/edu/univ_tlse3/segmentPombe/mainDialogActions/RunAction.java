@@ -25,7 +25,7 @@ public class RunAction implements ActionListener {
         if (process.checkParameters()) {
             process.updateParameters();
             SegPombeParameters parameters = process.getParameters();
-            SegPombe segPombe = new SegPombe(parameters);
+            SegPombe segPombe = new SegPombe(parameters, 0);
             segPombe.createCorrelationImage();
             segPombe.convertCorrelationToBinaryImage(false, Integer.MAX_VALUE);
             segPombe.analyseAndFilterParticles();
