@@ -1,5 +1,6 @@
 package edu.univ_tlse3.acquisition;
 
+import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
 import ij.ImagePlus;
 import org.micromanager.data.Coords;
@@ -41,7 +42,7 @@ public class MAARS_mda implements Callable<HashMap<Integer, ImagePlus[]>> {
       try {
          mm.acquisitions().loadAcquisition(pathToAcqSetting_);
       } catch (IOException e) {
-         e.printStackTrace();
+         IOUtils.printErrorToIJLog(e);
       }
       ds = mm.acquisitions().runAcquisition(channelName_, savingPath_);
       ArrayList<Coords> sortedCoords = ImgUtils.getSortedCoords(ds);

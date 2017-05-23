@@ -27,7 +27,6 @@ public class MaarsFluoAnalysisDialog extends JDialog {
     *
     */
    private static final long serialVersionUID = 1L;
-   public static Boolean saveRam_ = false;
    private JCheckBox doAnaChx_ = new JCheckBox("Do analysis?");
    private MaarsParameters parameters_;
    private JFormattedTextField mitosisDurationTf_;

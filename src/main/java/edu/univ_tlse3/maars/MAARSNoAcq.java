@@ -1,12 +1,9 @@
 package edu.univ_tlse3.maars;
 
-import edu.univ_tlse3.cellstateanalysis.Cell;
 import edu.univ_tlse3.cellstateanalysis.FluoAnalyzer;
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
-import edu.univ_tlse3.gui.MaarsFluoAnalysisDialog;
 import edu.univ_tlse3.gui.MaarsMainDialog;
-import edu.univ_tlse3.resultSaver.MAARSImgSaver;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 import edu.univ_tlse3.utils.ImgUtils;
@@ -103,7 +100,7 @@ public class MAARSNoAcq implements Runnable {
 
    private static ImagePlus processSplitImgs(String pathToFluoImgsDir, MaarsParameters parameters, SetOfCells soc,
                                              SOCVisualizer socVisualizer, CopyOnWriteArrayList<Map<String, Future>> tasksSet,
-                                             boolean saveRam, AtomicBoolean stop) {
+                                             AtomicBoolean stop) {
       ArrayList<Integer> arrayImgFrames = getFluoAcqStructure(pathToFluoImgsDir);
       int totalFrame = arrayImgFrames.size();
 
@@ -130,25 +127,25 @@ public class MAARSNoAcq implements Runnable {
             analysisTasks.put(channel, future);
             ImagePlus imgToSave = prepareImgToSave(zProjectedFluoImg, currentFluoImage, channel, current_frame,
                   Boolean.parseBoolean(parameters.getProjected()));
-            if (saveRam) {
-               IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
-               MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoImgsDir);
-               //TODO
-               CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
-               for (int i : cellIndex) {
-                  Cell c = soc.getCell(i);
-//                     for (Cell c : soc_){
-                  imgToSave.setRoi(c.getCellShapeRoi());
-                  for (int j = 1; j <= imgToSave.getNChannels(); j++) {
-                     ImagePlus croppedImg = new Duplicator().run(imgToSave, j, j, 1, imgToSave.getNSlices(),
-                           1, imgToSave.getNFrames());
-                     imgSaver.saveImgs(croppedImg, i, channel, true);
-                  }
-               }
-            } else {
+//            if (saveRam) {
+//               IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
+//               MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoImgsDir);
+//               //TODO
+//               CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
+//               for (int i : cellIndex) {
+//                  Cell c = soc.getCell(i);
+////                     for (Cell c : soc_){
+//                  imgToSave.setRoi(c.getCellShapeRoi());
+//                  for (int j = 1; j <= imgToSave.getNChannels(); j++) {
+//                     ImagePlus croppedImg = new Duplicator().run(imgToSave, j, j, 1, imgToSave.getNSlices(),
+//                           1, imgToSave.getNFrames());
+//                     imgSaver.saveImgs(croppedImg, i, channel, true);
+//                  }
+//               }
+//            } else {
                concatenatedFluoImgs = concatenatedFluoImgs == null ?
                      imgToSave : concatenator.concatenate(concatenatedFluoImgs, imgToSave, false);
-            }
+//            }
          }
          tasksSet.add(analysisTasks);
          if (stop.get()) {
@@ -240,11 +237,6 @@ public class MAARSNoAcq implements Runnable {
    public void run() {
       // Start time
       long start = System.currentTimeMillis();
-      for (String[] pos : getAcqPositions()) {
-         if (stop_.get()) {
-            break;
-         }
-      }
 
       soc_.reset();
       String pathToSegDir = FileUtils.convertPath(rootDir + File.separator + "BF_1");
@@ -280,7 +272,7 @@ public class MAARSNoAcq implements Runnable {
          soc_.loadCells(pathToSegDir, 0);
          ResultsTable rt;
          if (skipSegmentation) {
-            IJ.open(pathToSegDir + File.separator + "BF_Results.csv");
+            IJ.open(pathToSegDir + File.separator + "BF_Pos0_Results.csv");
             rt = ResultsTable.getResultsTable();
             ResultsTable.getResultsWindow().close(false);
          } else {
@@ -299,7 +291,6 @@ public class MAARSNoAcq implements Runnable {
             IOUtils.printErrorToIJLog(e);
          }
 
-         Boolean saveRam_ = MaarsFluoAnalysisDialog.saveRam_;
          String fluoTiffName = FileUtils.getShortestTiffName(pathToFluoDir);
 
          CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
@@ -310,7 +301,7 @@ public class MAARSNoAcq implements Runnable {
                   parameters, soc_, socVisualizer_, tasksSet, stop_);
          } else {
             concatenatedFluoImgs = processSplitImgs(pathToFluoDir, parameters, soc_,
-                  socVisualizer_, tasksSet, saveRam_, stop_);
+                  socVisualizer_, tasksSet, stop_);
          }
          concatenatedFluoImgs.getCalibration().frameInterval =
                Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
@@ -320,15 +311,15 @@ public class MAARSNoAcq implements Runnable {
             RoiManager.getInstance().close();
             if (soc_.size() != 0) {
                long startWriting = System.currentTimeMillis();
-               if (saveRam_) {
-                  MAARS.saveAll(soc_, pathToFluoDir, parameters.useDynamic());
-               } else {
+//               if (saveRam_) {
+//                  MAARS.saveAll(soc_, pathToFluoDir, parameters.useDynamic());
+//               } else {
                   concatenatedFluoImgs.show();
                   ArrayList<String> arrayChannels = new ArrayList<>();
                   Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
                   MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
                         arrayChannels);
-               }
+//               }
                IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                      + " sec for writing results");
                if (parameters.useDynamic()) {

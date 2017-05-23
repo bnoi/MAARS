@@ -8,6 +8,7 @@ import edu.univ_tlse3.maars.MaarsSegmentation;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
 import ij.IJ;
+import ij.ImageJ;
 import ij.plugin.PlugIn;
 
 import javax.swing.*;
@@ -98,13 +99,13 @@ public class GuiFreeRun implements PlugIn {
    }
 
    public static void main(String[] args) {
-//        new ImageJ();
-//        String configFileName = "maars_config.xml";
-//        String dir = "/media/tong/MAARSData/MAARSData/rad21/16-06-2";
-//        MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
-//        parameters.setSavingPath(dir);
-//        //executeAnalysis(fluoAnalysisDialog.getParameters());
-//        executeAnalysis(parameters);
+        new ImageJ();
+        String configFileName = "maars_config.xml";
+        String dir = "/media/tong/MAARSData/MAARSData/mal3/12-06-1";
+        MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
+        parameters.setSavingPath(dir);
+        //executeAnalysis(fluoAnalysisDialog.getParameters());
+        executeAnalysis(parameters);
 
 
 //        for (String s : new File(".").list()){

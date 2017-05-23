@@ -311,7 +311,7 @@ public class SegPombe {
       if (saveRoi && !nbRoi.equals(0)) {
          System.out.println("saving roi...");
          roiManager.runCommand("Select All");
-         roiManager.runCommand("Save", savingPath + File.separator + id + "ROI.zip");
+         roiManager.runCommand("Save", savingPath + File.separator + id + "_ROI.zip");
          roiManager.runCommand("Select All");
          roiManager.runCommand("Delete");
       }

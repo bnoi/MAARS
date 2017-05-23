@@ -38,6 +38,21 @@
                 <SPOT_RADIUS>0.25</SPOT_RADIUS>
                 <QUALITY>2</QUALITY>
             </TxRed>
+            <Cy5>
+                <MAXIMUM_NUMBER_OF_SPOT>2</MAXIMUM_NUMBER_OF_SPOT>
+                <SPOT_RADIUS>0.25</SPOT_RADIUS>
+                <QUALITY>2</QUALITY>
+            </Cy5>
+            <FITC>
+                <MAXIMUM_NUMBER_OF_SPOT>2</MAXIMUM_NUMBER_OF_SPOT>
+                <SPOT_RADIUS>0.25</SPOT_RADIUS>
+                <QUALITY>2</QUALITY>
+            </FITC>
+            <Rhodamine>
+                <MAXIMUM_NUMBER_OF_SPOT>2</MAXIMUM_NUMBER_OF_SPOT>
+                <SPOT_RADIUS>0.25</SPOT_RADIUS>
+                <QUALITY>2</QUALITY>
+            </Rhodamine>
         </DEFAULT_CHANNEL_PARAMATERS>
         <SAVING_PATH>/home/tong/Desktop/new_mda</SAVING_PATH>
         <!-- not editable with GUI -->
