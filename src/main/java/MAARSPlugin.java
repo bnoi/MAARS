@@ -22,7 +22,7 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 
    private static final String VERSION_INFO = "1.0.0";
    static private final String COPYRIGHT_NOTICE = "BSD compatible CeCILL-B License, 2017";
-   static private final String DESCRIPTION = "Micro-Manager plugin for Mitotic Analysing And Recording System";
+   static private final String DESCRIPTION = "Micro-Manager plugin for Mitotic Analysis And Recording System";
    static private final String NAME = "MAARS";
    private MMStudio mmStudio;
 

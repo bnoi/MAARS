@@ -275,8 +275,8 @@ public class SegPombe {
       filters.add(solidityFilter);
       filters.add(greyValueFilter);
       if (!nbRoi.equals(0)) {
-         Classifiers classifiers = new Classifiers(resultTable, imgCorrTemp);
-         classifiers.filterAll(filters);
+         CellFilterFacotory facotory = new CellFilterFacotory(resultTable, imgCorrTemp);
+         facotory.filterAll(filters);
       }
    }
 

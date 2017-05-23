@@ -306,28 +306,20 @@ public class MAARSNoAcq implements Runnable {
          concatenatedFluoImgs.getCalibration().frameInterval =
                Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
          MaarsMainDialog.waitAllTaskToFinish(tasksSet);
-         if (!stop_.get()) {
-            RoiManager.getInstance().reset();
-            RoiManager.getInstance().close();
-            if (soc_.size() != 0) {
-               long startWriting = System.currentTimeMillis();
-//               if (saveRam_) {
-//                  MAARS.saveAll(soc_, pathToFluoDir, parameters.useDynamic());
-//               } else {
-                  concatenatedFluoImgs.show();
-                  ArrayList<String> arrayChannels = new ArrayList<>();
-                  Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
-                  MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
-                        arrayChannels);
-//               }
-               IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-                     + " sec for writing results");
-               if (parameters.useDynamic()) {
-                  if (IJ.isWindows()) {
-                     pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
-                  }
-                  MAARS.analyzeMitosisDynamic(soc_, parameters, pathToSegDir);
+         if (!stop_.get() && soc_.size() != 0) {
+            long startWriting = System.currentTimeMillis();
+//            concatenatedFluoImgs.show();
+            ArrayList<String> arrayChannels = new ArrayList<>();
+            Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
+            MAARS.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
+                  arrayChannels);
+            IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+                  + " sec for writing results");
+            if (parameters.useDynamic()) {
+               if (IJ.isWindows()) {
+                  pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
                }
+               MAARS.analyzeMitosisDynamic(soc_, parameters, pathToSegDir);
             }
          }
       }

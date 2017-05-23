@@ -111,16 +111,6 @@ public class MaarsParameters {
    public static final String DO_METAPHASE_RATIO = "DO_METAPHASE_RATIO";
    public static final String DO_FIND_MEROTELY = "DO_FIND_MEROTELY";
    public static final String CHANNEL = "CHANNEL";
-   public static final String GFP = "GFP";
-   public static final String CFP = "CFP";
-   public static final String TXRED = "TXRED";
-   public static final String DAPI = "DAPI";
-   public static final String X_POS = "X_POS";
-   public static final String Y_POS = "Y_POS";
-   public static final String FRAME = "FRAME";
-   public static final String CUR_CHANNEL = "CHANNEL";
-   public static final String CUR_MAX_NB_SPOT = "CUR_MAX_NB_SPOT";
-   public static final String CUR_SPOT_RADIUS = "CUR_SPOT_RADIUS";
    public static final String PROJECTED = "PROJECTED";
    public static final String PATH_TO_BF_ACQ_SETTING = "PATH_TO_BF_ACQ_SETTING";
    public static final String PATH_TO_FLUO_ACQ_SETTING = "PATH_TO_FLUO_ACQ_SETTING";
@@ -136,13 +126,9 @@ public class MaarsParameters {
    private static final String MAXIMUM_NUMBER_OF_SPOT = "MAXIMUM_NUMBER_OF_SPOT";
    private static final String QUALITY = "QUALITY";
    private static final String SAVING_PATH = "SAVING_PATH";
-   private static final String SHUTTER = "SHUTTER";
-   private static final String COLOR = "COLOR";
-   private static final String EXPOSURE = "EXPOSURE";
    private static final String USING = "USING";
    private static final String GENERAL_ACQUISITION_PARAMETERS = "GENERAL_ACQUISITION_PARAMETERS";
    private static final String DEFAULT_CHANNEL_PARAMATERS = "DEFAULT_CHANNEL_PARAMATERS";
-   private static final String CHANNEL_GROUP = "CHANNEL_GROUP";
    private static final String SKIP = "SKIP";
    private static final String CALIBRATION = "CALIBRATION";
    private static final String BATCH_MODE = "BATCH_MODE";
@@ -151,7 +137,6 @@ public class MaarsParameters {
 
    private Document doc;
    private Element root;
-   private String[] allColors = {"GREEN", "CYAN", "RED", "BLUE", "WHITE", "GRAY"};
 
    /**
     * Constructor of Element need path to configuration file
@@ -308,71 +293,12 @@ public class MaarsParameters {
       return root.getChild(FLUO_ANALYSIS_PARAMETERS).getChildText(parameter);
    }
 
-//   /**
-//    * @param ch : GFP, CFP, DAPI, TXRED
-//    * @return corresponding channel color
-//    */
-//   public String getchColor(String ch) {
-//      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-//              .getChildText(COLOR);
-//   }
-//
-//   /**
-//    * @param ch : GFP, CFP, DAPI, TXRED
-//    * @return corresponding channel color
-//    */
-//   public String getchShutter(String ch) {
-//      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-//              .getChildText(SHUTTER);
-//   }
-
    /**
     * @param parameter name of fluo parameter
     * @return time limit of fluorescence acquisition for one acquisition
     */
    public String getSegmentationParameter(final String parameter) {
       return root.getChild(SEGMENTATION_PARAMETERS).getChildText(parameter);
-   }
-
-   /**
-    * @return the name of channel group set in micromanager
-    */
-   public String getChannelGroup() {
-      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChildText(CHANNEL_GROUP);
-   }
-
-   /**
-    * @param channelGroup channel group name
-    */
-   public void setChannelGroup(String channelGroup) {
-      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(CHANNEL_GROUP).setText(channelGroup);
-   }
-
-   /**
-    * @param ch : GFP, CFP, DAPI, TXRED
-    * @return corresponding channel shutter
-    */
-   public String getChShutter(String ch) {
-      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-            .getChildText(SHUTTER);
-   }
-
-   /**
-    * @param ch : GFP, CFP, DAPI, TXRED
-    * @return corresponding channel color
-    */
-   public String getChColor(String ch) {
-      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-            .getChildText(COLOR);
-   }
-
-   /**
-    * @param ch : GFP, CFP, DAPI, TXRED
-    * @return corresponding channel color
-    */
-   public String getChExposure(String ch) {
-      return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-            .getChildText(EXPOSURE);
    }
 
    /**
@@ -398,17 +324,6 @@ public class MaarsParameters {
     */
    public String getChQuality(String ch) {
       return root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch).getChildText(QUALITY);
-   }
-
-   /**
-    * @return list of all channels
-    */
-   public List<String> getAllChannels() {
-      ArrayList<String> channelNames = new ArrayList<>();
-      for (Element e : root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChildren()) {
-         channelNames.add(e.getName());
-      }
-      return channelNames;
    }
 
    //////////// Setters
@@ -505,40 +420,6 @@ public class MaarsParameters {
    }
 
    /**
-    * @param ch       : GFP, CFP, DAPI, TXRED
-    * @param exposure exposure of the corresonding channel
-    */
-   public void setChExposure(String ch, String exposure) {
-      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-            .getChild(EXPOSURE).setText(exposure);
-   }
-
-   /**
-    * @param ch    : GFP, CFP, DAPI, TXRED
-    * @param color Color
-    */
-   public void setChColor(String ch, String color) {
-      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-            .getChild(COLOR).setText(color);
-   }
-
-   /**
-    * @param ch      : GFP, CFP, DAPI, TXRED
-    * @param shutter shutter label
-    */
-   public void setChShutter(String ch, String shutter) {
-      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(DEFAULT_CHANNEL_PARAMATERS).getChild(ch)
-            .getChild(SHUTTER).setText(shutter);
-   }
-
-   /**
-    * @param path to position list file
-    */
-   public void setFieldNb(String path) {
-      root.getChild(PATH_TO_POSITION_LIST).setText(path);
-   }
-
-   /**
     * set segmentation parameter
     *
     * @param parameter : static final String of MaarsParameters
@@ -589,13 +470,6 @@ public class MaarsParameters {
     */
    public void setSegChannel(String bfChannel) {
       root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(bfChannel);
-   }
-
-   /**
-    * @return availiableColors
-    */
-   public String[] availiableColors() {
-      return allColors;
    }
 
    /**

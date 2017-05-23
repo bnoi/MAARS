@@ -12,12 +12,12 @@ import java.util.ArrayList;
 /**
  * Created by tongli on 27/04/2017.
  */
-class Classifiers {
+class CellFilterFacotory {
    private ResultsTable rt_;
    private ImagePlus targetImg_;
    private RoiManager rm_ = RoiManager.getInstance();
 
-   Classifiers(ResultsTable rt, ImagePlus targetImg) {
+   CellFilterFacotory(ResultsTable rt, ImagePlus targetImg) {
       rt_ = rt;
       targetImg_ = targetImg;
    }

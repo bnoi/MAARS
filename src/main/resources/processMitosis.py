@@ -11,8 +11,8 @@ from scipy import stats
 from shutil import copyfile
 
 
-def load_rois():
-    csvPath = baseDir + '/BF_Results.csv'
+def load_rois(posNb):
+    csvPath = baseDir + '/BF_Pos'+str(posNb)+'_Results.csv'
     return pd.DataFrame.from_csv(csvPath)
 
 
@@ -243,7 +243,7 @@ if __name__ == '__main__':
 
     # -----------------------------------run the analysis-----------------------------------#
     pool = mp.Pool(mp.cpu_count())
-    cellRois = load_rois()
+    cellRois = load_rois(0)
     createOutputDirs(mitosisDir, cropImgs, spots, features, figs)
     cellNbs = getAllCellNumbers(features_dir)
     tasks = []
