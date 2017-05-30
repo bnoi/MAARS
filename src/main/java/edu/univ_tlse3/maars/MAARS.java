@@ -161,17 +161,23 @@ public class MAARS implements Runnable {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
       String mitoDir = pathToSegDir + "_MITOSIS"+ File.separator;
-      String[] cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
+      String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToSegDir, parameters.getDetectionChForMitosis(),
             parameters.getCalibration(), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
-            parameters.getMinimumMitosisDuration()};
+            "-minimumPeriod", parameters.getMinimumMitosisDuration()};
+      String[] colocalisayion_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
+            PythonPipeline.COLOCAL_SCRIPT_NAME, mitoDir + File.separator + "spots" + File.separator,
+            parameters.getDetectionChForMitosis(), mitosisCellNbs, parameters.getDetectionChForMitosis(),
+            ktChannel, savingPath};
       FileUtils.createFolder(mitoDir);
       ArrayList cmds = new ArrayList();
-      cmds.add(String.join(" ",cmd));
+      cmds.add(String.join(" ", mitosis_cmd));
+      cmds.add(String.join(" ", colocalisayion_cmd));
       String bashPath = mitoDir + "pythonAnalysis.sh";
       FileUtils.writeScript(bashPath,cmds);
       IJ.log("Script saved");
-      PythonPipeline.runPythonScript(cmd, mitoDir);
+      PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
+      PythonPipeline.runPythonScript(colocalisayion_cmd, mitoDir + "colocalisation_log.txt");
       HashMap map = MAARS.getMitoticCellNbs(mitoDir);
       MAARS.findAbnormalCells(mitoDir, soc, map);
    }
@@ -396,6 +402,7 @@ public class MAARS implements Runnable {
          FileUtils.createFolder(MaarsParameters.DEPS_DIR);
          FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.TRACKMATE_LOADER_NAME);
          FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.ANALYSING_SCRIPT_NAME);
+         FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.COLOCAL_SCRIPT_NAME);
       }
    }
 }

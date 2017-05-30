@@ -295,7 +295,6 @@ public class MAARSNoAcq implements Runnable {
 
          CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
          ImagePlus concatenatedFluoImgs;
-         System.out.println(fluoTiffName);
          if (fluoTiffName != null) {
             concatenatedFluoImgs = processStackedImg(pathToFluoDir, fluoTiffName,
                   parameters, soc_, socVisualizer_, tasksSet, stop_);

@@ -12,14 +12,15 @@ import java.util.ArrayList;
 public class PythonPipeline {
    public static final String ANALYSING_SCRIPT_NAME = "processMitosis.py";
    public static final String TRACKMATE_LOADER_NAME = "tmXmlToDataFrame.py";
+   public static final String COLOCAL_SCRIPT_NAME = "kt_spb_colocalisation.py";
 
    /**
-    * @param cmd     command to execute
-    * @param logDir  log directory
+    * @param cmd           command to execute
+    * @param logFileName   log directory
     */
-   public static void runPythonScript(String[] cmd, String logDir) {
+   public static void runPythonScript(String[] cmd, String logFileName) {
       ProcessBuilder probuilder = new ProcessBuilder().inheritIO().redirectErrorStream(true).command(cmd);
-      File pythonLog = new File(logDir + "pythonPipeline_log.txt");
+      File pythonLog = new File(logFileName);
       try {
          probuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(pythonLog));
          Process process = probuilder.start();
