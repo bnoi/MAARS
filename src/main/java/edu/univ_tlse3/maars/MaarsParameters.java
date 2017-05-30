@@ -8,6 +8,7 @@ package edu.univ_tlse3.maars;
  */
 
 import edu.univ_tlse3.utils.IOUtils;
+import ij.IJ;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -133,7 +134,7 @@ public class MaarsParameters {
    private static final String CALIBRATION = "CALIBRATION";
    private static final String BATCH_MODE = "BATCH_MODE";
    private static final String TOLERANCE = "TOLERANCE";
-
+   public static final String DEPS_DIR = IJ.getDirectory("plugins") + "MAARS_deps"+ File.separator;
 
    private Document doc;
    private Element root;

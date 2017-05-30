@@ -70,30 +70,25 @@ def find_slope_change_point(elongation, minSegLen, timeInterval, majorAxieLen, c
     return line
 
 
-def set_attributes_from_cmd_line(self):
+def set_attributes_from_cmd_line():
     parser = ArgumentParser(
-        description="collect files             related to mitotic cell to root dir of acquisition ")
+        description="Find mitotic cells and put related data into a folder")
     parser.add_argument("baseDir",
                         help="path to acquisition folder",
                         type=str)
     parser.add_argument("channel",
                         help="channel used to detect SPBs",
                         type=str)
-    parser.add_argument("-calibration",
+    parser.add_argument("calibration",
                         help="calibration of image",
-                        type=float, default=0.1075)
+                        type=float)
+    parser.add_argument("acq_interval",
+                        help="interval of fluo acquisition",
+                        type=float)
     parser.add_argument("-minimumPeriod",
                         help="minimum time segment to be analyzed",
                         type=int, default=200)
-    parser.add_argument("-acq_interval",
-                        help="interval of fluo acquisition",
-                        type=int, default=20)
-    args = parser.parse_args()
-    self._baseDir = args.baseDir
-    channel = args.channel
-    calibration = args.calibration
-    minimumPeriod = args.minimumPeriod
-    acq_interval = args.acq_interval
+    return parser.parse_args()
 
 
 def getAllCellNumbers(features_dir):
@@ -220,12 +215,18 @@ def saveAllElongations(mitosisDir, elongationRegions):
 
 
 if __name__ == '__main__':
-    baseDir = "/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/BF_1"
-    channel = "CFP"
-    calibration = 0.10650000410025016
-    minimumPeriod = 200
-    acq_interval = 20
-    # launcher.set_attributes_from_cmd_line()
+    # example
+    # baseDir = "/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/BF_1"
+    # channel = "CFP"
+    # calibration = 0.10650000410025016
+    # minimumPeriod = 200
+    # acq_interval = 20
+    args = set_attributes_from_cmd_line()
+    baseDir = args.baseDir
+    channel = args.channel
+    calibration = args.calibration
+    minimumPeriod = args.minimumPeriod
+    acq_interval = args.acq_interval
 
     # user won't need to change
     mitosis_suffix = "_MITOSIS" + path.sep
@@ -240,7 +241,7 @@ if __name__ == '__main__':
     features_dir = fluoDir + features
     cropImgs_dir = fluoDir + cropImgs
     minSegLen = int(minimumPeriod / acq_interval)
-
+    
     # -----------------------------------run the analysis-----------------------------------#
     pool = mp.Pool(mp.cpu_count())
     cellRois = load_rois(0)

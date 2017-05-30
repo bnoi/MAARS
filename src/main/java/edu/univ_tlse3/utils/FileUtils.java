@@ -1,6 +1,5 @@
 package edu.univ_tlse3.utils;
 
-import edu.univ_tlse3.cellstateanalysis.PythonPipeline;
 import ij.IJ;
 
 import java.io.*;
@@ -92,7 +91,7 @@ public class FileUtils {
     * @return its inputstream
     */
    public static InputStream getInputStreamOfScript(String scriptName) {
-      ClassLoader classLoader = PythonPipeline.class.getClassLoader();
+      ClassLoader classLoader = FileUtils.class.getClassLoader();
       return classLoader.getResourceAsStream(scriptName);
    }
 
@@ -100,7 +99,7 @@ public class FileUtils {
     * @param folderPath folder to copy scripts
     * @param scriptName name of script
     */
-   public static void copyScriptDependency(String folderPath, String scriptName) {
+   public static void copy(String folderPath, String scriptName) {
       BufferedReader bfr = getBufferReaderOfScript(scriptName);
       ArrayList<String> script = new ArrayList<>();
       try {

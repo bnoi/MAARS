@@ -1,8 +1,8 @@
 import edu.univ_tlse3.gui.MaarsMainDialog;
+import edu.univ_tlse3.maars.MAARS;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.utils.FileUtils;
 import edu.univ_tlse3.utils.IOUtils;
-import ij.IJ;
 import org.micromanager.MenuPlugin;
 import org.micromanager.Studio;
 import org.micromanager.internal.MMStudio;
@@ -72,8 +72,6 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
       }
       MaarsParameters parameters = new MaarsParameters(inStream);
       new MaarsMainDialog(mmStudio, parameters);
-      if (!FileUtils.exists(IJ.getDirectory("plugins") + "/MAARS_deps")) {
-         FileUtils.createFolder(IJ.getDirectory("plugins") + "/MAARS_deps");
-      }
+      MAARS.copyDeps();
    }
 }

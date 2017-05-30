@@ -160,13 +160,18 @@ public class MAARS implements Runnable {
    static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir) {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
-      String mitoDir = pathToSegDir + "_MITOSIS";
-      ArrayList<String> script = PythonPipeline.getPythonScript(pathToSegDir, parameters.getDetectionChForMitosis(),
-            parameters.getCalibration(), parameters.getMinimumMitosisDuration(),
-            String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))));
-      PythonPipeline.savePythonScript(mitoDir + File.separator, script);
-      IJ.log("Script generated");
-      PythonPipeline.runPythonScript(mitoDir + File.separator);
+      String mitoDir = pathToSegDir + "_MITOSIS"+ File.separator;
+      String[] cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
+            PythonPipeline.ANALYSING_SCRIPT_NAME, pathToSegDir, parameters.getDetectionChForMitosis(),
+            parameters.getCalibration(), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
+            parameters.getMinimumMitosisDuration()};
+      FileUtils.createFolder(mitoDir);
+      ArrayList cmds = new ArrayList();
+      cmds.add(String.join(" ",cmd));
+      String bashPath = mitoDir + "pythonAnalysis.sh";
+      FileUtils.writeScript(bashPath,cmds);
+      IJ.log("Script saved");
+      PythonPipeline.runPythonScript(cmd, mitoDir);
       HashMap map = MAARS.getMitoticCellNbs(mitoDir);
       MAARS.findAbnormalCells(mitoDir, soc, map);
    }
@@ -298,7 +303,6 @@ public class MAARS implements Runnable {
             tasksSet_.add(channelsInFrame);
             frame++;
             double acqTook = System.currentTimeMillis() - beginAcq;
-            System.out.println(String.valueOf(acqTook));
             if (fluoTimeInterval > acqTook) {
                try {
                   Thread.sleep((long) (fluoTimeInterval - acqTook));
@@ -384,6 +388,14 @@ public class MAARS implements Runnable {
          System.setErr(ps);
       } catch (FileNotFoundException e) {
          IOUtils.printErrorToIJLog(e);
+      }
+   }
+
+   public static void copyDeps(){
+      if (!FileUtils.exists(MaarsParameters.DEPS_DIR)) {
+         FileUtils.createFolder(MaarsParameters.DEPS_DIR);
+         FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.TRACKMATE_LOADER_NAME);
+         FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.ANALYSING_SCRIPT_NAME);
       }
    }
 }

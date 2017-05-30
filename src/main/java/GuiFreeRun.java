@@ -1,7 +1,9 @@
+
 import edu.univ_tlse3.cellstateanalysis.SetOfCells;
 import edu.univ_tlse3.display.SOCVisualizer;
 import edu.univ_tlse3.gui.MaarsFluoAnalysisDialog;
 import edu.univ_tlse3.gui.MaarsSegmentationDialog;
+import edu.univ_tlse3.maars.MAARS;
 import edu.univ_tlse3.maars.MAARSNoAcq;
 import edu.univ_tlse3.maars.MaarsParameters;
 import edu.univ_tlse3.maars.MaarsSegmentation;
@@ -99,14 +101,14 @@ public class GuiFreeRun implements PlugIn {
    }
 
    public static void main(String[] args) {
-        new ImageJ();
-        String configFileName = "maars_config.xml";
-        String dir = "/media/tong/MAARSData/MAARSData/102/15-06-1";
-        MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
-        parameters.setSavingPath(dir);
-        //executeAnalysis(fluoAnalysisDialog.getParameters());
-        executeAnalysis(parameters);
-
+      new ImageJ();
+      MAARS.copyDeps();
+      String configFileName = "maars_config.xml";
+      String dir = "/Volumes/Macintosh/curioData/MAARSdata/102/15-06-2";
+      MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
+      parameters.setSavingPath(dir);
+      //executeAnalysis(fluoAnalysisDialog.getParameters());
+      executeAnalysis(parameters);
 
 //        for (String s : new File(".").list()){
 //            System.out.println(s);
