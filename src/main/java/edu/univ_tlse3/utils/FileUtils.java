@@ -177,7 +177,7 @@ public class FileUtils {
          String str;
          String[] splited;
          while ((str = in.readLine()) != null) {
-            splited = str.split("\t");
+            splited = str.split(",");
             table.put(splited[0], Arrays.copyOfRange(splited, 1, splited.length));
          }
          in.close();

@@ -260,7 +260,7 @@ public class MaarsFluoAnalysisDialog extends JDialog {
       if (img != null) {
          ImagePlus zProjectedFluoImg = ImgUtils.zProject(img, img.getCalibration());
          MaarsTrackmate tmTest = new MaarsTrackmate(zProjectedFluoImg, spotRadius, quality);
-         Model model = tmTest.doDetection(false);
+         Model model = tmTest.doDetection();
          model.getSpots().setVisible(true);
          SelectionModel selectionModel = new SelectionModel(model);
          HyperStackDisplayer displayer = new HyperStackDisplayer(model, selectionModel, zProjectedFluoImg);

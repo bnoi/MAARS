@@ -83,7 +83,7 @@ public class FluoAnalyzer implements Runnable {
          zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
       }
       MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
-      this.model = trackmate.doDetection(true);
+      this.model = trackmate.doDetection();
       int nbCell = soc.size();
       collection = SpotsContainer.getNBestqualitySpots(model.getSpots(), nbCell, maxNbSpot);
       double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);

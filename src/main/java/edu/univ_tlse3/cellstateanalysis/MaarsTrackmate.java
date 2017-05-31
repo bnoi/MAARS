@@ -4,7 +4,7 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
-import fiji.plugin.trackmate.features.spot.*;
+//import fiji.plugin.trackmate.features.spot.*;
 import ij.ImagePlus;
 import net.imglib2.type.numeric.real.FloatType;
 
@@ -23,11 +23,11 @@ public class MaarsTrackmate {
 
       // Computer different features (in order)
 
-      settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<FloatType>());
-      settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
-      settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
-      settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory<FloatType>());
-      settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory<FloatType>());
+//      settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<FloatType>());
+//      settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
+//      settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
+//      settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory<FloatType>());
+//      settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory<FloatType>());
 
       // Set up detection parameters.
 
@@ -45,19 +45,16 @@ public class MaarsTrackmate {
     * Take parameters in the constructor then initalize trakemate object to get
     * unfiltered spots.
     *
-    * @param computeFeatures to compute or not features of spots
     * @return Model a Trackmate style data structure
     */
-   public Model doDetection(boolean computeFeatures) {
+   public Model doDetection() {
       TrackMate trackmate = new TrackMate(settings);
 
       trackmate.execDetection();
 
       trackmate.execInitialSpotFiltering();
 
-      if (computeFeatures) {
-         trackmate.computeSpotFeatures(false);
-      }
+//      trackmate.computeSpotFeatures(false);
 
       return trackmate.getModel();
    }

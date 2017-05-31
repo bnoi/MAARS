@@ -21,15 +21,15 @@ def get_outside_spots(x_base, y_base, xs, ys, radius):
             spots_outside_ys.append(ys[i])
     return spots_outside_xs,spots_outside_ys
 
-def change_label(df, index, value):
+def change_label(df, index, col, value):
     for j in df.loc[index]:
-        df.set_value(index,"phase", value)
+        df.set_value(index,col, value)
 
 def prepare_data(root, cellNb, channel):
     spotsPath = root +cellNb+"_"+channel+".xml"
     chSpots = tm.getAllSpots(spotsPath)
-    labels = ["interphase"]*len(chSpots)
-    chSpots["phase"] = labels
+    chSpots["phase"] = ["interphase"]*len(chSpots)
+    chSpots["dotNb"] = ["1"] * len(chSpots)
     return chSpots
 
 def generate_circle_coords(radius):
@@ -38,7 +38,7 @@ def generate_circle_coords(radius):
     ys = radius *np.sin(an)
     return (xs, ys)
 
-def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot):
+def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot,radius = 0.25):
     print("processing cell %s" %cellNb)
     poleSpots = prepare_data(root,cellNb,poleCh)
     ktSpots  = prepare_data(root,cellNb,ktCh)
@@ -50,30 +50,36 @@ def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot):
 
     meta_color = "red"
     ana_color = "blue"
-    radius = 0.25
     circle_xs, circle_ys = generate_circle_coords(radius)
 
     alpha = 0.8
-    for x in ktSpots.index.levels[0]:
+    merged_frameNb = sorted(list(poleSpots.index.levels[0]) + list(set(list(ktSpots.index.levels[0])) - set(list(poleSpots.index.levels[0]))))
+    for x in merged_frameNb:
         if x not in poleSpots.index or x not in ktSpots.index:
             continue
         current_frame_poles = poleSpots.loc[x]
+        current_frame_kts = ktSpots.loc[x]
+        change_label(poleSpots,x,"dotNb",len(current_frame_poles))
+        change_label(ktSpots,x,"dotNb",len(current_frame_kts))
         if len(current_frame_poles)<2:
             continue
-        current_frame_kts = ktSpots.loc[x]
         spots_outside = (list(current_frame_kts[pos_x]), list(current_frame_kts[pos_y]))
         for i in range(0,len(current_frame_poles[pos_x])):
             spots_outside = get_outside_spots(current_frame_poles[pos_x].iloc[i], current_frame_poles[pos_y].iloc[i],
                                               spots_outside[0],spots_outside[1],radius)
         if len(spots_outside[0])==0:
-            change_label(poleSpots,x,"anaphase")
+            change_label(poleSpots,x,"phase","anaphase")
+            change_label(ktSpots,x,"phase","anaphase")
         else:
-            change_label(poleSpots,x,"metaphase")
+            change_label(poleSpots,x,"phase","metaphase")
+            change_label(ktSpots,x,"phase","anaphase")
     # print(cfpSpots['phase'][cfpSpots['phase']=='metaphase'])
     # indexsOfMetaphase = list(cfpSpots.index.levels[0][cfpSpots['phase'][cfpSpots['phase']=='metaphase'].index.labels[0]])
-    poleSpots['phase'].to_csv(savingRoot +cellNb+"_anot_spots.csv")
-
-
+    phase_d = pd.DataFrame(index=merged_frameNb)
+    phase_d['phase'] = poleSpots['phase'].xs(0,level=1)
+    phase_d['pole_dotNb'] = poleSpots['dotNb'].xs(0,level=1)
+    phase_d['kt_dotNb'] = ktSpots['dotNb'].xs(0,level=1)
+    phase_d.to_csv(savingRoot +cellNb+"_anot_spots.csv")
 
 parser = argparse.ArgumentParser(description='Find colocalisation state of each frame')
 parser.add_argument('root', metavar='root Path', type=str,
@@ -91,6 +97,8 @@ results = [pool.apply_async( process_one_cell, t ) for t in tasks]
 for result in results:
     result.get()
 pool.close()
+
+
     # fig,ax = plt.subplots(figsize=(5,5))
     # ax.axis('equal')
     # for k in [0,1]:

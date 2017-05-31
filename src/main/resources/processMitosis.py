@@ -63,10 +63,10 @@ def find_slope_change_point(elongation, minSegLen, timeInterval, majorAxieLen, c
     second_max_slope_change_index = normed_anaphase.index[minSegLen]
     if maxInd > normed_anaphase.index[minSegLen] and slope_changes.loc[maxInd]['slope'] > 0:
         second_max_slope_change_index = maxInd
-    line = str(cellNb) + "\t"
-    line += str(normed_anaphase.index[minSegLen]) + "\t"
-    line += "\t".join(str(int(e)) for e in sorted([first_max_slope_change_index, second_max_slope_change_index])) + "\t"
-    line += str(normed_anaphase.index[-minSegLen]) + "\n"
+    line = str(cellNb) + ","
+    line += str(normed_anaphase.index[minSegLen]) + ","
+    line += ",".join(str(int(e)) for e in sorted([first_max_slope_change_index, second_max_slope_change_index]))
+    line += "," + str(normed_anaphase.index[-minSegLen]) + "\n"
     return line
 
 
@@ -156,7 +156,7 @@ def getMitoticElongation(features_dir, cellNb, p, minSegLen, channel):
 
 def analyse_each_cell(pool, minSegLen, elongationRegions, cellRois, mitosisDir):
     slope_change_tasks = list()
-    f = open(mitosisDir + "mitosis_time_board.txt", "w+")
+    f = open(mitosisDir + "mitosis_time_board.csv", "w+")
     for cellId in elongationRegions.keys():
         cellNb = cellId.split("_")[0]
         current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
@@ -241,7 +241,7 @@ if __name__ == '__main__':
     features_dir = fluoDir + features
     cropImgs_dir = fluoDir + cropImgs
     minSegLen = int(minimumPeriod / acq_interval)
-    
+
     # -----------------------------------run the analysis-----------------------------------#
     pool = mp.Pool(mp.cpu_count())
     cellRois = load_rois(0)
@@ -260,7 +260,7 @@ if __name__ == '__main__':
     copy_mitosis_files(elongationRegions, ["CFP", "GFP", "TxRed", "DAPI"], fluoDir, mitosisDir, cropImgs, spots,
                        features)
     time_board = analyse_each_cell(pool, minSegLen, elongationRegions, cellRois, mitosisDir)
-    times = pd.DataFrame([cell.split("\t") for cell in time_board.split("\n")])
+    times = pd.DataFrame([cell.split(",") for cell in time_board.split("\n")])
     times = times.set_index(0)
     elongationRegionsDf = saveAllElongations(mitosisDir, elongationRegions)
     savePlots(elongationRegions, cellRois, calibration, times)
