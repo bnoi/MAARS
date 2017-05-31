@@ -176,6 +176,7 @@ public class MAARS implements Runnable {
             parameters.getDetectionChForMitosis(), "GFP", mitoDir + "phases" + File.separator};
       colocalisation_cmd = Stream.of(colocalisation_cmd, map.keySet().toArray(new String[map.keySet().size()])).
             flatMap(Stream::of).toArray(String[]::new);
+      PythonPipeline.runPythonScript(colocalisation_cmd, mitoDir + "colocalisation_log.txt");
       System.out.println(String.join(" ", colocalisation_cmd));
       ArrayList cmds = new ArrayList();
       cmds.add(String.join(" ", mitosis_cmd));
@@ -183,7 +184,6 @@ public class MAARS implements Runnable {
       String bashPath = mitoDir + "pythonAnalysis.sh";
       FileUtils.writeScript(bashPath,cmds);
       IJ.log("Script saved");
-      PythonPipeline.runPythonScript(colocalisation_cmd, mitoDir + "colocalisation_log.txt");
       MAARS.findAbnormalCells(mitoDir, soc, map);
    }
 

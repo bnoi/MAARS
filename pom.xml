@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.scijava</groupId>
-        <artifactId>pom-scijava</artifactId>
-        <version>14.0.0</version>
+        <groupId>sc.fiji</groupId>
+        <artifactId>pom-fiji</artifactId>
+        <version>26.1.1</version>
     </parent>
 
     <artifactId>MAARS_</artifactId>
@@ -120,7 +120,6 @@
             <url>file://${project.basedir}/repo</url>
         </repository>
     </repositories>
-
     <build>
         <finalName>${project.name}_${project.version}</finalName>
         <plugins>
@@ -128,9 +127,9 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <configuration>
                     <rules>
-                        <rule>
-                            <banDuplicateClasses>
-                                <!--<dependencies>-->
+                        <banClasses
+                                implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
+                            <dependencies>
                                 <!-- org.json clashes -->
                                 <dependency>
                                     <artifactId>MMJ_</artifactId>
@@ -138,16 +137,42 @@
                                         <ignoreClass>org/json/*</ignoreClass>
                                     </ignoreClasses>
                                 </dependency>
-                                <!--</dependencies>-->
-                                <findAllDuplicates>true</findAllDuplicates>
-                                <!--<ignoreClasses>-->
-                                <!--<ignoreClass>org.json.*</ignoreClass>-->
-                                <!--</ignoreClasses>-->
-                            </banDuplicateClasses>
-                        </rule>
+                            </dependencies>
+                            <findAllDuplicates>true</findAllDuplicates>
+                        </banClasses>
                     </rules>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    <!--scijava configuration-->
+    <!--<build>-->
+        <!--<finalName>${project.name}_${project.version}</finalName>-->
+        <!--<plugins>-->
+            <!--<plugin>-->
+                <!--<artifactId>maven-enforcer-plugin</artifactId>-->
+                <!--<configuration>-->
+                    <!--<rules>-->
+                        <!--<rule>-->
+                            <!--<banDuplicateClasses>-->
+                                <!--&lt;!&ndash;<dependencies>&ndash;&gt;-->
+                                <!--&lt;!&ndash; org.json clashes &ndash;&gt;-->
+                                <!--<dependency>-->
+                                    <!--<artifactId>MMJ_</artifactId>-->
+                                    <!--<ignoreClasses>-->
+                                        <!--<ignoreClass>org/json/*</ignoreClass>-->
+                                    <!--</ignoreClasses>-->
+                                <!--</dependency>-->
+                                <!--&lt;!&ndash;</dependencies>&ndash;&gt;-->
+                                <!--<findAllDuplicates>true</findAllDuplicates>-->
+                                <!--&lt;!&ndash;<ignoreClasses>&ndash;&gt;-->
+                                <!--&lt;!&ndash;<ignoreClass>org.json.*</ignoreClass>&ndash;&gt;-->
+                                <!--&lt;!&ndash;</ignoreClasses>&ndash;&gt;-->
+                            <!--</banDuplicateClasses>-->
+                        <!--</rule>-->
+                    <!--</rules>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+        <!--</plugins>-->
+    <!--</build>-->
 </project>
