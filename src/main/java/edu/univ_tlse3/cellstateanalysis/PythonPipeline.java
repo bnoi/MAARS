@@ -1,13 +1,9 @@
 package edu.univ_tlse3.cellstateanalysis;
 
-import edu.univ_tlse3.maars.MaarsParameters;
-import edu.univ_tlse3.utils.FileUtils;
 import ij.IJ;
-import ij.ImageJ;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class PythonPipeline {
    public static final String ANALYSING_SCRIPT_NAME = "processMitosis.py";
@@ -27,7 +23,7 @@ public class PythonPipeline {
          process.waitFor();
          process.destroyForcibly();
          if (!process.isAlive()) {
-            IJ.log("Python pipeline ended (please check the log file, if the result is not correct)");
+            IJ.log("Python extension ended (please check the log file for further information)");
          }
       } catch (IOException | InterruptedException e) {
          IJ.log(e.getMessage());

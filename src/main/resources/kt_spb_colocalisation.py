@@ -78,10 +78,10 @@ def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot):
 parser = argparse.ArgumentParser(description='Find colocalisation state of each frame')
 parser.add_argument('root', metavar='root Path', type=str,
                     help='path to root dir containing spot files (.xml)')
-parser.add_argument('cellNbs', type=str, nargs='+',help='cell number(s)')
 parser.add_argument('poleChannel', type=str,help='channel of pole')
 parser.add_argument('ktChannel', type=str,help='channel of kinetochore')
 parser.add_argument('savingRoot', type=str,help='folder to save results')
+parser.add_argument('cellNbs', type=str, nargs='+',help='cell number(s)')
 args = parser.parse_args()
 pool = mp.Pool(mp.cpu_count())
 tasks = []

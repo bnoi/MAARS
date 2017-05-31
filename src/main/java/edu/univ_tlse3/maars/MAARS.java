@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 /**
  * Main MAARS program
@@ -157,7 +158,7 @@ public class MAARS implements Runnable {
       return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.txt");
    }
 
-   static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir) {
+   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir) {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
       String mitoDir = pathToSegDir + "_MITOSIS"+ File.separator;
@@ -165,20 +166,24 @@ public class MAARS implements Runnable {
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToSegDir, parameters.getDetectionChForMitosis(),
             parameters.getCalibration(), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
             "-minimumPeriod", parameters.getMinimumMitosisDuration()};
-      String[] colocalisayion_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
-            PythonPipeline.COLOCAL_SCRIPT_NAME, mitoDir + File.separator + "spots" + File.separator,
-            parameters.getDetectionChForMitosis(), mitosisCellNbs, parameters.getDetectionChForMitosis(),
-            ktChannel, savingPath};
       FileUtils.createFolder(mitoDir);
+      FileUtils.createFolder(mitoDir + "phases");
+      PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
+      HashMap map = MAARS.getMitoticCellNbs(mitoDir);
+      String mitosisCellNbs = String.join(" ", map.keySet());
+      String[] colocalisation_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
+            PythonPipeline.COLOCAL_SCRIPT_NAME, mitoDir + "spots" + File.separator,
+            parameters.getDetectionChForMitosis(), "GFP", mitoDir + "phases" + File.separator};
+      colocalisation_cmd = Stream.of(colocalisation_cmd, map.keySet().toArray(new String[map.keySet().size()])).
+            flatMap(Stream::of).toArray(String[]::new);
+      System.out.println(String.join(" ", colocalisation_cmd));
       ArrayList cmds = new ArrayList();
       cmds.add(String.join(" ", mitosis_cmd));
-      cmds.add(String.join(" ", colocalisayion_cmd));
+      cmds.add(String.join(" ", colocalisation_cmd));
       String bashPath = mitoDir + "pythonAnalysis.sh";
       FileUtils.writeScript(bashPath,cmds);
       IJ.log("Script saved");
-      PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
-      PythonPipeline.runPythonScript(colocalisayion_cmd, mitoDir + "colocalisation_log.txt");
-      HashMap map = MAARS.getMitoticCellNbs(mitoDir);
+      PythonPipeline.runPythonScript(colocalisation_cmd, mitoDir + "colocalisation_log.txt");
       MAARS.findAbnormalCells(mitoDir, soc, map);
    }
 
