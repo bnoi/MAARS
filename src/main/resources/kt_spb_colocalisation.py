@@ -28,8 +28,6 @@ def change_label(df, index, col, value):
 def prepare_data(root, cellNb, channel):
     spotsPath = root +cellNb+"_"+channel+".xml"
     chSpots = tm.getAllSpots(spotsPath)
-    chSpots["phase"] = [None]*len(chSpots)
-    chSpots["dotNb"] = [None] * len(chSpots)
     return chSpots
 
 def generate_circle_coords(radius):
@@ -47,43 +45,45 @@ def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot,radius = 0.25):
     for j in [pos_x, pos_y]:
         poleSpots[j] = poleSpots[j].astype(np.float)
         ktSpots[j] = ktSpots[j].astype(np.float)
-        
+
     merged_frameNb = sorted(list(poleSpots.index.levels[0]) + list(set(list(ktSpots.index.levels[0])) - set(list(poleSpots.index.levels[0]))))
-    skip=False
+    phase_label = np.zeros(merged_frameNb[-1]+1)
+    poleDotNb = np.zeros(merged_frameNb[-1]+1)
+    ktDotNb = np.zeros(merged_frameNb[-1]+1)
+    n_pole = -1
+    n_kt = -1
     for x in merged_frameNb:
+        skip=False
         if x in poleSpots.index.levels[0]:
             current_frame_poles = poleSpots.loc[x]
-            change_label(poleSpots,x,"dotNb",len(current_frame_poles))
-            if len(current_frame_poles)> 1:
-                change_label(poleSpots,x,"phase","metaphase")
+            n_pole = len(current_frame_poles)
+            poleDotNb[x] = n_pole
+            if n_pole >1:
+                phase_label[x]= 1
         else:
             skip = True
         if x in ktSpots.index.levels[0]:
             current_frame_kts = ktSpots.loc[x]
-            change_label(ktSpots,x,"dotNb",len(current_frame_kts))
-            if len(current_frame_kts)>1:
-                change_label(ktSpots,x,"phase","metaphase")
+            n_kt = len(current_frame_kts)
+            ktDotNb[x] = n_kt
+            if n_kt>1:
+                phase_label[x]= 1
         else:
             skip=True
-        if skip or len(current_frame_poles)<2:
+        if skip or n_pole<2:
             continue
         spots_outside = (list(current_frame_kts[pos_x]), list(current_frame_kts[pos_y]))
         for i in range(0,len(current_frame_poles[pos_x])):
             spots_outside = get_outside_spots(current_frame_poles[pos_x].iloc[i], current_frame_poles[pos_y].iloc[i],
                                               spots_outside[0],spots_outside[1],radius)
         if len(spots_outside[0])==0:
-            change_label(poleSpots,x,"phase","anaphase")
-            change_label(ktSpots,x,"phase","anaphase")
+            phase_label[x]= 2
         else:
-            change_label(poleSpots,x,"phase","metaphase")
-            change_label(ktSpots,x,"phase","metaphase")
+            phase_label[x]= 1
     # print(cfpSpots['phase'][cfpSpots['phase']=='metaphase'])
     # indexsOfMetaphase = list(cfpSpots.index.levels[0][cfpSpots['phase'][cfpSpots['phase']=='metaphase'].index.labels[0]])
-    phase_d = pd.DataFrame(index=merged_frameNb)
-    phase_d['phase'] = poleSpots['phase'].xs(0,level=1)
-    phase_d.update(ktSpots['phase'].xs(0,level=1), overwrite=False)
-    phase_d['pole_dotNb'] = poleSpots['dotNb'].xs(0,level=1)
-    phase_d['kt_dotNb'] = ktSpots['dotNb'].xs(0,level=1)
+    phase_d = pd.DataFrame({'pole_dotNb':poleDotNb, 'kt_dotNb':ktDotNb, 'phase':phase_label})
+    phase_d = phase_d[(phase_d.T != 0).any()]
     phase_d.to_csv(savingRoot +cellNb+"_anot_spots.csv")
 
 parser = argparse.ArgumentParser(description='Find colocalisation state of each frame')
