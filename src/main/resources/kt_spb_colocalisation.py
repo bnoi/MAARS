@@ -28,8 +28,8 @@ def change_label(df, index, col, value):
 def prepare_data(root, cellNb, channel):
     spotsPath = root +cellNb+"_"+channel+".xml"
     chSpots = tm.getAllSpots(spotsPath)
-    chSpots["phase"] = ["interphase"]*len(chSpots)
-    chSpots["dotNb"] = ["1"] * len(chSpots)
+    chSpots["phase"] = [None]*len(chSpots)
+    chSpots["dotNb"] = [None] * len(chSpots)
     return chSpots
 
 def generate_circle_coords(radius):
@@ -47,21 +47,25 @@ def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot,radius = 0.25):
     for j in [pos_x, pos_y]:
         poleSpots[j] = poleSpots[j].astype(np.float)
         ktSpots[j] = ktSpots[j].astype(np.float)
-
-    meta_color = "red"
-    ana_color = "blue"
-    circle_xs, circle_ys = generate_circle_coords(radius)
-
-    alpha = 0.8
+        
     merged_frameNb = sorted(list(poleSpots.index.levels[0]) + list(set(list(ktSpots.index.levels[0])) - set(list(poleSpots.index.levels[0]))))
+    skip=False
     for x in merged_frameNb:
-        if x not in poleSpots.index or x not in ktSpots.index:
-            continue
-        current_frame_poles = poleSpots.loc[x]
-        current_frame_kts = ktSpots.loc[x]
-        change_label(poleSpots,x,"dotNb",len(current_frame_poles))
-        change_label(ktSpots,x,"dotNb",len(current_frame_kts))
-        if len(current_frame_poles)<2:
+        if x in poleSpots.index.levels[0]:
+            current_frame_poles = poleSpots.loc[x]
+            change_label(poleSpots,x,"dotNb",len(current_frame_poles))
+            if len(current_frame_poles)> 1:
+                change_label(poleSpots,x,"phase","metaphase")
+        else:
+            skip = True
+        if x in ktSpots.index.levels[0]:
+            current_frame_kts = ktSpots.loc[x]
+            change_label(ktSpots,x,"dotNb",len(current_frame_kts))
+            if len(current_frame_kts)>1:
+                change_label(ktSpots,x,"phase","metaphase")
+        else:
+            skip=True
+        if skip or len(current_frame_poles)<2:
             continue
         spots_outside = (list(current_frame_kts[pos_x]), list(current_frame_kts[pos_y]))
         for i in range(0,len(current_frame_poles[pos_x])):
@@ -72,11 +76,12 @@ def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot,radius = 0.25):
             change_label(ktSpots,x,"phase","anaphase")
         else:
             change_label(poleSpots,x,"phase","metaphase")
-            change_label(ktSpots,x,"phase","anaphase")
+            change_label(ktSpots,x,"phase","metaphase")
     # print(cfpSpots['phase'][cfpSpots['phase']=='metaphase'])
     # indexsOfMetaphase = list(cfpSpots.index.levels[0][cfpSpots['phase'][cfpSpots['phase']=='metaphase'].index.labels[0]])
     phase_d = pd.DataFrame(index=merged_frameNb)
     phase_d['phase'] = poleSpots['phase'].xs(0,level=1)
+    phase_d.update(ktSpots['phase'].xs(0,level=1), overwrite=False)
     phase_d['pole_dotNb'] = poleSpots['dotNb'].xs(0,level=1)
     phase_d['kt_dotNb'] = ktSpots['dotNb'].xs(0,level=1)
     phase_d.to_csv(savingRoot +cellNb+"_anot_spots.csv")
@@ -100,6 +105,9 @@ pool.close()
 
 
     # fig,ax = plt.subplots(figsize=(5,5))
+    # meta_color = "red"
+    # ana_color = "blue"
+    # circle_xs, circle_ys = generate_circle_coords(radius)
     # ax.axis('equal')
     # for k in [0,1]:
     #     ax.plot(circle_xs + current_frame_poles[pos_x].iloc[k], circle_ys + current_frame_poles[pos_y].iloc[k], "y--",alpha = alpha)

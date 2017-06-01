@@ -1,15 +1,32 @@
 from hmmlearn import hmm
 import pandas as pd
 import numpy as np
+import os
 
-d = pd.DataFrame.from_csv("/media/tong/MAARSData/MAARSData/102/15-06-2/BF_1_MITOSIS/phases/32_anot_spots.csv", header=None, index_col=[0,1])
-d.shape
-d.xs(1, level=1)
-d_unique = d.drop(1, level=1)
-d_unique['dotNb'] = np.ones(len(d_unique))
-d_unique.set_value(list(d.xs(1, level=1).index),'dotNb',2.0)
-startprob = np.array([0.6, 0.3, 0.1])
-transmat = np.array([[0.7, 0.2, 0.1], [0.3, 0.5, 0.2], [0.3, 0.3, 0.4]])
-means = np.array([[0.0, 0.0], [3.0, -3.0], [5.0, 10.0]])
-covars = np.tile(np.identity(2), (3, 1, 1))
-hmm.GaussianHMM(n_components=3)
+states = ['interphase', 'metaphase', 'anaphase']
+n_states = len(states)
+
+
+#test set
+root = "/Volumes/Macintosh/curioData/MAARSdata/102/15-06-2/BF_1_MITOSIS/phases/"
+allD = list()
+for f in os.listdir(root):
+    if not f.startswith("."):
+        allD.append(pd.DataFrame.from_csv(root + f, index_col=[0]))
+concated = pd.concat(allD)
+
+concated.groupby(['phase', 'pole_dotNb', 'kt_dotNb']).size()
+model = hmm.MultinomialHMM(3)
+model.fit(X)
+model.monitor_.history
+model
+model.transmat_
+model.n_features
+model.startprob_ = np.array([0.3, 0.3, 0.3])
+model.transmat_ = np.array([[0.5, 0.3, 0.2], [0.5, 0.3, 0.2], [0.5, 0.3, 0.2]])
+model.means = np.array([[0.0, 0.0], [3.0, -3.0], [5.0, 10.0]])
+model.covars_= np.tile(np.identity(2), (3, 1, 1))
+model
+
+
+
