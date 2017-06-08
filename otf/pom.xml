@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>edu.univ_tlse3.maars</groupId>
+    <artifactId>otf</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <scijava.jvm.version>1.8</scijava.jvm.version>
+        <project.micromanager.version>
+            2.0.0.2
+        </project.micromanager.version>
+    </properties>
+
+    <dependencies>
+
+        <!--dependencies already present in Micro Manager-->
+
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMJ_</artifactId>
+            <version>${project.micromanager.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMCoreJ</artifactId>
+            <version>${project.micromanager.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMAcqEngine</artifactId>
+            <version>${project.micromanager.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+
+        <!-- MAARS specific dependencies-->
+
+        <dependency>
+            <groupId>sc.fiji</groupId>
+            <artifactId>TrackMate_</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom2</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.name}_${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <configuration>
+                    <rules>
+                        <banClasses
+                                implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
+                            <dependencies>
+                                <!-- org.json clashes -->
+                                <dependency>
+                                    <artifactId>MMJ_</artifactId>
+                                    <ignoreClasses>
+                                        <ignoreClass>org/json/*</ignoreClass>
+                                    </ignoreClasses>
+                                </dependency>
+                            </dependencies>
+                            <findAllDuplicates>true</findAllDuplicates>
+                        </banClasses>
+                    </rules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

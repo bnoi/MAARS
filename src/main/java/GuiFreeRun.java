@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The main of MAARS without GUI configuration of MAARSparameters
+ * The main of MAARS without GUI configuration of MAARS parameters
  * Created by tongli on 28/04/2017.
  */
 public class GuiFreeRun implements PlugIn {
@@ -104,7 +104,7 @@ public class GuiFreeRun implements PlugIn {
       new ImageJ();
       MAARS.copyDeps();
       String configFileName = "maars_config.xml";
-      String dir = "/media/tong/MAARSData/MAARSData/102/15-06-2";
+      String dir = "/media/tong/DATACLAIRE/Tempombe/36C/102/36C_102_3";
       MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
       parameters.setSavingPath(dir);
 //      //executeAnalysis(fluoAnalysisDialog.getParameters());
@@ -223,12 +223,11 @@ public class GuiFreeRun implements PlugIn {
 
    @Override
    public void run(String s) {
+      MAARS.copyDeps();
       String configFileName = "maars_config.xml";
-      MaarsParameters parameters = loadMaarsParameters(configFileName);
-      if (!Boolean.parseBoolean(parameters.getSkipSegmentation())) {
-         runSegmentation(parameters);
-         parameters.setSkipSegmentation(!Boolean.parseBoolean(parameters.getSkipSegmentation()));
-      }
+      String dir = "/media/tong/DATACLAIRE/Tempombe/32C/849/32C_849_3";
+      MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
+      parameters.setSavingPath(dir);
       MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
       executeAnalysis(fluoAnalysisDialog.getParameters());
 //        byte[] encoded = new byte[0];

@@ -9,8 +9,10 @@
         <version>26.1.1</version>
     </parent>
 
+    <groupId>edu.univ_tlse3.maars</groupId>
+    <packaging>pom</packaging>
     <artifactId>MAARS_</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <name>MAARS</name>
 
     <description>A Micro-Manager plugin for cell biology analysis</description>
@@ -21,6 +23,13 @@
             2.0.0.2
         </project.micromanager.version>
     </properties>
+
+    <modules>
+        <module>lib</module>
+        <module>otf</module>
+        <module>post</module>
+        <module>bfSeg</module>
+    </modules>
 
     <developers>
 

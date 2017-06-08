@@ -161,11 +161,12 @@ public class MAARS implements Runnable {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
       String mitoDir = pathToSegDir + "_MITOSIS"+ File.separator;
+      System.out.println(mitoDir);
+      FileUtils.createFolder(mitoDir);
       String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToSegDir, parameters.getDetectionChForMitosis(),
             parameters.getCalibration(), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
             "-minimumPeriod", parameters.getMinimumMitosisDuration()};
-      FileUtils.createFolder(mitoDir);
       PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
       HashMap map = MAARS.getMitoticCellNbs(mitoDir);
       String[] colocalisation_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
