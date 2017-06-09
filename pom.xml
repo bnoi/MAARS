@@ -12,10 +12,10 @@
     <groupId>edu.univ_tlse3.maars</groupId>
     <packaging>pom</packaging>
     <artifactId>MAARS_</artifactId>
-    <version>2.0.0</version>
+    <version>1.0.0</version>
     <name>MAARS</name>
 
-    <description>A Micro-Manager plugin for cell biology analysis</description>
+    <description>A Micro-Manager (or not) plugin for mitotic-cell analysis</description>
 
     <properties>
         <scijava.jvm.version>1.8</scijava.jvm.version>
@@ -65,7 +65,6 @@
 
     </contributors>
 
-
     <url>https://github.com/bnoi/MAARS</url>
 
     <inceptionYear>2015</inceptionYear>
@@ -76,84 +75,6 @@
         <tag>HEAD</tag>
 
     </scm>
-
-    <dependencies>
-
-        <!--dependencies already present in Micro Manager-->
-
-        <dependency>
-            <groupId>org.micromanager</groupId>
-            <artifactId>MMJ_</artifactId>
-            <version>${project.micromanager.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.micromanager</groupId>
-            <artifactId>MMCoreJ</artifactId>
-            <version>${project.micromanager.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.micromanager</groupId>
-            <artifactId>MMAcqEngine</artifactId>
-            <version>${project.micromanager.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.4.1</version>
-        </dependency>
-
-        <!-- MAARS specific dependencies-->
-
-        <dependency>
-            <groupId>sc.fiji</groupId>
-            <artifactId>TrackMate_</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom2</artifactId>
-        </dependency>
-    </dependencies>
-
-    <repositories>
-        <repository>
-            <id>imagej.public</id>
-            <url>http://maven.imagej.net/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>in-project</id>
-            <name>In Project Repo</name>
-            <url>file://${project.basedir}/repo</url>
-        </repository>
-    </repositories>
-    <build>
-        <finalName>${project.name}_${project.version}</finalName>
-        <plugins>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <configuration>
-                    <rules>
-                        <banClasses
-                                implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
-                            <dependencies>
-                                <!-- org.json clashes -->
-                                <dependency>
-                                    <artifactId>MMJ_</artifactId>
-                                    <ignoreClasses>
-                                        <ignoreClass>org/json/*</ignoreClass>
-                                    </ignoreClasses>
-                                </dependency>
-                            </dependencies>
-                            <findAllDuplicates>true</findAllDuplicates>
-                        </banClasses>
-                    </rules>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
     <!--scijava configuration-->
     <!--<build>-->
         <!--<finalName>${project.name}_${project.version}</finalName>-->
