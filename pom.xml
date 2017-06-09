@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>sc.fiji</groupId>
-        <artifactId>pom-fiji</artifactId>
-        <version>26.1.1</version>
+        <groupId>org.scijava</groupId>
+        <artifactId>pom-scijava</artifactId>
+        <version>16.1.0</version>
     </parent>
 
     <groupId>edu.univ_tlse3.maars</groupId>
@@ -73,7 +73,6 @@
         <connection>scm:git:git://github.com/bnoi/MAARS</connection>
         <developerConnection>scm:git:git@github.com:bnoi/MAARS</developerConnection>
         <tag>HEAD</tag>
-
     </scm>
     <!--scijava configuration-->
     <!--<build>-->
@@ -85,7 +84,7 @@
                     <!--<rules>-->
                         <!--<rule>-->
                             <!--<banDuplicateClasses>-->
-                                <!--&lt;!&ndash;<dependencies>&ndash;&gt;-->
+                                <!--<dependencies>-->
                                 <!--&lt;!&ndash; org.json clashes &ndash;&gt;-->
                                 <!--<dependency>-->
                                     <!--<artifactId>MMJ_</artifactId>-->
@@ -93,8 +92,8 @@
                                         <!--<ignoreClass>org/json/*</ignoreClass>-->
                                     <!--</ignoreClasses>-->
                                 <!--</dependency>-->
-                                <!--&lt;!&ndash;</dependencies>&ndash;&gt;-->
-                                <!--<findAllDuplicates>true</findAllDuplicates>-->
+                                <!--</dependencies>-->
+                                <!--&lt;!&ndash;<findAllDuplicates>true</findAllDuplicates>&ndash;&gt;-->
                                 <!--&lt;!&ndash;<ignoreClasses>&ndash;&gt;-->
                                 <!--&lt;!&ndash;<ignoreClass>org.json.*</ignoreClass>&ndash;&gt;-->
                                 <!--&lt;!&ndash;</ignoreClasses>&ndash;&gt;-->
