@@ -19,9 +19,6 @@
 
     <properties>
         <scijava.jvm.version>1.8</scijava.jvm.version>
-        <project.micromanager.version>
-            2.0.0.2
-        </project.micromanager.version>
     </properties>
 
     <modules>
@@ -74,34 +71,30 @@
         <developerConnection>scm:git:git@github.com:bnoi/MAARS</developerConnection>
         <tag>HEAD</tag>
     </scm>
-    <!--scijava configuration-->
-    <!--<build>-->
-        <!--<finalName>${project.name}_${project.version}</finalName>-->
-        <!--<plugins>-->
-            <!--<plugin>-->
-                <!--<artifactId>maven-enforcer-plugin</artifactId>-->
-                <!--<configuration>-->
-                    <!--<rules>-->
-                        <!--<rule>-->
-                            <!--<banDuplicateClasses>-->
-                                <!--<dependencies>-->
-                                <!--&lt;!&ndash; org.json clashes &ndash;&gt;-->
-                                <!--<dependency>-->
-                                    <!--<artifactId>MMJ_</artifactId>-->
-                                    <!--<ignoreClasses>-->
-                                        <!--<ignoreClass>org/json/*</ignoreClass>-->
-                                    <!--</ignoreClasses>-->
-                                <!--</dependency>-->
-                                <!--</dependencies>-->
-                                <!--&lt;!&ndash;<findAllDuplicates>true</findAllDuplicates>&ndash;&gt;-->
-                                <!--&lt;!&ndash;<ignoreClasses>&ndash;&gt;-->
-                                <!--&lt;!&ndash;<ignoreClass>org.json.*</ignoreClass>&ndash;&gt;-->
-                                <!--&lt;!&ndash;</ignoreClasses>&ndash;&gt;-->
-                            <!--</banDuplicateClasses>-->
-                        <!--</rule>-->
-                    <!--</rules>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-        <!--</plugins>-->
-    <!--</build>-->
+
+    <build>
+        <finalName>${project.name}_${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>imagej.public</id>
+            <url>http://maven.imagej.net/content/groups/public</url>
+        </repository>
+    </repositories>
 </project>

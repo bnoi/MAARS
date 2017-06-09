@@ -11,37 +11,36 @@
     </parent>
 
     <packaging>jar</packaging>
-    <artifactId>otf</artifactId>
+    <artifactId>maars_otf</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <scijava.jvm.version>1.8</scijava.jvm.version>
-        <project.micromanager.version>
+        <micromanager.version>
             2.0.0.2
-        </project.micromanager.version>
+        </micromanager.version>
     </properties>
 
     <dependencies>
 
         <!--dependencies already present in Micro Manager-->
 
-        <!--<dependency>-->
-            <!--<groupId>org.micromanager</groupId>-->
-            <!--<artifactId>MMJ_</artifactId>-->
-            <!--<version>${project.micromanager.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMJ_</artifactId>
+            <version>${micromanager.version}</version>
+        </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.micromanager</groupId>-->
-            <!--<artifactId>MMCoreJ</artifactId>-->
-            <!--<version>${project.micromanager.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMCoreJ</artifactId>
+            <version>${micromanager.version}</version>
+        </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.micromanager</groupId>-->
-            <!--<artifactId>MMAcqEngine</artifactId>-->
-            <!--<version>${project.micromanager.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>MMAcqEngine</artifactId>
+            <version>${micromanager.version}</version>
+        </dependency>
 
         <!-- MAARS specific dependencies-->
 
@@ -53,46 +52,16 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>lib</artifactId>
+            <artifactId>maars_lib</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
     <repositories>
         <repository>
-            <id>imagej.public</id>
-            <url>http://maven.imagej.net/content/groups/public</url>
-        </repository>
-        <repository>
             <id>in-project</id>
             <name>In Project Repo</name>
             <url>file://${project.basedir}/repo</url>
         </repository>
     </repositories>
-
-    <build>
-        <finalName>${project.name}_${project.version}</finalName>
-        <plugins>
-            <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <configuration>
-                    <rules>
-                        <banClasses
-                                implementation="org.scijava.maven.plugin.enforcer.BanDuplicateClasses">
-                            <dependencies>
-                                <!-- org.json clashes -->
-                                <dependency>
-                                    <artifactId>MMJ_</artifactId>
-                                    <ignoreClasses>
-                                        <ignoreClass>org/json/*</ignoreClass>
-                                    </ignoreClasses>
-                                </dependency>
-                            </dependencies>
-                            <findAllDuplicates>true</findAllDuplicates>
-                        </banClasses>
-                    </rules>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
