@@ -22,10 +22,10 @@
     </properties>
 
     <modules>
-        <module>lib</module>
-        <module>otf</module>
-        <module>post</module>
-        <module>bfSeg</module>
+        <module>maars_lib</module>
+        <module>maars_otf</module>
+        <module>maars_post</module>
+        <module>maars_bfSeg</module>
     </modules>
 
     <developers>

@@ -101,7 +101,7 @@ public class GuiFreeRun implements PlugIn {
       new ImageJ();
       Maars_Interface.copyDeps();
       String configFileName = "maars_config.xml";
-      String dir = "/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1";
+      String dir = "/media/tong/data_claire/24C_non_analyse/102/24C_102_1";
       MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
       parameters.setSavingPath(dir);
 //      //executeAnalysis(fluoAnalysisDialog.getParameters());

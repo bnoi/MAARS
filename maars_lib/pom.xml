@@ -18,7 +18,6 @@
         <scijava.jvm.version>1.8</scijava.jvm.version>
     </properties>
 
-
     <dependencies>
 
         <!--dependencies already present in Micro Manager-->
