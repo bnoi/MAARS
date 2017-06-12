@@ -1,1 +1,0 @@
-mvn dependency:copy-dependencies -DoutputDirectory=/Applications/ImageJ/plugins/jars -DexcludeGroupIds=org.micromanager -DexcludeArtifactIds=commons-math3,eventbus,gentyref,jcommon,jfreechart,3D_Viewer

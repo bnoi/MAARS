@@ -7,16 +7,16 @@ import maars.display.SOCVisualizer;
 import maars.gui.MaarsMainDialog;
 import maars.utils.FileUtils;
 import maars.io.IOUtils;
-import maars.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
+import org.micromanager.data.*;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.concurrent.*;
@@ -59,6 +59,18 @@ public class MAARS implements Runnable {
       socVisualizerList_ = socVisualizerList;
    }
 
+   private void redirectLog(String savingPath) {
+      try {
+         PrintStream ps = new PrintStream(savingPath + File.separator + "FluoAnalysis.LOG");
+         curr_err = System.err;
+         curr_out = System.err;
+         System.setOut(ps);
+         System.setErr(ps);
+      } catch (FileNotFoundException e) {
+         IOUtils.printErrorToIJLog(e);
+      }
+   }
+
    public void interrupt() {
       stop_ = true;
    }
@@ -67,6 +79,7 @@ public class MAARS implements Runnable {
    public void run() {
       String BF = "BF";
       String FLUO = "FLUO";
+      int frame = 0;
       // Start time
       long start = System.currentTimeMillis();
       parameters.setCalibration(String.valueOf(mm.getCachedPixelSizeUm()));
@@ -76,27 +89,47 @@ public class MAARS implements Runnable {
 //           soc.reset();
 //        }
       String savingPath = FileUtils.convertPath(parameters.getSavingPath());
+      String bfPath = savingPath + File.separator + BF;
+      String fluoPath = savingPath + File.separator + FLUO;
       //acquisition
-
-      ExecutorService es = Executors.newSingleThreadExecutor();
-      HashMap<Integer, ImagePlus[]> segImgs = null;
+      Datastore fullSegDs = null;
+      Datastore fullFluoDs = null;
+      Datastore segDs = null;
+      Datastore fluoDs = null;
       try {
-         segImgs = es.submit(new MAARS_mda(
-               parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
-               savingPath, BF)).get();
+         fullSegDs = mm.data().createMultipageTIFFDatastore(bfPath, true, true);
+         fullFluoDs = mm.data().createMultipageTIFFDatastore(fluoPath, true, true);
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      ExecutorService es = Executors.newSingleThreadExecutor();
+      try {
+         segDs = es.submit(new MAARS_mda(
+               parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING))).get();
       } catch (InterruptedException | ExecutionException e) {
          IOUtils.printErrorToIJLog(e);
       }
-      if (segImgs == null) {
+      ArrayList<Image> segImgs = maars.mmUtils.ImgUtils.dsToSortedList(segDs, frame);
+      for (Image img: segImgs){
+         try {
+            fullSegDs.putImage(img);
+         } catch (DatastoreFrozenException | DatastoreRewriteException e) {
+            e.printStackTrace();
+         }
+      }
+      HashMap<Integer, ImagePlus[]> segImps = maars.mmUtils.ImgUtils.convertImages2Imp(segImgs,
+            segDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
+
+      if (segImgs.size() ==0) {
          IJ.log("No images acquired");
          return;
       }
       //update saving path
-      parameters.setSavingPath(savingPath + File.separator + BF + "_1");
+      parameters.setSavingPath(bfPath);
       MaarsSegmentation ms;
       ArrayList<MaarsSegmentation> arrayMs = new ArrayList<>();
-      for (Integer posNb : segImgs.keySet()) {
-         ImagePlus segImg = segImgs.get(posNb)[0];
+      for (Integer posNb : segImps.keySet()) {
+         ImagePlus segImg = segImps.get(posNb)[0];
          // --------------------------segmentation-----------------------------//
          ms = new MaarsSegmentation(parameters, segImg, posNb);
          arrayMs.add(ms);
@@ -114,15 +147,14 @@ public class MAARS implements Runnable {
       }
       parameters.setSavingPath(savingPath);
       // from Roi initialize a set of cell
-      for (Integer posNb : segImgs.keySet()) {
+      for (Integer posNb : segImps.keySet()) {
          SetOfCells soc = socList_.get(posNb);
          soc.reset();
-         soc.loadCells(savingPath + File.separator + BF + "_1", posNb);
+         soc.loadCells(bfPath, posNb);
          soc.setRoiMeasurementIntoCells(arrayMs.get(posNb).getRoiMeasurements());
       }
       // ----------------start acquisition and analysis --------//
       redirectLog(savingPath);
-      int frame = 0;
       Boolean do_analysis = Boolean.parseBoolean(parameters.getFluoParameter(MaarsParameters.DO_ANALYSIS));
       double fluoTimeInterval = Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL));
       ExecutorService es1 = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -140,37 +172,54 @@ public class MAARS implements Runnable {
             // Section to acquire bf images between fluos, can be skipped
             if (frame != 0) {
                try {
-                  segImgs = es1.submit(new MAARS_mda(parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING),
-                        savingPath, BF)).get();
+                  segDs = es1.submit(new MAARS_mda(parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING))).get();
                } catch (InterruptedException | ExecutionException e) {
                   IOUtils.printErrorToIJLog(e);
                }
-               parameters.setSavingPath(savingPath + File.separator + BF + "_" + String.valueOf(frame + 1));
-               for (Integer posNb : segImgs.keySet()) {
-                  ImagePlus segImg = segImgs.get(posNb)[0];
-                  //update saving path
-//                          parameters.setSavingPath(savingPath + File.separator + BF + "_"+posNb);
-                  // --------------------------segmentation-----------------------------//
-                  ms = new MaarsSegmentation(parameters, segImg, posNb);
+               segImgs = maars.mmUtils.ImgUtils.dsToSortedList(segDs, frame);
+               for (Image img: segImgs){
                   try {
-                     es1.submit(ms).get();
-                  } catch (InterruptedException | ExecutionException e) {
-                     IOUtils.printErrorToIJLog(e);
+                     fullSegDs.putImage(img);
+                  } catch (DatastoreFrozenException | DatastoreRewriteException e) {
+                     e.printStackTrace();
                   }
                }
+               segImps = maars.mmUtils.ImgUtils.convertImages2Imp(segImgs,
+                     segDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
+//               parameters.setSavingPath(savingPath + File.separator + BF + "_" + String.valueOf(frame + 1));
+//               for (Integer posNb : segImps.keySet()) {
+//                  ImagePlus segImg = segImps.get(posNb)[0];
+//                  //update saving path
+////                          parameters.setSavingPath(savingPath + File.separator + BF + "_"+posNb);
+//                  // --------------------------segmentation-----------------------------//
+//                  ms = new MaarsSegmentation(parameters, segImg, posNb);
+//                  try {
+//                     es1.submit(ms).get();
+//                  } catch (InterruptedException | ExecutionException e) {
+//                     IOUtils.printErrorToIJLog(e);
+//                  }
+//               }
             }
 
             Map<String, Future> channelsInFrame = new HashMap<>();
-            HashMap<Integer, ImagePlus[]> fluos = null;
             try {
-               fluos = es1.submit(new MAARS_mda(
-                     parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
-                     savingPath, FLUO)).get();
+               fluoDs = es1.submit(new MAARS_mda(
+                     parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING))).get();
             } catch (InterruptedException | ExecutionException e) {
                IOUtils.printErrorToIJLog(e);
             }
-            for (Integer posNb : fluos.keySet()) {
-               for (ImagePlus chImp:fluos.get(posNb)){
+            ArrayList<Image> fluoImgs = maars.mmUtils.ImgUtils.dsToSortedList(fluoDs, frame);
+            for (Image img: fluoImgs){
+               try {
+                  fullFluoDs.putImage(img);
+               } catch (DatastoreFrozenException | DatastoreRewriteException e) {
+                  e.printStackTrace();
+               }
+            }
+            HashMap<Integer, ImagePlus[]> fluoImps = maars.mmUtils.ImgUtils.convertImages2Imp(fluoImgs,
+                  fluoDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
+            for (Integer posNb : fluoImps.keySet()) {
+               for (ImagePlus chImp:fluoImps.get(posNb)){
                   //TODO
                   if (do_analysis) {
                      String channel = chImp.getTitle();
@@ -201,16 +250,24 @@ public class MAARS implements Runnable {
       } else {
          // being static acquisition
          Map<String, Future> channelsInFrame = new HashMap<>();
-         HashMap<Integer, ImagePlus[]> fluos = null;
          try {
-            fluos = es1.submit(new MAARS_mda(
-                  parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING),
-                  savingPath, FLUO)).get();
+            fluoDs = es1.submit(new MAARS_mda(
+                  parameters.getFluoParameter(MaarsParameters.PATH_TO_FLUO_ACQ_SETTING))).get();
          } catch (InterruptedException | ExecutionException e) {
             IOUtils.printErrorToIJLog(e);
          }
-         for (Integer posNb : fluos.keySet()) {
-            for (ImagePlus chImp:fluos.get(posNb)){
+         ArrayList<Image> fluoImgs = maars.mmUtils.ImgUtils.dsToSortedList(fluoDs, frame);
+         for (Image img: fluoImgs){
+            try {
+               fullFluoDs.putImage(img);
+            } catch (DatastoreFrozenException | DatastoreRewriteException e) {
+               e.printStackTrace();
+            }
+         }
+         HashMap<Integer, ImagePlus[]> fluoImps = maars.mmUtils.ImgUtils.convertImages2Imp(fluoImgs,
+               fluoDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
+         for (Integer posNb : fluoImps.keySet()) {
+            for (ImagePlus chImp:fluoImps.get(posNb)){
                String channel = chImp.getTitle();
                if (do_analysis) {
                   Future future2 = es1.submit(new FluoAnalyzer(chImp, chImp.getCalibration(), socList_.get(posNb), channel,
@@ -224,6 +281,10 @@ public class MAARS implements Runnable {
          tasksSet_.add(channelsInFrame);
       }
       parameters.setSavingPath(savingPath);
+      fullSegDs.freeze();
+      fullFluoDs.freeze();
+      fullSegDs.close();
+      fullFluoDs.close();
       es1.shutdown();
       try {
          es1.awaitTermination(60, TimeUnit.MINUTES);
@@ -231,19 +292,16 @@ public class MAARS implements Runnable {
          e.printStackTrace();
       }
       Maars_Interface.waitAllTaskToFinish(tasksSet_);
-      RoiManager.getInstance().reset();
-      RoiManager.getInstance().close();
-      for (Integer posNb : segImgs.keySet()) {
+      for (Integer posNb : segImps.keySet()) {
          SetOfCells soc = socList_.get(posNb);
          if (do_analysis) {
             long startWriting = System.currentTimeMillis();
-            String pathToFluoDir = savingPath + File.separator + FLUO + "_1";
-            ImagePlus mergedImg = ImgUtils.loadFullFluoImgs(pathToFluoDir);
+            ImagePlus mergedImg = IJ.openImage(fluoPath + File.separator + "MMStack_Pos"+posNb+".ome.tif");
             mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-            IOUtils.saveAll(soc, mergedImg, pathToFluoDir, parameters.useDynamic(), arrayChannels);
+            IOUtils.saveAll(soc, mergedImg, fluoPath, parameters.useDynamic(), arrayChannels);
             if (parameters.useDynamic()) {
                if (IJ.isWindows()) {
-                  savingPath = FileUtils.convertPathToLinuxType(savingPath + File.separator + BF + "_1");
+                  savingPath = FileUtils.convertPathToLinuxType(bfPath);
                }
                Maars_Interface.analyzeMitosisDynamic(soc, parameters, savingPath);
             }
@@ -260,17 +318,5 @@ public class MAARS implements Runnable {
       System.gc();
       IJ.showMessage("MAARS: Done!");
       MaarsMainDialog.okMainDialogButton.setEnabled(true);
-   }
-
-   private void redirectLog(String savingPath) {
-      try {
-         PrintStream ps = new PrintStream(savingPath + File.separator + "FluoAnalysis.LOG");
-         curr_err = System.err;
-         curr_out = System.err;
-         System.setOut(ps);
-         System.setErr(ps);
-      } catch (FileNotFoundException e) {
-         IOUtils.printErrorToIJLog(e);
-      }
    }
 }

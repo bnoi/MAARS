@@ -1,13 +1,15 @@
 package maars.mmUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.File;
+import java.util.*;
+import java.util.regex.Pattern;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
 import ij.plugin.ChannelSplitter;
+import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.plugin.HyperStackConverter;
 import org.micromanager.data.Coords;
@@ -105,5 +107,48 @@ public class ImgUtils {
          return c1 < c2 ? -1 : 1;
       });
       return coordsList;
+   }
+
+   public static ArrayList<Image> dsToSortedList(Datastore ds, int frame){
+      ArrayList<Image> imgs = new ArrayList<>();
+      ArrayList<Coords> sortedCoords = maars.mmUtils.ImgUtils.getSortedCoords(ds);
+      for (Coords coords : sortedCoords) {
+         Image newImg = ds.getImage(coords);
+         Coords.CoordsBuilder builder = coords.copy();
+         builder.time(frame);
+         imgs.add(newImg.copyAtCoords(builder.build()));
+      }
+      return imgs;
+   }
+
+   /**
+    * @param fluoDir fluo base dir where all full field images are stored
+    * @return an ImagePlus with all channels stacked
+    */
+   @Deprecated
+   public static ImagePlus loadFullFluoImgs(String fluoDir) {
+      Concatenator concatenator = new Concatenator();
+      ArrayList<String> listAcqNames = new ArrayList<>();
+      String pattern = "(\\w+)(_)(\\d+)";
+      for (String acqName : new File(fluoDir).list()) {
+         if (Pattern.matches(pattern, acqName)) {
+            listAcqNames.add(acqName);
+         }
+      }
+      String[] listAcqNamesArray = listAcqNames.toArray(new String[listAcqNames.size()]);
+      Arrays.sort(listAcqNamesArray,
+            Comparator.comparing(o -> Integer.parseInt(o.split("_", -1)[1])));
+      concatenator.setIm5D(true);
+      ImagePlus concatenatedFluoImgs = null;
+      for (String acqName : listAcqNamesArray) {
+         ImagePlus newImg = IJ.openImage(fluoDir + File.separator + acqName + File.separator + acqName + "_MMStack_Pos0.ome.tif");
+         ImageStack stack = newImg.getStack();
+         for (int i = 1; i <= stack.getSize(); i++) {
+            stack.setSliceLabel(acqName, i);
+         }
+         concatenatedFluoImgs = concatenatedFluoImgs == null ?
+               newImg : concatenator.concatenate(concatenatedFluoImgs, newImg, false);
+      }
+      return concatenatedFluoImgs;
    }
 }

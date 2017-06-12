@@ -1,7 +1,6 @@
 package maars.headless;
 
 import maars.agents.SetOfCells;
-import maars.display.SOCVisualizer;
 import maars.gui.MaarsFluoAnalysisDialog;
 import maars.gui.MaarsSegmentationDialog;
 import maars.main.MaarsParameters;
@@ -28,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * Created by tongli on 28/04/2017.
  */
 public class GuiFreeRun implements PlugIn {
-   private static MaarsParameters loadMaarsParameters(String configFileName, String rootDir) {
+   static MaarsParameters loadMaarsParameters(String configFileName, String rootDir) {
       if (rootDir == null) {
          JFileChooser chooser = new JFileChooser();
          chooser.setCurrentDirectory(new File("."));
@@ -67,12 +66,10 @@ public class GuiFreeRun implements PlugIn {
       return loadMaarsParameters(configFileName, null);
    }
 
-   private static void executeAnalysis(MaarsParameters parameters) {
+   static void executeAnalysis(MaarsParameters parameters) {
       SetOfCells soc = new SetOfCells(0);
-      SOCVisualizer socVisualizer = new SOCVisualizer();
-      socVisualizer.createGUI(soc);
       ExecutorService es = Executors.newSingleThreadExecutor();
-      es.execute(new MAARSNoAcq(parameters, socVisualizer, soc));
+      es.execute(new MAARSNoAcq(parameters, null, soc));
       es.shutdown();
       try {
          es.awaitTermination(20, TimeUnit.MINUTES);
