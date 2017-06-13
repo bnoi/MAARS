@@ -12,7 +12,7 @@ public class MAARSImgSaver {
    public String croppedImgDir;
 
    public MAARSImgSaver(String pathToFluoDir) {
-      this.croppedImgDir = pathToFluoDir + croppedImgs + File.separator;
+      this.croppedImgDir = pathToFluoDir + File.separator + croppedImgs + File.separator;
       FileUtils.createFolder(croppedImgDir);
    }
 

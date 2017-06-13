@@ -25,13 +25,12 @@ public class MAARS_mda implements Callable<Datastore> {
 
    @Override
    public Datastore call() throws Exception {
-      Datastore ds;
       MMStudio mm = MMStudio.getInstance();
       try {
-         mm.acquisitions().loadAcquisition(pathToAcqSetting_);
+         return mm.acquisitions().runAcquisitionWithSettings(mm.acquisitions().loadSequenceSettings(pathToAcqSetting_),true);
       } catch (IOException e) {
          IOUtils.printErrorToIJLog(e);
       }
-      return mm.acquisitions().runAcquisition();
+      return null;
    }
 }

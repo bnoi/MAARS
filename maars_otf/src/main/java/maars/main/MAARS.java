@@ -10,10 +10,8 @@ import maars.gui.MaarsMainDialog;
 import maars.io.IOUtils;
 import maars.utils.FileUtils;
 import mmcorej.CMMCore;
-import org.micromanager.data.Datastore;
-import org.micromanager.data.DatastoreFrozenException;
-import org.micromanager.data.DatastoreRewriteException;
-import org.micromanager.data.Image;
+import org.micromanager.data.*;
+import org.micromanager.data.internal.multipagetiff.StorageMultipageTiff;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -98,16 +96,19 @@ public class MAARS implements Runnable {
       String bfPath = savingPath + File.separator + BF;
       String fluoPath = savingPath + File.separator + FLUO;
       //acquisition
-      Datastore fullSegDs = null;
-      Datastore fullFluoDs = null;
-      Datastore segDs = null;
-      Datastore fluoDs = null;
+      Datastore fullSegDs = mm.data().createRAMDatastore();
+      Datastore fullFluoDs = mm.data().createRAMDatastore();
       try {
-         fullSegDs = mm.data().createMultipageTIFFDatastore(bfPath, true, true);
-         fullFluoDs = mm.data().createMultipageTIFFDatastore(fluoPath, true, true);
+         new StorageMultipageTiff(fullSegDs,
+               bfPath, true, true,
+               StorageMultipageTiff.getShouldSplitPositions());
       } catch (IOException e) {
          e.printStackTrace();
       }
+      fullFluoDs.setSavePath(fluoPath);
+      fullSegDs.setSavePath(bfPath);
+      Datastore segDs = null;
+      Datastore fluoDs = null;
       ExecutorService es = Executors.newSingleThreadExecutor();
       try {
          segDs = es.submit(new MAARS_mda(
@@ -119,6 +120,7 @@ public class MAARS implements Runnable {
       for (Image img: segImgs){
          try {
             fullSegDs.putImage(img);
+            System.out.println(img.getMetadata().toString());
          } catch (DatastoreFrozenException | DatastoreRewriteException e) {
             e.printStackTrace();
          }
@@ -287,6 +289,23 @@ public class MAARS implements Runnable {
          tasksSet_.add(channelsInFrame);
       }
       parameters.setSavingPath(savingPath);
+//      fullFluoDs.setSummaryMetadata();
+      try {
+         SummaryMetadata.SummaryMetadataBuilder segBuilder = segDs.getSummaryMetadata().copy();
+         segBuilder.prefix(BF);
+         segBuilder.waitInterval(fluoTimeInterval);
+         segBuilder.intendedDimensions(segDs.getSummaryMetadata().getIntendedDimensions().copy().time(frame).build());
+         fullSegDs.setSummaryMetadata(segBuilder.build());
+         SummaryMetadata.SummaryMetadataBuilder fluoBuilder = fluoDs.getSummaryMetadata().copy();
+         fluoBuilder.prefix(FLUO);
+         fluoBuilder.waitInterval(fluoTimeInterval);
+         fluoBuilder.intendedDimensions(fluoDs.getSummaryMetadata().getIntendedDimensions().copy().time(frame).build());
+         fullFluoDs.setSummaryMetadata(fluoBuilder.build());
+      } catch (DatastoreFrozenException | DatastoreRewriteException e) {
+         e.printStackTrace();
+      }
+      fullFluoDs.save(Datastore.SaveMode.MULTIPAGE_TIFF, fluoPath);
+      fullSegDs.save(Datastore.SaveMode.MULTIPAGE_TIFF, bfPath);
       fullSegDs.freeze();
       fullFluoDs.freeze();
       fullSegDs.close();
@@ -321,7 +340,6 @@ public class MAARS implements Runnable {
          soc.reset();
       }
       IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
-      System.gc();
       IJ.showMessage("MAARS: Done!");
       MaarsMainDialog.okMainDialogButton.setEnabled(true);
    }
