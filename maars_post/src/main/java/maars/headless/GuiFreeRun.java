@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * Created by tongli on 28/04/2017.
  */
 public class GuiFreeRun implements PlugIn {
-   static MaarsParameters loadMaarsParameters(String configFileName, String rootDir) {
+   public static MaarsParameters loadMaarsParameters(String configFileName, String rootDir) {
       if (rootDir == null) {
          JFileChooser chooser = new JFileChooser();
          chooser.setCurrentDirectory(new File("."));

@@ -225,7 +225,7 @@ public class MaarsParameters {
       doc.setContent(root);
       XMLOutputter xmlOutput = new XMLOutputter();
       xmlOutput.setFormat(Format.getPrettyFormat());
-      xmlOutput.output(doc, new FileWriter("maars_config.xml"));
+      xmlOutput.output(doc, new FileWriter(getSavingPath() + File.separator + "maars_config.xml"));
    }
 
    /**
