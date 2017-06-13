@@ -11,13 +11,11 @@ import maars.io.IOUtils;
 import maars.utils.FileUtils;
 import mmcorej.CMMCore;
 import org.micromanager.data.*;
-import org.micromanager.data.internal.multipagetiff.StorageMultipageTiff;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,15 +96,6 @@ public class MAARS implements Runnable {
       //acquisition
       Datastore fullSegDs = mm.data().createRAMDatastore();
       Datastore fullFluoDs = mm.data().createRAMDatastore();
-      try {
-         new StorageMultipageTiff(fullSegDs,
-               bfPath, true, true,
-               StorageMultipageTiff.getShouldSplitPositions());
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-      fullFluoDs.setSavePath(fluoPath);
-      fullSegDs.setSavePath(bfPath);
       Datastore segDs = null;
       Datastore fluoDs = null;
       ExecutorService es = Executors.newSingleThreadExecutor();
