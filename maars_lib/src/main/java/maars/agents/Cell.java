@@ -1,11 +1,11 @@
 package maars.agents;
 
-import maars.cellAnalysis.GeometryContainer;
-import maars.cellAnalysis.SpotsContainer;
-import maars.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import ij.gui.Roi;
+import maars.cellAnalysis.GeometryContainer;
+import maars.cellAnalysis.SpotsContainer;
+import maars.utils.ImgUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;

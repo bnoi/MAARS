@@ -1,10 +1,10 @@
 package maars.gui;
 
+import ij.IJ;
+import ij.gui.YesNoCancelDialog;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
 import maars.utils.GuiUtils;
-import ij.IJ;
-import ij.gui.YesNoCancelDialog;
 
 import javax.swing.*;
 import java.awt.*;

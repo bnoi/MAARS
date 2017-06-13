@@ -1,9 +1,9 @@
 package maars.io;
 
-import maars.utils.FileUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Concatenator;
+import maars.utils.FileUtils;
 
 import java.io.File;
 

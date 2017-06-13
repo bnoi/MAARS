@@ -1,10 +1,10 @@
 package maars.main;
 
-import maars.segmentPombe.SegPombe;
-import maars.segmentPombe.SegPombeParameters;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
+import maars.segmentPombe.SegPombe;
+import maars.segmentPombe.SegPombeParameters;
 import maars.utils.ImgUtils;
 
 /**

@@ -1,11 +1,11 @@
 package maars.io;
 
-import maars.agents.Cell;
-import maars.cellAnalysis.SpotsContainer;
-import maars.utils.FileUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.io.TmXmlWriter;
+import maars.agents.Cell;
+import maars.cellAnalysis.SpotsContainer;
+import maars.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

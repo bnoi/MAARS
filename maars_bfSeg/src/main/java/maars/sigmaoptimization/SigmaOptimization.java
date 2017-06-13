@@ -1,13 +1,13 @@
 package maars.sigmaoptimization;
 
-import maars.segmentPombe.ComputeCorrelation;
-import maars.io.IOUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
+import maars.io.IOUtils;
+import maars.segmentPombe.ComputeCorrelation;
 
 import java.awt.*;
 import java.io.BufferedWriter;

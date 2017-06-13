@@ -7,9 +7,8 @@ package maars.main;
  * @version Nov 10, 2015
  */
 
-import ij.ImageJ;
-import maars.io.IOUtils;
 import ij.IJ;
+import maars.io.IOUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -22,8 +21,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /*
  * MaarsParameters reads a configuration file written as a XML,
@@ -225,7 +222,7 @@ public class MaarsParameters {
       doc.setContent(root);
       XMLOutputter xmlOutput = new XMLOutputter();
       xmlOutput.setFormat(Format.getPrettyFormat());
-      xmlOutput.output(doc, new FileWriter(getSavingPath() + File.separator + "maars_config.xml"));
+      xmlOutput.output(doc, new FileWriter("maars_config.xml"));
    }
 
    /**

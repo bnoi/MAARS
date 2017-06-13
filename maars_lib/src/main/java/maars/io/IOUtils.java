@@ -1,10 +1,10 @@
 package maars.io;
 
-import maars.agents.Cell;
-import maars.agents.SetOfCells;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
+import maars.agents.Cell;
+import maars.agents.SetOfCells;
 import maars.utils.ImgUtils;
 
 import java.io.*;

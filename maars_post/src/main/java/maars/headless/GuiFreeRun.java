@@ -1,16 +1,16 @@
 package maars.headless;
 
+import ij.IJ;
+import ij.ImageJ;
+import ij.plugin.PlugIn;
 import maars.agents.SetOfCells;
 import maars.gui.MaarsFluoAnalysisDialog;
 import maars.gui.MaarsSegmentationDialog;
+import maars.io.IOUtils;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
 import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
-import maars.io.IOUtils;
-import ij.IJ;
-import ij.ImageJ;
-import ij.plugin.PlugIn;
 
 import javax.swing.*;
 import java.io.File;

@@ -1,13 +1,13 @@
 
 # coding: utf-8
 
-from os import path
-import matplotlib.pyplot as plt
-import tmXmlToDataFrame as tm
-import numpy as np
-import pandas as pd
 import argparse
 import multiprocessing as mp
+import numpy as np
+import pandas as pd
+
+import tmXmlToDataFrame as tm
+
 
 def dist(x1,y1,x2,y2):
     return np.sqrt((x1-x2)**2 + (y1-y2)**2)

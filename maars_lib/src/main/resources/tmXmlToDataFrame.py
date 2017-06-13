@@ -1,6 +1,7 @@
-import xml.etree.cElementTree as et
-import pandas as pd
 import os
+import pandas as pd
+import xml.etree.cElementTree as et
+
 
 def readXml(path):
     if not os.path.lexists(path):

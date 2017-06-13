@@ -1,9 +1,8 @@
 import maars.gui.MaarsMainDialog;
-import maars.main.MAARS;
+import maars.io.IOUtils;
 import maars.main.MaarsParameters;
 import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
-import maars.io.IOUtils;
 import org.micromanager.MenuPlugin;
 import org.micromanager.Studio;
 import org.micromanager.internal.MMStudio;

@@ -6,12 +6,9 @@ import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.plugin.*;
+import ij.plugin.RoiScaler;
+import ij.plugin.ZProjector;
 import maars.segmentPombe.SegPombeParameters;
-
-import java.io.File;
-import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com

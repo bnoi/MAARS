@@ -1,16 +1,19 @@
 package maars.main;
 
-import maars.acquisition.MAARS_mda;
-import maars.cellAnalysis.FluoAnalyzer;
-import maars.agents.SetOfCells;
-import maars.display.SOCVisualizer;
-import maars.gui.MaarsMainDialog;
-import maars.utils.FileUtils;
-import maars.io.IOUtils;
 import ij.IJ;
 import ij.ImagePlus;
+import maars.acquisition.MAARS_mda;
+import maars.agents.SetOfCells;
+import maars.cellAnalysis.FluoAnalyzer;
+import maars.display.SOCVisualizer;
+import maars.gui.MaarsMainDialog;
+import maars.io.IOUtils;
+import maars.utils.FileUtils;
 import mmcorej.CMMCore;
-import org.micromanager.data.*;
+import org.micromanager.data.Datastore;
+import org.micromanager.data.DatastoreFrozenException;
+import org.micromanager.data.DatastoreRewriteException;
+import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.internal.utils.ReportingUtils;
 
@@ -18,7 +21,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.*;
 
 /**

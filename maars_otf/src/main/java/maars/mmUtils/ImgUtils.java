@@ -1,9 +1,5 @@
 package maars.mmUtils;
 
-import java.io.File;
-import java.util.*;
-import java.util.regex.Pattern;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -12,12 +8,16 @@ import ij.plugin.ChannelSplitter;
 import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.plugin.HyperStackConverter;
+import ij.process.ImageProcessor;
 import org.micromanager.data.Coords;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.Image;
 import org.micromanager.data.SummaryMetadata;
 import org.micromanager.internal.MMStudio;
-import ij.process.ImageProcessor;
+
+import java.io.File;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by tongli on 09/06/2017.

@@ -1,15 +1,15 @@
 package maars.gui;
 
+import ij.IJ;
+import ij.gui.YesNoCancelDialog;
+import ij.plugin.frame.RoiManager;
 import maars.agents.SetOfCells;
 import maars.display.SOCVisualizer;
+import maars.io.IOUtils;
 import maars.main.MAARS;
 import maars.main.MaarsParameters;
 import maars.utils.FileUtils;
 import maars.utils.GuiUtils;
-import maars.io.IOUtils;
-import ij.IJ;
-import ij.gui.YesNoCancelDialog;
-import ij.plugin.frame.RoiManager;
 import mmcorej.CMMCore;
 import org.micromanager.MultiStagePosition;
 import org.micromanager.PositionList;

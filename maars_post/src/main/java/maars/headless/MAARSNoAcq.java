@@ -1,20 +1,20 @@
 package maars.headless;
 
-import maars.cellAnalysis.FluoAnalyzer;
-import maars.agents.SetOfCells;
-import maars.display.SOCVisualizer;
-import maars.main.MaarsParameters;
-import maars.main.MaarsSegmentation;
-import maars.main.Maars_Interface;
-import maars.utils.FileUtils;
-import maars.io.IOUtils;
-import maars.utils.ImgUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
 import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.plugin.HyperStackConverter;
+import maars.agents.SetOfCells;
+import maars.cellAnalysis.FluoAnalyzer;
+import maars.display.SOCVisualizer;
+import maars.io.IOUtils;
+import maars.main.MaarsParameters;
+import maars.main.MaarsSegmentation;
+import maars.main.Maars_Interface;
+import maars.utils.FileUtils;
+import maars.utils.ImgUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 

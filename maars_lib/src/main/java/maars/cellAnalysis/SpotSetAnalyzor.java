@@ -1,7 +1,7 @@
 package maars.cellAnalysis;
 
-import maars.utils.CollectionUtils;
 import fiji.plugin.trackmate.Spot;
+import maars.utils.CollectionUtils;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 

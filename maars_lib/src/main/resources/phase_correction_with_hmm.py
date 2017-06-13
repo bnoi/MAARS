@@ -1,7 +1,7 @@
-from hmmlearn import hmm
-import pandas as pd
 import numpy as np
 import os
+import pandas as pd
+from hmmlearn import hmm
 
 #test set
 root = "/media/tong/MAARSData/MAARSData/102/15-06-2/BF_1_MITOSIS/phases/"

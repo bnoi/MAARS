@@ -1,11 +1,11 @@
 package maars.cellAnalysis.singleCellAnalysisFactory;
 
-import maars.agents.Cell;
-import maars.cellAnalysis.SpotSetAnalyzor;
-import maars.utils.CollectionUtils;
 import fiji.plugin.trackmate.Spot;
 import ij.gui.Line;
 import ij.measure.Calibration;
+import maars.agents.Cell;
+import maars.cellAnalysis.SpotSetAnalyzor;
+import maars.utils.CollectionUtils;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;

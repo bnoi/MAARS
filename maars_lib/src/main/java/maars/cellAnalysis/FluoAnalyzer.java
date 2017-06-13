@@ -1,18 +1,18 @@
 package maars.cellAnalysis;
 
-import maars.agents.Cell;
-import maars.agents.SetOfCells;
-import maars.cellAnalysis.singleCellAnalysisFactory.FindLagging;
-import maars.display.SOCVisualizer;
-import maars.utils.CollectionUtils;
-import maars.io.IOUtils;
-import maars.utils.ImgUtils;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
+import maars.agents.Cell;
+import maars.agents.SetOfCells;
+import maars.cellAnalysis.singleCellAnalysisFactory.FindLagging;
+import maars.display.SOCVisualizer;
+import maars.io.IOUtils;
+import maars.utils.CollectionUtils;
+import maars.utils.ImgUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

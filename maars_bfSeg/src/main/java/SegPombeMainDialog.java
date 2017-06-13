@@ -1,10 +1,9 @@
-import ij.ImagePlus;
-import maars.segmentPombe.SegPombe;
-import maars.segmentPombe.SegPombeParameters;
-
 import ij.IJ;
+import ij.ImagePlus;
 import ij.gui.NonBlockingGenericDialog;
 import ij.plugin.PlugIn;
+import maars.segmentPombe.SegPombe;
+import maars.segmentPombe.SegPombeParameters;
 import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
 

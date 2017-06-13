@@ -1,9 +1,9 @@
 package maars.gui;
 
+import ij.IJ;
 import maars.cellAnalysis.MaarsTrackmate;
 import maars.main.MaarsParameters;
 import maars.utils.GuiUtils;
-import ij.IJ;
 
 import javax.swing.*;
 import java.awt.*;

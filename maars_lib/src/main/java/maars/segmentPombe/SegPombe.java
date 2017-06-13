@@ -1,6 +1,5 @@
 package maars.segmentPombe;
 
-import maars.io.IOUtils;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.WaitForUserDialog;
@@ -13,6 +12,7 @@ import ij.process.AutoThresholder;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
+import maars.io.IOUtils;
 
 import javax.swing.*;
 import java.awt.*;
