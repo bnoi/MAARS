@@ -5,6 +5,8 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import maars.agents.Cell;
 import maars.agents.SetOfCells;
+import maars.main.Maars_Interface;
+import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
 
 import java.io.*;
@@ -63,11 +65,13 @@ public class IOUtils {
    }
 
    public static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
-                       Boolean useDynamic, ArrayList<String> arrayChannels) {
+                       Boolean useDynamic, ArrayList<String> arrayChannels, int posNb) {
       IJ.log("Saving information of each cell on disk");
-      MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(pathToFluoDir);
-      MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(pathToFluoDir);
-      MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoDir);
+      String dest = pathToFluoDir + Maars_Interface.FLUOANALYSISDIR + posNb + File.separator;
+      FileUtils.createFolder(dest);
+      MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(dest);
+      MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(dest);
+      MAARSImgSaver imgSaver = new MAARSImgSaver(dest);
 //        TODO
       CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
       for (int i : cellIndex) {
@@ -85,7 +89,7 @@ public class IOUtils {
          }
       }
       if (useDynamic) {
-         IOUtils.serializeSoc(pathToFluoDir, soc);
+         IOUtils.serializeSoc(dest, soc);
       }
    }
 }

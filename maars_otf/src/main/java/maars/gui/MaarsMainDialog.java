@@ -356,7 +356,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             socList_.add(soc);
             SOCVisualizer socVisualizer = createVisualizer(soc);
             socVisualizerList_.add(socVisualizer);
-            if (parameters_.useDynamic()) {
+            if (parameters_.useDynamic()&&nbOfPos==1) {
                socVisualizer.setVisible(true);
             }
          }

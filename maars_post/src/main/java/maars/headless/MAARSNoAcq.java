@@ -238,8 +238,8 @@ public class MAARSNoAcq implements Runnable {
       long start = System.currentTimeMillis();
 
       soc_.reset();
-      String pathToSegDir = FileUtils.convertPath(rootDir + File.separator + "BF_1");
-      String pathToFluoDir = rootDir + File.separator + "FLUO_1" + File.separator;
+      String pathToSegDir = FileUtils.convertPath(rootDir + File.separator + Maars_Interface.SEG);
+      String pathToFluoDir = rootDir + File.separator + Maars_Interface.FLUO + File.separator;
       ArrayList<String> names = FileUtils.getTiffWithPattern(pathToSegDir, ".*_MMStack_.*");
       String pathToSegMovie = FileUtils.convertPath(pathToSegDir + File.separator + names.get(0));
       //update saving path
@@ -306,18 +306,17 @@ public class MAARSNoAcq implements Runnable {
          Maars_Interface.waitAllTaskToFinish(tasksSet);
          if (!stop_.get() && soc_.size() != 0) {
             long startWriting = System.currentTimeMillis();
-//            concatenatedFluoImgs.show();
             ArrayList<String> arrayChannels = new ArrayList<>();
             Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
             IOUtils.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
-                  arrayChannels);
+                  arrayChannels,0);
             IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                   + " sec for writing results");
             if (parameters.useDynamic()) {
                if (IJ.isWindows()) {
                   pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
                }
-               Maars_Interface.analyzeMitosisDynamic(soc_, parameters, pathToSegDir);
+               Maars_Interface.analyzeMitosisDynamic(soc_, parameters, pathToSegDir,0);
             }
          }
       }

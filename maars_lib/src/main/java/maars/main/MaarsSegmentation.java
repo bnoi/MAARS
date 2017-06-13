@@ -5,7 +5,10 @@ import ij.ImagePlus;
 import ij.measure.ResultsTable;
 import maars.segmentPombe.SegPombe;
 import maars.segmentPombe.SegPombeParameters;
+import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
+
+import java.io.File;
 
 /**
  * Class to segment a multiple z-stack bright field image then find and record
@@ -41,7 +44,7 @@ public class MaarsSegmentation implements Runnable {
       SegPombeParameters segPombeParam = segParameterWrapper(parameters_);
       // Main segmentation process
       IJ.log("Begin segmentation...");
-      SegPombe segPombe = new SegPombe(segPombeParam, posNb_);
+      SegPombe segPombe = new SegPombe(segPombeParam);
       segPombe.createCorrelationImage();
       segPombe.convertCorrelationToBinaryImage(Boolean.valueOf(parameters_.getBatchMode()),
             Integer.valueOf(parameters_.getSegTolerance()));
@@ -56,7 +59,9 @@ public class MaarsSegmentation implements Runnable {
       SegPombeParameters segPombeParam = new SegPombeParameters();
 
       segPombeParam.setImageToAnalyze(img_);
-      segPombeParam.setSavingPath(parameters.getSavingPath());
+      String root = parameters.getSavingPath() + File.separator + Maars_Interface.SEGANALYSISDIR + posNb_ + File.separator;
+      FileUtils.createFolder(root);
+      segPombeParam.setSavingPath(root);
 
       segPombeParam.setFilterAbnormalShape(
             Boolean.parseBoolean(parameters.getSegmentationParameter(MaarsParameters.FILTER_SOLIDITY)));

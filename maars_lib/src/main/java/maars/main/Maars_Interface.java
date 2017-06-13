@@ -23,6 +23,11 @@ import java.util.stream.Stream;
  * Created by tongli on 09/06/2017.
  */
 public class Maars_Interface {
+   public static final String SEG = "SegImgStack";
+   public static final String FLUO = "FluoImgStack";
+   public static final String MITODIRNAME = "Mitosis";
+   public final static String SEGANALYSISDIR = "SegAnalysis" + File.separator + "pos";
+   public final static String FLUOANALYSISDIR = "FluoAnalysis" + File.separator + "pos";
    /**
     * @param tasksSet tasks to be terminated
     */
@@ -87,11 +92,10 @@ public class Maars_Interface {
       return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
    }
 
-   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir) {
+   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir, int posNb) {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
-      String mitoDir = pathToSegDir + "_MITOSIS"+ File.separator;
-      System.out.println(mitoDir);
+      String mitoDir = pathToSegDir + MITODIRNAME + File.separator + "pos"+posNb + File.separator;
       FileUtils.createFolder(mitoDir);
       String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToSegDir, parameters.getDetectionChForMitosis(),

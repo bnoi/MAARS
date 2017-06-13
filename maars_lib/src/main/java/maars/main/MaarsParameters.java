@@ -459,10 +459,10 @@ public class MaarsParameters {
    }
 
    /**
-    * @param bfChannel bright field channel name
+    * @param segChannel bright field channel name
     */
-   public void setSegChannel(String bfChannel) {
-      root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(bfChannel);
+   public void setSegChannel(String segChannel) {
+      root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(segChannel);
    }
 
    /**

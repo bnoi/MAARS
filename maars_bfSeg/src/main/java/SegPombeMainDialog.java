@@ -397,7 +397,7 @@ public class SegPombeMainDialog implements PlugIn {
       runButton.addActionListener(e -> {
          if (checkParameters()) {
             updateParameters();
-            SegPombe segPombe = new SegPombe(parameters_, 0);
+            SegPombe segPombe = new SegPombe(parameters_);
             segPombe.createCorrelationImage();
             segPombe.convertCorrelationToBinaryImage(false, Integer.MAX_VALUE);
             segPombe.analyseAndFilterParticles();

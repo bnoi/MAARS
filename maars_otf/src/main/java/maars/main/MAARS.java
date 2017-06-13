@@ -79,20 +79,15 @@ public class MAARS implements Runnable {
 
    @Override
    public void run() {
-      String BF = "BF";
-      String FLUO = "FLUO";
       int frame = 0;
       // Start time
       long start = System.currentTimeMillis();
       parameters.setCalibration(String.valueOf(mm.getCachedPixelSizeUm()));
       ArrayList<String> arrayChannels = new ArrayList<>();
       Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
-//        for (SetOfCells soc : socList_){
-//           soc.reset();
-//        }
       String savingPath = FileUtils.convertPath(parameters.getSavingPath());
-      String bfPath = savingPath + File.separator + BF;
-      String fluoPath = savingPath + File.separator + FLUO;
+      String segPath = savingPath + File.separator + Maars_Interface.SEG;
+      String fluoPath = savingPath + File.separator + Maars_Interface.FLUO;
       //acquisition
       Datastore fullSegDs = mm.data().createRAMDatastore();
       Datastore fullFluoDs = mm.data().createRAMDatastore();
@@ -109,7 +104,6 @@ public class MAARS implements Runnable {
       for (Image img: segImgs){
          try {
             fullSegDs.putImage(img);
-            System.out.println(img.getMetadata().toString());
          } catch (DatastoreFrozenException | DatastoreRewriteException e) {
             e.printStackTrace();
          }
@@ -121,15 +115,13 @@ public class MAARS implements Runnable {
          IJ.log("No images acquired");
          return;
       }
-      //update saving path
-      parameters.setSavingPath(bfPath);
       MaarsSegmentation ms;
       ArrayList<MaarsSegmentation> arrayMs = new ArrayList<>();
       for (Integer posNb : segImps.keySet()) {
          ImagePlus segImg = segImps.get(posNb)[0];
          // --------------------------segmentation-----------------------------//
          ms = new MaarsSegmentation(parameters, segImg, posNb);
-         arrayMs.add(ms);
+         arrayMs.add(posNb, ms);
          try {
             es.submit(ms).get();
          } catch (InterruptedException | ExecutionException e) {
@@ -142,12 +134,11 @@ public class MAARS implements Runnable {
       } catch (InterruptedException e) {
          IOUtils.printErrorToIJLog(e);
       }
-      parameters.setSavingPath(savingPath);
       // from Roi initialize a set of cell
       for (Integer posNb : segImps.keySet()) {
          SetOfCells soc = socList_.get(posNb);
          soc.reset();
-         soc.loadCells(bfPath, posNb);
+         soc.loadCells(savingPath + File.separator + Maars_Interface.SEGANALYSISDIR, posNb);
          soc.setRoiMeasurementIntoCells(arrayMs.get(posNb).getRoiMeasurements());
       }
       // ----------------start acquisition and analysis --------//
@@ -228,7 +219,6 @@ public class MAARS implements Runnable {
                   }
                }
             }
-
             tasksSet_.add(channelsInFrame);
             frame++;
             double acqTook = System.currentTimeMillis() - beginAcq;
@@ -278,15 +268,14 @@ public class MAARS implements Runnable {
          tasksSet_.add(channelsInFrame);
       }
       parameters.setSavingPath(savingPath);
-//      fullFluoDs.setSummaryMetadata();
       try {
          SummaryMetadata.SummaryMetadataBuilder segBuilder = segDs.getSummaryMetadata().copy();
-         segBuilder.prefix(BF);
+         segBuilder.prefix(Maars_Interface.SEG);
          segBuilder.waitInterval(fluoTimeInterval);
          segBuilder.intendedDimensions(segDs.getSummaryMetadata().getIntendedDimensions().copy().time(frame).build());
          fullSegDs.setSummaryMetadata(segBuilder.build());
          SummaryMetadata.SummaryMetadataBuilder fluoBuilder = fluoDs.getSummaryMetadata().copy();
-         fluoBuilder.prefix(FLUO);
+         fluoBuilder.prefix(Maars_Interface.FLUO);
          fluoBuilder.waitInterval(fluoTimeInterval);
          fluoBuilder.intendedDimensions(fluoDs.getSummaryMetadata().getIntendedDimensions().copy().time(frame).build());
          fullFluoDs.setSummaryMetadata(fluoBuilder.build());
@@ -294,7 +283,7 @@ public class MAARS implements Runnable {
          e.printStackTrace();
       }
       fullFluoDs.save(Datastore.SaveMode.MULTIPAGE_TIFF, fluoPath);
-      fullSegDs.save(Datastore.SaveMode.MULTIPAGE_TIFF, bfPath);
+      fullSegDs.save(Datastore.SaveMode.MULTIPAGE_TIFF, segPath);
       fullSegDs.freeze();
       fullFluoDs.freeze();
       fullSegDs.close();
@@ -308,16 +297,16 @@ public class MAARS implements Runnable {
       Maars_Interface.waitAllTaskToFinish(tasksSet_);
       for (Integer posNb : segImps.keySet()) {
          SetOfCells soc = socList_.get(posNb);
-         if (do_analysis) {
+         if (do_analysis && !stop_) {
             long startWriting = System.currentTimeMillis();
-            ImagePlus mergedImg = IJ.openImage(fluoPath + File.separator + "MMStack_Pos"+posNb+".ome.tif");
+            ImagePlus mergedImg = IJ.openImage(fluoPath + File.separator + Maars_Interface.FLUO + "_MMStack_Pos"+posNb+".ome.tif");
             mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-            IOUtils.saveAll(soc, mergedImg, fluoPath, parameters.useDynamic(), arrayChannels);
+            IOUtils.saveAll(soc, mergedImg, savingPath, parameters.useDynamic(), arrayChannels, posNb);
             if (parameters.useDynamic()) {
                if (IJ.isWindows()) {
-                  savingPath = FileUtils.convertPathToLinuxType(bfPath);
+                  savingPath = FileUtils.convertPathToLinuxType(segPath);
                }
-               Maars_Interface.analyzeMitosisDynamic(soc, parameters, savingPath);
+               Maars_Interface.analyzeMitosisDynamic(soc, parameters, savingPath + File.separator, posNb);
             }
             ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                   + " sec for writing results");

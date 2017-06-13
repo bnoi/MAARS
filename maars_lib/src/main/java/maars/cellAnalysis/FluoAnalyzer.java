@@ -27,7 +27,7 @@ public class FluoAnalyzer implements Runnable {
 
    private ImagePlus fluoImage;
    private SetOfCells soc;
-   private Calibration bfImgCal;
+   private Calibration segImgCal;
    private Calibration fluoImgCal;
    private String channel;
    private int maxNbSpot;
@@ -41,7 +41,7 @@ public class FluoAnalyzer implements Runnable {
 
    /**
     * @param fluoImage     image zProjected or not
-    * @param bfImgCal      bright field image calibration, need it to decide whether or
+    * @param segImgCal      bright field image calibration, need it to decide whether or
     *                      not rescale ROI
     * @param soc           the set of cell to analyze
     * @param channel       fluo image channel
@@ -52,12 +52,12 @@ public class FluoAnalyzer implements Runnable {
     * @param socVisualizer a JFreeChart based display to show cell params
     * @param useDynamic    perform dynamic analysis
     */
-   public FluoAnalyzer(ImagePlus fluoImage, Calibration bfImgCal, SetOfCells soc, String channel, int maxNbSpot,
+   public FluoAnalyzer(ImagePlus fluoImage, Calibration segImgCal, SetOfCells soc, String channel, int maxNbSpot,
                        double radius, double quality, int frame, SOCVisualizer socVisualizer, Boolean useDynamic) {
       this.fluoImage = fluoImage;
       this.fluoImgCal = fluoImage.getCalibration();
       this.soc = soc;
-      this.bfImgCal = bfImgCal;
+      this.segImgCal = segImgCal;
       this.channel = channel;
       this.maxNbSpot = maxNbSpot;
       this.radius = radius;
@@ -88,7 +88,7 @@ public class FluoAnalyzer implements Runnable {
       this.model = trackmate.doDetection();
       int nbCell = soc.size();
       collection = SpotsContainer.getNBestqualitySpots(model.getSpots(), nbCell, maxNbSpot);
-      double[] factors = ImgUtils.getRescaleFactor(bfImgCal, fluoImgCal);
+      double[] factors = ImgUtils.getRescaleFactor(segImgCal, fluoImgCal);
 
       int nThread = Runtime.getRuntime().availableProcessors();
       final int[] nbOfCellEachThread = new int[2];
