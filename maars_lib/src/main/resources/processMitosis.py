@@ -211,7 +211,7 @@ def saveAllElongations(mitosisDir, elongationRegions):
 
 if __name__ == '__main__':
     # example
-    # baseDir = "/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/BF_1"
+    # baseDir = "/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1/"
     # channel = "CFP"
     # calibration = 0.10650000410025016
     # minimumPeriod = 200
@@ -228,20 +228,20 @@ if __name__ == '__main__':
     mitosis_suffix = "Mitosis" + path.sep
     fluo_suffix = "FluoAnalysis" + path.sep
     seg_suffix = "SegAnalysis" + path.sep
+    posPrefix = path.sep + "pos" + str(posNb) + path.sep
     cropImgs = "croppedImgs"
     spots = "spots"
     figs = "figs"
     features = "features"
-    mitosisDir = baseDir + mitosis_suffix
+    mitosisDir = baseDir + mitosis_suffix + posPrefix
     mitosisFigDir = mitosisDir + figs + path.sep
-    fluoDir = "/".join(baseDir.split("/")[:-1]) + path.sep + fluo_suffix
+    fluoDir = baseDir + fluo_suffix + posPrefix
     features_dir = fluoDir + features
-    cropImgs_dir = fluoDir + cropImgs
     minSegLen = int(minimumPeriod / acq_interval)
 
     # -----------------------------------run the analysis-----------------------------------#
     pool = mp.Pool(mp.cpu_count())
-    cellRois = pd.DataFrame.from_csv(baseDir + path.sep + seg_suffix +'pos'+str(posNb)+ path.sep + 'Results.csv')
+    cellRois = pd.DataFrame.from_csv(baseDir + path.sep + seg_suffix +posPrefix + 'Results.csv')
     createOutputDirs(mitosisDir, cropImgs, spots, features, figs)
     cellNbs = getAllCellNumbers(features_dir)
     tasks = []

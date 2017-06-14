@@ -22,8 +22,8 @@ import java.util.stream.Stream;
  * Created by tongli on 09/06/2017.
  */
 public class Maars_Interface {
-   public static final String SEG = "SegImgStack";
-   public static final String FLUO = "FluoImgStack";
+   public static final String SEG = "SegImgStacks";
+   public static final String FLUO = "FluoImgStacks";
    public static final String MITODIRNAME = "Mitosis";
    public final static String SEGANALYSISDIR = "SegAnalysis" + File.separator + "pos";
    public final static String FLUOANALYSISDIR = "FluoAnalysis" + File.separator + "pos";
@@ -117,6 +117,7 @@ public class Maars_Interface {
       IJ.log("Script saved");
       findAbnormalCells(mitoDir, soc, map);
    }
+
    public static void copyDeps(){
       if (!FileUtils.exists(MaarsParameters.DEPS_DIR)) {
          FileUtils.createFolder(MaarsParameters.DEPS_DIR);
@@ -133,7 +134,6 @@ public class Maars_Interface {
       // --------------------------segmentation-----------------------------//
       ExecutorService es = Executors.newSingleThreadExecutor();
       ImagePlus segImg = null;
-      ArrayList<MaarsSegmentation> msList = new ArrayList<>();
       for (int i=0; i< names.size();i++){
          posNbs[i] = String.valueOf(i);
          try {
@@ -142,18 +142,15 @@ public class Maars_Interface {
          } catch (Exception e) {
             IOUtils.printErrorToIJLog(e);
          }
-         msList.add(new MaarsSegmentation(parameters, segImg, i));
-      }
-      for (MaarsSegmentation ms: msList) {
          try {
-            es.submit(ms).get();
+            es.submit(new MaarsSegmentation(parameters, segImg, i)).get();
          } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
          }
       }
       es.shutdown();
       try {
-         es.awaitTermination(2, TimeUnit.MINUTES);
+         es.awaitTermination(3, TimeUnit.MINUTES);
       } catch (InterruptedException e) {
          e.printStackTrace();
       }
