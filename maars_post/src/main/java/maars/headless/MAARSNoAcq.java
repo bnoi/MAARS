@@ -236,87 +236,60 @@ public class MAARSNoAcq implements Runnable {
    public void run() {
       // Start time
       long start = System.currentTimeMillis();
-
-      soc_.reset();
-      String pathToSegDir = FileUtils.convertPath(rootDir + File.separator + Maars_Interface.SEG);
-      String pathToFluoDir = rootDir + File.separator + Maars_Interface.FLUO + File.separator;
-      ArrayList<String> names = FileUtils.getTiffWithPattern(pathToSegDir, ".*_MMStack_.*");
-      String pathToSegMovie = FileUtils.convertPath(pathToSegDir + File.separator + names.get(0));
-      //update saving path
-      parameters.setSavingPath(pathToSegDir);
-      Boolean skipSegmentation = Boolean.parseBoolean(parameters.getSkipSegmentation());
-      // --------------------------segmentation-----------------------------//
-      MaarsSegmentation ms = null;
-      ExecutorService es = Executors.newSingleThreadExecutor();
-      if (!skipSegmentation) {
-         ImagePlus segImg = null;
-         try {
-            segImg = IJ.openImage(pathToSegMovie);
-            parameters.setCalibration(String.valueOf(segImg.getCalibration().pixelWidth));
-         } catch (Exception e) {
-            IOUtils.printErrorToIJLog(e);
-         }
-         ms = new MaarsSegmentation(parameters, segImg, 0);
-         try {
-            es.submit(ms).get();
-         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-         }
-         es.shutdown();
-      }
-
-      if (FileUtils.exists(pathToSegDir + File.separator + "BF_Pos0_ROI.zip")) {
-         soc_.reset();
-         // from Roi.zip initialize a set of cell
-         soc_.loadCells(pathToSegDir, 0);
-         ResultsTable rt;
-         if (skipSegmentation) {
-            IJ.open(pathToSegDir + File.separator + "BF_Pos0_Results.csv");
-            rt = ResultsTable.getResultsTable();
+      String pathToSegDir = FileUtils.convertPath(rootDir + File.separator + Maars_Interface.SEG + File.separator);
+      String[] posNbs = Maars_Interface.post_segmentation(pathToSegDir,parameters);
+      String fluoImgsDir = FileUtils.convertPath(rootDir + File.separator + Maars_Interface.FLUO + File.separator);
+      String segAnaDirPrefix = rootDir + File.separator + Maars_Interface.SEGANALYSISDIR;
+      for (String posNb:posNbs) {
+         String currentPosPrefix = segAnaDirPrefix + posNb + File.separator;
+         String currentZipPath = currentPosPrefix + "ROI.zip";
+         if (FileUtils.exists(currentZipPath)) {
+            // from Roi.zip initialize a set of cell
+            soc_.loadCells(currentZipPath);
+            IJ.open(currentPosPrefix + "Results.csv");
+            ResultsTable rt = ResultsTable.getResultsTable();
             ResultsTable.getResultsWindow().close(false);
-         } else {
-            rt = ms.getRoiMeasurements();
-         }
-         soc_.setRoiMeasurementIntoCells(rt);
+            soc_.setRoiMeasurementIntoCells(rt);
+            // ----------------start acquisition and analysis --------//
+            try {
+               PrintStream ps = new PrintStream(rootDir + File.separator + "FluoAnalysis.LOG");
+               curr_err = System.err;
+               curr_out = System.err;
+               System.setOut(ps);
+               System.setErr(ps);
+            } catch (FileNotFoundException e) {
+               IOUtils.printErrorToIJLog(e);
+            }
 
-         // ----------------start acquisition and analysis --------//
-         try {
-            PrintStream ps = new PrintStream(pathToFluoDir + "FluoAnalysis.LOG");
-            curr_err = System.err;
-            curr_out = System.err;
-            System.setOut(ps);
-            System.setErr(ps);
-         } catch (FileNotFoundException e) {
-            IOUtils.printErrorToIJLog(e);
-         }
+            String fluoTiffName = FileUtils.getShortestTiffName(fluoImgsDir);
 
-         String fluoTiffName = FileUtils.getShortestTiffName(pathToFluoDir);
-
-         CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
-         ImagePlus concatenatedFluoImgs;
-         if (fluoTiffName != null) {
-            concatenatedFluoImgs = processStackedImg(pathToFluoDir, fluoTiffName,
-                  parameters, soc_, socVisualizer_, tasksSet, stop_);
-         } else {
-            concatenatedFluoImgs = processSplitImgs(pathToFluoDir, parameters, soc_,
-                  socVisualizer_, tasksSet, stop_);
-         }
-         concatenatedFluoImgs.getCalibration().frameInterval =
-               Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
-         Maars_Interface.waitAllTaskToFinish(tasksSet);
-         if (!stop_.get() && soc_.size() != 0) {
-            long startWriting = System.currentTimeMillis();
-            ArrayList<String> arrayChannels = new ArrayList<>();
-            Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
-            IOUtils.saveAll(soc_, concatenatedFluoImgs, pathToFluoDir, parameters.useDynamic(),
-                  arrayChannels,0);
-            IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
-                  + " sec for writing results");
-            if (parameters.useDynamic()) {
-               if (IJ.isWindows()) {
-                  pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
+            CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
+            ImagePlus concatenatedFluoImgs;
+            if (fluoTiffName != null) {
+               concatenatedFluoImgs = processStackedImg(fluoImgsDir, fluoTiffName,
+                     parameters, soc_, socVisualizer_, tasksSet, stop_);
+            } else {
+               concatenatedFluoImgs = processSplitImgs(fluoImgsDir, parameters, soc_,
+                     socVisualizer_, tasksSet, stop_);
+            }
+            concatenatedFluoImgs.getCalibration().frameInterval =
+                  Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
+            Maars_Interface.waitAllTaskToFinish(tasksSet);
+            if (!stop_.get() && soc_.size() != 0) {
+               long startWriting = System.currentTimeMillis();
+               ArrayList<String> arrayChannels = new ArrayList<>();
+               Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
+               IOUtils.saveAll(soc_, concatenatedFluoImgs, rootDir + File.separator, parameters.useDynamic(),
+                     arrayChannels, Integer.valueOf(posNb));
+               IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+                     + " sec for writing results");
+               if (parameters.useDynamic()) {
+                  if (IJ.isWindows()) {
+                     pathToSegDir = FileUtils.convertPathToLinuxType(pathToSegDir);
+                  }
+                  Maars_Interface.analyzeMitosisDynamic(soc_, parameters,
+                        rootDir + File.separator, Integer.valueOf(posNb));
                }
-               Maars_Interface.analyzeMitosisDynamic(soc_, parameters, pathToSegDir,0);
             }
          }
       }
@@ -326,12 +299,6 @@ public class MAARSNoAcq implements Runnable {
       soc_ = null;
       if (!stop_.get()) {
          IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
-      }
-      System.gc();
-      try {
-         es.awaitTermination(30, TimeUnit.SECONDS);
-      } catch (InterruptedException e) {
-         e.printStackTrace();
       }
    }
 }

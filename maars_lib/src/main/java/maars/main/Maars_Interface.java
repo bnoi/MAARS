@@ -1,6 +1,7 @@
 package maars.main;
 
 import ij.IJ;
+import ij.ImagePlus;
 import maars.agents.Cell;
 import maars.agents.SetOfCells;
 import maars.cellAnalysis.PythonPipeline;
@@ -14,9 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 /**
@@ -92,13 +91,13 @@ public class Maars_Interface {
       return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
    }
 
-   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToSegDir, int posNb) {
+   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToRoot, int posNb) {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
-      String mitoDir = pathToSegDir + MITODIRNAME + File.separator + "pos"+posNb + File.separator;
+      String mitoDir = pathToRoot + MITODIRNAME + File.separator + "pos"+posNb + File.separator;
       FileUtils.createFolder(mitoDir);
       String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
-            PythonPipeline.ANALYSING_SCRIPT_NAME, pathToSegDir, parameters.getDetectionChForMitosis(),
+            PythonPipeline.ANALYSING_SCRIPT_NAME, pathToRoot, parameters.getDetectionChForMitosis(),
             parameters.getCalibration(), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
             "-minimumPeriod", parameters.getMinimumMitosisDuration()};
       PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
@@ -118,8 +117,6 @@ public class Maars_Interface {
       IJ.log("Script saved");
       findAbnormalCells(mitoDir, soc, map);
    }
-
-
    public static void copyDeps(){
       if (!FileUtils.exists(MaarsParameters.DEPS_DIR)) {
          FileUtils.createFolder(MaarsParameters.DEPS_DIR);
@@ -127,5 +124,39 @@ public class Maars_Interface {
          FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.ANALYSING_SCRIPT_NAME);
          FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.COLOCAL_SCRIPT_NAME);
       }
+   }
+
+   public static String[] post_segmentation(String segImgsDir, MaarsParameters parameters){
+      segImgsDir = FileUtils.convertPath(segImgsDir);
+      ArrayList<String> names = FileUtils.getTiffWithPattern(segImgsDir, ".*_MMStack_Pos.*");
+      String[] posNbs = new String[names.size()];
+      // --------------------------segmentation-----------------------------//
+      ExecutorService es = Executors.newSingleThreadExecutor();
+      ImagePlus segImg = null;
+      ArrayList<MaarsSegmentation> msList = new ArrayList<>();
+      for (int i=0; i< names.size();i++){
+         posNbs[i] = String.valueOf(i);
+         try {
+            segImg = IJ.openImage(FileUtils.convertPath(segImgsDir + File.separator + names.get(i)));
+            parameters.setCalibration(String.valueOf(segImg.getCalibration().pixelWidth));
+         } catch (Exception e) {
+            IOUtils.printErrorToIJLog(e);
+         }
+         msList.add(new MaarsSegmentation(parameters, segImg, i));
+      }
+      for (MaarsSegmentation ms: msList) {
+         try {
+            es.submit(ms).get();
+         } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+         }
+      }
+      es.shutdown();
+      try {
+         es.awaitTermination(2, TimeUnit.MINUTES);
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      }
+      return posNbs;
    }
 }

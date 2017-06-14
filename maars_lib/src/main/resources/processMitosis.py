@@ -11,11 +11,6 @@ from scipy import stats
 from shutil import copyfile
 
 
-def load_rois(posNb):
-    csvPath = baseDir + '/BF_Pos'+str(posNb)+'_Results.csv'
-    return pd.DataFrame.from_csv(csvPath)
-
-
 def createOutputDirs(mitosisDir, cropImgs, spots, features, figs):
     croppedImgsDir = mitosisDir + cropImgs + "/"
     spotsDir = mitosisDir + spots + "/"
@@ -227,10 +222,12 @@ if __name__ == '__main__':
     calibration = args.calibration
     minimumPeriod = args.minimumPeriod
     acq_interval = args.acq_interval
+    posNb = 0
 
     # user won't need to change
-    mitosis_suffix = "_MITOSIS" + path.sep
-    fluo_suffix = "FLUO_1" + path.sep
+    mitosis_suffix = "Mitosis" + path.sep
+    fluo_suffix = "FluoAnalysis" + path.sep
+    seg_suffix = "SegAnalysis" + path.sep
     cropImgs = "croppedImgs"
     spots = "spots"
     figs = "figs"
@@ -244,7 +241,7 @@ if __name__ == '__main__':
 
     # -----------------------------------run the analysis-----------------------------------#
     pool = mp.Pool(mp.cpu_count())
-    cellRois = load_rois(0)
+    cellRois = pd.DataFrame.from_csv(baseDir + path.sep + seg_suffix +'pos'+str(posNb)+ path.sep + 'Results.csv')
     createOutputDirs(mitosisDir, cropImgs, spots, features, figs)
     cellNbs = getAllCellNumbers(features_dir)
     tasks = []

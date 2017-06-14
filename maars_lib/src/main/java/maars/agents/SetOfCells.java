@@ -33,11 +33,10 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
    }
 
    /**
-    * @param pathToSegDir path to segmentation directory
+    * @param pathToZip path to segmentation directory
     */
-   public void loadCells(String pathToSegDir, int posNb) {
-      IJ.log("Loading Cells of Pos " + posNb);
-      Roi[] roiArray = getRoisAsArray(pathToSegDir + File.separator + "ROI.zip");
+   public void loadCells(String pathToZip) {
+      Roi[] roiArray = getRoisAsArray(pathToZip);
       cellArray = new ArrayList<>();
       for (int i = 1; i <= roiArray.length; i++) {
          cellArray.add(i - 1, new Cell(roiArray[i - 1], i));
