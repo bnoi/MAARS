@@ -20,7 +20,7 @@ import java.io.IOException;
  *
  * @author marie
  */
-class SigmaOptimization implements PlugIn {
+public class SigmaOptimization implements PlugIn {
 
    private GenericDialog dialog;
    private double lowerSigma = 1;

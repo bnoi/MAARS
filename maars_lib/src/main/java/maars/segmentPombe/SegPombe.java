@@ -188,7 +188,7 @@ public class SegPombe {
     *
     * @param batchMode batch mode for optimization of segmentation
     */
-   public void convertCorrelationToBinaryImage(Boolean batchMode, int tolerance) {
+   public void convertCorrelationToBinaryImage(Boolean batchMode, double tolerance) {
 
       System.out.println("Convert correlation image to binary image");
 

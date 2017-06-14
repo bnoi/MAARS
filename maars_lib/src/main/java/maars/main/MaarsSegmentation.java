@@ -17,10 +17,12 @@ import java.io.File;
  * @author Tong LI
  */
 public class MaarsSegmentation implements Runnable {
-   private MaarsParameters parameters_;
    private ResultsTable rt;
    private ImagePlus img_;
    private int posNb_;
+   private SegPombeParameters segPombeParam_;
+   private Boolean batchMode = false;
+   private Double tolerance = 10.0;
 
    /**
     * * Constructor :
@@ -31,8 +33,17 @@ public class MaarsSegmentation implements Runnable {
     */
    public MaarsSegmentation(MaarsParameters parameters, ImagePlus img, int posNb) {
       img_ = img;
-      parameters_ = parameters;
       posNb_ = posNb;
+      batchMode = Boolean.valueOf(parameters.getBatchMode());
+      tolerance = Double.valueOf(parameters.getSegTolerance());
+      segPombeParam_ = segParameterWrapper(parameters);
+   }
+
+   /**
+    * Constructor 2
+    */
+   public MaarsSegmentation(SegPombeParameters segPombeParam){
+      segPombeParam_ = segPombeParam;
    }
 
    public ResultsTable getRoiMeasurements() {
@@ -41,13 +52,11 @@ public class MaarsSegmentation implements Runnable {
 
    @Override
    public void run() {
-      SegPombeParameters segPombeParam = segParameterWrapper(parameters_);
       // Main segmentation process
       IJ.log("Begin segmentation...");
-      SegPombe segPombe = new SegPombe(segPombeParam);
+      SegPombe segPombe = new SegPombe(segPombeParam_);
       segPombe.createCorrelationImage();
-      segPombe.convertCorrelationToBinaryImage(Boolean.valueOf(parameters_.getBatchMode()),
-            Integer.valueOf(parameters_.getSegTolerance()));
+      segPombe.convertCorrelationToBinaryImage(batchMode,tolerance);
       segPombe.analyseAndFilterParticles();
       segPombe.showAndSaveResultsAndCleanUp();
       IJ.log("Segmentation done");

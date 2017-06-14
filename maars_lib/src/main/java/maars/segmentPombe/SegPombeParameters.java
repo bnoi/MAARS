@@ -25,8 +25,8 @@ public class SegPombeParameters {
    //	public static double acquisitionStep = 0.3;
    private int focusSlide = 17;
    private boolean changeScale = true;
-   private int maxWidth = 1500;
-   private int maxHeight = 1500;
+   private int maxWidth = 3000;
+   private int maxHeight = 3000;
    private int direction = -1; // this is the direction of the equation to integrate
    // Parameters to filter results
    private double minParticleSize = 500;
@@ -40,10 +40,10 @@ public class SegPombeParameters {
    private boolean showBinaryImg = false;
    private boolean showDataFrame = false;
    private boolean showFocusImage = false;
-   private boolean saveCorrelationImg = true;
+   private boolean saveCorrelationImg = false;
    private boolean saveBinaryImg = true;
    private boolean saveDataFrame = true;
-   private boolean saveFocusImage = true;
+   private boolean saveFocusImage = false;
    private boolean saveRoi = true;
    // Width and Height indexes used in resolution array
    private double[] scales;

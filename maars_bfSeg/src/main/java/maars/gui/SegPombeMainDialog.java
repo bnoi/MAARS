@@ -1,8 +1,12 @@
+package maars.gui;
+
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
-import ij.gui.NonBlockingGenericDialog;
-import ij.plugin.PlugIn;
-import maars.segmentPombe.SegPombe;
+import ij.gui.GenericDialog;
+import ij.plugin.filter.PlugInFilter;
+import ij.process.ImageProcessor;
+import maars.main.MaarsSegmentation;
 import maars.segmentPombe.SegPombeParameters;
 import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
@@ -14,13 +18,10 @@ import java.awt.*;
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 4, 2015
  */
-public class SegPombeMainDialog implements PlugIn {
+public class SegPombeMainDialog implements PlugInFilter {
 
-   private SegPombeParameters parameters_;
+   private SegPombeParameters parameters_ = new SegPombeParameters();
    private Boolean unitsChecked_ = false;
-
-   // Main window
-   private NonBlockingGenericDialog mainWindow;
 
    // pombeSegmentor parameter object (with predefined values)
    private SegPombeParameters defaultParameters = new SegPombeParameters();
@@ -31,11 +32,11 @@ public class SegPombeMainDialog implements PlugIn {
    private JComboBox<String> typicalSizeUnitCombo;
 
    // to change image scale (number of pixels)
-   private Checkbox changeScaleCkb;
-   private JFormattedTextField maxWidthTf;
-   private JFormattedTextField maxHeightTf;
-   private JComboBox<String> maxWidthUnitCombo;
-   private JComboBox<String> maxHeightUnitCombo;
+//   private Checkbox changeScaleCkb;
+//   private JFormattedTextField maxWidthTf;
+//   private JFormattedTextField maxHeightTf;
+//   private JComboBox<String> maxWidthUnitCombo;
+//   private JComboBox<String> maxHeightUnitCombo;
 
    // to filter particles during the analysis and detect only cells
    private JFormattedTextField minParticleSizeTf;
@@ -84,10 +85,10 @@ public class SegPombeMainDialog implements PlugIn {
     * Create the main window in which there is : - a panel to handle the image
     * to Process and run the plugin - a panel to set(???)
     */
-   private void setMainWindow() {
-
-      mainWindow = new NonBlockingGenericDialog("Cells Boundaries");
-
+   private boolean showDialog() {
+      GenericDialog gd = new GenericDialog("MAARS : bright-field segmentation");
+      gd.setMinimumSize(new Dimension(300, 200));
+      gd.setSize(750, 500);
       Panel prefPanel = new Panel();
       prefPanel.setBackground(Color.WHITE);
       BoxLayout prefLayout = new BoxLayout(prefPanel, BoxLayout.Y_AXIS);
@@ -115,21 +116,21 @@ public class SegPombeMainDialog implements PlugIn {
             BoxLayout.X_AXIS);
       changeScalePanel.setLayout(changeScaleBoxLayout);
 
-      changeScaleCkb = new Checkbox("Change image size",
-            defaultParameters.changeScale());
-
-      Label maxWidthLabel = new Label();
-      maxWidthLabel.setText("maximum  width");
-      Label maxHLabel = new Label();
-      maxHLabel.setText("maximum height");
-      maxWidthTf = new JFormattedTextField(int.class);
-      maxWidthTf.setValue(defaultParameters.getMaxWidth());
-
-      maxHeightTf = new JFormattedTextField(int.class);
-      maxHeightTf.setValue(defaultParameters.getMaxHeight());
-
-      maxWidthUnitCombo = new JComboBox<>(unitList);
-      maxHeightUnitCombo = new JComboBox<>(unitList);
+//      changeScaleCkb = new Checkbox("Change image size",
+//            defaultParameters.changeScale());
+//
+//      Label maxWidthLabel = new Label();
+//      maxWidthLabel.setText("maximum  width");
+//      Label maxHLabel = new Label();
+//      maxHLabel.setText("maximum height");
+//      maxWidthTf = new JFormattedTextField(int.class);
+//      maxWidthTf.setValue(defaultParameters.getMaxWidth());
+//
+//      maxHeightTf = new JFormattedTextField(int.class);
+//      maxHeightTf.setValue(defaultParameters.getMaxHeight());
+//
+//      maxWidthUnitCombo = new JComboBox<>(unitList);
+//      maxHeightUnitCombo = new JComboBox<>(unitList);
 
       Panel maxValuesPanel = new Panel();
       Panel maxWidthPanel = new Panel();
@@ -142,18 +143,18 @@ public class SegPombeMainDialog implements PlugIn {
       BoxLayout maxValuesBoxLayout = new BoxLayout(maxValuesPanel,
             BoxLayout.Y_AXIS);
       maxWidthPanel.setLayout(maxWidthBoxLayout);
-      maxWidthPanel.add(maxWidthLabel);
-      maxWidthPanel.add(maxWidthTf);
-      maxWidthPanel.add(maxWidthUnitCombo);
+//      maxWidthPanel.add(maxWidthLabel);
+//      maxWidthPanel.add(maxWidthTf);
+//      maxWidthPanel.add(maxWidthUnitCombo);
       maxHeightPanel.setLayout(maxHeightBoxLayout);
-      maxHeightPanel.add(maxHLabel);
-      maxHeightPanel.add(maxHeightTf);
-      maxHeightPanel.add(maxHeightUnitCombo);
+//      maxHeightPanel.add(maxHLabel);
+//      maxHeightPanel.add(maxHeightTf);
+//      maxHeightPanel.add(maxHeightUnitCombo);
       maxValuesPanel.setLayout(maxValuesBoxLayout);
       maxValuesPanel.add(maxWidthPanel);
       maxValuesPanel.add(maxHeightPanel);
 
-      changeScalePanel.add(changeScaleCkb);
+//      changeScalePanel.add(changeScaleCkb);
       changeScalePanel.add(maxValuesPanel);
 
       // Filter abnormal forms
@@ -373,13 +374,10 @@ public class SegPombeMainDialog implements PlugIn {
       imgNameTf = new JTextField(20);
       imgNameTf.setEditable(false);
 
-      Button browseButton = new Button("Browse");
-//		browseAction = new BrowseAction(this, defaultParameters);
-//		browseButton.addActionListener(browseAction);
-
       Panel currentImagePanel = new Panel();
-      Button currentImageButton = new Button("Current Image");
+      Button currentImageButton = new Button("Load");
       currentImageButton.addActionListener(o2->{
+         parameters_.setImageToAnalyze(IJ.getImage());
          getAlreadryOpenedImage();
          resetFileNameField();
          setFileNameField(IJ.getImage().getTitle());
@@ -387,7 +385,6 @@ public class SegPombeMainDialog implements PlugIn {
       currentImagePanel.add(currentImageButton);
 
       fieldAndBrowsePanel.add(imgNameTf);
-      fieldAndBrowsePanel.add(browseButton);
 
       getPicturePanel.add(fieldAndBrowsePanel);
       getPicturePanel.add(currentImagePanel);
@@ -397,23 +394,15 @@ public class SegPombeMainDialog implements PlugIn {
       runButton.addActionListener(e -> {
          if (checkParameters()) {
             updateParameters();
-            SegPombe segPombe = new SegPombe(parameters_);
-            segPombe.createCorrelationImage();
-            segPombe.convertCorrelationToBinaryImage(false, Integer.MAX_VALUE);
-            segPombe.analyseAndFilterParticles();
-            segPombe.showAndSaveResultsAndCleanUp();
+            new Thread(new MaarsSegmentation(parameters_)).start();
          }
       });
 
-      Button cancelButton = new Button("Cancel");
-      cancelButton.addActionListener(o1-> hideMainWindow());
-
       runCancelPanel.add(runButton);
-      runCancelPanel.add(cancelButton);
 
       Label infoLabel = new Label();
       if (imgNameTf.getText().isEmpty()) {
-         infoLabel.setText("Please select the file you want to analyse");
+         infoLabel.setText("Please open an image and click Load");
       }
 
       runPanel.add(infoLabel, BorderLayout.NORTH);
@@ -425,7 +414,12 @@ public class SegPombeMainDialog implements PlugIn {
       jtp.addTab("Preferences", prefPanel);
       jtp.addTab("Result options", resultPanel);
 
-      mainWindow.add(jtp);
+      gd.add(jtp);
+      gd.pack();
+      gd.showDialog();
+      if (gd.wasCanceled())
+         return false;
+      return true;
    }
 
    // Setters
@@ -492,10 +486,6 @@ public class SegPombeMainDialog implements PlugIn {
       setPathDirField(IJ.getImage().getOriginalFileInfo().directory);
    }
 
-   private void hideMainWindow() {
-      mainWindow.setVisible(false);
-   }
-
    /*
     * Check validity of all text fields, this method is called only when using
     * segpombe plugin
@@ -524,24 +514,24 @@ public class SegPombeMainDialog implements PlugIn {
 
       // Check sigma value
       IJ.log("Checking if sigma value is valid");
-      if ((Double) typicalSizeTf.getValue() <= 0) {
+      if ((Float) typicalSizeTf.getValue() <= 0) {
          IJ.error("Wrong parameter", "Sigma must be a positive not null value");
          return false;
       }
       IJ.log("...OK!");
 
-      // Check new image size value
-      IJ.log("Checking if new image size values are valid");
-      if ((Integer) maxHeightTf.getValue() <= 0) {
-         IJ.error("Wrong parameter", "Max height must be a positive not null value");
-         return false;
-      }
-      IJ.log("...OK!");
-      if ((Integer) maxWidthTf.getValue() <= 0) {
-         IJ.error("Wrong parameter", "Max width must be a positive not null value");
-         return false;
-      }
-      IJ.log("...OK!");
+//      // Check new image size value
+//      IJ.log("Checking if new image size values are valid");
+//      if ((Integer) maxHeightTf.getValue() <= 0) {
+//         IJ.error("Wrong parameter", "Max height must be a positive not null value");
+//         return false;
+//      }
+//      IJ.log("...OK!");
+//      if ((Integer) maxWidthTf.getValue() <= 0) {
+//         IJ.error("Wrong parameter", "Max width must be a positive not null value");
+//         return false;
+//      }
+//      IJ.log("...OK!");
 
       // Check abnoraml cell shape value
       IJ.log("Checking if solidity value is valid");
@@ -595,11 +585,10 @@ public class SegPombeMainDialog implements PlugIn {
    private void updateParameters() {
       int selectedIndex;
       double tmpDouble;
-      int tmpInt;
 
       parameters_.setSavingPath(saveDirTf.getText());
       parameters_.setDirection(getDirection());
-      parameters_.setChangeScale(changeScaleCkb.getState());
+//      parameters_.setChangeScale(changeScaleCkb.getState());
       parameters_.setFilterAbnormalShape(filterAbnormalShapeCkb.getState());
       parameters_.setFiltrateWithMeanGrayValue(filterWithMeanGreyValueCkb.getState());
       parameters_.setShowCorrelationImg(showCorrelationImgCkb.getState());
@@ -608,12 +597,12 @@ public class SegPombeMainDialog implements PlugIn {
       parameters_.setShowFocusImage(showFocusImageCkb.getState());
       parameters_.setSaveRoi(saveRoiCkb.getState());
 
-      ImagePlus imgToAnalysis = IJ.getImage().duplicate();
+      ImagePlus imgToAnalysis = parameters_.getImageToAnalyze().duplicate();
       // if the unit chosen is a micron it must be converted
       IJ.log("Check if one of the unite used is micron");
       if (SegPombeParameters.MICRONS == typicalSizeUnitCombo.getSelectedIndex()
-            || SegPombeParameters.MICRONS == maxWidthUnitCombo.getSelectedIndex()
-            || SegPombeParameters.MICRONS == maxHeightUnitCombo.getSelectedIndex()
+//            || SegPombeParameters.MICRONS == maxWidthUnitCombo.getSelectedIndex()
+//            || SegPombeParameters.MICRONS == maxHeightUnitCombo.getSelectedIndex()
             || SegPombeParameters.MICRONS == minParticleSizeUnitCombo.getSelectedIndex()
             || SegPombeParameters.MICRONS == maxParticleSizeUnitCombo.getSelectedIndex()) {
          unitsChecked_ = ImgUtils.checkImgUnitsAndScale(imgToAnalysis, parameters_);
@@ -659,37 +648,37 @@ public class SegPombeMainDialog implements PlugIn {
             parameters_.setMaxParticleSize(tmpDouble);
          }
       }
-      // If the user chose to change the scale
-      IJ.log("Check if user wants to change scale");
-      if (changeScaleCkb.getState()) {
-         selectedIndex = maxWidthUnitCombo.getSelectedIndex();
-         tmpInt = (Integer) maxWidthTf.getValue();
-         if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked_) {
-            parameters_.setMaxWidth(ImgUtils.convertMicronToPixel(tmpInt, SegPombeParameters.WIDTH, parameters_));
-            IJ.log(
-                  "Width value is in micron, convert it in pixel : " + String.valueOf(parameters_.getMaxWidth()));
-         } else {
-            if (selectedIndex == SegPombeParameters.PIXELS) {
-               parameters_.setMaxWidth(tmpInt);
-            }
-         }
-
-         selectedIndex = maxHeightUnitCombo.getSelectedIndex();
-         tmpInt = (Integer) maxHeightTf.getValue();
-         if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked_) {
-
-            parameters_.setMaxHeight(ImgUtils.convertMicronToPixel(tmpInt, SegPombeParameters.HEIGHT, parameters_));
-            IJ.log("Height value is in micron, convert it in pixel : "
-                  + String.valueOf(parameters_.getMaxHeight()));
-         } else {
-            if (selectedIndex == SegPombeParameters.PIXELS) {
-               parameters_.setMaxHeight(tmpInt);
-            }
-         }
-         // Then we can change scale
-         IJ.log("Change scale");
-         ImgUtils.changeScale(imgToAnalysis,parameters_.getMaxWidth(), parameters_.getMaxHeight(), parameters_);
-      }
+//      // If the user chose to change the scale
+//      IJ.log("Check if user wants to change scale");
+//      if (changeScaleCkb.getState()) {
+//         selectedIndex = maxWidthUnitCombo.getSelectedIndex();
+//         tmpInt = (Integer) maxWidthTf.getValue();
+//         if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked_) {
+//            parameters_.setMaxWidth(ImgUtils.convertMicronToPixel(tmpInt, SegPombeParameters.WIDTH, parameters_));
+//            IJ.log(
+//                  "Width value is in micron, convert it in pixel : " + String.valueOf(parameters_.getMaxWidth()));
+//         } else {
+//            if (selectedIndex == SegPombeParameters.PIXELS) {
+//               parameters_.setMaxWidth(tmpInt);
+//            }
+//         }
+//
+//         selectedIndex = maxHeightUnitCombo.getSelectedIndex();
+//         tmpInt = (Integer) maxHeightTf.getValue();
+//         if (selectedIndex == SegPombeParameters.MICRONS && unitsChecked_) {
+//
+//            parameters_.setMaxHeight(ImgUtils.convertMicronToPixel(tmpInt, SegPombeParameters.HEIGHT, parameters_));
+//            IJ.log("Height value is in micron, convert it in pixel : "
+//                  + String.valueOf(parameters_.getMaxHeight()));
+//         } else {
+//            if (selectedIndex == SegPombeParameters.PIXELS) {
+//               parameters_.setMaxHeight(tmpInt);
+//            }
+//         }
+//         // Then we can change scale
+//         IJ.log("Change scale");
+//         ImgUtils.changeScale(imgToAnalysis,parameters_.getMaxWidth(), parameters_.getMaxHeight(), parameters_);
+//      }
 
       IJ.log("Check if user wants to precise z focus");
       if (manualZFocusCkb.getState()) {
@@ -705,7 +694,6 @@ public class SegPombeMainDialog implements PlugIn {
       } else {
          parameters_.setMeanGreyValueThreshold(0);
       }
-
    }
 
    /**
@@ -720,11 +708,6 @@ public class SegPombeMainDialog implements PlugIn {
             || showFocusImageCkb.getState() || saveFocusImageCkb.getState()
             || saveRoiCkb.getState());
    }
-
-   @Override
-   public void run(String arg0) {
-      setMainWindow();
-      mainWindow.showDialog();
 
 //      /**
 //       * IN CASE YOU JUST WANT TO RUN WITH A MACRO (you open the image then
@@ -746,11 +729,21 @@ public class SegPombeMainDialog implements PlugIn {
       // CellsBoundariesIdentification(this, 13, 200, 900000, -1, (int)
       // Math.round(imageToAnalyze.getSlice()/2),0.84 ,-177660);
       // cBI.identifyCellesBoundaries();
+	public static void main(String[] args) {
+      new ImageJ();
+      SegPombeMainDialog md = new SegPombeMainDialog();
+      md.showDialog();
+    }
+
+   @Override
+   public int setup(String s, ImagePlus imagePlus) {
+      parameters_.setImageToAnalyze(imagePlus);
+      return DOES_16;
    }
-//	public static void main(String[] args) {
-//        SegPombeMainDialog md = new SegPombeMainDialog();
-//        md.setMainWindow();
-//        md.showMainWindow();
-//    }
+
+   @Override
+   public void run(ImageProcessor imageProcessor) {
+      showDialog();
+   }
 }
 
