@@ -20,14 +20,14 @@ public class SegPombeParameters {
    // Parameters of the algorithm
    private ImagePlus imageToAnalyze;
    private float sigma = 3;
-   // it is 1 for image with cell boundaries be black then white
-   // it is -1 for image with cell boundaries be white then black
    //	public static double acquisitionStep = 0.3;
    private int focusSlide = 17;
    private boolean changeScale = true;
    private int maxWidth = 3000;
    private int maxHeight = 3000;
    private int direction = -1; // this is the direction of the equation to integrate
+   // it is -1 for image with cell boundaries be black then white
+   // it is 1 for image with cell boundaries be white then black
    // Parameters to filter results
    private double minParticleSize = 500;
    private double maxParticleSize = 40000;

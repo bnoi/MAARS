@@ -237,8 +237,9 @@ public class SegPombeMainDialog implements PlugInFilter {
       Label blackOrWhiteLabel = new Label(
             "Evolution of cells boundries on the movie :");
 
-      String blackOrWhiteState[] = {"First slice black - Last slice white",
-            "First slice white - Last slice black"};
+      String blackOrWhiteState[] = {
+            "First slice white - Last slice black",
+            "First slice black - Last slice white"};
       blackOrWhiteCombo = new JComboBox<>(blackOrWhiteState);
 
       blackOrWhitePanel.add(blackOrWhiteLabel);
