@@ -4,8 +4,9 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
-import ij.plugin.PlugIn;
+import ij.plugin.filter.PlugInFilter;
 import ij.plugin.frame.RoiManager;
+import ij.process.ImageProcessor;
 import maars.io.IOUtils;
 import maars.segmentPombe.ComputeCorrelation;
 
@@ -20,7 +21,7 @@ import java.io.IOException;
  *
  * @author marie
  */
-public class SigmaOptimization implements PlugIn {
+public class SigmaOptimization implements PlugInFilter {
 
    private GenericDialog dialog;
    private double lowerSigma = 1;
@@ -36,12 +37,14 @@ public class SigmaOptimization implements PlugIn {
     */
    private void createDialog() {
 
-      image = IJ.getImage();
       pathToSaveResult = image.getOriginalFileInfo().directory;
 
       zf = (image.getNSlices() / 2) + 1;
 
       dialog = new GenericDialog("Choose sigma range");
+      dialog.setMinimumSize(new Dimension(300, 200));
+      dialog.setSize(750, 500);
+      dialog.setModalityType(Dialog.ModalityType.MODELESS);
       dialog.setBounds(0, 0, 300, 400);
       dialog.addNumericField("Lower value", lowerSigma, 5);
       dialog.addNumericField("Upper value", upperSigma, 5);
@@ -53,6 +56,7 @@ public class SigmaOptimization implements PlugIn {
       OkAction action = new OkAction(this);
       okButton.addActionListener(action);
       dialog.add(okButton);
+      dialog.pack();
    }
 
    /**
@@ -118,7 +122,8 @@ public class SigmaOptimization implements PlugIn {
     * Runs the plugin : compute mean correlation value for each sigma in the
     * range tested
     */
-   public void run(String arg) {
+   @Override
+   public void run(ImageProcessor imageProcessor) {
       createDialog();
       dialog.setVisible(true);
 
@@ -143,6 +148,10 @@ public class SigmaOptimization implements PlugIn {
       RoiManager manager = RoiManager.getInstance();
       System.out.println("get roi as array");
       Roi[] rois = manager.getRoisAsArray();
+      if (rois.length == 0) {
+         IJ.error("You need to load ROIs.");
+         return;
+      }
       System.out.println("nb of roi :" + rois.length);
       image.hide();
 
@@ -186,5 +195,11 @@ public class SigmaOptimization implements PlugIn {
          System.out.println("could not close writer");
          IOUtils.printErrorToIJLog(e);
       }
+   }
+
+   @Override
+   public int setup(String s, ImagePlus imagePlus) {
+      image = imagePlus;
+      return DOES_16;
    }
 }

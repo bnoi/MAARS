@@ -15,7 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * @author Tong LI, mail: tongli.bioinfo@gmail.com
+ * @author Marie & Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 4, 2015
  */
 public class SegPombeMainDialog implements PlugInFilter {
@@ -89,6 +89,7 @@ public class SegPombeMainDialog implements PlugInFilter {
       GenericDialog gd = new GenericDialog("MAARS : bright-field segmentation");
       gd.setMinimumSize(new Dimension(300, 200));
       gd.setSize(750, 500);
+      gd.setModalityType(Dialog.ModalityType.MODELESS);
       Panel prefPanel = new Panel();
       prefPanel.setBackground(Color.WHITE);
       BoxLayout prefLayout = new BoxLayout(prefPanel, BoxLayout.Y_AXIS);
@@ -111,10 +112,10 @@ public class SegPombeMainDialog implements PlugInFilter {
       sizePanel.add(typicalSizeUnitCombo);
 
       // Allow to change image scale (change resolution)
-      Panel changeScalePanel = new Panel();
-      BoxLayout changeScaleBoxLayout = new BoxLayout(changeScalePanel,
-            BoxLayout.X_AXIS);
-      changeScalePanel.setLayout(changeScaleBoxLayout);
+//      Panel changeScalePanel = new Panel();
+//      BoxLayout changeScaleBoxLayout = new BoxLayout(changeScalePanel,
+//            BoxLayout.X_AXIS);
+//      changeScalePanel.setLayout(changeScaleBoxLayout);
 
 //      changeScaleCkb = new Checkbox("Change image size",
 //            defaultParameters.changeScale());
@@ -142,7 +143,7 @@ public class SegPombeMainDialog implements PlugInFilter {
             BoxLayout.X_AXIS);
       BoxLayout maxValuesBoxLayout = new BoxLayout(maxValuesPanel,
             BoxLayout.Y_AXIS);
-      maxWidthPanel.setLayout(maxWidthBoxLayout);
+//      maxWidthPanel.setLayout(maxWidthBoxLayout);
 //      maxWidthPanel.add(maxWidthLabel);
 //      maxWidthPanel.add(maxWidthTf);
 //      maxWidthPanel.add(maxWidthUnitCombo);
@@ -155,7 +156,7 @@ public class SegPombeMainDialog implements PlugInFilter {
       maxValuesPanel.add(maxHeightPanel);
 
 //      changeScalePanel.add(changeScaleCkb);
-      changeScalePanel.add(maxValuesPanel);
+//      changeScalePanel.add(maxValuesPanel);
 
       // Filter abnormal forms
       Panel filterAbnormalShapePanel = new Panel();
@@ -247,7 +248,7 @@ public class SegPombeMainDialog implements PlugInFilter {
       Panel manualZFocusPanel = new Panel();
 
       manualZFocusCkb = new Checkbox(
-            "Precise the slice corresponding to focus (default is the middle one)");
+            "Z focus slice number (default is the middle one)");
       manualZFocusTf = new JFormattedTextField(int.class);
       manualZFocusTf.setValue(defaultParameters.getFocusSlide());
 
@@ -255,8 +256,8 @@ public class SegPombeMainDialog implements PlugInFilter {
       manualZFocusPanel.add(manualZFocusTf);
 
       prefPanel.add(sizePanel);
-      prefPanel.add(new JSeparator());
-      prefPanel.add(changeScalePanel);
+//      prefPanel.add(new JSeparator());
+//      prefPanel.add(changeScalePanel);
       prefPanel.add(new JSeparator());
       prefPanel.add(filterAbnormalShapePanel);
       prefPanel.add(new JSeparator());
@@ -596,6 +597,10 @@ public class SegPombeMainDialog implements PlugInFilter {
       parameters_.setShowDataFrame(showDataFrameCkb.getState());
       parameters_.setShowFocusImage(showFocusImageCkb.getState());
       parameters_.setSaveRoi(saveRoiCkb.getState());
+      parameters_.setSaveCorrelationImg(saveCorrelationImgCkb.getState());
+      parameters_.setSaveDataFrame(saveDataFrameCkb.getState());
+      parameters_.setSaveFocusImage(saveFocusImageCkb.getState());
+      parameters_.setSaveBinaryImg(saveBinaryImgCkb.getState());
 
       ImagePlus imgToAnalysis = parameters_.getImageToAnalyze().duplicate();
       // if the unit chosen is a micron it must be converted
@@ -702,11 +707,11 @@ public class SegPombeMainDialog implements PlugInFilter {
     */
    private boolean checkResultOptions() {
 
-      return (showCorrelationImgCkb.getState() || saveBinaryImgCkb.getState()
+      return (showCorrelationImgCkb.getState()
+            || showBinaryImgCkb.getState() || saveRoiCkb.getState()
             || showDataFrameCkb.getState() || saveCorrelationImgCkb.getState()
             || saveBinaryImgCkb.getState() || saveDataFrameCkb.getState()
-            || showFocusImageCkb.getState() || saveFocusImageCkb.getState()
-            || saveRoiCkb.getState());
+            || showFocusImageCkb.getState() || saveFocusImageCkb.getState());
    }
 
 //      /**

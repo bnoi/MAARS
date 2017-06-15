@@ -41,10 +41,10 @@ public class SegPombeParameters {
    private boolean showDataFrame = false;
    private boolean showFocusImage = false;
    private boolean saveCorrelationImg = false;
-   private boolean saveBinaryImg = true;
-   private boolean saveDataFrame = true;
+   private boolean saveBinaryImg = false;
+   private boolean saveDataFrame = false;
    private boolean saveFocusImage = false;
-   private boolean saveRoi = true;
+   private boolean saveRoi = false;
    // Width and Height indexes used in resolution array
    private double[] scales;
 
