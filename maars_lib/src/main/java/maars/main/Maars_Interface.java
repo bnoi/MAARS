@@ -119,12 +119,10 @@ public class Maars_Interface {
    }
 
    public static void copyDeps(){
-      if (!FileUtils.exists(MaarsParameters.DEPS_DIR)) {
-         FileUtils.createFolder(MaarsParameters.DEPS_DIR);
-         FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.TRACKMATE_LOADER_NAME);
-         FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.ANALYSING_SCRIPT_NAME);
-         FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.COLOCAL_SCRIPT_NAME);
-      }
+      FileUtils.createFolder(MaarsParameters.DEPS_DIR);
+      FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.TRACKMATE_LOADER_NAME);
+      FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.ANALYSING_SCRIPT_NAME);
+      FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.COLOCAL_SCRIPT_NAME);
    }
 
    public static String[] post_segmentation(String segImgsDir, MaarsParameters parameters){

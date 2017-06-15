@@ -2,6 +2,7 @@ package maars.headless;
 
 import ij.IJ;
 import ij.ImageJ;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import maars.agents.SetOfCells;
 import maars.gui.MaarsFluoAnalysisDialog;
@@ -13,6 +14,7 @@ import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -97,11 +99,50 @@ public class GuiFreeRun implements PlugIn {
       parameters.setSavingPath(originalFolder);
    }
 
+   private static GenericDialog createDialog(){
+      GenericDialog dialog = new GenericDialog("Choose directories to analyze");
+      dialog.setLayout(new GridLayout(0,1));
+      dialog.addStringField("MAARS config file name" , "maars_config.xml");
+      dialog.add(new JLabel("Path(s) to folder of MAARS"));
+      ArrayList<JTextField> pathToFolderTfs = new ArrayList<>();
+      pathToFolderTfs.add(new JTextField("",20));
+      for (JTextField tf:pathToFolderTfs){
+         dialog.add(tf);
+      }
+      JButton addBut = new JButton("add");
+      addBut.addActionListener(o1->{
+         pathToFolderTfs.add(new JTextField("",20));
+         int counter = 3;
+         for (JTextField tf:pathToFolderTfs){
+            dialog.add(tf, counter);
+            counter+=1;
+         }
+         dialog.validate();
+      });
+      JButton clearBut = new JButton("clear");
+      clearBut.addActionListener(o->{
+         for (JTextField tf:pathToFolderTfs){
+            dialog.remove(tf);
+         }
+         pathToFolderTfs.clear();
+         pathToFolderTfs.add(new JTextField("",20));
+         for (JTextField tf:pathToFolderTfs){
+            dialog.add(tf,3);
+         }
+         dialog.validate();
+      });
+      dialog.add(addBut);
+      dialog.add(clearBut);
+      dialog.showDialog();
+      return dialog;
+   }
+
    public static void main(String[] args) {
       new ImageJ();
       Maars_Interface.copyDeps();
-      String configFileName = "maars_config.xml";
-      String dir = "/media/tong/MAARSData/MAARSData/102/15-06-1";
+      GenericDialog dia = createDialog();
+      String configFileName = dia.getNextString();
+      String dir = dia.getNextString();
       MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
       parameters.setSavingPath(dir);
 //      //executeAnalysis(fluoAnalysisDialog.getParameters());
