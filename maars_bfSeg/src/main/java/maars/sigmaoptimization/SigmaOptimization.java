@@ -27,7 +27,7 @@ public class SigmaOptimization implements PlugInFilter {
    private GenericDialog dialog;
    private double lowerSigma = 1;
    private double upperSigma = 9;
-   private double step = 0.2;
+   private double step = 0.3;
    private int zf;
    private int direction = 1;
    private ImagePlus image;
@@ -43,13 +43,14 @@ public class SigmaOptimization implements PlugInFilter {
       zf = (image.getNSlices() / 2) + 1;
 
       dialog = new GenericDialog("Choose sigma range");
+      dialog.setLayout(new GridLayout(0,1));
       dialog.setMinimumSize(new Dimension(300, 200));
       dialog.setSize(750, 500);
       dialog.setModalityType(Dialog.ModalityType.MODELESS);
       dialog.setBounds(0, 0, 300, 400);
       dialog.addNumericField("Lower value", lowerSigma,3);
       dialog.addNumericField("Upper value", upperSigma, 3);
-      dialog.addNumericField("step", step, 5);
+      dialog.addNumericField("step", step, 3);
       dialog.addStringField("path to save results", pathToSaveResult, 20);
       dialog.addNumericField("focus slice", zf, 3);
       dialog.addNumericField("direction", direction, 3);

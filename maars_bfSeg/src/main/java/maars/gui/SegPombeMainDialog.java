@@ -85,7 +85,7 @@ public class SegPombeMainDialog implements PlugInFilter {
     * Create the main window in which there is : - a panel to handle the image
     * to Process and run the plugin - a panel to set(???)
     */
-   private boolean showDialog() {
+   private void showDialog() {
       GenericDialog gd = new GenericDialog("MAARS : bright-field segmentation");
       gd.setMinimumSize(new Dimension(300, 200));
       gd.setSize(750, 500);
@@ -418,9 +418,6 @@ public class SegPombeMainDialog implements PlugInFilter {
       gd.add(jtp);
       gd.pack();
       gd.showDialog();
-      if (gd.wasCanceled())
-         return false;
-      return true;
    }
 
    // Setters
