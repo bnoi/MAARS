@@ -1,6 +1,7 @@
 package maars.sigmaoptimization;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
@@ -46,76 +47,28 @@ public class SigmaOptimization implements PlugInFilter {
       dialog.setSize(750, 500);
       dialog.setModalityType(Dialog.ModalityType.MODELESS);
       dialog.setBounds(0, 0, 300, 400);
-      dialog.addNumericField("Lower value", lowerSigma, 5);
-      dialog.addNumericField("Upper value", upperSigma, 5);
+      dialog.addNumericField("Lower value", lowerSigma,3);
+      dialog.addNumericField("Upper value", upperSigma, 3);
       dialog.addNumericField("step", step, 5);
       dialog.addStringField("path to save results", pathToSaveResult, 20);
       dialog.addNumericField("focus slice", zf, 3);
       dialog.addNumericField("direction", direction, 3);
       Button okButton = new Button("ok");
-      OkAction action = new OkAction(this);
-      okButton.addActionListener(action);
+      okButton.addActionListener(o->{
+         lowerSigma = dialog.getNextNumber();
+         upperSigma = dialog.getNextNumber();
+         step = dialog.getNextNumber();
+         pathToSaveResult = dialog.getNextString();
+         zf = (int) dialog.getNextNumber();
+         direction = (int) dialog.getNextNumber();
+         if (execute()) {
+            dialog.setVisible(false);
+            image.hide();
+         }
+      });
       dialog.add(okButton);
       dialog.pack();
-   }
-
-   /**
-    * Set lower value of range to test
-    *
-    * @param value value to set
-    */
-   void setLowerSigma(double value) {
-      lowerSigma = value;
-   }
-
-   /**
-    * Set upper value of range to test
-    *
-    * @param value value to set
-    */
-   void setUpperSigma(double value) {
-      upperSigma = value;
-   }
-
-   /**
-    * Set step of range to test
-    *
-    * @param value value to set
-    */
-   void setStep(double value) {
-      step = value;
-   }
-
-   /**
-    * Set path where results will be stored
-    *
-    * @param path path to set
-    */
-   void setPath(String path) {
-      pathToSaveResult = path;
-   }
-
-   /**
-    * slice index corresponding to focus plane
-    *
-    * @param zf focus to set
-    */
-   void setZFocus(int zf) {
-      this.zf = zf;
-   }
-
-   /**
-    * @param direction direction to set
-    */
-   void setDirection(int direction) {
-      this.direction = direction;
-   }
-
-   /**
-    * @return dialog
-    */
-   GenericDialog getDialog() {
-      return dialog;
+      dialog.setVisible(true);
    }
 
    /**
@@ -125,7 +78,36 @@ public class SigmaOptimization implements PlugInFilter {
    @Override
    public void run(ImageProcessor imageProcessor) {
       createDialog();
-      dialog.setVisible(true);
+   }
+
+   public void setImage(ImagePlus img){
+      image = img;
+   }
+
+   @Override
+   public int setup(String s, ImagePlus imagePlus) {
+      image = imagePlus;
+      return DOES_16;
+   }
+   public static void main(String[] args) {
+      new ImageJ();
+      IJ.open("/media/tong/MAARSData/MAARSData/102/15-06-1/SegImgStacks/_1_MMStack_Pos0.ome.tif");
+      SigmaOptimization md = new SigmaOptimization();
+      md.setImage(IJ.getImage());
+      md.createDialog();
+   }
+
+   public boolean execute(){
+      RoiManager manager = RoiManager.getInstance();
+
+      if (manager == null) {
+         IJ.error("You need to load ROIs.");
+         return false;
+      }
+
+      System.out.println("get roi as array");
+      Roi[] rois = manager.getRoisAsArray();
+      System.out.println("nb of roi :" + rois.length);
 
       FileWriter fw = null;
       try {
@@ -144,22 +126,12 @@ public class SigmaOptimization implements PlugInFilter {
          System.out.println("could not write in file");
          IOUtils.printErrorToIJLog(e);
       }
-      System.out.println("create roi manager");
-      RoiManager manager = RoiManager.getInstance();
-      System.out.println("get roi as array");
-      Roi[] rois = manager.getRoisAsArray();
-      if (rois.length == 0) {
-         IJ.error("You need to load ROIs.");
-         return;
-      }
-      System.out.println("nb of roi :" + rois.length);
-      image.hide();
 
       for (float sigma = (float) lowerSigma; sigma <= upperSigma; sigma = sigma
             + (float) step) {
          System.out.println("for sigma = " + sigma);
 
-         double mean = 0;
+         double total = 0;
          for (Roi roi1 : rois) {
             double x = roi1.getXBase();
             double y = roi1.getYBase();
@@ -175,10 +147,9 @@ public class SigmaOptimization implements PlugInFilter {
                   / (float) image.getCalibration().pixelDepth,
                   direction);
             computeCorrelationImage.preCalculateParameters(0, image.getNSlices() - 1);
-            mean = mean
-                  + computeCorrelationImage.integrate(iz);
+            total = total + computeCorrelationImage.integrate(iz);
          }
-         mean = mean / rois.length;
+         double mean = total / rois.length;
          System.out.println("mean = " + mean);
          try {
             bw.write(sigma + "," + mean);
@@ -195,11 +166,6 @@ public class SigmaOptimization implements PlugInFilter {
          System.out.println("could not close writer");
          IOUtils.printErrorToIJLog(e);
       }
-   }
-
-   @Override
-   public int setup(String s, ImagePlus imagePlus) {
-      image = imagePlus;
-      return DOES_16;
+      return true;
    }
 }
