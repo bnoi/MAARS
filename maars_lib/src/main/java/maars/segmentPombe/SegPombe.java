@@ -207,7 +207,7 @@ public class SegPombe {
          byteImage.invert();
       }
       BinaryProcessor binImage = new BinaryProcessor(byteImage);
-      this.binImage = new ImagePlus("binary Image", binImage);
+      this.binImage = new ImagePlus("binary Image of " + imageToAnalyze.getShortTitle(), binImage);
 
       if (imageToAnalyze.getCalibration().scaled()) {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
@@ -215,7 +215,8 @@ public class SegPombe {
 
       if (!batchMode || tolerance == Integer.MAX_VALUE) {
          this.binImage.show();
-         WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Please test your threshold (even undo/redo), and click ok.");
+         WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Optimize (or not) segmentation of "+
+               imageToAnalyze.getShortTitle()+ ", and click ok.");
          JButton adjWaterButton = new JButton("Adjustable Watershed");
          adjWaterButton.addActionListener(actionEvent -> {
             //IJ.run(this.binImage, "Adjustable_Watershed.java","");

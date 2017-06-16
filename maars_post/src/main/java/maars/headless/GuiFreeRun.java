@@ -57,7 +57,7 @@ public class GuiFreeRun implements PlugIn {
          parameters = new MaarsParameters(inStream);
          parameters.setSavingPath(rootDir);
          new MaarsSegmentationDialog(parameters, null);
-         runSegmentation(parameters);
+         Maars_Interface.post_segmentation(parameters);
          MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
          return fluoAnalysisDialog.getParameters();
       }
@@ -68,33 +68,9 @@ public class GuiFreeRun implements PlugIn {
    }
 
    static void executeAnalysis(MaarsParameters parameters) {
-      SetOfCells soc = new SetOfCells(0);
       ExecutorService es = Executors.newSingleThreadExecutor();
-      es.execute(new MAARSNoAcq(parameters, null, soc));
+      es.execute(new MAARSNoAcq(parameters));
       es.shutdown();
-      try {
-         es.awaitTermination(20, TimeUnit.MINUTES);
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-   }
-
-   private static void runSegmentation(MaarsParameters parameters) {
-      String originalFolder = parameters.getSavingPath();
-      String segDir = parameters.getSavingPath() + File.separator + Maars_Interface.SEG + File.separator;
-      parameters.setSavingPath(segDir);
-      ArrayList<String> names = FileUtils.getTiffWithPattern(segDir, ".*_MMStack_.*");
-      String pathToSegMovie = FileUtils.convertPath(segDir + File.separator + names.get(0));
-      MaarsSegmentation ms = new MaarsSegmentation(parameters, IJ.openImage(pathToSegMovie), 0);
-      ExecutorService es = Executors.newSingleThreadExecutor();
-      es.execute(ms);
-      es.shutdown();
-      try {
-         es.awaitTermination(30, TimeUnit.SECONDS);
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-      parameters.setSavingPath(originalFolder);
    }
 
    private static void createDialog(){
@@ -167,13 +143,16 @@ public class GuiFreeRun implements PlugIn {
       dialog.add(butPanel);
       okbut.setEnabled(false);
       okbut.addActionListener(o3->{
+         okbut.setEnabled(false);
          if (!validatePaths(pathToFolderTfs, maarConfigTf.getText())){
-            okbut.setEnabled(false);
+            IJ.error("Invalid MAARS folder found.");
          }else{
             for (JTextField tf:pathToFolderTfs) {
                MaarsParameters parameters = loadMaarsParameters(maarConfigTf.getText(), tf.getText());
                parameters.setSavingPath(tf.getText());
-               executeAnalysis(parameters);
+               String[] posNbs = Maars_Interface.post_segmentation(parameters);
+               Maars_Interface.post_fluoAnalysis(posNbs, tf.getText(), parameters);
+//               executeAnalysis(parameters);
             }
          }
       });

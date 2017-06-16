@@ -4,6 +4,7 @@ import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
+import maars.main.Maars_Interface;
 import maars.utils.GuiUtils;
 
 import javax.swing.*;
@@ -135,7 +136,7 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
       testSegBut.addActionListener(actionEvent -> {
          updateMAARSParamters();
          MaarsParameters parameters_dup = parameters.duplicate();
-         parameters_dup.setSavingPath(parameters.getSavingPath() + File.separator + "BF_1");
+         parameters_dup.setSavingPath(parameters.getSavingPath() + File.separator + Maars_Interface.SEG);
          // --------------------------segmentation-----------------------------//
          new Thread(new MaarsSegmentation(parameters_dup, IJ.getImage(), 0)).start();
       });
