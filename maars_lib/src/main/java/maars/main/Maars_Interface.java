@@ -136,6 +136,7 @@ public class Maars_Interface {
          posNbs[i] = String.valueOf(i);
          try {
             segImg = IJ.openImage(FileUtils.convertPath(segImgsDir + File.separator + names.get(i)));
+            segImg.show();
             parameters.setCalibration(String.valueOf(segImg.getCalibration().pixelWidth));
          } catch (Exception e) {
             IOUtils.printErrorToIJLog(e);

@@ -71,6 +71,11 @@ public class MaarsSegmentation implements Runnable {
       String root = parameters.getSavingPath() + File.separator + Maars_Interface.SEGANALYSISDIR + posNb_ + File.separator;
       FileUtils.createFolder(root);
       segPombeParam.setSavingPath(root);
+      segPombeParam.setSaveBinaryImg(true);
+      segPombeParam.setSaveFocusImage(true);
+      segPombeParam.setSaveDataFrame(true);
+      segPombeParam.setSaveCorrelationImg(true);
+      segPombeParam.setSaveRoi(true);
 
       segPombeParam.setFilterAbnormalShape(
             Boolean.parseBoolean(parameters.getSegmentationParameter(MaarsParameters.FILTER_SOLIDITY)));

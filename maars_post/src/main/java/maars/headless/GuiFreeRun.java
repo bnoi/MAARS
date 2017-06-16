@@ -2,7 +2,6 @@ package maars.headless;
 
 import ij.IJ;
 import ij.ImageJ;
-import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import maars.agents.SetOfCells;
 import maars.gui.MaarsFluoAnalysisDialog;
@@ -81,9 +80,8 @@ public class GuiFreeRun implements PlugIn {
    }
 
    private static void runSegmentation(MaarsParameters parameters) {
-      String defaultBfFolderName = "BF_1";
       String originalFolder = parameters.getSavingPath();
-      String segDir = parameters.getSavingPath() + File.separator + defaultBfFolderName + File.separator;
+      String segDir = parameters.getSavingPath() + File.separator + Maars_Interface.SEG + File.separator;
       parameters.setSavingPath(segDir);
       ArrayList<String> names = FileUtils.getTiffWithPattern(segDir, ".*_MMStack_.*");
       String pathToSegMovie = FileUtils.convertPath(segDir + File.separator + names.get(0));
@@ -99,16 +97,21 @@ public class GuiFreeRun implements PlugIn {
       parameters.setSavingPath(originalFolder);
    }
 
-   private static GenericDialog createDialog(){
-      GenericDialog dialog = new GenericDialog("Choose directories to analyze");
+   private static void createDialog(){
+      JDialog dialog = new JDialog();
+      dialog.setMinimumSize(new Dimension(400,300));
+      dialog.setTitle("Choose directories to analyze");
       dialog.setLayout(new GridLayout(0,1));
-      dialog.addStringField("MAARS config file name" , "maars_config.xml");
+      dialog.add(new JLabel("MAARS config file name"));
+      JFormattedTextField maarConfigTf = new JFormattedTextField(String.class);
+      maarConfigTf.setText("maars_config.xml");
+      dialog.add(maarConfigTf);
       dialog.add(new JLabel("Path(s) to folder of MAARS"));
       ArrayList<JTextField> pathToFolderTfs = new ArrayList<>();
-      pathToFolderTfs.add(new JTextField("",20));
       for (JTextField tf:pathToFolderTfs){
          dialog.add(tf);
       }
+      JButton okbut = new JButton("Ok");
       JButton addBut = new JButton("add");
       addBut.addActionListener(o1->{
          pathToFolderTfs.add(new JTextField("",20));
@@ -131,22 +134,80 @@ public class GuiFreeRun implements PlugIn {
          }
          dialog.validate();
       });
-      dialog.add(addBut);
-      dialog.add(clearBut);
-      dialog.showDialog();
-      return dialog;
+      JButton removeBut = new JButton("remove");
+      removeBut.addActionListener(o2->{
+         for (JTextField tf:pathToFolderTfs){
+            dialog.remove(tf);
+         }
+         pathToFolderTfs.remove(pathToFolderTfs.size()-1);
+         for (JTextField tf:pathToFolderTfs){
+            dialog.add(tf,3);
+         }
+         dialog.validate();
+      });
+      JButton validBut = new JButton("validate");
+      validBut.addActionListener(o4->{
+         for (JTextField tf:pathToFolderTfs) {
+            if (!validateMaarsDir(tf.getText(), maarConfigTf.getText())) {
+               okbut.setEnabled(false);
+               tf.setForeground(Color.RED);
+               tf.validate();
+            } else {
+               okbut.setEnabled(true);
+               tf.setForeground(Color.BLACK);
+               tf.validate();
+            }
+         }
+      });
+      JPanel butPanel = new JPanel();
+      butPanel.add(addBut);
+      butPanel.add(removeBut);
+      butPanel.add(clearBut);
+      butPanel.add(validBut);
+      dialog.add(butPanel);
+      okbut.setEnabled(false);
+      okbut.addActionListener(o3->{
+         if (!validatePaths(pathToFolderTfs, maarConfigTf.getText())){
+            okbut.setEnabled(false);
+         }else{
+            for (JTextField tf:pathToFolderTfs) {
+               MaarsParameters parameters = loadMaarsParameters(maarConfigTf.getText(), tf.getText());
+               parameters.setSavingPath(tf.getText());
+               executeAnalysis(parameters);
+            }
+         }
+      });
+      dialog.add(okbut);
+      dialog.setVisible(true);
+   }
+
+   static boolean validatePaths(ArrayList<JTextField> listTfs, String configName){
+      for (JTextField tf : listTfs){
+         if (!validateMaarsDir(tf.getText(), configName)){
+            tf.setForeground(Color.RED);
+            tf.validate();
+            return false;
+         }else{
+            tf.setForeground(Color.BLACK);
+            tf.validate();
+         }
+      }
+      return true;
+   }
+
+   static boolean validateMaarsDir(String path, String configName){
+      String root = path + File.separator;
+      return FileUtils.exists(path) && FileUtils.exists(root + configName) &&
+            FileUtils.exists(root  + Maars_Interface.SEG) && FileUtils.exists(root  + Maars_Interface.FLUO);
    }
 
    public static void main(String[] args) {
       new ImageJ();
       Maars_Interface.copyDeps();
-      GenericDialog dia = createDialog();
-      String configFileName = dia.getNextString();
-      String dir = dia.getNextString();
-      MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
-      parameters.setSavingPath(dir);
+      createDialog();
+
+
 //      //executeAnalysis(fluoAnalysisDialog.getParameters());
-      executeAnalysis(parameters);
 //      SetOfCells soc = new SetOfCells(0);
 //      MAARS.analyzeMitosisDynamic(soc,parameters,dir + "/BF_1");
 
@@ -262,12 +323,7 @@ public class GuiFreeRun implements PlugIn {
    @Override
    public void run(String s) {
       Maars_Interface.copyDeps();
-      String configFileName = "maars_config.xml";
-      String dir = "/Volumes/Macintosh/curioData/MAARSdata/102/12-06-1";
-      MaarsParameters parameters = loadMaarsParameters(configFileName, dir);
-      parameters.setSavingPath(dir);
-      MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameters);
-      executeAnalysis(fluoAnalysisDialog.getParameters());
+      createDialog();
 //        byte[] encoded = new byte[0];
 //        try {
 //            encoded = Files.readAllBytes(Paths.get("/home/tong/Desktop/new_mda/AcqSettings_bf.txt"));
