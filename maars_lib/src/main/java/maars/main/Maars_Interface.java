@@ -307,7 +307,7 @@ public class Maars_Interface {
 
    public static String[] post_segmentation(MaarsParameters parameters){
       String segImgsDir = FileUtils.convertPath(parameters.getSavingPath() + File.separator + Maars_Interface.SEG + File.separator);
-      ArrayList<String> names = FileUtils.getTiffWithPattern(segImgsDir, ".*_MMStack_Pos.*");
+      ArrayList<String> names = FileUtils.getTiffWithPattern(segImgsDir, ".*_MMStack_.*");
       String[] posNbs = new String[names.size()];
       // --------------------------segmentation-----------------------------//
       ExecutorService es = Executors.newSingleThreadExecutor();

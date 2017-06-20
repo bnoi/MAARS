@@ -38,7 +38,7 @@ import java.io.InputStream;
  *    +-----> FRAME_NUMBER
  *    +-----> RANGE_SIZE_FOR_MOVIE
  *    +-----> STEP
- *    +-----> CELL_SIZE
+ *    +-----> SIGMA
  *    +-----> MINIMUM_CELL_AREA
  *    +-----> MEAN_GREY_VALUE
  *    +-----> SOLIDITY
@@ -107,7 +107,7 @@ public class MaarsParameters {
    public static final String PROJECTED = "PROJECTED";
    public static final String PATH_TO_BF_ACQ_SETTING = "PATH_TO_BF_ACQ_SETTING";
    public static final String PATH_TO_FLUO_ACQ_SETTING = "PATH_TO_FLUO_ACQ_SETTING";
-   static final String CELL_SIZE = "CELL_SIZE";
+   static final String SIGMA = "SIGMA";
    static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
    static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
    private static final String SEGMENTATION_PARAMETERS = "SEGMENTATION_PARAMETERS";
@@ -126,6 +126,8 @@ public class MaarsParameters {
    private static final String CALIBRATION = "CALIBRATION";
    private static final String BATCH_MODE = "BATCH_MODE";
    private static final String TOLERANCE = "TOLERANCE";
+   public static final String FOCUS= "FOCUS";
+   public static final String DIRECTION = "DIRECTION";
    public static final String DEPS_DIR = IJ.getDirectory("plugins") + "MAARS_deps"+ File.separator;
 
    private Document doc;

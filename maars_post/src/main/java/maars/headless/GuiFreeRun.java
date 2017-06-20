@@ -3,12 +3,10 @@ package maars.headless;
 import ij.IJ;
 import ij.ImageJ;
 import ij.plugin.PlugIn;
-import maars.agents.SetOfCells;
 import maars.gui.MaarsFluoAnalysisDialog;
 import maars.gui.MaarsSegmentationDialog;
 import maars.io.IOUtils;
 import maars.main.MaarsParameters;
-import maars.main.MaarsSegmentation;
 import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
 
@@ -21,7 +19,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The main of MAARS without GUI configuration of MAARS parameters
@@ -151,7 +148,8 @@ public class GuiFreeRun implements PlugIn {
                MaarsParameters parameters = loadMaarsParameters(maarConfigTf.getText(), tf.getText());
                parameters.setSavingPath(tf.getText());
                String[] posNbs = Maars_Interface.post_segmentation(parameters);
-               Maars_Interface.post_fluoAnalysis(posNbs, tf.getText(), parameters);
+               System.out.println(posNbs);
+//               Maars_Interface.post_fluoAnalysis(posNbs, tf.getText(), parameters);
 //               executeAnalysis(parameters);
             }
          }

@@ -94,7 +94,7 @@ public class MaarsSegmentation implements Runnable {
             segPombeParam);
 
       segPombeParam.setSigma(
-            (int) Math.round(Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.CELL_SIZE))
+            (int) Math.round(Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.SIGMA))
                   / Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.STEP))));
 
       segPombeParam.setMinParticleSize((int) Math
@@ -112,6 +112,9 @@ public class MaarsSegmentation implements Runnable {
 
       segPombeParam.setMeanGreyValueThreshold(
             Double.parseDouble(parameters.getSegmentationParameter(MaarsParameters.MEAN_GREY_VALUE)));
+
+      segPombeParam.setFocusSlide(Integer.parseInt(parameters.getSegmentationParameter(MaarsParameters.FOCUS)));
+      segPombeParam.setDirection(Integer.parseInt(parameters.getSegmentationParameter(MaarsParameters.DIRECTION)));
       IJ.log("Done.");
       return segPombeParam;
    }

@@ -106,6 +106,8 @@ public class SegPombe {
 
       getFocusImage();
 
+      filterAbnormalShape = parameters.filterAbnormalShape();
+      filtrateWithMeanGrayValue = parameters.filtrateWithMeanGrayValue();
       this.solidityThreshold = parameters.getSolidityThreshold();
       this.meanGreyValueThreshold = parameters.getMeanGreyValueThreshold();
 
@@ -220,7 +222,8 @@ public class SegPombe {
          JButton adjWaterButton = new JButton("Adjustable Watershed");
          adjWaterButton.addActionListener(actionEvent -> {
             //IJ.run(this.binImage, "Adjustable_Watershed.java","");
-            IJ.run(this.binImage, "Compile and Run...", "compile=Adjustable_Watershed.java");
+            IJ.run(this.binImage, "Compile and Run...",
+                  "compile="+IJ.getDirectory("plugins") +"Adjustable_Watershed.java");
          });
          waitForUserDialog.setAlwaysOnTop(false);
          waitForUserDialog.setLayout(new BorderLayout());
@@ -229,7 +232,8 @@ public class SegPombe {
          waitForUserDialog.show();
          this.binImage.hide();
       } else {
-         IJ.run(this.binImage, "Adjustable Watershed", "tolerance=" + tolerance);
+         IJ.run(this.binImage, IJ.getDirectory("plugins") +"Adjustable Watershed",
+               "tolerance=" + tolerance);
       }
    }
 
@@ -266,12 +270,13 @@ public class SegPombe {
       particleAnalyzer.analyze(binImage);
       System.out.println("Done");
       Integer nbRoi = roiManager.getCount();
-      //todo
       ArrayList<CellFilter> filters = new ArrayList<>();
-      CellFilter solidityFilter = new CellFilter(ResultsTable.SOLIDITY, solidityThreshold, Double.MAX_VALUE);
-      CellFilter greyValueFilter = new CellFilter(ResultsTable.MEAN, meanGreyValueThreshold, Double.MAX_VALUE);
-      filters.add(solidityFilter);
-      filters.add(greyValueFilter);
+      if (filtrateWithMeanGrayValue) {
+         filters.add(new CellFilter(ResultsTable.MEAN, meanGreyValueThreshold, Double.MAX_VALUE));
+      }
+      if (filterAbnormalShape) {
+         filters.add(new CellFilter(ResultsTable.SOLIDITY, solidityThreshold, Double.MAX_VALUE));
+      }
       if (!nbRoi.equals(0)) {
          CellFilterFacotory facotory = new CellFilterFacotory(resultTable, imgCorrTemp);
          facotory.filterAll(filters);

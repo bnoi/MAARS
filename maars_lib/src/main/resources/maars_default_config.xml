@@ -62,6 +62,9 @@
         <!-- only useful in batch mode -->
         <TOLERANCE>10</TOLERANCE>
         <PATH_TO_BF_ACQ_SETTING>AcqSettings_bf.txt</PATH_TO_BF_ACQ_SETTING>
+        <SIGMA>3.0</SIGMA>
+        <DIRECTION>-1</DIRECTION>
+        <FOCUS>17</FOCUS>
         <SKIP>false</SKIP>
         <CELL_SIZE>3.0</CELL_SIZE>
         <CHANNEL>BF</CHANNEL>
