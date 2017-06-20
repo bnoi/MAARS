@@ -1,6 +1,6 @@
 # BfSeg Installation
-## Build the environment
-**Install Java 1.6 + **  
+## Build the environment  
+**Install Java 1.6 +**  
 **RAM** : About 400M  
 
 ## Installation
