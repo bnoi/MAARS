@@ -7,7 +7,7 @@
 [Download][download_bfseg] the `Adjustable_Watershed.java`, `maars_lib_1.0-SNAPSHOT.jar` and `maars_bfSeg_1.0-SNAPSHOT.jar` into your `plugins` folder of ImageJ.  
 
 ## How to use
- - Open your image to segment  
+ - Open your image to segment. `Make sure your image is calibrated, as least for x,y,z`.  
  - Click the plugin, like in this image :  
   ![][bfseg_plugin]  
  - Click `load` to load your current image :   
