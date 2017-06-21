@@ -14,7 +14,7 @@
  ![][bfseg_interface]  
 
 And Run!  
-Several seconds later, a prompt will be displayed to use [adjustable watershed][ad] plugin (or not) to make the segmenation even better.
+Several seconds later, a prompt will be displayed to use [adjustable watershed][ad] plugin (or not) to make the segmenation even better. To note that, this optimization will not work on Fiji. Since it doesn't support `compile and run` option.  
 If you are working on yeast cell, you won't need to change the parameters in `Preference` panel.  
 
 
