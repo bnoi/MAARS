@@ -8,8 +8,8 @@ public class ComputeCorrelation {
    private int N_ = 101; // precision parameter
    private double h_;
    private int first_ind_;
-   private double[] ind_d_ = new double[N_];
-   private int[] ind_i_ = new int[N_];
+   private double[] zs_d_ = new double[N_];
+   private int[] zs_i_ = new int[N_];
    private double[] smooth_ponderation_ = new double[N_];
 
    // it is -1 for image with cell boundaries be black then white
@@ -34,18 +34,17 @@ public class ComputeCorrelation {
       first_ind_ = first_ind;
       h_ = (last_ind - first_ind) / (double) N_; // step size
 
-
-      for (int i = 1; i <= ind_d_.length - 1; i += 1) {
-         ind_d_[i] = h_ * i;
+      for (int i = 1; i <= zs_d_.length - 1; i += 1) {
+         zs_d_[i] = first_ind + h_ * i;
       }
 
-      for (int i = 1; i <= ind_d_.length - 1; i += 1) {
-         ind_i_[i] = (int) ind_d_[i];
+      for (int i = 1; i <= zs_d_.length - 1; i += 1) {
+         zs_i_[i] = (int) zs_d_[i];
       }
 
-      for (int i = 1; i <= ind_d_.length - 1; i += 1) {
-         smooth_ponderation_[i] = direction * (ind_d_[i] - zf) *
-               Math.exp(-Math.pow(zf - ind_d_[i], 2) / (2 * Math.pow(sigma, 2)));
+      for (int i = 1; i <= zs_d_.length - 1; i += 1) {
+         smooth_ponderation_[i] = direction * (zs_d_[i] - zf) *
+               Math.exp(-Math.pow(zf - zs_d_[i], 2) / (2 * Math.pow(sigma, 2)));
       }
    }
 
@@ -54,7 +53,7 @@ public class ComputeCorrelation {
     * sufficiently smooth function.
     **********************************************************************/
    private double f(int index) {
-      return iz_[ind_i_[index]] * smooth_ponderation_[index];
+      return iz_[zs_i_[index]] * smooth_ponderation_[index];
    }
 
    /**********************************************************************

@@ -56,15 +56,21 @@ public class SigmaOptimization implements PlugInFilter {
       dialog.addNumericField("direction", direction, 3);
       Button okButton = new Button("ok");
       okButton.addActionListener(o->{
-         lowerSigma = dialog.getNextNumber();
-         upperSigma = dialog.getNextNumber();
-         step = dialog.getNextNumber();
-         pathToSaveResult = dialog.getNextString();
-         zf = (int) dialog.getNextNumber();
-         direction = (int) dialog.getNextNumber();
-         if (execute()) {
-            dialog.setVisible(false);
-            image.hide();
+         RoiManager manager = RoiManager.getInstance();
+
+         if (manager == null) {
+            IJ.error("You need to load ROIs.");
+         }else {
+            lowerSigma = dialog.getNextNumber();
+            upperSigma = dialog.getNextNumber();
+            step = dialog.getNextNumber();
+            pathToSaveResult = dialog.getNextString();
+            zf = (int) dialog.getNextNumber();
+            direction = (int) dialog.getNextNumber();
+            if (execute()) {
+               dialog.setVisible(false);
+               image.hide();
+            }
          }
       });
       dialog.add(okButton);
@@ -100,12 +106,6 @@ public class SigmaOptimization implements PlugInFilter {
 
    public boolean execute(){
       RoiManager manager = RoiManager.getInstance();
-
-      if (manager == null) {
-         IJ.error("You need to load ROIs.");
-         return false;
-      }
-
       System.out.println("get roi as array");
       Roi[] rois = manager.getRoisAsArray();
       System.out.println("nb of roi :" + rois.length);
@@ -127,28 +127,24 @@ public class SigmaOptimization implements PlugInFilter {
          System.out.println("could not write in file");
          IOUtils.printErrorToIJLog(e);
       }
-
+      float[] iz =new float[image.getNSlices()];
       for (float sigma = (float) lowerSigma; sigma <= upperSigma; sigma = sigma
             + (float) step) {
          System.out.println("for sigma = " + sigma);
 
+         ComputeCorrelation computeCorrelation = new ComputeCorrelation(zf, sigma
+               / (float) image.getCalibration().pixelDepth,
+               direction);
+         computeCorrelation.preCalculateParameters(0, image.getNSlices() - 1);
          double total = 0;
          for (Roi roi1 : rois) {
             double x = roi1.getXBase();
             double y = roi1.getYBase();
-            float[] iz = new float[image.getNSlices()];
-
-            System.out.println("for pixel x : " + x + " y : " + y);
-
             for (int z = 0; z < image.getNSlices(); z++) {
                image.setZ(z);
                iz[z] = image.getPixel((int) x, (int) y)[0];
             }
-            ComputeCorrelation computeCorrelationImage = new ComputeCorrelation(zf, sigma
-                  / (float) image.getCalibration().pixelDepth,
-                  direction);
-            computeCorrelationImage.preCalculateParameters(0, image.getNSlices() - 1);
-            total = total + computeCorrelationImage.integrate(iz);
+            total = total + computeCorrelation.integrate(iz);
          }
          double mean = total / rois.length;
          System.out.println("mean = " + mean);
