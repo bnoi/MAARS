@@ -14,15 +14,16 @@
  ![][bfseg_interface]  
 
 And Run!  
-Several seconds later, a prompt will be displayed to use [adjustable watershed][ad] plugin (or not) to make the segmenation even better. To note that, this optimization will not work on Fiji. Since it doesn't support `compile and run` option. 
-
-If you want to run it on Fiji, please install the plugin yourself by following the [instuction][ad]. The essential of this step is to close the gaps between cells,   
+Several seconds later, a prompt will be displayed asking whether or not to use [adjustable watershed][ad] plugin to improve the segmentation by adding lines to split merged cells.   
 before  
 ![][before]  
 after  
 ![][after]  
+To note, this option doesn't work on Fiji for instance. But if you want to do it, simply install the plugin yourself by following the [instuction][ad]. So when the binary image is displayed. You can run the plugin on it (or even do it manually...).   
+
 Once the lines are added on the binary image. You can click on `ok`.  
-If you are working on yeast cell, you won't need to change the parameters in `Preference` panel.  
+
+PS: If you are working on yeast cell, you won't need to change the parameters in `Preference` panel.  
 
 
 [bfseg_interface]: images/bfseg_interface.png 
