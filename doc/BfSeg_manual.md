@@ -17,7 +17,9 @@ And Run!
 Several seconds later, a prompt will be displayed to use [adjustable watershed][ad] plugin (or not) to make the segmenation even better. To note that, this optimization will not work on Fiji. Since it doesn't support `compile and run` option. 
 
 If you want to run it on Fiji, please install the plugin yourself by following the [instuction][ad]. The essential of this step is to close the gaps between cells,   
+before  
 ![][before]  
+after  
 ![][after]  
 Once the lines are added on the binary image. You can click on `ok`.  
 If you are working on yeast cell, you won't need to change the parameters in `Preference` panel.  
