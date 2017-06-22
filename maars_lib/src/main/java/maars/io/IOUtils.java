@@ -64,10 +64,10 @@ public class IOUtils {
       }
    }
 
-   public static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToFluoDir,
-                       Boolean useDynamic, ArrayList<String> arrayChannels, int posNb) {
+   public static void saveAll(SetOfCells soc, ImagePlus mergedImg, String pathToDir,
+                       Boolean useDynamic, ArrayList<String> arrayChannels, String posNb) {
       IJ.log("Saving information of each cell on disk");
-      String dest = pathToFluoDir + Maars_Interface.FLUOANALYSISDIR + posNb + File.separator;
+      String dest = pathToDir + Maars_Interface.FLUOANALYSISDIR + posNb + File.separator;
       FileUtils.createFolder(dest);
       MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(dest);
       MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(dest);

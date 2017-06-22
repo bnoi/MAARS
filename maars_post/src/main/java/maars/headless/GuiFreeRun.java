@@ -75,6 +75,9 @@ public class GuiFreeRun implements PlugIn {
       dialog.setMinimumSize(new Dimension(400,300));
       dialog.setTitle("Choose directories to analyze");
       dialog.setLayout(new GridLayout(0,1));
+      String[] methods = new String[]{"Segmentation", "FluoAnalysis"};
+      JComboBox<String> methdoComBox = new JComboBox<>(methods);
+      dialog.add(methdoComBox);
       dialog.add(new JLabel("MAARS config file name"));
       JFormattedTextField maarConfigTf = new JFormattedTextField(String.class);
       maarConfigTf.setText("maars_config.xml");
@@ -86,9 +89,10 @@ public class GuiFreeRun implements PlugIn {
       }
       JButton okbut = new JButton("Ok");
       JButton addBut = new JButton("add");
+      int fInd = 4;
       addBut.addActionListener(o1->{
          pathToFolderTfs.add(new JTextField("",20));
-         int counter = 3;
+         int counter = fInd;
          for (JTextField tf:pathToFolderTfs){
             dialog.add(tf, counter);
             counter+=1;
@@ -103,7 +107,7 @@ public class GuiFreeRun implements PlugIn {
          pathToFolderTfs.clear();
          pathToFolderTfs.add(new JTextField("",20));
          for (JTextField tf:pathToFolderTfs){
-            dialog.add(tf,3);
+            dialog.add(tf,fInd);
          }
          dialog.validate();
       });
@@ -114,7 +118,7 @@ public class GuiFreeRun implements PlugIn {
          }
          pathToFolderTfs.remove(pathToFolderTfs.size()-1);
          for (JTextField tf:pathToFolderTfs){
-            dialog.add(tf,3);
+            dialog.add(tf,fInd);
          }
          dialog.validate();
       });
@@ -147,10 +151,14 @@ public class GuiFreeRun implements PlugIn {
             for (JTextField tf:pathToFolderTfs) {
                MaarsParameters parameters = loadMaarsParameters(maarConfigTf.getText(), tf.getText());
                parameters.setSavingPath(tf.getText());
-               String[] posNbs = Maars_Interface.post_segmentation(parameters);
-               System.out.println(posNbs);
-//               Maars_Interface.post_fluoAnalysis(posNbs, tf.getText(), parameters);
-//               executeAnalysis(parameters);
+               String[] imgNames = Maars_Interface.getBfImgs(parameters);
+               String[] posNbs = Maars_Interface.getPosNbs(imgNames);
+               if (methdoComBox.getSelectedIndex() == 0) {
+                  Maars_Interface.post_segmentation(parameters, imgNames, posNbs);
+               }else{
+                  Maars_Interface.post_fluoAnalysis(posNbs, tf.getText(), parameters);
+               }
+               IJ.showMessage(methods[methdoComBox.getSelectedIndex()] + " done");
             }
          }
       });

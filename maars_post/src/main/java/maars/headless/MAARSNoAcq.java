@@ -39,8 +39,8 @@ public class MAARSNoAcq implements Runnable {
    @Override
    public void run() {
       long start = System.currentTimeMillis();
-      String[] posNbs = Maars_Interface.post_segmentation(parameters);
-      Maars_Interface.post_fluoAnalysis(posNbs, rootDir, parameters);
+//      String[] posNbs = Maars_Interface.post_segmentation(parameters);
+//      Maars_Interface.post_fluoAnalysis(posNbs, rootDir, parameters);
       IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
    }
 }

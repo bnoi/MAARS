@@ -139,11 +139,8 @@ public class FileUtils {
       File[] listOfFiles = folder.listFiles();
       for (int i = 0; i < listOfFiles.length; i++) {
          if (listOfFiles[i].isFile()) {
-            String currentTifName = listOfFiles[i].getName();
-            if (currentTifName.endsWith("tif") || currentTifName.endsWith("tiff")) {
-               if (Pattern.matches(pattern, currentTifName)) {
-                  names.add(currentTifName);
-               }
+            if (Pattern.matches(pattern, listOfFiles[i].getName())) {
+               names.add(listOfFiles[i].getName());
             }
          }
       }

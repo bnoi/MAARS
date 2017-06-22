@@ -352,7 +352,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          saveParameters();
          int nbOfPos = loadPositions();
          for (int i = 0; i < nbOfPos; i++) {
-            SetOfCells soc = new SetOfCells(i);
+            SetOfCells soc = new SetOfCells(i+"");
             socList_.add(soc);
             SOCVisualizer socVisualizer = createVisualizer(soc);
             socVisualizerList_.add(socVisualizer);

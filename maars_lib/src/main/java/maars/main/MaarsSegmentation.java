@@ -19,7 +19,7 @@ import java.io.File;
 public class MaarsSegmentation implements Runnable {
    private ResultsTable rt;
    private ImagePlus img_;
-   private int posNb_;
+   private String posNb_;
    private SegPombeParameters segPombeParam_;
    private Boolean batchMode = false;
    private Double tolerance = 10.0;
@@ -31,7 +31,7 @@ public class MaarsSegmentation implements Runnable {
     * @param img        image to segment
     * @param posNb      position id
     */
-   public MaarsSegmentation(MaarsParameters parameters, ImagePlus img, int posNb) {
+   public MaarsSegmentation(MaarsParameters parameters, ImagePlus img, String posNb) {
       img_ = img;
       posNb_ = posNb;
       batchMode = Boolean.valueOf(parameters.getBatchMode());

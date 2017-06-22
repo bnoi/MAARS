@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -37,8 +38,8 @@ public class Maars_Interface {
    public static final String SEG = "SegImgStacks";
    public static final String FLUO = "FluoImgStacks";
    public static final String MITODIRNAME = "Mitosis";
-   public final static String SEGANALYSISDIR = "SegAnalysis" + File.separator + "pos";
-   public final static String FLUOANALYSISDIR = "FluoAnalysis" + File.separator + "pos";
+   public final static String SEGANALYSISDIR = "SegAnalysis" + File.separator;
+   public final static String FLUOANALYSISDIR = "FluoAnalysis" + File.separator;
    /**
     * @param tasksSet tasks to be terminated
     */
@@ -103,10 +104,10 @@ public class Maars_Interface {
       return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
    }
 
-   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToRoot, int posNb) {
+   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToRoot, String posNb) {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
-      String mitoDir = pathToRoot + MITODIRNAME + File.separator + "pos"+posNb + File.separator;
+      String mitoDir = pathToRoot + MITODIRNAME + File.separator + posNb + File.separator;
       FileUtils.createFolder(mitoDir);
       String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToRoot, parameters.getDetectionChForMitosis(),
@@ -305,30 +306,55 @@ public class Maars_Interface {
       return concatenatedFluoImgs;
    }
 
-   public static String[] post_segmentation(MaarsParameters parameters){
+   public static String[] getBfImgs(MaarsParameters parameters){
       String segImgsDir = FileUtils.convertPath(parameters.getSavingPath() + File.separator + Maars_Interface.SEG + File.separator);
-      ArrayList<String> names = FileUtils.getTiffWithPattern(segImgsDir, ".*_MMStack_.*");
-      String[] posNbs = new String[names.size()];
-      // --------------------------segmentation-----------------------------//
+      ArrayList<String> names = FileUtils.getTiffWithPattern(segImgsDir, ".*_MMStack_.*.ome.tif");
+      return names.toArray(new String[names.size()]);
+   }
+
+   public static String[] getPosNbs(String[] imgNames){
+      String[] posNbs = new String[imgNames.length];
+      Pattern pattern = Pattern.compile(".*_MMStack_(.*?).ome.tif");
+      for (int i=0;i<imgNames.length;i++){
+         Matcher matcher = pattern.matcher(imgNames[i]);
+         while ( matcher.find() ) {
+            posNbs[i] = matcher.group(1);
+         }
+      }
+      return posNbs;
+   }
+
+   public static void post_segmentation(MaarsParameters parameters){
+      String[] imgNames = getBfImgs(parameters);
+      String[] posNbs = getPosNbs(imgNames);
+      segExecuter(parameters, imgNames, posNbs);
+   }
+
+   public static void post_segmentation(MaarsParameters parameters, String[] imgNames, String[] posNbs){
+      segExecuter(parameters, imgNames, posNbs);
+   }
+
+   private static void segExecuter(MaarsParameters parameters, String[] imgNames, String[] posNbs) {
       ExecutorService es = Executors.newSingleThreadExecutor();
       ImagePlus segImg = null;
-      for (int i=0; i< names.size();i++){
-         posNbs[i] = String.valueOf(i);
+      for (int i=0; i< imgNames.length;i++){
          try {
-            segImg = IJ.openImage(FileUtils.convertPath(segImgsDir + File.separator + names.get(i)));
+            segImg = IJ.openImage(FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
+                        Maars_Interface.SEG + File.separator + imgNames[i]);
+            System.out.println(FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
+                  Maars_Interface.SEG + File.separator + imgNames[i]);
             parameters.setCalibration(String.valueOf(segImg.getCalibration().pixelWidth));
          } catch (Exception e) {
             IOUtils.printErrorToIJLog(e);
          }
-         es.execute(new MaarsSegmentation(parameters, segImg, i));
+         es.execute(new MaarsSegmentation(parameters, segImg, posNbs[i]));
       }
       es.shutdown();
-      try {
-         es.awaitTermination(1, TimeUnit.MINUTES);
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-      return posNbs;
+//      try {
+//         es.awaitTermination(1, TimeUnit.MINUTES);
+//      } catch (InterruptedException e) {
+//         e.printStackTrace();
+//      }
    }
 
    public static void post_fluoAnalysis(String[] posNbs, String rootDir, MaarsParameters parameters) {
@@ -339,7 +365,7 @@ public class Maars_Interface {
       String fluoImgsDir = FileUtils.convertPath(rootDir + File.separator + Maars_Interface.FLUO + File.separator);
       String segAnaDirPrefix = rootDir + File.separator + Maars_Interface.SEGANALYSISDIR;
       for (String posNb:posNbs) {
-         soc = new SetOfCells(Integer.valueOf(posNb));
+         soc = new SetOfCells(posNb);
          String currentPosPrefix = segAnaDirPrefix + posNb + File.separator;
          String currentZipPath = currentPosPrefix + "ROI.zip";
          if (FileUtils.exists(currentZipPath)) {
@@ -378,13 +404,14 @@ public class Maars_Interface {
                long startWriting = System.currentTimeMillis();
                ArrayList<String> arrayChannels = new ArrayList<>();
                Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
+               FileUtils.createFolder(rootDir + File.separator + Maars_Interface.FLUOANALYSISDIR);
                IOUtils.saveAll(soc, concatenatedFluoImgs, rootDir + File.separator, parameters.useDynamic(),
-                     arrayChannels, Integer.valueOf(posNb));
+                     arrayChannels, posNb);
                IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                      + " sec for writing results");
                if (parameters.useDynamic()) {
                   Maars_Interface.analyzeMitosisDynamic(soc, parameters,
-                        rootDir + File.separator, Integer.valueOf(posNb));
+                        rootDir + File.separator, posNb);
                }
             }
          }

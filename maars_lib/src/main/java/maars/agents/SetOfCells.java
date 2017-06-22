@@ -22,14 +22,14 @@ public class SetOfCells implements Iterable<Cell>, Iterator<Cell>, Serializable 
    private int iteratorCount = 0;
    private ArrayList<Cell> cellArray;
    private CopyOnWriteArrayList<Integer> cellsWithAtLeast1Spot_ = new CopyOnWriteArrayList<>();
-   private int positionNb_;
+   private String position_;
 
-   public SetOfCells(int positionNb) {
-      positionNb_ = positionNb;
+   public SetOfCells(String positionNb) {
+      position_ = positionNb;
    }
 
-   public int getPosNb() {
-      return positionNb_;
+   public String getPosNb() {
+      return position_;
    }
 
    /**
