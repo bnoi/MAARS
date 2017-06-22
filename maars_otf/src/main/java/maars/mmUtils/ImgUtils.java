@@ -32,7 +32,7 @@ public class ImgUtils {
     * @param pixelSizeUm     image calib
     * @return imageplus
     */
-   public static HashMap<Integer, ImagePlus[]> convertImages2Imp(List<Image> listImg, SummaryMetadata summaryMetadata,
+   public static HashMap<String, ImagePlus[]> convertImages2Imp(List<Image> listImg, SummaryMetadata summaryMetadata,
                                                                  double pixelSizeUm) {
       ImageStack imageStack = new ImageStack(Integer.valueOf(summaryMetadata.getUserData().getString("Width")),
             Integer.valueOf(summaryMetadata.getUserData().getString("Height")));
@@ -46,12 +46,11 @@ public class ImgUtils {
       cal.pixelHeight = pixelSizeUm;
       cal.pixelDepth = summaryMetadata.getZStepUm();
       imagePlus.setCalibration(cal);
-
 //       String[] axisOrder = summaryMetadata.getAxisOrder();
 //       System.out.println(""+ axisOrder);
       int positionNb = summaryMetadata.getIntendedDimensions().getStagePosition();
       int onePosStackSize = imagePlus.getStackSize() / positionNb;
-      HashMap<Integer, ImagePlus[]> reorderedImps = new HashMap<>();
+      HashMap<String, ImagePlus[]> reorderedImps = new HashMap<>();
       ImagePlus reorderedOnePos;
       for (int i = 0; i < positionNb; i++) {
          ImagePlus onePos = new Duplicator().run(imagePlus, i * onePosStackSize + 1, (i + 1) * onePosStackSize);
@@ -67,7 +66,7 @@ public class ImgUtils {
          } else {
             channels = new ImagePlus[]{reorderedOnePos};
          }
-         reorderedImps.put(i, channels);
+         reorderedImps.put(summaryMetadata.getStagePositions()[i].getLabel(), channels);
       }
       return reorderedImps;
    }

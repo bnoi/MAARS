@@ -22,8 +22,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
@@ -48,8 +49,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
    private JRadioButton staticOpt;
    private MaarsFluoAnalysisDialog fluoDialog_;
    private MaarsSegmentationDialog segDialog_;
-   private ArrayList<SetOfCells> socList_ = new ArrayList<>();
-   private ArrayList<SOCVisualizer> socVisualizerList_ = new ArrayList<>();
+   private HashMap<String, SetOfCells> socList_ = new HashMap<>();
+   private HashMap<String, SOCVisualizer> socVisualizerList_ = new HashMap<>();
    private JButton stopButton_;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
    private JFormattedTextField posListTf_;
@@ -325,7 +326,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       return socVisualizer;
    }
 
-   private int loadPositions() {
+   private String[] loadPositions() {
       PositionList pl = new PositionList();
       try {
          if (FileUtils.exists(parameters_.getPathToPositionList())) {
@@ -342,7 +343,11 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       } catch (Exception e1) {
          IOUtils.printErrorToIJLog(e1);
       }
-      return pl.getNumberOfPositions();
+      String[] posNames = new String[pl.getPositions().length];
+      for (int i = 0; i<pl.getPositions().length;i++){
+         posNames[i] = pl.getPositions()[i].getLabel();
+      }
+      return posNames;
    }
 
    @Override
@@ -350,13 +355,13 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       MAARS maars = null;
       if (e.getSource() == okMainDialogButton) {
          saveParameters();
-         int nbOfPos = loadPositions();
-         for (int i = 0; i < nbOfPos; i++) {
+         String[] posNames = loadPositions();
+         for (int i = 0; i < posNames.length; i++) {
             SetOfCells soc = new SetOfCells(i+"");
-            socList_.add(soc);
+            socList_.put(posNames[i], soc);
             SOCVisualizer socVisualizer = createVisualizer(soc);
-            socVisualizerList_.add(socVisualizer);
-            if (parameters_.useDynamic()&&nbOfPos==1) {
+            socVisualizerList_.put(posNames[i],socVisualizer);
+            if (parameters_.useDynamic()&& Objects.equals(posNames[i], "Pos0")) {
                socVisualizer.setVisible(true);
             }
          }
@@ -391,7 +396,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          setAnalysisStrategy();
          fluoAcqDurationTf.setEditable(false);
       } else if (e.getSource() == showDataVisualizer_) {
-         for (SOCVisualizer socVisualizer : socVisualizerList_) {
+         for (SOCVisualizer socVisualizer : socVisualizerList_.values()) {
             socVisualizer.setVisible(true);
          }
       } else if (e.getSource() == stopButton_) {

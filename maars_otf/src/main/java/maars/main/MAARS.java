@@ -36,8 +36,8 @@ public class MAARS implements Runnable {
    private MMStudio mm;
    private CMMCore mmc;
    private MaarsParameters parameters;
-   private ArrayList<SetOfCells> socList_;
-   private ArrayList<SOCVisualizer> socVisualizerList_;
+   private HashMap<String, SetOfCells> socList_;
+   private HashMap<String, SOCVisualizer> socVisualizerList_;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
 
    /**
@@ -50,9 +50,9 @@ public class MAARS implements Runnable {
     * @param tasksSet          tasks to be terminated
     * @param socList           list of set of cell
     */
-   public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, ArrayList<SOCVisualizer> socVisualizerList,
+   public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, HashMap<String, SOCVisualizer> socVisualizerList,
                 CopyOnWriteArrayList<Map<String, Future>> tasksSet,
-                ArrayList<SetOfCells> socList) {
+                HashMap<String, SetOfCells> socList) {
       this.mmc = mmc;
       this.parameters = parameters;
       socList_ = socList;
@@ -108,7 +108,7 @@ public class MAARS implements Runnable {
             e.printStackTrace();
          }
       }
-      HashMap<Integer, ImagePlus[]> segImps = maars.mmUtils.ImgUtils.convertImages2Imp(segImgs,
+      HashMap<String, ImagePlus[]> segImps = maars.mmUtils.ImgUtils.convertImages2Imp(segImgs,
             segDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
 
       if (segImgs.size() ==0) {
@@ -116,12 +116,12 @@ public class MAARS implements Runnable {
          return;
       }
       MaarsSegmentation ms;
-      ArrayList<MaarsSegmentation> arrayMs = new ArrayList<>();
-      for (Integer posNb : segImps.keySet()) {
+      HashMap<String, MaarsSegmentation> arrayMs = new HashMap<>();
+      for (String posNb : segImps.keySet()) {
          ImagePlus segImg = segImps.get(posNb)[0];
          // --------------------------segmentation-----------------------------//
          ms = new MaarsSegmentation(parameters, segImg, posNb);
-         arrayMs.add(posNb, ms);
+         arrayMs.put(posNb, ms);
          try {
             es.submit(ms).get();
          } catch (InterruptedException | ExecutionException e) {
@@ -135,11 +135,11 @@ public class MAARS implements Runnable {
          IOUtils.printErrorToIJLog(e);
       }
       // from Roi initialize a set of cell
-      for (Integer posNb : segImps.keySet()) {
-         SetOfCells soc = socList_.get(posNb);
+      for (String pos : segImps.keySet()) {
+         SetOfCells soc = socList_.get(pos);
          soc.reset();
          soc.loadCells(savingPath + File.separator + Maars_Interface.SEGANALYSISDIR);
-         soc.setRoiMeasurementIntoCells(arrayMs.get(posNb).getRoiMeasurements());
+         soc.setRoiMeasurementIntoCells(arrayMs.get(pos).getRoiMeasurements());
       }
       // ----------------start acquisition and analysis --------//
       redirectLog(savingPath);
@@ -204,9 +204,9 @@ public class MAARS implements Runnable {
                   e.printStackTrace();
                }
             }
-            HashMap<Integer, ImagePlus[]> fluoImps = maars.mmUtils.ImgUtils.convertImages2Imp(fluoImgs,
+            HashMap<String, ImagePlus[]> fluoImps = maars.mmUtils.ImgUtils.convertImages2Imp(fluoImgs,
                   fluoDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
-            for (Integer posNb : fluoImps.keySet()) {
+            for (String posNb : fluoImps.keySet()) {
                for (ImagePlus chImp:fluoImps.get(posNb)){
                   //TODO
                   if (do_analysis) {
@@ -251,9 +251,9 @@ public class MAARS implements Runnable {
                e.printStackTrace();
             }
          }
-         HashMap<Integer, ImagePlus[]> fluoImps = maars.mmUtils.ImgUtils.convertImages2Imp(fluoImgs,
+         HashMap<String, ImagePlus[]> fluoImps = maars.mmUtils.ImgUtils.convertImages2Imp(fluoImgs,
                fluoDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
-         for (Integer posNb : fluoImps.keySet()) {
+         for (String posNb : fluoImps.keySet()) {
             for (ImagePlus chImp:fluoImps.get(posNb)){
                String channel = chImp.getTitle();
                if (do_analysis) {
@@ -295,18 +295,18 @@ public class MAARS implements Runnable {
          e.printStackTrace();
       }
       Maars_Interface.waitAllTaskToFinish(tasksSet_);
-      for (Integer posNb : segImps.keySet()) {
-         SetOfCells soc = socList_.get(posNb);
+      for (String pos : segImps.keySet()) {
+         SetOfCells soc = socList_.get(pos);
          if (do_analysis && !stop_) {
             long startWriting = System.currentTimeMillis();
-            ImagePlus mergedImg = IJ.openImage(fluoPath + File.separator + Maars_Interface.FLUO + "_MMStack_Pos"+posNb+".ome.tif");
+            ImagePlus mergedImg = IJ.openImage(fluoPath + File.separator + Maars_Interface.FLUO + "_MMStack_Pos"+pos+".ome.tif");
             mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
-            IOUtils.saveAll(soc, mergedImg, savingPath, parameters.useDynamic(), arrayChannels, posNb);
+            IOUtils.saveAll(soc, mergedImg, savingPath, parameters.useDynamic(), arrayChannels, pos);
             if (parameters.useDynamic()) {
                if (IJ.isWindows()) {
                   savingPath = FileUtils.convertPathToLinuxType(segPath);
                }
-               Maars_Interface.analyzeMitosisDynamic(soc, parameters, savingPath + File.separator, posNb);
+               Maars_Interface.analyzeMitosisDynamic(soc, parameters, savingPath + File.separator, pos);
             }
             ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                   + " sec for writing results");
