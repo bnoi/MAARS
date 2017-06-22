@@ -146,7 +146,7 @@ public class GuiFreeRun implements PlugIn {
       okbut.addActionListener(o3->{
          okbut.setEnabled(false);
          if (!validatePaths(pathToFolderTfs, maarConfigTf.getText())){
-            IJ.error("Invalid MAARS folder found.");
+            IJ.error("Invalid MAARS folder.");
          }else{
             for (JTextField tf:pathToFolderTfs) {
                MaarsParameters parameters = loadMaarsParameters(maarConfigTf.getText(), tf.getText());

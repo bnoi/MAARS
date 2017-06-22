@@ -80,6 +80,9 @@ def set_attributes_from_cmd_line():
     parser.add_argument("acq_interval",
                         help="interval of fluo acquisition",
                         type=float)
+    parser.add_argument("pos",
+                        help="position name",
+                        type=str)
     parser.add_argument("-minimumPeriod",
                         help="minimum time segment to be analyzed",
                         type=int, default=200)
@@ -222,13 +225,13 @@ if __name__ == '__main__':
     calibration = args.calibration
     minimumPeriod = args.minimumPeriod
     acq_interval = args.acq_interval
-    posNb = 0
+    pos = args.pos
 
     # user won't need to change
     mitosis_suffix = "Mitosis" + path.sep
     fluo_suffix = "FluoAnalysis" + path.sep
     seg_suffix = "SegAnalysis" + path.sep
-    posPrefix = path.sep + "pos" + str(posNb) + path.sep
+    posPrefix = path.sep + pos + path.sep
     cropImgs = "croppedImgs"
     spots = "spots"
     figs = "figs"

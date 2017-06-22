@@ -104,15 +104,15 @@ public class Maars_Interface {
       return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
    }
 
-   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToRoot, String posNb) {
+   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToRoot, String pos) {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
-      String mitoDir = pathToRoot + MITODIRNAME + File.separator + posNb + File.separator;
+      String mitoDir = pathToRoot + MITODIRNAME + File.separator + pos + File.separator;
       FileUtils.createFolder(mitoDir);
       String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToRoot, parameters.getDetectionChForMitosis(),
             parameters.getCalibration(), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
-            "-minimumPeriod", parameters.getMinimumMitosisDuration()};
+            pos, "-minimumPeriod", parameters.getMinimumMitosisDuration()};
       PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
       HashMap map = getMitoticCellNbs(mitoDir);
       String[] colocalisation_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
@@ -233,7 +233,15 @@ public class Maars_Interface {
       return 0;
    }
 
-   private static ImagePlus loadImg(String pathToFluoImgsDir, String fluoTiffName) {
+   private static ImagePlus loadImgOfPosition(String pathToFluoImgsDir, String pos) {
+      File folder = new File(pathToFluoImgsDir);
+      File[] listOfFiles = folder.listFiles();
+      String fluoTiffName = null;
+      for (File f:listOfFiles){
+         if (Pattern.matches(".*_MMStack_"+pos+"\\..*", f.getName())){
+            fluoTiffName = f.getName();
+         }
+      }
       IJ.run("TIFF Virtual Stack...", "open=" + pathToFluoImgsDir + File.separator + fluoTiffName);
       ImagePlus im = IJ.getImage();
       String infoProperties = im.getInfoProperty();
@@ -247,10 +255,10 @@ public class Maars_Interface {
       return im2;
    }
 
-   private static ImagePlus processStackedImg(String pathToFluoImgsDir, String fluoTiffName,
+   private static ImagePlus processStackedImg(String pathToFluoImgsDir, String pos,
                                               MaarsParameters parameters, SetOfCells soc, SOCVisualizer socVisualizer,
                                               CopyOnWriteArrayList<Map<String, Future>> tasksSet, AtomicBoolean stop) {
-      ImagePlus concatenatedFluoImgs = loadImg(pathToFluoImgsDir, fluoTiffName);
+      ImagePlus concatenatedFluoImgs = loadImgOfPosition(pathToFluoImgsDir, pos);
 
       JSONObject jsonObject = null;
       try {
@@ -387,11 +395,10 @@ public class Maars_Interface {
             }
 
             String fluoTiffName = FileUtils.getShortestTiffName(fluoImgsDir);
-
             CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
             ImagePlus concatenatedFluoImgs;
             if (fluoTiffName != null) {
-               concatenatedFluoImgs = processStackedImg(fluoImgsDir, fluoTiffName,
+               concatenatedFluoImgs = processStackedImg(fluoImgsDir, posNb,
                      parameters, soc, null, tasksSet, stop);
             } else {
                concatenatedFluoImgs = processSplitImgs(fluoImgsDir, parameters, soc,
