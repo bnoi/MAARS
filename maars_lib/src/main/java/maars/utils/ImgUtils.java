@@ -8,7 +8,12 @@ import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
+import loci.formats.FormatException;
+import loci.plugins.BF;
 import maars.segmentPombe.SegPombeParameters;
+
+import java.io.IOException;
+
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
@@ -93,6 +98,7 @@ public class ImgUtils {
     *                second one is a factor to change height
     * @return rescaled ROI
     */
+   @Deprecated
    public static Roi rescaleRoi(Roi oldRoi, double[] factors) {
       Roi roi = RoiScaler.scale(oldRoi, factors[0], factors[1], true);
       roi.setName("rescaledRoi");
@@ -106,6 +112,7 @@ public class ImgUtils {
     * @param maxHeight new height
     * @param maxWidth  new width
     */
+   @Deprecated
    public static void changeScale(ImagePlus img, int maxWidth, int maxHeight, SegPombeParameters parameters) {
       int newWidth;
       int newHeight;
@@ -224,7 +231,6 @@ public class ImgUtils {
    /**
     * Method to check if the image is scaled and if the unit matches 'micron'
     */
-   @Deprecated
    public static Boolean checkImgUnitsAndScale(ImagePlus img, SegPombeParameters parameters) {
       IJ.log("Check if image is scaled");
       if (img.getCalibration().scaled()) {
@@ -262,7 +268,6 @@ public class ImgUtils {
     * CellsBoundaries constants : WIDTH and HEIGHT and DEPTH. Return an int
     * width or height in pixels.
     */
-   @Deprecated
    public static int convertMicronToPixel(double micronSize, int widthOrHeightOrDepth, SegPombeParameters parameters) {
       return (int) Math.round(micronSize / parameters.getScale(widthOrHeightOrDepth));
    }
@@ -276,9 +281,23 @@ public class ImgUtils {
     * @param widthOrHeightOrDepth Dimension
     * @return Return an double width or height in microns.
     */
-   @Deprecated
    public static double convertPixelToMicron(int pixelSize, int widthOrHeightOrDepth, SegPombeParameters parameters) {
 
       return parameters.getScale(widthOrHeightOrDepth) * pixelSize;
+   }
+
+   public static ImagePlus[] importBioFormat(String path){
+      ImagePlus[] imp=null;
+      try {
+         imp = BF.openImagePlus(path);
+      } catch (FormatException | IOException e) {
+         e.printStackTrace();
+      }
+      return imp;
+   }
+
+   public static void main(String[] s){
+      ImagePlus[] imps = importBioFormat("/media/tong/merotelyData/29C_analyses_faites/29C_849_1/FLUO_1/849_29C_2_MMStack_Pos0.ome.tif");
+      imps[0].show();
    }
 }

@@ -26,6 +26,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.4.1</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- MAARS specific dependencies-->
@@ -33,18 +34,43 @@
         <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>TrackMate_</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>
             <version>2.0.6</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20170516</version>
+            <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>formats-gpl</artifactId>
+            <!--<version>5.5.2</version>-->
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>formats_api</artifactId>
+            <!--<version>5.5.2</version>-->
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>bio-formats_plugins</artifactId>
+            <!--<version>5.5.2</version>-->
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 </project>
