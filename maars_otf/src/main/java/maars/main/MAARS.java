@@ -96,7 +96,7 @@ public class MAARS implements Runnable {
       ExecutorService es = Executors.newSingleThreadExecutor();
       try {
          segDs = es.submit(new MAARS_mda(
-               parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING))).get();
+               parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING), new SetOfCells(""))).get();
       } catch (InterruptedException | ExecutionException e) {
          IOUtils.printErrorToIJLog(e);
       }
