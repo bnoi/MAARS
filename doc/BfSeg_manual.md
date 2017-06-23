@@ -28,7 +28,7 @@ PS: If you are working on yeast cell, you won't need to change the parameters in
 
 [bfseg_interface]: images/bfseg_interface.png 
 [bfseg_plugin]: images/bfseg_plugin.png  
-[download_bfseg]: https://github.com/bnoi/MAARS/tree/multiPosition/jars/MAARS_bfseg
+[download_bfseg]: https://github.com/bnoi/MAARS/tree/master/jars/MAARS_bfseg
 [ad]: http://imagejdocu.tudor.lu/doku.php?id=plugin:segmentation:adjustable_watershed:start
 [before]: images/before.png 
 [after]: images/after.png 
