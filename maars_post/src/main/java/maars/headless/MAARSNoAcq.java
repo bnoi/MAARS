@@ -1,9 +1,7 @@
 package maars.headless;
 
 import ij.IJ;
-import maars.agents.SetOfCells;
 import maars.main.MaarsParameters;
-import maars.main.Maars_Interface;
 
 import java.io.File;
 import java.util.ArrayList;

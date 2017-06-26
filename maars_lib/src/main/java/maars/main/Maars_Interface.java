@@ -7,7 +7,7 @@ import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.plugin.HyperStackConverter;
 import maars.agents.Cell;
-import maars.agents.SetOfCells;
+import maars.agents.DefaultSetOfCells;
 import maars.cellAnalysis.FluoAnalyzer;
 import maars.cellAnalysis.PythonPipeline;
 import maars.display.SOCVisualizer;
@@ -58,7 +58,7 @@ public class Maars_Interface {
    }
 
    private static void findAbnormalCells(String mitoDir,
-                                         SetOfCells soc,
+                                         DefaultSetOfCells soc,
                                          HashMap map) {
       if (FileUtils.exists(mitoDir)) {
          PrintWriter out = null;
@@ -104,7 +104,7 @@ public class Maars_Interface {
       return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
    }
 
-   public static void analyzeMitosisDynamic(SetOfCells soc, MaarsParameters parameters, String pathToRoot, String pos) {
+   public static void analyzeMitosisDynamic(DefaultSetOfCells soc, MaarsParameters parameters, String pathToRoot, String pos) {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
       String mitoDir = pathToRoot + MITODIRNAME + File.separator + pos + File.separator;
@@ -164,7 +164,7 @@ public class Maars_Interface {
       return imgToSave;
    }
 
-   private static ImagePlus processSplitImgs(String pathToFluoImgsDir, MaarsParameters parameters, SetOfCells soc,
+   private static ImagePlus processSplitImgs(String pathToFluoImgsDir, MaarsParameters parameters, DefaultSetOfCells soc,
                                              SOCVisualizer socVisualizer, CopyOnWriteArrayList<Map<String, Future>> tasksSet,
                                              AtomicBoolean stop) {
       ArrayList<Integer> arrayImgFrames = getFluoAcqStructure(pathToFluoImgsDir);
@@ -256,7 +256,7 @@ public class Maars_Interface {
    }
 
    private static ImagePlus processStackedImg(String pathToFluoImgsDir, String pos,
-                                              MaarsParameters parameters, SetOfCells soc, SOCVisualizer socVisualizer,
+                                              MaarsParameters parameters, DefaultSetOfCells soc, SOCVisualizer socVisualizer,
                                               CopyOnWriteArrayList<Map<String, Future>> tasksSet, AtomicBoolean stop) {
       ImagePlus concatenatedFluoImgs = loadImgOfPosition(pathToFluoImgsDir, pos);
 
@@ -369,11 +369,11 @@ public class Maars_Interface {
       AtomicBoolean stop = new AtomicBoolean(false);
       PrintStream curr_err = null;
       PrintStream curr_out = null;
-      SetOfCells soc = null;
+      DefaultSetOfCells soc = null;
       String fluoImgsDir = FileUtils.convertPath(rootDir + File.separator + Maars_Interface.FLUO + File.separator);
       String segAnaDirPrefix = rootDir + File.separator + Maars_Interface.SEGANALYSISDIR;
       for (String posNb:posNbs) {
-         soc = new SetOfCells(posNb);
+         soc = new DefaultSetOfCells(posNb);
          String currentPosPrefix = segAnaDirPrefix + posNb + File.separator;
          String currentZipPath = currentPosPrefix + "ROI.zip";
          if (FileUtils.exists(currentZipPath)) {
@@ -382,7 +382,7 @@ public class Maars_Interface {
             IJ.open(currentPosPrefix + "Results.csv");
             ResultsTable rt = ResultsTable.getResultsTable();
             ResultsTable.getResultsWindow().close(false);
-            soc.setRoiMeasurementIntoCells(rt);
+            soc.addRoiMeasurementIntoCells(rt);
             // ----------------start acquisition and analysis --------//
             try {
                PrintStream ps = new PrintStream(rootDir + File.separator + "FluoAnalysis.LOG");

@@ -1,7 +1,7 @@
 package maars.display;
 
 import maars.agents.Cell;
-import maars.agents.SetOfCells;
+import maars.agents.DefaultSetOfCells;
 import maars.io.IOUtils;
 import org.jfree.chart.ChartPanel;
 
@@ -36,9 +36,9 @@ public class SOCVisualizer extends JFrame {
     * this method should be invoked from
     * the event dispatch thread.
     *
-    * @param setOfCells soc object
+    * @param defaultSetOfCells soc object
     */
-   public void createGUI(SetOfCells setOfCells) {
+   public void createGUI(DefaultSetOfCells defaultSetOfCells) {
       //Create and set up the window.
       JPanel mainPanel = new JPanel();
       mainPanel.setLayout(new BorderLayout());
@@ -60,7 +60,7 @@ public class SOCVisualizer extends JFrame {
                int index = cellToDisplayList_.locationToIndex(e.getPoint());
                if (index != -1) {
                   Object item = alreadyShownList_.getElementAt(index);
-                  updateSplitPane(splitPane, setOfCells, (Integer) item);
+                  updateSplitPane(splitPane, defaultSetOfCells, (Integer) item);
                }
             }
          }
@@ -79,7 +79,7 @@ public class SOCVisualizer extends JFrame {
             }
             if (index >= 0 && index <= cellToDisplayList_.getLastVisibleIndex()) {
                Object item = alreadyShownList_.getElementAt(index);
-               updateSplitPane(splitPane, setOfCells, (Integer) item);
+               updateSplitPane(splitPane, defaultSetOfCells, (Integer) item);
             }
          }
       });
@@ -105,9 +105,9 @@ public class SOCVisualizer extends JFrame {
             ObjectInputStream obj_in =
                   new ObjectInputStream(f_in);
             Object obj = obj_in.readObject();
-            if (obj instanceof SetOfCells) {
+            if (obj instanceof DefaultSetOfCells) {
                // Cast object to a soc
-               SetOfCells soc = (SetOfCells) obj;
+               DefaultSetOfCells soc = (DefaultSetOfCells) obj;
                updateParameters(soc);
             }
          } catch (IOException | ClassNotFoundException e) {
@@ -132,16 +132,16 @@ public class SOCVisualizer extends JFrame {
       pack();
    }
 
-   public void updateParameters(SetOfCells setOfCells) {
-      for (Integer cellIndex : setOfCells.getPotentialMitosisCell()) {
-         int cellNb = setOfCells.getCell(cellIndex).getCellNumber();
+   public void updateParameters(DefaultSetOfCells defaultSetOfCells) {
+      for (Integer cellIndex : defaultSetOfCells.getPotentialMitosisCell()) {
+         int cellNb = defaultSetOfCells.getCell(cellIndex).getCellNumber();
          if (!alreadyShownList_.contains(cellNb)) {
             alreadyShownList_.addElement(cellNb);
          }
       }
    }
 
-   private void updateSplitPane(JSplitPane splitPane, SetOfCells soc, int cellNb) {
+   private void updateSplitPane(JSplitPane splitPane, DefaultSetOfCells soc, int cellNb) {
       splitPane.remove(1);
       Cell c = soc.getCell(cellNb);
       ChartPanel chartPanel = CellChartPanel.updateCellContent(c);

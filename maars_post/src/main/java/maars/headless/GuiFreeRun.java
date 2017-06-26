@@ -193,7 +193,7 @@ public class GuiFreeRun implements PlugIn {
 
 
 //      //executeAnalysis(fluoAnalysisDialog.getParameters());
-//      SetOfCells soc = new SetOfCells(0);
+//      DefaultSetOfCells soc = new DefaultSetOfCells(0);
 //      MAARS.analyzeMitosisDynamic(soc,parameters,dir + "/BF_1");
 
 //        for (String s : new File(".").list()){

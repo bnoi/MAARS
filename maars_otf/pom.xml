@@ -42,8 +42,6 @@
             <version>${micromanager.version}</version>
         </dependency>
 
-        <!-- MAARS specific dependencies-->
-
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom2</artifactId>

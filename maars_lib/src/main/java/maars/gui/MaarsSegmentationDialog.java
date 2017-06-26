@@ -5,6 +5,7 @@ import ij.gui.YesNoCancelDialog;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
 import maars.main.Maars_Interface;
+import maars.utils.FileUtils;
 import maars.utils.GuiUtils;
 
 import javax.swing.*;
@@ -12,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * Class to create and display a dialog to get parameters for the image
@@ -35,12 +37,21 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
    private JCheckBox skipSegChBox;
    private JButton okBut;
 
+   public MaarsSegmentationDialog(){
+      InputStream inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
+      parameters_ = new MaarsParameters(inStream);
+      createSegmentationDialog(parameters_, null);
+   }
+
+   public MaarsSegmentationDialog(final MaarsParameters parameters, JFrame maarsMainFrame){
+      super(maarsMainFrame);
+      createSegmentationDialog(parameters, maarsMainFrame);
+   }
    /**
     * @param maarsMainFrame main frame
     * @param parameters     default parameters (which are going to be displayed)
     */
-   public MaarsSegmentationDialog(final MaarsParameters parameters, JFrame maarsMainFrame) {
-      super(maarsMainFrame);
+   public void createSegmentationDialog(final MaarsParameters parameters, JFrame maarsMainFrame) {
       parameters_ = parameters;
       setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       setModalityType(ModalityType.DOCUMENT_MODAL);

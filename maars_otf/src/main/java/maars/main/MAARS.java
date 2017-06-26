@@ -3,7 +3,9 @@ package maars.main;
 import ij.IJ;
 import ij.ImagePlus;
 import maars.acquisition.MAARS_mda;
+import maars.agents.DefaultSetOfCells;
 import maars.agents.SetOfCells;
+import maars.agents.SocSet;
 import maars.cellAnalysis.FluoAnalyzer;
 import maars.display.SOCVisualizer;
 import maars.gui.MaarsMainDialog;
@@ -16,6 +18,7 @@ import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +27,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * Main MAARS program
+ * Main MAARSSeg program
  *
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 21, 2015
@@ -36,7 +39,7 @@ public class MAARS implements Runnable {
    private MMStudio mm;
    private CMMCore mmc;
    private MaarsParameters parameters;
-   private HashMap<String, SetOfCells> socList_;
+   private SocSet socSet_;
    private HashMap<String, SOCVisualizer> socVisualizerList_;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_;
 
@@ -45,17 +48,17 @@ public class MAARS implements Runnable {
     *
     * @param mm                MMStudio object (gui)
     * @param mmc               CMMCore object (core)
-    * @param parameters        MAARS parameters object
+    * @param parameters        MAARSSeg parameters object
     * @param socVisualizerList list of set of cell visualizer
     * @param tasksSet          tasks to be terminated
-    * @param socList           list of set of cell
+    * @param socSet            list of set of cell
     */
    public MAARS(MMStudio mm, CMMCore mmc, MaarsParameters parameters, HashMap<String, SOCVisualizer> socVisualizerList,
                 CopyOnWriteArrayList<Map<String, Future>> tasksSet,
-                HashMap<String, SetOfCells> socList) {
+                SocSet socSet) {
       this.mmc = mmc;
       this.parameters = parameters;
-      socList_ = socList;
+      socSet_ = socSet;
       this.mm = mm;
       tasksSet_ = tasksSet;
       socVisualizerList_ = socVisualizerList;
@@ -89,14 +92,20 @@ public class MAARS implements Runnable {
       String segPath = savingPath + File.separator + Maars_Interface.SEG;
       String fluoPath = savingPath + File.separator + Maars_Interface.FLUO;
       //acquisition
-      Datastore fullSegDs = mm.data().createRAMDatastore();
-      Datastore fullFluoDs = mm.data().createRAMDatastore();
+      Datastore fullFluoDs = null;
+      Datastore fullSegDs = null;
+      try {
+         fullSegDs = mm.data().createMultipageTIFFDatastore(segPath, true, true);
+         fullFluoDs = mm.data().createMultipageTIFFDatastore(fluoPath, true, true);
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
       Datastore segDs = null;
       Datastore fluoDs = null;
       ExecutorService es = Executors.newSingleThreadExecutor();
       try {
          segDs = es.submit(new MAARS_mda(
-               parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING), new SetOfCells(""))).get();
+               parameters.getSegmentationParameter(MaarsParameters.PATH_TO_BF_ACQ_SETTING))).get();
       } catch (InterruptedException | ExecutionException e) {
          IOUtils.printErrorToIJLog(e);
       }
@@ -136,10 +145,10 @@ public class MAARS implements Runnable {
       }
       // from Roi initialize a set of cell
       for (String pos : segImps.keySet()) {
-         SetOfCells soc = socList_.get(pos);
+         SetOfCells soc = socSet_.getSoc(pos);
          soc.reset();
          soc.loadCells(savingPath + File.separator + Maars_Interface.SEGANALYSISDIR);
-         soc.setRoiMeasurementIntoCells(arrayMs.get(pos).getRoiMeasurements());
+         soc.addRoiMeasurementIntoCells(arrayMs.get(pos).getRoiMeasurements());
       }
       // ----------------start acquisition and analysis --------//
       redirectLog(savingPath);
@@ -211,7 +220,7 @@ public class MAARS implements Runnable {
                   //TODO
                   if (do_analysis) {
                      String channel = chImp.getTitle();
-                     Future future2 = es1.submit(new FluoAnalyzer(chImp, chImp.getCalibration(), socList_.get(posNb), channel,
+                     Future future2 = es1.submit(new FluoAnalyzer(chImp, chImp.getCalibration(), (DefaultSetOfCells) socSet_.getSoc(posNb), channel,
                            Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                            Double.parseDouble(parameters.getChSpotRaius(channel)),
                            Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizerList_.get(posNb), parameters.useDynamic()));
@@ -257,7 +266,7 @@ public class MAARS implements Runnable {
             for (ImagePlus chImp:fluoImps.get(posNb)){
                String channel = chImp.getTitle();
                if (do_analysis) {
-                  Future future2 = es1.submit(new FluoAnalyzer(chImp, chImp.getCalibration(), socList_.get(posNb), channel,
+                  Future future2 = es1.submit(new FluoAnalyzer(chImp, chImp.getCalibration(), (DefaultSetOfCells) socSet_.getSoc(posNb), channel,
                         Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                         Double.parseDouble(parameters.getChSpotRaius(channel)),
                         Double.parseDouble(parameters.getChQuality(channel)), frame, socVisualizerList_.get(posNb), parameters.useDynamic()));
@@ -296,10 +305,10 @@ public class MAARS implements Runnable {
       }
       Maars_Interface.waitAllTaskToFinish(tasksSet_);
       for (String pos : segImps.keySet()) {
-         SetOfCells soc = socList_.get(pos);
+         DefaultSetOfCells soc = (DefaultSetOfCells) socSet_.getSoc(pos);
          if (do_analysis && !stop_) {
             long startWriting = System.currentTimeMillis();
-            ImagePlus mergedImg = IJ.openImage(fluoPath + File.separator + Maars_Interface.FLUO + "_MMStack_Pos"+pos+".ome.tif");
+            ImagePlus mergedImg = IJ.openImage(fluoPath + File.separator + Maars_Interface.FLUO + "_MMStack_"+pos+".ome.tif");
             mergedImg.getCalibration().frameInterval = fluoTimeInterval / 1000;
             IOUtils.saveAll(soc, mergedImg, savingPath, parameters.useDynamic(), arrayChannels, pos);
             if (parameters.useDynamic()) {
@@ -318,7 +327,7 @@ public class MAARS implements Runnable {
          soc.reset();
       }
       IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
-      IJ.showMessage("MAARS: Done!");
+      IJ.showMessage("MAARSSeg: Done!");
       MaarsMainDialog.okMainDialogButton.setEnabled(true);
    }
 }

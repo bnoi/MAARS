@@ -3,7 +3,8 @@ package maars.gui;
 import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
-import maars.agents.SetOfCells;
+import maars.agents.DefaultSetOfCells;
+import maars.agents.DefaultSocSet;
 import maars.display.SOCVisualizer;
 import maars.io.IOUtils;
 import maars.main.MAARS;
@@ -49,7 +50,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
    private JRadioButton staticOpt;
    private MaarsFluoAnalysisDialog fluoDialog_;
    private MaarsSegmentationDialog segDialog_;
-   private HashMap<String, SetOfCells> socList_ = new HashMap<>();
+   private DefaultSocSet socSet_ = new DefaultSocSet();
    private HashMap<String, SOCVisualizer> socVisualizerList_ = new HashMap<>();
    private JButton stopButton_;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
@@ -65,7 +66,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
     * @param parameters :MaarsParameters
     */
    public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
-      super("Mitosis Analysing And Recording System - MAARS");
+      super("Mitosis Analysing And Recording System - MAARSSeg");
       // ------------initialization of parameters---------------//
 
       mm_ = mm;
@@ -320,7 +321,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       }
    }
 
-   private SOCVisualizer createVisualizer(SetOfCells soc) {
+   private SOCVisualizer createVisualizer(DefaultSetOfCells soc) {
       final SOCVisualizer socVisualizer = new SOCVisualizer();
       socVisualizer.createGUI(soc);
       return socVisualizer;
@@ -357,8 +358,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          saveParameters();
          String[] posNames = loadPositions();
          for (int i = 0; i < posNames.length; i++) {
-            SetOfCells soc = new SetOfCells(i+"");
-            socList_.put(posNames[i], soc);
+            DefaultSetOfCells soc = new DefaultSetOfCells(posNames[i]+"");
+            socSet_.put(posNames[i], soc);
             SOCVisualizer socVisualizer = createVisualizer(soc);
             socVisualizerList_.put(posNames[i],socVisualizer);
             if (parameters_.useDynamic()&& Objects.equals(posNames[i], "Pos0")) {
@@ -370,7 +371,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          } catch (IOException e1) {
             e1.printStackTrace();
          }
-         maars = new MAARS(mm_, mmc_, parameters_, socVisualizerList_, tasksSet_, socList_);
+         maars = new MAARS(mm_, mmc_, parameters_, socVisualizerList_, tasksSet_, socSet_);
          new Thread(maars).start();
          okMainDialogButton.setEnabled(false);
          showDataVisualizer_.setEnabled(true);
@@ -410,15 +411,16 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                roiManager.reset();
                roiManager.close();
             }
-            for (int i = 0; i < socList_.size(); i++) {
-               socList_.get(i).reset();
-               socVisualizerList_.get(i).cleanUp();
-               socVisualizerList_.get(i).setVisible(false);
-               socVisualizerList_.get(i).createGUI(socList_.get(i));
+            for (String posName : socSet_.getPositionNames()) {
+               socSet_.getSoc(posName).reset();
+               //TODO
+//               socVisualizerList_.get(i).cleanUp();
+//               socVisualizerList_.get(i).setVisible(false);
+//               socVisualizerList_.get(i).createGUI(socSet_.getSoc(posName));
             }
          }
       } else {
-         IJ.log("MAARS don't understand what you want, sorry");
+         IJ.log("MAARSSeg don't understand what you want, sorry");
       }
    }
 }

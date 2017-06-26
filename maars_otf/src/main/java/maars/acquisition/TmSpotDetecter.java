@@ -1,29 +1,28 @@
 package maars.acquisition;
 
 import ij.IJ;
-import maars.agents.SetOfCells;
-import maars.io.IOUtils;
-import maars.main.MaarsParameters;
+import maars.agents.SocSet;
 import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by tong on 23/06/17.
  */
 public class TmSpotDetecter implements Runnable {
-   SetOfCells soc_;
-   public TmSpotDetecter(SetOfCells soc){
-      soc_ = soc;
+   SocSet socSet_;
+   int counter = 0;
+   public TmSpotDetecter(SocSet socSet){
+      socSet_ = socSet;
    }
    @Override
    public void run() {
-      IJ.log("123123");
-//      List<Image> lImages = MMStudio.getInstance().displays().getCurrentWindow().getDisplayedImages();
+      MMStudio mm = MMStudio.getInstance();
+      IJ.log(mm.getPositionList().getPosition(counter).getLabel() +" ");
+      IJ.log(socSet_.getSoc(mm.getPositionList().getPosition(counter).getLabel()).getPosLabel() + "");
+      counter++;
+//      List<Image> lImages = mm.displays().getCurrentWindow().getDisplayedImages();
 //      lImages.subList(Math.max(lImages.size()-7,0),lImages.size());
    }
 }

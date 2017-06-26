@@ -7,7 +7,7 @@ import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import maars.agents.Cell;
-import maars.agents.SetOfCells;
+import maars.agents.DefaultSetOfCells;
 import maars.cellAnalysis.singleCellAnalysisFactory.FindLagging;
 import maars.display.SOCVisualizer;
 import maars.io.IOUtils;
@@ -26,7 +26,7 @@ import java.util.concurrent.*;
 public class FluoAnalyzer implements Runnable {
 
    private ImagePlus fluoImage;
-   private SetOfCells soc;
+   private DefaultSetOfCells soc;
    private Calibration segImgCal;
    private Calibration fluoImgCal;
    private String channel;
@@ -52,7 +52,7 @@ public class FluoAnalyzer implements Runnable {
     * @param socVisualizer a JFreeChart based display to show cell params
     * @param useDynamic    perform dynamic analysis
     */
-   public FluoAnalyzer(ImagePlus fluoImage, Calibration segImgCal, SetOfCells soc, String channel, int maxNbSpot,
+   public FluoAnalyzer(ImagePlus fluoImage, Calibration segImgCal, DefaultSetOfCells soc, String channel, int maxNbSpot,
                        double radius, double quality, int frame, SOCVisualizer socVisualizer, Boolean useDynamic) {
       this.fluoImage = fluoImage;
       this.fluoImgCal = fluoImage.getCalibration();
