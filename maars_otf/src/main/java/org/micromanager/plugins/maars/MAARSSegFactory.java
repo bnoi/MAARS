@@ -5,6 +5,8 @@ import org.micromanager.Studio;
 import org.micromanager.data.Processor;
 import org.micromanager.data.ProcessorFactory;
 
+import java.io.File;
+
 /**
  * Created by tong on 26/06/17.
  */
@@ -17,6 +19,7 @@ public class MAARSSegFactory implements ProcessorFactory{
    }
    @Override
    public Processor createProcessor() {
+      parameters_.setSavingPath(studio_.acquisitions().getAcquisitionSettings().root);
       return new MAARSSeg(parameters_);
    }
 }

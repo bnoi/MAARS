@@ -26,7 +26,11 @@ public class MAARSSegConfigurator implements ProcessorConfigurator {
 
    @Override
    public void cleanup() {
-      dialog.setVisible(false);
+      if (dialog!=null && dialog.isVisible()) {
+         dialog.setVisible(false);
+      }
+      dialog = null;
+      parameters_ = null;
    }
 
    @Override

@@ -4,12 +4,16 @@ import ij.IJ;
 import ij.ImagePlus;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
+import maars.main.Maars_Interface;
 import maars.mmUtils.ImgUtils;
+import org.json.JSONException;
 import org.micromanager.data.Image;
 import org.micromanager.data.Processor;
 import org.micromanager.data.ProcessorContext;
 import org.micromanager.internal.MMStudio;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -32,11 +36,18 @@ public class MAARSSeg extends Processor{
 
    @Override
    public void processImage(Image image, ProcessorContext processorContext) {
+      boolean isOk = IsOkToSegmentCells();
       counter_++;
       zstack_.add(image);
       processorContext.outputImage(image);
-      IJ.log(image.getCoords() + "");
-      if (counter_ == 34){
+      if (counter_ == mm_.acquisitions().getAcquisitionSettings().slices.size() && isOk){
+         String prefix = "";
+         try {
+            prefix = mm_.getAcquisitionEngine2010().getSummaryMetadata().getString("Prefix");
+         } catch (JSONException e) {
+            e.printStackTrace();
+         }
+         parameters_.setSegmentationParameter(MaarsParameters.SEG_PREFIX,  prefix);
          ImagePlus imp = ImgUtils.convertWithMetadata(zstack_, mm_.getCachedPixelSizeUm());
          ExecutorService es = Executors.newSingleThreadExecutor();
          if (mm_.positions().getPositionList().getPositions().length>0){
@@ -50,6 +61,22 @@ public class MAARSSeg extends Processor{
          es.shutdown();
          counter_ = 0;
          zstack_ = new ArrayList<>();
+         parameters_.save(parameters_.getSavingPath());
       }
+   }
+
+   public Boolean IsOkToSegmentCells() {
+      boolean isOk = true;
+      if (mm_.live().getIsLiveModeOn()){
+         mm_.logs().showError("MAARS segmentation is not designed for live streaming, please launch MDA acquisition.");
+         mm_.live().setLiveMode(false);
+         isOk = false;
+      }else if (!mm_.acquisitions().getAcquisitionSettings().save){
+         mm_.logs().showError("You need to save your images to perform segmentation.");
+         mm_.acquisitions().setPause(true);
+         mm_.acquisitions().haltAcquisition();
+         isOk = false;
+      }
+      return isOk;
    }
 }

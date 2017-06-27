@@ -68,7 +68,8 @@ public class MaarsSegmentation implements Runnable {
       SegPombeParameters segPombeParam = new SegPombeParameters();
 
       segPombeParam.setImageToAnalyze(img_);
-      String root = parameters.getSavingPath() + File.separator + Maars_Interface.SEGANALYSISDIR + posNb_ + File.separator;
+      String root = parameters.getSavingPath() + File.separator + parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX) +
+            Maars_Interface.SEGANALYSIS_SUFFIX + posNb_ + File.separator;
       FileUtils.createFolder(root);
       segPombeParam.setSavingPath(root);
       segPombeParam.setSaveBinaryImg(true);

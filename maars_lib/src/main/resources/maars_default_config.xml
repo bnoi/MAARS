@@ -62,6 +62,7 @@
         <!-- only useful in batch mode -->
         <TOLERANCE>10</TOLERANCE>
         <PATH_TO_BF_ACQ_SETTING>AcqSettings_bf.txt</PATH_TO_BF_ACQ_SETTING>
+        <SEG_PREFIX></SEG_PREFIX>
         <SIGMA>3.0</SIGMA>
         <DIRECTION>-1</DIRECTION>
         <FOCUS>17</FOCUS>

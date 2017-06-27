@@ -107,6 +107,7 @@ public class MaarsParameters {
    public static final String PROJECTED = "PROJECTED";
    public static final String PATH_TO_BF_ACQ_SETTING = "PATH_TO_BF_ACQ_SETTING";
    public static final String PATH_TO_FLUO_ACQ_SETTING = "PATH_TO_FLUO_ACQ_SETTING";
+   public static final String SEG_PREFIX = "SEG_PREFIX";
    static final String SIGMA = "SIGMA";
    static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
    static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";

@@ -147,7 +147,8 @@ public class MAARS implements Runnable {
       for (String pos : segImps.keySet()) {
          SetOfCells soc = socSet_.getSoc(pos);
          soc.reset();
-         soc.loadCells(savingPath + File.separator + Maars_Interface.SEGANALYSISDIR);
+         soc.loadCells(savingPath + File.separator + parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX)
+               + Maars_Interface.SEGANALYSIS_SUFFIX);
          soc.addRoiMeasurementIntoCells(arrayMs.get(pos).getRoiMeasurements());
       }
       // ----------------start acquisition and analysis --------//

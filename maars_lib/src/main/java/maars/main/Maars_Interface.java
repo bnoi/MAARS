@@ -18,10 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -35,7 +32,7 @@ public class Maars_Interface {
    public static final String SEG = "SegImgStacks";
    public static final String FLUO = "FluoImgStacks";
    public static final String MITODIRNAME = "Mitosis";
-   public final static String SEGANALYSISDIR = "SegAnalysis" + File.separator;
+   public final static String SEGANALYSIS_SUFFIX = "_SegAnalysis" + File.separator;
    public final static String FLUOANALYSISDIR = "FluoAnalysis" + File.separator;
    /**
     * @param tasksSet tasks to be terminated
@@ -368,7 +365,8 @@ public class Maars_Interface {
       PrintStream curr_out = null;
       DefaultSetOfCells soc = null;
       String fluoImgsDir = FileUtils.convertPath(rootDir + File.separator + Maars_Interface.FLUO + File.separator);
-      String segAnaDirPrefix = rootDir + File.separator + Maars_Interface.SEGANALYSISDIR;
+      String segAnaDirPrefix = rootDir + File.separator + parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX)
+            + Maars_Interface.SEGANALYSIS_SUFFIX;
       for (String posNb:posNbs) {
          soc = new DefaultSetOfCells(posNb);
          String currentPosPrefix = segAnaDirPrefix + posNb + File.separator;
