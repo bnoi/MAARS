@@ -34,18 +34,8 @@ public class ImgUtils {
     */
    public static HashMap<String, ImagePlus[]> convertImages2Imp(List<Image> listImg, SummaryMetadata summaryMetadata,
                                                                  double pixelSizeUm) {
-      ImageStack imageStack = new ImageStack(Integer.valueOf(summaryMetadata.getUserData().getString("Width")),
-            Integer.valueOf(summaryMetadata.getUserData().getString("Height")));
-      for (Image img : listImg) {
-         imageStack.addSlice(img.getMetadata().getReceivedTime(), image2imp(img));
-      }
-      ImagePlus imagePlus = new ImagePlus("", imageStack);
-      Calibration cal = new Calibration();
-      cal.setUnit("micron");
-      cal.pixelWidth = pixelSizeUm;
-      cal.pixelHeight = pixelSizeUm;
-      cal.pixelDepth = summaryMetadata.getZStepUm();
-      imagePlus.setCalibration(cal);
+      ImagePlus imagePlus = convertWithMetadata(listImg, pixelSizeUm);
+      imagePlus.getCalibration().pixelDepth = summaryMetadata.getZStepUm();
 //       String[] axisOrder = summaryMetadata.getAxisOrder();
 //       System.out.println(""+ axisOrder);
       int positionNb = summaryMetadata.getIntendedDimensions().getStagePosition();
@@ -69,6 +59,24 @@ public class ImgUtils {
          reorderedImps.put(summaryMetadata.getStagePositions()[i].getLabel(), channels);
       }
       return reorderedImps;
+   }
+
+   public static ImagePlus convertWithMetadata(List<Image> listImg, double pixelSizeUm) {
+      ImagePlus imagePlus = image2Imp(listImg);
+      Calibration cal = new Calibration();
+      cal.setUnit("micron");
+      cal.pixelWidth = pixelSizeUm;
+      cal.pixelHeight = pixelSizeUm;
+      imagePlus.setCalibration(cal);
+      return imagePlus;
+   }
+
+   private static ImagePlus image2Imp(List<Image> listImg) {
+      ImageStack imageStack = new ImageStack(listImg.get(0).getWidth(), listImg.get(0).getHeight());
+      for (Image img : listImg) {
+         imageStack.addSlice(img.getCoords() + "", image2imp(img));
+      }
+      return new ImagePlus("Stacked Images", imageStack);
    }
 
    /**
