@@ -1,5 +1,7 @@
 package org.micromanager.plugins.maars;
 
+import maars.main.MaarsParameters;
+import maars.main.Maars_Interface;
 import org.micromanager.PropertyMap;
 import org.micromanager.Studio;
 import org.micromanager.data.ProcessorConfigurator;
@@ -14,15 +16,16 @@ import org.scijava.plugin.SciJavaPlugin;
 @Plugin(type = ProcessorPlugin.class)
 public class MAARSSegPlugin implements ProcessorPlugin, SciJavaPlugin{
    Studio studio_;
+   MaarsParameters parameters_ = Maars_Interface.loadParameters();
 
    @Override
    public ProcessorConfigurator createConfigurator(PropertyMap propertyMap) {
-      return new MAARSSegConfigurator(studio_);
+      return new MAARSSegConfigurator(studio_, parameters_);
    }
 
    @Override
    public ProcessorFactory createFactory(PropertyMap propertyMap) {
-      return new MAARSSegFactory(studio_);
+      return new MAARSSegFactory(studio_, parameters_);
    }
 
    @Override

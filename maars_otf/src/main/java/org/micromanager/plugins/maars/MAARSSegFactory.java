@@ -1,5 +1,6 @@
 package org.micromanager.plugins.maars;
 
+import maars.main.MaarsParameters;
 import org.micromanager.Studio;
 import org.micromanager.data.Processor;
 import org.micromanager.data.ProcessorFactory;
@@ -9,11 +10,13 @@ import org.micromanager.data.ProcessorFactory;
  */
 public class MAARSSegFactory implements ProcessorFactory{
    Studio studio_;
-   public MAARSSegFactory(Studio studio){
+   MaarsParameters parameters_;
+   public MAARSSegFactory(Studio studio, MaarsParameters parameters){
       studio_ = studio;
+      parameters_ = parameters;
    }
    @Override
    public Processor createProcessor() {
-      return new MAARSSeg();
+      return new MAARSSeg(parameters_);
    }
 }

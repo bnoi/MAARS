@@ -17,10 +17,7 @@ import maars.utils.ImgUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -426,5 +423,21 @@ public class Maars_Interface {
       System.setErr(curr_err);
       System.setOut(curr_out);
       soc.reset();
+   }
+
+   public static MaarsParameters loadParameters(){
+      String configFileName = "maars_config.xml";
+      InputStream inStream = null;
+      if (FileUtils.exists(configFileName)) {
+         try {
+            inStream = new FileInputStream(configFileName);
+         } catch (FileNotFoundException e) {
+            IOUtils.printErrorToIJLog(e);
+         }
+
+      } else {
+         inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
+      }
+      return new MaarsParameters(inStream);
    }
 }

@@ -37,21 +37,14 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
    private JCheckBox skipSegChBox;
    private JButton okBut;
 
-   public MaarsSegmentationDialog(){
-      InputStream inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
-      parameters_ = new MaarsParameters(inStream);
-      createSegmentationDialog(parameters_, null);
-   }
-
    public MaarsSegmentationDialog(final MaarsParameters parameters, JFrame maarsMainFrame){
       super(maarsMainFrame);
-      createSegmentationDialog(parameters, maarsMainFrame);
+      createSegmentationDialog(parameters);
    }
    /**
-    * @param maarsMainFrame main frame
     * @param parameters     default parameters (which are going to be displayed)
     */
-   public void createSegmentationDialog(final MaarsParameters parameters, JFrame maarsMainFrame) {
+   public void createSegmentationDialog(final MaarsParameters parameters) {
       parameters_ = parameters;
       setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
       setModalityType(ModalityType.DOCUMENT_MODAL);

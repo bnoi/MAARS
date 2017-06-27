@@ -1,6 +1,7 @@
 package org.micromanager.plugins.maars;
 
 import maars.gui.MaarsSegmentationDialog;
+import maars.main.MaarsParameters;
 import org.micromanager.PropertyMap;
 import org.micromanager.Studio;
 import org.micromanager.data.ProcessorConfigurator;
@@ -11,14 +12,16 @@ import org.micromanager.data.ProcessorConfigurator;
 public class MAARSSegConfigurator implements ProcessorConfigurator {
    MaarsSegmentationDialog dialog;
    Studio studio_;
+   MaarsParameters parameters_;
 
-   public MAARSSegConfigurator(Studio studio){
+   public MAARSSegConfigurator(Studio studio, MaarsParameters parameters){
       studio_ = studio;
+      parameters_ = parameters;
    }
 
    @Override
    public void showGUI() {
-      dialog = new MaarsSegmentationDialog();
+      dialog = new MaarsSegmentationDialog(parameters_, null);
    }
 
    @Override

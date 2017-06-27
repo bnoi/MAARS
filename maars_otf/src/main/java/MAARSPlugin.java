@@ -58,20 +58,7 @@ public class MAARSPlugin implements org.micromanager.MenuPlugin, SciJavaPlugin {
 
    @Override
    public void onPluginSelected() {
-      String configFileName = "maars_config.xml";
-      InputStream inStream = null;
-      if (FileUtils.exists(configFileName)) {
-         try {
-            inStream = new FileInputStream(configFileName);
-         } catch (FileNotFoundException e) {
-            IOUtils.printErrorToIJLog(e);
-         }
-
-      } else {
-         inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
-      }
-      MaarsParameters parameters = new MaarsParameters(inStream);
-      new MaarsMainDialog(mmStudio, parameters);
+      new MaarsMainDialog(mmStudio, Maars_Interface.loadParameters());
       Maars_Interface.copyDeps();
    }
 }
