@@ -64,12 +64,6 @@ public class GuiFreeRun implements PlugIn {
       return loadMaarsParameters(configFileName, null);
    }
 
-   static void executeAnalysis(MaarsParameters parameters) {
-      ExecutorService es = Executors.newSingleThreadExecutor();
-      es.execute(new MAARSNoAcq(parameters));
-      es.shutdown();
-   }
-
    private static void createDialog(){
       JDialog dialog = new JDialog();
       dialog.setMinimumSize(new Dimension(400,300));

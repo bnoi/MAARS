@@ -316,7 +316,7 @@ public class MAARS implements Runnable {
                if (IJ.isWindows()) {
                   savingPath = FileUtils.convertPathToLinuxType(segPath);
                }
-               Maars_Interface.analyzeMitosisDynamic(soc, parameters, savingPath + File.separator, pos);
+               Maars_Interface.analyzeMitosisDynamic(soc, parameters);
             }
             ReportingUtils.logMessage("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                   + " sec for writing results");

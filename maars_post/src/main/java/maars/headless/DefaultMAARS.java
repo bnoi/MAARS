@@ -30,7 +30,6 @@ public class DefaultMAARS extends AbstractOp implements MAARS_headless{
       String configFileName = "maars_config.xml";
       MaarsParameters parameters = GuiFreeRun.loadMaarsParameters(configFileName, path_);
       parameters.setSavingPath(path_);
-      GuiFreeRun.executeAnalysis(parameters);
    }
 
    @Override

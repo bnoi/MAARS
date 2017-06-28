@@ -98,9 +98,11 @@ public class Maars_Interface {
       return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
    }
 
-   public static void analyzeMitosisDynamic(DefaultSetOfCells soc, MaarsParameters parameters, String pathToRoot, String pos) {
+   public static void analyzeMitosisDynamic(DefaultSetOfCells soc, MaarsParameters parameters) {
       // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
+      String pos = soc.getPosLabel();
+      String pathToRoot = parameters.getSavingPath() + File.separator;
       String mitoDir = pathToRoot + MITODIRNAME + File.separator + pos + File.separator;
       FileUtils.createFolder(mitoDir);
       String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
@@ -412,8 +414,7 @@ public class Maars_Interface {
                IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                      + " sec for writing results");
                if (parameters.useDynamic()) {
-                  Maars_Interface.analyzeMitosisDynamic(soc, parameters,
-                        rootDir + File.separator, posNb);
+                  Maars_Interface.analyzeMitosisDynamic(soc, parameters);
                }
             }
          }
