@@ -83,6 +83,12 @@ def set_attributes_from_cmd_line():
     parser.add_argument("pos",
                         help="position name",
                         type=str)
+    parser.add_argument("bf_Prefix",
+                        help="bright field prefix",
+                        type=str)
+    parser.add_argument("fluo_Prefix",
+                        help="fluo field prefix",
+                        type=str)
     parser.add_argument("-minimumPeriod",
                         help="minimum time segment to be analyzed",
                         type=int, default=200)
@@ -226,11 +232,13 @@ if __name__ == '__main__':
     minimumPeriod = args.minimumPeriod
     acq_interval = args.acq_interval
     pos = args.pos
+    bfprefix = args.bf_Prefix
+    fluoprefix = args.fluo_Prefix
 
     # user won't need to change
     mitosis_suffix = "Mitosis" + path.sep
-    fluo_suffix = "FluoAnalysis" + path.sep
-    seg_suffix = "SegAnalysis" + path.sep
+    fluo = fluoprefix + "_FluoAnalysis" + path.sep
+    seg = bfprefix + "_SegAnalysis" + path.sep
     posPrefix = path.sep + pos + path.sep
     cropImgs = "croppedImgs"
     spots = "spots"
@@ -238,13 +246,13 @@ if __name__ == '__main__':
     features = "features"
     mitosisDir = baseDir + mitosis_suffix + posPrefix
     mitosisFigDir = mitosisDir + figs + path.sep
-    fluoDir = baseDir + fluo_suffix + posPrefix
+    fluoDir = baseDir + fluo + posPrefix
     features_dir = fluoDir + features
     minSegLen = int(minimumPeriod / acq_interval)
 
     # -----------------------------------run the analysis-----------------------------------#
     pool = mp.Pool(mp.cpu_count())
-    cellRois = pd.DataFrame.from_csv(baseDir + path.sep + seg_suffix +posPrefix + 'Results.csv')
+    cellRois = pd.DataFrame.from_csv(baseDir + path.sep + seg +posPrefix + 'Results.csv')
     createOutputDirs(mitosisDir, cropImgs, spots, features, figs)
     cellNbs = getAllCellNumbers(features_dir)
     tasks = []

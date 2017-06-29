@@ -3,6 +3,7 @@ package maars.headless;
 import ij.IJ;
 import ij.ImageJ;
 import ij.plugin.PlugIn;
+import loci.plugins.LociImporter;
 import maars.gui.MaarsFluoAnalysisDialog;
 import maars.gui.MaarsSegmentationDialog;
 import maars.io.IOUtils;
@@ -12,13 +13,8 @@ import maars.utils.FileUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * The main of MAARS without GUI configuration of MAARS parameters
@@ -60,10 +56,6 @@ public class GuiFreeRun implements PlugIn {
       }
    }
 
-   private static MaarsParameters loadMaarsParameters(String configFileName) {
-      return loadMaarsParameters(configFileName, null);
-   }
-
    private static void createDialog(){
       JDialog dialog = new JDialog();
       dialog.setMinimumSize(new Dimension(400,300));
@@ -72,7 +64,7 @@ public class GuiFreeRun implements PlugIn {
       String[] methods = new String[]{"Segmentation", "FluoAnalysis"};
       JComboBox<String> methdoComBox = new JComboBox<>(methods);
       dialog.add(methdoComBox);
-      dialog.add(new JLabel("MAARS config file name"));
+      dialog.add(new JLabel("Path to MAARS config file"));
       JFormattedTextField maarConfigTf = new JFormattedTextField(String.class);
       maarConfigTf.setText("maars_config.xml");
       dialog.add(maarConfigTf);
@@ -119,7 +111,7 @@ public class GuiFreeRun implements PlugIn {
       JButton validBut = new JButton("validate");
       validBut.addActionListener(o4->{
          for (JTextField tf:pathToFolderTfs) {
-            if (!validateMaarsDir(tf.getText(), maarConfigTf.getText())) {
+            if (!isOkToProcess(tf.getText(), maarConfigTf.getText())) {
                okbut.setEnabled(false);
                tf.setForeground(Color.RED);
                tf.validate();
@@ -142,17 +134,53 @@ public class GuiFreeRun implements PlugIn {
          if (!validatePaths(pathToFolderTfs, maarConfigTf.getText())){
             IJ.error("Invalid MAARS folder.");
          }else{
+            int selection = 0;
+            MaarsParameters parameters = null;
+            if (methdoComBox.getSelectedIndex() == 1) {
+               selection = 1;
+            }else if(methdoComBox.getSelectedIndex() == 2){
+               selection = 2;
+            } else{
+               try {
+                  parameters = new MaarsParameters(
+                        new FileInputStream(maarConfigTf.getText()));
+               } catch (FileNotFoundException e) {
+                  e.printStackTrace();
+               }
+            }
             for (JTextField tf:pathToFolderTfs) {
-               MaarsParameters parameters = loadMaarsParameters(maarConfigTf.getText(), tf.getText());
-               parameters.setSavingPath(tf.getText());
+               String currentFolder = tf.getText();
+               String[] split = currentFolder.split("/");
+               int endIndex = currentFolder.lastIndexOf("/");
+               String savingRoot = null;
+               if (endIndex != -1) {
+                  savingRoot = currentFolder.substring(0, endIndex); // not forgot to put check if(endIndex != -1)
+               }
+               if (parameters==null) {
+                  try {
+                     parameters = new MaarsParameters(
+                           new FileInputStream(savingRoot + File.separator + MaarsParameters.DEFAULT_CONFIG_NAME));
+                  } catch (FileNotFoundException e) {
+                     e.printStackTrace();
+                  }
+               }
+               parameters.setSavingPath(savingRoot);
+               if (selection==0){
+                  parameters.setSegmentationParameter(MaarsParameters.SEG_PREFIX, split[split.length-1]);
+                  parameters.save(savingRoot);
+               } else if (selection==1){
+                  parameters.setFluoParameter(MaarsParameters.FLUO_PREFIX, split[split.length-1]);
+                  parameters.save(savingRoot);
+               }
                String[] imgNames = Maars_Interface.getBfImgs(parameters);
                String[] posNbs = Maars_Interface.getPosNbs(imgNames);
-               if (methdoComBox.getSelectedIndex() == 0) {
+
+               if (selection==0) {
                   Maars_Interface.post_segmentation(parameters, imgNames, posNbs);
-               }else{
-                  Maars_Interface.post_fluoAnalysis(posNbs, tf.getText(), parameters);
+               }else if(selection == 1){
+                  Maars_Interface.post_fluoAnalysis(posNbs, parameters);
                }
-               IJ.showMessage(methods[methdoComBox.getSelectedIndex()] + " done");
+//               IJ.showMessage(methods[methdoComBox.getSelectedIndex()] + " done");
             }
          }
       });
@@ -162,7 +190,7 @@ public class GuiFreeRun implements PlugIn {
 
    static boolean validatePaths(ArrayList<JTextField> listTfs, String configName){
       for (JTextField tf : listTfs){
-         if (!validateMaarsDir(tf.getText(), configName)){
+         if (!isOkToProcess(tf.getText(), configName)){
             tf.setForeground(Color.RED);
             tf.validate();
             return false;
@@ -174,16 +202,20 @@ public class GuiFreeRun implements PlugIn {
       return true;
    }
 
-   static boolean validateMaarsDir(String path, String configName){
-      String root = path + File.separator;
-      return FileUtils.exists(path) && FileUtils.exists(root + configName) &&
-            FileUtils.exists(root  + Maars_Interface.SEG) && FileUtils.exists(root  + Maars_Interface.FLUO);
+   static boolean isOkToProcess(String tiffFolder, String configName){
+      return FileUtils.exists(tiffFolder) && FileUtils.exists(configName) && FileUtils.containsTiffFile(tiffFolder);
    }
 
    public static void main(String[] args) {
       new ImageJ();
-      Maars_Interface.copyDeps();
-      createDialog();
+      String cmd = "open=/media/tong/data_claire/Tempombe/18C/102/18C_102_4/FLUO_1/18C_9_MMStack_849_3.ome.tif " +
+            "autoscale color_mode=Default rois_import=[ROI manager] split_channels view=Hyperstack stack_order=XYCZT";
+      LociImporter importer = new LociImporter();
+      importer.run(cmd);
+//      IJ.run("Bio-Formats Importer",
+//            "check_for_upgrades open=/media/tong/data_claire/Tempombe/18C/102/18C_102_4/FLUO_1/18C_9_MMStack_102_1.ome.tif autoscale color_mode=Default rois_import=[ROI manager] split_channels view=Hyperstack stack_order=XYCZT series_1");
+//      Maars_Interface.copyDeps();
+//      createDialog();
 
 
 //      //executeAnalysis(fluoAnalysisDialog.getParameters());

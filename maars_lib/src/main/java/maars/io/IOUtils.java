@@ -5,7 +5,6 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import maars.agents.Cell;
 import maars.agents.DefaultSetOfCells;
-import maars.agents.SetOfCells;
 import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
@@ -66,9 +65,9 @@ public class IOUtils {
    }
 
    public static void saveAll(DefaultSetOfCells soc, ImagePlus mergedImg, String pathToDir,
-                              Boolean useDynamic, ArrayList<String> arrayChannels, String posNb) {
+                              Boolean useDynamic, ArrayList<String> arrayChannels, String posNb, String prefix) {
       IJ.log("Saving information of each cell on disk");
-      String dest = pathToDir + Maars_Interface.FLUOANALYSISDIR + posNb + File.separator;
+      String dest = pathToDir + prefix + Maars_Interface.FLUOANALYSIS_SUFFIX + posNb + File.separator;
       FileUtils.createFolder(dest);
       MAARSSpotsSaver spotSaver = new MAARSSpotsSaver(dest);
       MAARSGeometrySaver geoSaver = new MAARSGeometrySaver(dest);

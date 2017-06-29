@@ -113,23 +113,14 @@ public class FileUtils {
       FileUtils.writeScript(folderPath + scriptName, script);
    }
 
-   public static String getShortestTiffName(String path2Folder) {
-      File folder = new File(path2Folder);
-      File[] listOfFiles = folder.listFiles();
-      String shortestTifName = null;
-      int minTifNameLength = Integer.MAX_VALUE;
-      for (int i = 0; i < listOfFiles.length; i++) {
-         if (listOfFiles[i].isFile()) {
-            String currentTifName = listOfFiles[i].getName();
-            if (currentTifName.endsWith("tif") || currentTifName.endsWith("tiff")) {
-               if (currentTifName.length() < minTifNameLength) {
-                  shortestTifName = currentTifName;
-                  minTifNameLength = currentTifName.length();
-               }
-            }
+   public static boolean containsTiffFile(String path){
+      boolean hasTiffFile = false;
+      for (String f : new File(path).list()){
+         if (f.endsWith(".tiff") || f.endsWith(".tif")){
+            hasTiffFile = true;
          }
       }
-      return shortestTifName;
+      return hasTiffFile;
    }
 
    public static ArrayList<String> getTiffWithPattern(String path, String pattern) {

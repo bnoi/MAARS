@@ -60,9 +60,9 @@
 
         <dependency>
             <groupId>ome</groupId>
-            <artifactId>formats_api</artifactId>
-            <!--<version>5.5.2</version>-->
-            <scope>runtime</scope>
+            <artifactId>formats-api</artifactId>
+            <version>5.5.2</version>
+            <!--<scope>runtime</scope>-->
         </dependency>
 
         <dependency>

@@ -29,11 +29,9 @@ import java.util.stream.Stream;
  * Created by tongli on 09/06/2017.
  */
 public class Maars_Interface {
-   public static final String SEG = "SegImgStacks";
-   public static final String FLUO = "FluoImgStacks";
    public static final String MITODIRNAME = "Mitosis";
    public final static String SEGANALYSIS_SUFFIX = "_SegAnalysis" + File.separator;
-   public final static String FLUOANALYSISDIR = "FluoAnalysis" + File.separator;
+   public final static String FLUOANALYSIS_SUFFIX = "_FluoAnalysis" + File.separator;
    /**
     * @param tasksSet tasks to be terminated
     */
@@ -108,7 +106,8 @@ public class Maars_Interface {
       String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToRoot, parameters.getDetectionChForMitosis(),
             parameters.getCalibration(), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
-            pos, "-minimumPeriod", parameters.getMinimumMitosisDuration()};
+            pos, parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX),
+            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX), "-minimumPeriod", parameters.getMinimumMitosisDuration()};
       PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
       HashMap map = getMitoticCellNbs(mitoDir);
       String[] colocalisation_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
@@ -230,14 +229,14 @@ public class Maars_Interface {
    }
 
    private static ImagePlus loadImgOfPosition(String pathToFluoImgsDir, String pos) {
-      File folder = new File(pathToFluoImgsDir);
-      File[] listOfFiles = folder.listFiles();
+      File[] listOfFiles = new File(pathToFluoImgsDir).listFiles();
       String fluoTiffName = null;
       for (File f:listOfFiles){
          if (Pattern.matches(".*_MMStack_"+pos+"\\..*", f.getName())){
             fluoTiffName = f.getName();
          }
       }
+      IJ.log(fluoTiffName);
       IJ.run("TIFF Virtual Stack...", "open=" + pathToFluoImgsDir + File.separator + fluoTiffName);
       ImagePlus im = IJ.getImage();
       String infoProperties = im.getInfoProperty();
@@ -255,7 +254,6 @@ public class Maars_Interface {
                                               MaarsParameters parameters, DefaultSetOfCells soc, SOCVisualizer socVisualizer,
                                               CopyOnWriteArrayList<Map<String, Future>> tasksSet, AtomicBoolean stop) {
       ImagePlus concatenatedFluoImgs = loadImgOfPosition(pathToFluoImgsDir, pos);
-
       JSONObject jsonObject = null;
       try {
          jsonObject = new JSONObject(concatenatedFluoImgs.getInfoProperty());
@@ -311,7 +309,8 @@ public class Maars_Interface {
    }
 
    public static String[] getBfImgs(MaarsParameters parameters){
-      String segImgsDir = FileUtils.convertPath(parameters.getSavingPath() + File.separator + Maars_Interface.SEG + File.separator);
+      String segImgsDir = FileUtils.convertPath(parameters.getSavingPath() + File.separator +
+            parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + File.separator);
       ArrayList<String> names = FileUtils.getTiffWithPattern(segImgsDir, ".*_MMStack_.*.ome.tif");
       return names.toArray(new String[names.size()]);
    }
@@ -343,10 +342,8 @@ public class Maars_Interface {
       ImagePlus segImg = null;
       for (int i=0; i< imgNames.length;i++){
          try {
-            segImg = IJ.openImage(FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
-                        Maars_Interface.SEG + File.separator + imgNames[i]);
-            System.out.println(FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
-                  Maars_Interface.SEG + File.separator + imgNames[i]);
+            segImg = IJ.openImage(FileUtils.convertPath(parameters.getSavingPath() + File.separator +
+                  parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + File.separator) + imgNames[i]);
             parameters.setCalibration(String.valueOf(segImg.getCalibration().pixelWidth));
          } catch (Exception e) {
             IOUtils.printErrorToIJLog(e);
@@ -361,17 +358,18 @@ public class Maars_Interface {
 //      }
    }
 
-   public static void post_fluoAnalysis(String[] posNbs, String rootDir, MaarsParameters parameters) {
+   public static void post_fluoAnalysis(String[] posNbs, MaarsParameters parameters) {
       AtomicBoolean stop = new AtomicBoolean(false);
       PrintStream curr_err = null;
       PrintStream curr_out = null;
       DefaultSetOfCells soc = null;
-      String fluoImgsDir = FileUtils.convertPath(rootDir + File.separator + Maars_Interface.FLUO + File.separator);
-      String segAnaDirPrefix = rootDir + File.separator + parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX)
+      String fluoImgsDir = FileUtils.convertPath(parameters.getSavingPath() + File.separator +
+            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX) + File.separator);
+      String segAnaDir = parameters.getSavingPath() + File.separator + parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX)
             + Maars_Interface.SEGANALYSIS_SUFFIX;
       for (String posNb:posNbs) {
          soc = new DefaultSetOfCells(posNb);
-         String currentPosPrefix = segAnaDirPrefix + posNb + File.separator;
+         String currentPosPrefix = segAnaDir + posNb + File.separator;
          String currentZipPath = currentPosPrefix + "ROI.zip";
          if (FileUtils.exists(currentZipPath)) {
             // from Roi.zip initialize a set of cell
@@ -382,7 +380,7 @@ public class Maars_Interface {
             soc.addRoiMeasurementIntoCells(rt);
             // ----------------start acquisition and analysis --------//
             try {
-               PrintStream ps = new PrintStream(rootDir + File.separator + "FluoAnalysis.LOG");
+               PrintStream ps = new PrintStream(parameters.getSavingPath() + File.separator + "FluoAnalysis.LOG");
                curr_err = System.err;
                curr_out = System.err;
                System.setOut(ps);
@@ -391,10 +389,10 @@ public class Maars_Interface {
                IOUtils.printErrorToIJLog(e);
             }
 
-            String fluoTiffName = FileUtils.getShortestTiffName(fluoImgsDir);
+            boolean containsTiffFile = FileUtils.containsTiffFile(fluoImgsDir);
             CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
             ImagePlus concatenatedFluoImgs;
-            if (fluoTiffName != null) {
+            if (containsTiffFile) {
                concatenatedFluoImgs = processStackedImg(fluoImgsDir, posNb,
                      parameters, soc, null, tasksSet, stop);
             } else {
@@ -408,9 +406,10 @@ public class Maars_Interface {
                long startWriting = System.currentTimeMillis();
                ArrayList<String> arrayChannels = new ArrayList<>();
                Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
-               FileUtils.createFolder(rootDir + File.separator + Maars_Interface.FLUOANALYSISDIR);
-               IOUtils.saveAll(soc, concatenatedFluoImgs, rootDir + File.separator, parameters.useDynamic(),
-                     arrayChannels, posNb);
+               FileUtils.createFolder(parameters.getSavingPath() + File.separator + parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX)
+               +Maars_Interface.FLUOANALYSIS_SUFFIX);
+               IOUtils.saveAll(soc, concatenatedFluoImgs, parameters.getSavingPath() + File.separator, parameters.useDynamic(),
+                     arrayChannels, posNb, parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX));
                IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                      + " sec for writing results");
                if (parameters.useDynamic()) {

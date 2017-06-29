@@ -9,6 +9,10 @@
         <version>1.0.0</version>
     </parent>
 
+    <properties>
+        <scijava.jvm.version>1.8</scijava.jvm.version>
+    </properties>
+
     <packaging>jar</packaging>
     <artifactId>maars_bfSeg</artifactId>
     <version>1.0-SNAPSHOT</version>

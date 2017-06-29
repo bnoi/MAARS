@@ -108,6 +108,7 @@ public class MaarsParameters {
    public static final String PATH_TO_BF_ACQ_SETTING = "PATH_TO_BF_ACQ_SETTING";
    public static final String PATH_TO_FLUO_ACQ_SETTING = "PATH_TO_FLUO_ACQ_SETTING";
    public static final String SEG_PREFIX = "SEG_PREFIX";
+   public static final String FLUO_PREFIX = "FLUO_PREFIX";
    static final String SIGMA = "SIGMA";
    static final String NEW_MAX_WIDTH_FOR_CHANGE_SCALE = "NEW_MAX_WIDTH_FOR_CHANGE_SCALE";
    static final String NEW_MAX_HEIGTH_FOR_CHANGE_SCALE = "NEW_MAX_HEIGTH_FOR_CHANGE_SCALE";
@@ -130,7 +131,7 @@ public class MaarsParameters {
    public static final String FOCUS= "FOCUS";
    public static final String DIRECTION = "DIRECTION";
    public static final String DEPS_DIR = IJ.getDirectory("plugins") + "MAARS_deps"+ File.separator;
-
+   public static final String DEFAULT_CONFIG_NAME = "maars_config.xml";
    private Document doc;
    private Element root;
 
@@ -225,7 +226,7 @@ public class MaarsParameters {
       doc.setContent(root);
       XMLOutputter xmlOutput = new XMLOutputter();
       xmlOutput.setFormat(Format.getPrettyFormat());
-      xmlOutput.output(doc, new FileWriter("maars_config.xml"));
+      xmlOutput.output(doc, new FileWriter(DEFAULT_CONFIG_NAME));
    }
 
    /**
@@ -238,7 +239,7 @@ public class MaarsParameters {
       XMLOutputter xmlOutput = new XMLOutputter();
       xmlOutput.setFormat(Format.getPrettyFormat());
       try {
-         xmlOutput.output(doc, new FileWriter(path + File.separator + "maars_config.xml"));
+         xmlOutput.output(doc, new FileWriter(path + File.separator + DEFAULT_CONFIG_NAME));
       } catch (IOException e) {
          e.printStackTrace();
       }

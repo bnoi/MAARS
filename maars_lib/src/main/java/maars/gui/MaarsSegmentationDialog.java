@@ -140,9 +140,10 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
       testSegBut.addActionListener(actionEvent -> {
          updateMAARSParamters();
          MaarsParameters parameters_dup = parameters.duplicate();
-         parameters_dup.setSavingPath(parameters.getSavingPath() + File.separator + Maars_Interface.SEG);
+         parameters_dup.setSavingPath(parameters.getSavingPath() + File.separator +
+               parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + Maars_Interface.SEGANALYSIS_SUFFIX);
          // --------------------------segmentation-----------------------------//
-         new Thread(new MaarsSegmentation(parameters_dup, IJ.getImage(), "0")).start();
+         new Thread(new MaarsSegmentation(parameters_dup, IJ.getImage(), "test")).start();
       });
 
       //
