@@ -1,4 +1,4 @@
-package org.micromanager.plugins.maars;
+package org.micromanager.plugins.maars.segmentation;
 
 import maars.gui.MaarsSegmentationDialog;
 import maars.main.MaarsParameters;

@@ -1,4 +1,4 @@
-package org.micromanager.plugins.maars;
+package org.micromanager.plugins.maars.segmentation;
 
 import maars.main.MaarsParameters;
 import maars.main.Maars_Interface;
@@ -17,9 +17,24 @@ import org.scijava.plugin.SciJavaPlugin;
 public class MAARSSegPlugin implements ProcessorPlugin, SciJavaPlugin{
    Studio studio_;
    MaarsParameters parameters_ = Maars_Interface.loadParameters();
+   static final String pluginName = "MAARS Seg";
 
    @Override
    public ProcessorConfigurator createConfigurator(PropertyMap propertyMap) {
+      PropertyMap.PropertyMapBuilder maarsBuilder = studio_.data().getPropertyMapBuilder();
+      maarsBuilder = maarsBuilder.putDouble(MaarsParameters.MAXIMUM_CELL_AREA,
+            Double.parseDouble(parameters_.getSegmentationParameter(MaarsParameters.MAXIMUM_CELL_AREA)));
+      maarsBuilder = maarsBuilder.putDouble(MaarsParameters.MINIMUM_CELL_AREA,
+            );
+      maarsBuilder = maarsBuilder.putBoolean(MaarsParameters.FILTER_MEAN_GREY_VALUE,
+            );
+      maarsBuilder = maarsBuilder.putInt(MaarsParameters.MEAN_GREY_VALUE,
+            );
+      maarsBuilder = maarsBuilder.putBoolean(MaarsParameters.FILTER_SOLIDITY,
+            );
+      maarsBuilder = maarsBuilder.putInt(MaarsParameters.SOLIDITY,
+            );
+      studio_.profile().insertProperties(MAARSSegPlugin.class, maarsBuilder.build());
       return new MAARSSegConfigurator(studio_, parameters_);
    }
 
@@ -35,7 +50,7 @@ public class MAARSSegPlugin implements ProcessorPlugin, SciJavaPlugin{
 
    @Override
    public String getName() {
-      return "MAARS Seg";
+      return pluginName;
    }
 
    @Override

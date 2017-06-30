@@ -1,11 +1,9 @@
-package org.micromanager.plugins.maars;
+package org.micromanager.plugins.maars.segmentation;
 
 import maars.main.MaarsParameters;
 import org.micromanager.Studio;
 import org.micromanager.data.Processor;
 import org.micromanager.data.ProcessorFactory;
-
-import java.io.File;
 
 /**
  * Created by tong on 26/06/17.

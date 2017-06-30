@@ -1,10 +1,8 @@
-package org.micromanager.plugins.maars;
+package org.micromanager.plugins.maars.segmentation;
 
-import ij.IJ;
 import ij.ImagePlus;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
-import maars.main.Maars_Interface;
 import maars.mmUtils.ImgUtils;
 import org.json.JSONException;
 import org.micromanager.data.Image;
@@ -12,8 +10,6 @@ import org.micromanager.data.Processor;
 import org.micromanager.data.ProcessorContext;
 import org.micromanager.internal.MMStudio;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
