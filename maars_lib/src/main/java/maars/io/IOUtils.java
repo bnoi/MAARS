@@ -74,6 +74,8 @@ public class IOUtils {
       MAARSImgSaver imgSaver = new MAARSImgSaver(dest);
 //        TODO
       CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
+      ImagePlus croppedImg;
+      Duplicator duplicator = new Duplicator();
       for (int i : cellIndex) {
          Cell cell = soc.getCell(i);
 //        for (Cell cell : soc){
@@ -81,7 +83,7 @@ public class IOUtils {
          spotSaver.save(cell);
          mergedImg.setRoi(cell.getCellShapeRoi());
          for (int j = 1; j <= mergedImg.getNChannels(); j++) {
-            ImagePlus croppedImg = new Duplicator().run(mergedImg, j, j, 1, mergedImg.getNSlices(),
+            croppedImg = duplicator.run(mergedImg, j, j, 1, mergedImg.getNSlices(),
                   1, mergedImg.getNFrames());
             IJ.run(croppedImg, "Grays", "");
             croppedImg.setRoi(ImgUtils.centerCroppedRoi(cell.getCellShapeRoi()));
@@ -91,5 +93,6 @@ public class IOUtils {
       if (useDynamic) {
          IOUtils.serializeSoc(dest, soc);
       }
+      mergedImg.hide();
    }
 }

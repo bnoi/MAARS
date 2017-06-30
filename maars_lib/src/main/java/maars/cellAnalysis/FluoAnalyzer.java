@@ -118,7 +118,6 @@ public class FluoAnalyzer implements Runnable {
       }
       fluoImage = null;
       model = null;
-      System.gc();
    }
 
    //private class for analysing cells

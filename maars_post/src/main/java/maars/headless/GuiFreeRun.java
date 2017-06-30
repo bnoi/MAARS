@@ -2,6 +2,7 @@ package maars.headless;
 
 import ij.IJ;
 import ij.ImageJ;
+import ij.ImagePlus;
 import ij.plugin.PlugIn;
 import loci.plugins.LociImporter;
 import maars.gui.MaarsFluoAnalysisDialog;
@@ -15,12 +16,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * The main of MAARS without GUI configuration of MAARS parameters
  * Created by tongli on 28/04/2017.
  */
-public class GuiFreeRun implements PlugIn {
+public class GuiFreeRun implements PlugIn, Runnable {
    public static MaarsParameters loadMaarsParameters(String configFileName, String rootDir) {
       if (rootDir == null) {
          JFileChooser chooser = new JFileChooser();
@@ -148,7 +153,9 @@ public class GuiFreeRun implements PlugIn {
                   e.printStackTrace();
                }
             }
+            ExecutorService es = Executors.newSingleThreadExecutor();
             for (JTextField tf:pathToFolderTfs) {
+
                String currentFolder = tf.getText();
                String[] split = currentFolder.split("/");
                int endIndex = currentFolder.lastIndexOf("/");
@@ -178,10 +185,11 @@ public class GuiFreeRun implements PlugIn {
                if (selection==0) {
                   Maars_Interface.post_segmentation(parameters, imgNames, posNbs);
                }else if(selection == 1){
-                  Maars_Interface.post_fluoAnalysis(posNbs, parameters);
+                  es.execute(new PostFluoAnalysis(posNbs, parameters));
                }
 //               IJ.showMessage(methods[methdoComBox.getSelectedIndex()] + " done");
             }
+            es.shutdown();
          }
       });
       dialog.add(okbut);
@@ -208,14 +216,12 @@ public class GuiFreeRun implements PlugIn {
 
    public static void main(String[] args) {
       new ImageJ();
-      String cmd = "open=/media/tong/data_claire/Tempombe/18C/102/18C_102_4/FLUO_1/18C_9_MMStack_849_3.ome.tif " +
-            "autoscale color_mode=Default rois_import=[ROI manager] split_channels view=Hyperstack stack_order=XYCZT";
-      LociImporter importer = new LociImporter();
-      importer.run(cmd);
-//      IJ.run("Bio-Formats Importer",
-//            "check_for_upgrades open=/media/tong/data_claire/Tempombe/18C/102/18C_102_4/FLUO_1/18C_9_MMStack_102_1.ome.tif autoscale color_mode=Default rois_import=[ROI manager] split_channels view=Hyperstack stack_order=XYCZT series_1");
-//      Maars_Interface.copyDeps();
-//      createDialog();
+//      String cmd = "open=/media/tong/data_claire/Tempombe/18C/102/18C_102_4/FLUO_1/18C_9_MMStack_849_3.ome.tif " +
+//            "autoscale color_mode=Default rois_import=[ROI manager] split_channels view=Hyperstack stack_order=XYCZT";
+//      LociImporter importer = new LociImporter();
+//      importer.run(cmd);
+      Maars_Interface.copyDeps();
+      new Thread(new GuiFreeRun()).start();
 
 
 //      //executeAnalysis(fluoAnalysisDialog.getParameters());
@@ -349,5 +355,11 @@ public class GuiFreeRun implements PlugIn {
 //            e.printStackTrace();
 //        }
 //        System.out.println(pl.getPosition(0).getX());
+   }
+
+   @Override
+   public void run() {
+      Maars_Interface.copyDeps();
+      createDialog();
    }
 }
