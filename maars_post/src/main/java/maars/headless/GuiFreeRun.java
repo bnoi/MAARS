@@ -179,13 +179,10 @@ public class GuiFreeRun implements PlugIn, Runnable {
                   parameters.setFluoParameter(MaarsParameters.FLUO_PREFIX, split[split.length-1]);
                   parameters.save(savingRoot);
                }
-               String[] imgNames = Maars_Interface.getBfImgs(parameters);
-               String[] posNbs = Maars_Interface.getPosNbs(imgNames);
-
                if (selection==0) {
-                  Maars_Interface.post_segmentation(parameters, imgNames, posNbs);
+                  Maars_Interface.post_segmentation(parameters);
                }else if(selection == 1){
-                  es.execute(new PostFluoAnalysis(posNbs, parameters));
+                  es.execute(new PostFluoAnalysis(parameters));
                }
 //               IJ.showMessage(methods[methdoComBox.getSelectedIndex()] + " done");
             }

@@ -76,14 +76,7 @@ public class FluoAnalyzer implements Runnable {
       if (fluoImage.getCalibration().getUnit().equals("cm")) {
          fluoImage = ImgUtils.unitCmToMicron(fluoImage);
       }
-      // TODO projection or not
-      ImagePlus zProjectedFluoImg;
-      if (fluoImage.getImageStackSize() == 1) {
-         zProjectedFluoImg = fluoImage;
-      } else {
-         zProjectedFluoImg = ImgUtils.zProject(fluoImage, fluoImage.getCalibration());
-         zProjectedFluoImg.setTitle(fluoImage.getTitle() + "_" + channel + "_projected");
-      }
+      ImagePlus zProjectedFluoImg = fluoImage;
       MaarsTrackmate trackmate = new MaarsTrackmate(zProjectedFluoImg, radius, quality);
       this.model = trackmate.doDetection();
       int nbCell = soc.size();

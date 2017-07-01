@@ -37,8 +37,9 @@ import java.util.regex.Pattern;
 public class PostFluoAnalysis implements Runnable{
    String[] posNbs_;
    MaarsParameters parameters_;
-   public PostFluoAnalysis(String[] posNbs, MaarsParameters parameters){
-      posNbs_ = posNbs;
+   public PostFluoAnalysis(MaarsParameters parameters){
+      String[] imgNames = Maars_Interface.getBfImgs(parameters);
+      posNbs_ = Maars_Interface.getPosNbs(imgNames);
       parameters_ = parameters;
    }
    @Override
@@ -47,10 +48,10 @@ public class PostFluoAnalysis implements Runnable{
       PrintStream curr_err = null;
       PrintStream curr_out = null;
       DefaultSetOfCells soc;
-      String fluoImgsDir = FileUtils.convertPath(parameters_.getSavingPath() + File.separator +
-            parameters_.getFluoParameter(MaarsParameters.FLUO_PREFIX) + File.separator);
-      String segAnaDir = parameters_.getSavingPath() + File.separator + parameters_.getSegmentationParameter(MaarsParameters.SEG_PREFIX)
-            + Maars_Interface.SEGANALYSIS_SUFFIX;
+      String fluoImgsDir = FileUtils.convertPath(parameters_.getSavingPath()) + File.separator +
+            parameters_.getFluoParameter(MaarsParameters.FLUO_PREFIX) + File.separator;
+      String segAnaDir = FileUtils.convertPath(parameters_.getSavingPath()) + File.separator +
+            parameters_.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + Maars_Interface.SEGANALYSIS_SUFFIX;
       for (String posNb:posNbs_) {
          ImagePlus concatenatedFluoImgs = null;
          soc = new DefaultSetOfCells(posNb);

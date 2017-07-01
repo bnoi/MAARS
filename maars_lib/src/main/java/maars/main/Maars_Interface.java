@@ -160,10 +160,6 @@ public class Maars_Interface {
       segExecuter(parameters, imgNames, posNbs);
    }
 
-   public static void post_segmentation(MaarsParameters parameters, String[] imgNames, String[] posNbs){
-      segExecuter(parameters, imgNames, posNbs);
-   }
-
    private static void segExecuter(MaarsParameters parameters, String[] imgNames, String[] posNbs) {
       ExecutorService es = Executors.newSingleThreadExecutor();
       ImagePlus segImg = null;

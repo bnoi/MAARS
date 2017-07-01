@@ -53,22 +53,8 @@
 
         <dependency>
             <groupId>ome</groupId>
-            <artifactId>formats-gpl</artifactId>
-            <!--<version>5.5.2</version>-->
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-api</artifactId>
-            <version>5.5.2</version>
-            <!--<scope>runtime</scope>-->
-        </dependency>
-
-        <dependency>
-            <groupId>ome</groupId>
             <artifactId>bio-formats_plugins</artifactId>
-            <!--<version>5.5.2</version>-->
+            <version>5.5.2</version>
             <scope>compile</scope>
         </dependency>
 

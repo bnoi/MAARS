@@ -1,6 +1,7 @@
 package maars.utils;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
@@ -8,11 +9,10 @@ import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
-import loci.formats.FormatException;
-import loci.plugins.BF;
+import loci.plugins.LociImporter;
 import maars.segmentPombe.SegPombeParameters;
 
-import java.io.IOException;
+import java.awt.*;
 
 
 /**
@@ -31,7 +31,7 @@ public class ImgUtils {
       ZProjector projector = new ZProjector();
       projector.setMethod(ZProjector.MAX_METHOD);
       projector.setImage(img);
-      projector.doProjection();
+      projector.doHyperStackProjection(true);
       ImagePlus projected = projector.getProjection();
       projected.setCalibration(cal);
       return projected;
@@ -282,22 +282,28 @@ public class ImgUtils {
     * @return Return an double width or height in microns.
     */
    public static double convertPixelToMicron(int pixelSize, int widthOrHeightOrDepth, SegPombeParameters parameters) {
-
       return parameters.getScale(widthOrHeightOrDepth) * pixelSize;
    }
 
-   public static ImagePlus[] importBioFormat(String path){
-      ImagePlus[] imp=null;
-      try {
-         imp = BF.openImagePlus(path);
-      } catch (FormatException | IOException e) {
-         e.printStackTrace();
-      }
-      return imp;
+   public static ImagePlus lociImport(String tiffPath){
+      LociImporter importer = new LociImporter();
+      String cmd = "open="+tiffPath+"";
+      importer.run(cmd);
+//      int ind = tiffPath.lastIndexOf("/");
+//      String tiffname = null;
+//      if (ind != -1) {
+//         tiffname = tiffPath.substring(ind+1, tiffPath.length()); // not forgot to put check if(endIndex != -1)
+//      }
+//      ind = tiffname.indexOf(".ome.tif");
+//      IJ.selectWindow(tiffname + " - " + tiffname.substring(0,ind));
+//      ImagePlus imp = IJ.getImage();
+      return IJ.getImage();
    }
 
-   public static void main(String[] s){
-      ImagePlus[] imps = importBioFormat("/media/tong/merotelyData/29C_analyses_faites/29C_849_1/FLUO_1/849_29C_2_MMStack_Pos0.ome.tif");
-      imps[0].show();
+   public static void main(String[] strs){
+      new ImageJ();
+      ImagePlus imp = lociImport("/Users/tongli/Desktop/22C_849_1/FLUO_1/22C_3_MMStack_849_1.ome.tif");
+//      IJ.log(imp.get());
+//      zProject(imp, imp.getCalibration());
    }
 }
