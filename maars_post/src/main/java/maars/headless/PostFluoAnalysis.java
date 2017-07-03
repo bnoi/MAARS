@@ -140,9 +140,9 @@ public class PostFluoAnalysis implements Runnable{
       int totalFrame = extractFromOMEmetadata(jsonObject, "time");
 //               totalPosition = (int) ((Map)map.get("IntendedDimensions")).get("position");
 
-      IJ.log("Re-stack image : channel " + totalChannel + ", slice " + totalSlice + ", frame " + totalFrame);
-      concatenatedFluoImgs = HyperStackConverter.toHyperStack(concatenatedFluoImgs, totalChannel, totalSlice, totalFrame
-            , "xyzct", "Grayscale");
+//      IJ.log("Re-stack image : channel " + totalChannel + ", slice " + totalSlice + ", frame " + totalFrame);
+//      concatenatedFluoImgs = HyperStackConverter.toHyperStack(concatenatedFluoImgs, totalChannel, totalSlice, totalFrame
+//            , "xyzct", "Grayscale");
       ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
       for (int i = 1; i <= totalFrame; i++) {
          Map<String, Future> chAnalysisTasks = new HashMap<>();
@@ -152,7 +152,7 @@ public class PostFluoAnalysis implements Runnable{
             ImagePlus zProjectedFluoImg = ImgUtils.zProject(
                   new Duplicator().run(concatenatedFluoImgs, j, j, 1, totalSlice, i, i)
                   , concatenatedFluoImgs.getCalibration());
-            Future future = es.submit(new FluoAnalyzer(zProjectedFluoImg.duplicate(), zProjectedFluoImg.getCalibration(),
+            Future future = es.submit(new FluoAnalyzer(zProjectedFluoImg, zProjectedFluoImg.getCalibration(),
                   soc, channel, Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                   Double.parseDouble(parameters.getChSpotRaius(channel)),
                   Double.parseDouble(parameters.getChQuality(channel)), i, socVisualizer,
@@ -164,12 +164,12 @@ public class PostFluoAnalysis implements Runnable{
             break;
          }
       }
+      System.gc();
+      es.shutdown();
       if (Boolean.parseBoolean(parameters.getProjected())) {
          IJ.run(concatenatedFluoImgs, "Z Project...", "projection=[Max Intensity] all");
          return (IJ.getImage());
       }
-      System.gc();
-      es.shutdown();
       return concatenatedFluoImgs;
    }
 
@@ -248,8 +248,9 @@ public class PostFluoAnalysis implements Runnable{
       IOUtils.writeToFile(pathToFluoImgsDir + File.separator + "metadata.txt", im.getProperties());
       im.close();
       String tifNameBase = fluoTiffName.split("\\.", -1)[0];
-      IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + " sort");
-      ImagePlus im2 = IJ.getImage();
+//      IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + " sort");
+//      ImagePlus im2 = IJ.getImage();
+      ImagePlus im2 = ImgUtils.lociImport(pathToFluoImgsDir);
       im2.hide();
       im2.setProperty("Info", infoProperties);
       return im2;

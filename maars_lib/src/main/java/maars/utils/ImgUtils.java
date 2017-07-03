@@ -7,8 +7,7 @@ import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.plugin.RoiScaler;
-import ij.plugin.ZProjector;
+import ij.plugin.*;
 import loci.plugins.LociImporter;
 import maars.segmentPombe.SegPombeParameters;
 
@@ -303,6 +302,7 @@ public class ImgUtils {
    public static void main(String[] strs){
       new ImageJ();
       ImagePlus imp = lociImport("/Users/tongli/Desktop/22C_849_1/FLUO_1/22C_3_MMStack_849_1.ome.tif");
+//            makeSubstack(imp,"delete slices=1-2");
 //      IJ.log(imp.get());
 //      zProject(imp, imp.getCalibration());
    }
