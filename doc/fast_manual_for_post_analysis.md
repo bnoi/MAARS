@@ -22,7 +22,8 @@ Please choose and open this and only this images in this dialog.
 
 ### Known issus
 1. There is no check to verify whether the option 3 contains fluo images or segmentation images. So if user accidentally chose to perform segmentation on fluo-images.
-The program will freeze. **In this case, Please re-launch MAARS and manually change the seg_prefix in the config file ![][seg_prefix_config] to the segmentation folder name before launching next fluo-analysis**  
+The program will freeze. **In this case, Please re-launch MAARS and manually change the seg_prefix in the config file ![][seg_prefix_config] to the segmentation folder name before launching next fluo-analysis**   
+
 [seg_prefix_config]: images/seg_prefix_config.png
 [select_images]: images/select_images.png
 [importor_params]: images/importor_configure.png
