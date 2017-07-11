@@ -22,18 +22,18 @@ public class MAARSSegPlugin implements ProcessorPlugin, SciJavaPlugin{
    @Override
    public ProcessorConfigurator createConfigurator(PropertyMap propertyMap) {
       PropertyMap.PropertyMapBuilder maarsBuilder = studio_.data().getPropertyMapBuilder();
-      maarsBuilder = maarsBuilder.putDouble(MaarsParameters.MAXIMUM_CELL_AREA,
-            Double.parseDouble(parameters_.getSegmentationParameter(MaarsParameters.MAXIMUM_CELL_AREA)));
-      maarsBuilder = maarsBuilder.putDouble(MaarsParameters.MINIMUM_CELL_AREA,
-            );
-      maarsBuilder = maarsBuilder.putBoolean(MaarsParameters.FILTER_MEAN_GREY_VALUE,
-            );
-      maarsBuilder = maarsBuilder.putInt(MaarsParameters.MEAN_GREY_VALUE,
-            );
-      maarsBuilder = maarsBuilder.putBoolean(MaarsParameters.FILTER_SOLIDITY,
-            );
-      maarsBuilder = maarsBuilder.putInt(MaarsParameters.SOLIDITY,
-            );
+//      maarsBuilder = maarsBuilder.putDouble(MaarsParameters.MAXIMUM_CELL_AREA,
+//            Double.parseDouble(parameters_.getSegmentationParameter(MaarsParameters.MAXIMUM_CELL_AREA)));
+//      maarsBuilder = maarsBuilder.putDouble(MaarsParameters.MINIMUM_CELL_AREA,
+//            );
+//      maarsBuilder = maarsBuilder.putBoolean(MaarsParameters.FILTER_MEAN_GREY_VALUE,
+//            );
+//      maarsBuilder = maarsBuilder.putInt(MaarsParameters.MEAN_GREY_VALUE,
+//            );
+//      maarsBuilder = maarsBuilder.putBoolean(MaarsParameters.FILTER_SOLIDITY,
+//            );
+//      maarsBuilder = maarsBuilder.putInt(MaarsParameters.SOLIDITY,
+//            );
       studio_.profile().insertProperties(MAARSSegPlugin.class, maarsBuilder.build());
       return new MAARSSegConfigurator(studio_, parameters_);
    }

@@ -250,7 +250,7 @@ public class PostFluoAnalysis implements Runnable{
       String tifNameBase = fluoTiffName.split("\\.", -1)[0];
 //      IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + " sort");
 //      ImagePlus im2 = IJ.getImage();
-      ImagePlus im2 = ImgUtils.lociImport(pathToFluoImgsDir);
+      ImagePlus im2 = ImgUtils.lociImport(pathToFluoImgsDir + File.separator + fluoTiffName);
       im2.hide();
       im2.setProperty("Info", infoProperties);
       return im2;
