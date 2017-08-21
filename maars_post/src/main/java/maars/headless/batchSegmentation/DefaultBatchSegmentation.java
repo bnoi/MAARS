@@ -1,8 +1,11 @@
 package maars.headless.batchSegmentation;
 
+import ij.IJ;
+import ij.ImagePlus;
 import maars.gui.MaarsFluoAnalysisDialog;
 import maars.gui.MaarsSegmentationDialog;
 import maars.main.MaarsParameters;
+import maars.main.MaarsSegmentation;
 import maars.utils.FileUtils;
 import net.imagej.ops.AbstractOp;
 import org.scijava.ItemIO;
@@ -44,9 +47,17 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
          }
          parameter = new MaarsParameters(inStream);
          parameter.setSavingPath(d);
-         new MaarsSegmentationDialog(parameter, null);
-         MaarsFluoAnalysisDialog fluoAnalysisDialog = new MaarsFluoAnalysisDialog(parameter);
-         parameter = fluoAnalysisDialog.getParameters();
+         for (String f : FileUtils.getTiffWithPattern(d,".*.tif")){
+            System.out.println(d + File.separator + f);
+            ImagePlus img = IJ.openImage(d + File.separator + f);
+            Thread th = new Thread(new MaarsSegmentation(parameter, img, f));
+            th.start();
+            try {
+               th.join();
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+            }
+         }
          parameter.save(d);
       }
    }

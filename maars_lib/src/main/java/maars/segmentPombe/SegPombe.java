@@ -190,7 +190,7 @@ public class SegPombe {
     *
     * @param batchMode batch mode for optimization of segmentation
     */
-   public void convertCorrelationToBinaryImage(Boolean batchMode, double tolerance) {
+   public void convertCorrelationToBinaryImage(Boolean batchMode, Double tolerance) {
 
       System.out.println("Convert correlation image to binary image");
 
@@ -232,8 +232,9 @@ public class SegPombe {
          waitForUserDialog.show();
          this.binImage.hide();
       } else {
-         IJ.run(this.binImage, IJ.getDirectory("plugins") +"Adjustable Watershed",
-               "tolerance=" + tolerance);
+         System.out.println("no improvement on binary");
+//         IJ.run(this.binImage, IJ.getDirectory("plugins") +"Adjustable Watershed",
+//               "tolerance=" + tolerance);
       }
    }
 
