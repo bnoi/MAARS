@@ -2,6 +2,7 @@ package maars.headless;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.VirtualStack;
 import ij.measure.ResultsTable;
 import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
@@ -34,10 +35,10 @@ import java.util.regex.Pattern;
 /**
  * Created by tong on 30/06/17.
  */
-public class PostFluoAnalysis implements Runnable{
+public class MaarsFluoAnalysis implements Runnable{
    String[] posNbs_;
    MaarsParameters parameters_;
-   public PostFluoAnalysis(MaarsParameters parameters){
+   public MaarsFluoAnalysis(MaarsParameters parameters){
       String[] imgNames = Maars_Interface.getBfImgs(parameters);
       posNbs_ = Maars_Interface.getPosNbs(imgNames);
       parameters_ = parameters;
@@ -192,9 +193,9 @@ public class PostFluoAnalysis implements Runnable{
          for (String channel : arrayChannels) {
             IJ.log("Processing channel " + channel + "_" + current_frame);
             String pathToFluoMovie = pathToFluoImgsDir + channel + "_" + current_frame + "/" + channel + "_" + current_frame + "_MMStack_Pos0.ome.tif";
-            ImagePlus currentFluoImage = IJ.openImage(pathToFluoMovie);
+            ImagePlus currentFluoImage = IJ.openVirtual(pathToFluoMovie);
             ImagePlus zProjectedFluoImg = ImgUtils.zProject(currentFluoImage, currentFluoImage.getCalibration());
-            Future future = es.submit(new FluoAnalyzer(zProjectedFluoImg.duplicate(), zProjectedFluoImg.getCalibration(),
+            Future future = es.submit(new FluoAnalyzer(zProjectedFluoImg, zProjectedFluoImg.getCalibration(),
                   soc, channel, Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                   Double.parseDouble(parameters.getChSpotRaius(channel)),
                   Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer,

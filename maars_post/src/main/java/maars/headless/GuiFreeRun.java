@@ -2,9 +2,7 @@ package maars.headless;
 
 import ij.IJ;
 import ij.ImageJ;
-import ij.ImagePlus;
 import ij.plugin.PlugIn;
-import loci.plugins.LociImporter;
 import maars.gui.MaarsFluoAnalysisDialog;
 import maars.gui.MaarsSegmentationDialog;
 import maars.io.IOUtils;
@@ -16,10 +14,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * The main of MAARS without GUI configuration of MAARS parameters
@@ -182,7 +178,7 @@ public class GuiFreeRun implements PlugIn, Runnable {
                if (selection==0) {
                   Maars_Interface.post_segmentation(parameters);
                }else if(selection == 1){
-                  es.execute(new PostFluoAnalysis(parameters));
+                  es.execute(new MaarsFluoAnalysis(parameters));
                }
 //               IJ.showMessage(methods[methdoComBox.getSelectedIndex()] + " done");
             }
@@ -208,7 +204,8 @@ public class GuiFreeRun implements PlugIn, Runnable {
    }
 
    static boolean isOkToProcess(String tiffFolder, String configName){
-      return FileUtils.exists(tiffFolder) && FileUtils.exists(configName) && FileUtils.containsTiffFile(tiffFolder);
+      return FileUtils.exists(tiffFolder) && FileUtils.exists(configName);
+//            && FileUtils.containsTiffFile(tiffFolder);
    }
 
    public static void main(String[] args) {

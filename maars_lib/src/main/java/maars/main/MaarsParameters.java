@@ -9,6 +9,7 @@ package maars.main;
 
 import ij.IJ;
 import maars.io.IOUtils;
+import maars.utils.FileUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -17,10 +18,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /*
  * MaarsParameters reads a configuration file written as a XML,
@@ -486,5 +484,22 @@ public class MaarsParameters {
       MaarsParameters newParams = new MaarsParameters();
       newParams.setRoot(newRoot);
       return newParams;
+   }
+
+   /**
+    * @param path to config file
+    */
+   public static MaarsParameters fromFile(String path){
+      InputStream inStream = null;
+      if (FileUtils.exists(path)) {
+         try {
+            inStream = new FileInputStream(path);
+         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+         }
+      } else {
+         inStream = FileUtils.getInputStreamOfScript("maars_default_config.xml");
+      }
+      return new MaarsParameters(inStream);
    }
 }
