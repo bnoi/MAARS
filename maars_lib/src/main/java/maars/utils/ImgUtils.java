@@ -286,7 +286,7 @@ public class ImgUtils {
 
    public static ImagePlus lociImport(String tiffPath){
       LociImporter importer = new LociImporter();
-      String cmd = "open="+tiffPath+"";
+      String cmd = "open="+tiffPath+" color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT use_virtual_stack";
       importer.run(cmd);
 //      int ind = tiffPath.lastIndexOf("/");
 //      String tiffname = null;

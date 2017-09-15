@@ -115,7 +115,7 @@ public class MaarsFluoAnalysis implements Runnable{
       System.setOut(curr_out);
    }
 
-   public static ImagePlus processStackedImg(String pathToFluoImgsDir, String pos,
+   private static ImagePlus processStackedImg(String pathToFluoImgsDir, String pos,
                                              MaarsParameters parameters, DefaultSetOfCells soc, SOCVisualizer socVisualizer,
                                              CopyOnWriteArrayList<Map<String, Future>> tasksSet, AtomicBoolean stop) {
       ImagePlus concatenatedFluoImgs = loadImgOfPosition(pathToFluoImgsDir, pos);
@@ -243,12 +243,12 @@ public class MaarsFluoAnalysis implements Runnable{
          }
       }
       IJ.log(fluoTiffName);
-      IJ.run("TIFF Virtual Stack...", "open=" + pathToFluoImgsDir + File.separator + fluoTiffName);
+      IJ.run("TIFF Virtual Stack...", "open=" + pathToFluoImgsDir + fluoTiffName);
       ImagePlus im = IJ.getImage();
       String infoProperties = im.getInfoProperty();
       IOUtils.writeToFile(pathToFluoImgsDir + File.separator + "metadata.txt", im.getProperties());
       im.close();
-      String tifNameBase = fluoTiffName.split("\\.", -1)[0];
+//      String tifNameBase = fluoTiffName.split("\\.", -1)[0];
 //      IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + " sort");
 //      ImagePlus im2 = IJ.getImage();
       ImagePlus im2 = ImgUtils.lociImport(pathToFluoImgsDir + File.separator + fluoTiffName);

@@ -5,6 +5,7 @@ import fiji.plugin.trackmate.SelectionModel;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.TrackMate;
 import fiji.plugin.trackmate.detection.LogDetectorFactory;
+import fiji.plugin.trackmate.features.spot.*;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
@@ -25,11 +26,11 @@ public class MaarsTrackmate {
 
       // Computer different features (in order)
 
-//      settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<FloatType>());
-//      settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<FloatType>());
-//      settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<FloatType>());
-//      settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory<FloatType>());
-//      settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory<FloatType>());
+      settings.addSpotAnalyzerFactory(new SpotIntensityAnalyzerFactory<>());
+      settings.addSpotAnalyzerFactory(new SpotContrastAndSNRAnalyzerFactory<>());
+      settings.addSpotAnalyzerFactory(new SpotMorphologyAnalyzerFactory<>());
+      settings.addSpotAnalyzerFactory(new SpotRadiusEstimatorFactory<>());
+      settings.addSpotAnalyzerFactory(new SpotContrastAnalyzerFactory<>());
 
       // Set up detection parameters.
 
@@ -56,7 +57,7 @@ public class MaarsTrackmate {
 
       trackmate.execInitialSpotFiltering();
 
-//      trackmate.computeSpotFeatures(false);
+      trackmate.computeSpotFeatures(false);
 
       return trackmate.getModel();
    }
