@@ -6,6 +6,10 @@ import ij.measure.ResultsTable;
 import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.plugin.HyperStackConverter;
+import loci.formats.FormatException;
+import loci.formats.ImageReader;
+import loci.formats.MetadataTools;
+import loci.formats.meta.IMetadata;
 import maars.agents.DefaultSetOfCells;
 import maars.cellAnalysis.FluoAnalyzer;
 import maars.display.SOCVisualizer;
@@ -14,11 +18,10 @@ import maars.main.MaarsParameters;
 import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -123,13 +126,14 @@ public class MaarsFluoAnalysis implements Runnable{
       int totalFrame = Integer.parseInt(concatenatedFluoImgs.getStringProperty("SizeT"));
 
       ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+      Duplicator duplicator = new Duplicator();
       for (int i = 1; i <= totalFrame; i++) {
          Map<String, Future> chAnalysisTasks = new HashMap<>();
          for (int j = 1; j <= totalChannel; j++) {
             String channel = arrayChannels[j - 1];
             IJ.log("Processing channel " + channel + "_" + i);
             ImagePlus zProjectedFluoImg = ImgUtils.zProject(
-                  new Duplicator().run(concatenatedFluoImgs, j, j, 1, totalSlice, i, i)
+                  duplicator.run(concatenatedFluoImgs, j, j, 1, totalSlice, i, i)
                   , concatenatedFluoImgs.getCalibration());
             Future future = es.submit(new FluoAnalyzer(zProjectedFluoImg, zProjectedFluoImg.getCalibration(),
                   soc, channel, Integer.parseInt(parameters.getChMaxNbSpot(channel)),
@@ -221,27 +225,11 @@ public class MaarsFluoAnalysis implements Runnable{
          }
       }
       IJ.log(fluoTiffName);
-//      IJ.run("TIFF Virtual Stack...", "open=" + pathToFluoImgsDir + fluoTiffName);
-//      ImagePlus im = IJ.getImage();
-//      String infoProperties = im.getInfoProperty();
-//      IOUtils.writeToFile(pathToFluoImgsDir + File.separator + "metadata.txt", im.getProperties());
-//      im.close();
-//      String tifNameBase = fluoTiffName.split("\\.", -1)[0];
-//      IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + " sort");
-//      ImagePlus im2 = IJ.getImage();
-      ImagePlus im2 = ImgUtils.lociImport(pathToFluoImgsDir + File.separator + fluoTiffName);
-      im2.hide();
-//      im2.setProperty("Info", infoProperties);
+      HashMap map = populateSeriesImgNames(pathToFluoImgsDir + File.separator + fluoTiffName);
+      String serie_number = (String) map.get(fluoTiffName.split("\\.")[0]);
+      IJ.log(serie_number + " selected");
+      ImagePlus im2 = ImgUtils.lociImport(pathToFluoImgsDir + File.separator + fluoTiffName, serie_number);
       return im2;
-   }
-
-   private static int extractFromOMEmetadata(JSONObject omeData, String parameter) {
-      try {
-         return ((JSONObject) omeData.get("IntendedDimensions")).getInt(parameter);
-      } catch (JSONException e) {
-         e.printStackTrace();
-      }
-      return 0;
    }
 
    private static ImagePlus prepareImgToSave(ImagePlus projectedImg, ImagePlus notProjected, String channel, int frame,
@@ -251,6 +239,27 @@ public class MaarsFluoAnalysis implements Runnable{
          imgToSave.getStack().setSliceLabel(channel + "_" + frame, i);
       }
       return imgToSave;
+   }
+
+   private static HashMap populateSeriesImgNames(String pathToTiffFile) {
+      HashMap<String, String> seriesImgNames = new HashMap<>();
+      IMetadata omexmlMetadata = MetadataTools.createOMEXMLMetadata();
+      ImageReader reader = new ImageReader();
+      reader.setMetadataStore(omexmlMetadata);
+      try {
+         reader.setId(pathToTiffFile);
+      } catch (FormatException | IOException e) {
+         e.printStackTrace();
+      }
+      int seriesCount = reader.getSeriesCount();
+      for (int i = 0; i < seriesCount; i++) {
+         reader.setSeries(i);
+         String name = omexmlMetadata.getImageName(i); // this is the image name stored in the file
+         String label = "series_" + (i + 1);  // this is the label that you see in ImageJ
+         seriesImgNames.put(name, label);
+      }
+      IJ.log(seriesCount + " series registered");
+      return seriesImgNames;
    }
 
    private static ArrayList<Integer> getFluoAcqStructure(String pathToFluoDir) {

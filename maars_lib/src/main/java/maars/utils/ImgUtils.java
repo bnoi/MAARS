@@ -8,7 +8,14 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.*;
+import loci.formats.FormatException;
+import loci.formats.ImageReader;
+import loci.formats.MetadataTools;
+import loci.formats.meta.IMetadata;
 import maars.segmentPombe.SegPombeParameters;
+
+import java.io.IOException;
+import java.util.Hashtable;
 
 
 /**
@@ -281,8 +288,8 @@ public class ImgUtils {
       return parameters.getScale(widthOrHeightOrDepth) * pixelSize;
    }
 
-   public static ImagePlus lociImport(String tiffPath){
-      String cmd = "open="+tiffPath+" color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT use_virtual_stack";
+   public static ImagePlus lociImport(String tiffPath, String serie_number){
+      String cmd = "open="+tiffPath+" color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT use_virtual_stack " + serie_number;
 //      int ind = tiffPath.lastIndexOf("/");
 //      String tiffname = null;
 //      if (ind != -1) {
@@ -292,14 +299,8 @@ public class ImgUtils {
 //      IJ.selectWindow(tiffname + " - " + tiffname.substring(0,ind));
 //      ImagePlus imp = IJ.getImage();
       IJ.run("Bio-Formats Importer", cmd);
-      return IJ.getImage();
-   }
-
-   public static void main(String[] strs){
-      new ImageJ();
-      ImagePlus imp = lociImport("/Users/tongli/Desktop/22C_849_1/FLUO_1/22C_3_MMStack_849_1.ome.tif");
-//            makeSubstack(imp,"delete slices=1-2");
-//      IJ.log(imp.get());
-//      zProject(imp, imp.getCalibration());
+      ImagePlus imp = IJ.getImage();
+      imp.hide();
+      return imp;
    }
 }
