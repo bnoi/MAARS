@@ -2,7 +2,6 @@ package maars.headless;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.VirtualStack;
 import ij.measure.ResultsTable;
 import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
@@ -75,16 +74,15 @@ public class MaarsFluoAnalysis implements Runnable{
             } catch (FileNotFoundException e) {
                IOUtils.printErrorToIJLog(e);
             }
-
-            boolean containsTiffFile = FileUtils.containsTiffFile(fluoImgsDir);
+//            boolean containsTiffFile = FileUtils.containsTiffFile(fluoImgsDir);
             CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
-            if (containsTiffFile) {
-               concatenatedFluoImgs = processStackedImg(fluoImgsDir, posNb,
+//            if (containsTiffFile) {
+            concatenatedFluoImgs = processStackedImg(fluoImgsDir, posNb,
                      parameters_, soc, null, tasksSet, stop);
-            } else {
-               concatenatedFluoImgs = processSplitImgs(fluoImgsDir, parameters_, soc,
-                     null, tasksSet, stop);
-            }
+//            } else {
+//               concatenatedFluoImgs = processSplitImgs(fluoImgsDir, parameters_, soc,
+//                     null, tasksSet, stop);
+//            }
             concatenatedFluoImgs.getCalibration().frameInterval =
                   Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
             Maars_Interface.waitAllTaskToFinish(tasksSet);
@@ -105,8 +103,6 @@ public class MaarsFluoAnalysis implements Runnable{
          }
          soc.reset();
          concatenatedFluoImgs.close();
-         concatenatedFluoImgs = null;
-         soc = null;
          for (int i = 0; i <10; i++) {
             System.gc();
          }
@@ -119,36 +115,18 @@ public class MaarsFluoAnalysis implements Runnable{
                                              MaarsParameters parameters, DefaultSetOfCells soc, SOCVisualizer socVisualizer,
                                              CopyOnWriteArrayList<Map<String, Future>> tasksSet, AtomicBoolean stop) {
       ImagePlus concatenatedFluoImgs = loadImgOfPosition(pathToFluoImgsDir, pos);
-      JSONObject jsonObject = null;
-      try {
-         jsonObject = new JSONObject(concatenatedFluoImgs.getInfoProperty());
-      } catch (JSONException e) {
-         e.printStackTrace();
-      }
 
-      ArrayList<String> arrayChannels = new ArrayList<>();
-      try {
-         for (int i = 0; i < jsonObject.getJSONArray("ChNames").length(); i++) {
-            arrayChannels.add(jsonObject.getJSONArray("ChNames").getString(i));
-         }
-      } catch (JSONException e) {
-         e.printStackTrace();
-      }
+      String[] arrayChannels = parameters.getUsingChannels().split(",");
 
-//        ArrayList<String> arrayChannels = (ArrayList) map.get("ChNames");
-      int totalChannel = extractFromOMEmetadata(jsonObject, "channel");
-      int totalSlice = extractFromOMEmetadata(jsonObject, "z");
-      int totalFrame = extractFromOMEmetadata(jsonObject, "time");
-//               totalPosition = (int) ((Map)map.get("IntendedDimensions")).get("position");
+      int totalChannel = Integer.parseInt(concatenatedFluoImgs.getStringProperty("SizeC"));
+      int totalSlice = Integer.parseInt(concatenatedFluoImgs.getStringProperty("SizeZ"));
+      int totalFrame = Integer.parseInt(concatenatedFluoImgs.getStringProperty("SizeT"));
 
-//      IJ.log("Re-stack image : channel " + totalChannel + ", slice " + totalSlice + ", frame " + totalFrame);
-//      concatenatedFluoImgs = HyperStackConverter.toHyperStack(concatenatedFluoImgs, totalChannel, totalSlice, totalFrame
-//            , "xyzct", "Grayscale");
       ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
       for (int i = 1; i <= totalFrame; i++) {
          Map<String, Future> chAnalysisTasks = new HashMap<>();
          for (int j = 1; j <= totalChannel; j++) {
-            String channel = arrayChannels.get(j - 1);
+            String channel = arrayChannels[j - 1];
             IJ.log("Processing channel " + channel + "_" + i);
             ImagePlus zProjectedFluoImg = ImgUtils.zProject(
                   new Duplicator().run(concatenatedFluoImgs, j, j, 1, totalSlice, i, i)
@@ -243,17 +221,17 @@ public class MaarsFluoAnalysis implements Runnable{
          }
       }
       IJ.log(fluoTiffName);
-      IJ.run("TIFF Virtual Stack...", "open=" + pathToFluoImgsDir + fluoTiffName);
-      ImagePlus im = IJ.getImage();
-      String infoProperties = im.getInfoProperty();
-      IOUtils.writeToFile(pathToFluoImgsDir + File.separator + "metadata.txt", im.getProperties());
-      im.close();
+//      IJ.run("TIFF Virtual Stack...", "open=" + pathToFluoImgsDir + fluoTiffName);
+//      ImagePlus im = IJ.getImage();
+//      String infoProperties = im.getInfoProperty();
+//      IOUtils.writeToFile(pathToFluoImgsDir + File.separator + "metadata.txt", im.getProperties());
+//      im.close();
 //      String tifNameBase = fluoTiffName.split("\\.", -1)[0];
 //      IJ.run("Image Sequence...", "open=" + pathToFluoImgsDir + " file=" + tifNameBase + " sort");
 //      ImagePlus im2 = IJ.getImage();
       ImagePlus im2 = ImgUtils.lociImport(pathToFluoImgsDir + File.separator + fluoTiffName);
       im2.hide();
-      im2.setProperty("Info", infoProperties);
+//      im2.setProperty("Info", infoProperties);
       return im2;
    }
 

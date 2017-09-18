@@ -8,10 +8,7 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.*;
-import loci.plugins.LociImporter;
 import maars.segmentPombe.SegPombeParameters;
-
-import java.awt.*;
 
 
 /**
@@ -285,9 +282,7 @@ public class ImgUtils {
    }
 
    public static ImagePlus lociImport(String tiffPath){
-      LociImporter importer = new LociImporter();
       String cmd = "open="+tiffPath+" color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT use_virtual_stack";
-      importer.run(cmd);
 //      int ind = tiffPath.lastIndexOf("/");
 //      String tiffname = null;
 //      if (ind != -1) {
@@ -296,6 +291,7 @@ public class ImgUtils {
 //      ind = tiffname.indexOf(".ome.tif");
 //      IJ.selectWindow(tiffname + " - " + tiffname.substring(0,ind));
 //      ImagePlus imp = IJ.getImage();
+      IJ.run("Bio-Formats Importer", cmd);
       return IJ.getImage();
    }
 
