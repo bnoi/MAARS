@@ -77,15 +77,9 @@ public class MaarsFluoAnalysis implements Runnable{
             } catch (FileNotFoundException e) {
                IOUtils.printErrorToIJLog(e);
             }
-//            boolean containsTiffFile = FileUtils.containsTiffFile(fluoImgsDir);
             CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
-//            if (containsTiffFile) {
             concatenatedFluoImgs = processStackedImg(fluoImgsDir, posNb,
                      parameters_, soc, null, tasksSet, stop);
-//            } else {
-//               concatenatedFluoImgs = processSplitImgs(fluoImgsDir, parameters_, soc,
-//                     null, tasksSet, stop);
-//            }
             concatenatedFluoImgs.getCalibration().frameInterval =
                   Double.parseDouble(parameters_.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000;
             Maars_Interface.waitAllTaskToFinish(tasksSet);
@@ -226,8 +220,13 @@ public class MaarsFluoAnalysis implements Runnable{
       }
       IJ.log(fluoTiffName);
       HashMap map = populateSeriesImgNames(pathToFluoImgsDir + File.separator + fluoTiffName);
-      String serie_number = (String) map.get(fluoTiffName.split("\\.")[0]);
-      IJ.log(serie_number + " selected");
+      String serie_number;
+      if (map.size() !=1){
+         serie_number = (String) map.get(fluoTiffName.split("\\.")[0]);
+         IJ.log(serie_number + " selected");
+      }else{
+         serie_number = "";
+      }
       ImagePlus im2 = ImgUtils.lociImport(pathToFluoImgsDir + File.separator + fluoTiffName, serie_number);
       return im2;
    }

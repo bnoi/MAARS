@@ -1,21 +1,13 @@
 package maars.utils;
 
 import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.*;
-import loci.formats.FormatException;
-import loci.formats.ImageReader;
-import loci.formats.MetadataTools;
-import loci.formats.meta.IMetadata;
 import maars.segmentPombe.SegPombeParameters;
-
-import java.io.IOException;
-import java.util.Hashtable;
 
 
 /**
@@ -290,14 +282,6 @@ public class ImgUtils {
 
    public static ImagePlus lociImport(String tiffPath, String serie_number){
       String cmd = "open="+tiffPath+" color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT use_virtual_stack " + serie_number;
-//      int ind = tiffPath.lastIndexOf("/");
-//      String tiffname = null;
-//      if (ind != -1) {
-//         tiffname = tiffPath.substring(ind+1, tiffPath.length()); // not forgot to put check if(endIndex != -1)
-//      }
-//      ind = tiffname.indexOf(".ome.tif");
-//      IJ.selectWindow(tiffname + " - " + tiffname.substring(0,ind));
-//      ImagePlus imp = IJ.getImage();
       IJ.run("Bio-Formats Importer", cmd);
       ImagePlus imp = IJ.getImage();
       imp.hide();
