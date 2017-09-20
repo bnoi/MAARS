@@ -9,9 +9,9 @@ import org.micromanager.data.ProcessorFactory;
  * Created by tong on 26/06/17.
  */
 public class MAARSSegFactory implements ProcessorFactory{
-   Studio studio_;
-   MaarsParameters parameters_;
-   public MAARSSegFactory(Studio studio, MaarsParameters parameters){
+   private Studio studio_;
+   private MaarsParameters parameters_;
+   MAARSSegFactory(Studio studio, MaarsParameters parameters){
       studio_ = studio;
       parameters_ = parameters;
    }

@@ -109,7 +109,7 @@ public class MAARS implements Runnable {
 //      } catch (InterruptedException | ExecutionException e) {
 //         IOUtils.printErrorToIJLog(e);
 //      }
-//      ArrayList<Image> segImgs = maars.mmUtils.ImgUtils.dsToSortedList(segDs, frame);
+//      ArrayList<Image> segImgs = maars.mmUtils.ImgMMUtils.dsToSortedList(segDs, frame);
 //      for (Image img: segImgs){
 //         try {
 //            fullSegDs.putImage(img);
@@ -117,7 +117,7 @@ public class MAARS implements Runnable {
 //            e.printStackTrace();
 //         }
 //      }
-//      HashMap<String, ImagePlus[]> segImps = maars.mmUtils.ImgUtils.convertImages2Imp(segImgs,
+//      HashMap<String, ImagePlus[]> segImps = maars.mmUtils.ImgMMUtils.convertImages2Imp(segImgs,
 //            segDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
 //
 //      if (segImgs.size() ==0) {
@@ -174,7 +174,7 @@ public class MAARS implements Runnable {
 //               } catch (InterruptedException | ExecutionException e) {
 //                  IOUtils.printErrorToIJLog(e);
 //               }
-//               segImgs = maars.mmUtils.ImgUtils.dsToSortedList(segDs, frame);
+//               segImgs = maars.mmUtils.ImgMMUtils.dsToSortedList(segDs, frame);
 //               for (Image img: segImgs){
 //                  try {
 //                     fullSegDs.putImage(img);
@@ -182,7 +182,7 @@ public class MAARS implements Runnable {
 //                     e.printStackTrace();
 //                  }
 //               }
-//               segImps = maars.mmUtils.ImgUtils.convertImages2Imp(segImgs,
+//               segImps = maars.mmUtils.ImgMMUtils.convertImages2Imp(segImgs,
 //                     segDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
 ////               parameters.setSavingPath(savingPath + File.separator + BF + "_" + String.valueOf(frame + 1));
 ////               for (Integer posNb : segImps.keySet()) {
@@ -206,7 +206,7 @@ public class MAARS implements Runnable {
 //            } catch (InterruptedException | ExecutionException e) {
 //               IOUtils.printErrorToIJLog(e);
 //            }
-//            ArrayList<Image> fluoImgs = maars.mmUtils.ImgUtils.dsToSortedList(fluoDs, frame);
+//            ArrayList<Image> fluoImgs = maars.mmUtils.ImgMMUtils.dsToSortedList(fluoDs, frame);
 //            for (Image img: fluoImgs){
 //               try {
 //                  fullFluoDs.putImage(img);
@@ -214,7 +214,7 @@ public class MAARS implements Runnable {
 //                  e.printStackTrace();
 //               }
 //            }
-//            HashMap<String, ImagePlus[]> fluoImps = maars.mmUtils.ImgUtils.convertImages2Imp(fluoImgs,
+//            HashMap<String, ImagePlus[]> fluoImps = maars.mmUtils.ImgMMUtils.convertImages2Imp(fluoImgs,
 //                  fluoDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
 //            for (String posNb : fluoImps.keySet()) {
 //               for (ImagePlus chImp:fluoImps.get(posNb)){
@@ -253,7 +253,7 @@ public class MAARS implements Runnable {
 //         } catch (InterruptedException | ExecutionException e) {
 //            IOUtils.printErrorToIJLog(e);
 //         }
-//         ArrayList<Image> fluoImgs = maars.mmUtils.ImgUtils.dsToSortedList(fluoDs, frame);
+//         ArrayList<Image> fluoImgs = maars.mmUtils.ImgMMUtils.dsToSortedList(fluoDs, frame);
 //         for (Image img: fluoImgs){
 //            try {
 //               fullFluoDs.putImage(img);
@@ -261,7 +261,7 @@ public class MAARS implements Runnable {
 //               e.printStackTrace();
 //            }
 //         }
-//         HashMap<String, ImagePlus[]> fluoImps = maars.mmUtils.ImgUtils.convertImages2Imp(fluoImgs,
+//         HashMap<String, ImagePlus[]> fluoImps = maars.mmUtils.ImgMMUtils.convertImages2Imp(fluoImgs,
 //               fluoDs.getSummaryMetadata(), mm.getCore().getPixelSizeUm());
 //         for (String posNb : fluoImps.keySet()) {
 //            for (ImagePlus chImp:fluoImps.get(posNb)){

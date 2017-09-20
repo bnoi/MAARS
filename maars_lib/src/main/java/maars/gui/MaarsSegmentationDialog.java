@@ -5,7 +5,6 @@ import ij.gui.YesNoCancelDialog;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
 import maars.main.Maars_Interface;
-import maars.utils.FileUtils;
 import maars.utils.GuiUtils;
 
 import javax.swing.*;
@@ -13,7 +12,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * Class to create and display a dialog to get parameters for the image

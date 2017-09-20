@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 /**
  * Created by tongli on 09/06/2017.
  */
-public class ImgUtils {
+public class ImgMMUtils {
 
    /**
     * convert a list of Image to an ImagePlus
@@ -118,7 +118,7 @@ public class ImgUtils {
 
    public static ArrayList<Image> dsToSortedList(Datastore ds, int frame){
       ArrayList<Image> imgs = new ArrayList<>();
-      ArrayList<Coords> sortedCoords = maars.mmUtils.ImgUtils.getSortedCoords(ds);
+      ArrayList<Coords> sortedCoords = ImgMMUtils.getSortedCoords(ds);
       for (Coords coords : sortedCoords) {
          Image newImg = ds.getImage(coords);
          Coords.CoordsBuilder builder = coords.copy();
@@ -157,5 +157,22 @@ public class ImgUtils {
                newImg : concatenator.concatenate(concatenatedFluoImgs, newImg, false);
       }
       return concatenatedFluoImgs;
+   }
+
+   public static Boolean IsOkToProceed() {
+      boolean isOk = true;
+      MMStudio mm = MMStudio.getInstance();
+      if (mm.live().getIsLiveModeOn()){
+         mm.logs().showError("MAARS segmentation is not designed for live streaming, please launch MDA acquisition.");
+         mm.live().setLiveMode(false);
+         isOk = false;
+      }else if (!mm.acquisitions().getAcquisitionSettings().save){
+         mm.logs().showError("You need to save your images to perform segmentation.");
+         mm.acquisitions().setPause(true);
+         mm.acquisitions().haltAcquisition();
+         mm.getAcquisitionEngine2010().stop();
+         isOk = false;
+      }
+      return isOk;
    }
 }
