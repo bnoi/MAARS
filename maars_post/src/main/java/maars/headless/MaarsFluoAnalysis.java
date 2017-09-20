@@ -3,9 +3,7 @@ package maars.headless;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
-import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
-import ij.plugin.HyperStackConverter;
 import loci.formats.FormatException;
 import loci.formats.ImageReader;
 import loci.formats.MetadataTools;
@@ -150,66 +148,6 @@ public class MaarsFluoAnalysis implements Runnable{
       return concatenatedFluoImgs;
    }
 
-   private static ImagePlus processSplitImgs(String pathToFluoImgsDir, MaarsParameters parameters, DefaultSetOfCells soc,
-                                             SOCVisualizer socVisualizer, CopyOnWriteArrayList<Map<String, Future>> tasksSet,
-                                             AtomicBoolean stop) {
-      ArrayList<Integer> arrayImgFrames = getFluoAcqStructure(pathToFluoImgsDir);
-      int totalFrame = arrayImgFrames.size();
-
-      Concatenator concatenator = new Concatenator();
-      concatenator.setIm5D(true);
-
-      ArrayList<String> arrayChannels = new ArrayList<>();
-      Collections.addAll(arrayChannels, parameters.getUsingChannels().split(",", -1));
-
-      ImagePlus concatenatedFluoImgs = null;
-      ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-      for (Integer current_frame : arrayImgFrames) {
-         Map<String, Future> analysisTasks = new HashMap<>();
-         for (String channel : arrayChannels) {
-            IJ.log("Processing channel " + channel + "_" + current_frame);
-            String pathToFluoMovie = pathToFluoImgsDir + channel + "_" + current_frame + "/" + channel + "_" + current_frame + "_MMStack_Pos0.ome.tif";
-            ImagePlus currentFluoImage = IJ.openVirtual(pathToFluoMovie);
-            ImagePlus zProjectedFluoImg = ImgUtils.zProject(currentFluoImage, currentFluoImage.getCalibration());
-            Future future = es.submit(new FluoAnalyzer(zProjectedFluoImg, zProjectedFluoImg.getCalibration(),
-                  soc, channel, Integer.parseInt(parameters.getChMaxNbSpot(channel)),
-                  Double.parseDouble(parameters.getChSpotRaius(channel)),
-                  Double.parseDouble(parameters.getChQuality(channel)), current_frame, socVisualizer,
-                  parameters.useDynamic()));
-            analysisTasks.put(channel, future);
-            ImagePlus imgToSave = prepareImgToSave(zProjectedFluoImg, currentFluoImage, channel, current_frame,
-                  Boolean.parseBoolean(parameters.getProjected()));
-//            if (saveRam) {
-//               IJ.log("Due to lack of RAM, MAARS will append cropped images frame by frame on disk (much slower)");
-//               MAARSImgSaver imgSaver = new MAARSImgSaver(pathToFluoImgsDir);
-//               //TODO
-//               CopyOnWriteArrayList<Integer> cellIndex = soc.getPotentialMitosisCell();
-//               for (int i : cellIndex) {
-//                  Cell c = soc.getCell(i);
-////                     for (Cell c : soc_){
-//                  imgToSave.setRoi(c.getCellShapeRoi());
-//                  for (int j = 1; j <= imgToSave.getNChannels(); j++) {
-//                     ImagePlus croppedImg = new Duplicator().run(imgToSave, j, j, 1, imgToSave.getNSlices(),
-//                           1, imgToSave.getNFrames());
-//                     imgSaver.saveImgs(croppedImg, i, channel, true);
-//                  }
-//               }
-//            } else {
-            concatenatedFluoImgs = concatenatedFluoImgs == null ?
-                  imgToSave : concatenator.concatenate(concatenatedFluoImgs, imgToSave, false);
-//            }
-         }
-         tasksSet.add(analysisTasks);
-         if (stop.get()) {
-            break;
-         }
-      }
-      es.shutdown();
-      return HyperStackConverter.toHyperStack(concatenatedFluoImgs, arrayChannels.size(),
-            concatenatedFluoImgs.getStack().getSize() / arrayChannels.size() / totalFrame, totalFrame,
-            "xyzct", "Grayscale");
-   }
-
    private static ImagePlus loadImgOfPosition(String pathToFluoImgsDir, String pos) {
       File[] listOfFiles = new File(pathToFluoImgsDir).listFiles();
       String fluoTiffName = null;
@@ -231,15 +169,6 @@ public class MaarsFluoAnalysis implements Runnable{
       return im2;
    }
 
-   private static ImagePlus prepareImgToSave(ImagePlus projectedImg, ImagePlus notProjected, String channel, int frame,
-                                             Boolean projected) {
-      ImagePlus imgToSave = projected ? projectedImg : notProjected;
-      for (int i = 1; i <= imgToSave.getStack().getSize(); i++) {
-         imgToSave.getStack().setSliceLabel(channel + "_" + frame, i);
-      }
-      return imgToSave;
-   }
-
    private static HashMap populateSeriesImgNames(String pathToTiffFile) {
       HashMap<String, String> seriesImgNames = new HashMap<>();
       IMetadata omexmlMetadata = MetadataTools.createOMEXMLMetadata();
@@ -259,22 +188,5 @@ public class MaarsFluoAnalysis implements Runnable{
       }
       IJ.log(seriesCount + " series registered");
       return seriesImgNames;
-   }
-
-   private static ArrayList<Integer> getFluoAcqStructure(String pathToFluoDir) {
-      String[] listAcqNames = new File(pathToFluoDir).list();
-      String pattern = "(\\w+)(_)(\\d+)";
-      ArrayList<Integer> arrayImgFrames = new ArrayList<>();
-      assert listAcqNames != null;
-      for (String acqName : listAcqNames) {
-         if (Pattern.matches(pattern, acqName)) {
-            String current_frame = acqName.split("_", -1)[1];
-            if (!arrayImgFrames.contains(Integer.parseInt(current_frame))) {
-               arrayImgFrames.add(Integer.parseInt(current_frame));
-            }
-         }
-      }
-      Collections.sort(arrayImgFrames);
-      return arrayImgFrames;
    }
 }
