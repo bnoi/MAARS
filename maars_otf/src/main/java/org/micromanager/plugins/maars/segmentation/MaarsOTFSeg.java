@@ -19,14 +19,14 @@ import java.util.concurrent.Executors;
 /**
  * Created by tong on 26/06/17.
  */
-public class MAARSSeg extends Processor{
+public class MaarsOTFSeg extends Processor{
    private MaarsParameters parameters_;
    private MMStudio mm_ = MMStudio.getInstance();
    private List<Image> zstack_ = new ArrayList<>();
    private int counter_ = 0;
    private String pos_ = "Pos0";
 
-   MAARSSeg(MaarsParameters parameters){
+   MaarsOTFSeg(MaarsParameters parameters){
       parameters_ = parameters;
    }
 

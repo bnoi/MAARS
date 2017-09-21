@@ -8,16 +8,16 @@ import org.micromanager.data.ProcessorFactory;
 /**
  * Created by tong on 26/06/17.
  */
-public class MAARSSegFactory implements ProcessorFactory{
+public class MaarsOTFSegFactory implements ProcessorFactory{
    private Studio studio_;
    private MaarsParameters parameters_;
-   MAARSSegFactory(Studio studio, MaarsParameters parameters){
+   MaarsOTFSegFactory(Studio studio, MaarsParameters parameters){
       studio_ = studio;
       parameters_ = parameters;
    }
    @Override
    public Processor createProcessor() {
       parameters_.setSavingPath(studio_.acquisitions().getAcquisitionSettings().root);
-      return new MAARSSeg(parameters_);
+      return new MaarsOTFSeg(parameters_);
    }
 }

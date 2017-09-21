@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * Main MAARSSeg program
+ * Main MaarsOTFSeg program
  *
  * @author Tong LI, mail: tongli.bioinfo@gmail.com
  * @version Nov 21, 2015
@@ -48,7 +48,7 @@ public class MAARS implements Runnable {
     *
     * @param mm                MMStudio object (gui)
     * @param mmc               CMMCore object (core)
-    * @param parameters        MAARSSeg parameters object
+    * @param parameters        MaarsOTFSeg parameters object
     * @param socVisualizerList list of set of cell visualizer
     * @param tasksSet          tasks to be terminated
     * @param socSet            list of set of cell
@@ -328,7 +328,7 @@ public class MAARS implements Runnable {
 //         soc.reset();
 //      }
 //      IJ.log("it took " + (double) (System.currentTimeMillis() - start) / 1000 + " sec for analysing all fields");
-//      IJ.showMessage("MAARSSeg: Done!");
+//      IJ.showMessage("MaarsOTFSeg: Done!");
 //      MaarsMainDialog.okMainDialogButton.setEnabled(true);
    }
 }

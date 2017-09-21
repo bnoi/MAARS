@@ -1,27 +1,26 @@
-package org.micromanager.plugins.maars.segmentation;
+package org.micromanager.plugins.maars.fluoanalysis;
 
-import maars.gui.MaarsSegmentationDialog;
+import maars.gui.MaarsFluoAnalysisDialog;
 import maars.main.MaarsParameters;
 import org.micromanager.PropertyMap;
 import org.micromanager.Studio;
 import org.micromanager.data.ProcessorConfigurator;
 
 /**
- * Created by tong on 26/06/17.
+ * Created by tongli on 27/06/2017.
  */
-public class MAARSSegConfigurator implements ProcessorConfigurator {
-   MaarsSegmentationDialog dialog;
+public class MaarsOTFFluoAnalysisConfigurator implements ProcessorConfigurator {
    Studio studio_;
    MaarsParameters parameters_;
+   MaarsFluoAnalysisDialog dialog;
 
-   public MAARSSegConfigurator(Studio studio, MaarsParameters parameters){
+   public MaarsOTFFluoAnalysisConfigurator(Studio studio, MaarsParameters parameters){
       studio_ = studio;
       parameters_ = parameters;
    }
-
    @Override
    public void showGUI() {
-      dialog = new MaarsSegmentationDialog(parameters_, null);
+      dialog = new MaarsFluoAnalysisDialog(parameters_);
    }
 
    @Override

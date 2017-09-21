@@ -1,4 +1,4 @@
-package org.micromanager.plugins.maars.segmentation;
+package org.micromanager.plugins.maars.fluoanalysis;
 
 import maars.main.MaarsParameters;
 import maars.main.Maars_Interface;
@@ -7,18 +7,20 @@ import org.micromanager.Studio;
 import org.micromanager.data.ProcessorConfigurator;
 import org.micromanager.data.ProcessorFactory;
 import org.micromanager.data.ProcessorPlugin;
+import org.micromanager.plugins.maars.segmentation.MaarsOTFSegConfigurator;
+import org.micromanager.plugins.maars.segmentation.MaarsOTFSegFactory;
+import org.micromanager.plugins.maars.segmentation.MaarsOTFSegPlugin;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
 /**
- * Created by tong on 26/06/17.
+ * Created by tongli on 27/06/2017.
  */
 @Plugin(type = ProcessorPlugin.class)
-public class MAARSSegPlugin implements ProcessorPlugin, SciJavaPlugin{
+public class MaarsOTFFluoAnalysisPlugin implements ProcessorPlugin, SciJavaPlugin {
    Studio studio_;
    MaarsParameters parameters_ = Maars_Interface.loadParameters();
-   static final String pluginName = "MAARS Seg";
-
+   static final String pluginName = "MAARS Fluo";
    @Override
    public ProcessorConfigurator createConfigurator(PropertyMap propertyMap) {
       PropertyMap.PropertyMapBuilder maarsBuilder = studio_.data().getPropertyMapBuilder();
@@ -34,13 +36,13 @@ public class MAARSSegPlugin implements ProcessorPlugin, SciJavaPlugin{
 //            );
 //      maarsBuilder = maarsBuilder.putInt(MaarsParameters.SOLIDITY,
 //            );
-      studio_.profile().insertProperties(MAARSSegPlugin.class, maarsBuilder.build());
-      return new MAARSSegConfigurator(studio_, parameters_);
+      studio_.profile().insertProperties(MaarsOTFSegPlugin.class, maarsBuilder.build());
+      return new MaarsOTFFluoAnalysisConfigurator(studio_, parameters_);
    }
 
    @Override
    public ProcessorFactory createFactory(PropertyMap propertyMap) {
-      return new MAARSSegFactory(studio_, parameters_);
+      return new MaarsOTFFluoAnalysisFactory(studio_, parameters_);
    }
 
    @Override
@@ -50,17 +52,17 @@ public class MAARSSegPlugin implements ProcessorPlugin, SciJavaPlugin{
 
    @Override
    public String getName() {
-      return pluginName;
+      return "MAARS FluoAnalysis";
    }
 
    @Override
    public String getHelpText() {
-      return "Bright field segmentation of MAARS";
+      return "Fluo-analysis plugin of MAARS";
    }
 
    @Override
    public String getVersion() {
-      return "0.0.1";
+      return null;
    }
 
    @Override

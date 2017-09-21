@@ -66,7 +66,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
     * @param parameters :MaarsParameters
     */
    public MaarsMainDialog(MMStudio mm, MaarsParameters parameters) {
-      super("Mitosis Analysing And Recording System - MAARSSeg");
+      super("Mitosis Analysing And Recording System - MaarsOTFSeg");
       // ------------initialization of parameters---------------//
 
       mm_ = mm;
@@ -420,7 +420,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
             }
          }
       } else {
-         IJ.log("MAARSSeg don't understand what you want, sorry");
+         IJ.log("MaarsOTFSeg don't understand what you want, sorry");
       }
    }
 }

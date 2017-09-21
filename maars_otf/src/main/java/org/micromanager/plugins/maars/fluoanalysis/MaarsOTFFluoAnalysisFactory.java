@@ -8,16 +8,16 @@ import org.micromanager.data.ProcessorFactory;
 /**
  * Created by tongli on 27/06/2017.
  */
-public class MAARSFluoAnalysisFactory implements ProcessorFactory {
+public class MaarsOTFFluoAnalysisFactory implements ProcessorFactory {
    private Studio studio_;
    private MaarsParameters parameters_;
-   MAARSFluoAnalysisFactory(Studio studio, MaarsParameters parameters){
+   MaarsOTFFluoAnalysisFactory(Studio studio, MaarsParameters parameters){
       studio_ = studio;
       parameters_ = parameters;
    }
    @Override
    public Processor createProcessor() {
       parameters_.setSavingPath(studio_.acquisitions().getAcquisitionSettings().root);
-      return new MAARSFluoAnalysis(parameters_);
+      return new MaarsOTFFluoAnalysis(parameters_);
    }
 }

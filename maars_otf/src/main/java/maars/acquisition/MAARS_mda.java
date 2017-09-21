@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 
 /**
- * Only called with On-the-Fly analysis of MAARSSeg.
+ * Only called with On-the-Fly analysis of MaarsOTFSeg.
  * Created by Tong LI on 24/06/2016.
  */
 public class MAARS_mda implements Callable<Datastore> {
