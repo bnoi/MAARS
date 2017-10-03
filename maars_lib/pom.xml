@@ -91,12 +91,6 @@
             <version>${nd4j.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.datavec</groupId>
-            <artifactId>datavec-data-image</artifactId>
-            <version>LATEST</version>
-        </dependency>
-
     </dependencies>
     <repositories>
         <repository>
