@@ -16,8 +16,8 @@
 
     <properties>
         <scijava.jvm.version>1.8</scijava.jvm.version>
-        <nd4j.version>0.9.1</nd4j.version>
-        <datavec.version>0.9.1</datavec.version>
+        <nd4j.version>LATEST</nd4j.version>
+        <datavec.version>LATEST</datavec.version>
     </properties>
 
     <dependencies>
@@ -61,17 +61,17 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacpp</artifactId>
-            <version>1.3.3-SNAPSHOT</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.bytedeco</groupId>-->
+            <!--<artifactId>javacpp</artifactId>-->
+            <!--<version>1.3.3-SNAPSHOT</version>-->
+        <!--</dependency>-->
 
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-cuda-8.0-platform</artifactId>
-            <version>${nd4j.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.nd4j</groupId>-->
+            <!--<artifactId>nd4j-cuda-8.0-platform</artifactId>-->
+            <!--<version>${nd4j.version}</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.datavec</groupId>
@@ -79,17 +79,23 @@
             <version>${datavec.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.datavec</groupId>
-            <artifactId>datavec-spark_2.11</artifactId>
-            <version>0.8.1_spark_2-SNAPSHOT</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.datavec</groupId>-->
+            <!--<artifactId>datavec-spark_2.11</artifactId>-->
+            <!--<version>0.8.1_spark_2-SNAPSHOT</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-cuda-8.0</artifactId>
             <version>${nd4j.version}</version>
         </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>org.deeplearning4j</groupId>-->
+            <!--<artifactId>deeplearning4j-modelimport</artifactId>-->
+            <!--<version>${nd4j.version}</version>-->
+        <!--</dependency>-->
 
     </dependencies>
     <repositories>
@@ -98,7 +104,7 @@
             <name>Sonatype Nexus Snapshots</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <releases>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>

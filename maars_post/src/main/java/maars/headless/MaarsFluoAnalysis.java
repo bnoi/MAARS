@@ -117,6 +117,10 @@ public class MaarsFluoAnalysis implements Runnable{
       int totalSlice = Integer.parseInt(concatenatedFluoImgs.getStringProperty("SizeZ"));
       int totalFrame = Integer.parseInt(concatenatedFluoImgs.getStringProperty("SizeT"));
 
+      if (Boolean.parseBoolean(parameters.getProjected())) {
+         concatenatedFluoImgs = ImgUtils.zProject(concatenatedFluoImgs, concatenatedFluoImgs.getCalibration());
+      }
+
       ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
       Duplicator duplicator = new Duplicator();
       for (int i = 1; i <= totalFrame; i++) {
@@ -124,9 +128,14 @@ public class MaarsFluoAnalysis implements Runnable{
          for (int j = 1; j <= totalChannel; j++) {
             String channel = arrayChannels[j - 1];
             IJ.log("Processing channel " + channel + "_" + i);
-            ImagePlus zProjectedFluoImg = ImgUtils.zProject(
-                  duplicator.run(concatenatedFluoImgs, j, j, 1, totalSlice, i, i)
-                  , concatenatedFluoImgs.getCalibration());
+            ImagePlus zProjectedFluoImg;
+            if (!Boolean.parseBoolean(parameters.getProjected())) {
+               zProjectedFluoImg = ImgUtils.zProject(
+                     duplicator.run(concatenatedFluoImgs, j, j, 1, totalSlice, i, i)
+                     , concatenatedFluoImgs.getCalibration());
+            }else{
+               zProjectedFluoImg = duplicator.run(concatenatedFluoImgs, j, j, 1, 1, i, i);
+            }
             Future future = es.submit(new FluoAnalyzer(zProjectedFluoImg, zProjectedFluoImg.getCalibration(),
                   soc, channel, Integer.parseInt(parameters.getChMaxNbSpot(channel)),
                   Double.parseDouble(parameters.getChSpotRaius(channel)),
@@ -141,10 +150,6 @@ public class MaarsFluoAnalysis implements Runnable{
       }
       System.gc();
       es.shutdown();
-      if (Boolean.parseBoolean(parameters.getProjected())) {
-         IJ.run(concatenatedFluoImgs, "Z Project...", "projection=[Max Intensity] all");
-         return (IJ.getImage());
-      }
       return concatenatedFluoImgs;
    }
 

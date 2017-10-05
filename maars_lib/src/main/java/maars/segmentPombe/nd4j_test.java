@@ -1,28 +1,18 @@
 package maars.segmentPombe;
 
-import ij.IJ;
-import ij.ImagePlus;
+import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
-import org.datavec.api.records.listener.impl.LogRecordListener;
+import org.datavec.api.records.reader.RecordReader;
 import org.datavec.api.split.FileSplit;
+import org.datavec.api.split.InputSplit;
 import org.datavec.image.loader.ImageLoader;
-import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.recordreader.ImageRecordReader;
-import org.datavec.image.recordreader.VideoRecordReader;
-import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.dataset.DataSet;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
-import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
-import org.nd4j.linalg.dataset.api.preprocessor.ImagePreProcessingScaler;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.INDArrayIndex;
-import org.nd4j.linalg.indexing.NDArrayIndex;
+import org.deeplearning4j.nn.modelimport.keras.KerasModelImport;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -39,19 +29,21 @@ public class nd4j_test {
       Random randNumGen = new Random(rngseed);
       int batchSize = 1;
       int outputNum = 2;
+      String p = "/home/tong/Desktop/all_unsorted";
+      File parentDir =  new File(p);
+      FileSplit filesInDir = new FileSplit(parentDir, ImageLoader.ALLOWED_FORMATS, randNumGen);
+      ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
+      BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, ImageLoader.ALLOWED_FORMATS, labelMaker);
 
-      ImagePlus img = IJ.openImage("/media/tong/MAARSData/MAARSData/mod20/12-06-1/BF_1/_1_MMStack_Pos0.ome.tif");
-//      File testData =  new File("/home/tong/Dropbox/data/validation");
-      System.out.println(Arrays.toString(img.getDimensions()));
-      INDArray totalArray = Nd4j.create(height, width, img.getDimensions()[3]);
-      for (int i=0; i<img.getDimensions()[3];i++){
-         img.setZ(i);
-         INDArray array = Nd4j.create(img.getProcessor().getFloatArray());
-         totalArray.put(new INDArrayIndex[]{NDArrayIndex.all(), NDArrayIndex.all(), NDArrayIndex.point(i)}, array);
-      }
-      System.out.println(totalArray.get(NDArrayIndex.point(0), NDArrayIndex.point(0), NDArrayIndex.all()));
+      ImageRecordReader recordReader = new ImageRecordReader(height,width,channels,labelMaker);
 
-//      NativeImageLoader loader = new NativeImageLoader(height, width,channels);
+      InputSplit[] filesInDirSplit = filesInDir.sample(pathFilter, 20, 50);
+      InputSplit trainData = filesInDirSplit[0];
+      InputSplit testData = filesInDirSplit[1];
+      System.out.println(trainData.length());
+      System.out.println(testData.length());
+
+      //      NativeImageLoader loader = new NativeImageLoader(height, width,channels);
 //      System.out.println(loader.asMatrix(trainData).shape());
 
       //FileSplit(Path, allowed format, random)
@@ -74,5 +66,39 @@ public class nd4j_test {
 //         System.out.println(ds);
 //         System.out.println(dataIter.getLabels());
 //      }
+
+
+      //      INDArray out = totalArray.get(NDArrayIndex.point(0), NDArrayIndex.point(0), NDArrayIndex.all());
+//      System.out.println(out);
+//      INDArray on = totalArray.get(NDArrayIndex.point(365), NDArrayIndex.point(193), NDArrayIndex.all());
+//      System.out.println(on);
+//      XYSeries outData = new XYSeries("Out");
+//      for (int i=0; i<out.length(); i++){
+//         outData.add(i, out.getDouble(i));
+//      }
+//      final XYSeriesCollection data = new XYSeriesCollection(outData);
+//      XYSeries oneData = new XYSeries("on");
+//      for (int i=0; i<on.length(); i++){
+//         oneData.add(i, on.getDouble(i));
+//      }
+//
+//      data.addSeries(oneData);
+//      final JFreeChart chart = ChartFactory.createXYLineChart(
+//            "XY Series Demo",
+//            "X",
+//            "Y",
+//            data,
+//            PlotOrientation.VERTICAL,
+//            true,
+//            true,
+//            false
+//      );
+      //
+//      final ChartPanel chartPanel = new ChartPanel(chart);
+//      chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+//      ApplicationFrame frame = new ApplicationFrame("test");
+//      frame.setContentPane(chartPanel);
+//      frame.setVisible(true);
+//      RefineryUtilities.centerFrameOnScreen(frame);
    }
 }
