@@ -112,11 +112,10 @@ public class Maars_Interface {
       HashMap map = getMitoticCellNbs(mitoDir);
       String[] colocalisation_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
             PythonPipeline.COLOCAL_SCRIPT_NAME, mitoDir + "spots" + File.separator,
-            parameters.getDetectionChForMitosis(), "GFP", mitoDir + "phases" + File.separator};
+            parameters.getDetectionChForMitosis(), "GFP", mitoDir};
       colocalisation_cmd = Stream.of(colocalisation_cmd, map.keySet().toArray(new String[map.keySet().size()])).
             flatMap(Stream::of).toArray(String[]::new);
-      FileUtils.createFolder(mitoDir + "phases");
-      PythonPipeline.runPythonScript(colocalisation_cmd, mitoDir + "colocalisation_log.txt");
+      PythonPipeline.runPythonScript(colocalisation_cmd, mitoDir + "colocalisation.log");
       ArrayList<String> cmds = new ArrayList<>();
       cmds.add(String.join(" ", mitosis_cmd));
       cmds.add(String.join(" ", colocalisation_cmd));

@@ -36,7 +36,7 @@ def generate_circle_coords(radius):
     ys = radius *np.sin(an)
     return (xs, ys)
 
-def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot,radius = 0.25):
+def process_one_cell(root, cellNb, poleCh, ktCh,radius = 0.25):
     print("processing cell %s" %cellNb)
     poleSpots = prepare_data(root,cellNb,poleCh)
     ktSpots  = prepare_data(root,cellNb,ktCh)
@@ -45,7 +45,6 @@ def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot,radius = 0.25):
     for j in [pos_x, pos_y]:
         poleSpots[j] = poleSpots[j].astype(np.float)
         ktSpots[j] = ktSpots[j].astype(np.float)
-
     merged_frameNb = sorted(list(poleSpots.index.levels[0]) + list(set(list(ktSpots.index.levels[0])) - set(list(poleSpots.index.levels[0]))))
     phase_label = np.zeros(merged_frameNb[-1]+1)
     poleDotNb = np.zeros(merged_frameNb[-1]+1)
@@ -55,7 +54,7 @@ def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot,radius = 0.25):
     for x in merged_frameNb:
         skip=False
         if x in poleSpots.index.levels[0]:
-            current_frame_poles = poleSpots.loc[x]
+            current_frame_poles = poleSpots.loc[x] 
             n_pole = len(current_frame_poles)
             poleDotNb[x] = n_pole
             if n_pole >1:
@@ -80,11 +79,9 @@ def process_one_cell(root, cellNb, poleCh, ktCh, savingRoot,radius = 0.25):
             phase_label[x]= 2
         else:
             phase_label[x]= 1
-    # print(cfpSpots['phase'][cfpSpots['phase']=='metaphase'])
-    # indexsOfMetaphase = list(cfpSpots.index.levels[0][cfpSpots['phase'][cfpSpots['phase']=='metaphase'].index.labels[0]])
-    phase_d = pd.DataFrame({'pole_dotNb':poleDotNb, 'kt_dotNb':ktDotNb, 'phase':phase_label})
+    phase_d = pd.DataFrame.from_dict({'pole_dotNb':poleDotNb, 'kt_dotNb':ktDotNb, 'phase':phase_label})
     phase_d = phase_d[(phase_d.T != 0).any()]
-    phase_d.to_csv(savingRoot +cellNb+"_anot_spots.csv")
+    return cellNb, phase_d
 
 parser = argparse.ArgumentParser(description='Find colocalisation state of each frame')
 parser.add_argument('root', metavar='root Path', type=str,
@@ -97,12 +94,14 @@ args = parser.parse_args()
 pool = mp.Pool(mp.cpu_count())
 tasks = []
 for cellNb in args.cellNbs:
-    tasks.append((args.root, cellNb, args.poleChannel, args.ktChannel, args.savingRoot))
+    tasks.append((args.root, cellNb, args.poleChannel, args.ktChannel))
 results = [pool.apply_async( process_one_cell, t ) for t in tasks]
+allD = dict()
 for result in results:
-    result.get()
+    nb, table = result.get()
+    allD[nb] = table.T
 pool.close()
-
+pd.concat(allD).to_csv(args.savingRoot + "colocalisation.csv")
 
     # fig,ax = plt.subplots(figsize=(5,5))
     # meta_color = "red"

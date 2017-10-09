@@ -2,13 +2,9 @@ package maars.segmentPombe;
 
 import org.datavec.api.io.filters.BalancedPathFilter;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
-import org.datavec.api.records.reader.RecordReader;
 import org.datavec.api.split.FileSplit;
 import org.datavec.api.split.InputSplit;
 import org.datavec.image.loader.ImageLoader;
-import org.datavec.image.recordreader.ImageRecordReader;
-import org.deeplearning4j.nn.modelimport.keras.KerasModelImport;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,20 +18,15 @@ public class nd4j_test {
    private static Logger log = LoggerFactory.getLogger(nd4j_test.class);
 
    public static void main(String[] args) throws Exception{
-      int height= 2160;
-      int width = 2560;
-      int channels = 3;
       int rngseed = 123;
       Random randNumGen = new Random(rngseed);
       int batchSize = 1;
       int outputNum = 2;
-      String p = "/home/tong/Desktop/all_unsorted";
+      String p = "/media/tong/screening/100x/Mitosis/795_wt/croppedImgs/25_CFP.tif";
       File parentDir =  new File(p);
       FileSplit filesInDir = new FileSplit(parentDir, ImageLoader.ALLOWED_FORMATS, randNumGen);
       ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
       BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, ImageLoader.ALLOWED_FORMATS, labelMaker);
-
-      ImageRecordReader recordReader = new ImageRecordReader(height,width,channels,labelMaker);
 
       InputSplit[] filesInDirSplit = filesInDir.sample(pathFilter, 20, 50);
       InputSplit trainData = filesInDirSplit[0];
@@ -43,7 +34,9 @@ public class nd4j_test {
       System.out.println(trainData.length());
       System.out.println(testData.length());
 
-      //      NativeImageLoader loader = new NativeImageLoader(height, width,channels);
+
+//      NativeImageLoader loader = new NativeImageLoader();
+
 //      System.out.println(loader.asMatrix(trainData).shape());
 
       //FileSplit(Path, allowed format, random)

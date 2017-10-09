@@ -1,6 +1,5 @@
 package maars.headless.batchFluoAnalysis;
 
-import ij.IJ;
 import maars.headless.MaarsFluoAnalysis;
 import maars.main.MaarsParameters;
 import net.imagej.ops.AbstractOp;
