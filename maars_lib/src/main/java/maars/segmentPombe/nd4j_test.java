@@ -1,10 +1,14 @@
 package maars.segmentPombe;
 
-import org.datavec.api.io.filters.BalancedPathFilter;
-import org.datavec.api.io.labels.ParentPathLabelGenerator;
-import org.datavec.api.split.FileSplit;
-import org.datavec.api.split.InputSplit;
-import org.datavec.image.loader.ImageLoader;
+//import org.datavec.api.io.filters.BalancedPathFilter;
+//import org.datavec.api.io.labels.ParentPathLabelGenerator;
+//import org.datavec.api.split.FileSplit;
+//import org.datavec.api.split.InputSplit;
+//import org.datavec.image.loader.ImageLoader;
+import org.bytedeco.javacpp.opencv_core.*;
+import org.bytedeco.javacpp.opencv_highgui;
+import org.bytedeco.javacpp.opencv_highgui.*;
+import org.bytedeco.javacpp.opencv_imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,17 +26,24 @@ public class nd4j_test {
       Random randNumGen = new Random(rngseed);
       int batchSize = 1;
       int outputNum = 2;
-      String p = "/media/tong/screening/100x/Mitosis/795_wt/croppedImgs/25_CFP.tif";
+      String p = "/Users/tongli/Desktop/100x/Mitosis/795_wt/figs/102.png";
       File parentDir =  new File(p);
-      FileSplit filesInDir = new FileSplit(parentDir, ImageLoader.ALLOWED_FORMATS, randNumGen);
-      ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
-      BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, ImageLoader.ALLOWED_FORMATS, labelMaker);
+      Mat img = opencv_imgcodecs.imread(p);
+      opencv_highgui.namedWindow("Linear Blend", opencv_highgui.WINDOW_AUTOSIZE); // Create Window
 
-      InputSplit[] filesInDirSplit = filesInDir.sample(pathFilter, 20, 50);
-      InputSplit trainData = filesInDirSplit[0];
-      InputSplit testData = filesInDirSplit[1];
-      System.out.println(trainData.length());
-      System.out.println(testData.length());
+      opencv_highgui.startWindowThread();
+      opencv_highgui.namedWindow("preview");
+      opencv_highgui.imshow("test", img);
+      opencv_highgui.waitKey(0);
+//      FileSplit filesInDir = new FileSplit(parentDir, ImageLoader.ALLOWED_FORMATS, randNumGen);
+//      ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
+//      BalancedPathFilter pathFilter = new BalancedPathFilter(randNumGen, ImageLoader.ALLOWED_FORMATS, labelMaker);
+//
+//      InputSplit[] filesInDirSplit = filesInDir.sample(pathFilter, 20, 50);
+//      InputSplit trainData = filesInDirSplit[0];
+//      InputSplit testData = filesInDirSplit[1];
+//      System.out.println(trainData.length());
+//      System.out.println(testData.length());
 
 
 //      NativeImageLoader loader = new NativeImageLoader();
