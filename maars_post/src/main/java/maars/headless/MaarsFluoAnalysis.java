@@ -97,10 +97,7 @@ public class MaarsFluoAnalysis implements Runnable{
             }
          }
          soc.reset();
-         concatenatedFluoImgs.close();
-         for (int i = 0; i <10; i++) {
-            System.gc();
-         }
+         System.gc();
       }
       System.setErr(curr_err);
       System.setOut(curr_out);
