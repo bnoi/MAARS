@@ -7,8 +7,7 @@ import java.io.IOException;
 
 public class PythonPipeline {
    public static final String ANALYSING_SCRIPT_NAME = "processMitosis.py";
-   public static final String TRACKMATE_LOADER_NAME = "tmXmlToDataFrame.py";
-   public static final String COLOCAL_SCRIPT_NAME = "kt_spb_colocalisation.py";
+   public static final String TRACKMATE_LOADER_NAME = "TMxml2dflib.py";
 
    /**
     * @param cmd           command to execute

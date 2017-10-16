@@ -110,15 +110,8 @@ public class Maars_Interface {
             parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX), "-minimumPeriod", parameters.getMinimumMitosisDuration()};
       PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
       HashMap map = getMitoticCellNbs(mitoDir);
-      String[] colocalisation_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
-            PythonPipeline.COLOCAL_SCRIPT_NAME, mitoDir + "spots" + File.separator,
-            parameters.getDetectionChForMitosis(), "GFP", mitoDir};
-      colocalisation_cmd = Stream.of(colocalisation_cmd, map.keySet().toArray(new String[map.keySet().size()])).
-            flatMap(Stream::of).toArray(String[]::new);
-      PythonPipeline.runPythonScript(colocalisation_cmd, mitoDir + "colocalisation.log");
       ArrayList<String> cmds = new ArrayList<>();
       cmds.add(String.join(" ", mitosis_cmd));
-      cmds.add(String.join(" ", colocalisation_cmd));
       String bashPath = mitoDir + "pythonAnalysis.sh";
       FileUtils.writeScript(bashPath,cmds);
       IJ.log("Script saved");
@@ -129,7 +122,6 @@ public class Maars_Interface {
       FileUtils.createFolder(MaarsParameters.DEPS_DIR);
       FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.TRACKMATE_LOADER_NAME);
       FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.ANALYSING_SCRIPT_NAME);
-      FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.COLOCAL_SCRIPT_NAME);
    }
 
 
