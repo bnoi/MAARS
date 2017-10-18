@@ -7,8 +7,6 @@ import org.micromanager.Studio;
 import org.micromanager.data.ProcessorConfigurator;
 import org.micromanager.data.ProcessorFactory;
 import org.micromanager.data.ProcessorPlugin;
-import org.micromanager.plugins.maars.segmentation.MaarsOTFSegConfigurator;
-import org.micromanager.plugins.maars.segmentation.MaarsOTFSegFactory;
 import org.micromanager.plugins.maars.segmentation.MaarsOTFSegPlugin;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;

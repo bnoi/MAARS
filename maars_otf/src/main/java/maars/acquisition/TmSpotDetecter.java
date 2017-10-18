@@ -2,10 +2,7 @@ package maars.acquisition;
 
 import ij.IJ;
 import maars.agents.SocSet;
-import org.micromanager.data.Image;
 import org.micromanager.internal.MMStudio;
-
-import java.util.List;
 
 /**
  * Created by tong on 23/06/17.

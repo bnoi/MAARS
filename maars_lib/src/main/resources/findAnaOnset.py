@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 root = "/media/tong/screening/100x/Mitosis_analysis/795_wt/"
 timeBoard = pd.read_csv(root + "mitosis_time_board.csv", header=None, index_col=0)
 phaseDectetion = pd.read_csv(root + "colocalisation.csv", index_col=[0,1])

@@ -11,8 +11,6 @@ import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-import java.awt.*;
-
 /**
  * This ImageJ plugin does Watershed segmentation of the EDM, similar to
  * Process>Binary>Watershed but with adjustable sensitivity.

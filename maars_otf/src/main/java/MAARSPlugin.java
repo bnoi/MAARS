@@ -1,17 +1,10 @@
 import maars.gui.MaarsMainDialog;
-import maars.io.IOUtils;
-import maars.main.MaarsParameters;
 import maars.main.Maars_Interface;
-import maars.utils.FileUtils;
 import org.micromanager.MenuPlugin;
 import org.micromanager.Studio;
 import org.micromanager.internal.MMStudio;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 /**
  * @author Tong LI, mail: tongli.bioinfo@gmail.com

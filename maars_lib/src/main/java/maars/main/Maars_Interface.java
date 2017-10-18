@@ -2,28 +2,20 @@ package maars.main;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.measure.ResultsTable;
-import ij.plugin.Concatenator;
-import ij.plugin.Duplicator;
-import ij.plugin.HyperStackConverter;
 import maars.agents.Cell;
 import maars.agents.DefaultSetOfCells;
-import maars.cellAnalysis.FluoAnalyzer;
 import maars.cellAnalysis.PythonPipeline;
-import maars.display.SOCVisualizer;
 import maars.io.IOUtils;
 import maars.utils.FileUtils;
-import maars.utils.ImgUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Created by tongli on 09/06/2017.
@@ -92,12 +84,11 @@ public class Maars_Interface {
       }
    }
 
-   static HashMap getMitoticCellNbs(String mitoDir) {
-      return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
-   }
+//   static HashMap getMitoticCellNbs(String mitoDir) {
+//      return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
+//   }
 
    public static void analyzeMitosisDynamic(DefaultSetOfCells soc, MaarsParameters parameters) {
-      // TODO need to find a place for the metadata, maybe in images
       IJ.log("Start python analysis");
       String pos = soc.getPosLabel();
       String pathToRoot = parameters.getSavingPath() + File.separator;
@@ -109,13 +100,13 @@ public class Maars_Interface {
             pos, parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX),
             parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX), "-minimumPeriod", parameters.getMinimumMitosisDuration()};
       PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
-      HashMap map = getMitoticCellNbs(mitoDir);
+//      HashMap map = getMitoticCellNbs(mitoDir);
       ArrayList<String> cmds = new ArrayList<>();
       cmds.add(String.join(" ", mitosis_cmd));
       String bashPath = mitoDir + "pythonAnalysis.sh";
       FileUtils.writeScript(bashPath,cmds);
       IJ.log("Script saved");
-      findAbnormalCells(mitoDir, soc, map);
+//      findAbnormalCells(mitoDir, soc, map);
    }
 
    public static void copyDeps(){

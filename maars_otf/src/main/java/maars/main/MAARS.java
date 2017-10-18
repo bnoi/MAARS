@@ -1,30 +1,18 @@
 package maars.main;
 
-import ij.IJ;
-import ij.ImagePlus;
-import maars.acquisition.MAARS_mda;
-import maars.agents.DefaultSetOfCells;
-import maars.agents.SetOfCells;
 import maars.agents.SocSet;
-import maars.cellAnalysis.FluoAnalyzer;
 import maars.display.SOCVisualizer;
-import maars.gui.MaarsMainDialog;
 import maars.io.IOUtils;
-import maars.utils.FileUtils;
 import mmcorej.CMMCore;
-import org.micromanager.data.*;
 import org.micromanager.internal.MMStudio;
-import org.micromanager.internal.utils.ReportingUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 
 /**
  * Main MaarsOTFSeg program

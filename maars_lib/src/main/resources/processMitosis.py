@@ -1,17 +1,18 @@
 # coding: utf-8
 # !/usr/bin/env python3
 
-import matplotlib.pyplot as plt
+import cellh5
 import multiprocessing as mp
 import numpy as np
 import pandas as pd
+import tifffile
 from argparse import ArgumentParser
 from os import path, mkdir, listdir
 from scipy import stats
 from shutil import copyfile
-import tifffile
-import cellh5
+
 import TMxml2dflib
+
 
 def createOutputDirs(mitosisDir, cropImgs, spots, features, figs):
     for targetDir in [cropImgs, spots, features, figs]:

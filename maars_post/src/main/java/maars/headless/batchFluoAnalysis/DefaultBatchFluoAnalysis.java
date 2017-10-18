@@ -2,6 +2,7 @@ package maars.headless.batchFluoAnalysis;
 
 import maars.headless.MaarsFluoAnalysis;
 import maars.main.MaarsParameters;
+import maars.main.Maars_Interface;
 import net.imagej.ops.AbstractOp;
 import org.scijava.plugin.Attr;
 import org.scijava.plugin.Parameter;
@@ -25,6 +26,7 @@ public class DefaultBatchFluoAnalysis extends AbstractOp implements BatchFluoAna
    }
 
    private void fluoAnalysis(String[] dirs, String configName){
+      Maars_Interface.copyDeps();
       for (String d : dirs) {
          System.out.println(d);
          MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
