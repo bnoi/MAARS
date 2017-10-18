@@ -12,7 +12,6 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.regex.Pattern;
 import fiji.Debug;
 /**
@@ -37,10 +36,10 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
          parameter.setSavingPath(d);
          parameter.save(d);
          String segPath = d + File.separator + parameter.getSegmentationParameter(MaarsParameters.SEG_PREFIX);
-         Collection<String> posNbs = MaarsFluoAnalysis.getPositionSuffix(segPath);
+         String[] posNbs = MaarsFluoAnalysis.getPositionSuffix(segPath);
          for (String pos: posNbs){
             for (String f : FileUtils.getTiffWithPattern(segPath, ".*.tif")){
-               if (Pattern.matches(pos+"\\.ome\\.tif", f)){
+               if (Pattern.matches(".*MMStack_" + pos+"\\.ome\\.tif", f)){
                   ImagePlus img = IJ.openImage(segPath + File.separator + f);
                   Thread th = new Thread(new MaarsSegmentation(parameter, img, pos));
                   th.start();

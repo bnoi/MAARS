@@ -33,15 +33,12 @@ import java.util.regex.Pattern;
  */
 public class MaarsFluoAnalysis implements Runnable{
    public static final String MITODIRNAME = "Mitosis";
-   Collection<String> posNbs_;
+   String[] posNbs_;
    MaarsParameters parameters_;
-   String fluoImgsDir;
    public MaarsFluoAnalysis(MaarsParameters parameters){
-      fluoImgsDir= FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
-            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX) + File.separator;
-//      String segDir = FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
-//            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX);
-      posNbs_ = getPositionSuffix(fluoImgsDir);
+      String segDir = FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
+            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX);
+      posNbs_ = getPositionSuffix(segDir);
       parameters_ = parameters;
    }
    @Override
@@ -50,6 +47,8 @@ public class MaarsFluoAnalysis implements Runnable{
       PrintStream curr_err = null;
       PrintStream curr_out = null;
       DefaultSetOfCells soc;
+      String fluoImgsDir= FileUtils.convertPath(parameters_.getSavingPath()) + File.separator +
+            parameters_.getFluoParameter(MaarsParameters.FLUO_PREFIX) + File.separator;
       String segAnaDir = FileUtils.convertPath(parameters_.getSavingPath()) + File.separator +
             parameters_.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + Maars_Interface.SEGANALYSIS_SUFFIX;
       for (String posNb:posNbs_) {
@@ -145,7 +144,7 @@ public class MaarsFluoAnalysis implements Runnable{
       return concatenatedFluoImgs.duplicate();
    }
 
-   public static Collection<String> getPositionSuffix(String path){
+   public static String[] getPositionSuffix(String path){
       String tifName = null;
       File[] listOfFiles = new File(path).listFiles();
       for (File f:listOfFiles){
@@ -153,16 +152,22 @@ public class MaarsFluoAnalysis implements Runnable{
             tifName = f.getName();
          }
       }
-      HashMap<String, String> names = populateSeriesImgNames(path + File.separator + tifName);
-      return names.keySet();
+      HashMap<String, String> namesDic = populateSeriesImgNames(path + File.separator + tifName);
+      String[] names = new String[namesDic.size()];
+      names = namesDic.keySet().toArray(names);
+      String[] pos = new String[names.length];
+      for (int i =0; i< names.length; i++){
+         String[] splitName = names[i].split("_");
+         pos[i] = splitName[splitName.length-1];
+      }
+      return pos;
    }
 
    private static ImagePlus loadImgOfPosition(String pathToFluoImgsDir, String pos) {
       File[] listOfFiles = new File(pathToFluoImgsDir).listFiles();
       String fluoTiffName = null;
       for (File f:listOfFiles){
-         IJ.log(pos+"\\..*      " + f.getName());
-         if (Pattern.matches(pos+"\\..*", f.getName())){
+         if (Pattern.matches(".*MMStack_" + pos+"\\..*", f.getName())){
             fluoTiffName = f.getName();
          }
       }
