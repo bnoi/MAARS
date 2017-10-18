@@ -49,5 +49,10 @@
             <!--<version>5.5.2</version>-->
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>sc.fiji</groupId>
+            <artifactId>fiji-lib</artifactId>
+        </dependency>
     </dependencies>
 </project>

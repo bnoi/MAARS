@@ -14,30 +14,28 @@ import java.io.File;
 public class DefaultBatchFluoAnalysis extends AbstractOp implements BatchFluoAnalysis{
 
    @Parameter
-   private String[] dirs;
+   private String d;
 
    @Parameter
    private String configName;
 
    @Override
    public void run() {
-      fluoAnalysis(dirs,configName);
+      fluoAnalysis(d,configName);
    }
 
-   private void fluoAnalysis(String[] dirs, String configName){
+   private void fluoAnalysis(String d, String configName){
       Maars_Interface.copyDeps();
-      for (String d : dirs) {
-         System.out.println(d);
-         MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
-         parameter.setSavingPath(d);
-         parameter.save(d);
-         Thread th = new Thread(new MaarsFluoAnalysis(parameter));
-         th.start();
-         try {
-            th.join();
-         } catch (InterruptedException e) {
-            e.printStackTrace();
-         }
+      System.out.println(d);
+      MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
+      parameter.setSavingPath(d);
+      parameter.save(d);
+      Thread th = new Thread(new MaarsFluoAnalysis(parameter));
+      th.start();
+      try {
+         th.join();
+      } catch (InterruptedException e) {
+         e.printStackTrace();
       }
    }
 }

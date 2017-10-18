@@ -2,9 +2,9 @@ package maars.headless.batchSegmentation;
 
 import ij.IJ;
 import ij.ImagePlus;
+import maars.headless.batchFluoAnalysis.MaarsFluoAnalysis;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
-import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
 import net.imagej.ops.AbstractOp;
 import org.scijava.plugin.Attr;
@@ -12,7 +12,9 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import java.io.File;
-
+import java.util.Collection;
+import java.util.regex.Pattern;
+import fiji.Debug;
 /**
  * Created by tongli on 13/06/2017.
  */
@@ -35,17 +37,24 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
          parameter.setSavingPath(d);
          parameter.save(d);
          String segPath = d + File.separator + parameter.getSegmentationParameter(MaarsParameters.SEG_PREFIX);
-         for (String f : FileUtils.getTiffWithPattern(segPath, ".*.tif")){
-            ImagePlus img = IJ.openImage(segPath + File.separator + f);
-            Thread th = new Thread(new MaarsSegmentation(parameter, img,
-                  Maars_Interface.getPosNbs(new String[]{f})[0]));
-            th.start();
-            try {
-               th.join();
-            } catch (InterruptedException e) {
-               e.printStackTrace();
+         Collection<String> posNbs = MaarsFluoAnalysis.getPositionSuffix(segPath);
+         for (String pos: posNbs){
+            for (String f : FileUtils.getTiffWithPattern(segPath, ".*.tif")){
+               if (Pattern.matches(pos+"\\.ome\\.tif", f)){
+                  ImagePlus img = IJ.openImage(segPath + File.separator + f);
+                  Thread th = new Thread(new MaarsSegmentation(parameter, img, pos));
+                  th.start();
+                  try {
+                     th.join();
+                  } catch (InterruptedException e) {
+                     e.printStackTrace();
+                  }
+               }
             }
          }
       }
+   }
+   public static void main(String[] args){
+      Debug.run("","");
    }
 }

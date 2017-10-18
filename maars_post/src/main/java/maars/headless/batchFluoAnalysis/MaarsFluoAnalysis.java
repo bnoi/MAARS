@@ -8,8 +8,10 @@ import loci.formats.FormatException;
 import loci.formats.ImageReader;
 import loci.formats.MetadataTools;
 import loci.formats.meta.IMetadata;
+import maars.agents.Cell;
 import maars.agents.DefaultSetOfCells;
 import maars.cellAnalysis.FluoAnalyzer;
+import maars.cellAnalysis.PythonPipeline;
 import maars.display.SOCVisualizer;
 import maars.io.IOUtils;
 import maars.main.MaarsParameters;
@@ -17,14 +19,8 @@ import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,11 +32,16 @@ import java.util.regex.Pattern;
  * Created by tong on 30/06/17.
  */
 public class MaarsFluoAnalysis implements Runnable{
-   String[] posNbs_;
+   public static final String MITODIRNAME = "Mitosis";
+   Collection<String> posNbs_;
    MaarsParameters parameters_;
+   String fluoImgsDir;
    public MaarsFluoAnalysis(MaarsParameters parameters){
-      String[] imgNames = Maars_Interface.getBfImgs(parameters);
-      posNbs_ = Maars_Interface.getPosNbs(imgNames);
+      fluoImgsDir= FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
+            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX) + File.separator;
+//      String segDir = FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
+//            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX);
+      posNbs_ = getPositionSuffix(fluoImgsDir);
       parameters_ = parameters;
    }
    @Override
@@ -49,11 +50,10 @@ public class MaarsFluoAnalysis implements Runnable{
       PrintStream curr_err = null;
       PrintStream curr_out = null;
       DefaultSetOfCells soc;
-      String fluoImgsDir = FileUtils.convertPath(parameters_.getSavingPath()) + File.separator +
-            parameters_.getFluoParameter(MaarsParameters.FLUO_PREFIX) + File.separator;
       String segAnaDir = FileUtils.convertPath(parameters_.getSavingPath()) + File.separator +
             parameters_.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + Maars_Interface.SEGANALYSIS_SUFFIX;
       for (String posNb:posNbs_) {
+         IJ.log(posNb);
          ImagePlus concatenatedFluoImgs = null;
          soc = new DefaultSetOfCells(posNb);
          String currentPosPrefix = segAnaDir + posNb + File.separator;
@@ -92,7 +92,7 @@ public class MaarsFluoAnalysis implements Runnable{
                IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                      + " sec for writing results");
                if (parameters_.useDynamic()) {
-                  Maars_Interface.analyzeMitosisDynamic(soc, parameters_);
+                  analyzeMitosisDynamic(soc, parameters_);
                }
             }
          }
@@ -145,19 +145,33 @@ public class MaarsFluoAnalysis implements Runnable{
       return concatenatedFluoImgs.duplicate();
    }
 
+   public static Collection<String> getPositionSuffix(String path){
+      String tifName = null;
+      File[] listOfFiles = new File(path).listFiles();
+      for (File f:listOfFiles){
+         if (f.getName().endsWith(".tif") || f.getName().endsWith(".tiff")){
+            tifName = f.getName();
+         }
+      }
+      HashMap<String, String> names = populateSeriesImgNames(path + File.separator + tifName);
+      return names.keySet();
+   }
+
    private static ImagePlus loadImgOfPosition(String pathToFluoImgsDir, String pos) {
       File[] listOfFiles = new File(pathToFluoImgsDir).listFiles();
       String fluoTiffName = null;
       for (File f:listOfFiles){
-         if (Pattern.matches(".*_MMStack_"+pos+"\\..*", f.getName())){
+         IJ.log(pos+"\\..*      " + f.getName());
+         if (Pattern.matches(pos+"\\..*", f.getName())){
             fluoTiffName = f.getName();
          }
       }
+      assert fluoTiffName!= null;
       IJ.log(fluoTiffName);
-      HashMap map = populateSeriesImgNames(pathToFluoImgsDir + File.separator + fluoTiffName);
+      HashMap<String, String> map = populateSeriesImgNames(pathToFluoImgsDir + File.separator + fluoTiffName);
       String serie_number;
       if (map.size() !=1){
-         serie_number = (String) map.get(fluoTiffName.split("\\.")[0]);
+         serie_number = map.get(fluoTiffName.split("\\.")[0]);
          IJ.log(serie_number + " selected");
       }else{
          serie_number = "";
@@ -166,10 +180,10 @@ public class MaarsFluoAnalysis implements Runnable{
       return im2;
    }
 
-   private static HashMap populateSeriesImgNames(String pathToTiffFile) {
+   private static HashMap<String, String> populateSeriesImgNames(String pathToTiffFile) {
       HashMap<String, String> seriesImgNames = new HashMap<>();
-      IMetadata omexmlMetadata = MetadataTools.createOMEXMLMetadata();
       ImageReader reader = new ImageReader();
+      IMetadata omexmlMetadata = MetadataTools.createOMEXMLMetadata();
       reader.setMetadataStore(omexmlMetadata);
       try {
          reader.setId(pathToTiffFile);
@@ -185,5 +199,73 @@ public class MaarsFluoAnalysis implements Runnable{
       }
       IJ.log(seriesCount + " series registered");
       return seriesImgNames;
+   }
+
+   private static void findAbnormalCells(String mitoDir,
+                                         DefaultSetOfCells soc,
+                                         HashMap map) {
+      if (FileUtils.exists(mitoDir)) {
+         PrintWriter out = null;
+         try {
+            out = new PrintWriter(mitoDir + File.separator + "abnormalCells.txt");
+         } catch (FileNotFoundException e) {
+            IOUtils.printErrorToIJLog(e);
+         }
+
+         for (Object cellNb : map.keySet()) {
+            int cellNbInt = Integer.parseInt(String.valueOf(cellNb));
+            int anaBOnsetFrame = Integer.valueOf(((String[]) map.get(cellNb))[2]);
+            int lastAnaphaseFrame = Integer.valueOf(((String[]) map.get(cellNb))[3]);
+            Cell cell = soc.getCell(cellNbInt);
+            cell.setAnaBOnsetFrame(anaBOnsetFrame);
+            ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
+            assert out != null;
+            if (spotInBtwnFrames.size() > 0) {
+               Collections.sort(spotInBtwnFrames);
+               int laggingTimePoint = spotInBtwnFrames.get(spotInBtwnFrames.size() - 1);
+               if (laggingTimePoint > anaBOnsetFrame && laggingTimePoint < lastAnaphaseFrame) {
+                  String laggingMessage = "Lagging :" + cellNb + "_lastLaggingTimePoint_" + laggingTimePoint + "_anaBonset_" + anaBOnsetFrame;
+                  out.println(laggingMessage);
+                  IJ.log(laggingMessage);
+                  IJ.openImage(mitoDir + File.separator + "croppedImgs"
+                        + File.separator + cellNb + "_GFP.tif").show();
+               }
+            }
+            //TODO to show unaligned cell
+            if (cell.unalignedSpotFrames().size() > 0) {
+               String unalignKtMessage = "Unaligned : Cell " + cellNb + " detected with unaligned kinetochore(s)";
+               IJ.log(unalignKtMessage);
+               out.println(unalignKtMessage);
+            }
+         }
+         assert out != null;
+         out.close();
+         IJ.log("lagging detection finished");
+      }
+   }
+
+//   static HashMap getMitoticCellNbs(String mitoDir) {
+//      return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
+//   }
+
+   public static void analyzeMitosisDynamic(DefaultSetOfCells soc, MaarsParameters parameters) {
+      IJ.log("Start python analysis");
+      String pos = soc.getPosLabel();
+      String pathToRoot = parameters.getSavingPath() + File.separator;
+      String mitoDir = pathToRoot + MITODIRNAME + File.separator + pos + File.separator;
+      FileUtils.createFolder(mitoDir);
+      String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
+            PythonPipeline.ANALYSING_SCRIPT_NAME, pathToRoot, parameters.getDetectionChForMitosis(),
+            parameters.getCalibration(), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
+            pos, parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX),
+            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX), "-minimumPeriod", parameters.getMinimumMitosisDuration()};
+      PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
+//      HashMap map = getMitoticCellNbs(mitoDir);
+      ArrayList<String> cmds = new ArrayList<>();
+      cmds.add(String.join(" ", mitosis_cmd));
+      String bashPath = mitoDir + "pythonAnalysis.sh";
+      FileUtils.writeScript(bashPath,cmds);
+      IJ.log("Script saved");
+//      findAbnormalCells(mitoDir, soc, map);
    }
 }
