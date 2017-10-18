@@ -1,4 +1,4 @@
-package maars.headless;
+package maars.headless.batchFluoAnalysis;
 
 import ij.IJ;
 import ij.ImagePlus;

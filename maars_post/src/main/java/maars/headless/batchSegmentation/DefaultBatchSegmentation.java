@@ -32,6 +32,8 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
       for (String d : dirs) {
          System.out.println(d);
          MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
+         parameter.setSavingPath(d);
+         parameter.save(d);
          String segPath = d + File.separator + parameter.getSegmentationParameter(MaarsParameters.SEG_PREFIX);
          for (String f : FileUtils.getTiffWithPattern(segPath, ".*.tif")){
             ImagePlus img = IJ.openImage(segPath + File.separator + f);

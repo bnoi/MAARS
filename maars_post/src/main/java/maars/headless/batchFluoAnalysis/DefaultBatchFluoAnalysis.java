@@ -1,6 +1,5 @@
 package maars.headless.batchFluoAnalysis;
 
-import maars.headless.MaarsFluoAnalysis;
 import maars.main.MaarsParameters;
 import maars.main.Maars_Interface;
 import net.imagej.ops.AbstractOp;
@@ -30,6 +29,8 @@ public class DefaultBatchFluoAnalysis extends AbstractOp implements BatchFluoAna
       for (String d : dirs) {
          System.out.println(d);
          MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
+         parameter.setSavingPath(d);
+         parameter.save(d);
          Thread th = new Thread(new MaarsFluoAnalysis(parameter));
          th.start();
          try {
