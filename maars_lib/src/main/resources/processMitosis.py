@@ -13,47 +13,10 @@ from shutil import copyfile
 
 import TMxml2dflib
 
-
-def createOutputDirs(mitosisDir, cropImgs, spots, features, figs):
-    for targetDir in [cropImgs, spots, features, figs]:
-        d = mitosisDir + targetDir + path.sep
-        if not path.isdir(d):
-            mkdir(d)
-
-def find_slope_change_point(elongation, minSegLen, timeInterval, majorAxieLen, cellNb):
-    elongation = extendMitoRegion(elongation, minSegLen)
-    slopes = dict()
-    #     normaliz spindle size with cell length
-    normed_anaphase = elongation / majorAxieLen
-    for i in range(len(normed_anaphase)):
-        one_seg = normed_anaphase.iloc[i:i + minSegLen]
-        par = np.polyfit(one_seg.index, one_seg, 1, full=True)
-        slope = par[0][0]
-        slopes[one_seg.index[0]] = slope
-    slopes = pd.DataFrame.from_dict(slopes).T
-    slope_changes = pd.DataFrame(columns=['slopeDiff'])
-    for i in range(len(slopes.index) - 2 * minSegLen):
-        current_slope_change = slopes.loc[slopes.index[i + 2*minSegLen]] - slopes.loc[slopes.index[i + minSegLen]]
-        slope_changes.loc[slopes.index[i]] = current_slope_change[0]
-    slope_changes = slope_changes.sort_index()
-    first_max_slope_change_index = int(slope_changes.idxmax()) if int(slope_changes.idxmax()) >= 0 else normed_anaphase.index[minSegLen]
-    return (str(cellNb), normed_anaphase.index[minSegLen], first_max_slope_change_index, normed_anaphase.index[-minSegLen])
-
-    # range_to_null = 480 / timeInterval
-    # # try not to find the second max slope change close to the first one
-    # slope_changes.loc[
-    # first_max_slope_change_index - range_to_null:first_max_slope_change_index + range_to_null] = -np.inf
-    # maxInd = slope_changes.idxmax()['slopeDiff']
-    # maxInd = int(maxInd if not np.isnan(maxInd)  else 0)
-    # second_max_slope_change_index = normed_anaphase.index[minSegLen]
-    # if maxInd > normed_anaphase.index[minSegLen] and slope_changes.loc[maxInd]['slopeDiff'] > 0:
-    #     second_max_slope_change_index = maxInd
-    # line = str(cellNb) + ","
-    # line += str(normed_anaphase.index[minSegLen]) + ","
-    # line += ",".join(str(int(e)) for e in sorted([first_max_slope_change_index, second_max_slope_change_index]))
-    # line += "," + str(normed_anaphase.index[-minSegLen]) + "\n"
-    # return line
-
+def createOutputDirs(mitosisDir, outputDirs):
+    for targetDir in outputDirs:
+        if not path.exists(mitosisDir + targetDir + path.sep):
+            mkdir(mitosisDir + targetDir + path.sep)
 
 def set_attributes_from_cmd_line():
     parser = ArgumentParser(
@@ -87,13 +50,12 @@ def set_attributes_from_cmd_line():
                         type=int, default=200)
     return parser.parse_args()
 
-
 def getAllCellNumbers(features_dir):
     return pd.Series([int(f.split("_")[0]) for f in listdir(features_dir)]).unique()
 
 def extendMitoRegion(mitoregion, extendLen):
     dlist = extendLen*[mitoregion.iloc[0]] + list(mitoregion) + extendLen*[mitoregion.iloc[-1]]
-    indlist = list(np.arange(mitoregion.index[0]- extendLen, mitoregion.index[0])) +        list(mitoregion.index) + list(np.arange(mitoregion.index[-1], mitoregion.index[-1]+extendLen))
+    indlist = list(np.arange(mitoregion.index[0]- extendLen, mitoregion.index[0])) + list(mitoregion.index) + list(np.arange(mitoregion.index[-1], mitoregion.index[-1]+extendLen))
     return pd.DataFrame(dlist, index=indlist,columns={"SpLength"}).interpolate()
 
 def find_mitotic_region(featureOfOneCell, minSegLen, p):
@@ -143,7 +105,7 @@ def analyse_each_cell(pool, minSegLen, elongationRegions, cellRois, mitosisDir):
     for job in jobs:
         res = job.get()
         timePoints[res[0]] = res[1:]
-    return timePoints
+    return pd.DataFrame.from_dict(timePoints).T
 
 
 def copy_mitosis_files(elongationRegions, channels, fluoDir, mitosisDir, cropImgs, spots, features):
@@ -178,12 +140,46 @@ def copy_mitosis_files(elongationRegions, channels, fluoDir, mitosisDir, cropImg
 #         plt.savefig(mitosisFigDir + str(cellNb), transparent=True, bbox_inches='tight')
 #         plt.close(fig)
 
+def find_slope_change_point(elongation, minSegLen, timeInterval, majorAxieLen, cellNb):
+    elongation = extendMitoRegion(elongation, minSegLen)
+    slopes = dict()
+    #     normaliz spindle size with cell length
+    normed_anaphase = elongation / majorAxieLen
+    for i in range(len(normed_anaphase)):
+        one_seg = normed_anaphase.iloc[i:i + minSegLen]
+        par = np.polyfit(one_seg.index, one_seg, 1, full=True)
+        slope = par[0][0]
+        slopes[one_seg.index[0]] = slope
+    slopes = pd.DataFrame.from_dict(slopes).T
+    slope_changes = pd.DataFrame(columns=['slopeDiff'])
+    for i in range(len(slopes.index) - 2 * minSegLen):
+        current_slope_change = slopes.loc[slopes.index[i + 2*minSegLen]] - slopes.loc[slopes.index[i + minSegLen]]
+        slope_changes.loc[slopes.index[i]] = current_slope_change[0]
+    slope_changes = slope_changes.sort_index()
+    first_max_slope_change_index = int(slope_changes.idxmax()) if int(slope_changes.idxmax()) >= 0 else normed_anaphase.index[minSegLen]
+    return (str(cellNb), normed_anaphase.index[minSegLen], first_max_slope_change_index, normed_anaphase.index[-minSegLen])
+
+    # range_to_null = 480 / timeInterval
+    # # try not to find the second max slope change close to the first one
+    # slope_changes.loc[
+    # first_max_slope_change_index - range_to_null:first_max_slope_change_index + range_to_null] = -np.inf
+    # maxInd = slope_changes.idxmax()['slopeDiff']
+    # maxInd = int(maxInd if not np.isnan(maxInd)  else 0)
+    # second_max_slope_change_index = normed_anaphase.index[minSegLen]
+    # if maxInd > normed_anaphase.index[minSegLen] and slope_changes.loc[maxInd]['slopeDiff'] > 0:
+    #     second_max_slope_change_index = maxInd
+    # line = str(cellNb) + ","
+    # line += str(normed_anaphase.index[minSegLen]) + ","
+    # line += ",".join(str(int(e)) for e in sorted([first_max_slope_change_index, second_max_slope_change_index]))
+    # line += "," + str(normed_anaphase.index[-minSegLen]) + "\n"
+    # return line
+
 ############################## ch5 methods######################################
-def ch5writeChDef(ciw):
-    c_def = CH5ImageChannelDefinition()
-    c_def.add_row(channel_name="BF", description='bright-field', is_physical=True,
-                  voxel_size=(0.0645,0.0645,0.3), color="#aabbcc")
-    ciw.write_definition(c_def)
+# def ch5writeChDef(ciw):
+#     c_def = CH5ImageChannelDefinition()
+#     c_def.add_row(channel_name="BF", description='bright-field', is_physical=True,
+#                   voxel_size=(0.0645,0.0645,0.3), color="#aabbcc")
+#     ciw.write_definition(c_def)
 
 def ch5writeRegDef(crw):
     r_def = cellh5.CH5ImageRegionDefinition()
@@ -220,30 +216,30 @@ def find_phases_of_one_cell(poleSpots, ktSpots, radius = 0.25):
     pos_x = "POSITION_X"
     pos_y = "POSITION_Y"
     for j in [pos_x, pos_y]:
-        poleSpots[j] = poleSpots[j].astype(np.float)
-        ktSpots[j] = ktSpots[j].astype(np.float)
+        poleSpots[j] = poleSpots[j].astype(np.float16)
+        ktSpots[j] = ktSpots[j].astype(np.float16)
     merged_frameNb = sorted(list(poleSpots.index.levels[0]) + list(set(list(ktSpots.index.levels[0])) - set(list(poleSpots.index.levels[0]))))
-    phase_label = np.empty(merged_frameNb[-1]+1)
-    poleDotNb = np.empty(merged_frameNb[-1]+1)
-    ktDotNb = np.empty(merged_frameNb[-1]+1)
+    phase_label = np.zeros(merged_frameNb[-1], dtype=np.int8)
+    poleDotNb = np.zeros(merged_frameNb[-1], dtype=np.int8)
+    ktDotNb = np.zeros(merged_frameNb[-1], dtype=np.int8)
     n_pole = None
     n_kt = None
     for x in merged_frameNb:
         skip=False
         if x in poleSpots.index.levels[0]:
-            current_frame_poles = poleSpots.loc[x]
+            current_frame_poles = poleSpots.loc[x-1]
             n_pole = len(current_frame_poles)
-            poleDotNb[x] = n_pole
+            poleDotNb[x-1] = n_pole
             if n_pole >1:
-                phase_label[x]= 1
+                phase_label[x-1]= 1
         else:
             skip = True
         if x in ktSpots.index.levels[0]:
-            current_frame_kts = ktSpots.loc[x]
+            current_frame_kts = ktSpots.loc[x-1]
             n_kt = len(current_frame_kts)
-            ktDotNb[x] = n_kt
+            ktDotNb[x-1] = n_kt
             if n_kt>1:
-                phase_label[x]= 1
+                phase_label[x-1]= 1
         else:
             skip=True
         if skip or n_pole<2:
@@ -252,9 +248,9 @@ def find_phases_of_one_cell(poleSpots, ktSpots, radius = 0.25):
         for i in range(0,len(current_frame_poles[pos_x])):
             spots_outside = get_outside_spots(current_frame_poles[pos_x].iloc[i], current_frame_poles[pos_y].iloc[i],spots_outside[0],spots_outside[1],radius)
         if len(spots_outside[0])==0:
-            phase_label[x]= 2
+            phase_label[x-1]= 2
         else:
-            phase_label[x]= 1
+            phase_label[x-1]= 1
     phase_d = pd.DataFrame.from_dict({'pole_dotNb':poleDotNb, 'kt_dotNb':ktDotNb, 'phase':phase_label})
     phase_d = phase_d[(phase_d.T != 0).any()]
     return phase_d
@@ -303,7 +299,7 @@ if __name__ == '__main__':
             continue
         elongationRegions[res[0]] = res[1]
 
-    timePoints = pd.DataFrame.from_dict(analyse_each_cell(pool, minSegLen, elongationRegions, cellRois, mitosisDir)).T
+    timePoints = analyse_each_cell(pool, minSegLen, elongationRegions, cellRois, mitosisDir)
     if ch5:
         description = ("cell", "cell_shape_features")
         with cellh5.CH5FileWriter(mitosisDir + "mitosisAnalysis.ch5") as cfw:
