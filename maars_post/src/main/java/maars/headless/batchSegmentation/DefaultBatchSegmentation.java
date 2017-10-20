@@ -13,7 +13,6 @@ import org.scijava.plugin.Plugin;
 
 import java.io.File;
 import java.util.regex.Pattern;
-import fiji.Debug;
 /**
  * Created by tongli on 13/06/2017.
  */
@@ -31,7 +30,7 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
 
    private void launchSeg(String[] dirs, String configName) {
       for (String d : dirs) {
-         System.out.println(d);
+         IJ.log(d);
          MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
          parameter.setSavingPath(d);
          parameter.save(d);
@@ -52,8 +51,5 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
             }
          }
       }
-   }
-   public static void main(String[] args){
-      Debug.run("","");
    }
 }

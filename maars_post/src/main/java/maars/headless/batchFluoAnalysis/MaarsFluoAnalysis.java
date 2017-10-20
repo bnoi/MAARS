@@ -52,7 +52,6 @@ public class MaarsFluoAnalysis implements Runnable{
       String segAnaDir = FileUtils.convertPath(parameters_.getSavingPath()) + File.separator +
             parameters_.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + Maars_Interface.SEGANALYSIS_SUFFIX;
       for (String posNb:posNbs_) {
-         IJ.log(posNb);
          ImagePlus concatenatedFluoImgs = null;
          soc = new DefaultSetOfCells(posNb);
          String currentPosPrefix = segAnaDir + posNb + File.separator;
