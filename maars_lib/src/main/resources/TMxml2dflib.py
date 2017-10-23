@@ -1,3 +1,5 @@
+# !/usr/bin/env python3
+# coding: utf-8
 import os
 import pandas as pd
 import xml.etree.cElementTree as et
@@ -6,7 +8,7 @@ import xml.etree.cElementTree as et
 def readXml(path):
     if not os.path.lexists(path):
         raise IOError("File does not exist %s" %path)
-    return et.fromstring(open(path).read())
+    return et.fromstring(open(path, mode="r", encoding="utf-8").read())
 
 def dropConstantCols(df):
     for col in df.columns:

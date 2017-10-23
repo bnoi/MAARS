@@ -10,8 +10,12 @@ from argparse import ArgumentParser
 from os import path, mkdir, listdir
 from scipy import stats
 from shutil import copyfile
-
 import TMxml2dflib
+
+pos_x = "POSITION_X"
+pos_y = "POSITION_Y"
+poleSuffix = "_pole"
+ktSuffix = "_kt"
 
 def createOutputDirs(mitosisDir, outputDirs):
     for targetDir in outputDirs:
@@ -193,67 +197,88 @@ def ch5writeRegDef(crw):
 def dist(x1,y1,x2,y2):
     return np.sqrt((x1-x2)**2 + (y1-y2)**2)
 
-def get_outside_spots(x_base, y_base, xs, ys, radius):
-    spots_outside_xs = list()
-    spots_outside_ys = list()
-    for i in range(0,len(xs)):
-        if dist(x_base, y_base,xs[i],ys[i]) > radius:
-            spots_outside_xs.append(xs[i])
-            spots_outside_ys.append(ys[i])
-    return spots_outside_xs,spots_outside_ys
+def noKtOutsidePoles(spotsInFrame, radius):
+    for i in spotsInFrame.index:
+        if np.min(dist(spotsInFrame[pos_x + poleSuffix], spotsInFrame[pos_y + poleSuffix], \
+            spotsInFrame.loc[i][pos_x + ktSuffix], spotsInFrame.loc[i][pos_y + ktSuffix])) > radius:
+            return False
+    return True
 
-def change_label(df, index, col, value):
-    for j in df.loc[index]:
-        df.set_value(index,col, value)
+def getkts2polesStats(spotsInFrame):
+    distances = pd.Series()
+    for i in spotsInFrame.index:
+        distances = distances.append(dist(spotsInFrame[pos_x + poleSuffix], spotsInFrame[pos_y + poleSuffix], \
+            spotsInFrame.loc[i][pos_x + ktSuffix], spotsInFrame.loc[i][pos_y + ktSuffix]))
+    return distances
 
-def generate_circle_coords(radius):
-    an = np.linspace(0, 2*np.pi, 100)
-    xs = radius *np.cos(an)
-    ys = radius *np.sin(an)
-    return (xs, ys)
+# def generate_circle_coords(radius):
+#     an = np.linspace(0, 2*np.pi, 100)
+#     xs = radius *np.cos(an)
+#     ys = radius *np.sin(an)
+#     return (xs, ys)
 
-def find_phases_of_one_cell(poleSpots, ktSpots, radius = 0.25):
-    pos_x = "POSITION_X"
-    pos_y = "POSITION_Y"
-    for j in [pos_x, pos_y]:
-        poleSpots[j] = poleSpots[j].astype(np.float16)
-        ktSpots[j] = ktSpots[j].astype(np.float16)
-    merged_frameNb = sorted(list(poleSpots.index.levels[0]) + list(set(list(ktSpots.index.levels[0])) - set(list(poleSpots.index.levels[0]))))
-    phase_label = np.zeros(merged_frameNb[-1], dtype=np.int8)
-    poleDotNb = np.zeros(merged_frameNb[-1], dtype=np.int8)
-    ktDotNb = np.zeros(merged_frameNb[-1], dtype=np.int8)
-    n_pole = None
-    n_kt = None
-    for x in merged_frameNb:
-        skip=False
-        if x in poleSpots.index.levels[0]:
-            current_frame_poles = poleSpots.loc[x-1]
-            n_pole = len(current_frame_poles)
-            poleDotNb[x-1] = n_pole
-            if n_pole >1:
-                phase_label[x-1]= 1
+def getSpotGeos(poleSpots, ktSpots, radius = 0.25):
+    spots = poleSpots[[pos_x, pos_y]].join(ktSpots[[pos_x, pos_y]], how="outer", lsuffix=poleSuffix, rsuffix=ktSuffix)
+    geos = pd.DataFrame(columns = ["phase", "poleNb", "ktNb", "poleCenter_X","poleCenter_Y",\
+        "ktCenter_X","ktCenter_Y", "poleCenter2KtCenter_X", "poleCenter2KtCenter_Y", \
+        "ktXpos_std", "ktYpos_std", "kts2ktCenter_mean","kts2ktCenter_std", "kts2ktCenter_max","kts2ktCenter_min", \
+        "kts2poleCenter_mean","kts2poleCenter_std", "kts2poleCenter_max","kts2poleCenter_min", \
+        "kts2poles_mean", "kts2poles_std", "kts2poles_max", "kts2poles_min", \
+        "kt2Sp_mean", "kt2Sp_std", "kt2Sp_max", "kt2Sp_min", \
+        "proj2SpCenter_mean", "proj2SpCenter_std","proj2SpCenter_max","proj2SpCenter_min"])
+    for f in spots.index.levels[0]:
+        geos.loc[f] = computeGeometries(spots.loc[f])
+    return geos
+
+def getDotProjectionOnSp(sp1x, sp1y, sp2x, sp2y, dotx, doty):
+    px = sp2x-sp1x
+    py = sp2y-sp1y
+    dAB = px*px + py*py
+    u = ((dotx - sp1x) * px + (doty - sp1y) * py) / dAB
+    return pd.concat([sp1x + u * px, sp1y + u * py], axis=1)
+
+def computeGeometries(spotsInFrame):
+    # import matplotlib.pyplot as plt
+    statFeatures = ["mean","std","max","min"]
+    spotsInFrame = spotsInFrame.astype(np.float)
+    spotCounts = spotsInFrame.count()
+    maxSpotNb = np.max(spotCounts)
+    phase = 0
+    spotStats = spotsInFrame.describe()
+    poleCenterX, poleCenterY = spotStats[[pos_x + poleSuffix, pos_y + poleSuffix]].loc["mean"]
+    ktCenterX, ktCenterY = spotStats[[pos_x + ktSuffix, pos_y + ktSuffix]].loc["mean"]
+    params = [spotCounts[0], spotCounts[2], poleCenterX, poleCenterY, ktCenterX, \
+        ktCenterY, poleCenterX - ktCenterX, poleCenterY - ktCenterY, \
+        spotStats[pos_x + ktSuffix].loc["std"], spotStats[pos_y + ktSuffix].loc["std"]]
+    if maxSpotNb >= 2:
+        phase = 1
+        kt2ktCenter = dist(spotsInFrame[pos_x + ktSuffix], spotsInFrame[pos_y + ktSuffix],\
+            ktCenterX, ktCenterY)
+        params += kt2ktCenter.describe()[statFeatures].tolist()
+        if spotCounts[0] ==  2:
+            kt2poleCenter = dist(spotsInFrame[pos_x + ktSuffix], spotsInFrame[pos_y + ktSuffix],\
+                poleCenterX,poleCenterY)
+            projDots = getDotProjectionOnSp(\
+                spotsInFrame.loc[0][pos_x + poleSuffix], spotsInFrame.loc[0][pos_y + poleSuffix],
+                spotsInFrame.loc[1][pos_x + poleSuffix], spotsInFrame.loc[1][pos_y + poleSuffix],
+                spotsInFrame[pos_x + ktSuffix], spotsInFrame[pos_y + ktSuffix])
+            kts2Sp = dist(spotsInFrame[pos_x + ktSuffix], spotsInFrame[pos_y + ktSuffix], projDots[0], projDots[1])
+            if noKtOutsidePoles(spotsInFrame, 0.25):
+                phase = 2
+            proj2SpCenter = dist(projDots[0], projDots[1], poleCenterX, poleCenterY)
+            params += kt2poleCenter.describe()[statFeatures].tolist() + \
+                getkts2polesStats(spotsInFrame).describe()[statFeatures].tolist() + \
+                kts2Sp.describe()[statFeatures].tolist() + proj2SpCenter.describe()[statFeatures].tolist()
+            # ax = spotsInFrame.plot(pos_x + poleSuffix, pos_y + poleSuffix, c='red',kind="scatter")
+            # spotsInFrame.plot(pos_x + ktSuffix, pos_y + ktSuffix, c='green',kind="scatter", ax=ax)
+            # plt.scatter(poleCenterX, poleCenterY, c="blue")
+            # plt.scatter(ktCenterX, ktCenterY, c="y")
         else:
-            skip = True
-        if x in ktSpots.index.levels[0]:
-            current_frame_kts = ktSpots.loc[x-1]
-            n_kt = len(current_frame_kts)
-            ktDotNb[x-1] = n_kt
-            if n_kt>1:
-                phase_label[x-1]= 1
-        else:
-            skip=True
-        if skip or n_pole<2:
-            continue
-        spots_outside = (list(current_frame_kts[pos_x]), list(current_frame_kts[pos_y]))
-        for i in range(0,len(current_frame_poles[pos_x])):
-            spots_outside = get_outside_spots(current_frame_poles[pos_x].iloc[i], current_frame_poles[pos_y].iloc[i],spots_outside[0],spots_outside[1],radius)
-        if len(spots_outside[0])==0:
-            phase_label[x-1]= 2
-        else:
-            phase_label[x-1]= 1
-    phase_d = pd.DataFrame.from_dict({'pole_dotNb':poleDotNb, 'kt_dotNb':ktDotNb, 'phase':phase_label})
-    phase_d = phase_d[(phase_d.T != 0).any()]
-    return phase_d
+            params += [None] * 16
+    else:
+        params += [None] * 20
+    # plt.show()
+    return [phase] + params
 
 if __name__ == '__main__':
     args = set_attributes_from_cmd_line()
@@ -306,39 +331,37 @@ if __name__ == '__main__':
             for cellNb in [k.split("_")[0] for k in elongationRegions.keys()]:
                 cdata = list()
                 for c in chs:
-                    cdata.append(
-                    tifffile.imread(baseDir + path.sep + fluo + posPrefix + cropImgs + str(cellNb) + "_" + c + ".tif"))
+                    cdata.append(tifffile.imread(fluoDir + cropImgs + str(cellNb) + "_" + c + ".tif"))
                 cdata = np.array(cdata)
                 while len(cdata.shape) < 5:
                     cdata = np.expand_dims(cdata, axis=0)
                 shape = cdata.shape
                 cpw = cfw.add_position(cellh5.CH5PositionCoordinate(pos, date, cellNb))
+                
                 crw = cpw.add_label_image(shape=shape, dtype=np.int16)
                 for c in range(shape[0]):
                     for t in range(shape[1]):
                         for z in range(shape[2]):
                             crw.write(cdata[c,t,z,:,:], c=c, t=t, z=z)
                 crw.finalize()
+                
                 regObjs = list()
+                
                 cow_cell = cpw.add_region_object('cell')
-                regObjs.append(cow_cell)
                 for t in range(shape[2]):
                     cow_cell.write(t=t, object_labels=np.array([cellNb]))
                 cow_cell.finalize()
-                # cfew_cell_bounding = cpw.add_object_bounding_box(object_name="cell_boundaries")
-                # cfew_cell_bounding.write(cellRois.loc[int(cellNb)][["X","Y","Min","Max"]].values.astype(np.int16).flatten().reshape((-1,4)))
-                # cfew_cell_bounding.finalize()
+                regObjs.append(cow_cell)
+                
                 cfew_cell_features = cpw.add_object_feature_matrix(object_name=description[0],
                     feature_name=description[1], n_features=len(cellRois.columns),
-                    dtype=np.float32)
+                    dtype=np.float16)
                 cfew_cell_features.write(np.expand_dims(cellRois.loc[int(cellNb)], axis=0))
                 cfew_cell_features.finalize()
 
-
                 cfewSpotMats = list()
-                cfewFeatureMats = list()
-                featuresOfCurrentCell = {chs[0]: None, chs[1]:None}
-                spotsOfCurrentCell = {chs[0]: None, chs[1]:None}
+                featuresOfCurrentCell = {chs[0]: None, chs[1]: None}
+                spotsOfCurrentCell = {chs[0]: None, chs[1]: None}
                 for c in chs:
                     ##### save features data#######
                     curId = str(cellNb) + "_" + c
@@ -362,30 +385,34 @@ if __name__ == '__main__':
                     features = pd.merge(features, changePoints, on='Frame', how='outer')
                     featuresOfCurrentCell[c] = features
                     ##### save spot data#######
-                    spotsData = TMxml2dflib.getAllSpots(baseDir + path.sep + fluo + posPrefix + spots + str(cellNb) + "_" + c + ".xml")
+                    spotsData = TMxml2dflib.getAllSpots(fluoDir + spots + str(cellNb) + "_" + c + ".xml")
                     del spotsData["name"]
                     cow_spot = cpw.add_region_object(c + '_spot')
-                    regObjs.append(cow_spot)
                     for t in spotsData.index.levels[0]:
                         cow_spot.write(t=t, object_labels=spotsData.loc[t]['ID'])
                     cow_spot.finalize()
+                    
+                    regObjs.append(cow_spot)
+                    
                     cfew_spot_features = cpw.add_object_feature_matrix(object_name=c + '_spot',
                         feature_name=c + '_spot_features', n_features=len(spotsData.columns),
-                        dtype=np.float32)
-                    cfew_spot_features.write(spotsData.astype(np.float32))
+                        dtype=np.float16)
+                    cfew_spot_features.write(spotsData.astype(np.float16))
                     cfew_spot_features.finalize()
+                    
                     spotsOfCurrentCell[c] = spotsData
                     cfewSpotMats.append(cfew_spot_features)
-                table = find_phases_of_one_cell(spotsOfCurrentCell[channel], spotsOfCurrentCell["GFP"])
+                geos = getSpotGeos(spotsOfCurrentCell[channel], spotsOfCurrentCell["GFP"])
+                geos['Frame'] = list(geos.index)
+                features = pd.merge(featuresOfCurrentCell[channel], geos, on='Frame', how='outer')
+                features.set_index('Frame', inplace=True)
+                features.sort_index(inplace=True)
+                cfewFeatureMats = list()
                 for c in chs:
-                    table['Frame'] = list(table.index)
-                    features = pd.merge(featuresOfCurrentCell[c], table, on='Frame', how='outer')
-                    features.set_index('Frame', inplace=True)
-                    features.sort_index(inplace=True)
                     cfew_features = cpw.add_object_feature_matrix(object_name=c + '_features',
                         feature_name=c + '_features', n_features=len(features.columns),
-                        dtype=np.float32)
-                    cfew_features.write(features.astype(np.float32))
+                        dtype=np.float16)
+                    cfew_features.write(features.astype(np.float16))
                     cfew_features.finalize()
                     cfewFeatureMats.append(cfew_features)
             for regobj in regObjs:
@@ -407,3 +434,4 @@ if __name__ == '__main__':
     pool.close()
     pool.join()
     print("Done")
+    
