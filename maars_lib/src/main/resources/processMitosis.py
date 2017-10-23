@@ -9,6 +9,7 @@ import tifffile
 from argparse import ArgumentParser
 from os import path, mkdir, listdir
 from scipy import stats
+from scipy.spatial import ConvexHull
 from shutil import copyfile
 import TMxml2dflib
 
@@ -222,6 +223,7 @@ def getSpotGeos(poleSpots, ktSpots, radius = 0.25):
     geos = pd.DataFrame(columns = ["phase", "poleNb", "ktNb", "poleCenter_X","poleCenter_Y",\
         "ktCenter_X","ktCenter_Y", "poleCenter2KtCenter_X", "poleCenter2KtCenter_Y", \
         "ktXpos_std", "ktYpos_std", "kts2ktCenter_mean","kts2ktCenter_std", "kts2ktCenter_max","kts2ktCenter_min", \
+        "convexHull_area",
         "kts2poleCenter_mean","kts2poleCenter_std", "kts2poleCenter_max","kts2poleCenter_min", \
         "kts2poles_mean", "kts2poles_std", "kts2poles_max", "kts2poles_min", \
         "kt2Sp_mean", "kt2Sp_std", "kt2Sp_max", "kt2Sp_min", \
@@ -255,6 +257,11 @@ def computeGeometries(spotsInFrame):
         kt2ktCenter = dist(spotsInFrame[pos_x + ktSuffix], spotsInFrame[pos_y + ktSuffix],\
             ktCenterX, ktCenterY)
         params += kt2ktCenter.describe()[statFeatures].tolist()
+        if spotCounts[2] > 2 :
+            convexHull = ConvexHull(np.array(spotsInFrame[[pos_x + ktSuffix, pos_y + ktSuffix]]), incremental=False)
+            params += [convexHull.area]
+        else:
+            params += [None]
         if spotCounts[0] ==  2:
             kt2poleCenter = dist(spotsInFrame[pos_x + ktSuffix], spotsInFrame[pos_y + ktSuffix],\
                 poleCenterX,poleCenterY)
@@ -276,7 +283,7 @@ def computeGeometries(spotsInFrame):
         else:
             params += [None] * 16
     else:
-        params += [None] * 20
+        params += [None] * 21
     # plt.show()
     return [phase] + params
 
@@ -337,22 +344,22 @@ if __name__ == '__main__':
                     cdata = np.expand_dims(cdata, axis=0)
                 shape = cdata.shape
                 cpw = cfw.add_position(cellh5.CH5PositionCoordinate(pos, date, cellNb))
-                
+
                 crw = cpw.add_label_image(shape=shape, dtype=np.int16)
                 for c in range(shape[0]):
                     for t in range(shape[1]):
                         for z in range(shape[2]):
                             crw.write(cdata[c,t,z,:,:], c=c, t=t, z=z)
                 crw.finalize()
-                
+
                 regObjs = list()
-                
+
                 cow_cell = cpw.add_region_object('cell')
                 for t in range(shape[2]):
                     cow_cell.write(t=t, object_labels=np.array([cellNb]))
                 cow_cell.finalize()
                 regObjs.append(cow_cell)
-                
+
                 cfew_cell_features = cpw.add_object_feature_matrix(object_name=description[0],
                     feature_name=description[1], n_features=len(cellRois.columns),
                     dtype=np.float16)
@@ -391,15 +398,15 @@ if __name__ == '__main__':
                     for t in spotsData.index.levels[0]:
                         cow_spot.write(t=t, object_labels=spotsData.loc[t]['ID'])
                     cow_spot.finalize()
-                    
+
                     regObjs.append(cow_spot)
-                    
+
                     cfew_spot_features = cpw.add_object_feature_matrix(object_name=c + '_spot',
                         feature_name=c + '_spot_features', n_features=len(spotsData.columns),
                         dtype=np.float16)
                     cfew_spot_features.write(spotsData.astype(np.float16))
                     cfew_spot_features.finalize()
-                    
+
                     spotsOfCurrentCell[c] = spotsData
                     cfewSpotMats.append(cfew_spot_features)
                 geos = getSpotGeos(spotsOfCurrentCell[channel], spotsOfCurrentCell["GFP"])
@@ -434,4 +441,3 @@ if __name__ == '__main__':
     pool.close()
     pool.join()
     print("Done")
-    
