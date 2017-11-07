@@ -1,4 +1,9 @@
 # MAARS manual
+
+## Kernel
+The kernel of MAARS is written in Java, which uses the API of multiple open-source projects (i.e. Micro-manager, Trackmate) to acquire and analyze images.  
+In the end of Java analysis, MAARS will call a Python script. For instance, an extension which find anaphase B onset and chromosome lagging is present. We Anaconda plateform for these analysis.
+
 ## Launching MAARS
 You can find MAARS in `Plugins` of **Micro-Manager toolbar** (not ImageJ toolbar!). Then you will see this main dialog which is designed to change different parameters of MAARS, 
 

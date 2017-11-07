@@ -1,29 +1,27 @@
 TravisCI [![Build Status](https://travis-ci.org/bnoi/MAARS.svg?branch=master)](https://travis-ci.org/bnoi/MAARS)
 
-# Mitotic Analysing And Recording System
+# Mitotic Analysis And Recording System
 
-MAARS (Mitotic Analysing And Recording System) is a Micro-Manager plugin designed to automatically record and analyze fission yeast cells in mitosis, either with an on-the-fly manner or an off-line manner.
-
-The plugin is designed to be flexible and easy to use whatever the hardware and the type of cells you have.
-
-## Kernel
-The kernel of MAARS which is written in Java, use the API (or source code) of multiple open-source projects (i.e. Micro-manager, Trackmate) to acquire and analyze images. 
-
-## Extension
-An extension of MAARS which find anaphase B onset and chromosome lagging, is written in Python. We used functions of Anaconda in order to facilitate our analysis. (further may be change to Java version)
+MAARS (Mitotic Analysis And Recording System) is a Micro-Manager plugin designed to automatically record and analyze fission yeast cells in mitosis on-the-fly. Fiji ops for quantitative post-analysis is also possible.
 
 ## Code structure
-- jars : dependencies of MAARS
-- repo : the folder that we put the builded plugin for Micro-Manager
-- src : kernel code of MAARS
+- maars_lib : core of MAARS, required by other sub-projects
+- maars_bfSeg : segmentation with GUI
+- maars_otf : on-the-fly analysis
+- maars_post : quantitative post-analysis with Fiji ops
+  - Fiji_deps : dependencies of MAARS required in Fiji
+  - MM_deps : dependencies of MAARS required in Micro-Manager
+
 
 ## Installation (for basic users)
 
-- Copy MAARS plugin (`jars/MAARS_-1.0-SNAPSHOT.jar`) inside `Micro Manager folder/mmplugins`.
+- copy either `jars/Fiji_deps` or `jars/MM_deps` to your ImageJ/Fiji plugin folder
+- On-the-fly plugin in Micro-Manager:
+  - Copy `jars/maars_lib_2.0-SNAPSHOT.jar` and `jars/maars_otf_2.0-SNAPSHOT.jar` to `$Micro Manager folder/mmplugins`.  
+- Post-analysis Fiji ops:
+  - Copy `jars/maars_lib_2.0-SNAPSHOT.jar` and `jars/maars_otf_2.0-SNAPSHOT.jar` to `$Fiji folder/jars`.  
 
-- Copy dependencies (`jars/MAARS_deps/`) inside `Micro Manager folder/plugins/MAARS_deps`.
-
-That's all !
+[see more details for installation](doc/manual.md).
 
 ## For developers
 
@@ -35,6 +33,10 @@ That's all !
 
 - `install.sh` : Use to install MAARS plugin and its dependencies to Micro-Manager installation.
 
+- `copyFijiDeps.sh` : copy dependencies for running MAARS in Fiji to `Fiji_deps` folder
+
+- `copyMMDeps.sh` : copy dependencies for running MAARS in Micro-Manager to `MM_deps` folder
+
 ## License
 
 [BSD compatible CeCILL-B License](LICENSE).
@@ -42,10 +44,10 @@ That's all !
 ## Authors
 
 - Mainteners and contact
-    - Hadrien Mary (hadrien.mary@gmail.com)
     - Tong Li (tong.li@univ-tlse3.fr)
-    
+
 - Co-author
+    - Hadrien Mary (hadrien.mary@gmail.com)
     - Simon Cabello (simon.cabelloaguilar@gmail.com)
     - Marie Grosjean (marie.grosjean.31@gmail.com)
     - Jonathan Fouchard (j.fouchard@ucl.ac.uk)
