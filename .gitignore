@@ -129,4 +129,4 @@ ENV/
 
 .idea/
 .idea/libraries/
-*Fiji_deps/
+*MAARS_deps/

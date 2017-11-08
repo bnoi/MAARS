@@ -20,11 +20,13 @@ fi
 
 # Install MAARS plugin
 if [ -f "$MM_ANCHOR" ]; then
+  bash copyMMDeps.sh
   rm -f $IMAGEJ_ROOT/mmplugins/maars*.jar
   cp jars/maars*.jar $IMAGEJ_ROOT/mmplugins/
 fi
 
 if [ -f "$FIJI_ANCHOR" ]; then
+  bash copyFijiDeps.sh
   rm -f $IMAGEJ_ROOT/jars/maars*.jar
   cp jars/maars*.jar $IMAGEJ_ROOT/jars/
 fi
