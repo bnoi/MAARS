@@ -8,21 +8,48 @@ then
     exit 1
 fi
 
-MM_FOLDER=$1
-JAR_FILE="$MM_FOLDER/plugins/Micro-Manager/MMJ_.jar"
+IMAGEJ_ROOT=$1
+MM_ANCHOR="$IMAGEJ_ROOT/plugins/Micro-Manager/MMJ_.jar"
+FIJI_ANCHOR="$IMAGEJ_ROOT/jars/fiji-2.0.0-SNAPSHOT.jar"
 
-if [ ! -f "$JAR_FILE" ]
+if [ ! -f "$MM_ANCHOR" ] && [ ! -f "$FIJI_ANCHOR" ]
 then
-    echo "Does $MM_FOLDER really contain Micro-Manager ?"
+    echo "Does $IMAGEJ_ROOT really contain Micro-Manager/Fiji ?"
     exit 1
 fi
 
 # Install MAARS plugin
-rm -f $MM_FOLDER/mmplugins/MAARS*.jar
-cp jars/MAARS*.jar $MM_FOLDER/mmplugins/
+if [ -f "$MM_ANCHOR" ]; then
+  rm -f $IMAGEJ_ROOT/mmplugins/maars*.jar
+  cp jars/maars*.jar $IMAGEJ_ROOT/mmplugins/
+fi
+
+if [ -f "$FIJI_ANCHOR" ]; then
+  rm -f $IMAGEJ_ROOT/jars/maars*.jar
+  cp jars/maars*.jar $IMAGEJ_ROOT/jars/
+fi
 
 # Install dependencies
-rm -fr $MM_FOLDER/plugins/maars_dependencies
-cp -R jars/maars_dependencies $MM_FOLDER/plugins/
+rm -fr $IMAGEJ_ROOT/plugins/MAARS_deps
+mkdir -p $IMAGEJ_ROOT/plugins/MAARS_deps
 
-echo "Installation done to $MM_FOLDER"
+
+function join_by { local IFS="$1"; shift; echo "$*"; }
+
+for jarPath in jars/MAARS_deps/*
+do
+  jarPathAry=(${jarPath//// })
+  jarName=(${jarPathAry[2]//-/ })
+  nameLen=${#jarName[@]}
+  artifactNameary=${jarName[*]:0:$nameLen - 1 }
+  artifactName=$(join_by - $artifactNameary)
+  res=$(find $IMAGEJ_ROOT -name $artifactName*.jar )
+  if [ "$res" != "" ] ; then
+    echo "$artifactName is present in destination"
+  else
+    cp $jarPath $IMAGEJ_ROOT/plugins/MAARS_deps
+    echo "$jarPath copied"
+  fi
+done
+
+echo "Installation done to $IMAGEJ_ROOT"

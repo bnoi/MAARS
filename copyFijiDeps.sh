@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 mvn dependency:copy-dependencies -DaddParentPoms=true \
--DoutputDirectory=Fiji_deps -DexcludeGroupIds=org.micromanager,net.imglib2 \
+-DoutputDirectory=../jars/MAARS_deps -DexcludeGroupIds=org.micromanager,net.imglib2 \
 -DexcludeArtifactIds=commons-math3,eventbus,gentyref,jcommon,jfreechart,\
 3D_Viewer,scijava-common,commons-lang3,commons-logging,ejml,fiji-lib,\
 ij1-patcher,ij,imagej-common,imagej-deprecated,j3dcore,j3dutils,jama,\
