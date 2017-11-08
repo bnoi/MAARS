@@ -44,9 +44,7 @@ do
   artifactNameary=${jarName[*]:0:$nameLen - 1 }
   artifactName=$(join_by - $artifactNameary)
   res=$(find $IMAGEJ_ROOT -name $artifactName*.jar )
-  if [ "$res" != "" ] ; then
-    echo "$artifactName is present in destination"
-  else
+  if [ "$res" == "" ] && [ "$artifactName" != maars_lib-2.0.0 ] ; then
     cp $jarPath $IMAGEJ_ROOT/plugins/MAARS_deps
     echo "$jarPath copied"
   fi
