@@ -4,7 +4,9 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Calibration;
 import maars.agents.DefaultSetOfCells;
+import maars.agents.SetOfCells;
 import maars.cellAnalysis.FluoAnalyzer;
+import maars.io.IOUtils;
 import maars.main.MaarsParameters;
 import maars.main.Maars_Interface;
 import maars.mmUtils.ImgMMUtils;
@@ -19,6 +21,7 @@ import org.micromanager.internal.MMStudio;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,7 +34,7 @@ public class MaarsOTFFluoAnalysis extends Processor {
    private MaarsParameters parameters_;
    private MMStudio mm_ = MMStudio.getInstance();
    private Calibration cal_ = new Calibration();
-   private HashMap<String, ArrayList<Image>> chImages= new HashMap<>();
+   private HashMap<String, ArrayList<Image>> chZstacks= new HashMap<>();
    private HashMap<String, DefaultSetOfCells> posSoc_ = new HashMap<>();
    private ExecutorService es_ = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
    MaarsOTFFluoAnalysis(MaarsParameters parameters){
@@ -39,7 +42,7 @@ public class MaarsOTFFluoAnalysis extends Processor {
       SequenceSettings seqSetting = mm_.getAcquisitionManager().getAcquisitionSettings();
       for (ChannelSpec chspc : seqSetting.channels){
          if (chspc.useChannel){
-            chImages.put(chspc.config, new ArrayList<>());
+            chZstacks.put(chspc.config, new ArrayList<>());
          }
       }
       cal_.pixelDepth = Math.abs(seqSetting.slices.get(0) - seqSetting.slices.get(1));
@@ -66,12 +69,12 @@ public class MaarsOTFFluoAnalysis extends Processor {
          defaultSetOfCells.loadCells(currentZipPath);
          posSoc_.put(currentPos, defaultSetOfCells);
       }
-      ArrayList<Image> currentChImgs = chImages.get(currentCh);
+      ArrayList<Image> currentChImgs = chZstacks.get(currentCh);
       currentChImgs.add(image);
       processorContext.outputImage(image);
 
       if (currentChImgs.size() == mm_.acquisitions().getAcquisitionSettings().slices.size() && isOk){
-         chImages.get(currentCh).clear();
+         chZstacks.get(currentCh).clear();
          ImagePlus imp = ImgMMUtils.convertWithMetadata(currentChImgs, mm_.getCachedPixelSizeUm());
          ImagePlus zProjectedFluoImg = ImgUtils.zProject(imp, cal_);
          try {
@@ -85,5 +88,20 @@ public class MaarsOTFFluoAnalysis extends Processor {
          }
          es_.shutdown();
       }
+//      SetOfCells soc = posSoc_.get(currentPos);
+//      if (soc.size() != 0) {
+//         long startWriting = System.currentTimeMillis();
+//         ArrayList<String> arrayChannels = new ArrayList<>();
+//         Collections.addAll(arrayChannels, parameters_.getUsingChannels().split(",", -1));
+//         FileUtils.createFolder(parameters_.getSavingPath() + File.separator + parameters_.getFluoParameter(MaarsParameters.FLUO_PREFIX)
+//               +Maars_Interface.FLUOANALYSIS_SUFFIX);
+//         IOUtils.saveAll(soc, concatenatedFluoImgs, parameters_.getSavingPath() + File.separator, parameters_.useDynamic(),
+//               arrayChannels, currentPos, parameters_.getFluoParameter(MaarsParameters.FLUO_PREFIX));
+//         IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+//               + " sec for writing results");
+//         if (parameters_.useDynamic()) {
+//            analyzeMitosisDynamic(soc, parameters_);
+//         }
+//      }
    }
 }

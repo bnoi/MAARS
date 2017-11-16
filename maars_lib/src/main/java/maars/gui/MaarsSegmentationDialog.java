@@ -166,12 +166,10 @@ public class MaarsSegmentationDialog extends JDialog implements ActionListener {
 
       //
 
-      JPanel okPanel = new JPanel();
       okBut = new JButton("OK");
       getRootPane().setDefaultButton(okBut);
       okBut.addActionListener(this);
-      okPanel.add(okBut);
-      add(okPanel, BorderLayout.SOUTH);
+      add(okBut, BorderLayout.SOUTH);
 
       pack();
       setVisible(true);
