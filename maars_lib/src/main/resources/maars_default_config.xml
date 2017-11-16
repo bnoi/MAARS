@@ -57,7 +57,7 @@
         </DEFAULT_CHANNEL_PARAMATERS>
         <SAVING_PATH></SAVING_PATH>
         <!-- not editable with GUI -->
-        <BATCH_MODE>false</BATCH_MODE>
+        <BATCH_MODE>true</BATCH_MODE>
     </GENERAL_ACQUISITION_PARAMETERS>
     <SEGMENTATION_PARAMETERS>
         <!-- only useful in batch mode -->
