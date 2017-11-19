@@ -1,7 +1,7 @@
 # coding: utf-8
 # !/usr/bin/env python3
 
-import cellh5
+from cellh5 import cellh5, cellh5write
 import multiprocessing as mp
 import numpy as np
 import pandas as pd
@@ -89,7 +89,7 @@ def find_mitotic_region(featureOfOneCell, minSegLen, p):
 def getMitoticElongation(features_dir, cellNb, p, minSegLen, channel):
     csvPath = features_dir + str(cellNb) + '_' + channel + '.csv'
     if path.lexists(csvPath):
-        oneCell = pd.DataFrame.from_csv(csvPath)
+        oneCell = pd.read_csv(csvPath)
         elongationRegion = find_mitotic_region(oneCell, minSegLen, p)
         if elongationRegion is None:
             return
@@ -187,7 +187,7 @@ def find_slope_change_point(elongation, minSegLen, timeInterval, majorAxieLen, c
 #     ciw.write_definition(c_def)
 
 def ch5writeRegDef(crw):
-    r_def = cellh5.CH5ImageRegionDefinition()
+    r_def = cellh5write.CH5ImageRegionDefinition()
     r_def.add_row(region_name='cell', channel_idx='0')
     r_def.add_row(region_name='cell', channel_idx='1')
     r_def.add_row(region_name='ktspot', channel_idx='1')
@@ -318,7 +318,7 @@ if __name__ == '__main__':
 
     # -----------------------------------run the analysis-----------------------------------#
     pool = mp.Pool(mp.cpu_count())
-    cellRois = pd.DataFrame.from_csv(baseDir + path.sep + seg +posPrefix + 'Results.csv')
+    cellRois = pd.read_csv(baseDir + path.sep + seg +posPrefix + 'Results.csv')
     cellNbs = getAllCellNumbers(features_dir)
     tasks = []
     for cellNb in cellNbs:
@@ -334,7 +334,7 @@ if __name__ == '__main__':
     timePoints = analyse_each_cell(pool, minSegLen, elongationRegions, cellRois, mitosisDir)
     if ch5:
         description = ("cell", "cell_shape_features")
-        with cellh5.CH5FileWriter(mitosisDir + "mitosisAnalysis.ch5") as cfw:
+        with cellh5write.CH5FileWriter(mitosisDir + "mitosisAnalysis.ch5") as cfw:
             for cellNb in [k.split("_")[0] for k in elongationRegions.keys()]:
                 cdata = list()
                 for c in chs:
