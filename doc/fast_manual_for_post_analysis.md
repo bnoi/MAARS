@@ -31,12 +31,12 @@ your BF folder name
 also no more confirmation dialog will be displayed.
 
 ## How to run MAARS with command-line
-1. Open `script panel` of Fiji. 
+1. Open `script panel` of Fiji.  
 ![][script-panel]  
 2. Load [this script][batchMAARS] and select `Python` as language.
 If everything went well, you should see text with color like this  
 ![][python_interpreter]  
-3. Click on `Run`, you will get this
+3. Click on `Run`, you will get this  
 ![][post_interface]  
 User `Browse` button to load the root folder of the acquisition. 
   - **Important Note**: If it's your time running segmenation/fluoanalysis within the root folder and 
