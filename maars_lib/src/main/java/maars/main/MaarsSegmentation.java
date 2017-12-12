@@ -22,7 +22,7 @@ public class MaarsSegmentation implements Runnable {
    private String posNb_;
    private SegPombeParameters segPombeParam_;
    private Boolean batchMode = false;
-   private Double tolerance = 10.0;
+   private Double tolerance = Double.MAX_VALUE;
 
    /**
     * * Constructor :

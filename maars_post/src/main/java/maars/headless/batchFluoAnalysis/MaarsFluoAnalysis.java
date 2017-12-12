@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -154,10 +155,13 @@ public class MaarsFluoAnalysis implements Runnable{
       HashMap<String, String> namesDic = populateSeriesImgNames(path + File.separator + tifName);
       String[] names = new String[namesDic.size()];
       names = namesDic.keySet().toArray(names);
+      Pattern pattern = Pattern.compile(".*MMStack_(.*)");
       String[] pos = new String[names.length];
       for (int i =0; i< names.length; i++){
-         String[] splitName = names[i].split("_");
-         pos[i] = splitName[splitName.length-1];
+         Matcher matcher = pattern.matcher(names[i]);
+         while (matcher.find()) {
+            pos[i] = matcher.group(1);
+         }
       }
       return pos;
    }
