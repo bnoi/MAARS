@@ -3,7 +3,7 @@
     <CALIBRATION>0.1066</CALIBRATION>
     <PATH_TO_POSITION_LIST></PATH_TO_POSITION_LIST>
     <FLUO_ANALYSIS_PARAMETERS>
-        <FLUO_PREFIX></FLUO_PREFIX>
+        <FLUO_PREFIX>FLUO_1</FLUO_PREFIX>
         <PATH_TO_FLUO_ACQ_SETTING>AcqSettings_fluo.txt</PATH_TO_FLUO_ACQ_SETTING>
         <DYNAMIC>true</DYNAMIC>
         <!-- the order is important !!!! -->
@@ -57,13 +57,13 @@
         </DEFAULT_CHANNEL_PARAMATERS>
         <SAVING_PATH></SAVING_PATH>
         <!-- not editable with GUI -->
-        <BATCH_MODE>true</BATCH_MODE>
+        <BATCH_MODE>false</BATCH_MODE>
     </GENERAL_ACQUISITION_PARAMETERS>
     <SEGMENTATION_PARAMETERS>
         <!-- only useful in batch mode -->
         <TOLERANCE>10</TOLERANCE>
         <PATH_TO_BF_ACQ_SETTING>AcqSettings_bf.txt</PATH_TO_BF_ACQ_SETTING>
-        <SEG_PREFIX></SEG_PREFIX>
+        <SEG_PREFIX>BF_1</SEG_PREFIX>
         <SIGMA>3.0</SIGMA>
         <DIRECTION>-1</DIRECTION>
         <FOCUS>17</FOCUS>
