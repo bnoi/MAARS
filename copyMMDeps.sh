@@ -1,2 +1,8 @@
 #!/usr/bin/env bash
-mvn dependency:copy-dependencies -DoutputDirectory=../jars/MAARS_deps -DexcludeGroupIds=org.micromanager -DexcludeArtifactIds=commons-math3,eventbus,gentyref,jcommon,jfreechart,3D_Viewer,scijava-common
+cd maars_lib
+mvn dependency:copy-dependencies -DoutputDirectory=../jars/MAARS_deps -DexcludeGroupIds=org.micromanager
+cd ../maars_otf
+mvn dependency:copy-dependencies -DoutputDirectory=../jars/MAARS_deps -DexcludeGroupIds=org.micromanager
+cd ../maars_bfSeg
+mvn dependency:copy-dependencies -DoutputDirectory=../jars/MAARS_deps -DexcludeGroupIds=org.micromanager
+cd ..
