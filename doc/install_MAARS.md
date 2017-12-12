@@ -1,5 +1,5 @@
-# MAARS Installation
-This manual should be applicable to all OSs (Ubuntu16.04/MacOS Sierra/Win7)
+# MAARS Installation for FluoAnalysis
+Since post-analysis is not pure Java, You will have to install Python with Anaconda.This manual should be applicable to all OSs (Ubuntu16.04/MacOS Sierra/Win7)
 
 ## Build the environment
 * **Install Anaconda** (for post-analysis with python) :  
@@ -24,12 +24,6 @@ _**For all users** :_ To confirm you got the correct version of Java, you can ve
 ![][image2]  
 _**Important** :_ Don't forget to configure ImageJ's RAM allocation. In `Edit/Options/Memory & Threads...`  
 ![][image3]
-
-## Installation
-[Download][download_maars] and unzip the latest `MAARS_1.0.0.zip` into your `plugins` folder under MM’s root folder. You will get a `MAARS_1.0.0.jar` and its dependencies in a folder called `MAARS_deps`.  
-![][image4]
-
-You are now ready to run MAARS.
 
 
 [Anaconda]: https://www.continuum.io/downloads
