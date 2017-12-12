@@ -19,10 +19,10 @@ Dependencies:
 
 1. ___(You can skip this step if you only need the segmentation but not fluo analysis)___ Copy MAARS dependencies: copy either `jars/Fiji_deps` or `jars/MM_deps` into your Fiji `jars` folder or ImageJ `plugins/jars` folder correspondingly.
 2. Copy the the MAARS modules:
-  1. Copy the `jars/maars_lib_2.0.0-SNAPSHOT.jar` into your `path_to_Fiji/MM_folder/plugins` folder (This is the core module required by all the other modules of MAARS)
-  2. If you want to launch MAARS
-    - ___on-the-fly with Micro-Manager___ (***Currently unstable*** due to updates in version 2.0): copy `jars/maars_otf_2.0.0-SNAPSHOT.jar` to `path_to_Micro_Manager_folder/mmplugins`.  
-    - or with ___Fiji___ : Copy `jars/maars_post_2.0.0-SNAPSHOT.jar` and `jars/maars_bfSeg_2.0.0-SNAPSHOT.jar` into `path_to_Fiji_folder/plugins`.  
+    1. Copy the `jars/maars_lib_2.0.0-SNAPSHOT.jar` into your `path_to_Fiji/MM_folder/plugins` folder (This is the core module required by all the other modules of MAARS)
+    2. If you want to launch MAARS
+        - ___on-the-fly with Micro-Manager___ (***Currently unstable*** due to updates in version 2.0): copy `jars/maars_otf_2.0.0-SNAPSHOT.jar` to `path_to_Micro_Manager_folder/mmplugins`.  
+        - or with ___Fiji___ : Copy `jars/maars_post_2.0.0-SNAPSHOT.jar` and `jars/maars_bfSeg_2.0.0-SNAPSHOT.jar` into `path_to_Fiji_folder/plugins`.  
 
 
 
