@@ -215,7 +215,7 @@ public class SegPombe {
          this.binImage.setCalibration(imageToAnalyze.getCalibration());
       }
 
-      if (!batchMode || tolerance == Integer.MAX_VALUE) {
+      if (!batchMode || tolerance == Double.MAX_VALUE) {
          this.binImage.show();
          WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Optimize (or not) segmentation of "+
                imageToAnalyze.getShortTitle()+ ", and click ok.");

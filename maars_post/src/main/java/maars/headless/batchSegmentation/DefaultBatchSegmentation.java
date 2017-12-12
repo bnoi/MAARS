@@ -37,6 +37,7 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
          String segPath = d + File.separator + parameter.getSegmentationParameter(MaarsParameters.SEG_PREFIX);
          String[] posNbs = MaarsFluoAnalysis.getPositionSuffix(segPath);
          for (String pos: posNbs){
+            IJ.log(pos);
             for (String f : FileUtils.getTiffWithPattern(segPath, ".*.tif")){
                if (Pattern.matches(".*MMStack_" + pos+"\\.ome\\.tif", f)){
                   ImagePlus img = IJ.openImage(segPath + File.separator + f);

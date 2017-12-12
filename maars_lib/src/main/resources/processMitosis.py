@@ -1,7 +1,7 @@
 # coding: utf-8
 # !/usr/bin/env python3
 
-from cellh5 import cellh5, cellh5write
+import cellh5, cellh5write
 import multiprocessing as mp
 import numpy as np
 import pandas as pd
@@ -219,18 +219,21 @@ def getkts2polesStats(spotsInFrame):
 #     return (xs, ys)
 
 def getSpotGeos(poleSpots, ktSpots, radius = 0.25):
-    spots = poleSpots[[pos_x, pos_y]].join(ktSpots[[pos_x, pos_y]], how="outer", lsuffix=poleSuffix, rsuffix=ktSuffix)
-    geos = pd.DataFrame(columns = ["phase", "poleNb", "ktNb", "poleCenter_X","poleCenter_Y",\
-        "ktCenter_X","ktCenter_Y", "poleCenter2KtCenter_X", "poleCenter2KtCenter_Y", \
-        "ktXpos_std", "ktYpos_std", "kts2ktCenter_mean","kts2ktCenter_std", "kts2ktCenter_max","kts2ktCenter_min", \
-        "convexHull_area",
-        "kts2poleCenter_mean","kts2poleCenter_std", "kts2poleCenter_max","kts2poleCenter_min", \
-        "kts2poles_mean", "kts2poles_std", "kts2poles_max", "kts2poles_min", \
-        "kt2Sp_mean", "kt2Sp_std", "kt2Sp_max", "kt2Sp_min", \
-        "proj2SpCenter_mean", "proj2SpCenter_std","proj2SpCenter_max","proj2SpCenter_min"])
-    for f in spots.index.levels[0]:
-        geos.loc[f] = computeGeometries(spots.loc[f])
-    return geos
+    if poleSpots is not None and ktSpots is not None:
+        spots = poleSpots[[pos_x, pos_y]].join(ktSpots[[pos_x, pos_y]], how="outer", lsuffix=poleSuffix, rsuffix=ktSuffix)
+        geos = pd.DataFrame(columns = ["phase", "poleNb", "ktNb", "poleCenter_X","poleCenter_Y",\
+            "ktCenter_X","ktCenter_Y", "poleCenter2KtCenter_X", "poleCenter2KtCenter_Y", \
+            "ktXpos_std", "ktYpos_std", "kts2ktCenter_mean","kts2ktCenter_std", "kts2ktCenter_max","kts2ktCenter_min", \
+            "convexHull_area",
+            "kts2poleCenter_mean","kts2poleCenter_std", "kts2poleCenter_max","kts2poleCenter_min", \
+            "kts2poles_mean", "kts2poles_std", "kts2poles_max", "kts2poles_min", \
+            "kt2Sp_mean", "kt2Sp_std", "kt2Sp_max", "kt2Sp_min", \
+            "proj2SpCenter_mean", "proj2SpCenter_std","proj2SpCenter_max","proj2SpCenter_min"])
+        for f in spots.index.levels[0]:
+            geos.loc[f] = computeGeometries(spots.loc[f])
+        return geos
+    else:
+        return
 
 def getDotProjectionOnSp(sp1x, sp1y, sp2x, sp2y, dotx, doty):
     px = sp2x-sp1x
@@ -287,6 +290,19 @@ def computeGeometries(spotsInFrame):
     # plt.show()
     return [phase] + params
 
+def isInMitosis(cellNb, features_dir, channel):
+    csvPath = features_dir + str(cellNb) + '_' + channel + '.csv'
+    if path.lexists(csvPath):
+        oneCell = pd.read_csv(csvPath)
+        spLens = oneCell['SpLength']
+        if len(spLens[spLens > 0]) > 0:
+            return str(cellNb) + "_" + channel, spLens
+        else:
+            return
+    else:
+        return
+    
+
 if __name__ == '__main__':
     args = set_attributes_from_cmd_line()
     baseDir = args.baseDir
@@ -321,17 +337,25 @@ if __name__ == '__main__':
     cellRois = pd.read_csv(baseDir + path.sep + seg +posPrefix + 'Results.csv')
     cellNbs = getAllCellNumbers(features_dir)
     tasks = []
-    for cellNb in cellNbs:
-        tasks.append((features_dir, cellNb, -4, minSegLen, channel))
-    results = [pool.apply_async(getMitoticElongation, t) for t in tasks]
+    isStatic=True
+    if isStatic:
+        for cellNb in cellNbs:
+            tasks.append((cellNb, features_dir, channel))
+        results = [pool.apply_async(isInMitosis, t) for t in tasks]
+    else:
+        for cellNb in cellNbs:
+            tasks.append((features_dir, cellNb, -4, minSegLen, channel))
+        results = [pool.apply_async(getMitoticElongation, t) for t in tasks]
     elongationRegions = dict()
     for result in results:
         res = result.get()
         if res is None:
             continue
         elongationRegions[res[0]] = res[1]
-
-    timePoints = analyse_each_cell(pool, minSegLen, elongationRegions, cellRois, mitosisDir)
+    if isStatic:
+        timePoints = None
+    else:
+        timePoints = analyse_each_cell(pool, minSegLen, elongationRegions, cellRois, mitosisDir)
     if ch5:
         description = ("cell", "cell_shape_features")
         with cellh5write.CH5FileWriter(mitosisDir + "mitosisAnalysis.ch5") as cfw:
@@ -372,7 +396,10 @@ if __name__ == '__main__':
                 for c in chs:
                     ##### save features data#######
                     curId = str(cellNb) + "_" + c
-                    features = pd.read_csv(features_dir + curId + ".csv")
+                    try:
+                        features = pd.read_csv(features_dir + curId + ".csv")
+                    except :
+                        continue
                     # cow_feature = cpw.add_region_object(c + '_features')
                     # regObjs.append(cow_feature)
                     # for t in features['Frame']:
@@ -387,33 +414,37 @@ if __name__ == '__main__':
                             pd.DataFrame({"Frame":features.index, "mitoRegion":np.empty(len(features.index))})
                             , on='Frame', how='outer')
                     changePoints = pd.DataFrame({"Frame":features.index,"ChangePoints":np.empty(len(features.index))})
-                    for chPoiInd in timePoints.loc[str(cellNb)].values:
-                        changePoints.loc[chPoiInd] = [1, chPoiInd]
+                    if timePoints != None:
+                        for chPoiInd in timePoints.loc[str(cellNb)].values:
+                            changePoints.loc[chPoiInd] = [1, chPoiInd]
                     features = pd.merge(features, changePoints, on='Frame', how='outer')
                     featuresOfCurrentCell[c] = features
                     ##### save spot data#######
                     spotsData = TMxml2dflib.getAllSpots(fluoDir + spots + str(cellNb) + "_" + c + ".xml")
-                    del spotsData["name"]
-                    cow_spot = cpw.add_region_object(c + '_spot')
-                    for t in spotsData.index.levels[0]:
-                        cow_spot.write(t=t, object_labels=spotsData.loc[t]['ID'])
-                    cow_spot.finalize()
+                    print(spotsData.shape[0])
+                    if spotsData.shape[0] > 1:
+                        spotsData.drop('name', axis=1, inplace=True)
+                        cow_spot = cpw.add_region_object(c + '_spot')
+                        for t in spotsData.index.levels[0]:
+                                cow_spot.write(t=t, object_labels=spotsData.loc[t]['ID'])
+                        cow_spot.finalize()
 
-                    regObjs.append(cow_spot)
+                        regObjs.append(cow_spot)
 
-                    cfew_spot_features = cpw.add_object_feature_matrix(object_name=c + '_spot',
-                        feature_name=c + '_spot_features', n_features=len(spotsData.columns),
-                        dtype=np.float16)
-                    cfew_spot_features.write(spotsData.astype(np.float16))
-                    cfew_spot_features.finalize()
+                        cfew_spot_features = cpw.add_object_feature_matrix(object_name=c + '_spot',
+                            feature_name=c + '_spot_features', n_features=len(spotsData.columns),
+                            dtype=np.float16)
+                        cfew_spot_features.write(spotsData.astype(np.float16))
+                        cfew_spot_features.finalize()
 
-                    spotsOfCurrentCell[c] = spotsData
-                    cfewSpotMats.append(cfew_spot_features)
+                        spotsOfCurrentCell[c] = spotsData
+                        cfewSpotMats.append(cfew_spot_features)
                 geos = getSpotGeos(spotsOfCurrentCell[channel], spotsOfCurrentCell["GFP"])
-                geos['Frame'] = list(geos.index)
-                features = pd.merge(featuresOfCurrentCell[channel], geos, on='Frame', how='outer')
-                features.set_index('Frame', inplace=True)
-                features.sort_index(inplace=True)
+                if geos is not None:
+                    geos['Frame'] = list(geos.index)
+                    features = pd.merge(featuresOfCurrentCell[channel], geos, on='Frame', how='outer')
+                    features.set_index('Frame', inplace=True)
+                    features.sort_index(inplace=True)
                 cfewFeatureMats = list()
                 for c in chs:
                     cfew_features = cpw.add_object_feature_matrix(object_name=c + '_features',
