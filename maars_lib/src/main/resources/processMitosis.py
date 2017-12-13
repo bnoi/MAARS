@@ -47,9 +47,9 @@ def set_attributes_from_cmd_line():
     parser.add_argument("fluo_Prefix",
                         help="fluo field prefix",
                         type=str)
-    parser.add_argument("-ch5",
-                        help="save into cellh5",
-                        type=bool, default=True)
+    parser.add_argument('--ch5', dest='ch5', action='store_true', help="save into cellh5")
+    parser.add_argument('--no-ch5', dest='ch5', action='store_false', help="not save into cellh5")
+    parser.set_defaults(ch5=True)
     parser.add_argument("-minimumPeriod",
                         help="minimum time segment to be analyzed",
                         type=int, default=200)
@@ -126,24 +126,24 @@ def copy_mitosis_files(elongationRegions, channels, fluoDir, mitosisDir, cropImg
                          mitosisDir + features + path.sep + str(cellNb) + "_" + ch + ".csv");
 
 
-# def savePlots(elongationRegions, cellRois, calibration, time_board):
-#     for cell_id, elongation in elongationRegions.items():
-#         # print(cell_id, elongation)
-#         cellNb = int(cell_id.split("_")[0])
-#         current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
-#         fig, ax = plt.subplots(figsize=(15, 8))
-#         ax.axhline(current_major_length, c='red', lw=10)
-#         ax.axvline(int(time_board.loc[str(cellNb)][1]), c='red')
-#         ax.axvline(int(time_board.loc[str(cellNb)][2]), c='black', linestyle=":")
-#         ax.axvline(int(time_board.loc[str(cellNb)][3]), c='black', linestyle=":")
-#         ax.axvline(int(time_board.loc[str(cellNb)][4]), c='red')
-#         plt.ylabel("Spindle Length ($μm$)", fontsize=20)
-#         plt.tick_params(axis='both', which='major', labelsize=20)
-#         plt.xlabel("Timepoint // interval " + str(acq_interval), fontsize=20)
-#         plt.ylim(0, current_major_length)
-#         plt.plot(elongation.index, elongation, "-o", c="black")
-#         plt.savefig(mitosisFigDir + str(cellNb), transparent=True, bbox_inches='tight')
-#         plt.close(fig)
+def savePlots(elongationRegions, cellRois, calibration, time_board):
+    for cell_id, elongation in elongationRegions.items():
+        print(cell_id, elongation)
+        cellNb = int(cell_id.split("_")[0])
+        current_major_length = cellRois.loc[int(cellNb)]['Major'] * calibration
+        fig, ax = plt.subplots(figsize=(15, 8))
+        ax.axhline(current_major_length, c='red', lw=10)
+        ax.axvline(int(time_board.loc[str(cellNb)][1]), c='red')
+        ax.axvline(int(time_board.loc[str(cellNb)][2]), c='black', linestyle=":")
+        ax.axvline(int(time_board.loc[str(cellNb)][3]), c='black', linestyle=":")
+        ax.axvline(int(time_board.loc[str(cellNb)][4]), c='red')
+        plt.ylabel("Spindle Length ($μm$)", fontsize=20)
+        plt.tick_params(axis='both', which='major', labelsize=20)
+        plt.xlabel("Timepoint // interval " + str(acq_interval), fontsize=20)
+        plt.ylim(0, current_major_length)
+        plt.plot(elongation.index, elongation, "-o", c="black")
+        plt.savefig(mitosisFigDir + str(cellNb), transparent=True, bbox_inches='tight')
+        plt.close(fig)
 
 def find_slope_change_point(elongation, minSegLen, timeInterval, majorAxieLen, cellNb):
     elongation = extendMitoRegion(elongation, minSegLen)
@@ -301,7 +301,7 @@ def isInMitosis(cellNb, features_dir, channel):
             return
     else:
         return
-    
+
 
 if __name__ == '__main__':
     args = set_attributes_from_cmd_line()
@@ -462,13 +462,14 @@ if __name__ == '__main__':
             for cf in cfewFeatureMats:
                 cf.write_definition(list(features.columns))
             ch5writeRegDef(crw)
-    else:
-        createOutputDirs(mitosisDir, cropImgs, spots, features, figs)
-        copy_mitosis_files(elongationRegions, ["CFP", "GFP", "TxRed", "DAPI"],
-            fluoDir, mitosisDir, cropImgs, spots,features)
-        pd.DataFrame.from_dict(elongationRegions).to_csv(mitosisDir + "mitosis_elongations.csv")
-        timePoints.to_csv(mitosisDir + "mitosis_time_board.csv")
-        # savePlots(elongationRegions, cellRois, calibration, times)
+    elif timePoints != None:
+            createOutputDirs(mitosisDir, [cropImgs, spots, features, figs])
+            copy_mitosis_files(elongationRegions, ["CFP", "GFP", "TxRed", "DAPI"],
+                fluoDir, mitosisDir, cropImgs, spots,features)
+            pd.DataFrame.from_dict(elongationRegions).to_csv(mitosisDir + "mitosis_elongations.csv")
+            timePoints.to_csv(mitosisDir + "mitosis_time_board.csv")
+            print(elongationRegions)
+            savePlots(elongationRegions, cellRois, calibration, timePoints)
     pool.close()
     pool.join()
     print("Done")
