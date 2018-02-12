@@ -16,6 +16,8 @@ import maars.main.MaarsParameters;
 import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
@@ -33,6 +35,8 @@ import java.util.regex.Pattern;
 public class MaarsFluoAnalysis implements Runnable{
    public static final String MITODIRNAME = "Mitosis";
    public static final String MMSIGNATURE = "MMStack_";
+   private static Logger logger = LoggerFactory.getLogger(MaarsFluoAnalysis.class);
+
    String[] posNbs_;
    MaarsParameters parameters_;
    public MaarsFluoAnalysis(MaarsParameters parameters){
@@ -87,7 +91,7 @@ public class MaarsFluoAnalysis implements Runnable{
                      +Maars_Interface.FLUOANALYSIS_SUFFIX);
                IOUtils.saveAll(soc, concatenatedFluoImgs, parameters_.getSavingPath() + File.separator, parameters_.useDynamic(),
                      arrayChannels, posNb, parameters_.getFluoParameter(MaarsParameters.FLUO_PREFIX));
-               IJ.log("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
+               logger.info("it took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                      + " sec for writing results");
                if (parameters_.useDynamic()) {
                   analyzeMitosisDynamic(soc, parameters_);
@@ -118,7 +122,7 @@ public class MaarsFluoAnalysis implements Runnable{
          Map<String, Future> chAnalysisTasks = new HashMap<>();
          for (int j = 1; j <= totalChannel; j++) {
             String channel = arrayChannels[j - 1];
-            IJ.log("Processing channel " + channel + "_" + i);
+            logger.info("Processing channel " + channel + "_" + i);
             ImagePlus zProjectedFluoImg = ImgUtils.zProject(
                   duplicator.run(concatenatedFluoImgs, j, j, 1, totalSlice, i, i)
                   , concatenatedFluoImgs.getCalibration());
@@ -168,7 +172,7 @@ public class MaarsFluoAnalysis implements Runnable{
                if (laggingTimePoint > anaBOnsetFrame && laggingTimePoint < lastAnaphaseFrame) {
                   String laggingMessage = "Lagging :" + cellNb + "_lastLaggingTimePoint_" + laggingTimePoint + "_anaBonset_" + anaBOnsetFrame;
                   out.println(laggingMessage);
-                  IJ.log(laggingMessage);
+                  logger.info(laggingMessage);
                   IJ.openImage(mitoDir + File.separator + "croppedImgs"
                         + File.separator + cellNb + "_GFP.tif").show();
                }
@@ -176,13 +180,13 @@ public class MaarsFluoAnalysis implements Runnable{
             //TODO to show unaligned cell
             if (cell.unalignedSpotFrames().size() > 0) {
                String unalignKtMessage = "Unaligned : Cell " + cellNb + " detected with unaligned kinetochore(s)";
-               IJ.log(unalignKtMessage);
+               logger.info(unalignKtMessage);
                out.println(unalignKtMessage);
             }
          }
          assert out != null;
          out.close();
-         IJ.log("lagging detection finished");
+         logger.info("lagging detection finished");
       }
    }
 
@@ -191,7 +195,7 @@ public class MaarsFluoAnalysis implements Runnable{
 //   }
 
    public static void analyzeMitosisDynamic(DefaultSetOfCells soc, MaarsParameters parameters) {
-      IJ.log("Start python analysis");
+      logger.info("Start python analysis");
       String pos = soc.getPosLabel();
       String pathToRoot = parameters.getSavingPath() + File.separator;
       String mitoDir = pathToRoot + MITODIRNAME + File.separator + pos + File.separator;
@@ -207,7 +211,7 @@ public class MaarsFluoAnalysis implements Runnable{
       cmds.add(String.join(" ", mitosis_cmd));
       String bashPath = mitoDir + "pythonAnalysis.sh";
       FileUtils.writeScript(bashPath,cmds);
-      IJ.log("Script saved");
+      logger.info("Script saved");
 //      findAbnormalCells(mitoDir, soc, map);
    }
 }
