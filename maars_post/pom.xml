@@ -94,6 +94,13 @@
             <artifactId>imglib2</artifactId>
             <version>4.6.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/net.imagej/imagej-ops -->
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>imagej-ops</artifactId>
+            <version>0.39.0</version>
+        </dependency>
     </dependencies>
 
     <build>
