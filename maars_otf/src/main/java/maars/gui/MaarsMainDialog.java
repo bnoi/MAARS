@@ -4,10 +4,9 @@ import ij.IJ;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.RoiManager;
 import maars.agents.DefaultSetOfCells;
-import maars.agents.DefaultSocSet;
 import maars.display.SOCVisualizer;
 import maars.io.IOUtils;
-import maars.main.MAARS;
+//import maars.main.MAARS;
 import maars.main.MaarsParameters;
 import maars.utils.FileUtils;
 import maars.utils.GuiUtils;
@@ -50,7 +49,7 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
    private JRadioButton staticOpt;
    private MaarsFluoAnalysisDialog fluoDialog_;
    private MaarsSegmentationDialog segDialog_;
-   private DefaultSocSet socSet_ = new DefaultSocSet();
+//   private DefaultSocSet socSet_ = new DefaultSocSet();
    private HashMap<String, SOCVisualizer> socVisualizerList_ = new HashMap<>();
    private JButton stopButton_;
    private CopyOnWriteArrayList<Map<String, Future>> tasksSet_ = new CopyOnWriteArrayList<>();
@@ -323,7 +322,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
    private SOCVisualizer createVisualizer(DefaultSetOfCells soc) {
       final SOCVisualizer socVisualizer = new SOCVisualizer();
-      socVisualizer.createGUI(soc);
       return socVisualizer;
    }
 
@@ -353,13 +351,13 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
 
    @Override
    public void actionPerformed(ActionEvent e) {
-      MAARS maars = null;
+//      MAARS maars = null;
       if (e.getSource() == okMainDialogButton) {
          saveParameters();
          String[] posNames = loadPositions();
          for (int i = 0; i < posNames.length; i++) {
             DefaultSetOfCells soc = new DefaultSetOfCells(posNames[i]+"");
-            socSet_.put(posNames[i], soc);
+//            socSet_.put(posNames[i], soc);
             SOCVisualizer socVisualizer = createVisualizer(soc);
             socVisualizerList_.put(posNames[i],socVisualizer);
             if (parameters_.useDynamic()&& Objects.equals(posNames[i], "Pos0")) {
@@ -371,8 +369,8 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          } catch (IOException e1) {
             e1.printStackTrace();
          }
-         maars = new MAARS(mm_, mmc_, parameters_, socVisualizerList_, tasksSet_, socSet_);
-         new Thread(maars).start();
+//         maars = new MAARS(mm_, mmc_, parameters_, socVisualizerList_, tasksSet_, socSet_);
+//         new Thread(maars).start();
          okMainDialogButton.setEnabled(false);
          showDataVisualizer_.setEnabled(true);
       } else if (e.getSource() == segmButton) {
@@ -405,19 +403,19 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
                "Stop current analysis ?");
          yesNoCancelDialog.setAlwaysOnTop(true);
          if (yesNoCancelDialog.yesPressed()) {
-            maars.interrupt();
+//            maars.interrupt();
             RoiManager roiManager = RoiManager.getInstance();
             if (roiManager != null) {
                roiManager.reset();
                roiManager.close();
             }
-            for (String posName : socSet_.getPositionNames()) {
-               socSet_.getSoc(posName).reset();
+//            for (String posName : socSet_.getPositionNames()) {
+//               socSet_.getSoc(posName).reset();
                //TODO
 //               socVisualizerList_.get(i).cleanUp();
 //               socVisualizerList_.get(i).setVisible(false);
 //               socVisualizerList_.get(i).createGUI(socSet_.getSoc(posName));
-            }
+//            }
          }
       } else {
          IJ.log("MaarsOTFSeg don't understand what you want, sorry");

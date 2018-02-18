@@ -1,7 +1,8 @@
 # coding: utf-8
 # !/usr/bin/env python3
 
-import cellh5, cellh5write
+import cellh5
+import cellh5write
 import multiprocessing as mp
 import numpy as np
 import pandas as pd

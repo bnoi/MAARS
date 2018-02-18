@@ -1,7 +1,6 @@
 package maars.headless.batchSegmentation;
 
 import loci.formats.FormatException;
-import maars.headless.ImgLoader;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
 import maars.utils.ImgUtils;
@@ -45,7 +44,7 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
          String segDir = d + File.separator + parameter.getSegmentationParameter(MaarsParameters.SEG_PREFIX);
          imgPath = Objects.requireNonNull(new File(segDir).listFiles(
                (FilenameFilter) new WildcardFileFilter("*." + suffix)))[0].getAbsolutePath();
-         Map<Integer, String> serieNbPos = ImgLoader.populateSeriesImgNames(imgPath);
+         Map<Integer, String> serieNbPos = ImgUtils.populateSeriesImgNames(imgPath);
 
          for (int serie: serieNbPos.keySet()){
             String posName =serieNbPos.get(serie);
