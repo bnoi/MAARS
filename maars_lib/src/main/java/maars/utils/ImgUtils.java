@@ -8,7 +8,18 @@ import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.RoiScaler;
 import ij.plugin.ZProjector;
+import loci.formats.FormatException;
+import loci.formats.ImageReader;
+import loci.formats.MetadataTools;
+import loci.formats.meta.IMetadata;
+import loci.plugins.BF;
+import loci.plugins.in.ImporterOptions;
 import maars.segmentPombe.SegPombeParameters;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -281,11 +292,48 @@ public class ImgUtils {
       return parameters.getScale(widthOrHeightOrDepth) * pixelSize;
    }
 
-   public static ImagePlus lociImport(String tiffPath, String serie_number){
-      String cmd = "open="+tiffPath+" color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT use_virtual_stack " + serie_number;
-      IJ.run("Bio-Formats Importer", cmd);
-      ImagePlus imp = IJ.getImage();
-      imp.hide();
-      return imp;
+   public static ImagePlus lociImport(String tiffPath, int serie_number) throws IOException, FormatException {
+      ImporterOptions options = new ImporterOptions();
+      options.setVirtual(true);
+      options.setGroupFiles(true);
+      options.setMustGroup(true);
+      options.setId(tiffPath);
+      options.setStackFormat("Hyperstack");
+      options.clearSeries();
+      options.setSeriesOn(serie_number, true);
+      return BF.openImagePlus(options)[0];
+   }
+
+   public static HashMap<Integer, String> populateSeriesImgNames(String pathToTiffFile) {
+      Pattern pattern = Pattern.compile(".*_(.*)");
+
+      HashMap<Integer, String> seriesImgNames = new HashMap<>();
+      int seriesCount = 0;
+      try (ImageReader reader = new ImageReader()) {
+         IMetadata omexmlMetadata = MetadataTools.createOMEXMLMetadata();
+         reader.setMetadataStore(omexmlMetadata);
+         try {
+            reader.setId(pathToTiffFile);
+         } catch (FormatException | IOException e) {
+            e.printStackTrace();
+         }
+         seriesCount = reader.getSeriesCount();
+         for (int i = 0; i < seriesCount; i++) {
+            reader.setSeries(i);
+            String name = omexmlMetadata.getImageName(i); // this is the image name stored in the file
+            Matcher matcher = pattern.matcher(name);
+            String pos = null;
+            if (matcher.find()) {
+               pos = matcher.group(1);
+            }
+            assert pos !=null;
+            seriesImgNames.put(i, pos);
+         }
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      assert seriesCount !=0 ;
+      IJ.log(seriesCount + " series registered");
+      return seriesImgNames;
    }
 }

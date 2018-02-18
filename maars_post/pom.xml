@@ -19,41 +19,11 @@
     <artifactId>maars_post</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>net.imagej</groupId>
-            <artifactId>imagej</artifactId>
-            <!--<version>2.0.0-pre-1</version>-->
-        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>maars_lib</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-gpl</artifactId>
-            <!--<version>5.5.2</version>-->
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-api</artifactId>
-            <version>5.5.2</version>
-            <!--<scope>runtime</scope>-->
-        </dependency>
-
-        <dependency>
-            <groupId>ome</groupId>
-            <artifactId>bio-formats_plugins</artifactId>
-            <!--<version>5.5.2</version>-->
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>sc.fiji</groupId>
-            <artifactId>fiji-lib</artifactId>
         </dependency>
 
         <!-- Block for unit tests -->
@@ -88,13 +58,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/net.imglib2/imglib2 -->
-        <dependency>
-            <groupId>net.imglib2</groupId>
-            <artifactId>imglib2</artifactId>
-            <version>4.6.0</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/net.imagej/imagej-ops -->
         <dependency>
             <groupId>net.imagej</groupId>
@@ -109,6 +72,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
+                <configuration>
+                    <argLine>-Xmx8024m</argLine>
+                </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>org.junit.platform</groupId>

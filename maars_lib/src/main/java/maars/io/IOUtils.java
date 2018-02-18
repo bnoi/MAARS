@@ -31,16 +31,6 @@ public class IOUtils {
       ps.close();
    }
 
-   public static void writeToFile(String filePath, Properties properties) {
-      try (PrintWriter out = new PrintWriter(filePath)) {
-         properties.store(out, "");
-      } catch (FileNotFoundException e) {
-         IOUtils.printErrorToIJLog(e);
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-   }
-
    public static void serializeSoc(String pathToFluoDir, DefaultSetOfCells soc) {
       File f = new File(pathToFluoDir + "SetOfCell.serialize");
       ObjectOutputStream objOut = null;
