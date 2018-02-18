@@ -1,13 +1,12 @@
 package maars.headless.batchSegmentation;
 
-import ij.IJ;
-import ij.ImagePlus;
+import loci.formats.FormatException;
 import maars.headless.ImgLoader;
-import maars.headless.batchFluoAnalysis.MaarsFluoAnalysis;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
-import maars.utils.FileUtils;
+import maars.utils.ImgUtils;
 import net.imagej.ops.AbstractOp;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.scijava.plugin.Attr;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -15,7 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.regex.Pattern;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
 /**
  * Created by tongli on 13/06/2017.
  */
@@ -28,31 +30,36 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
 
    @Parameter
    private String configName;
+
+   @Parameter
+   private String suffix;
+
    @Override
    public void run(){
-      launchSeg(dirs, configName);}
-
-   private void launchSeg(String[] dirs, String configName) {
+      String imgPath;
       for (String d : dirs) {
          logger.info(d);
          MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
          parameter.setSavingPath(d);
          parameter.save(d);
-         String segPath = d + File.separator + parameter.getSegmentationParameter(MaarsParameters.SEG_PREFIX);
-         String[] posNbs = ImgLoader.getPositionSuffix(segPath, MaarsFluoAnalysis.MMSIGNATURE);
-         for (String pos: posNbs){
-            logger.info(pos);
-            for (String f : FileUtils.getTiffWithPattern(segPath, ".*.tif")){
-               if (Pattern.matches(".*MMStack_" + pos+"\\.ome\\.tif", f)){
-                  ImagePlus img = IJ.openImage(segPath + File.separator + f);
-                  Thread th = new Thread(new MaarsSegmentation(parameter, img, pos));
-                  th.start();
-                  try {
-                     th.join();
-                  } catch (InterruptedException e) {
-                     e.printStackTrace();
-                  }
+         String segDir = d + File.separator + parameter.getSegmentationParameter(MaarsParameters.SEG_PREFIX);
+         imgPath = Objects.requireNonNull(new File(segDir).listFiles(
+               (FilenameFilter) new WildcardFileFilter("*." + suffix)))[0].getAbsolutePath();
+         Map<Integer, String> serieNbPos = ImgLoader.populateSeriesImgNames(imgPath);
+
+         for (int serie: serieNbPos.keySet()){
+            String posName =serieNbPos.get(serie);
+            logger.info(posName);
+            try {
+               Thread th = new Thread(new MaarsSegmentation(parameter, ImgUtils.lociImport(imgPath, serie), posName));
+               th.start();
+               try {
+                  th.join();
+               } catch (InterruptedException e) {
+                  e.printStackTrace();
                }
+            } catch (IOException | FormatException e) {
+               e.printStackTrace();
             }
          }
       }
