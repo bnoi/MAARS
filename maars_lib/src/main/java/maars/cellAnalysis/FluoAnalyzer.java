@@ -107,7 +107,7 @@ public class FluoAnalyzer implements Runnable {
          e.printStackTrace();
       }
       if (useDynamic_ && socVisualizer_ != null) {
-         socVisualizer_.updateParameters(soc);
+         socVisualizer_.updateCellList(soc);
       }
       fluoImage = null;
       model = null;

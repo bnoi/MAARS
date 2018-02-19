@@ -19,6 +19,9 @@ public class DefaultBatchFluoAnalysis extends AbstractOp implements BatchFluoAna
    @Parameter
    private String configName;
 
+   @Parameter
+   private String suffix;
+
    @Override
    public void run() {
       fluoAnalysis(d,configName);
@@ -30,7 +33,7 @@ public class DefaultBatchFluoAnalysis extends AbstractOp implements BatchFluoAna
       MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
       parameter.setSavingPath(d);
       parameter.save(d);
-      Thread th = new Thread(new MaarsFluoAnalysis(parameter));
+      Thread th = new Thread(new MaarsFluoAnalysis(parameter, suffix));
       th.start();
       try {
          th.join();
