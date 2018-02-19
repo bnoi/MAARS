@@ -13,7 +13,7 @@ Why Python/Anaconda?
 See [general installation](install_MAARS.md)
 
 ## Requirements:
-You need at least 3 components to run MAARS (besides you may [already segmented your cells](I have my segmentations)):
+You need at least 3 components to run MAARS (besides you may **already segmented your cells** see bottom of this page):
 1. A folder that contains bright-field images (folder `BF_1` in our case)
 2. A folder that contains fluorescence images (folder `FLUO_1` in our case)
 3. A `maars-config.xml` file
@@ -28,12 +28,12 @@ You have 3 ways to create this file.
 2. Run `batchSegmentation` or `batchFluoanalysis`, it will create one at the root folder if it doesn't exist.
 3. Copy-paste [this example](https://github.com/bnoi/MAARS/blob/master/maars_lib/src/main/resources/maars_default_config.xml) and modify manually with text editor  
 
-It comprises 4 sets of parameter concerning `FluoAnalysis`, `GeneralAcquisition`, `Segmentation` and `MitosisDectection`.
+It comprises 4 sets of parameter concerning `FluoAnalysis`, `GeneralAcquisition`, `Segmentation` and `MitosisDectection`.  
 ![][config_structure]  
 TODO: add detailed description about each parameter...
 
 ## How to run MAARS post-acquisition analysis
-__**Note**: change `SEG_PREFIX` and `FLUO_PREFIX` in the `maars_config.xml` to the name of folders correspondingly. `BF_1` and `FLUO_1` in the example. __
+**IMPORTANT NOTE**: change `SEG_PREFIX` and `FLUO_PREFIX` in the `maars_config.xml` to the name of folders correspondingly. `BF_1` and `FLUO_1` in the example.
 1. Open `script panel` of Fiji.  
 ![][script-panel]  
 2. Load [this script][batchMAARS] and select `Python` as language.
@@ -43,10 +43,10 @@ If everything went well, you should see text with color like this
 ![][post_interface]  
 User `Browse` button to load the root folder of the acquisition. 
 4. It is recommaned to run the script 3 times in following the order:  
-  1. Segmentation
-  2. Configuration of fluoanalysis parameters (for spot detection)
-  3. Fluo-analysis
-5. In `fluoConfigurator` you can tune the parameters for spot detection using `preview` button. It will take the __active image__ as input and find dots using [Trackmate](https://imagej.net/TrackMate). Once you are satisfied with the parameters, overwrite it or save it in the root fodler.
+  - Segmentation
+  - Configuration of fluoanalysis parameters (for spot detection)
+  - Fluo-analysis
+5. In `fluoConfigurator` you can tune the parameters for spot detection using `preview` button. It will take the __active image__ as input and find dots using [Trackmate](https://imagej.net/TrackMate). Once you are satisfied with the parameters, overwrite it or save it in the root fodler.  
 ![](images/configurator.png)
 6. When you've finished segmentation and fluo analysis in the root, you will get newly 
 created folders and files as below:  
