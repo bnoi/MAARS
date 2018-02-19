@@ -19,41 +19,84 @@
     <artifactId>maars_post</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>net.imagej</groupId>
-            <artifactId>imagej</artifactId>
-            <!--<version>2.0.0-pre-1</version>-->
-        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>maars_lib</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Block for unit tests -->
         <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-gpl</artifactId>
-            <!--<version>5.5.2</version>-->
-            <scope>compile</scope>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.0.1</version>
         </dependency>
 
         <dependency>
-            <groupId>ome</groupId>
-            <artifactId>formats-api</artifactId>
-            <version>5.5.2</version>
-            <!--<scope>runtime</scope>-->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>4.12.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>1.0.1</version>
+            <scope>test</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/net.imagej/imagej-ops -->
         <dependency>
-            <groupId>ome</groupId>
-            <artifactId>bio-formats_plugins</artifactId>
-            <!--<version>5.5.2</version>-->
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>sc.fiji</groupId>
-            <artifactId>fiji-lib</artifactId>
+            <groupId>net.imagej</groupId>
+            <artifactId>imagej-ops</artifactId>
+            <version>0.39.0</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <argLine>-Xmx8024m</argLine>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.platform</groupId>
+                        <artifactId>junit-platform-surefire-provider</artifactId>
+                        <version>1.0.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>5.0.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+                <version>3.7.0</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>
