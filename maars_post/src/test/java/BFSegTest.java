@@ -127,10 +127,10 @@ public class  BFSegTest {
 //      String oneExample = "/Volumes/Macintosh/curioData/screening/20_10_17_2/BF_1";
 //      File[] listFiles = new File(oneExample).listFiles((FilenameFilter) new WildcardFileFilter("*.tif"));
 //      logger.info(listFiles[0] + "");
-      String oneExample = "/Volumes/Macintosh/curioData/screening/20_10_17_2/BF_1/BF_1_MMStack_wt.ome.tif";
-      IFormatReader reader = new OMETiffReader();
-      reader.setId(oneExample);
-      for (String s :reader.getUsedFiles()) logger.info(s);
+//      String oneExample = "/Volumes/Macintosh/curioData/screening/20_10_17_2/BF_1/BF_1_MMStack_wt.ome.tif";
+//      IFormatReader reader = new OMETiffReader();
+//      reader.setId(oneExample);
+//      for (String s :reader.getUsedFiles()) logger.info(s);
 //      logger.info(reader.getSeriesCount() + "");
 //      assertEquals(4, reader.getSeriesCount());
 //
