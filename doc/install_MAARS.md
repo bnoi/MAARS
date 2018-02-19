@@ -9,7 +9,7 @@ This manual should be applicable to all OSs (Ubuntu16.04/MacOS Sierra/Win7)
 * **RAM** :  
 Generally, the more the better. This also depends on the size of your images.
 * **Prepare Anaconda(Post-acquisition) and/or Micro-Manager(on-the-fly)**:
-see [Options](Options) part below.
+see **Options** part below.
 
 
 _**Important** :_ Don't forget to configure ImageJ's RAM allocation. In `Edit/Options/Memory & Threads...`  
@@ -36,7 +36,7 @@ Example:
 ## Options
 
 * **About `Adjustable_Watershed.java`**
-see [this manual](Adjustable_Watershed.java) to decide whether or not to install it.
+see [this manual](BfSeg_manual.md) to decide whether or not to install it.
 
 * **(Optional if you need <span style="color:red"> complete analysis of MAARS</span>) Install Anaconda **  
 If you want more parameters than the ones listed in the image saved into [Cellh5 format](http://cellh5.org/) file. Go install Anaconda.
