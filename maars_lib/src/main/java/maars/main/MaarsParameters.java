@@ -24,7 +24,6 @@ import java.io.*;
  * MaarsParameters reads a configuration file written as a XML,
  * then allows to access values thanks to all constants defined.
  *
- * CALIBRATION
  * SEGMENTATION_PARAMETERS
  *    |
  *    +-----> TOLERANCE
@@ -123,7 +122,6 @@ public class MaarsParameters {
    private static final String GENERAL_ACQUISITION_PARAMETERS = "GENERAL_ACQUISITION_PARAMETERS";
    private static final String DEFAULT_CHANNEL_PARAMATERS = "DEFAULT_CHANNEL_PARAMATERS";
    private static final String SKIP = "SKIP";
-   private static final String CALIBRATION = "CALIBRATION";
    private static final String BATCH_MODE = "BATCH_MODE";
    private static final String TOLERANCE = "TOLERANCE";
    public static final String FOCUS= "FOCUS";
@@ -376,20 +374,6 @@ public class MaarsParameters {
     */
    public void setDetectionChForMitosis(String chForMitosis) {
       root.getChild(MITOSIS_DETECTION_PARAMETERS).getChild(DETECTION_CHANNEL).setText(chForMitosis);
-   }
-
-   /**
-    * @return calibration object
-    */
-   public String getCalibration() {
-      return root.getChildText(CALIBRATION);
-   }
-
-   /**
-    * @param calib calibration object
-    */
-   public void setCalibration(String calib) {
-      root.getChild(CALIBRATION).setText(calib);
    }
 
    /**
