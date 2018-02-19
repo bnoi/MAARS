@@ -20,14 +20,12 @@ public class DefaultFluoConfigurator extends AbstractOp implements FluoConfigura
 
    @Parameter
    private String configName;
+
    @Override
    public void run(){
-      launchSeg(dirs, configName);}
-
-   private void launchSeg(String[] dirs, String configName) {
       for (String d : dirs) {
          System.out.println(d);
-         MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
+         MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator + configName);
          new MaarsFluoAnalysisDialog(parameter);
       }
    }
