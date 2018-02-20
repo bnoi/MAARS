@@ -1,5 +1,6 @@
 package maars.display;
 
+import maars.agents.Cell;
 import maars.agents.DefaultSetOfCells;
 import maars.cellAnalysis.SpotSetAnalyzor;
 import maars.io.IOUtils;
@@ -12,6 +13,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -19,6 +22,7 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RefineryUtilities;
@@ -33,35 +37,27 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
 
    private DefaultSetOfCells currentSoc = null;
 
-   /** The datasets. */
-   private XYSeriesCollection[] datasets = new XYSeriesCollection[SUBPLOT_COUNT];;
-
    /** The number of subplots. */
    public static final int SUBPLOT_COUNT = SpotSetAnalyzor.GeoParamSet.length;
+
+   /** The datasets. */
+   private XYSeriesCollection[] datasets;
 
    /** The most recent value added to series 1. */
    private double[] lastValue = new double[SUBPLOT_COUNT];
 
-   final CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis());
+   private String[] channels;
 
-   public SOCVisualizer() {
+   private final CombinedDomainXYPlot plot = new CombinedDomainXYPlot(new NumberAxis());
+
+   public SOCVisualizer(String[] channels) {
       super("Display cells with at least 1 spot detected");
       setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-      for (int i = 0; i < SUBPLOT_COUNT; i++) {
-         this.lastValue[i] = 0.0;
-         final XYSeries series = new XYSeries("Random " + i);
-         this.datasets[i] = new XYSeriesCollection(series);
-         final NumberAxis rangeAxis = new NumberAxis("Y" + i);
-         rangeAxis.setAutoRangeIncludesZero(false);
-         final XYPlot subplot = new XYPlot(
-               this.datasets[i], null, rangeAxis, new StandardXYItemRenderer()
-         );
-         subplot.setBackgroundPaint(Color.lightGray);
-         subplot.setDomainGridlinePaint(Color.white);
-         subplot.setRangeGridlinePaint(Color.white);
-         plot.add(subplot);
-      }
+      this.channels = channels;
+      prepareDataSet(channels);
+
+      preparePlots();
 
       final JFreeChart chart = new JFreeChart("Plots of parameters", plot);
       chart.setBorderPaint(Color.black);
@@ -82,9 +78,8 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
       chartPanel.setBorder(BorderFactory.createTitledBorder("Parameters"));
       chartPanel.setToolTipText("parameters of selected cell");
 
-      chartPanel.setPreferredSize(new java.awt.Dimension(500, 470));
+      chartPanel.setPreferredSize(new java.awt.Dimension(450, 350));
 
-      alreadyShownList_.add(0,1);
       RefineryUtilities.centerFrameOnScreen(this);
       cellToDisplayList_ = new JList<>(alreadyShownList_);
       cellToDisplayList_.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -133,7 +128,8 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
       splitPane.setOneTouchExpandable(true);
       splitPane.setDividerLocation(120);
 
-      content.add(splitPane, BorderLayout.WEST);
+      content.setPreferredSize(new java.awt.Dimension(900, 650));
+      content.add(splitPane, BorderLayout.CENTER);
       content.add(loadSocPanel, BorderLayout.EAST);
 
       cellToDisplayList_.addMouseListener(this);
@@ -143,20 +139,78 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
       this.pack();
    }
 
-   public void updateCellList(DefaultSetOfCells defaultSetOfCells) {
-      alreadyShownList_.clear();
-      cellToDisplayList_.clearSelection();
-      this.currentSoc = defaultSetOfCells;
-      for (Integer cellIndex : currentSoc.getPotentialMitosisCell()) {
-         int cellNb = currentSoc.getCell(cellIndex).getCellNumber();
-         alreadyShownList_.addElement(cellNb);
+   private void preparePlots() {
+      for (int f = 0; f < SUBPLOT_COUNT; f++) {
+         final NumberAxis rangeAxis = new NumberAxis(SpotSetAnalyzor.GeoParamSet[f]);
+         rangeAxis.setAutoRangeIncludesZero(false);
+         final XYPlot subplot = new XYPlot(
+               this.datasets[f], null, rangeAxis, new StandardXYItemRenderer()
+         );
+         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+         for (int c =0; c < channels.length; c++) {
+            renderer.setSeriesShapesVisible(c, false);
+            renderer.setSeriesPaint(c, getColor(channels[c]));
+            subplot.setRenderer(c, renderer);
+         }
+         subplot.setBackgroundPaint(Color.lightGray);
+         subplot.setDomainGridlinePaint(Color.white);
+         subplot.setRangeGridlinePaint(Color.white);
+         plot.add(subplot);
       }
    }
 
-   public void updatePlot(DefaultSetOfCells soc, int cellNb){
-      for (int i = 0; i < SUBPLOT_COUNT; i++) {
-         this.datasets[i].getSeries(0).clear();
-         soc.getCell(cellNb).getGeometryContainer();
+   private void prepareDataSet(String[] channels) {
+      this.datasets = new XYSeriesCollection[SUBPLOT_COUNT];
+      XYSeries series;
+      XYSeriesCollection collectionForChannels;
+      for (int f = 0; f < SUBPLOT_COUNT; f++) {
+         collectionForChannels = new XYSeriesCollection();
+         for (String channel : channels) {
+            series = new XYSeries(SpotSetAnalyzor.GeoParamSet[f] + "_" + channel);
+            collectionForChannels.addSeries(series);
+         }
+         this.datasets[f] = collectionForChannels;
+      }
+   }
+
+   public void updateCellList(DefaultSetOfCells defaultSetOfCells) {
+      this.currentSoc = defaultSetOfCells;
+      assert currentSoc.size() > 0;
+      for (Integer cellIndex : currentSoc.getPotentialMitosisCell()) {
+         int cellNb = currentSoc.getCell(cellIndex).getCellNumber();
+         if (!alreadyShownList_.contains(cellNb)){
+            alreadyShownList_.addElement(cellNb);
+         }
+      }
+      cellToDisplayList_.validate();
+   }
+
+   public void updatePlot(Cell cell){
+      for (int f = 0; f < SUBPLOT_COUNT; f++) {
+         for (int c = 0; c < channels.length; c++){
+            HashMap<Integer, HashMap<String, Double>> currentGeos = cell.getGeometryContainer().getGeosInChannel(this.channels[c]);
+            for (int t :currentGeos.keySet()){
+               for (String existingfeature : currentGeos.get(t).keySet()){
+                  double currentVal = currentGeos.get(t).get(existingfeature).intValue();
+                  this.datasets[f].getSeries(c).addOrUpdate((double) t, currentVal);
+               }
+            }
+         }
+      }
+   }
+
+   private static Color getColor(String channel) {
+      switch (channel) {
+         case "CFP":
+            return Color.BLUE;
+         case "GFP":
+            return Color.GREEN;
+         case "TxRed":
+            return Color.RED;
+         case "DAPI":
+            return Color.CYAN;
+         default:
+            return null;
       }
    }
 
@@ -166,7 +220,7 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
          int index = cellToDisplayList_.locationToIndex(e.getPoint());
          if (index != -1) {
             Object item = alreadyShownList_.getElementAt(index);
-            updatePlot(currentSoc, (Integer) item);
+            updatePlot(currentSoc.getCell((Integer) item));
          }
       }
    }
@@ -208,7 +262,7 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
       }
       if (index >= 0 && index <= cellToDisplayList_.getLastVisibleIndex()) {
          Object item = alreadyShownList_.getElementAt(index);
-         updatePlot(currentSoc, (Integer) item);
+         updatePlot(currentSoc.getCell((Integer) item));
       }
    }
 
@@ -218,7 +272,7 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
    }
 
    public static void main(String[] args) {
-      SOCVisualizer visualizer = new SOCVisualizer();
+      SOCVisualizer visualizer = new SOCVisualizer(new String[]{"CFP", "GFP"});
       DefaultSetOfCells soc = new DefaultSetOfCells("test");
       visualizer.updateCellList(soc);
       visualizer.setVisible(true);

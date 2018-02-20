@@ -39,6 +39,8 @@ public class MaarsFluoAnalysis implements Runnable{
 
    private Map<Integer, String> serieNbPos;
    private MaarsParameters parameters_;
+   private SOCVisualizer visualizer;
+   private String[] usingChannels;
    public MaarsFluoAnalysis(MaarsParameters parameters, String suffix){
       String fluoDir = FileUtils.convertPath(parameters.getSavingPath()) + File.separator +
             parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX);
@@ -46,6 +48,10 @@ public class MaarsFluoAnalysis implements Runnable{
             (FilenameFilter) new WildcardFileFilter("*." + suffix)))[0].getAbsolutePath();
       serieNbPos = ImgUtils.populateSeriesImgNames(FLUOIMGPATH);
       parameters_ = parameters;
+      usingChannels = parameters_.getUsingChannels().split(",", -1);
+      IJ.log(usingChannels[0]);
+      visualizer = new SOCVisualizer(usingChannels);
+      visualizer.setVisible(true);
    }
    @Override
    public void run() {
@@ -81,7 +87,7 @@ public class MaarsFluoAnalysis implements Runnable{
             CopyOnWriteArrayList<Map<String, Future>> tasksSet = new CopyOnWriteArrayList<>();
             try {
                concatenatedFluoImgs = processStackedImg(FLUOIMGPATH, serie,
-                           parameters_, soc, null, tasksSet, stop);
+                           parameters_, soc, visualizer, tasksSet, stop);
             } catch (IOException | FormatException e) {
                e.printStackTrace();
             }

@@ -87,6 +87,7 @@
 //      return subplot;
 //   }
 //
+//
 //   private static Color getColor(String channel) {
 //      switch (channel) {
 //         case "CFP":
@@ -101,42 +102,43 @@
 //            return null;
 //      }
 //   }
-//
-//   // ****************************************************************************
-//   // * JFREECHART DEVELOPER GUIDE                                               *
-//   // * The JFreeChart Developer Guide, written by David Gilbert, is available   *
-//   // * to purchase from Object Refinery Limited:                                *
-//   // *                                                                          *
-//   // * http://www.object-refinery.com/jfreechart/guide.html                     *
-//   // *                                                                          *
-//   // * Sales are used to provide funding for the JFreeChart project - please    *
-//   // * support us so that we can continue developing free software.             *
-//   // ****************************************************************************
-//
-////    /**
-////     * Handles a click on the button by adding new (random) data.
-////     *
-////     * @param e  the action event.
-////     */
-////    public void actionPerformed(final ActionEvent e) {
-////
-////        for (int i = 0; i < SUBPLOT_COUNT; i++) {
-////            if (e.getActionCommand().endsWith(String.valueOf(i))) {
-////                final Millisecond now = new Millisecond();
-////                System.out.println("Now = " + now.toString());
-////                this.lastValue[i] = this.lastValue[i] * (0.90 + 0.2 * Math.random());
-////                this.datasets[i].getSeries(0).add(new Millisecond(), this.lastValue[i]);
-////            }
-////        }
-////
-////        if (e.getActionCommand().equals("ADD_ALL")) {
-////            final Millisecond now = new Millisecond();
-////            System.out.println("Now = " + now.toString());
-////            for (int i = 0; i < SUBPLOT_COUNT; i++) {
-////                this.lastValue[i] = this.lastValue[i] * (0.90 + 0.2 * Math.random());
-////                this.datasets[i].getSeries(0).add(new Millisecond(), this.lastValue[i]);
-////            }
-////        }
-////
-////    }
 //}
+////
+////   // ****************************************************************************
+////   // * JFREECHART DEVELOPER GUIDE                                               *
+////   // * The JFreeChart Developer Guide, written by David Gilbert, is available   *
+////   // * to purchase from Object Refinery Limited:                                *
+////   // *                                                                          *
+////   // * http://www.object-refinery.com/jfreechart/guide.html                     *
+////   // *                                                                          *
+////   // * Sales are used to provide funding for the JFreeChart project - please    *
+////   // * support us so that we can continue developing free software.             *
+////   // ****************************************************************************
+////
+//////    /**
+//////     * Handles a click on the button by adding new (random) data.
+//////     *
+//////     * @param e  the action event.
+//////     */
+//////    public void actionPerformed(final ActionEvent e) {
+//////
+//////        for (int i = 0; i < SUBPLOT_COUNT; i++) {
+//////            if (e.getActionCommand().endsWith(String.valueOf(i))) {
+//////                final Millisecond now = new Millisecond();
+//////                System.out.println("Now = " + now.toString());
+//////                this.lastValue[i] = this.lastValue[i] * (0.90 + 0.2 * Math.random());
+//////                this.datasets[i].getSeries(0).add(new Millisecond(), this.lastValue[i]);
+//////            }
+//////        }
+//////
+//////        if (e.getActionCommand().equals("ADD_ALL")) {
+//////            final Millisecond now = new Millisecond();
+//////            System.out.println("Now = " + now.toString());
+//////            for (int i = 0; i < SUBPLOT_COUNT; i++) {
+//////                this.lastValue[i] = this.lastValue[i] * (0.90 + 0.2 * Math.random());
+//////                this.datasets[i].getSeries(0).add(new Millisecond(), this.lastValue[i]);
+//////            }
+//////        }
+//////
+//////    }
+////}
