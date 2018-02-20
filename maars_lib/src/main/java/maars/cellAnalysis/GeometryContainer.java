@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Set;
 
-public class GeometryContainer <T extends Double>implements Serializable {
+public class GeometryContainer <T extends Number> implements Serializable {
    private HashMap<String, HashMap<Integer, HashMap<String, T>>> geosOfCells;
 
    public GeometryContainer() {
