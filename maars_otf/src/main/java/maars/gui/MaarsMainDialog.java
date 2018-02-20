@@ -320,11 +320,6 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
       }
    }
 
-   private SOCVisualizer createVisualizer(DefaultSetOfCells soc) {
-      final SOCVisualizer socVisualizer = new SOCVisualizer();
-      return socVisualizer;
-   }
-
    private String[] loadPositions() {
       PositionList pl = new PositionList();
       try {
@@ -358,11 +353,11 @@ public class MaarsMainDialog extends JFrame implements ActionListener {
          for (int i = 0; i < posNames.length; i++) {
             DefaultSetOfCells soc = new DefaultSetOfCells(posNames[i]+"");
 //            socSet_.put(posNames[i], soc);
-            SOCVisualizer socVisualizer = createVisualizer(soc);
-            socVisualizerList_.put(posNames[i],socVisualizer);
-            if (parameters_.useDynamic()&& Objects.equals(posNames[i], "Pos0")) {
-               socVisualizer.setVisible(true);
-            }
+//            SOCVisualizer socVisualizer = createVisualizer(soc);
+//            socVisualizerList_.put(posNames[i],socVisualizer);
+//            if (parameters_.useDynamic()&& Objects.equals(posNames[i], "Pos0")) {
+//               socVisualizer.setVisible(true);
+//            }
          }
          try {
             parameters_.save();

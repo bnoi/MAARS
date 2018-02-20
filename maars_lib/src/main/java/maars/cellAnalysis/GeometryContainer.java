@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Set;
 
-public class GeometryContainer implements Serializable {
-   private HashMap<String, HashMap<Integer, HashMap<String, Object>>> geosOfCells;
+public class GeometryContainer <T extends Double>implements Serializable {
+   private HashMap<String, HashMap<Integer, HashMap<String, T>>> geosOfCells;
 
    public GeometryContainer() {
    }
@@ -35,18 +35,18 @@ public class GeometryContainer implements Serializable {
     * @param frame      frame name
     * @param geometries geometry of spindle
     */
-   public void putGeometry(String channel, int frame, HashMap<String, Object> geometries) {
+   public void putGeometry(String channel, Integer frame, HashMap<String, T> geometries) {
       if (!geoFrameExists(channel, frame)) {
          getGeosInChannel(channel).put(frame, new HashMap<>());
       }
       getGeosInChannel(channel).put(frame, geometries);
    }
 
-   public Set<String> getUsingChannels() {
-      return this.geosOfCells.keySet();
+   public String[] getUsingChannels() {
+      return this.geosOfCells.keySet().toArray(new String[]{});
    }
 
-   public HashMap<Integer, HashMap<String, Object>> getGeosInChannel(String channel) {
+   public HashMap<Integer, HashMap<String, T>> getGeosInChannel(String channel) {
       return this.geosOfCells.get(channel);
    }
 
