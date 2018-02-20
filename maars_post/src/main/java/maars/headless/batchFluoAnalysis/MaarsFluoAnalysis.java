@@ -109,6 +109,8 @@ public class MaarsFluoAnalysis implements Runnable{
                }
             }
          }
+         visualizer.clear();
+         visualizer.setVisible(true);
          soc.reset();
          System.gc();
       }

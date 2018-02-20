@@ -91,7 +91,7 @@ public class Cell implements Serializable {
       return this.spotContainer;
    }
 
-   public void putGeometry(String channel, int frame, HashMap<String, Object> geometries) {
+   public void putGeometry(String channel, int frame, HashMap<String, Double> geometries) {
       this.geoContainer.putGeometry(channel, frame, geometries);
    }
 
@@ -117,5 +117,13 @@ public class Cell implements Serializable {
 
    public ArrayList<Integer> unalignedSpotFrames() {
       return frameWithUnalignedSpot_;
+   }
+
+   public Boolean hasSpotsInBetween(){
+      return spotInBetweenFrames.size() > 0;
+   }
+
+   public Boolean hasUnalignedDots(){
+        return frameWithUnalignedSpot_.size() > 0;
    }
 }

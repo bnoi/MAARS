@@ -136,6 +136,33 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
 
       cellToDisplayList_.addKeyListener(this);
 
+      cellToDisplayList_.setCellRenderer(new DefaultListCellRenderer() {
+
+         @Override
+         public Component getListCellRendererComponent(JList list,
+                                                       Object value, int index, boolean isSelected,
+                                                       boolean cellHasFocus) {
+
+            super.getListCellRendererComponent(list, value, index,
+                  isSelected, cellHasFocus);
+
+            Integer num = (Integer) value;
+            if (num > 0){
+               if (currentSoc.getCell(num).hasSpotsInBetween()) {
+                  setBackground(Color.lightGray);
+               }
+               if (currentSoc.getCell(num).hasUnalignedDots()) {
+                  setBackground(Color.magenta);
+               }
+               if (currentSoc.getCell(num).hasSpotsInBetween() & currentSoc.getCell(num).hasUnalignedDots()) {
+                  setBackground(Color.RED);
+               }
+            }
+
+            return this;
+         }
+      });
+
       this.pack();
    }
 
@@ -185,14 +212,15 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
       cellToDisplayList_.validate();
    }
 
-   public void updatePlot(Cell cell){
+   private void updatePlot(Cell cell){
+      clearPlot();
       for (int f = 0; f < SUBPLOT_COUNT; f++) {
          for (int c = 0; c < channels.length; c++){
             HashMap<Integer, HashMap<String, Double>> currentGeos = cell.getGeometryContainer().getGeosInChannel(this.channels[c]);
             for (int t :currentGeos.keySet()){
-               for (String existingfeature : currentGeos.get(t).keySet()){
-                  double currentVal = currentGeos.get(t).get(existingfeature).intValue();
-                  this.datasets[f].getSeries(c).addOrUpdate((double) t, currentVal);
+               if ( currentGeos.get(t).keySet().contains(SpotSetAnalyzor.GeoParamSet[f])){
+                  this.datasets[f].getSeries(c).addOrUpdate(Integer.valueOf(t),
+                        currentGeos.get(t).get(SpotSetAnalyzor.GeoParamSet[f]));
                }
             }
          }
@@ -214,6 +242,18 @@ public class SOCVisualizer extends JFrame implements MouseListener, KeyListener{
       }
    }
 
+   private void clearPlot(){
+      for (int f = 0; f < SUBPLOT_COUNT; f++) {
+         for (int c = 0; c < channels.length; c++) {
+            this.datasets[f].getSeries(c).clear();
+         }
+      }
+   }
+   public void clear(){
+      alreadyShownList_.clear();
+      cellToDisplayList_.validate();
+      clearPlot();
+   }
    @Override
    public void mouseClicked(MouseEvent e) {
       if (e.getClickCount() == 2) {

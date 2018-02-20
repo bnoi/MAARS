@@ -65,11 +65,11 @@ public class SpotSetAnalyzor {
     *
     * @param spotSet set of spots to analyze
     */
-   HashMap<String, Object> compute(Iterable<Spot> spotSet) {
+   HashMap<String, Double> compute(Iterable<Spot> spotSet) {
       // this functions modify directly coordinates of spot in
       // soc, because it's back-up
       // cptgeometry.centerSpots(spotSet);
-      HashMap<String, Object> geometry;
+      HashMap<String, Double> geometry;
       int setSize = CollectionUtils.size(spotSet);
       if (setSize > 1) {
          poles = findMostDistant2Spots(spotSet);
@@ -84,9 +84,9 @@ public class SpotSetAnalyzor {
       return geometry;
    }
 
-   private HashMap<String, Object> computeGeometry(int setSize) {
-      HashMap<String, Object> geometry = new HashMap<>();
-      geometry.put(NbOfSpotDetected, setSize);
+   private HashMap<String, Double> computeGeometry(int setSize) {
+      HashMap<String, Double> geometry = new HashMap<>();
+      geometry.put(NbOfSpotDetected, (double) setSize);
       Vector3D polesVec = getSpAsVector(poles);
       geometry.put(SpLength, polesVec.getNorm());
       Spot spCenter = getCenter(poles);
@@ -223,16 +223,16 @@ public class SpotSetAnalyzor {
             Objects.equals(s1.getFeature(Spot.POSITION_Z), s2.getFeature(Spot.POSITION_Z));
    }
 
-   private HashMap<String, Object> emptyGeometry() {
-      HashMap<String, Object> geometry = new HashMap<>();
-      geometry.put(NbOfSpotDetected, 1);
-      geometry.put(SpLength, "");
-      geometry.put(SpCenterX, "");
-      geometry.put(SpCenterY, "");
-      geometry.put(SpCenterZ, "");
-      geometry.put(SpAngToMaj, "");
-      geometry.put(CellCenterToSpCenterLen, "");
-      geometry.put(CellCenterToSpCenterAng, "");
+   private HashMap<String, Double> emptyGeometry() {
+      HashMap<String, Double> geometry = new HashMap<>();
+      geometry.put(NbOfSpotDetected, 1.);
+      geometry.put(SpLength, Double.NaN);
+      geometry.put(SpCenterX, Double.NaN);
+      geometry.put(SpCenterY, Double.NaN);
+      geometry.put(SpCenterZ, Double.NaN);
+      geometry.put(SpAngToMaj, Double.NaN);
+      geometry.put(CellCenterToSpCenterLen, Double.NaN);
+      geometry.put(CellCenterToSpCenterAng, Double.NaN);
       return geometry;
    }
 }
