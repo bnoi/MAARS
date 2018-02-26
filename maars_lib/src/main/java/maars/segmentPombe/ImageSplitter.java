@@ -41,8 +41,7 @@ class ImageSplitter {
    ImagePlus crop(int xBase, int width) {
       ImagePlus newImg = new ImagePlus();
       ImageStack stack = img.getStack();
-      ImageStack newStack;
-      newStack = stack.crop(xBase, 0, 0, width, img.getHeight(), img.getNSlices());
+      ImageStack newStack = stack.crop(xBase, 0, 0, width, img.getHeight(), img.getNSlices());
       newImg.setStack(newStack);
       return newImg;
    }
