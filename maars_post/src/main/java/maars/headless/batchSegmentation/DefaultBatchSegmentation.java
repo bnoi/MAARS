@@ -50,7 +50,7 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
             String posName =serieNbPos.get(serie);
             logger.info(posName);
             try {
-               Thread th = new Thread(new MaarsSegmentation(parameter, ImgUtils.lociImport(imgPath, serie), posName));
+               Thread th = new Thread(new MaarsSegmentation(parameter, ImgUtils.lociImport(imgPath, serie, false), posName));
                th.start();
                try {
                   th.join();
