@@ -293,8 +293,12 @@ public class ImgUtils {
    }
 
    public static ImagePlus lociImport(String tiffPath, int serie_number) throws IOException, FormatException {
+      return lociImport(tiffPath, serie_number, true);
+   }
+
+   public static ImagePlus lociImport(String tiffPath, int serie_number, Boolean virtual) throws IOException, FormatException {
       ImporterOptions options = new ImporterOptions();
-      options.setVirtual(true);
+      options.setVirtual(virtual);
       options.setGroupFiles(true);
       options.setMustGroup(true);
       options.setId(tiffPath);

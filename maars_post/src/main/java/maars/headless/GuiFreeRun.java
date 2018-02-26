@@ -1,3 +1,13 @@
+package maars.headless;
+
+import fiji.Debug;
+public class GuiFreeRun  {
+   public static void main(String[] args) {
+      Debug.run("Script...", "");
+   }
+}
+
+
 //package maars.headless;
 //
 //import ij.IJ;
