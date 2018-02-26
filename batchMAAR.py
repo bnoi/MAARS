@@ -3,5 +3,5 @@
 #@File(label="Select a directory", style="directory") d
 if method=="fluoConfigurator":
     ops.run(method, d.getPath(), "maars_config.xml")
-else:    
+else:
     ops.run(method, d.getPath(), "maars_config.xml", "tif")
