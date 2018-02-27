@@ -262,8 +262,7 @@ public class SegPombe {
       ParticleAnalyzer particleAnalyzer = new ParticleAnalyzer(
             ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.SHOW_PROGRESS
                   + ParticleAnalyzer.ADD_TO_MANAGER,
-            Measurements.AREA + Measurements.CENTROID + Measurements.PERIMETER + Measurements.SHAPE_DESCRIPTORS
-                  + Measurements.ELLIPSE + Measurements.KURTOSIS + Measurements.SKEWNESS,
+             Measurements.MEAN + Measurements.SHAPE_DESCRIPTORS,
             resultTable, minParticleInMicron, maxParticleInMicron);
       System.out.println("minParticleSize " + minParticleInMicron + " maxParticleSize " + maxParticleInMicron);
       System.out.println("Analyse particles on " + binImage.getTitle() + " ...");
