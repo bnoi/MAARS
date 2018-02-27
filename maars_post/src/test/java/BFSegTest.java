@@ -29,7 +29,7 @@ public class  BFSegTest {
 
       MaarsParameters parameters = new MaarsParameters(FileUtils.getInputStreamOfScript("maars_default_config.xml"));
 
-      String root = System.getProperty("user.dir") + "/src/main/resources/";
+      String root = System.getProperty("user.dir") + File.separator + "src"+ File.separator + "main"+ File.separator + "resources"+ File.separator;
 
       parameters.setSavingPath(root);
 
