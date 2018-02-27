@@ -52,11 +52,11 @@ public class SegPombe {
    private ResultsTable resultTable;
    private RoiManager roiManager;
    // Options related to display and save
-   private boolean showCorrelationImg;
+   private boolean showIntegratedImg;
    private boolean showBinaryImg;
    private boolean showDataFrame;
    private boolean showFocusImage;
-   private boolean saveCorrelationImg;
+   private boolean saveIntegratedImg;
    private boolean saveBinaryImg;
    private boolean saveDataFrame;
    private boolean saveFocusImage;
@@ -65,6 +65,13 @@ public class SegPombe {
    private PrintStream ps;
    private PrintStream curr_err;
    private PrintStream curr_out;
+
+   public static final String BINARY = "Binary";
+   public static final String INTEGRATED = "Integrated";
+   public static final String FOCUS = "Focus";
+   public static final String RESULTS = "Results";
+   public static final String ROI = "ROI";
+   public static final String SEGLOG = "Segmentation.log";
 
    /**
     * Constructor
@@ -75,7 +82,7 @@ public class SegPombe {
       this.imageToAnalyze = parameters.getImageToAnalyze();
       this.savingPath = parameters.getSavingPath();
       try {
-         ps = new PrintStream(savingPath + File.separator + "Segmentation.LOG");
+         ps = new PrintStream(savingPath + File.separator + SEGLOG);
          curr_err = System.err;
          curr_out = System.out;
          System.setOut(ps);
@@ -92,12 +99,12 @@ public class SegPombe {
       this.direction = parameters.getDirection();
 
       // ResultOptions
-      this.showCorrelationImg = parameters.showCorrelationImg();
+      this.showIntegratedImg = parameters.showIntegratedImg();
       this.showBinaryImg = parameters.showBinaryImg();
       this.showDataFrame = parameters.showDataFrame();
       this.showFocusImage = parameters.showFocusImage();
 
-      this.saveCorrelationImg = parameters.saveCorrelationImg();
+      this.saveIntegratedImg = parameters.saveIntegratedImg();
       this.saveBinaryImg = parameters.saveBinaryImg();
       this.saveDataFrame = parameters.saveDataFrame();
       this.saveFocusImage = parameters.saveFocusImage();
@@ -127,23 +134,23 @@ public class SegPombe {
       if (saveFocusImage) {
          IJ.run(focusImg, "Enhance Contrast", "saturated=0.35");
          FileSaver fileSaver = new FileSaver(focusImg);
-         fileSaver.saveAsTiff(savingPath + File.separator + "FocusImage.tif");
+         fileSaver.saveAsTiff(savingPath + File.separator + FOCUS + ".tif");
       }
       imageToAnalyze.flatten();
-      System.out.println("FocusImage saved.");
+      System.out.println(FOCUS + " Image saved.");
    }
 
    /**
-    * Create an image correlation where each pixel corresponds to the
-    * correlation of a specific curve see equation in computeCorrelation object
+    * Create an image Integrated where each pixel corresponds to the
+    * Integrated of a specific curve see equation in computeIntegrated object
     */
-   public void createCorrelationImage() {
+   public void createIntegratedImage() {
 
-      System.out.println("creating correlation image");
+      System.out.println("creating Integrated image");
       System.out.println("Width : " + String.valueOf(imageToAnalyze.getWidth()) + ", Height : "
             + String.valueOf(imageToAnalyze.getHeight()));
       int nbProcessor = Runtime.getRuntime().availableProcessors();
-      System.out.println("Compute correlation with " + nbProcessor + " processor");
+      System.out.println("Compute Integrate with " + nbProcessor + " processor");
       ImageSplitter splitter = new ImageSplitter(imageToAnalyze, nbProcessor);
       int xPosition = 0;
       ImagePlus subImg;
@@ -155,13 +162,13 @@ public class SegPombe {
       for (int i = 0; i < nbProcessor; i++) {
          if (i == 0) {
             subImg = splitter.crop(xPosition, widths[1]);
-            task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
+            task = executor.submit(new ComputeImageIntegrate(subImg, zFocus, sigma, direction));
             map.put(xPosition, task);
             xPosition += widths[1];
          } else {
-            IJ.showStatus("Computing correlation image");
+            IJ.showStatus("Computing Integrated image");
             subImg = splitter.crop(xPosition, widths[0]);
-            task = executor.submit(new ComputeImageCorrelation(subImg, zFocus, sigma, direction));
+            task = executor.submit(new ComputeImageIntegrate(subImg, zFocus, sigma, direction));
             map.put(xPosition, task);
             xPosition += widths[0];
          }
@@ -171,7 +178,7 @@ public class SegPombe {
          for (int xPos : map.keySet()) {
             FloatProcessor processor = map.get(xPos).get();
             for (int x = 0; x < processor.getWidth(); x++) {
-               IJ.showStatus("Rendering correlation image");
+               IJ.showStatus("Rendering Integrated image");
                for (int y = 0; y < processor.getHeight(); y++) {
                   imgCorrTempProcessor.putPixel(x + xPos, y, processor.get(x, y));
                }
@@ -185,14 +192,14 @@ public class SegPombe {
    }
 
    /**
-    * This method set a threshold with Ostu method on the correlation image and
+    * This method set a threshold with Ostu method on the Integrated image and
     * convert it into Binary Image
     *
     * @param batchMode batch mode for optimization of segmentation
     */
-   public void convertCorrelationToBinaryImage(Boolean batchMode, Double tolerance) {
+   public void convertIntegratedToBinaryImage(Boolean batchMode, Double tolerance) {
 
-      System.out.println("Convert correlation image to binary image");
+      System.out.println("Convert Integrated image to binary image");
 
       ByteProcessor byteImage = imgCorrTempProcessor.convertToByteProcessor(true);
       byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, true, BinaryProcessor.BLACK_AND_WHITE_LUT);
@@ -239,7 +246,7 @@ public class SegPombe {
    }
 
    /**
-    * Run with output of convertCorrelationToBinaryImage as parameter. It
+    * Run with output of convertIntegratedToBinaryImage as parameter. It
     * analyse particles of the image and filter them according to there area,
     * and there solidity value (if requested)
     */
@@ -256,7 +263,7 @@ public class SegPombe {
          roiManager = new RoiManager();
       }
 
-      imgCorrTemp = new ImagePlus("Correlation Image", imgCorrTempProcessor);
+      imgCorrTemp = new ImagePlus("Integrated Image", imgCorrTempProcessor);
 
       ParticleAnalyzer.setRoiManager(roiManager);
       ParticleAnalyzer particleAnalyzer = new ParticleAnalyzer(
@@ -329,9 +336,9 @@ public class SegPombe {
 
       if (saveBinaryImg) {
          System.out.println("save binary image");
-         binImage.setTitle("BinaryImage");
+         binImage.setTitle(BINARY);
          FileSaver fileSaver = new FileSaver(binImage);
-         fileSaver.saveAsTiff(savingPath + File.separator + "BinaryImage.tif");
+         fileSaver.saveAsTiff(savingPath + File.separator + BINARY + ".tif");
       }
       if (showBinaryImg) {
          System.out.println("show binary image");
@@ -341,18 +348,18 @@ public class SegPombe {
          binImage.flush();
       }
 
-      if (saveCorrelationImg) {
-         System.out.println("save correlation image");
-         imgCorrTemp.setTitle("CorrelationImage");
+      if (saveIntegratedImg) {
+         System.out.println("save Integrated image");
+         imgCorrTemp.setTitle(INTEGRATED);
          IJ.run(imgCorrTemp, "Enhance Contrast", "saturated=0.35");
          FileSaver fileSaver = new FileSaver(imgCorrTemp);
-         fileSaver.saveAsTiff(savingPath + File.separator + "CorrelationImage.tif");
+         fileSaver.saveAsTiff(savingPath + File.separator + INTEGRATED +".tif");
       }
-      if (showCorrelationImg) {
-         System.out.println("show correlation image");
+      if (showIntegratedImg) {
+         System.out.println("show Integrated image");
          imgCorrTemp.show();
       } else {
-         System.out.println("flush correlation image");
+         System.out.println("flush Integrated image");
          imgCorrTemp.flush();
       }
       ps.close();

@@ -9,7 +9,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.plugin.frame.RoiManager;
 import ij.process.ImageProcessor;
 import maars.io.IOUtils;
-import maars.segmentPombe.ComputeCorrelation;
+import maars.segmentPombe.ComputeIntegration;
 
 import java.awt.*;
 import java.io.BufferedWriter;
@@ -79,7 +79,7 @@ public class SigmaOptimization implements PlugInFilter {
    }
 
    /**
-    * Runs the plugin : compute mean correlation value for each sigma in the
+    * Runs the plugin : compute mean integrate value for each sigma in the
     * range tested
     */
    @Override
@@ -121,7 +121,7 @@ public class SigmaOptimization implements PlugInFilter {
       BufferedWriter bw = new BufferedWriter(fw);
 
       try {
-         bw.write("sigma,mean_correlation");
+         bw.write("sigma,mean_integrate");
          bw.newLine();
       } catch (IOException e) {
          System.out.println("could not write in file");
@@ -132,10 +132,10 @@ public class SigmaOptimization implements PlugInFilter {
             + (float) step) {
          System.out.println("for sigma = " + sigma);
 
-         ComputeCorrelation computeCorrelation = new ComputeCorrelation(zf, sigma
+         ComputeIntegration computeIntegration = new ComputeIntegration(zf, sigma
                / (float) image.getCalibration().pixelDepth,
                direction);
-         computeCorrelation.preCalculateParameters(0, image.getNSlices() - 1);
+         computeIntegration.preCalculateParameters(0, image.getNSlices() - 1);
          double total = 0;
          for (Roi roi1 : rois) {
             double x = roi1.getXBase();
@@ -144,7 +144,7 @@ public class SigmaOptimization implements PlugInFilter {
                image.setZ(z);
                iz[z] = image.getPixel((int) x, (int) y)[0];
             }
-            total = total + computeCorrelation.integrate(iz);
+            total = total + computeIntegration.integrate(iz);
          }
          double mean = total / rois.length;
          System.out.println("mean = " + mean);

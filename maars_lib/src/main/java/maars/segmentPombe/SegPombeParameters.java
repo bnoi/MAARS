@@ -36,11 +36,11 @@ public class SegPombeParameters {
    private boolean filterAbnormalShape = true;
    private boolean filtrateWithMeanGrayValue = true;
    // Options related to display and save
-   private boolean showCorrelationImg = false;
+   private boolean showIntegratedImg = false;
    private boolean showBinaryImg = false;
    private boolean showDataFrame = false;
    private boolean showFocusImage = false;
-   private boolean saveCorrelationImg = false;
+   private boolean saveIntegratedImg = false;
    private boolean saveBinaryImg = false;
    private boolean saveDataFrame = false;
    private boolean saveFocusImage = false;
@@ -104,12 +104,12 @@ public class SegPombeParameters {
       this.direction = direction;
    }
 
-   boolean showCorrelationImg() {
-      return showCorrelationImg;
+   boolean showIntegratedImg() {
+      return showIntegratedImg;
    }
 
-   public void setShowCorrelationImg(boolean showCorrelationImg) {
-      this.showCorrelationImg = showCorrelationImg;
+   public void setShowIntegratedImg(boolean showIntegratedImg) {
+      this.showIntegratedImg = showIntegratedImg;
    }
 
    boolean showBinaryImg() {
@@ -136,12 +136,12 @@ public class SegPombeParameters {
       this.showFocusImage = showFocusImage;
    }
 
-   boolean saveCorrelationImg() {
-      return saveCorrelationImg;
+   boolean saveIntegratedImg() {
+      return saveIntegratedImg;
    }
 
-   public void setSaveCorrelationImg(boolean saveCorrelationImg) {
-      this.saveCorrelationImg = saveCorrelationImg;
+   public void setSaveIntegratedImg(boolean saveIntegratedImg) {
+      this.saveIntegratedImg = saveIntegratedImg;
    }
 
    boolean saveBinaryImg() {

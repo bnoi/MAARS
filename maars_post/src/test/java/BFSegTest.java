@@ -1,16 +1,21 @@
 import ij.ImagePlus;
 
 import loci.formats.FormatException;
-import loci.formats.IFormatReader;
-import loci.formats.in.OMETiffReader;
 import loci.plugins.BF;
 import loci.plugins.in.ImporterOptions;
+import maars.main.MaarsParameters;
+import maars.main.MaarsSegmentation;
+import maars.main.Maars_Interface;
+import maars.segmentPombe.SegPombe;
+import maars.utils.FileUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,9 +23,17 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class  BFSegTest {
    private static Logger logger = LoggerFactory.getLogger(BFSegTest.class);
+
    @Parameterized.Parameters
    public static Collection<Object[]> prepareFiles() throws IOException, FormatException {
+
+      MaarsParameters parameters = new MaarsParameters(FileUtils.getInputStreamOfScript("maars_default_config.xml"));
+
       String root = System.getProperty("user.dir") + "/src/main/resources/";
+
+      parameters.setSavingPath(root);
+
+      parameters.setBatchMode(true);
 
       ImporterOptions options = new ImporterOptions();
       options.setVirtual(true);
@@ -30,13 +43,16 @@ public class  BFSegTest {
 
       options.setId(root + "FLUO.tif");
       ImagePlus[] fluoimg = BF.openImagePlus(options);
-      return Arrays.asList(new Object[][] {{bfimg[0], fluoimg[0]}});
+      return Arrays.asList(new Object[][] {{bfimg[0], fluoimg[0], parameters}});
    }
    @Parameterized.Parameter
    public ImagePlus bfimg;
 
    @Parameterized.Parameter(1)
    public ImagePlus fluoimg;
+
+   @Parameterized.Parameter(2)
+   public MaarsParameters parameters_;
 
 //   @Test
 //   public void show() throws ImgIOException, IOException, FormatException, io.scif.FormatException {
@@ -122,8 +138,28 @@ public class  BFSegTest {
 //      }
 //   }
 
+   //This is a dirty test of the exist of output files.
    @Test
-   public void bfloadTest() throws IOException, FormatException {
+   public void bfSegOutputTest() {
+      String fakePosNb = "wt";
+      Thread th = new Thread(new MaarsSegmentation(parameters_, bfimg, fakePosNb));
+      th.start();
+      try {
+         th.join();
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      }
+      String outputRoot = parameters_.getSavingPath() + parameters_.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + Maars_Interface.SEGANALYSIS_SUFFIX;
+      String outputPosDir = outputRoot + File.separator + fakePosNb;
+      Assert.assertTrue(FileUtils.exists(outputRoot));
+      Assert.assertTrue(FileUtils.exists(outputPosDir));
+      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.BINARY + ".tif"));
+      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.INTEGRATED + ".tif"));
+      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.FOCUS + ".tif"));
+      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.ROI + ".zip"));
+      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.RESULTS + ".csv"));
+      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.SEGLOG));
+   }
 //      String oneExample = "/Volumes/Macintosh/curioData/screening/20_10_17_2/BF_1";
 //      File[] listFiles = new File(oneExample).listFiles((FilenameFilter) new WildcardFileFilter("*.tif"));
 //      logger.info(listFiles[0] + "");
@@ -155,6 +191,5 @@ public class  BFSegTest {
 //      } catch (InterruptedException e) {
 //         e.printStackTrace();
 //      }
-   }
 
 }
