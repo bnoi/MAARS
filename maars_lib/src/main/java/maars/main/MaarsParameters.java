@@ -451,6 +451,10 @@ public class MaarsParameters {
       root.getChild(SEGMENTATION_PARAMETERS).getChild(CHANNEL).setText(segChannel);
    }
 
+   public void setBatchMode(Boolean batchMode) {
+      root.getChild(GENERAL_ACQUISITION_PARAMETERS).getChild(BATCH_MODE).setText(String.valueOf(batchMode));
+   }
+
    /**
     * @param root the dataset of this class
     */

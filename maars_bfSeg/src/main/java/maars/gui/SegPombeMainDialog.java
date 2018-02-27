@@ -57,11 +57,11 @@ public class SegPombeMainDialog implements PlugInFilter {
    private JFormattedTextField meanGreyValueField;
 
    // to select what result should be displayed or saved
-   private Checkbox showCorrelationImgCkb;
+   private Checkbox showIntegratedImgCkb;
    private Checkbox showBinaryImgCkb;
    private Checkbox showDataFrameCkb;
    private Checkbox showFocusImageCkb;
-   private Checkbox saveCorrelationImgCkb;
+   private Checkbox saveIntegratedImgCkb;
    private Checkbox saveBinaryImgCkb;
    private Checkbox saveDataFrameCkb;
    private Checkbox saveFocusImageCkb;
@@ -177,7 +177,7 @@ public class SegPombeMainDialog implements PlugInFilter {
             filterWithMinGreyValuePanel, BoxLayout.X_AXIS);
       filterWithMinGreyValuePanel.setLayout(filterWithMinGrayValueLayout);
       filterWithMeanGreyValueCkb = new Checkbox(
-            "Filter background using mean grey value on correlation image",
+            "Filter background using mean grey value on Integrated image",
             defaultParameters.filterAbnormalShape());
       meanGreyValueField = new JFormattedTextField(Float.class);
       meanGreyValueField.setValue(defaultParameters.getMeanGreyValueThreshold());
@@ -275,12 +275,12 @@ public class SegPombeMainDialog implements PlugInFilter {
 
       // Displays Result options
       showFocusImageCkb = new Checkbox();
-      showCorrelationImgCkb = new Checkbox();
+      showIntegratedImgCkb = new Checkbox();
       showBinaryImgCkb = new Checkbox();
       showDataFrameCkb = new Checkbox();
       saveFocusImageCkb = new Checkbox();
       saveRoiCkb = new Checkbox();
-      saveCorrelationImgCkb = new Checkbox();
+      saveIntegratedImgCkb = new Checkbox();
       saveBinaryImgCkb = new Checkbox();
       saveDataFrameCkb = new Checkbox();
 
@@ -295,7 +295,7 @@ public class SegPombeMainDialog implements PlugInFilter {
 
       Label focusImg = new Label("Focus Image");
       Label rois = new Label("ROIs");
-      Label corrImg = new Label("Correlation Image");
+      Label corrImg = new Label("Integrated Image");
       Label BinaryImg = new Label("Binary Image");
       Label dataFrame = new Label("Data Frame");
 
@@ -331,7 +331,7 @@ public class SegPombeMainDialog implements PlugInFilter {
       displayPanel.add(showFocusImageCkb);
       displayPanel.add(new Label("does it anyway"));
       displayPanel.add(showDataFrameCkb);
-      displayPanel.add(showCorrelationImgCkb);
+      displayPanel.add(showIntegratedImgCkb);
       displayPanel.add(showBinaryImgCkb);
       savePanel.setLayout(saveBoxLayout);
       savePanel.add(save);
@@ -339,7 +339,7 @@ public class SegPombeMainDialog implements PlugInFilter {
       savePanel.add(saveFocusImageCkb);
       savePanel.add(saveRoiCkb);
       savePanel.add(saveDataFrameCkb);
-      savePanel.add(saveCorrelationImgCkb);
+      savePanel.add(saveIntegratedImgCkb);
       savePanel.add(saveBinaryImgCkb);
 
       labDispSavePanel.setLayout(labDispSaveLayout);
@@ -590,12 +590,12 @@ public class SegPombeMainDialog implements PlugInFilter {
 //      parameters_.setChangeScale(changeScaleCkb.getState());
       parameters_.setFilterAbnormalShape(filterAbnormalShapeCkb.getState());
       parameters_.setFiltrateWithMeanGrayValue(filterWithMeanGreyValueCkb.getState());
-      parameters_.setShowCorrelationImg(showCorrelationImgCkb.getState());
+      parameters_.setShowIntegratedImg(showIntegratedImgCkb.getState());
       parameters_.setShowBinaryImg(showBinaryImgCkb.getState());
       parameters_.setShowDataFrame(showDataFrameCkb.getState());
       parameters_.setShowFocusImage(showFocusImageCkb.getState());
       parameters_.setSaveRoi(saveRoiCkb.getState());
-      parameters_.setSaveCorrelationImg(saveCorrelationImgCkb.getState());
+      parameters_.setSaveIntegratedImg(saveIntegratedImgCkb.getState());
       parameters_.setSaveDataFrame(saveDataFrameCkb.getState());
       parameters_.setSaveFocusImage(saveFocusImageCkb.getState());
       parameters_.setSaveBinaryImg(saveBinaryImgCkb.getState());
@@ -705,9 +705,9 @@ public class SegPombeMainDialog implements PlugInFilter {
     */
    private boolean checkResultOptions() {
 
-      return (showCorrelationImgCkb.getState()
+      return (showIntegratedImgCkb.getState()
             || showBinaryImgCkb.getState() || saveRoiCkb.getState()
-            || showDataFrameCkb.getState() || saveCorrelationImgCkb.getState()
+            || showDataFrameCkb.getState() || saveIntegratedImgCkb.getState()
             || saveBinaryImgCkb.getState() || saveDataFrameCkb.getState()
             || showFocusImageCkb.getState() || saveFocusImageCkb.getState());
    }
@@ -719,7 +719,7 @@ public class SegPombeMainDialog implements PlugInFilter {
 //       */
       // showFocusImage.setState(false);
       // saveBinaryImg.setState(true);
-      // saveCorrelationImg.setState(true);
+      // saveIntegratedImg.setState(true);
       // saveDataFrame.setState(true);
       // saveFocusImage.setState(true);
       // saveRoi.setState(true);
