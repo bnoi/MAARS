@@ -46,7 +46,7 @@ public class SegPombe {
    private boolean filterAbnormalShape;
    private boolean filtrateWithMeanGrayValue;
    // Variables to get results
-   private FloatProcessor imgCorrTempProcessor;
+   private FloatProcessor integratedProcessor;
    private ImagePlus binImage;
    private ImagePlus imgCorrTemp;
    private ResultsTable resultTable;
@@ -173,14 +173,14 @@ public class SegPombe {
             xPosition += widths[0];
          }
       }
-      imgCorrTempProcessor = new FloatProcessor(imageToAnalyze.getWidth(), imageToAnalyze.getHeight());
+      integratedProcessor = new FloatProcessor(imageToAnalyze.getWidth(), imageToAnalyze.getHeight());
       try {
          for (int xPos : map.keySet()) {
             FloatProcessor processor = map.get(xPos).get();
             for (int x = 0; x < processor.getWidth(); x++) {
                IJ.showStatus("Rendering Integrated image");
                for (int y = 0; y < processor.getHeight(); y++) {
-                  imgCorrTempProcessor.putPixel(x + xPos, y, processor.get(x, y));
+                  integratedProcessor.putPixel(x + xPos, y, processor.get(x, y));
                }
             }
          }
@@ -201,7 +201,7 @@ public class SegPombe {
 
       System.out.println("Convert Integrated image to binary image");
 
-      ByteProcessor byteImage = imgCorrTempProcessor.convertToByteProcessor(true);
+      ByteProcessor byteImage = integratedProcessor.convertToByteProcessor(true);
       byteImage.setAutoThreshold(AutoThresholder.Method.Otsu, true, BinaryProcessor.BLACK_AND_WHITE_LUT);
 
       // image pre-processing
@@ -263,7 +263,7 @@ public class SegPombe {
          roiManager = new RoiManager();
       }
 
-      imgCorrTemp = new ImagePlus("Integrated Image", imgCorrTempProcessor);
+      imgCorrTemp = new ImagePlus("Integrated Image", integratedProcessor);
 
       ParticleAnalyzer.setRoiManager(roiManager);
       ParticleAnalyzer particleAnalyzer = new ParticleAnalyzer(
@@ -365,5 +365,9 @@ public class SegPombe {
       ps.close();
       System.setOut(curr_out);
       System.setErr(curr_err);
+   }
+
+   public FloatProcessor getintegratedProcessor() {
+      return integratedProcessor;
    }
 }
