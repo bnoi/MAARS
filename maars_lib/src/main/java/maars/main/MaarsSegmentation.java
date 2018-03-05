@@ -119,4 +119,8 @@ public class MaarsSegmentation implements Runnable {
       IJ.log("Done.");
       return segPombeParam;
    }
+
+   public SegPombeParameters getSegPombeParam() {
+      return segPombeParam_;
+   }
 }
