@@ -140,27 +140,27 @@ public class  BFSegTest {
 //   }
 
    //This is a dirty test of the exist of output files.
-   @Test
-   public void bfSegOutputTest() {
-      String fakePosNb = "wt";
-      Thread th = new Thread(new MaarsSegmentation(parameters_, bfimg, fakePosNb));
-      th.start();
-      try {
-         th.join();
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-      String outputRoot = parameters_.getSavingPath() + parameters_.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + Maars_Interface.SEGANALYSIS_SUFFIX;
-      String outputPosDir = outputRoot + File.separator + fakePosNb;
-      Assert.assertTrue(FileUtils.exists(outputRoot));
-      Assert.assertTrue(FileUtils.exists(outputPosDir));
-      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.BINARY + ".tif"));
-      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.INTEGRATED + ".tif"));
-      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.FOCUS + ".tif"));
-      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.ROI + ".zip"));
-      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.RESULTS + ".csv"));
-      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.SEGLOG));
-   }
+//   @Test
+//   public void bfSegOutputTest() {
+//      String fakePosNb = "wt";
+//      Thread th = new Thread(new MaarsSegmentation(parameters_, bfimg, fakePosNb));
+//      th.start();
+//      try {
+//         th.join();
+//      } catch (InterruptedException e) {
+//         e.printStackTrace();
+//      }
+//      String outputRoot = parameters_.getSavingPath() + parameters_.getSegmentationParameter(MaarsParameters.SEG_PREFIX) + Maars_Interface.SEGANALYSIS_SUFFIX;
+//      String outputPosDir = outputRoot + File.separator + fakePosNb;
+//      Assert.assertTrue(FileUtils.exists(outputRoot));
+//      Assert.assertTrue(FileUtils.exists(outputPosDir));
+//      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.BINARY + ".tif"));
+//      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.INTEGRATED + ".tif"));
+//      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.FOCUS + ".tif"));
+//      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.ROI + ".zip"));
+//      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.RESULTS + ".csv"));
+//      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.SEGLOG));
+//   }
 
    @Test
    public void calculateIntegratedImgTest(){

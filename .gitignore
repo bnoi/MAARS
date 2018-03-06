@@ -132,3 +132,4 @@ ENV/
 *MAARS_deps/
 maars_post/src/main/resources/BF_1_SegAnalysis*
 
+*.html

@@ -42,7 +42,6 @@ public class Maars_Interface {
 
    public static void copyDeps(){
       FileUtils.createFolder(MaarsParameters.DEPS_DIR);
-      FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.TRACKMATE_LOADER_NAME);
       FileUtils.copy(MaarsParameters.DEPS_DIR, PythonPipeline.ANALYSING_SCRIPT_NAME);
    }
 
