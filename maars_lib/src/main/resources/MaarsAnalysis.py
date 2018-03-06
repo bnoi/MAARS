@@ -15,17 +15,16 @@ if __name__ == '__main__':
     mitoFilter = analyser.getMitosisFilter()
     mitoCellNbs = analyser.getMitoCellNbs(mitoFilter)
     dict_id_spLens = analyser.getElongations(mitoCellNbs)
-    slopeChanges = analyser.getMaxSlopes(dict_id_spLens)
-    analyser.writeReport(mitoCellNbs, dict_id_spLens, slopeChanges)
-    ##########plotting#################
-    Plotting.plotElong(dict_id_spLens)
-
-    mitoRange = pd.DataFrame(columns = ["start", "stop"])
+    mitoRange = pd.DataFrame(columns = ["start", "end"])
     for cellId in dict_id_spLens.keys():
         interpolated_spLens = dict_id_spLens[cellId]
         mitoRange.loc[cellId] = [interpolated_spLens.index[0], interpolated_spLens.index[-1]]
-    print(mitoRange)
-    print(slopeChanges)
+    slopeChanges = analyser.getMaxSlopes(dict_id_spLens)
+    slopeChanges.insert(2, "start", mitoRange["start"])
+    slopeChanges.insert(3, "end", mitoRange["end"])
+    analyser.writeReport(mitoCellNbs, dict_id_spLens, slopeChanges)
+    ##########plotting#################
+    Plotting.plotElong(dict_id_spLens)
     # pathToXmls = [maarscsts.FLUO_SPOT + str(c) + "_" + args.channel + '.xml' for c in mitoticCellNbs]
     # # Track SPBs
     #
