@@ -162,7 +162,7 @@ public class MaarsFluoAnalysis implements Runnable{
 
    private static void findAbnormalCells(String mitoDir,
                                          DefaultSetOfCells soc,
-                                         HashMap map) {
+                                         HashMap slopeChanges) {
       assert FileUtils.exists(mitoDir);
       PrintWriter out = null;
       try {
@@ -171,10 +171,10 @@ public class MaarsFluoAnalysis implements Runnable{
          IOUtils.printErrorToIJLog(e);
       }
       assert out != null;
-      for (Object cellNb : map.keySet()) {
+      for (Object cellNb : slopeChanges.keySet()) {
          int cellNbInt = Integer.parseInt(String.valueOf(cellNb));
-         int anaBOnsetFrame = Integer.valueOf(((String[]) map.get(cellNb))[2]);
-         int lastAnaphaseFrame = Integer.valueOf(((String[]) map.get(cellNb))[3]);
+         int anaBOnsetFrame = Integer.valueOf(((String[]) slopeChanges.get(cellNb))[1]);
+         int lastAnaphaseFrame = Integer.valueOf(((String[]) slopeChanges.get(cellNb))[2]);
          Cell cell = soc.getCell(cellNbInt);
          cell.setAnaBOnsetFrame(anaBOnsetFrame);
          ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
@@ -201,9 +201,9 @@ public class MaarsFluoAnalysis implements Runnable{
       IJ.log("lagging detection finished");
    }
 
-//   static HashMap getMitoticCellNbs(String mitoDir) {
-//      return FileUtils.readTable(mitoDir + File.separator + "mitosis_time_board.csv");
-//   }
+   static HashMap getMitoticCellNbs(String mitoDir) {
+      return FileUtils.readTable(mitoDir + File.separator + "slopeChanges.csv");
+   }
 
    public static void analyzeMitosisDynamic(DefaultSetOfCells soc, MaarsParameters parameters, double calib) {
       IJ.log("Start python analysis");
@@ -220,9 +220,8 @@ public class MaarsFluoAnalysis implements Runnable{
       cmds.add(String.join(" ", mitosis_cmd));
       String bashPath = mitoDir + "pythonAnalysis.sh";
       FileUtils.writeScript(bashPath, cmds);
-      IJ.log("Script saved");
+      IJ.log("Script saved. If it fails, you can still run it manually afterward.");
       PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
-//      HashMap map = getMitoticCellNbs(mitoDir);
-//      findAbnormalCells(mitoDir, soc, map);
+      findAbnormalCells(mitoDir, soc, getMitoticCellNbs(mitoDir));
    }
 }

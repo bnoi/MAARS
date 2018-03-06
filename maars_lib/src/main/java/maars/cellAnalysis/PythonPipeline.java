@@ -6,8 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class PythonPipeline {
-   public static final String ANALYSING_SCRIPT_NAME = "processMitosis.py";
-   public static final String TRACKMATE_LOADER_NAME = "TMxml2dflib.py";
+   public static final String ANALYSING_SCRIPT_NAME = "MaarsAnalysis.py";
 
    /**
     * @param cmd           command to execute
