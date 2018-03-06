@@ -174,7 +174,7 @@ public class MaarsFluoAnalysis implements Runnable{
       for (Object cellNb : slopeChanges.keySet()) {
          int cellNbInt = Integer.parseInt(String.valueOf(cellNb));
          int anaBOnsetFrame = Integer.valueOf(((String[]) slopeChanges.get(cellNb))[1]);
-         int lastAnaphaseFrame = Integer.valueOf(((String[]) slopeChanges.get(cellNb))[2]);
+         int lastAnaphaseFrame = Integer.valueOf(((String[]) slopeChanges.get(cellNb))[3]);
          Cell cell = soc.getCell(cellNbInt);
          cell.setAnaBOnsetFrame(anaBOnsetFrame);
          ArrayList<Integer> spotInBtwnFrames = cell.getSpotInBtwnFrames();
