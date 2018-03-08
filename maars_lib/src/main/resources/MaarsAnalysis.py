@@ -9,22 +9,23 @@ from maarsanalyzer.MaarsAnalyzer import MaarsAnalyzer
 if __name__ == '__main__':
     args = loader.set_attributes_from_cmd_line()
     analyser = MaarsAnalyzer(args.baseDir, args.pos, args.bf_Prefix, args.fluo_Prefix,\
-        args.minimumPeriod, args.acq_interval, targetCh ="CFP", toCh5=True)
-    # analyser = MaarsAnalyzer("/media/tong/screening/20_10_17",\
-    #     "dam1", "BF_1", "FLUO_1", 200, 30, targetCh ="CFP", toCh5=True)
+        args.minimumPeriod, args.acq_interval, targetCh ="CFP", toCh5=True, isstatic=args.isstatic)
+    # analyser = MaarsAnalyzer("/media/tong/screening/Data/07_03_18",\
+    #     "wt-1", "BF_WT_1", "FLUO_WT_2", 200, 30, targetCh ="CFP", toCh5=True, isstatic=True)
     mitoFilter = analyser.getMitosisFilter()
     mitoCellNbs = analyser.getMitoCellNbs(mitoFilter)
     dict_id_spLens = analyser.getElongations(mitoCellNbs)
-    mitoRange = pd.DataFrame(columns = ["start", "end"])
+    timeTable = pd.DataFrame(columns = ["0", "1", "start", "end"])
     for cellId in dict_id_spLens.keys():
-        interpolated_spLens = dict_id_spLens[cellId]
-        mitoRange.loc[cellId] = [interpolated_spLens.index[0], interpolated_spLens.index[-1]]
-    slopeChanges = analyser.getMaxSlopes(dict_id_spLens)
-    slopeChanges.insert(2, "start", mitoRange["start"])
-    slopeChanges.insert(3, "end", mitoRange["end"])
-    analyser.writeReport(mitoCellNbs, dict_id_spLens, slopeChanges)
-    ##########plotting#################
-    Plotting.plotElong(dict_id_spLens)
+        timeTable.loc[cellId] = ( None, None, dict_id_spLens[cellId].index[0], dict_id_spLens[cellId].index[-1])
+    if not analyser.isstatic():
+        slopesChanges = analyser.getMaxSlopes(dict_id_spLens)
+        for cellId in dict_id_spLens.keys():
+            timeTable.set_value(cellId, "0", slopesChanges.loc[cellId]["0"])
+            timeTable.set_value(cellId, "1", slopesChanges.loc[cellId]["1"])
+        ##########plotting#################
+        Plotting.plotElong(dict_id_spLens)
+    analyser.writeReport(mitoCellNbs, dict_id_spLens, timeTable)
     # pathToXmls = [maarscsts.FLUO_SPOT + str(c) + "_" + args.channel + '.xml' for c in mitoticCellNbs]
     # # Track SPBs
     #

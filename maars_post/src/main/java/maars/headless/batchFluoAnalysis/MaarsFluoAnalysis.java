@@ -104,9 +104,7 @@ public class MaarsFluoAnalysis implements Runnable{
                      arrayChannels, posName, parameters_.getFluoParameter(MaarsParameters.FLUO_PREFIX));
                IJ.log("It took " + (double) (System.currentTimeMillis() - startWriting) / 1000
                      + " sec for writing results");
-               if (parameters_.useDynamic()) {
-                  analyzeMitosisDynamic(soc, parameters_, concatenatedFluoImgs.getCalibration().pixelWidth);
-               }
+               analyzeMitosisDynamic(soc, parameters_, concatenatedFluoImgs.getCalibration().pixelWidth);
             }
          }
          visualizer.clear();
@@ -211,17 +209,26 @@ public class MaarsFluoAnalysis implements Runnable{
       String pathToRoot = parameters.getSavingPath() + File.separator;
       String mitoDir = pathToRoot + MITODIRNAME + File.separator + pos + File.separator;
       FileUtils.createFolder(mitoDir);
+      Boolean dynamic = parameters.useDynamic();
+      String dynaOrstatic;
+      if (dynamic) {
+         dynaOrstatic = "--dynamic";
+      } else {
+         dynaOrstatic = "--static";
+      }
       String[] mitosis_cmd = new String[]{PythonPipeline.getPythonDefaultPathInConda(), MaarsParameters.DEPS_DIR +
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToRoot, parameters.getDetectionChForMitosis(),
             Double.toString(calib), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
             pos, parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX),
-            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX), "-minimumPeriod", parameters.getMinimumMitosisDuration()};
+            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX), "-minimumPeriod", parameters.getMinimumMitosisDuration(), dynaOrstatic};
       ArrayList<String> cmds = new ArrayList<>();
       cmds.add(String.join(" ", mitosis_cmd));
       String bashPath = mitoDir + "pythonAnalysis.sh";
       FileUtils.writeScript(bashPath, cmds);
       IJ.log("Script saved. If it fails, you can still run it manually afterward.");
       PythonPipeline.runPythonScript(mitosis_cmd, mitoDir + "mitosisDetection_log.txt");
-      findAbnormalCells(mitoDir, soc, getMitoticCellNbs(mitoDir));
+      if (parameters.useDynamic()) {
+         findAbnormalCells(mitoDir, soc, getMitoticCellNbs(mitoDir));
+      }
    }
 }
