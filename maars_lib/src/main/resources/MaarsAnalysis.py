@@ -2,7 +2,6 @@
 # !/usr/bin/env python3
 
 from maarsanalyzer.io import loader
-import pandas as pd
 from maarsanalyzer import Plotting
 from maarsanalyzer.MaarsAnalyzer import MaarsAnalyzer
 
