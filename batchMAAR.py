@@ -4,4 +4,4 @@
 if method=="fluoConfigurator":
     ops.run(method, d.getPath(), "maars_config.xml")
 else:
-    ops.run(method, d.getPath(), "maars_config.xml", "tif")
+    ops.run(method, d.getPath(), "maars_config.xml", "tiff")
