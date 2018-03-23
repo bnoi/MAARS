@@ -16,6 +16,7 @@ import loci.plugins.BF;
 import loci.plugins.in.ImporterOptions;
 import maars.segmentPombe.SegPombeParameters;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -308,7 +309,7 @@ public class ImgUtils {
       return BF.openImagePlus(options)[0];
    }
 
-   public static HashMap<Integer, String> populateSeriesImgNames(String pathToTiffFile) {
+   public static HashMap<Integer, String> populateSeriesImgNames(String pathToTiffFile){
       Pattern pattern = Pattern.compile(".*_(.*)");
 
       HashMap<Integer, String> seriesImgNames = new HashMap<>();
@@ -325,10 +326,16 @@ public class ImgUtils {
          for (int i = 0; i < seriesCount; i++) {
             reader.setSeries(i);
             String name = omexmlMetadata.getImageName(i); // this is the image name stored in the file
-            Matcher matcher = pattern.matcher(name);
             String pos = null;
-            if (matcher.find()) {
-               pos = matcher.group(1);
+            if (name.equals("")){
+               pos = getPosNameFromFileName(pathToTiffFile);
+            }else{
+               Matcher matcher = pattern.matcher(name);
+               if (matcher.find()) {
+                  pos = matcher.group(1);
+               }else{
+                  new FormatException("Can not load series names from metadata");
+               }
             }
             assert pos !=null;
             seriesImgNames.put(i, pos);
@@ -339,5 +346,18 @@ public class ImgUtils {
       assert seriesCount !=0 ;
       IJ.log(seriesCount + " series registered");
       return seriesImgNames;
+   }
+
+   private static String getPosNameFromFileName(String filePath){
+      String[] splits = filePath.split(File.separator);
+      String fileName = splits[splits.length-1];
+      Pattern pattern = Pattern.compile(".*_(.*).ome.tif*");
+      Matcher matcher = pattern.matcher(fileName);
+      String pos = null;
+      if (matcher.find()) {
+         pos = matcher.group(1);
+      }
+      assert pos != null;
+      return pos;
    }
 }
