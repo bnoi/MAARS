@@ -7,8 +7,8 @@ from maarsanalyzer.MaarsAnalyzer import MaarsAnalyzer
 
 if __name__ == '__main__':
     args = loader.set_attributes_from_cmd_line()
-    analyser = MaarsAnalyzer(args.baseDir, args.pos, args.bf_Prefix, args.fluo_Prefix,\
-        args.minimumPeriod, args.acq_interval, args.calibration, targetCh ="CFP", toCh5=True, isstatic=args.isstatic)
+    analyser = MaarsAnalyzer(args.baseDir, args.pos, args.bf_Prefix, args.fluo_Prefix, \
+                             args.minimumPeriod, args.acq_interval, args.calibration, args.ch_list, targetCh =args.channel, toCh5=True, isstatic=args.isstatic)
     mitoFilter = analyser.getMitosisFilter()
     mitoCellNbs = analyser.getMitoCellNbs(mitoFilter)
     dict_id_spLens = analyser.getElongations(mitoCellNbs)

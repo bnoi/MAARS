@@ -6,6 +6,8 @@ import fiji.plugin.trackmate.SpotCollection;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Calibration;
+import ij.measure.Measurements;
+import ij.measure.ResultsTable;
 import maars.agents.Cell;
 import maars.agents.DefaultSetOfCells;
 import maars.cellAnalysis.singleCellAnalysisFactory.FindLagging;
@@ -175,9 +177,12 @@ public class FluoAnalyzer implements Runnable {
             // remove spots found in current cell in order to accelerate
             // iteration
             currentThreadSpots.removeAll(spotsToDel);
-            SpotSetAnalyzor spotSetAnalyzor = new SpotSetAnalyzor(cell.get(Cell.X_CENTROID) * fluoImgCal.pixelWidth,
-                  cell.get(Cell.Y_CENTROID) * fluoImgCal.pixelHeight,
-                  cell.get(Cell.MAJOR) * fluoImgCal.pixelWidth, cell.get(Cell.ANGLE), calibratedXBase,
+            
+            SpotSetAnalyzor spotSetAnalyzor = new SpotSetAnalyzor(
+                  cell.get(ResultsTable.getDefaultHeading(ResultsTable.X_CENTROID)) * fluoImgCal.pixelWidth,
+                  cell.get(ResultsTable.getDefaultHeading(ResultsTable.Y_CENTROID)) * fluoImgCal.pixelHeight,
+                  cell.get(ResultsTable.getDefaultHeading(ResultsTable.MAJOR)) * fluoImgCal.pixelWidth,
+                  cell.get(ResultsTable.getDefaultHeading(ResultsTable.ANGLE)), calibratedXBase,
                   calibratedYBase);
 
             Iterable<Spot> spotSet = cell.getSpotsInFrame(channel, frame);

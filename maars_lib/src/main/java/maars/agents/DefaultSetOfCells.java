@@ -79,8 +79,9 @@ public class DefaultSetOfCells implements Iterable<Cell>, Iterator<Cell>, Serial
     * @param rt rt from particle analyzer
     */
    public void addRoiMeasurementIntoCells(ResultsTable rt) {
+      String[] header = rt.getColumnHeadings().split("\t", -1);
       for (Cell c : cellArray) {
-         c.setRoiMeasurement(rt.getRowAsString(c.getCellNumber() - 1));
+         c.setRoiMeasurement(header, rt.getRowAsString(c.getCellNumber() - 1));
       }
    }
 
