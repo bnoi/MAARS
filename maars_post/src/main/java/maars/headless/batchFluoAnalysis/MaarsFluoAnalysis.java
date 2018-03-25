@@ -17,6 +17,7 @@ import maars.main.Maars_Interface;
 import maars.utils.FileUtils;
 import maars.utils.ImgUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -220,7 +221,8 @@ public class MaarsFluoAnalysis implements Runnable{
             PythonPipeline.ANALYSING_SCRIPT_NAME, pathToRoot, parameters.getDetectionChForMitosis(),
             Double.toString(calib), String.valueOf((Math.round(Double.parseDouble(parameters.getFluoParameter(MaarsParameters.TIME_INTERVAL)) / 1000))),
             pos, parameters.getSegmentationParameter(MaarsParameters.SEG_PREFIX),
-            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX), "-minimumPeriod", parameters.getMinimumMitosisDuration(), dynaOrstatic};
+            parameters.getFluoParameter(MaarsParameters.FLUO_PREFIX), "-minimumPeriod", parameters.getMinimumMitosisDuration(), dynaOrstatic, "--ch_list"};
+      mitosis_cmd = ArrayUtils.addAll(mitosis_cmd, parameters.getUsingChannels().split(","));
       ArrayList<String> cmds = new ArrayList<>();
       cmds.add(String.join(" ", mitosis_cmd));
       String bashPath = mitoDir + "pythonAnalysis.sh";

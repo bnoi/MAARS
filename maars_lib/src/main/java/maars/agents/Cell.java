@@ -15,13 +15,10 @@ import java.util.HashMap;
  * @author Tong LI
  */
 public class Cell implements Serializable {
-
-   public static final int AREA = 1, MEAN = 2, STD_DEV = 3, MIN = 4, MAX = 5, X_CENTROID = 6, Y_CENTROID = 7,
-         PERIMETER = 8, MAJOR = 9, MINOR = 10, ANGLE = 11, CIRCULARITY = 12, ASPECT_RATIO = 13, ROUNDNESS = 14,
-         SOLIDITY = 15;
+   
    private int cellNumber;
    private transient Roi cellShapeRoi;
-   private String[] measurements;
+   private HashMap<String, Double> measurements = new HashMap<>();
    private transient SpotsContainer spotContainer;
    private GeometryContainer geoContainer;
    private ArrayList<Integer> spotInBetweenFrames = new ArrayList<>();
@@ -54,12 +51,16 @@ public class Cell implements Serializable {
       return this.cellNumber;
    }
 
-   void setRoiMeasurement(String measurements) {
-      this.measurements = measurements.split("\t", -1);
+   void setRoiMeasurement(String[] featureNames, String measurements) {
+      String[] values = measurements.split("\t", -1);
+      assert featureNames.length == values.length;
+      for (int i = 0; i < featureNames.length; i++){
+         this.measurements.put(featureNames[i], Double.parseDouble(values[i]));
+      }
    }
 
-   public double get(int headerIndex) {
-      return Double.parseDouble(measurements[headerIndex]);
+   public double get(String parameter) {
+      return measurements.get(parameter);
    }
 
    public void addChannel(String channel) {
