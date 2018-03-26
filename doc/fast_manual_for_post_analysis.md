@@ -54,8 +54,10 @@ created folders and files as below:
 
 ## I have my segmentation
 
-Create manually the folder `BF_1_SegAnalysis` and then the folder `wt`.  In the end, put the ROI.zip which contains the segmentations in this folder.  
-_note_ : The `wt` is just the last part of your filename e.g. `wt` in `BF_1_MMStack_wt`, `cdc25` in `BF_1_MMStack_cdc25` etc. The fluo-images should be named the same way e.g. `FLUO_1_MMStack_wt` and `FLUO_1_MMStack_cdc25`.  
+Create manually the folder `BF_1_SegAnalysis` and then the folder `wt`.  In the end, put the `ROI.zip` and `Results.csv` into this folder. 
+As for the ResultsTable, you should measure these parameters:
+![](images/features_for_Seg.png)  
+_note_ : The `wt` is the position name in Multiple-Position acquisition if you're using Micro-Manager. e.g. `wt` in `BF_1_MMStack_wt`, `cdc25` in `BF_1_MMStack_cdc25` etc. The fluo-images should be named the same way e.g. `FLUO_1_MMStack_wt` and `FLUO_1_MMStack_cdc25`.  
 ![](images/roi_location.png)  
 Do this for all the strains and you are ready to run the reste of analysis i.e. `fluoConfigurator` and `batchFluoAnalysis`.
 
