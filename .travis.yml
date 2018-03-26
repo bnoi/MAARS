@@ -2,4 +2,6 @@ language: java
 jdk:
   - oraclejdk8
 os:
-   - windows
+  - windows
+install:
+  -
