@@ -38,20 +38,12 @@ Example:
 * **About `Adjustable_Watershed.java`**
 see [this manual](BfSeg_manual.md) to decide whether or not to install it.
 
-* **(Optional if you need <span style="color:red"> complete analysis of MAARS</span>) Install Anaconda **  
-If you want more parameters than the ones listed in the image saved into [Cellh5 format](http://cellh5.org/) file. Go install Anaconda.
+* **(Optional if you need <span style="color:red"> advanced analysis of MAARS</span>) Install Anaconda **  
+If the parameters that are listed below is not enough for you. You can try to install Anaconda.
 ![](images/primary_output.png)
-Otherwise, you won't need to install Anaconda, since it is a Python plugin for for advanced analysis.  
+Otherwise, you won't need to install Anaconda.  
 Download [Anaconda3][Anaconda] and then install to its _default (important)_ folder.
-Then install the following packages:
-	- Numpy (should be in Anaconda3 already)
-	- Pandas (should be in Anaconda3 already)
-	- matplotlib (should be in Anaconda3 already)
-	- Scipy
-	- cellh5
-	- Bokeh  
-with command-line `conda install scipy bokeh` and `conda install -c bioinfotongli cellh5`.  
-Sorry if there is still missing packages, just install them with `conda install [package name]`.
+`conda install -c bioinfotongli maarsanalyzer`.  
 
 
 * **(Optional if you need <span style="color:red"> on-the-fly analysis</span>) Install Micro-Manager 2.0** (_**not compatible**_ with version MM 1.4):  
