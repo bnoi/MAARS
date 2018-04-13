@@ -296,6 +296,13 @@ public class ImgUtils {
    public static ImagePlus lociImport(String tiffPath, int serie_number) throws IOException, FormatException {
       return lociImport(tiffPath, serie_number, true);
    }
+   
+   public static ImagePlus lociImport(String tiffPath) throws IOException, FormatException {
+      IJ.run("Bio-Formats Importer", "open="+tiffPath+" color_mode=Default open_files view=Hyperstack stack_order=XYCZT");
+      ImagePlus imp = IJ.getImage();
+      imp.hide();
+      return imp;
+   }
 
    public static ImagePlus lociImport(String tiffPath, int serie_number, Boolean virtual) throws IOException, FormatException {
       ImporterOptions options = new ImporterOptions();
@@ -348,7 +355,7 @@ public class ImgUtils {
       return seriesImgNames;
    }
 
-   private static String getPosNameFromFileName(String filePath){
+   public static String getPosNameFromFileName(String filePath){
       String[] splits = filePath.split(File.separator);
       String fileName = splits[splits.length-1];
       Pattern pattern = Pattern.compile(".*_(.*).ome.tif*");
@@ -359,5 +366,15 @@ public class ImgUtils {
       }
       assert pos != null;
       return pos;
+   }
+   
+   public static HashMap<Integer, String> populateSeriesImgNames(File[] fileNames){
+      HashMap<Integer, String> seriesImgNames = new HashMap<>();
+      int counter = 0;
+      for (File f : fileNames){
+         seriesImgNames.put(counter, f.getAbsolutePath());
+         counter++;
+      }
+      return seriesImgNames;
    }
 }
