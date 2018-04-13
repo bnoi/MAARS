@@ -1,5 +1,6 @@
 package maars.headless.batchSegmentation;
 
+import ij.ImagePlus;
 import loci.formats.FormatException;
 import maars.main.MaarsParameters;
 import maars.main.MaarsSegmentation;
@@ -32,32 +33,57 @@ public class DefaultBatchSegmentation extends AbstractOp implements BatchSegment
 
    @Parameter
    private String suffix;
+   
+   @Parameter
+   private boolean splitted;
 
    @Override
    public void run(){
-      String imgPath;
+      String imgPath = null;
       for (String d : dirs) {
          logger.info(d);
          MaarsParameters parameter = MaarsParameters.fromFile(d + File.separator  + configName);
          parameter.setSavingPath(d);
          parameter.save(d);
          String segDir = d + File.separator + parameter.getSegmentationParameter(MaarsParameters.SEG_PREFIX);
-         imgPath = Objects.requireNonNull(new File(segDir).listFiles(
-               (FilenameFilter) new WildcardFileFilter("*." + suffix)))[0].getAbsolutePath();
-         Map<Integer, String> serieNbPos = ImgUtils.populateSeriesImgNames(imgPath);
-
+         File[] allFiles = Objects.requireNonNull(new File(segDir).listFiles(
+               (FilenameFilter) new WildcardFileFilter("*." + suffix)));
+         Map<Integer, String> serieNbPos;
+         if (splitted){
+            serieNbPos = ImgUtils.populateSeriesImgNames(allFiles);
+         }else{
+            imgPath = allFiles[0].getAbsolutePath();
+            serieNbPos = ImgUtils.populateSeriesImgNames(imgPath);
+         }
          for (int serie: serieNbPos.keySet()){
-            String posName =serieNbPos.get(serie);
-            logger.info(posName);
-            try {
-               Thread th = new Thread(new MaarsSegmentation(parameter, ImgUtils.lociImport(imgPath, serie, false), posName));
-               th.start();
+            ImagePlus currentImp = null;
+            String posName;
+            if (splitted){
+               imgPath = serieNbPos.get(serie);
+               logger.info(imgPath);
                try {
-                  th.join();
-               } catch (InterruptedException e) {
+                  currentImp = ImgUtils.lociImport(imgPath);
+               } catch (IOException | FormatException e) {
                   e.printStackTrace();
                }
-            } catch (IOException | FormatException e) {
+               posName = ImgUtils.getPosNameFromFileName(imgPath);
+            }else{
+               posName = serieNbPos.get(serie);
+               logger.info(posName);
+               assert imgPath!= null;
+               try {
+                  currentImp = ImgUtils.lociImport(imgPath, serie, false);
+               } catch (IOException | FormatException e) {
+                  e.printStackTrace();
+               }
+            }
+//            currentImp.show();
+            assert currentImp != null;
+            Thread th = new Thread(new MaarsSegmentation(parameter, currentImp, posName));
+            th.start();
+            try {
+               th.join();
+            } catch (InterruptedException e) {
                e.printStackTrace();
             }
          }
