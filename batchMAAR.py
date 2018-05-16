@@ -4,5 +4,7 @@
 #@String(value="tif") suffix
 if method=="fluoConfigurator":
     ops.run(method, d.getPath(), "maars_config.xml")
+elif method == "batchSegmentation":
+	ops.run(method, d.getPath(), "maars_config.xml", suffix, False)
 else:
-    ops.run(method, d.getPath(), "maars_config.xml", suffix, False)
+    ops.run(method, d.getPath(), "maars_config.xml", suffix)
