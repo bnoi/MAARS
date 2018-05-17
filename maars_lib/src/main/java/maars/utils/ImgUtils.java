@@ -356,7 +356,13 @@ public class ImgUtils {
    }
 
    public static String getPosNameFromFileName(String filePath){
-      String[] splits = filePath.split(File.separator);
+      String sep;
+      if (IJ.isWindows()){
+         sep = "\\\\";
+      }else{
+         sep = File.separator;
+      }
+      String[] splits = filePath.split(sep);
       String fileName = splits[splits.length-1];
       Pattern pattern = Pattern.compile(".*_(.*).ome.tif*");
       Matcher matcher = pattern.matcher(fileName);
