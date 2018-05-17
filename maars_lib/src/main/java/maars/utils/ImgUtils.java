@@ -15,10 +15,16 @@ import loci.formats.meta.IMetadata;
 import loci.plugins.BF;
 import loci.plugins.in.ImporterOptions;
 import maars.segmentPombe.SegPombeParameters;
+import org.datavec.api.split.FileSplit;
+import org.datavec.image.loader.NativeImageLoader;
+import org.datavec.image.recordreader.ImageRecordReader;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -376,5 +382,11 @@ public class ImgUtils {
          counter++;
       }
       return seriesImgNames;
+   }
+
+   public static FileSplit loadImages(String dir, Random rnd){
+      File parentDir = new File(dir);
+      FileSplit splits = new FileSplit(parentDir, NativeImageLoader.ALLOWED_FORMATS, rnd);
+      return splits;
    }
 }

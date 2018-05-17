@@ -15,8 +15,7 @@
 
     <properties>
         <scijava.jvm.version>1.8</scijava.jvm.version>
-        <nd4j.version>LATEST</nd4j.version>
-        <datavec.version>LATEST</datavec.version>
+        <dl4j.version>0.9.1</dl4j.version>
     </properties>
 
     <dependencies>
@@ -57,6 +56,28 @@
             <artifactId>bio-formats_plugins</artifactId>
             <version>5.5.2</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.deeplearning4j/deeplearning4j-core -->
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.nd4j/nd4j-native-platform -->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-cuda-8.0-platform</artifactId>
+            <version>${dl4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.datavec/datavec-api -->
+        <dependency>
+            <groupId>org.datavec</groupId>
+            <artifactId>datavec-api</artifactId>
+            <version>${dl4j.version}</version>
         </dependency>
 
         <!--<dependency>-->
