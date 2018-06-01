@@ -162,20 +162,20 @@ public class  BFSegTest {
 //      Assert.assertTrue(FileUtils.exists(outputPosDir + File.separator + SegPombe.SEGLOG));
 //   }
 
-   @Test
-   public void calculateIntegratedImgTest(){
-      String fakePosNb = "wt";
-      MaarsSegmentation segmentation = new MaarsSegmentation(parameters_, bfimg, fakePosNb);
-      SegPombe segPombe = new SegPombe(segmentation.getSegPombeParam());
-      segPombe.createIntegratedImage();
-      FloatProcessor processor = segPombe.getintegratedProcessor();
-      Assert.assertEquals(368, processor.getWidth());
-      Assert.assertEquals(264, processor.getHeight());
-      Assert.assertEquals(19036.273, processor.getf(290,85), 0.001);
-      Assert.assertEquals(-171252.5, processor.getf(185,136), 0.1);
-      Assert.assertEquals(133048.2, processor.getf(329,36), 0.1);
-      Assert.assertEquals(20217.37, processor.getf(40,231), 0.1);
-   }
+//    @Test
+//    public void calculateIntegratedImgTest(){
+//       String fakePosNb = "wt";
+//       MaarsSegmentation segmentation = new MaarsSegmentation(parameters_, bfimg, fakePosNb);
+//       SegPombe segPombe = new SegPombe(segmentation.getSegPombeParam());
+//       segPombe.createIntegratedImage();
+//       FloatProcessor processor = segPombe.getintegratedProcessor();
+//       Assert.assertEquals(368, processor.getWidth());
+//       Assert.assertEquals(264, processor.getHeight());
+//       Assert.assertEquals(19036.273, processor.getf(290,85), 0.001);
+//       Assert.assertEquals(-171252.5, processor.getf(185,136), 0.1);
+//       Assert.assertEquals(133048.2, processor.getf(329,36), 0.1);
+//       Assert.assertEquals(20217.37, processor.getf(40,231), 0.1);
+//    }
 //      String oneExample = "/Volumes/Macintosh/curioData/screening/20_10_17_2/BF_1";
 //      File[] listFiles = new File(oneExample).listFiles((FilenameFilter) new WildcardFileFilter("*.tif"));
 //      logger.info(listFiles[0] + "");
