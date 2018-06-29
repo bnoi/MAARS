@@ -4,7 +4,6 @@ import org.datavec.api.records.listener.impl.LogRecordListener;
 import org.datavec.api.split.FileSplit;
 import org.datavec.image.recordreader.ImageRecordReader;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.nd4j.linalg.dataset.DataSet;
@@ -19,8 +18,8 @@ import java.util.Collection;
 import java.util.Random;
 
 @RunWith(Parameterized.class)
-public class  IOTest {
-   private static Logger logger = LoggerFactory.getLogger(IOTest.class);
+public class  ClassificationTest {
+   private static Logger logger = LoggerFactory.getLogger(ClassificationTest.class);
 
    @Parameterized.Parameters
    public static Collection<Object[]> prepareFiles() throws IOException {
